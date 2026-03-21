@@ -73,5 +73,7 @@ Capstone/[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin*
 # Temporary auto-generated Android Assets
 Capstone/[Aa]ssets/[Ss]treamingAssets/aa.meta
 Capstone/[Aa]ssets/[Ss]treamingAssets/aa/*
-Capstone/Assets/Resources/Instances
-Capstone/Assets/Resources/Validation
+
+
+#Capstone/Assets/Resources/Instances
+#Capstone/Assets/Resources/Validation
