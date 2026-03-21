@@ -1,0 +1,134 @@
+\doxysection{generate\+\_\+reference Namespace Reference}
+\hypertarget{namespacegenerate__reference}{}\label{namespacegenerate__reference}\index{generate\_reference@{generate\_reference}}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{namespacegenerate__reference_a493124dd130711573e9c3ca60796b6f8}\label{namespacegenerate__reference_a493124dd130711573e9c3ca60796b6f8} 
+list {\bfseries INSTANCES} = \+["{}ta01"{}, "{}ta11"{}, "{}ta21"{}, "{}ta31"{}]\+
+\item 
+list \doxymbox{\hyperlink{namespacegenerate__reference_a8f37d81a04a4ffb2bab4c3c0ac21f5dd}{RULES}}
+\item 
+dict \doxymbox{\hyperlink{namespacegenerate__reference_ae652fb0bedf7b56a7fdc6f7e93a0d42a}{RULE\+\_\+\+MAP}}
+\item 
+\Hypertarget{namespacegenerate__reference_a0ce5801d14d41da22d906db1e6e8c1ce}\label{namespacegenerate__reference_a0ce5801d14d41da22d906db1e6e8c1ce} 
+list {\bfseries records} = \+[$\,$]\+
+\item 
+\Hypertarget{namespacegenerate__reference_a794e7007a1652061ec93a8071a61644a}\label{namespacegenerate__reference_a794e7007a1652061ec93a8071a61644a} 
+dict {\bfseries schedules} = \{\}
+\item 
+\Hypertarget{namespacegenerate__reference_afc398a343f97dbe649a3ae8c2b026f0e}\label{namespacegenerate__reference_afc398a343f97dbe649a3ae8c2b026f0e} 
+{\bfseries instance} = load\+\_\+benchmark\+\_\+instance(instance\+\_\+name)
+\item 
+\Hypertarget{namespacegenerate__reference_aef818737e9cd2aaa800a7250ff56d72e}\label{namespacegenerate__reference_aef818737e9cd2aaa800a7250ff56d72e} 
+{\bfseries metadata} = instance.\+metadata if hasattr(instance, "{}metadata"{}) else \{\}
+\item 
+\Hypertarget{namespacegenerate__reference_a7d96a4d690ee85bf8d8bbb399a18ae5c}\label{namespacegenerate__reference_a7d96a4d690ee85bf8d8bbb399a18ae5c} 
+{\bfseries optimum} = metadata.\+get("{}optimum"{})
+\item 
+\Hypertarget{namespacegenerate__reference_a158a86752364fc76c6038061fcd1bdd1}\label{namespacegenerate__reference_a158a86752364fc76c6038061fcd1bdd1} 
+{\bfseries solver} = Dispatching\+Rule\+Solver(rule\+\_\+name, ready\+\_\+operations\+\_\+filter=None)
+\item 
+\Hypertarget{namespacegenerate__reference_ae5b35572db3aac5b20dbdf83fd41c71c}\label{namespacegenerate__reference_ae5b35572db3aac5b20dbdf83fd41c71c} 
+{\bfseries start} = time.\+perf\+\_\+counter()
+\item 
+\Hypertarget{namespacegenerate__reference_a5272eed0e3c4514f435683c4fbdfd54e}\label{namespacegenerate__reference_a5272eed0e3c4514f435683c4fbdfd54e} 
+{\bfseries schedule} = solver(instance)
+\item 
+\Hypertarget{namespacegenerate__reference_a13b607cf1b5d85180e92c7f1f42e7d8f}\label{namespacegenerate__reference_a13b607cf1b5d85180e92c7f1f42e7d8f} 
+{\bfseries elapsed} = time.\+perf\+\_\+counter() -\/ start
+\item 
+\Hypertarget{namespacegenerate__reference_a0c306efa0318e61b976d4dd3b1f76e97}\label{namespacegenerate__reference_a0c306efa0318e61b976d4dd3b1f76e97} 
+{\bfseries makespan} = schedule.\+makespan()
+\item 
+\Hypertarget{namespacegenerate__reference_a682eb0184cf4de85d8fbc527b93a1e0f}\label{namespacegenerate__reference_a682eb0184cf4de85d8fbc527b93a1e0f} 
+tuple {\bfseries gap} = ((makespan -\/ optimum) /\+ optimum \texorpdfstring{$\ast$}{*} 100) if optimum else None
+\item 
+\Hypertarget{namespacegenerate__reference_af8944d6458c6e77db9b67e76f45a9338}\label{namespacegenerate__reference_af8944d6458c6e77db9b67e76f45a9338} 
+dict {\bfseries rule\+\_\+key} = RULE\+\_\+\+MAP\+[rule\+\_\+name]\+
+\item 
+\Hypertarget{namespacegenerate__reference_ad3861235ed2150dbd7f52c14e78b0bd4}\label{namespacegenerate__reference_ad3861235ed2150dbd7f52c14e78b0bd4} 
+str {\bfseries instance\+\_\+schedule\+\_\+key} = f"{}\{instance\+\_\+name\}\+\_\+\{rule\+\_\+key\}"{}
+\item 
+\Hypertarget{namespacegenerate__reference_a21624b655cc1f1753c44151614930288}\label{namespacegenerate__reference_a21624b655cc1f1753c44151614930288} 
+list {\bfseries op\+\_\+list} = \+[$\,$]\+
+\item 
+\Hypertarget{namespacegenerate__reference_ac8da0c01c2e1d54f91cd013f56ed5466}\label{namespacegenerate__reference_ac8da0c01c2e1d54f91cd013f56ed5466} 
+{\bfseries op} = sched\+\_\+op.\+operation
+\item 
+\Hypertarget{namespacegenerate__reference_af995fe1a69d0c08c863b36c860467d67}\label{namespacegenerate__reference_af995fe1a69d0c08c863b36c860467d67} 
+{\bfseries job\+\_\+id} = sched\+\_\+op.\+job\+\_\+id
+\item 
+\Hypertarget{namespacegenerate__reference_a76d14a879f2cb92c9737ed543b50256d}\label{namespacegenerate__reference_a76d14a879f2cb92c9737ed543b50256d} 
+{\bfseries key}
+\item 
+\Hypertarget{namespacegenerate__reference_a0447d1f7738d53b5e920fad4088c4c64}\label{namespacegenerate__reference_a0447d1f7738d53b5e920fad4088c4c64} 
+{\bfseries df} = pd.\+Data\+Frame(records)
+\item 
+\Hypertarget{namespacegenerate__reference_ae3c096124f4b7c70b87a72fdf507d860}\label{namespacegenerate__reference_ae3c096124f4b7c70b87a72fdf507d860} 
+{\bfseries index}
+\item 
+\Hypertarget{namespacegenerate__reference_a61fb39e699b5fa3cee03c3d5379955c8}\label{namespacegenerate__reference_a61fb39e699b5fa3cee03c3d5379955c8} 
+{\bfseries f}
+\item 
+\Hypertarget{namespacegenerate__reference_a0fc40c9e7d0bebcce3a01bbdb314403c}\label{namespacegenerate__reference_a0fc40c9e7d0bebcce3a01bbdb314403c} 
+{\bfseries indent}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}Reference Makespan Generator
+=============================
+Generates ground-truth makespans from job_shop_lib for cross-validation
+against the C# DES simulator.
+
+Outputs two files:
+  1. reference_makespans.csv — (instance, rule, makespan) for comparison
+  2. reference_schedules.json — full operation-level schedule for debugging
+     mismatches (which op started when on which machine)
+
+Usage:
+    pip install job-shop-lib pandas
+    python generate_reference.py
+
+The C# simulator should produce identical makespans for matching rules.
+If not, the schedule JSON lets you find exactly where the two diverge.
+\end{DoxyVerb}
+ 
+
+\label{doc-var-members}
+\Hypertarget{namespacegenerate__reference_doc-var-members}
+\doxysubsection{Variable Documentation}
+\Hypertarget{namespacegenerate__reference_ae652fb0bedf7b56a7fdc6f7e93a0d42a}\index{generate\_reference@{generate\_reference}!RULE\_MAP@{RULE\_MAP}}
+\index{RULE\_MAP@{RULE\_MAP}!generate\_reference@{generate\_reference}}
+\doxysubsubsection{\texorpdfstring{RULE\_MAP}{RULE\_MAP}}
+{\footnotesize\ttfamily \label{namespacegenerate__reference_ae652fb0bedf7b56a7fdc6f7e93a0d42a} 
+dict generate\+\_\+reference.\+RULE\+\_\+\+MAP}
+
+{\bfseries Initial value:\+}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ =\ \ \{}
+\DoxyCodeLine{00002\ \ \ \ \ \textcolor{stringliteral}{"{}shortest\_processing\_time"{}}:\ \ \ \ \textcolor{stringliteral}{"{}SPT"{}},}
+\DoxyCodeLine{00003\ \ \ \ \ \textcolor{stringliteral}{"{}largest\_processing\_time"{}}:\ \ \ \ \ \textcolor{stringliteral}{"{}LPT"{}},}
+\DoxyCodeLine{00004\ \ \ \ \ \textcolor{stringliteral}{"{}most\_work\_remaining"{}}:\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}MWR"{}},}
+\DoxyCodeLine{00005\ \ \ \ \ \textcolor{stringliteral}{"{}first\_come\_first\_served"{}}:\ \ \ \ \ \textcolor{stringliteral}{"{}FCFS"{}},}
+\DoxyCodeLine{00006\ \ \ \ \ \textcolor{stringliteral}{"{}most\_operations\_remaining"{}}:\ \ \ \textcolor{stringliteral}{"{}MOR"{}},}
+\DoxyCodeLine{00007\ \}}
+
+\end{DoxyCode}
+\Hypertarget{namespacegenerate__reference_a8f37d81a04a4ffb2bab4c3c0ac21f5dd}\index{generate\_reference@{generate\_reference}!RULES@{RULES}}
+\index{RULES@{RULES}!generate\_reference@{generate\_reference}}
+\doxysubsubsection{\texorpdfstring{RULES}{RULES}}
+{\footnotesize\ttfamily \label{namespacegenerate__reference_a8f37d81a04a4ffb2bab4c3c0ac21f5dd} 
+list generate\+\_\+reference.\+RULES}
+
+{\bfseries Initial value:\+}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ =\ \ [}
+\DoxyCodeLine{00002\ \ \ \ \ \textcolor{stringliteral}{"{}shortest\_processing\_time"{}},\ \ \ \ \textcolor{comment}{\#\ →\ C\#\ SPT\_SMPT}}
+\DoxyCodeLine{00003\ \ \ \ \ \textcolor{stringliteral}{"{}largest\_processing\_time"{}},\ \ \ \ \ \textcolor{comment}{\#\ →\ C\#\ LPT\_MMUR\ /\ LPT\_SMPT}}
+\DoxyCodeLine{00004\ \ \ \ \ \textcolor{stringliteral}{"{}most\_work\_remaining"{}},\ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ →\ C\#\ LRT\_MMUR}}
+\DoxyCodeLine{00005\ \ \ \ \ \textcolor{stringliteral}{"{}first\_come\_first\_served"{}},\ \ \ \ \ \textcolor{comment}{\#\ →\ C\#\ SDT\_SRWT\ (FIFO\ fallback)}}
+\DoxyCodeLine{00006\ \ \ \ \ \textcolor{stringliteral}{"{}most\_operations\_remaining"{}},\ \ \ \textcolor{comment}{\#\ →\ no\ C\#\ equivalent\ yet}}
+\DoxyCodeLine{00007\ ]}
+
+\end{DoxyCode}

@@ -1,0 +1,115 @@
+\doxysection{Assets.\+Scripts.\+Scheduling.\+Core.\+Sim\+Event Class Reference}
+\hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event}{}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event}\index{Assets.Scripts.Scheduling.Core.SimEvent@{Assets.Scripts.Scheduling.Core.SimEvent}}
+
+
+Immutable record representing a single scheduled event in the simulation timeline.  
+
+
+Inheritance diagram for Assets.\+Scripts.\+Scheduling.\+Core.\+Sim\+Event:\+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_a01cabb80c276b0048a8d365665624cec}{Sim\+Event}} (double time, \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a74e900c350e0673c74e0e62b6f351056}{Event\+Type}} type, int job\+Id, int machine\+Id, long seq)
+\begin{DoxyCompactList}\small\item\em Constructs a fully specified, immutable simulation event. \end{DoxyCompactList}\item 
+int \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_aa4e08bba070a7378ed02e997f574435a}{Compare\+To}} (\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_a01cabb80c276b0048a8d365665624cec}{Sim\+Event}} other)
+\begin{DoxyCompactList}\small\item\em Compares this event to another for priority queue ordering. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_a607c1c72df770a64614efd6de3cd4698}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_a607c1c72df770a64614efd6de3cd4698} 
+double {\bfseries Time}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em Simulation time at which this event is scheduled to occur. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_a20b87a79a2dacebe9f166401c6de4e42}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_a20b87a79a2dacebe9f166401c6de4e42} 
+\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a74e900c350e0673c74e0e62b6f351056}{Event\+Type}} {\bfseries Type}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em The category of this event, determining how \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator}{DESSimulator} dispatches it. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_a646915578862335b3d02e19d7c8cecfa}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_a646915578862335b3d02e19d7c8cecfa} 
+int {\bfseries Job\+Id}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em ID of the job associated with this event. Set to {\ttfamily -\/1} if not applicable. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_a1841b4f5aeb5d322f195f89393e14f5c}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_a1841b4f5aeb5d322f195f89393e14f5c} 
+int {\bfseries Machine\+Id}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em ID of the machine associated with this event. Set to {\ttfamily -\/1} if not applicable. \end{DoxyCompactList}\item 
+long \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_ab56cee8678fd0b8f95a8aa4b18bf4fc8}{Sequence\+Number}}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em Monotonically increasing counter assigned at enqueue time. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Immutable record representing a single scheduled event in the simulation timeline. 
+
+Implements {\ttfamily IComparable$<$\+Sim\+Event$>$} so that instances can be stored directly in a {\ttfamily Sorted\+Set} inside \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_event_queue}{Event\+Queue}. Ordering is by \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_a607c1c72df770a64614efd6de3cd4698}{Time} ascending, with \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_ab56cee8678fd0b8f95a8aa4b18bf4fc8}{Sequence\+Number} as a FIFO tiebreaker for events scheduled at the same instant. 
+
+\label{doc-constructors}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_doc-constructors}
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_a01cabb80c276b0048a8d365665624cec}\index{Assets.Scripts.Scheduling.Core.SimEvent@{Assets.Scripts.Scheduling.Core.SimEvent}!SimEvent@{SimEvent}}
+\index{SimEvent@{SimEvent}!Assets.Scripts.Scheduling.Core.SimEvent@{Assets.Scripts.Scheduling.Core.SimEvent}}
+\doxysubsubsection{\texorpdfstring{SimEvent()}{SimEvent()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_a01cabb80c276b0048a8d365665624cec} 
+Assets.\+Scripts.\+Scheduling.\+Core.\+Sim\+Event.\+Sim\+Event (\begin{DoxyParamCaption}\item[{double}]{time}{, }\item[{\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a74e900c350e0673c74e0e62b6f351056}{Event\+Type}}}]{type}{, }\item[{int}]{job\+Id}{, }\item[{int}]{machine\+Id}{, }\item[{long}]{seq}{}\end{DoxyParamCaption})}
+
+
+
+Constructs a fully specified, immutable simulation event. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em time} & Simulation time at which the event fires. \\
+\hline
+{\em type} & The \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a74e900c350e0673c74e0e62b6f351056}{Event\+Type} that classifies this event. \\
+\hline
+{\em job\+Id} & ID of the relevant job, or {\ttfamily -\/1} if not applicable. \\
+\hline
+{\em machine\+Id} & ID of the relevant machine, or {\ttfamily -\/1} if not applicable. \\
+\hline
+{\em seq} & Sequence number assigned by \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_event_queue}{Event\+Queue} to enforce FIFO ordering. \\
+\hline
+\end{DoxyParams}
+
+
+\label{doc-func-members}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_aa4e08bba070a7378ed02e997f574435a}\index{Assets.Scripts.Scheduling.Core.SimEvent@{Assets.Scripts.Scheduling.Core.SimEvent}!CompareTo@{CompareTo}}
+\index{CompareTo@{CompareTo}!Assets.Scripts.Scheduling.Core.SimEvent@{Assets.Scripts.Scheduling.Core.SimEvent}}
+\doxysubsubsection{\texorpdfstring{CompareTo()}{CompareTo()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_aa4e08bba070a7378ed02e997f574435a} 
+int Assets.\+Scripts.\+Scheduling.\+Core.\+Sim\+Event.\+Compare\+To (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_a01cabb80c276b0048a8d365665624cec}{Sim\+Event}}}]{other}{}\end{DoxyParamCaption})}
+
+
+
+Compares this event to another for priority queue ordering. 
+
+Primary sort is by \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_a607c1c72df770a64614efd6de3cd4698}{Time} ascending. When two events share the same time, \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_ab56cee8678fd0b8f95a8aa4b18bf4fc8}{Sequence\+Number} is used as a FIFO tiebreaker, ensuring earlier-\/enqueued events are processed first.
+
+
+\begin{DoxyParams}{Parameters}
+{\em other} & The event to compare against. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A negative value if this event should be processed before {\ttfamily other}, zero if they are equal, or a positive value if {\ttfamily other} has higher priority. 
+\end{DoxyReturn}
+
+
+\label{doc-property-members}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_doc-property-members}
+\doxysubsection{Property Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_ab56cee8678fd0b8f95a8aa4b18bf4fc8}\index{Assets.Scripts.Scheduling.Core.SimEvent@{Assets.Scripts.Scheduling.Core.SimEvent}!SequenceNumber@{SequenceNumber}}
+\index{SequenceNumber@{SequenceNumber}!Assets.Scripts.Scheduling.Core.SimEvent@{Assets.Scripts.Scheduling.Core.SimEvent}}
+\doxysubsubsection{\texorpdfstring{SequenceNumber}{SequenceNumber}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_ab56cee8678fd0b8f95a8aa4b18bf4fc8} 
+long Assets.\+Scripts.\+Scheduling.\+Core.\+Sim\+Event.\+Sequence\+Number\hspace{0.3cm}{\ttfamily [get]}}
+
+
+
+Monotonically increasing counter assigned at enqueue time. 
+
+Used as a FIFO tiebreaker so that events with identical \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_a607c1c72df770a64614efd6de3cd4698}{Time} values are processed in the order they were enqueued. A lower sequence number indicates higher priority. 
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Scheduling/\+\+Core/\+Event\+Queue.\+cs\end{DoxyCompactItemize}

@@ -1,0 +1,141 @@
+\doxysection{Assets.\+Scripts.\+Scheduling.\+Core.\+DESSimulator Class Reference}
+\hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator}{}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator}\index{Assets.Scripts.Scheduling.Core.DESSimulator@{Assets.Scripts.Scheduling.Core.DESSimulator}}
+
+
+Pure discrete-\/event simulator for \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job}{Job} Shop Problem (JSP) validation.  
+
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_aa79c7f08fc10bc3b96c14e2b6137b95f}{Load\+Instance}} (\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance}{Taillard\+Instance}} instance)
+\begin{DoxyCompactList}\small\item\em Loads a Taillard instance and initializes all jobs and machines. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a477dc5db6d5bfeea5ec2dd71e9cfd63e}{Reset}} ()
+\begin{DoxyCompactList}\small\item\em Resets all simulator state without reloading the instance. \end{DoxyCompactList}\item 
+double \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a73e213e5d37b0db03a31962243bf1045}{Run}} ()
+\begin{DoxyCompactList}\small\item\em Runs the full simulation to completion and returns the makespan. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a093526a79b3cd12b3013b50b6158a4fd}{Print\+Schedule}} ()
+\begin{DoxyCompactList}\small\item\em Prints a Gantt-\/style schedule summary to stdout for debugging. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a5444d7f73303a58d3914a10f3eba12bf}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a5444d7f73303a58d3914a10f3eba12bf} 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job}{Job}}\+[$\,$]\+ {\bfseries Jobs}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_aa0cabb24c437a170b19350cd4e02ab4f}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_aa0cabb24c437a170b19350cd4e02ab4f} 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine}{Machine}}\+[$\,$]\+ {\bfseries Machines}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a560d61cfcac94c39f1dc27e1faaac1c7}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a560d61cfcac94c39f1dc27e1faaac1c7} 
+Event\+Queue {\bfseries Event\+Queue}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_af4a2072abe638bff842a288eda6a6655}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_af4a2072abe638bff842a288eda6a6655} 
+double {\bfseries Current\+Time}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a2c5124a8b4dbad41b87d7ee29032e52a}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a2c5124a8b4dbad41b87d7ee29032e52a} 
+double {\bfseries Makespan}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_aa7e8ec191cee7cb93220103c04414873}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_aa7e8ec191cee7cb93220103c04414873} 
+\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87}{Dispatching\+Rule}} {\bfseries Active\+Rule}\hspace{0.3cm}{\ttfamily  \+[get, set]\+}
+\item 
+Func$<$ int, int, double $>$ \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a455511e83b7e16697ab4e36379dffbc8}{Get\+Transit\+Time}} = (from, to) =$>$ 0.\+0\hspace{0.3cm}{\ttfamily  \+[get, set]\+}
+\begin{DoxyCompactList}\small\item\em Transit time delegate injected by the spatial layer. \end{DoxyCompactList}\item 
+Action$<$ int $>$ \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_acb07dc5ba5008808680172d6113b91b0}{On\+Dispatch\+Required}}\hspace{0.3cm}{\ttfamily  \+[get, set]\+}
+\begin{DoxyCompactList}\small\item\em Callback for RL integration, invoked when a machine requires a dispatch decision. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a4d391494c10566eabc3f53549089c310}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a4d391494c10566eabc3f53549089c310} 
+int {\bfseries Total\+Operations\+Completed}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a387acb9f195c44157a016a4d475179ea}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a387acb9f195c44157a016a4d475179ea} 
+int {\bfseries Total\+Jobs\+Completed}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Pure discrete-\/event simulator for \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job}{Job} Shop Problem (JSP) validation. 
+
+No \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_unity}{Unity} dependencies — can run standalone or inside \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_unity}{Unity}. Transit times are zero for benchmark validation. The RL layer will later wrap this and inject non-\/zero transit via AGVs. 
+
+\label{doc-func-members}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_aa79c7f08fc10bc3b96c14e2b6137b95f}\index{Assets.Scripts.Scheduling.Core.DESSimulator@{Assets.Scripts.Scheduling.Core.DESSimulator}!LoadInstance@{LoadInstance}}
+\index{LoadInstance@{LoadInstance}!Assets.Scripts.Scheduling.Core.DESSimulator@{Assets.Scripts.Scheduling.Core.DESSimulator}}
+\doxysubsubsection{\texorpdfstring{LoadInstance()}{LoadInstance()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_aa79c7f08fc10bc3b96c14e2b6137b95f} 
+void Assets.\+Scripts.\+Scheduling.\+Core.\+DESSimulator.\+Load\+Instance (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance}{Taillard\+Instance}}}]{instance}{}\end{DoxyParamCaption})}
+
+
+
+Loads a Taillard instance and initializes all jobs and machines. 
+
+Constructs \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine}{Machine} and \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job}{Job} arrays from the provided instance, mapping raw operation data into typed \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation}{Operation} objects, then calls \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a477dc5db6d5bfeea5ec2dd71e9cfd63e}{Reset()} to prepare the simulator for execution.
+
+
+\begin{DoxyParams}{Parameters}
+{\em instance} & The Taillard benchmark instance to load, containing job count, machine count, and per-\/job operation sequences with durations. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a093526a79b3cd12b3013b50b6158a4fd}\index{Assets.Scripts.Scheduling.Core.DESSimulator@{Assets.Scripts.Scheduling.Core.DESSimulator}!PrintSchedule@{PrintSchedule}}
+\index{PrintSchedule@{PrintSchedule}!Assets.Scripts.Scheduling.Core.DESSimulator@{Assets.Scripts.Scheduling.Core.DESSimulator}}
+\doxysubsubsection{\texorpdfstring{PrintSchedule()}{PrintSchedule()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a093526a79b3cd12b3013b50b6158a4fd} 
+void Assets.\+Scripts.\+Scheduling.\+Core.\+DESSimulator.\+Print\+Schedule (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Prints a Gantt-\/style schedule summary to stdout for debugging. 
+
+Outputs the makespan, job and machine counts, total operations completed, and a per-\/machine timeline showing each operation as {\ttfamily }\+[J\{job\+Id\} \{start\+Time\}-\/\{end\+Time\}]\+, sorted by start time. \Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a477dc5db6d5bfeea5ec2dd71e9cfd63e}\index{Assets.Scripts.Scheduling.Core.DESSimulator@{Assets.Scripts.Scheduling.Core.DESSimulator}!Reset@{Reset}}
+\index{Reset@{Reset}!Assets.Scripts.Scheduling.Core.DESSimulator@{Assets.Scripts.Scheduling.Core.DESSimulator}}
+\doxysubsubsection{\texorpdfstring{Reset()}{Reset()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a477dc5db6d5bfeea5ec2dd71e9cfd63e} 
+void Assets.\+Scripts.\+Scheduling.\+Core.\+DESSimulator.\+Reset (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Resets all simulator state without reloading the instance. 
+
+Clears the event queue, resets time and statistics counters, restores all machines to \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0ae599161956d626eda4cb0a5ffb85271c}{Machine\+State.\+Idle}, clears all machine waiting queues, and re-\/enqueues a \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a74e900c350e0673c74e0e62b6f351056a3beaa4602cbdfa387e4c483abe9933ab}{Event\+Type.\+Job\+Arrived} event at t=0 for every job. Call this to re-\/run the same instance under a different dispatching rule. \Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a73e213e5d37b0db03a31962243bf1045}\index{Assets.Scripts.Scheduling.Core.DESSimulator@{Assets.Scripts.Scheduling.Core.DESSimulator}!Run@{Run}}
+\index{Run@{Run}!Assets.Scripts.Scheduling.Core.DESSimulator@{Assets.Scripts.Scheduling.Core.DESSimulator}}
+\doxysubsubsection{\texorpdfstring{Run()}{Run()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a73e213e5d37b0db03a31962243bf1045} 
+double Assets.\+Scripts.\+Scheduling.\+Core.\+DESSimulator.\+Run (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Runs the full simulation to completion and returns the makespan. 
+
+Processes all events in the \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_event_queue}{Event\+Queue} in chronological order, advancing Current\+Time to each event\textquotesingle{}s timestamp and dispatching to either Handle\+Job\+Arrived or Handle\+Operation\+Complete as appropriate. Simulation ends when the queue is empty.
+
+\begin{DoxyReturn}{Returns}
+The makespan, defined as the latest completion time across all jobs. 
+\end{DoxyReturn}
+
+
+\label{doc-property-members}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_doc-property-members}
+\doxysubsection{Property Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a455511e83b7e16697ab4e36379dffbc8}\index{Assets.Scripts.Scheduling.Core.DESSimulator@{Assets.Scripts.Scheduling.Core.DESSimulator}!GetTransitTime@{GetTransitTime}}
+\index{GetTransitTime@{GetTransitTime}!Assets.Scripts.Scheduling.Core.DESSimulator@{Assets.Scripts.Scheduling.Core.DESSimulator}}
+\doxysubsubsection{\texorpdfstring{GetTransitTime}{GetTransitTime}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a455511e83b7e16697ab4e36379dffbc8} 
+Func$<$int, int, double$>$ Assets.\+Scripts.\+Scheduling.\+Core.\+DESSimulator.\+Get\+Transit\+Time = (from, to) =$>$ 0.\+0\hspace{0.3cm}{\ttfamily [get]}, {\ttfamily [set]}}
+
+
+
+Transit time delegate injected by the spatial layer. 
+
+Defaults to zero for benchmark validation. Parameters represent the source machine ID and destination machine ID respectively. \Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_acb07dc5ba5008808680172d6113b91b0}\index{Assets.Scripts.Scheduling.Core.DESSimulator@{Assets.Scripts.Scheduling.Core.DESSimulator}!OnDispatchRequired@{OnDispatchRequired}}
+\index{OnDispatchRequired@{OnDispatchRequired}!Assets.Scripts.Scheduling.Core.DESSimulator@{Assets.Scripts.Scheduling.Core.DESSimulator}}
+\doxysubsubsection{\texorpdfstring{OnDispatchRequired}{OnDispatchRequired}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_acb07dc5ba5008808680172d6113b91b0} 
+Action$<$int$>$ Assets.\+Scripts.\+Scheduling.\+Core.\+DESSimulator.\+On\+Dispatch\+Required\hspace{0.3cm}{\ttfamily [get]}, {\ttfamily [set]}}
+
+
+
+Callback for RL integration, invoked when a machine requires a dispatch decision. 
+
+The integer parameter passed to the action represents the machine ID that is awaiting a dispatch assignment. 
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Scheduling/\+\+Core/\+DESSimulator.\+cs\end{DoxyCompactItemize}

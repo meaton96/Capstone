@@ -1,0 +1,30 @@
+\doxysection{compare\+\_\+results Namespace Reference}
+\hypertarget{namespacecompare__results}{}\label{namespacecompare__results}\index{compare\_results@{compare\_results}}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{namespacecompare__results_a35e05c33e420d53d64f7325d97474630}\label{namespacecompare__results_a35e05c33e420d53d64f7325d97474630} 
+{\bfseries load\+\_\+data} ()
+\item 
+\Hypertarget{namespacecompare__results_af50d8fe016b615bbccbf5a7a18781ea1}\label{namespacecompare__results_af50d8fe016b615bbccbf5a7a18781ea1} 
+{\bfseries find\+\_\+first\+\_\+divergence} (ref\+\_\+ops, cs\+\_\+ops)
+\item 
+\Hypertarget{namespacecompare__results_a5a767a970869d2fce924e91254c7bd90}\label{namespacecompare__results_a5a767a970869d2fce924e91254c7bd90} 
+{\bfseries main} ()
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}Cross-Validation Comparator (v2)
+=================================
+Compares C# DES output against job_shop_lib reference.
+
+Handles:
+  - Duplicate rows (from re-running exporters)
+  - Missing rules on either side
+  - Large-scale mismatch diagnosis
+
+Usage:
+    python compare_results.py
+\end{DoxyVerb}
+ 

@@ -1,0 +1,99 @@
+\doxysection{mirror\+\_\+des.\+DESSimulator Class Reference}
+\hypertarget{classmirror__des_1_1_d_e_s_simulator}{}\label{classmirror__des_1_1_d_e_s_simulator}\index{mirror\_des.DESSimulator@{mirror\_des.DESSimulator}}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classmirror__des_1_1_d_e_s_simulator_a1e40c656006ddb0e9f3fcd8dfdbacf4b}\label{classmirror__des_1_1_d_e_s_simulator_a1e40c656006ddb0e9f3fcd8dfdbacf4b} 
+{\bfseries \+\_\+\+\_\+init\+\_\+\+\_\+} (self)
+\item 
+\doxymbox{\hyperlink{classmirror__des_1_1_d_e_s_simulator_ab6f24bcc8319d6ab33b45ac4c173c684}{load\+\_\+instance}} (self, dict data)
+\item 
+\doxymbox{\hyperlink{classmirror__des_1_1_d_e_s_simulator_ade6423930beac196872c94c04b58e953}{reset}} (self)
+\item 
+float \doxymbox{\hyperlink{classmirror__des_1_1_d_e_s_simulator_aa005313dcbe52d0ab815b0401ec6667c}{run}} (self, Callable rule\+\_\+fn)
+\item 
+list\+[dict]\+ \doxymbox{\hyperlink{classmirror__des_1_1_d_e_s_simulator_aabbce29825591d89b5e1389f8d95d14b}{get\+\_\+schedule}} (self)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classmirror__des_1_1_d_e_s_simulator_ace4a32fa136af3b7ed3802372c2571c3}\label{classmirror__des_1_1_d_e_s_simulator_ace4a32fa136af3b7ed3802372c2571c3} 
+list {\bfseries jobs} = \+[$\,$]\+
+\item 
+\Hypertarget{classmirror__des_1_1_d_e_s_simulator_ac92dd2252135c0274611e2ec72ee2365}\label{classmirror__des_1_1_d_e_s_simulator_ac92dd2252135c0274611e2ec72ee2365} 
+list {\bfseries machines} = \+[$\,$]\+
+\item 
+\Hypertarget{classmirror__des_1_1_d_e_s_simulator_a38953ec7b97ce8301f3dba0bbb27f68d}\label{classmirror__des_1_1_d_e_s_simulator_a38953ec7b97ce8301f3dba0bbb27f68d} 
+list {\bfseries event\+\_\+queue} = \+[$\,$]\+
+\item 
+\Hypertarget{classmirror__des_1_1_d_e_s_simulator_afbf76c3bcad3bdf8d77fe19788e19d41}\label{classmirror__des_1_1_d_e_s_simulator_afbf76c3bcad3bdf8d77fe19788e19d41} 
+int {\bfseries sequence} = 0
+\item 
+\Hypertarget{classmirror__des_1_1_d_e_s_simulator_a76dadf3da9d54c3e22e82b381289671c}\label{classmirror__des_1_1_d_e_s_simulator_a76dadf3da9d54c3e22e82b381289671c} 
+float {\bfseries current\+\_\+time} = 0.\+0
+\item 
+\Hypertarget{classmirror__des_1_1_d_e_s_simulator_a44f3a32cf14a1d53ddac89ac827c069d}\label{classmirror__des_1_1_d_e_s_simulator_a44f3a32cf14a1d53ddac89ac827c069d} 
+Callable {\bfseries rule\+\_\+fn} = \doxymbox{\hyperlink{namespacemirror__des_af63d758a2857c1058e7d718f88704d49}{rule\+\_\+spt}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{classmirror__des_1_1_d_e_s_simulator_a7afbe2a437d8e16f61a0aea3fd9cc9dd}\label{classmirror__des_1_1_d_e_s_simulator_a7afbe2a437d8e16f61a0aea3fd9cc9dd} 
+{\bfseries \+\_\+enqueue} (self, float time, \doxymbox{\hyperlink{classmirror__des_1_1_event_type}{Event\+Type}} event\+\_\+type, int job\+\_\+id, int machine\+\_\+id)
+\item 
+\Hypertarget{classmirror__des_1_1_d_e_s_simulator_a6856e8f621e022e83ebd8de00a9f2a6f}\label{classmirror__des_1_1_d_e_s_simulator_a6856e8f621e022e83ebd8de00a9f2a6f} 
+{\bfseries \+\_\+handle\+\_\+job\+\_\+arrived} (self, \doxymbox{\hyperlink{classmirror__des_1_1_sim_event}{Sim\+Event}} evt)
+\item 
+\Hypertarget{classmirror__des_1_1_d_e_s_simulator_a0370816330e873df194441743ded6388}\label{classmirror__des_1_1_d_e_s_simulator_a0370816330e873df194441743ded6388} 
+{\bfseries \+\_\+handle\+\_\+operation\+\_\+complete} (self, \doxymbox{\hyperlink{classmirror__des_1_1_sim_event}{Sim\+Event}} evt)
+\item 
+\Hypertarget{classmirror__des_1_1_d_e_s_simulator_a4ba93a6288c45ba2f9089bc2eaea0322}\label{classmirror__des_1_1_d_e_s_simulator_a4ba93a6288c45ba2f9089bc2eaea0322} 
+{\bfseries \+\_\+try\+\_\+dispatch\+\_\+job} (self, \doxymbox{\hyperlink{classmirror__des_1_1_job}{Job}} job)
+\item 
+\Hypertarget{classmirror__des_1_1_d_e_s_simulator_a679553f33b8cfcde52e312641542d82e}\label{classmirror__des_1_1_d_e_s_simulator_a679553f33b8cfcde52e312641542d82e} 
+{\bfseries \+\_\+try\+\_\+start\+\_\+next\+\_\+on\+\_\+machine} (self, \doxymbox{\hyperlink{classmirror__des_1_1_machine}{Machine}} machine)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}Event-driven DES with per-machine queues.
+Mirrors C# DESSimulator exactly.
+\end{DoxyVerb}
+ 
+
+\label{doc-func-members}
+\Hypertarget{classmirror__des_1_1_d_e_s_simulator_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classmirror__des_1_1_d_e_s_simulator_aabbce29825591d89b5e1389f8d95d14b}\index{mirror\_des.DESSimulator@{mirror\_des.DESSimulator}!get\_schedule@{get\_schedule}}
+\index{get\_schedule@{get\_schedule}!mirror\_des.DESSimulator@{mirror\_des.DESSimulator}}
+\doxysubsubsection{\texorpdfstring{get\_schedule()}{get\_schedule()}}
+{\footnotesize\ttfamily \label{classmirror__des_1_1_d_e_s_simulator_aabbce29825591d89b5e1389f8d95d14b} 
+ list\+[dict]\+ mirror\+\_\+des.\+DESSimulator.\+get\+\_\+schedule (\begin{DoxyParamCaption}\item[{}]{self}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Extract full schedule for comparison.\end{DoxyVerb}
+ \Hypertarget{classmirror__des_1_1_d_e_s_simulator_ab6f24bcc8319d6ab33b45ac4c173c684}\index{mirror\_des.DESSimulator@{mirror\_des.DESSimulator}!load\_instance@{load\_instance}}
+\index{load\_instance@{load\_instance}!mirror\_des.DESSimulator@{mirror\_des.DESSimulator}}
+\doxysubsubsection{\texorpdfstring{load\_instance()}{load\_instance()}}
+{\footnotesize\ttfamily \label{classmirror__des_1_1_d_e_s_simulator_ab6f24bcc8319d6ab33b45ac4c173c684} 
+mirror\+\_\+des.\+DESSimulator.\+load\+\_\+instance (\begin{DoxyParamCaption}\item[{}]{self}{, }\item[{dict}]{data}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Load from the Taillard JSON format.\end{DoxyVerb}
+ \Hypertarget{classmirror__des_1_1_d_e_s_simulator_ade6423930beac196872c94c04b58e953}\index{mirror\_des.DESSimulator@{mirror\_des.DESSimulator}!reset@{reset}}
+\index{reset@{reset}!mirror\_des.DESSimulator@{mirror\_des.DESSimulator}}
+\doxysubsubsection{\texorpdfstring{reset()}{reset()}}
+{\footnotesize\ttfamily \label{classmirror__des_1_1_d_e_s_simulator_ade6423930beac196872c94c04b58e953} 
+mirror\+\_\+des.\+DESSimulator.\+reset (\begin{DoxyParamCaption}\item[{}]{self}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Reset state and enqueue all job arrivals at t=0.\end{DoxyVerb}
+ \Hypertarget{classmirror__des_1_1_d_e_s_simulator_aa005313dcbe52d0ab815b0401ec6667c}\index{mirror\_des.DESSimulator@{mirror\_des.DESSimulator}!run@{run}}
+\index{run@{run}!mirror\_des.DESSimulator@{mirror\_des.DESSimulator}}
+\doxysubsubsection{\texorpdfstring{run()}{run()}}
+{\footnotesize\ttfamily \label{classmirror__des_1_1_d_e_s_simulator_aa005313dcbe52d0ab815b0401ec6667c} 
+ float mirror\+\_\+des.\+DESSimulator.\+run (\begin{DoxyParamCaption}\item[{}]{self}{, }\item[{Callable}]{rule\+\_\+fn}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Run simulation to completion, return makespan.\end{DoxyVerb}
+ 
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Scheduling/\+\+Validation/\+mirror\+\_\+des.\+py\end{DoxyCompactItemize}

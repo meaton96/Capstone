@@ -1,0 +1,154 @@
+\doxysection{mirror\+\_\+des Namespace Reference}
+\hypertarget{namespacemirror__des}{}\label{namespacemirror__des}\index{mirror\_des@{mirror\_des}}
+\doxysubsubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \doxymbox{\hyperlink{classmirror__des_1_1_event_type}{Event\+Type}}
+\item 
+class \doxymbox{\hyperlink{classmirror__des_1_1_sim_event}{Sim\+Event}}
+\item 
+class \doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}}
+\item 
+class \doxymbox{\hyperlink{classmirror__des_1_1_job}{Job}}
+\item 
+class \doxymbox{\hyperlink{classmirror__des_1_1_machine_state}{Machine\+State}}
+\item 
+class \doxymbox{\hyperlink{classmirror__des_1_1_machine}{Machine}}
+\item 
+class \doxymbox{\hyperlink{classmirror__des_1_1_d_e_s_simulator}{DESSimulator}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{namespacemirror__des_a14fd2a448c1f3bde337d405884daee98}\label{namespacemirror__des_a14fd2a448c1f3bde337d405884daee98} 
+int {\bfseries remaining\+\_\+work} (\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}} op, list\+[\doxymbox{\hyperlink{classmirror__des_1_1_job}{Job}}]\+ jobs)
+\item 
+\Hypertarget{namespacemirror__des_ab07ae90bfd2e2d94051503f25659fd6c}\label{namespacemirror__des_ab07ae90bfd2e2d94051503f25659fd6c} 
+int {\bfseries remaining\+\_\+ops} (\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}} op, list\+[\doxymbox{\hyperlink{classmirror__des_1_1_job}{Job}}]\+ jobs)
+\item 
+\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}} \doxymbox{\hyperlink{namespacemirror__des_af63d758a2857c1058e7d718f88704d49}{rule\+\_\+spt}} (list\+[\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}}]\+ waiting, list\+[\doxymbox{\hyperlink{classmirror__des_1_1_job}{Job}}]\+ jobs)
+\item 
+\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}} \doxymbox{\hyperlink{namespacemirror__des_a28fe22601ebf8f3e8492ddca8e078c7f}{rule\+\_\+lpt}} (list\+[\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}}]\+ waiting, list\+[\doxymbox{\hyperlink{classmirror__des_1_1_job}{Job}}]\+ jobs)
+\item 
+\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}} \doxymbox{\hyperlink{namespacemirror__des_a9e69b7fc7cddb1c2fd72d11f79aeec49}{rule\+\_\+mwr}} (list\+[\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}}]\+ waiting, list\+[\doxymbox{\hyperlink{classmirror__des_1_1_job}{Job}}]\+ jobs)
+\item 
+\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}} \doxymbox{\hyperlink{namespacemirror__des_aaae55895a1f19d2b208f5d7564f96ccd}{rule\+\_\+mor}} (list\+[\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}}]\+ waiting, list\+[\doxymbox{\hyperlink{classmirror__des_1_1_job}{Job}}]\+ jobs)
+\item 
+\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}} \doxymbox{\hyperlink{namespacemirror__des_a7b27e8381d97b9dec160f36014023b90}{rule\+\_\+fcfs}} (list\+[\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}}]\+ waiting, list\+[\doxymbox{\hyperlink{classmirror__des_1_1_job}{Job}}]\+ jobs)
+\item 
+\Hypertarget{namespacemirror__des_aded3fd37ef177df3a00d19adb174e832}\label{namespacemirror__des_aded3fd37ef177df3a00d19adb174e832} 
+list\+[str]\+ {\bfseries find\+\_\+json\+\_\+files} (str directory)
+\item 
+\Hypertarget{namespacemirror__des_a151325a665863a91fa6e507ef6646e9d}\label{namespacemirror__des_a151325a665863a91fa6e507ef6646e9d} 
+{\bfseries main} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+dict \doxymbox{\hyperlink{namespacemirror__des_abc2a48719d4bf0c7201a1a0057f04b6b}{RULES}}
+\item 
+dict \doxymbox{\hyperlink{namespacemirror__des_a0a5a4097bb51078032c804fa387ea642}{RULE\+\_\+\+FULL\+\_\+\+NAMES}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}Mirror DES — Python implementation matching the C# DESSimulator exactly.
+========================================================================
+
+Architecture (matches C# DESSimulator.cs):
+  - Event-driven with a priority queue sorted by (time, sequence_number)
+  - Per-machine waiting queues
+  - When a job arrives at a machine:
+      - If machine is idle → start immediately
+      - If machine is busy → add to machine's waiting queue
+  - When a machine finishes an operation:
+      - Advance the job to its next operation (dispatch to next machine)
+      - Pick next op from this machine's waiting queue via dispatching rule
+  - Tiebreaker: lowest job_id (matching C# .ThenBy(op => op.JobId))
+
+This should produce IDENTICAL makespans to the C# DES.
+Any delta means a real bug in one of the two implementations.
+
+Usage:
+    python mirror_des.py                          # runs all instances in current dir
+    python mirror_des.py --instance ta01.json     # runs a single instance
+\end{DoxyVerb}
+ 
+
+\label{doc-func-members}
+\Hypertarget{namespacemirror__des_doc-func-members}
+\doxysubsection{Function Documentation}
+\Hypertarget{namespacemirror__des_a7b27e8381d97b9dec160f36014023b90}\index{mirror\_des@{mirror\_des}!rule\_fcfs@{rule\_fcfs}}
+\index{rule\_fcfs@{rule\_fcfs}!mirror\_des@{mirror\_des}}
+\doxysubsubsection{\texorpdfstring{rule\_fcfs()}{rule\_fcfs()}}
+{\footnotesize\ttfamily \label{namespacemirror__des_a7b27e8381d97b9dec160f36014023b90} 
+ \doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}} mirror\+\_\+des.\+rule\+\_\+fcfs (\begin{DoxyParamCaption}\item[{list\+[\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}}]\+}]{waiting}{, }\item[{list\+[\doxymbox{\hyperlink{classmirror__des_1_1_job}{Job}}]\+}]{jobs}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}First Come First Served — return first in queue (insertion order)\end{DoxyVerb}
+ \Hypertarget{namespacemirror__des_a28fe22601ebf8f3e8492ddca8e078c7f}\index{mirror\_des@{mirror\_des}!rule\_lpt@{rule\_lpt}}
+\index{rule\_lpt@{rule\_lpt}!mirror\_des@{mirror\_des}}
+\doxysubsubsection{\texorpdfstring{rule\_lpt()}{rule\_lpt()}}
+{\footnotesize\ttfamily \label{namespacemirror__des_a28fe22601ebf8f3e8492ddca8e078c7f} 
+ \doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}} mirror\+\_\+des.\+rule\+\_\+lpt (\begin{DoxyParamCaption}\item[{list\+[\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}}]\+}]{waiting}{, }\item[{list\+[\doxymbox{\hyperlink{classmirror__des_1_1_job}{Job}}]\+}]{jobs}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Longest Processing Time (tiebreak: lowest job_id)\end{DoxyVerb}
+ \Hypertarget{namespacemirror__des_aaae55895a1f19d2b208f5d7564f96ccd}\index{mirror\_des@{mirror\_des}!rule\_mor@{rule\_mor}}
+\index{rule\_mor@{rule\_mor}!mirror\_des@{mirror\_des}}
+\doxysubsubsection{\texorpdfstring{rule\_mor()}{rule\_mor()}}
+{\footnotesize\ttfamily \label{namespacemirror__des_aaae55895a1f19d2b208f5d7564f96ccd} 
+ \doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}} mirror\+\_\+des.\+rule\+\_\+mor (\begin{DoxyParamCaption}\item[{list\+[\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}}]\+}]{waiting}{, }\item[{list\+[\doxymbox{\hyperlink{classmirror__des_1_1_job}{Job}}]\+}]{jobs}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Most Operations Remaining (tiebreak: lowest job_id)\end{DoxyVerb}
+ \Hypertarget{namespacemirror__des_a9e69b7fc7cddb1c2fd72d11f79aeec49}\index{mirror\_des@{mirror\_des}!rule\_mwr@{rule\_mwr}}
+\index{rule\_mwr@{rule\_mwr}!mirror\_des@{mirror\_des}}
+\doxysubsubsection{\texorpdfstring{rule\_mwr()}{rule\_mwr()}}
+{\footnotesize\ttfamily \label{namespacemirror__des_a9e69b7fc7cddb1c2fd72d11f79aeec49} 
+ \doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}} mirror\+\_\+des.\+rule\+\_\+mwr (\begin{DoxyParamCaption}\item[{list\+[\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}}]\+}]{waiting}{, }\item[{list\+[\doxymbox{\hyperlink{classmirror__des_1_1_job}{Job}}]\+}]{jobs}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Most Work Remaining = Longest Remaining Time (tiebreak: lowest job_id)\end{DoxyVerb}
+ \Hypertarget{namespacemirror__des_af63d758a2857c1058e7d718f88704d49}\index{mirror\_des@{mirror\_des}!rule\_spt@{rule\_spt}}
+\index{rule\_spt@{rule\_spt}!mirror\_des@{mirror\_des}}
+\doxysubsubsection{\texorpdfstring{rule\_spt()}{rule\_spt()}}
+{\footnotesize\ttfamily \label{namespacemirror__des_af63d758a2857c1058e7d718f88704d49} 
+ \doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}} mirror\+\_\+des.\+rule\+\_\+spt (\begin{DoxyParamCaption}\item[{list\+[\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}}]\+}]{waiting}{, }\item[{list\+[\doxymbox{\hyperlink{classmirror__des_1_1_job}{Job}}]\+}]{jobs}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Shortest Processing Time (tiebreak: lowest job_id)\end{DoxyVerb}
+ 
+
+\label{doc-var-members}
+\Hypertarget{namespacemirror__des_doc-var-members}
+\doxysubsection{Variable Documentation}
+\Hypertarget{namespacemirror__des_a0a5a4097bb51078032c804fa387ea642}\index{mirror\_des@{mirror\_des}!RULE\_FULL\_NAMES@{RULE\_FULL\_NAMES}}
+\index{RULE\_FULL\_NAMES@{RULE\_FULL\_NAMES}!mirror\_des@{mirror\_des}}
+\doxysubsubsection{\texorpdfstring{RULE\_FULL\_NAMES}{RULE\_FULL\_NAMES}}
+{\footnotesize\ttfamily \label{namespacemirror__des_a0a5a4097bb51078032c804fa387ea642} 
+dict mirror\+\_\+des.\+RULE\+\_\+\+FULL\+\_\+\+NAMES}
+
+{\bfseries Initial value:\+}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ =\ \ \{}
+\DoxyCodeLine{00002\ \ \ \ \ \textcolor{stringliteral}{"{}SPT"{}}:\ \textcolor{stringliteral}{"{}shortest\_processing\_time"{}},}
+\DoxyCodeLine{00003\ \ \ \ \ \textcolor{stringliteral}{"{}LPT"{}}:\ \textcolor{stringliteral}{"{}largest\_processing\_time"{}},}
+\DoxyCodeLine{00004\ \ \ \ \ \textcolor{stringliteral}{"{}MWR"{}}:\ \textcolor{stringliteral}{"{}most\_work\_remaining"{}},}
+\DoxyCodeLine{00005\ \ \ \ \ \textcolor{stringliteral}{"{}MOR"{}}:\ \textcolor{stringliteral}{"{}most\_operations\_remaining"{}},}
+\DoxyCodeLine{00006\ \ \ \ \ \textcolor{stringliteral}{"{}FCFS"{}}:\ \textcolor{stringliteral}{"{}first\_come\_first\_served"{}},}
+\DoxyCodeLine{00007\ \}}
+
+\end{DoxyCode}
+\Hypertarget{namespacemirror__des_abc2a48719d4bf0c7201a1a0057f04b6b}\index{mirror\_des@{mirror\_des}!RULES@{RULES}}
+\index{RULES@{RULES}!mirror\_des@{mirror\_des}}
+\doxysubsubsection{\texorpdfstring{RULES}{RULES}}
+{\footnotesize\ttfamily \label{namespacemirror__des_abc2a48719d4bf0c7201a1a0057f04b6b} 
+dict mirror\+\_\+des.\+RULES}
+
+{\bfseries Initial value:\+}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ =\ \ \{}
+\DoxyCodeLine{00002\ \ \ \ \ \textcolor{stringliteral}{"{}SPT"{}}:\ rule\_spt,}
+\DoxyCodeLine{00003\ \ \ \ \ \textcolor{stringliteral}{"{}LPT"{}}:\ rule\_lpt,}
+\DoxyCodeLine{00004\ \ \ \ \ \textcolor{stringliteral}{"{}MWR"{}}:\ rule\_mwr,}
+\DoxyCodeLine{00005\ \ \ \ \ \textcolor{stringliteral}{"{}MOR"{}}:\ rule\_mor,}
+\DoxyCodeLine{00006\ \ \ \ \ \textcolor{stringliteral}{"{}FCFS"{}}:\ rule\_fcfs,}
+\DoxyCodeLine{00007\ \}}
+
+\end{DoxyCode}

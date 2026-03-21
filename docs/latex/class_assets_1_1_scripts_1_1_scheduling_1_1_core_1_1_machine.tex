@@ -1,0 +1,139 @@
+\doxysection{Assets.\+Scripts.\+Scheduling.\+Core.\+Machine Class Reference}
+\hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine}{}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine}\index{Assets.Scripts.Scheduling.Core.Machine@{Assets.Scripts.Scheduling.Core.Machine}}
+
+
+Represents a single machine on the shop floor.  
+
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_a951ff37eeafe61f662b33ee6db31d4fe}{Machine}} (int id)
+\begin{DoxyCompactList}\small\item\em Constructs an idle machine with an empty waiting queue. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_a5afae06a59815933c3b65c74d889c30c}{Start\+Processing}} (\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation}{Operation}} op, double current\+Time)
+\begin{DoxyCompactList}\small\item\em Transitions the machine to \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0ad8a942ef2b04672adfafef0ad817a407}{Machine\+State.\+Busy} and begins processing an operation. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_af09eca5980967cecce42664fcd3f6b6e}{Finish\+Processing}} ()
+\begin{DoxyCompactList}\small\item\em Transitions the machine to \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0ae599161956d626eda4cb0a5ffb85271c}{Machine\+State.\+Idle} after an operation completes. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_ac71d1813ce216732f2f12483e1441907}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_ac71d1813ce216732f2f12483e1441907} 
+int {\bfseries Id}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em Unique identifier for this machine, matching its index in DESSimulator.\+Machines. \end{DoxyCompactList}\item 
+\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0}{Machine\+State}} \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_a7bc7eeb999dc8f0f3483b981ef94afa5}{State}} = \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0ae599161956d626eda4cb0a5ffb85271c}{Machine\+State.\+Idle}}\hspace{0.3cm}{\ttfamily  \+[get, set]\+}
+\begin{DoxyCompactList}\small\item\em Current operational state of the machine. \end{DoxyCompactList}\item 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation}{Operation}} \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_acc36045a17f281fb2b7e5ce7eb02482e}{Current\+Operation}}\hspace{0.3cm}{\ttfamily  \+[get, set]\+}
+\begin{DoxyCompactList}\small\item\em The operation currently being processed, or {\ttfamily null} when the machine is idle. \end{DoxyCompactList}\item 
+double \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_a5941a0fba6b6be337c4cea165c196241}{Busy\+Until}} = 0\hspace{0.3cm}{\ttfamily  \+[get, set]\+}
+\begin{DoxyCompactList}\small\item\em Simulation time at which the current operation will finish. \end{DoxyCompactList}\item 
+List$<$ \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation}{Operation}} $>$ \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_ae56e4992f7199a184ff22c52ae036058}{Waiting\+Queue}} = new List$<$\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation}{Operation}}$>$()\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em Ordered list of operations waiting to be processed on this machine. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Represents a single machine on the shop floor. 
+
+Maintains the machine\textquotesingle{}s current \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0}{Machine\+State}, the \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation}{Operation} it is actively processing, and a \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_ae56e4992f7199a184ff22c52ae036058}{Waiting\+Queue} of operations that have arrived but cannot yet start. State transitions are driven exclusively by \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator}{DESSimulator} via \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_a5afae06a59815933c3b65c74d889c30c}{Start\+Processing} and \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_af09eca5980967cecce42664fcd3f6b6e}{Finish\+Processing}. 
+
+\label{doc-constructors}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_doc-constructors}
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_a951ff37eeafe61f662b33ee6db31d4fe}\index{Assets.Scripts.Scheduling.Core.Machine@{Assets.Scripts.Scheduling.Core.Machine}!Machine@{Machine}}
+\index{Machine@{Machine}!Assets.Scripts.Scheduling.Core.Machine@{Assets.Scripts.Scheduling.Core.Machine}}
+\doxysubsubsection{\texorpdfstring{Machine()}{Machine()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_a951ff37eeafe61f662b33ee6db31d4fe} 
+Assets.\+Scripts.\+Scheduling.\+Core.\+Machine.\+Machine (\begin{DoxyParamCaption}\item[{int}]{id}{}\end{DoxyParamCaption})}
+
+
+
+Constructs an idle machine with an empty waiting queue. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em id} & Unique machine identifier matching its index in DESSimulator.\+Machines. \\
+\hline
+\end{DoxyParams}
+
+
+\label{doc-func-members}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_af09eca5980967cecce42664fcd3f6b6e}\index{Assets.Scripts.Scheduling.Core.Machine@{Assets.Scripts.Scheduling.Core.Machine}!FinishProcessing@{FinishProcessing}}
+\index{FinishProcessing@{FinishProcessing}!Assets.Scripts.Scheduling.Core.Machine@{Assets.Scripts.Scheduling.Core.Machine}}
+\doxysubsubsection{\texorpdfstring{FinishProcessing()}{FinishProcessing()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_af09eca5980967cecce42664fcd3f6b6e} 
+void Assets.\+Scripts.\+Scheduling.\+Core.\+Machine.\+Finish\+Processing (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Transitions the machine to \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0ae599161956d626eda4cb0a5ffb85271c}{Machine\+State.\+Idle} after an operation completes. 
+
+Clears \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_acc36045a17f281fb2b7e5ce7eb02482e}{Current\+Operation} and sets \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_a7bc7eeb999dc8f0f3483b981ef94afa5}{State} to \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0ae599161956d626eda4cb0a5ffb85271c}{Machine\+State.\+Idle}. Does not select the next operation from \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_ae56e4992f7199a184ff22c52ae036058}{Waiting\+Queue} — that responsibility belongs to DESSimulator.\+Try\+Start\+Next\+On\+Machine, which is called immediately after this method in DESSimulator.\+Handle\+Operation\+Complete. \Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_a5afae06a59815933c3b65c74d889c30c}\index{Assets.Scripts.Scheduling.Core.Machine@{Assets.Scripts.Scheduling.Core.Machine}!StartProcessing@{StartProcessing}}
+\index{StartProcessing@{StartProcessing}!Assets.Scripts.Scheduling.Core.Machine@{Assets.Scripts.Scheduling.Core.Machine}}
+\doxysubsubsection{\texorpdfstring{StartProcessing()}{StartProcessing()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_a5afae06a59815933c3b65c74d889c30c} 
+void Assets.\+Scripts.\+Scheduling.\+Core.\+Machine.\+Start\+Processing (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation}{Operation}}}]{op}{, }\item[{double}]{current\+Time}{}\end{DoxyParamCaption})}
+
+
+
+Transitions the machine to \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0ad8a942ef2b04672adfafef0ad817a407}{Machine\+State.\+Busy} and begins processing an operation. 
+
+Sets \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_a7bc7eeb999dc8f0f3483b981ef94afa5}{State} to \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0ad8a942ef2b04672adfafef0ad817a407}{Machine\+State.\+Busy}, assigns {\ttfamily op} to \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_acc36045a17f281fb2b7e5ce7eb02482e}{Current\+Operation}, stamps \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_a53d45f1ff0ac549efa8f19bb12c7b07b}{Operation.\+Start\+Time} with {\ttfamily current\+Time}, and computes \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_a5c826ae3e7644df48c3743d2fd2f5acf}{Operation.\+End\+Time} as {\ttfamily current\+Time} + \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_a33c6d6f8ca03df6cacc3cae0ba540b18}{Operation.\+Duration}. \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_a5941a0fba6b6be337c4cea165c196241}{Busy\+Until} is updated to match \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_a5c826ae3e7644df48c3743d2fd2f5acf}{Operation.\+End\+Time} so the simulator can schedule the \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a74e900c350e0673c74e0e62b6f351056a118b996cf01af1910a157f7409f5d0df}{Event\+Type.\+Operation\+Complete} event.
+
+
+\begin{DoxyParams}{Parameters}
+{\em op} & The operation to begin processing. Must not be {\ttfamily null}. \\
+\hline
+{\em current\+Time} & The current simulation time at which processing starts. \\
+\hline
+\end{DoxyParams}
+
+
+\label{doc-property-members}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_doc-property-members}
+\doxysubsection{Property Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_a5941a0fba6b6be337c4cea165c196241}\index{Assets.Scripts.Scheduling.Core.Machine@{Assets.Scripts.Scheduling.Core.Machine}!BusyUntil@{BusyUntil}}
+\index{BusyUntil@{BusyUntil}!Assets.Scripts.Scheduling.Core.Machine@{Assets.Scripts.Scheduling.Core.Machine}}
+\doxysubsubsection{\texorpdfstring{BusyUntil}{BusyUntil}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_a5941a0fba6b6be337c4cea165c196241} 
+double Assets.\+Scripts.\+Scheduling.\+Core.\+Machine.\+Busy\+Until = 0\hspace{0.3cm}{\ttfamily [get]}, {\ttfamily [set]}}
+
+
+
+Simulation time at which the current operation will finish. 
+
+Mirrors \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_a5c826ae3e7644df48c3743d2fd2f5acf}{Operation.\+End\+Time} of \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_acc36045a17f281fb2b7e5ce7eb02482e}{Current\+Operation} and is used by \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator}{DESSimulator} to schedule the corresponding \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a74e900c350e0673c74e0e62b6f351056a118b996cf01af1910a157f7409f5d0df}{Event\+Type.\+Operation\+Complete} event. Reset to {\ttfamily 0} by \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a477dc5db6d5bfeea5ec2dd71e9cfd63e}{DESSimulator.\+Reset} between runs. \Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_acc36045a17f281fb2b7e5ce7eb02482e}\index{Assets.Scripts.Scheduling.Core.Machine@{Assets.Scripts.Scheduling.Core.Machine}!CurrentOperation@{CurrentOperation}}
+\index{CurrentOperation@{CurrentOperation}!Assets.Scripts.Scheduling.Core.Machine@{Assets.Scripts.Scheduling.Core.Machine}}
+\doxysubsubsection{\texorpdfstring{CurrentOperation}{CurrentOperation}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_acc36045a17f281fb2b7e5ce7eb02482e} 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation}{Operation}} Assets.\+Scripts.\+Scheduling.\+Core.\+Machine.\+Current\+Operation\hspace{0.3cm}{\ttfamily [get]}, {\ttfamily [set]}}
+
+
+
+The operation currently being processed, or {\ttfamily null} when the machine is idle. 
+
+Set by \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_a5afae06a59815933c3b65c74d889c30c}{Start\+Processing} and cleared to {\ttfamily null} by \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_af09eca5980967cecce42664fcd3f6b6e}{Finish\+Processing}. \Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_a7bc7eeb999dc8f0f3483b981ef94afa5}\index{Assets.Scripts.Scheduling.Core.Machine@{Assets.Scripts.Scheduling.Core.Machine}!State@{State}}
+\index{State@{State}!Assets.Scripts.Scheduling.Core.Machine@{Assets.Scripts.Scheduling.Core.Machine}}
+\doxysubsubsection{\texorpdfstring{State}{State}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_a7bc7eeb999dc8f0f3483b981ef94afa5} 
+\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0}{Machine\+State}} Assets.\+Scripts.\+Scheduling.\+Core.\+Machine.\+State = \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0ae599161956d626eda4cb0a5ffb85271c}{Machine\+State.\+Idle}}\hspace{0.3cm}{\ttfamily [get]}, {\ttfamily [set]}}
+
+
+
+Current operational state of the machine. 
+
+Initialised to \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0ae599161956d626eda4cb0a5ffb85271c}{Machine\+State.\+Idle}. Transitions to \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0ad8a942ef2b04672adfafef0ad817a407}{Machine\+State.\+Busy} on \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_a5afae06a59815933c3b65c74d889c30c}{Start\+Processing} and back to \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0ae599161956d626eda4cb0a5ffb85271c}{Machine\+State.\+Idle} on \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_af09eca5980967cecce42664fcd3f6b6e}{Finish\+Processing}. \Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_ae56e4992f7199a184ff22c52ae036058}\index{Assets.Scripts.Scheduling.Core.Machine@{Assets.Scripts.Scheduling.Core.Machine}!WaitingQueue@{WaitingQueue}}
+\index{WaitingQueue@{WaitingQueue}!Assets.Scripts.Scheduling.Core.Machine@{Assets.Scripts.Scheduling.Core.Machine}}
+\doxysubsubsection{\texorpdfstring{WaitingQueue}{WaitingQueue}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_ae56e4992f7199a184ff22c52ae036058} 
+List$<$\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation}{Operation}}$>$ Assets.\+Scripts.\+Scheduling.\+Core.\+Machine.\+Waiting\+Queue = new List$<$\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation}{Operation}}$>$()\hspace{0.3cm}{\ttfamily [get]}}
+
+
+
+Ordered list of operations waiting to be processed on this machine. 
+
+Operations are appended by DESSimulator.\+Try\+Dispatch\+Job when the machine is busy, and removed by DESSimulator.\+Try\+Start\+Next\+On\+Machine when the machine becomes free. Selection order is determined by Dispatching\+Rules.\+Select\+Next. 
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Scheduling/\+\+Core/\+Machine.\+cs\end{DoxyCompactItemize}

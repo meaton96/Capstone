@@ -1,0 +1,115 @@
+\doxysection{Assets.\+Scripts.\+Scheduling.\+Data.\+Taillard\+Instance Class Reference}
+\hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance}{}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance}\index{Assets.Scripts.Scheduling.Data.TaillardInstance@{Assets.Scripts.Scheduling.Data.TaillardInstance}}
+
+
+Direct deserialization target for the Taillard JSON benchmark format.  
+
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_ada37d37bc9f9beb703f74cbdb5b4ab62}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_ada37d37bc9f9beb703f74cbdb5b4ab62} 
+int int duration\+[$\,$]\+ {\bfseries Get\+Job\+Operations} (int job\+Index)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_a98a30393472294f14fa27c0bacd36822}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_a98a30393472294f14fa27c0bacd36822} 
+string {\bfseries name}
+\begin{DoxyCompactList}\small\item\em Benchmark instance identifier, e.\+g. {\ttfamily "{}ta001"{}}. \end{DoxyCompactList}\item 
+int\+[$\,$]\+\+[$\,$]\+ \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_a7590980360c981cb8e7a63498bb96f77}{duration\+\_\+matrix}}
+\begin{DoxyCompactList}\small\item\em Processing time matrix indexed as {\ttfamily }\+[job]\+\+[operation]\+. \end{DoxyCompactList}\item 
+int\+[$\,$]\+\+[$\,$]\+ \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_a9ee0366b1709a54f08fb45a32e4fb0e9}{machines\+\_\+matrix}}
+\begin{DoxyCompactList}\small\item\em Machine assignment matrix indexed as {\ttfamily }\+[job]\+\+[operation]\+. \end{DoxyCompactList}\item 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata}{Taillard\+Metadata}} \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_ae360821e88eccf4c53083e43ac7bb179}{metadata}}
+\begin{DoxyCompactList}\small\item\em Known bounds and bibliographic reference for this instance. \end{DoxyCompactList}\item 
+int \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_ac09a835ada8df416bbaac2ed3cea788f}{machine}}
+\begin{DoxyCompactList}\small\item\em Returns the ordered operation sequence for a single job as typed value tuples. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_af2bd50c21201cbe57bd256239db584d6}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_af2bd50c21201cbe57bd256239db584d6} 
+int {\bfseries Job\+Count}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em Number of jobs in the instance, derived from the row count of \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_a7590980360c981cb8e7a63498bb96f77}{duration\+\_\+matrix}. \end{DoxyCompactList}\item 
+int \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_a7207f47edf07e7ec6704d88cadebd4c4}{Machine\+Count}}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em Number of machines in the instance, derived from the column count of \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_a7590980360c981cb8e7a63498bb96f77}{duration\+\_\+matrix}. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Direct deserialization target for the Taillard JSON benchmark format. 
+
+Field names match the JSON keys exactly to allow zero-\/configuration deserialization via \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_unity}{Unity}\textquotesingle{}s {\ttfamily Json\+Utility} or {\ttfamily System.\+Text.\+Json}. After deserialization, \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_af2bd50c21201cbe57bd256239db584d6}{Job\+Count} and \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_a7207f47edf07e7ec6704d88cadebd4c4}{Machine\+Count} are derived from the matrix dimensions, and Get\+Job\+Operations provides the typed operation pairs consumed by DESSimulator.\+Load\+Instance. 
+
+\label{doc-variable-members}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_doc-variable-members}
+\doxysubsection{Member Data Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_a7590980360c981cb8e7a63498bb96f77}\index{Assets.Scripts.Scheduling.Data.TaillardInstance@{Assets.Scripts.Scheduling.Data.TaillardInstance}!duration\_matrix@{duration\_matrix}}
+\index{duration\_matrix@{duration\_matrix}!Assets.Scripts.Scheduling.Data.TaillardInstance@{Assets.Scripts.Scheduling.Data.TaillardInstance}}
+\doxysubsubsection{\texorpdfstring{duration\_matrix}{duration\_matrix}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_a7590980360c981cb8e7a63498bb96f77} 
+int \+[$\,$]\+\+[$\,$]\+ Assets.\+Scripts.\+Scheduling.\+Data.\+Taillard\+Instance.\+duration\+\_\+matrix}
+
+
+
+Processing time matrix indexed as {\ttfamily }\+[job]\+\+[operation]\+. 
+
+Each entry is the number of time units required for that operation. Must be rectangular (all rows the same length) for \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_a7207f47edf07e7ec6704d88cadebd4c4}{Machine\+Count} to be valid. \Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_ac09a835ada8df416bbaac2ed3cea788f}\index{Assets.Scripts.Scheduling.Data.TaillardInstance@{Assets.Scripts.Scheduling.Data.TaillardInstance}!machine@{machine}}
+\index{machine@{machine}!Assets.Scripts.Scheduling.Data.TaillardInstance@{Assets.Scripts.Scheduling.Data.TaillardInstance}}
+\doxysubsubsection{\texorpdfstring{machine}{machine}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_ac09a835ada8df416bbaac2ed3cea788f} 
+int Assets.\+Scripts.\+Scheduling.\+Data.\+Taillard\+Instance.\+machine}
+
+
+
+Returns the ordered operation sequence for a single job as typed value tuples. 
+
+Zips \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_a9ee0366b1709a54f08fb45a32e4fb0e9}{machines\+\_\+matrix} and \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_a7590980360c981cb8e7a63498bb96f77}{duration\+\_\+matrix} for the given job index into an array of {\ttfamily }(machine, duration) pairs in operation order. This is the primary data accessor used by DESSimulator.\+Load\+Instance when constructing Operation objects.
+
+
+\begin{DoxyParams}{Parameters}
+{\em job\+Index} & Zero-\/based index of the job to query. Must be in the range {\ttfamily }\+[0, Job\+Count).\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+An array of {\ttfamily }(int machine, int duration) tuples, one per operation, in the order they must be executed. 
+\end{DoxyReturn}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_a9ee0366b1709a54f08fb45a32e4fb0e9}\index{Assets.Scripts.Scheduling.Data.TaillardInstance@{Assets.Scripts.Scheduling.Data.TaillardInstance}!machines\_matrix@{machines\_matrix}}
+\index{machines\_matrix@{machines\_matrix}!Assets.Scripts.Scheduling.Data.TaillardInstance@{Assets.Scripts.Scheduling.Data.TaillardInstance}}
+\doxysubsubsection{\texorpdfstring{machines\_matrix}{machines\_matrix}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_a9ee0366b1709a54f08fb45a32e4fb0e9} 
+int \+[$\,$]\+\+[$\,$]\+ Assets.\+Scripts.\+Scheduling.\+Data.\+Taillard\+Instance.\+machines\+\_\+matrix}
+
+
+
+Machine assignment matrix indexed as {\ttfamily }\+[job]\+\+[operation]\+. 
+
+Each entry is the zero-\/based index of the machine that must process that operation. Dimensions must match \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_a7590980360c981cb8e7a63498bb96f77}{duration\+\_\+matrix} exactly. \Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_ae360821e88eccf4c53083e43ac7bb179}\index{Assets.Scripts.Scheduling.Data.TaillardInstance@{Assets.Scripts.Scheduling.Data.TaillardInstance}!metadata@{metadata}}
+\index{metadata@{metadata}!Assets.Scripts.Scheduling.Data.TaillardInstance@{Assets.Scripts.Scheduling.Data.TaillardInstance}}
+\doxysubsubsection{\texorpdfstring{metadata}{metadata}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_ae360821e88eccf4c53083e43ac7bb179} 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata}{Taillard\+Metadata}} Assets.\+Scripts.\+Scheduling.\+Data.\+Taillard\+Instance.\+metadata}
+
+
+
+Known bounds and bibliographic reference for this instance. 
+
+May be {\ttfamily null} if the JSON source omits the metadata block. 
+
+\label{doc-property-members}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_doc-property-members}
+\doxysubsection{Property Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_a7207f47edf07e7ec6704d88cadebd4c4}\index{Assets.Scripts.Scheduling.Data.TaillardInstance@{Assets.Scripts.Scheduling.Data.TaillardInstance}!MachineCount@{MachineCount}}
+\index{MachineCount@{MachineCount}!Assets.Scripts.Scheduling.Data.TaillardInstance@{Assets.Scripts.Scheduling.Data.TaillardInstance}}
+\doxysubsubsection{\texorpdfstring{MachineCount}{MachineCount}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_a7207f47edf07e7ec6704d88cadebd4c4} 
+int Assets.\+Scripts.\+Scheduling.\+Data.\+Taillard\+Instance.\+Machine\+Count\hspace{0.3cm}{\ttfamily [get]}}
+
+
+
+Number of machines in the instance, derived from the column count of \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_a7590980360c981cb8e7a63498bb96f77}{duration\+\_\+matrix}. 
+
+Taillard benchmark instances are always square (jobs × machines = machines × machines), so {\ttfamily duration\+\_\+matrix}\+[0]\+.Length is a reliable column count. Behaviour is undefined if \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_a7590980360c981cb8e7a63498bb96f77}{duration\+\_\+matrix} is empty or jagged. 
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Scheduling/\+\+Data/\+Taillard\+Instance.\+cs\end{DoxyCompactItemize}

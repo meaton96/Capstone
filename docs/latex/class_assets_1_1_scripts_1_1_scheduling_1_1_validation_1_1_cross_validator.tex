@@ -1,0 +1,76 @@
+\doxysection{Assets.\+Scripts.\+Scheduling.\+Validation.\+Cross\+Validator Class Reference}
+\hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator}{}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator}\index{Assets.Scripts.Scheduling.Validation.CrossValidator@{Assets.Scripts.Scheduling.Validation.CrossValidator}}
+
+
+\doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_unity}{Unity} entry point that exports C\# makespan results for cross-\/validation against job\+\_\+shop\+\_\+lib.  
+
+
+Inheritance diagram for Assets.\+Scripts.\+Scheduling.\+Validation.\+Cross\+Validator:\+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+string \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_a874643c3bab4c70ffecb10fd871e963e}{instance\+Directory}} = "{}Assets/\+Streaming\+Assets/\+Instances"{}
+\begin{DoxyCompactList}\small\item\em Absolute or project-\/relative path to the folder containing Taillard {\ttfamily }.json files. \end{DoxyCompactList}\item 
+string \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_a80ede1968dc597c505ef36ec96837d23}{output\+Directory}} = "{}Assets/\+Streaming\+Assets/\+Validation"{}
+\begin{DoxyCompactList}\small\item\em Absolute or project-\/relative path to the folder where export files will be written. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_unity}{Unity} entry point that exports C\# makespan results for cross-\/validation against job\+\_\+shop\+\_\+lib. 
+
+Attach to any Game\+Object in the scene. On Play, the component locates all Taillard JSON files in \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_a874643c3bab4c70ffecb10fd871e963e}{instance\+Directory}, runs Validation\+Exporter.\+Run\+And\+Export to simulate every instance under every Dispatching\+Rule, and writes {\ttfamily csharp\+\_\+makespans.\+csv} and {\ttfamily csharp\+\_\+schedules.\+json} to \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_a80ede1968dc597c505ef36ec96837d23}{output\+Directory}. The exported files are then consumed by {\ttfamily compare\+\_\+results.\+py} to diff C\# results against the Python job\+\_\+shop\+\_\+lib reference.
+
+\begin{DoxyParagraph}{Setup}
+
+\begin{DoxyEnumerate}
+\item Place Taillard JSON files in {\ttfamily Assets/\+\+Resources/\+\+Instances/\+}.
+\item Copy the same files to a regular folder (e.\+g. {\ttfamily Assets/\+\+Streaming\+Assets/\+\+Instances/\+}) because Validation\+Exporter reads directly from disk, not via {\ttfamily Resources.\+Load}.
+\item Set \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_a874643c3bab4c70ffecb10fd871e963e}{instance\+Directory} and \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_a80ede1968dc597c505ef36ec96837d23}{output\+Directory} in the Inspector.
+\item Enter Play Mode.
+\item Run {\ttfamily compare\+\_\+results.\+py} from the output directory:\+ 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{cd\ Assets/StreamingAssets/Validation}
+\DoxyCodeLine{python\ compare\_results.py}
+
+\end{DoxyCode}
+
+\end{DoxyEnumerate}
+\end{DoxyParagraph}
+\begin{DoxyNote}{Note}
+This component does not use the \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_unity}{Unity} Resources system. Both directories must be accessible as real filesystem paths at runtime, not \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_unity}{Unity} virtual paths. 
+\end{DoxyNote}
+
+
+\label{doc-variable-members}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_doc-variable-members}
+\doxysubsection{Member Data Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_a874643c3bab4c70ffecb10fd871e963e}\index{Assets.Scripts.Scheduling.Validation.CrossValidator@{Assets.Scripts.Scheduling.Validation.CrossValidator}!instanceDirectory@{instanceDirectory}}
+\index{instanceDirectory@{instanceDirectory}!Assets.Scripts.Scheduling.Validation.CrossValidator@{Assets.Scripts.Scheduling.Validation.CrossValidator}}
+\doxysubsubsection{\texorpdfstring{instanceDirectory}{instanceDirectory}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_a874643c3bab4c70ffecb10fd871e963e} 
+string Assets.\+Scripts.\+Scheduling.\+Validation.\+Cross\+Validator.\+instance\+Directory = "{}Assets/\+Streaming\+Assets/\+Instances"{}}
+
+
+
+Absolute or project-\/relative path to the folder containing Taillard {\ttfamily }.json files. 
+
+Must be a real filesystem path readable by {\ttfamily System.\+IO} — not a {\ttfamily Resources/\+} virtual path. Defaults to {\ttfamily Assets/\+\+Streaming\+Assets/\+\+Instances}. Validated on Start; a missing directory aborts the export with a {\ttfamily Debug.\+Log\+Error}. \Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_a80ede1968dc597c505ef36ec96837d23}\index{Assets.Scripts.Scheduling.Validation.CrossValidator@{Assets.Scripts.Scheduling.Validation.CrossValidator}!outputDirectory@{outputDirectory}}
+\index{outputDirectory@{outputDirectory}!Assets.Scripts.Scheduling.Validation.CrossValidator@{Assets.Scripts.Scheduling.Validation.CrossValidator}}
+\doxysubsubsection{\texorpdfstring{outputDirectory}{outputDirectory}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_a80ede1968dc597c505ef36ec96837d23} 
+string Assets.\+Scripts.\+Scheduling.\+Validation.\+Cross\+Validator.\+output\+Directory = "{}Assets/\+Streaming\+Assets/\+Validation"{}}
+
+
+
+Absolute or project-\/relative path to the folder where export files will be written. 
+
+Created automatically by Start if it does not already exist. Validation\+Exporter.\+Run\+And\+Export writes {\ttfamily csharp\+\_\+makespans.\+csv} and {\ttfamily csharp\+\_\+schedules.\+json} to this location. 
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Scheduling/\+\+Validation/\+Cross\+Validator.\+cs\end{DoxyCompactItemize}

@@ -1,0 +1,87 @@
+\doxysection{Assets.\+Scripts.\+Scheduling.\+Validation.\+Validation\+Runner.\+Validation\+Result Struct Reference}
+\hypertarget{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result}{}\label{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result}\index{Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidationResult@{Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidationResult}}
+
+
+Encapsulates the outcome of a single simulation run against a benchmark instance.  
+
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+override string \doxymbox{\hyperlink{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_aff1c63ea0501a57ab4246a8c63e07674}{To\+String}} ()
+\begin{DoxyCompactList}\small\item\em Returns a single-\/line summary of the result suitable for console logging. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_a0926bf1f8fc15ac009860d1b985d105a}\label{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_a0926bf1f8fc15ac009860d1b985d105a} 
+string {\bfseries Instance\+Name}
+\begin{DoxyCompactList}\small\item\em Name of the benchmark instance, sourced from Taillard\+Instance.\+name. \end{DoxyCompactList}\item 
+int \doxymbox{\hyperlink{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_a517920986cf8204bea22af51ce7a823d}{Known\+Optimum}}
+\begin{DoxyCompactList}\small\item\em Proven optimal makespan for this instance, sourced from Taillard\+Metadata.\+optimum. \end{DoxyCompactList}\item 
+\Hypertarget{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_aeb38fc30e0ecf984b8fc04e70fa4a663}\label{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_aeb38fc30e0ecf984b8fc04e70fa4a663} 
+int {\bfseries Lower\+Bound}
+\begin{DoxyCompactList}\small\item\em Theoretical lower bound on the makespan, below which no valid schedule can exist. \end{DoxyCompactList}\item 
+\Hypertarget{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_a22ebc7de4f255381a4584ef47c152017}\label{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_a22ebc7de4f255381a4584ef47c152017} 
+int {\bfseries Upper\+Bound}
+\begin{DoxyCompactList}\small\item\em Best known upper bound on the makespan from the published literature. \end{DoxyCompactList}\item 
+\Hypertarget{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_a1b4e8e889bb4876f00515d4376cbcf92}\label{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_a1b4e8e889bb4876f00515d4376cbcf92} 
+double {\bfseries Makespan}
+\begin{DoxyCompactList}\small\item\em Makespan achieved by the simulation run, in simulation time units. \end{DoxyCompactList}\item 
+\Hypertarget{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_a6a683f8b0bd00e2262f6c1247ebb49d7}\label{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_a6a683f8b0bd00e2262f6c1247ebb49d7} 
+\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87}{Dispatching\+Rule}} {\bfseries Rule\+Used}
+\begin{DoxyCompactList}\small\item\em The Dispatching\+Rule used to produce this result. \end{DoxyCompactList}\item 
+double \doxymbox{\hyperlink{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_a7e469c74087c89fb0c85b2544085d7b8}{Gap\+Percent}}
+\begin{DoxyCompactList}\small\item\em Percentage gap between \doxylink{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_a1b4e8e889bb4876f00515d4376cbcf92}{Makespan} and \doxylink{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_a517920986cf8204bea22af51ce7a823d}{Known\+Optimum}. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Encapsulates the outcome of a single simulation run against a benchmark instance. 
+
+Captures the instance identity, all known bound values from Taillard\+Metadata, the achieved makespan, the rule used, and the optimality gap so results from different rules can be compared directly. 
+
+\label{doc-func-members}
+\Hypertarget{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_aff1c63ea0501a57ab4246a8c63e07674}\index{Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidationResult@{Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidationResult}!ToString@{ToString}}
+\index{ToString@{ToString}!Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidationResult@{Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidationResult}}
+\doxysubsubsection{\texorpdfstring{ToString()}{ToString()}}
+{\footnotesize\ttfamily \label{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_aff1c63ea0501a57ab4246a8c63e07674} 
+override string Assets.\+Scripts.\+Scheduling.\+Validation.\+Validation\+Runner.\+Validation\+Result.\+To\+String (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Returns a single-\/line summary of the result suitable for console logging. 
+
+\begin{DoxyReturn}{Returns}
+A formatted string containing instance name, rule, makespan, optimum, gap percentage, and bound range. 
+\end{DoxyReturn}
+
+
+\label{doc-variable-members}
+\Hypertarget{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_doc-variable-members}
+\doxysubsection{Member Data Documentation}
+\Hypertarget{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_a7e469c74087c89fb0c85b2544085d7b8}\index{Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidationResult@{Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidationResult}!GapPercent@{GapPercent}}
+\index{GapPercent@{GapPercent}!Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidationResult@{Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidationResult}}
+\doxysubsubsection{\texorpdfstring{GapPercent}{GapPercent}}
+{\footnotesize\ttfamily \label{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_a7e469c74087c89fb0c85b2544085d7b8} 
+double Assets.\+Scripts.\+Scheduling.\+Validation.\+Validation\+Runner.\+Validation\+Result.\+Gap\+Percent}
+
+
+
+Percentage gap between \doxylink{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_a1b4e8e889bb4876f00515d4376cbcf92}{Makespan} and \doxylink{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_a517920986cf8204bea22af51ce7a823d}{Known\+Optimum}. 
+
+Computed as {\ttfamily }(Makespan -\/ Known\+Optimum) /\+ Known\+Optimum \texorpdfstring{$\ast$}{*} 100. A value of {\ttfamily 0} indicates an optimal schedule was found. Negative values indicate a bug, since no schedule can beat the proven optimum. \Hypertarget{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_a517920986cf8204bea22af51ce7a823d}\index{Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidationResult@{Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidationResult}!KnownOptimum@{KnownOptimum}}
+\index{KnownOptimum@{KnownOptimum}!Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidationResult@{Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidationResult}}
+\doxysubsubsection{\texorpdfstring{KnownOptimum}{KnownOptimum}}
+{\footnotesize\ttfamily \label{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_a517920986cf8204bea22af51ce7a823d} 
+int Assets.\+Scripts.\+Scheduling.\+Validation.\+Validation\+Runner.\+Validation\+Result.\+Known\+Optimum}
+
+
+
+Proven optimal makespan for this instance, sourced from Taillard\+Metadata.\+optimum. 
+
+Used as the denominator in \doxylink{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_a7e469c74087c89fb0c85b2544085d7b8}{Gap\+Percent}. If {\ttfamily 0}, gap calculation will produce undefined results. 
+
+The documentation for this struct was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Scheduling/\+\+Validation/\+Validation\+Runner.\+cs\end{DoxyCompactItemize}

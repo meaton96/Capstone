@@ -1,0 +1,131 @@
+\doxysection{Assets.\+Scripts.\+Scheduling.\+Validation.\+Validation\+Runner Class Reference}
+\hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner}{}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner}\index{Assets.Scripts.Scheduling.Validation.ValidationRunner@{Assets.Scripts.Scheduling.Validation.ValidationRunner}}
+
+
+Validates the DESSimulator against Taillard JSP benchmark instances.  
+
+
+\doxysubsubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \doxymbox{\hyperlink{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result}{Validation\+Result}}
+\begin{DoxyCompactList}\small\item\em Encapsulates the outcome of a single simulation run against a benchmark instance. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\doxymbox{\hyperlink{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result}{Validation\+Result}} \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_acc29f6fc8de3820b1229ea52786a8c68}{Run\+Single}} (\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance}{Taillard\+Instance}} instance, \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87}{Dispatching\+Rule}} rule)
+\begin{DoxyCompactList}\small\item\em Simulates a single instance with one dispatching rule and returns a gap analysis. \end{DoxyCompactList}\item 
+List$<$ \doxymbox{\hyperlink{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result}{Validation\+Result}} $>$ \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_a8024432bea5a9a1908488f3611bd2efd}{Run\+All\+Rules}} (\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance}{Taillard\+Instance}} instance)
+\begin{DoxyCompactList}\small\item\em Runs every Dispatching\+Rule on an instance and returns results sorted by makespan. \end{DoxyCompactList}\item 
+List$<$ string $>$ \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_a68a76d37888dd4b0aaadc15867c029b9}{Validate\+Constraints}} (\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance}{Taillard\+Instance}} instance, \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87}{Dispatching\+Rule}} rule)
+\begin{DoxyCompactList}\small\item\em Verifies correctness invariants of the DESSimulator against a benchmark instance. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Validates the DESSimulator against Taillard JSP benchmark instances. 
+
+Provides three levels of validation:\+
+\begin{DoxyItemize}
+\item \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_acc29f6fc8de3820b1229ea52786a8c68}{Run\+Single} — simulate one instance with one Dispatching\+Rule and measure the gap to optimum.
+\item \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_a8024432bea5a9a1908488f3611bd2efd}{Run\+All\+Rules} — sweep every Dispatching\+Rule and return results sorted by makespan.
+\item \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_a68a76d37888dd4b0aaadc15867c029b9}{Validate\+Constraints} — verify correctness invariants (valid times, precedence, no machine overlap, makespan above lower bound).
+\end{DoxyItemize}
+
+Usage outside \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_unity}{Unity}:\+ 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{var\ runner\ =\ \textcolor{keyword}{new}\ ValidationRunner();}
+\DoxyCodeLine{runner.RunValidation(taillardInstance);}
+
+\end{DoxyCode}
+
+
+Usage inside \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_unity}{Unity}:\+ 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{comment}{//\ Call\ from\ a\ MonoBehaviour\ via\ the\ TaillardValidator\ component.}}
+
+\end{DoxyCode}
+ 
+
+\label{doc-func-members}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_a8024432bea5a9a1908488f3611bd2efd}\index{Assets.Scripts.Scheduling.Validation.ValidationRunner@{Assets.Scripts.Scheduling.Validation.ValidationRunner}!RunAllRules@{RunAllRules}}
+\index{RunAllRules@{RunAllRules}!Assets.Scripts.Scheduling.Validation.ValidationRunner@{Assets.Scripts.Scheduling.Validation.ValidationRunner}}
+\doxysubsubsection{\texorpdfstring{RunAllRules()}{RunAllRules()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_a8024432bea5a9a1908488f3611bd2efd} 
+List$<$ \doxymbox{\hyperlink{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result}{Validation\+Result}} $>$ Assets.\+Scripts.\+Scheduling.\+Validation.\+Validation\+Runner.\+Run\+All\+Rules (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance}{Taillard\+Instance}}}]{instance}{}\end{DoxyParamCaption})}
+
+
+
+Runs every Dispatching\+Rule on an instance and returns results sorted by makespan. 
+
+Iterates all values of the Dispatching\+Rule enum via {\ttfamily Enum.\+Get\+Values}, delegates each to \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_acc29f6fc8de3820b1229ea52786a8c68}{Run\+Single}, and sorts the collected results by \doxylink{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_a1b4e8e889bb4876f00515d4376cbcf92}{Validation\+Result.\+Makespan} ascending so the best-\/performing heuristic appears first. Useful for identifying the strongest baseline rule for a given instance before applying RL-\/based scheduling.
+
+
+\begin{DoxyParams}{Parameters}
+{\em instance} & The benchmark instance to run all rules against.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A list of \doxylink{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result}{Validation\+Result} values, one per Dispatching\+Rule, sorted by makespan ascending. 
+\end{DoxyReturn}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_acc29f6fc8de3820b1229ea52786a8c68}\index{Assets.Scripts.Scheduling.Validation.ValidationRunner@{Assets.Scripts.Scheduling.Validation.ValidationRunner}!RunSingle@{RunSingle}}
+\index{RunSingle@{RunSingle}!Assets.Scripts.Scheduling.Validation.ValidationRunner@{Assets.Scripts.Scheduling.Validation.ValidationRunner}}
+\doxysubsubsection{\texorpdfstring{RunSingle()}{RunSingle()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_acc29f6fc8de3820b1229ea52786a8c68} 
+\doxymbox{\hyperlink{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result}{Validation\+Result}} Assets.\+Scripts.\+Scheduling.\+Validation.\+Validation\+Runner.\+Run\+Single (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance}{Taillard\+Instance}}}]{instance}{, }\item[{\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87}{Dispatching\+Rule}}}]{rule}{}\end{DoxyParamCaption})}
+
+
+
+Simulates a single instance with one dispatching rule and returns a gap analysis. 
+
+Constructs a fresh DESSimulator, loads {\ttfamily instance}, sets {\ttfamily rule} as the active dispatching rule, runs to completion, and packages the result into a \doxylink{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result}{Validation\+Result}. The gap percentage is computed relative to Taillard\+Metadata.\+optimum and will be infinite or undefined if optimum is {\ttfamily 0}.
+
+
+\begin{DoxyParams}{Parameters}
+{\em instance} & The benchmark instance to simulate. Must have valid Taillard\+Instance.\+metadata with a non-\/zero Taillard\+Metadata.\+optimum for gap analysis to be meaningful. \\
+\hline
+{\em rule} & The Dispatching\+Rule to apply during the simulation run.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A \doxylink{struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result}{Validation\+Result} containing the makespan, gap, and bound values for this rule and instance combination. 
+\end{DoxyReturn}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_a68a76d37888dd4b0aaadc15867c029b9}\index{Assets.Scripts.Scheduling.Validation.ValidationRunner@{Assets.Scripts.Scheduling.Validation.ValidationRunner}!ValidateConstraints@{ValidateConstraints}}
+\index{ValidateConstraints@{ValidateConstraints}!Assets.Scripts.Scheduling.Validation.ValidationRunner@{Assets.Scripts.Scheduling.Validation.ValidationRunner}}
+\doxysubsubsection{\texorpdfstring{ValidateConstraints()}{ValidateConstraints()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_a68a76d37888dd4b0aaadc15867c029b9} 
+List$<$ string $>$ Assets.\+Scripts.\+Scheduling.\+Validation.\+Validation\+Runner.\+Validate\+Constraints (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance}{Taillard\+Instance}}}]{instance}{, }\item[{\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87}{Dispatching\+Rule}}}]{rule}{}\end{DoxyParamCaption})}
+
+
+
+Verifies correctness invariants of the DESSimulator against a benchmark instance. 
+
+Runs a fresh simulation with {\ttfamily rule} and performs four sequential checks. All violations found across all checks are collected and returned — execution does not stop at the first error. A correct implementation should always return an empty list.
+
+The four checks are:\+
+\begin{DoxyEnumerate}
+\item {\bfseries{Valid times}}:\+ every Operation has non-\/negative Operation.\+Start\+Time and Operation.\+End\+Time. A value of {\ttfamily -\/1} indicates the operation was never scheduled.
+\item {\bfseries{Precedence}}:\+ for each job, operation {\ttfamily i} must start no earlier than operation {\ttfamily i-\/1} ends. Violations indicate a sequencing bug in DESSimulator.
+\item {\bfseries{No machine overlap}}:\+ no two operations assigned to the same machine may overlap in time. Operations are sorted by start time and checked pairwise. Violations indicate a machine contention bug.
+\item {\bfseries{Makespan lower bound}}:\+ the achieved makespan must be at or above Taillard\+Metadata.\+lower\+\_\+bound. A violation indicates a bug that produces a schedule that is theoretically impossible.
+\end{DoxyEnumerate}
+
+\begin{DoxyNote}{Note}
+A floating-\/point epsilon of {\ttfamily 1e-\/9} is applied to all time comparisons to guard against rounding errors in double arithmetic.
+\end{DoxyNote}
+
+\begin{DoxyParams}{Parameters}
+{\em instance} & The benchmark instance to validate against. Must have valid Taillard\+Metadata with a meaningful Taillard\+Metadata.\+lower\+\_\+bound. \\
+\hline
+{\em rule} & The Dispatching\+Rule to use for the validation simulation run.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A list of human-\/readable error strings describing each violation found. Returns an empty list if all constraints are satisfied. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Scheduling/\+\+Validation/\+Validation\+Runner.\+cs\end{DoxyCompactItemize}

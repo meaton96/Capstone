@@ -1,0 +1,65 @@
+\chapter{Scheduling Module Documentation }
+\hypertarget{md__c_1_2_users_2_mike_2_documents_2_git_hub_2_capstone_2_capstone_2_assets_2_scripts_2_scheduling_2doc}{}\label{md__c_1_2_users_2_mike_2_documents_2_git_hub_2_capstone_2_capstone_2_assets_2_scripts_2_scheduling_2doc}\index{Scheduling Module Documentation@{Scheduling Module Documentation}}
+\label{md__c_1_2_users_2_mike_2_documents_2_git_hub_2_capstone_2_capstone_2_assets_2_scripts_2_scheduling_2doc_autotoc_md0}%
+\Hypertarget{md__c_1_2_users_2_mike_2_documents_2_git_hub_2_capstone_2_capstone_2_assets_2_scripts_2_scheduling_2doc_autotoc_md0}%
+
+
+This document provides an overview of the {\ttfamily Scheduling} module, its structure, and the purpose of its key components. This module is a C\# implementation of a discrete-\/event simulator for solving Job-\/\+Shop Scheduling Problems (JSP), with a focus on validation against well-\/known benchmark instances.\hypertarget{md__c_1_2_users_2_mike_2_documents_2_git_hub_2_capstone_2_capstone_2_assets_2_scripts_2_scheduling_2doc_autotoc_md1}{}\doxysection{\texorpdfstring{Folder Structure}{Folder Structure}}\label{md__c_1_2_users_2_mike_2_documents_2_git_hub_2_capstone_2_capstone_2_assets_2_scripts_2_scheduling_2doc_autotoc_md1}
+The {\ttfamily Scheduling} module is organized into the following subfolders:\+
+
+
+\begin{DoxyItemize}
+\item {\ttfamily Core/\+}:\+ Contains the core logic for the discrete-\/event simulator. These scripts are pure C\# and have no Unity dependencies.
+\item {\ttfamily Data/\+}:\+ Contains data structures for representing scheduling problem instances, specifically the Taillard benchmark format.
+\item {\ttfamily Unity/\+}:\+ Contains {\ttfamily Mono\+Behaviour} components that bridge the core simulator with the Unity environment for in-\/editor validation and testing.
+\item {\ttfamily Validation/\+}:\+ Contains scripts and tools for validating the correctness and performance of the simulator. This includes comparing results against a reference Python implementation.
+\end{DoxyItemize}
+
+\DoxyHorRuler{0}
+\hypertarget{md__c_1_2_users_2_mike_2_documents_2_git_hub_2_capstone_2_capstone_2_assets_2_scripts_2_scheduling_2doc_autotoc_md3}{}\doxysection{\texorpdfstring{{\ttfamily Core/\+}}{{\ttfamily Core/\+}}}\label{md__c_1_2_users_2_mike_2_documents_2_git_hub_2_capstone_2_capstone_2_assets_2_scripts_2_scheduling_2doc_autotoc_md3}
+This folder contains the heart of the scheduling simulator.
+
+
+\begin{DoxyItemize}
+\item {\bfseries{{\ttfamily DESSimulator.\+cs}}}:\+ The main simulator class. It manages the simulation clock, events, jobs, and machines. It can load a problem instance and run the simulation from start to finish.
+\item {\bfseries{{\ttfamily Dispatching\+Rules.\+cs}}}:\+ Implements a variety of common dispatching (or priority) rules used in scheduling to decide which job to process next when a machine becomes available. Examples include Shortest Processing Time (SPT) and First-\/\+Come, First-\/\+Served (FCFS).
+\item {\bfseries{{\ttfamily Event\+Queue.\+cs}}}:\+ A min-\/heap priority queue for managing simulation events. Events are ordered by their timestamp, ensuring the simulation proceeds in the correct chronological order.
+\item {\bfseries{{\ttfamily Job.\+cs}}}:\+ Defines the {\ttfamily Job} and {\ttfamily Operation} classes. A {\ttfamily Job} consists of a sequence of {\ttfamily Operation}s, where each operation must be processed on a specific machine for a certain duration.
+\item {\bfseries{{\ttfamily Machine.\+cs}}}:\+ Represents a machine on the shop floor. It can be idle or busy processing an operation and maintains a queue of jobs waiting to be processed.
+\end{DoxyItemize}
+
+\DoxyHorRuler{0}
+\hypertarget{md__c_1_2_users_2_mike_2_documents_2_git_hub_2_capstone_2_capstone_2_assets_2_scripts_2_scheduling_2doc_autotoc_md5}{}\doxysection{\texorpdfstring{{\ttfamily Data/\+}}{{\ttfamily Data/\+}}}\label{md__c_1_2_users_2_mike_2_documents_2_git_hub_2_capstone_2_capstone_2_assets_2_scripts_2_scheduling_2doc_autotoc_md5}
+This folder handles the data representation of scheduling problems.
+
+
+\begin{DoxyItemize}
+\item {\bfseries{{\ttfamily Taillard\+Instance.\+cs}}}:\+ A data structure designed to deserialize job-\/shop problem instances from JSON files that follow the Taillard benchmark format. It stores the processing times, machine sequences, and metadata (like the known optimal makespan).
+\end{DoxyItemize}
+
+\DoxyHorRuler{0}
+\hypertarget{md__c_1_2_users_2_mike_2_documents_2_git_hub_2_capstone_2_capstone_2_assets_2_scripts_2_scheduling_2doc_autotoc_md7}{}\doxysection{\texorpdfstring{{\ttfamily Unity/\+}}{{\ttfamily Unity/\+}}}\label{md__c_1_2_users_2_mike_2_documents_2_git_hub_2_capstone_2_capstone_2_assets_2_scripts_2_scheduling_2doc_autotoc_md7}
+This folder contains Unity-\/specific scripts that act as a bridge to the core simulation engine, allowing it to be used within the Unity Editor.
+
+
+\begin{DoxyItemize}
+\item {\bfseries{{\ttfamily Taillard\+Validator.\+cs}}}:\+ A {\ttfamily Mono\+Behaviour} that you can attach to a Game\+Object. It provides a user interface in the Inspector to select a Taillard instance (from {\ttfamily Resources/\+\+Instances}), choose a dispatching rule, and run a validation test directly in the editor.
+\item {\bfseries{{\ttfamily Cross\+Validator.\+cs}}}:\+ A {\ttfamily Mono\+Behaviour} used to automate the process of running the C\# simulator over a batch of instances and exporting the results (makespans and full schedules) to CSV and JSON files. These exported files are formatted to be directly comparable with the output from a companion Python implementation.
+\end{DoxyItemize}
+
+\DoxyHorRuler{0}
+\hypertarget{md__c_1_2_users_2_mike_2_documents_2_git_hub_2_capstone_2_capstone_2_assets_2_scripts_2_scheduling_2doc_autotoc_md9}{}\doxysection{\texorpdfstring{{\ttfamily Validation/\+}}{{\ttfamily Validation/\+}}}\label{md__c_1_2_users_2_mike_2_documents_2_git_hub_2_capstone_2_capstone_2_assets_2_scripts_2_scheduling_2doc_autotoc_md9}
+This folder contains tools for ensuring the simulator is correct and for comparing its performance against a reference implementation.
+
+
+\begin{DoxyItemize}
+\item {\bfseries{{\ttfamily Validation\+Runner.\+cs}}}:\+ A class responsible for running a series of validation checks. It can run a single instance with a specific rule, or run all available rules to see which one performs best. It also includes methods to verify that fundamental scheduling constraints (like operation precedence and machine capacity) are not violated.
+\item {\bfseries{{\ttfamily Validation\+Exporter.\+cs}}}:\+ This static class contains the logic to export simulation results into formats (CSV and JSON) that match those generated by the Python validation scripts. This enables a direct, line-\/by-\/line comparison of outputs to check for discrepancies.
+\item {\bfseries{Python Scripts ({\ttfamily \texorpdfstring{$\ast$}{*}.py})}}:\+ This collection of Python scripts serves as an independent, reference implementation of a job-\/shop simulator.
+\begin{DoxyItemize}
+\item {\ttfamily generate\+\_\+reference.\+py}:\+ Generates the canonical {\ttfamily reference\+\_\+makespans.\+csv} and {\ttfamily reference\+\_\+schedules.\+json} files using the {\ttfamily job-\/shop-\/lib} Python library.
+\item {\ttfamily compare\+\_\+results.\+py}:\+ Compares the {\ttfamily csharp\+\_\+makespans.\+csv} generated by {\ttfamily Validation\+Exporter} against the {\ttfamily reference\+\_\+makespans.\+csv} and reports any differences in the calculated makespans.
+\item {\ttfamily compare\+\_\+mirror.\+py}:\+ Provides an even more detailed comparison by checking the full schedule JSON files for any discrepancies in start/\+end times for any operation.
+\item {\ttfamily mirror\+\_\+des.\+py}:\+ A minimal, standalone Python implementation of the same DES logic, used by {\ttfamily compare\+\_\+mirror.\+py} to ensure the comparison is fair. 
+\end{DoxyItemize}
+\end{DoxyItemize}

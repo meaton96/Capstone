@@ -1,0 +1,102 @@
+\doxysection{Assets.\+Scripts.\+Scheduling.\+Core.\+Job Class Reference}
+\hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job}{}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job}\index{Assets.Scripts.Scheduling.Core.Job@{Assets.Scripts.Scheduling.Core.Job}}
+
+
+An ordered sequence of \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation}{Operation} objects representing a single job.  
+
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_a21cff90377b064a30e0cee59774de3a7}{Job}} (int id, \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation}{Operation}}\+[$\,$]\+ operations, double arrival\+Time=0)
+\begin{DoxyCompactList}\small\item\em Constructs a job with a fixed operation sequence and an optional arrival time. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_a6d359a8dff65848142a8a6e8cc32440e}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_a6d359a8dff65848142a8a6e8cc32440e} 
+int {\bfseries Id}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em Unique identifier for this job, matching its index in DESSimulator.\+Jobs. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_a0d323e363dfe893aae602c1d6541943b}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_a0d323e363dfe893aae602c1d6541943b} 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation}{Operation}}\+[$\,$]\+ {\bfseries Operations}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em Ordered array of operations that must be executed sequentially. \end{DoxyCompactList}\item 
+int \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_a95c34ede07918ec6b705d42d89ddba3e}{Next\+Operation\+Index}} = 0\hspace{0.3cm}{\ttfamily  \+[get, set]\+}
+\begin{DoxyCompactList}\small\item\em Index of the next operation to be dispatched or currently in progress. \end{DoxyCompactList}\item 
+double \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_aa1c1d8a26ce8148b5a2ccea8113c9890}{Arrival\+Time}}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em Simulation time at which this job entered the system. \end{DoxyCompactList}\item 
+double \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_a26d164bc9562e761d35d5d13d2156036}{Completion\+Time}} = -\/1\hspace{0.3cm}{\ttfamily  \+[get, set]\+}
+\begin{DoxyCompactList}\small\item\em Simulation time at which the job\textquotesingle{}s final operation completed. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_a08059999b9beefced19f84b58f8d422c}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_a08059999b9beefced19f84b58f8d422c} 
+bool {\bfseries Is\+Complete}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em {\ttfamily true} when all operations have been processed; {\ttfamily false} otherwise. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_a8c8ffe232d70f7afde4cd9074a3b2fa8}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_a8c8ffe232d70f7afde4cd9074a3b2fa8} 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation}{Operation}} {\bfseries Current\+Operation}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em The next operation awaiting dispatch, or {\ttfamily null} if the job is complete. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+An ordered sequence of \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation}{Operation} objects representing a single job. 
+
+Tracks execution progress via \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_a95c34ede07918ec6b705d42d89ddba3e}{Next\+Operation\+Index}, which advances each time an operation completes inside DESSimulator.\+Handle\+Operation\+Complete. \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_a8c8ffe232d70f7afde4cd9074a3b2fa8}{Current\+Operation} and \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_a08059999b9beefced19f84b58f8d422c}{Is\+Complete} are derived directly from this index and require no additional state. 
+
+\label{doc-constructors}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_doc-constructors}
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_a21cff90377b064a30e0cee59774de3a7}\index{Assets.Scripts.Scheduling.Core.Job@{Assets.Scripts.Scheduling.Core.Job}!Job@{Job}}
+\index{Job@{Job}!Assets.Scripts.Scheduling.Core.Job@{Assets.Scripts.Scheduling.Core.Job}}
+\doxysubsubsection{\texorpdfstring{Job()}{Job()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_a21cff90377b064a30e0cee59774de3a7} 
+Assets.\+Scripts.\+Scheduling.\+Core.\+Job.\+Job (\begin{DoxyParamCaption}\item[{int}]{id}{, }\item[{\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation}{Operation}}\+[$\,$]\+}]{operations}{, }\item[{double}]{arrival\+Time}{ = {\ttfamily 0}}\end{DoxyParamCaption})}
+
+
+
+Constructs a job with a fixed operation sequence and an optional arrival time. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em id} & Unique job identifier. \\
+\hline
+{\em operations} & Ordered array of operations to execute. Must not be null or empty. \\
+\hline
+{\em arrival\+Time} & Simulation time at which the job enters the system. Defaults to {\ttfamily 0}. \\
+\hline
+\end{DoxyParams}
+
+
+\label{doc-property-members}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_doc-property-members}
+\doxysubsection{Property Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_aa1c1d8a26ce8148b5a2ccea8113c9890}\index{Assets.Scripts.Scheduling.Core.Job@{Assets.Scripts.Scheduling.Core.Job}!ArrivalTime@{ArrivalTime}}
+\index{ArrivalTime@{ArrivalTime}!Assets.Scripts.Scheduling.Core.Job@{Assets.Scripts.Scheduling.Core.Job}}
+\doxysubsubsection{\texorpdfstring{ArrivalTime}{ArrivalTime}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_aa1c1d8a26ce8148b5a2ccea8113c9890} 
+double Assets.\+Scripts.\+Scheduling.\+Core.\+Job.\+Arrival\+Time\hspace{0.3cm}{\ttfamily [get]}}
+
+
+
+Simulation time at which this job entered the system. 
+
+Currently fixed at {\ttfamily 0} for all jobs in Taillard benchmark instances. Reserved for future dynamic arrival scheduling. \Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_a26d164bc9562e761d35d5d13d2156036}\index{Assets.Scripts.Scheduling.Core.Job@{Assets.Scripts.Scheduling.Core.Job}!CompletionTime@{CompletionTime}}
+\index{CompletionTime@{CompletionTime}!Assets.Scripts.Scheduling.Core.Job@{Assets.Scripts.Scheduling.Core.Job}}
+\doxysubsubsection{\texorpdfstring{CompletionTime}{CompletionTime}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_a26d164bc9562e761d35d5d13d2156036} 
+double Assets.\+Scripts.\+Scheduling.\+Core.\+Job.\+Completion\+Time = -\/1\hspace{0.3cm}{\ttfamily [get]}, {\ttfamily [set]}}
+
+
+
+Simulation time at which the job\textquotesingle{}s final operation completed. 
+
+Initialised to {\ttfamily -\/1} and set by DESSimulator.\+Handle\+Operation\+Complete when \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_a08059999b9beefced19f84b58f8d422c}{Is\+Complete} first becomes {\ttfamily true}. Used to compute the makespan. \Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_a95c34ede07918ec6b705d42d89ddba3e}\index{Assets.Scripts.Scheduling.Core.Job@{Assets.Scripts.Scheduling.Core.Job}!NextOperationIndex@{NextOperationIndex}}
+\index{NextOperationIndex@{NextOperationIndex}!Assets.Scripts.Scheduling.Core.Job@{Assets.Scripts.Scheduling.Core.Job}}
+\doxysubsubsection{\texorpdfstring{NextOperationIndex}{NextOperationIndex}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_a95c34ede07918ec6b705d42d89ddba3e} 
+int Assets.\+Scripts.\+Scheduling.\+Core.\+Job.\+Next\+Operation\+Index = 0\hspace{0.3cm}{\ttfamily [get]}, {\ttfamily [set]}}
+
+
+
+Index of the next operation to be dispatched or currently in progress. 
+
+Starts at {\ttfamily 0} and is incremented by \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator}{DESSimulator} after each \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a74e900c350e0673c74e0e62b6f351056a118b996cf01af1910a157f7409f5d0df}{Event\+Type.\+Operation\+Complete} event. When equal to {\ttfamily Operations.\+Length} the job is considered complete. 
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Scheduling/\+\+Core/\+Job.\+cs\end{DoxyCompactItemize}

@@ -1,0 +1,92 @@
+\doxysection{Assets.\+Scripts.\+Scheduling.\+Core.\+Operation Class Reference}
+\hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation}{}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation}\index{Assets.Scripts.Scheduling.Core.Operation@{Assets.Scripts.Scheduling.Core.Operation}}
+
+
+Represents a single operation within a job:\+ process on a given machine for a fixed duration.  
+
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_ad95eabd51be0fc1f460848715e8ecfb3}{Operation}} (int job\+Id, int op\+Index, int machine\+Id, int duration)
+\begin{DoxyCompactList}\small\item\em Constructs a fully specified, immutable operation. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_a99aa0aa4e9fcc8afae0dd242b8deb22f}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_a99aa0aa4e9fcc8afae0dd242b8deb22f} 
+int {\bfseries Job\+Id}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em ID of the job this operation belongs to. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_acdc6f217ecabd0032093b6ca0a4842dd}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_acdc6f217ecabd0032093b6ca0a4842dd} 
+int {\bfseries Operation\+Index}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em Zero-\/based index of this operation within its parent job\textquotesingle{}s operation sequence. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_a498171222194623510eeb1bd3b79e6d9}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_a498171222194623510eeb1bd3b79e6d9} 
+int {\bfseries Machine\+Id}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em ID of the machine on which this operation must be processed. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_a33c6d6f8ca03df6cacc3cae0ba540b18}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_a33c6d6f8ca03df6cacc3cae0ba540b18} 
+int {\bfseries Duration}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em Processing time required to complete this operation, in simulation time units. \end{DoxyCompactList}\item 
+double \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_a53d45f1ff0ac549efa8f19bb12c7b07b}{Start\+Time}} = -\/1\hspace{0.3cm}{\ttfamily  \+[get, set]\+}
+\begin{DoxyCompactList}\small\item\em Simulation time at which this operation began processing. \end{DoxyCompactList}\item 
+double \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_a5c826ae3e7644df48c3743d2fd2f5acf}{End\+Time}} = -\/1\hspace{0.3cm}{\ttfamily  \+[get, set]\+}
+\begin{DoxyCompactList}\small\item\em Simulation time at which this operation finished processing. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Represents a single operation within a job:\+ process on a given machine for a fixed duration. 
+
+Operations are immutable after construction except for \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_a53d45f1ff0ac549efa8f19bb12c7b07b}{Start\+Time} and \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_a5c826ae3e7644df48c3743d2fd2f5acf}{End\+Time}, which are set to {\ttfamily -\/1} at creation and populated by \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator}{DESSimulator} during the simulation run. Each operation belongs to exactly one job and targets exactly one machine. 
+
+\label{doc-constructors}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_doc-constructors}
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_ad95eabd51be0fc1f460848715e8ecfb3}\index{Assets.Scripts.Scheduling.Core.Operation@{Assets.Scripts.Scheduling.Core.Operation}!Operation@{Operation}}
+\index{Operation@{Operation}!Assets.Scripts.Scheduling.Core.Operation@{Assets.Scripts.Scheduling.Core.Operation}}
+\doxysubsubsection{\texorpdfstring{Operation()}{Operation()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_ad95eabd51be0fc1f460848715e8ecfb3} 
+Assets.\+Scripts.\+Scheduling.\+Core.\+Operation.\+Operation (\begin{DoxyParamCaption}\item[{int}]{job\+Id}{, }\item[{int}]{op\+Index}{, }\item[{int}]{machine\+Id}{, }\item[{int}]{duration}{}\end{DoxyParamCaption})}
+
+
+
+Constructs a fully specified, immutable operation. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em job\+Id} & ID of the owning job. \\
+\hline
+{\em op\+Index} & Zero-\/based position of this operation in the job\textquotesingle{}s sequence. \\
+\hline
+{\em machine\+Id} & ID of the machine that must process this operation. \\
+\hline
+{\em duration} & Processing time in simulation time units. \\
+\hline
+\end{DoxyParams}
+
+
+\label{doc-property-members}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_doc-property-members}
+\doxysubsection{Property Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_a5c826ae3e7644df48c3743d2fd2f5acf}\index{Assets.Scripts.Scheduling.Core.Operation@{Assets.Scripts.Scheduling.Core.Operation}!EndTime@{EndTime}}
+\index{EndTime@{EndTime}!Assets.Scripts.Scheduling.Core.Operation@{Assets.Scripts.Scheduling.Core.Operation}}
+\doxysubsubsection{\texorpdfstring{EndTime}{EndTime}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_a5c826ae3e7644df48c3743d2fd2f5acf} 
+double Assets.\+Scripts.\+Scheduling.\+Core.\+Operation.\+End\+Time = -\/1\hspace{0.3cm}{\ttfamily [get]}, {\ttfamily [set]}}
+
+
+
+Simulation time at which this operation finished processing. 
+
+Initialised to {\ttfamily -\/1} and set by \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_a5afae06a59815933c3b65c74d889c30c}{Machine.\+Start\+Processing} during simulation. Equal to \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_a53d45f1ff0ac549efa8f19bb12c7b07b}{Start\+Time} + \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_a33c6d6f8ca03df6cacc3cae0ba540b18}{Duration} once the operation has been scheduled. \Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_a53d45f1ff0ac549efa8f19bb12c7b07b}\index{Assets.Scripts.Scheduling.Core.Operation@{Assets.Scripts.Scheduling.Core.Operation}!StartTime@{StartTime}}
+\index{StartTime@{StartTime}!Assets.Scripts.Scheduling.Core.Operation@{Assets.Scripts.Scheduling.Core.Operation}}
+\doxysubsubsection{\texorpdfstring{StartTime}{StartTime}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_a53d45f1ff0ac549efa8f19bb12c7b07b} 
+double Assets.\+Scripts.\+Scheduling.\+Core.\+Operation.\+Start\+Time = -\/1\hspace{0.3cm}{\ttfamily [get]}, {\ttfamily [set]}}
+
+
+
+Simulation time at which this operation began processing. 
+
+Initialised to {\ttfamily -\/1} and set by \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_a5afae06a59815933c3b65c74d889c30c}{Machine.\+Start\+Processing} during simulation. 
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Scheduling/\+\+Core/\+Job.\+cs\end{DoxyCompactItemize}

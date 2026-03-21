@@ -1,0 +1,32 @@
+\doxysection{Assets.\+Scripts.\+Scheduling.\+Data.\+Taillard\+Metadata Class Reference}
+\hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata}{}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata}\index{Assets.Scripts.Scheduling.Data.TaillardMetadata@{Assets.Scripts.Scheduling.Data.TaillardMetadata}}
+
+
+Known optimality bounds and bibliographic metadata for a \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance}{Taillard\+Instance}.  
+
+
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata_a7b26e31ea7dd8a1c471511ef4da5f50c}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata_a7b26e31ea7dd8a1c471511ef4da5f50c} 
+int {\bfseries optimum}
+\begin{DoxyCompactList}\small\item\em Proven optimal makespan for this instance, or {\ttfamily 0} if unknown. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata_aa246d492d3b2d770d686dc6e4e734c93}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata_aa246d492d3b2d770d686dc6e4e734c93} 
+int {\bfseries upper\+\_\+bound}
+\begin{DoxyCompactList}\small\item\em Best known upper bound on the makespan, i.\+e. the lowest makespan achieved by any published algorithm for this instance. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata_a05c0ecab1d6fc933930a88c799590b30}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata_a05c0ecab1d6fc933930a88c799590b30} 
+int {\bfseries lower\+\_\+bound}
+\begin{DoxyCompactList}\small\item\em Theoretical lower bound on the makespan, below which no valid schedule can exist. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata_a611b1a8070c6e02d37f63854a1487c04}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata_a611b1a8070c6e02d37f63854a1487c04} 
+string {\bfseries reference}
+\begin{DoxyCompactList}\small\item\em Bibliographic reference identifying the source of the bound values, e.\+g. {\ttfamily "{}\+Taillard 1993"{}}. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Known optimality bounds and bibliographic metadata for a \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance}{Taillard\+Instance}. 
+
+Populated from the JSON metadata block alongside the problem matrices. Used for post-\/simulation validation:\+ comparing DESSimulator.\+Makespan against \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata_a7b26e31ea7dd8a1c471511ef4da5f50c}{optimum} or \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata_aa246d492d3b2d770d686dc6e4e734c93}{upper\+\_\+bound} confirms correctness of the dispatching rules. All fields default to {\ttfamily 0} if absent from the JSON source. 
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Scheduling/\+\+Data/\+Taillard\+Instance.\+cs\end{DoxyCompactItemize}

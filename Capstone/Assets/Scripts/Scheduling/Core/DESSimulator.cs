@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Scheduling.Data;
+using Assets.Scripts.Scheduling.Data;
 
-namespace Scheduling.Core
+namespace Assets.Scripts.Scheduling.Core
 {
     /// @brief Pure discrete-event simulator for Job Shop Problem (JSP) validation.
     ///

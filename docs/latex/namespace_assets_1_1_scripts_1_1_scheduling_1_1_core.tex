@@ -1,0 +1,177 @@
+\doxysection{Assets.\+Scripts.\+Scheduling.\+Core Namespace Reference}
+\hypertarget{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core}{}\label{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core}\index{Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}}
+\doxysubsubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator}{DESSimulator}}
+\begin{DoxyCompactList}\small\item\em Pure discrete-\/event simulator for \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job}{Job} Shop Problem (JSP) validation. \end{DoxyCompactList}\item 
+class {\bfseries Dispatching\+Rules}
+\item 
+class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event}{Sim\+Event}}
+\begin{DoxyCompactList}\small\item\em Immutable record representing a single scheduled event in the simulation timeline. \end{DoxyCompactList}\item 
+class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_event_queue}{Event\+Queue}}
+\begin{DoxyCompactList}\small\item\em Min-\/heap priority queue for simulation events, ordered by time with FIFO tiebreaking. \end{DoxyCompactList}\item 
+class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation}{Operation}}
+\begin{DoxyCompactList}\small\item\em Represents a single operation within a job:\+ process on a given machine for a fixed duration. \end{DoxyCompactList}\item 
+class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job}{Job}}
+\begin{DoxyCompactList}\small\item\em An ordered sequence of \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation}{Operation} objects representing a single job. \end{DoxyCompactList}\item 
+class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine}{Machine}}
+\begin{DoxyCompactList}\small\item\em Represents a single machine on the shop floor. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87}{Dispatching\+Rule}} \{ \newline
+\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87ade91ab1cd38237cb688634ed2b95a62e}{SPT\+\_\+\+SMPT}}
+, \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87a18355950aa0d135000b56aba39667cf3}{SPT\+\_\+\+SRWT}}
+, \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87a40b3eb67035d572136df047c40dc195d}{LPT\+\_\+\+MMUR}}
+, \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87a335656bc8a6ee16400e89f426971c4e5}{LPT\+\_\+\+SMPT}}
+, \newline
+\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87a9207d43f78389b34a02df21e4c33f724}{SRT\+\_\+\+SRWT}}
+, \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87a43f08a6810a17732c5bf5f20644ca7d6}{SRT\+\_\+\+SMPT}}
+, \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87a3ead285f50958d8aa6e59cf3fe61b421}{LRT\+\_\+\+MMUR}}
+, \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87ab3532cf9795624618f89ea415c2e173a}{SDT\+\_\+\+SRWT}}
+, \newline
+\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87ae69ac1079473dee4c15dc7bb67c1cad3}{MOR}}
+ \}
+\begin{DoxyCompactList}\small\item\em Composite primary dispatching rules for machine queue selection. \end{DoxyCompactList}\item 
+enum \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a74e900c350e0673c74e0e62b6f351056}{Event\+Type}} \{ \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a74e900c350e0673c74e0e62b6f351056a3beaa4602cbdfa387e4c483abe9933ab}{Job\+Arrived}}
+, \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a74e900c350e0673c74e0e62b6f351056a118b996cf01af1910a157f7409f5d0df}{Operation\+Complete}}
+ \}
+\begin{DoxyCompactList}\small\item\em Discriminated union of simulation event types processed by \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator}{DESSimulator}. \end{DoxyCompactList}\item 
+enum \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0}{Machine\+State}} \{ \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0ae599161956d626eda4cb0a5ffb85271c}{Idle}}
+, \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0ad8a942ef2b04672adfafef0ad817a407}{Busy}}
+, \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0ad7c8c85bf79bbe1b7188497c32c3b0ca}{Failed}}
+, \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0a0493d27e20d11e356e53e0a730b0ad08}{Repair}}
+ \}
+\begin{DoxyCompactList}\small\item\em Operational states a machine can occupy during simulation. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\label{doc-enum-members}
+\Hypertarget{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_doc-enum-members}
+\doxysubsection{Enumeration Type Documentation}
+\Hypertarget{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87}\index{Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}!DispatchingRule@{DispatchingRule}}
+\index{DispatchingRule@{DispatchingRule}!Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}}
+\doxysubsubsection{\texorpdfstring{DispatchingRule}{DispatchingRule}}
+{\footnotesize\ttfamily \label{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87} 
+enum \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87}{Assets.\+Scripts.\+Scheduling.\+Core.\+Dispatching\+Rule}}}
+
+
+
+Composite primary dispatching rules for machine queue selection. 
+
+Tiebreaking is always by lowest job ID to match job\+\_\+shop\+\_\+lib\textquotesingle{}s default internal ordering, ensuring identical makespans when the primary sort key is equal. Each enumerator name encodes its primary heuristic and secondary metric separated by an underscore, except MOR which has no secondary metric. \begin{DoxyEnumFields}[2]{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{SPT\_SMPT@{SPT\_SMPT}!Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}}
+\index{Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}!SPT\_SMPT@{SPT\_SMPT}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87ade91ab1cd38237cb688634ed2b95a62e}\label{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87ade91ab1cd38237cb688634ed2b95a62e} 
+SPT\+\_\+\+SMPT&Shortest Processing Time — primary sort by \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_a33c6d6f8ca03df6cacc3cae0ba540b18}{Operation.\+Duration} ascending. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{SPT\_SRWT@{SPT\_SRWT}!Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}}
+\index{Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}!SPT\_SRWT@{SPT\_SRWT}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87a18355950aa0d135000b56aba39667cf3}\label{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87a18355950aa0d135000b56aba39667cf3} 
+SPT\+\_\+\+SRWT&Shortest Processing Time with Shortest Remaining Work Time secondary metric. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{LPT\_MMUR@{LPT\_MMUR}!Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}}
+\index{Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}!LPT\_MMUR@{LPT\_MMUR}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87a40b3eb67035d572136df047c40dc195d}\label{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87a40b3eb67035d572136df047c40dc195d} 
+LPT\+\_\+\+MMUR&Longest Processing Time — primary sort by \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_a33c6d6f8ca03df6cacc3cae0ba540b18}{Operation.\+Duration} descending. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{LPT\_SMPT@{LPT\_SMPT}!Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}}
+\index{Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}!LPT\_SMPT@{LPT\_SMPT}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87a335656bc8a6ee16400e89f426971c4e5}\label{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87a335656bc8a6ee16400e89f426971c4e5} 
+LPT\+\_\+\+SMPT&Longest Processing Time with Smallest Most Urgent Remaining Time secondary metric. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{SRT\_SRWT@{SRT\_SRWT}!Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}}
+\index{Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}!SRT\_SRWT@{SRT\_SRWT}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87a9207d43f78389b34a02df21e4c33f724}\label{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87a9207d43f78389b34a02df21e4c33f724} 
+SRT\+\_\+\+SRWT&Shortest Remaining Time — primary sort by total remaining work ascending. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{SRT\_SMPT@{SRT\_SMPT}!Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}}
+\index{Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}!SRT\_SMPT@{SRT\_SMPT}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87a43f08a6810a17732c5bf5f20644ca7d6}\label{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87a43f08a6810a17732c5bf5f20644ca7d6} 
+SRT\+\_\+\+SMPT&Shortest Remaining Time with Smallest Most Urgent Remaining Time secondary metric. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{LRT\_MMUR@{LRT\_MMUR}!Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}}
+\index{Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}!LRT\_MMUR@{LRT\_MMUR}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87a3ead285f50958d8aa6e59cf3fe61b421}\label{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87a3ead285f50958d8aa6e59cf3fe61b421} 
+LRT\+\_\+\+MMUR&Longest Remaining Time — primary sort by total remaining work descending. Equivalent to {\ttfamily most\+\_\+work\+\_\+remaining} in job\+\_\+shop\+\_\+lib. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{SDT\_SRWT@{SDT\_SRWT}!Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}}
+\index{Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}!SDT\_SRWT@{SDT\_SRWT}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87ab3532cf9795624618f89ea415c2e173a}\label{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87ab3532cf9795624618f89ea415c2e173a} 
+SDT\+\_\+\+SRWT&Smallest Due Time — FIFO based on arrival order. Equivalent to {\ttfamily first\+\_\+come\+\_\+first\+\_\+served} in job\+\_\+shop\+\_\+lib. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{MOR@{MOR}!Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}}
+\index{Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}!MOR@{MOR}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87ae69ac1079473dee4c15dc7bb67c1cad3}\label{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87ae69ac1079473dee4c15dc7bb67c1cad3} 
+MOR&Most Operations Remaining — primary sort by count of unprocessed operations descending. Equivalent to {\ttfamily most\+\_\+operations\+\_\+remaining} in job\+\_\+shop\+\_\+lib. \\
+\hline
+
+\end{DoxyEnumFields}
+\Hypertarget{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a74e900c350e0673c74e0e62b6f351056}\index{Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}!EventType@{EventType}}
+\index{EventType@{EventType}!Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}}
+\doxysubsubsection{\texorpdfstring{EventType}{EventType}}
+{\footnotesize\ttfamily \label{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a74e900c350e0673c74e0e62b6f351056} 
+enum \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a74e900c350e0673c74e0e62b6f351056}{Assets.\+Scripts.\+Scheduling.\+Core.\+Event\+Type}}}
+
+
+
+Discriminated union of simulation event types processed by \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator}{DESSimulator}. 
+
+\begin{DoxyEnumFields}[2]{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{JobArrived@{JobArrived}!Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}}
+\index{Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}!JobArrived@{JobArrived}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a74e900c350e0673c74e0e62b6f351056a3beaa4602cbdfa387e4c483abe9933ab}\label{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a74e900c350e0673c74e0e62b6f351056a3beaa4602cbdfa387e4c483abe9933ab} 
+Job\+Arrived&A job has arrived at its next required machine and is ready to be queued or started. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{OperationComplete@{OperationComplete}!Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}}
+\index{Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}!OperationComplete@{OperationComplete}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a74e900c350e0673c74e0e62b6f351056a118b996cf01af1910a157f7409f5d0df}\label{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a74e900c350e0673c74e0e62b6f351056a118b996cf01af1910a157f7409f5d0df} 
+Operation\+Complete&An operation that was running on a machine has finished processing. \\
+\hline
+
+\end{DoxyEnumFields}
+\Hypertarget{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0}\index{Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}!MachineState@{MachineState}}
+\index{MachineState@{MachineState}!Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}}
+\doxysubsubsection{\texorpdfstring{MachineState}{MachineState}}
+{\footnotesize\ttfamily \label{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0} 
+enum \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0}{Assets.\+Scripts.\+Scheduling.\+Core.\+Machine\+State}}}
+
+
+
+Operational states a machine can occupy during simulation. 
+
+\doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0ad7c8c85bf79bbe1b7188497c32c3b0ca}{Machine\+State.\+Failed} and \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0a0493d27e20d11e356e53e0a730b0ad08}{Machine\+State.\+Repair} are reserved for future fault-\/injection extensions and are not currently handled by \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator}{DESSimulator}. \begin{DoxyEnumFields}[2]{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{Idle@{Idle}!Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}}
+\index{Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}!Idle@{Idle}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0ae599161956d626eda4cb0a5ffb85271c}\label{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0ae599161956d626eda4cb0a5ffb85271c} 
+Idle&\doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine}{Machine} is free and ready to accept a new operation. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{Busy@{Busy}!Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}}
+\index{Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}!Busy@{Busy}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0ad8a942ef2b04672adfafef0ad817a407}\label{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0ad8a942ef2b04672adfafef0ad817a407} 
+Busy&\doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine}{Machine} is currently processing an operation. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{Failed@{Failed}!Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}}
+\index{Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}!Failed@{Failed}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0ad7c8c85bf79bbe1b7188497c32c3b0ca}\label{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0ad7c8c85bf79bbe1b7188497c32c3b0ca} 
+Failed&\doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine}{Machine} has experienced a fault and cannot accept work. Reserved for future use. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{Repair@{Repair}!Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}}
+\index{Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}!Repair@{Repair}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0a0493d27e20d11e356e53e0a730b0ad08}\label{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0a0493d27e20d11e356e53e0a730b0ad08} 
+Repair&\doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine}{Machine} is undergoing repair after a fault. Reserved for future use. \\
+\hline
+
+\end{DoxyEnumFields}

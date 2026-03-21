@@ -3,26 +3,47 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
-using Scheduling.Data;
-using Scheduling.Core;
+using Assets.Scripts.Scheduling.Data;
+using Assets.Scripts.Scheduling.Core;
 
-namespace Scheduling.Validation
+namespace Assets.Scripts.Scheduling.Validation
 {
-    /// <summary>
-    /// Exports makespan results and full operation schedules in the same format
-    /// as the Python reference generator, enabling direct comparison.
+    /// @brief Exports makespan results and full operation schedules in the same format
+    /// as the Python reference generator, enabling direct diff against job_shop_lib output.
     ///
-    /// Usage in Unity:
-    ///   Call ValidationExporter.RunAndExport() from a MonoBehaviour,
-    ///   or run standalone as a console app.
+    /// @details Produces two output files whose column and key names are kept deliberately
+    /// in sync with the Python reference scripts:
+    /// - @c csharp_makespans.csv — one row per instance/rule combination, matching the
+    ///   column layout of @c reference_makespans.csv.
+    /// - @c csharp_schedules.json — one entry per instance/rule combination containing the
+    ///   full sorted operation schedule, matching the structure of @c reference_schedules.json.
     ///
-    /// Output:
-    ///   csharp_makespans.csv      — matches reference_makespans.csv columns
-    ///   csharp_schedules.json     — matches reference_schedules.json structure
-    /// </summary>
+    /// Usage inside Unity:
+    /// @code
+    /// ValidationExporter.RunAndExport(instanceDir, outputDir);
+    /// @endcode
+    ///
+    /// Usage as a standalone console app:
+    /// @code
+    /// ValidationExporter.RunAndExport("path/to/instances", "path/to/output");
+    /// @endcode
+    ///
+    /// @note Only the five rules present in @ref RuleMap are exported. This subset matches
+    /// the rules implemented in the Python reference generator; additional @ref DispatchingRule
+    /// values are intentionally excluded to keep the comparison columns aligned.
     public static class ValidationExporter
     {
-        // Map C# dispatching rules to the same short keys used in the Python script
+        /// @brief Mapping from @ref DispatchingRule enum values to the short keys and full names
+        /// used by the Python reference generator.
+        ///
+        /// @details Each entry is a @c (rule, key, fullName) tuple where:
+        /// - @c rule is the @ref DispatchingRule enum value used to configure @ref DESSimulator.
+        /// - @c key is the abbreviated column identifier written to @c csharp_makespans.csv
+        ///   (e.g. @c "SPT"), matching the Python script's short-form keys.
+        /// - @c fullName is the snake_case name written to the @c rule_full CSV column
+        ///   (e.g. @c "shortest_processing_time"), matching the Python script's full-form keys.
+        ///
+        /// @note Only rules present in this map are simulated and exported by @ref RunAndExport.
         private static readonly (DispatchingRule rule, string key, string fullName)[] RuleMap =
         {
             (DispatchingRule.SPT_SMPT,  "SPT",  "shortest_processing_time"),
@@ -32,6 +53,38 @@ namespace Scheduling.Validation
             (DispatchingRule.MOR,       "MOR",  "most_operations_remaining"),
         };
 
+        /// @brief Simulates all Taillard instances in a directory under every mapped rule and
+        /// writes the results to CSV and JSON export files.
+        ///
+        /// @details Processes files in the following sequence:
+        /// -# Discovers all @c *.json files in @p instanceDir, sorted alphabetically.
+        /// -# For each file, deserializes a @ref TaillardInstance via Newtonsoft.Json.
+        ///    Files that fail to parse or produce null/incomplete data are skipped with a
+        ///    console warning; processing continues with the next file.
+        /// -# For each instance, iterates every entry in @ref RuleMap, running a fresh
+        ///    @ref DESSimulator per rule. Computes the optimality gap if
+        ///    @ref TaillardMetadata.optimum is non-zero; otherwise leaves the gap column empty.
+        /// -# Appends one CSV row per instance/rule combination to an in-memory list.
+        /// -# Builds a per-instance/rule operation schedule list, sorted by start time,
+        ///    then machine ID, then job ID, and stores it under the key @c "{name}_{key}"
+        ///    in the schedules dictionary.
+        /// -# Writes @c csharp_makespans.csv to @p outputDir containing all CSV rows.
+        /// -# Writes @c csharp_schedules.json to @p outputDir containing all schedules,
+        ///    serialized with indented formatting for human readability.
+        ///
+        /// @par CSV columns
+        /// @c instance, @c rule, @c rule_full, @c makespan, @c optimum, @c gap_pct,
+        /// @c num_jobs, @c num_machines
+        ///
+        /// @par Schedule JSON structure
+        /// A top-level object keyed by @c "{instanceName}_{ruleKey}". Each value is an array
+        /// of operation objects with fields: @c job, @c op_index, @c machine, @c start,
+        /// @c end, @c duration.
+        ///
+        /// @param instanceDir Filesystem path to the directory containing Taillard @c .json files.
+        /// Must be a real disk path — not a Unity @c Resources/ virtual path.
+        /// @param outputDir Filesystem path to the directory where output files will be written.
+        /// Must exist before this method is called; @ref CrossValidator.Start creates it if needed.
         public static void RunAndExport(string instanceDir, string outputDir)
         {
             var csvLines = new List<string>
@@ -40,7 +93,6 @@ namespace Scheduling.Validation
             };
             var allSchedules = new Dictionary<string, List<Dictionary<string, object>>>();
 
-            // Find all JSON files in the instance directory
             var jsonFiles = Directory.GetFiles(instanceDir, "*.json")
                                      .OrderBy(f => f)
                                      .ToArray();
@@ -70,8 +122,6 @@ namespace Scheduling.Validation
                 Console.WriteLine($"\n{"".PadLeft(60, '=')}");
                 Console.WriteLine($"Instance: {name}");
                 Console.WriteLine($"{"".PadLeft(60, '=')}");
-
-
 
                 foreach (var (rule, key, fullName) in RuleMap)
                 {
@@ -135,12 +185,10 @@ namespace Scheduling.Validation
                 }
             }
 
-            // Write CSV
             string csvPath = Path.Combine(outputDir, "csharp_makespans.csv");
             File.WriteAllLines(csvPath, csvLines);
             Console.WriteLine($"\nSaved {csvLines.Count - 1} rows to {csvPath}");
 
-            // Write schedules JSON
             string jsonPath = Path.Combine(outputDir, "csharp_schedules.json");
             File.WriteAllText(jsonPath, JsonConvert.SerializeObject(allSchedules, Formatting.Indented));
             Console.WriteLine($"Saved {allSchedules.Count} schedules to {jsonPath}");

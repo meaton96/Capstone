@@ -1,0 +1,106 @@
+\doxysection{Assets.\+Scripts.\+Scheduling.\+Core.\+Event\+Queue Class Reference}
+\hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_event_queue}{}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_event_queue}\index{Assets.Scripts.Scheduling.Core.EventQueue@{Assets.Scripts.Scheduling.Core.EventQueue}}
+
+
+Min-\/heap priority queue for simulation events, ordered by time with FIFO tiebreaking.  
+
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event}{Sim\+Event}} \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_event_queue_a39672842cee05a52d874c80899723254}{Enqueue}} (double time, \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a74e900c350e0673c74e0e62b6f351056}{Event\+Type}} type, int job\+Id=-\/1, int machine\+Id=-\/1)
+\begin{DoxyCompactList}\small\item\em Creates and enqueues a new \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event}{Sim\+Event} at the specified simulation time. \end{DoxyCompactList}\item 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event}{Sim\+Event}} \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_event_queue_ac25bfc5db249e1fb13834aaac8edf50f}{Dequeue}} ()
+\begin{DoxyCompactList}\small\item\em Removes and returns the earliest-\/scheduled event in the queue. \end{DoxyCompactList}\item 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event}{Sim\+Event}} \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_event_queue_ad8a80432dd7688f7707fc58bd24b713b}{Peek}} ()
+\begin{DoxyCompactList}\small\item\em Returns the earliest-\/scheduled event without removing it from the queue. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_event_queue_ad6b54c0bd3b2cdf4afd81560f409da23}{Clear}} ()
+\begin{DoxyCompactList}\small\item\em Removes all events from the queue and resets the sequence counter to zero. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_event_queue_a36b58a1148a1f68a96be72df273d97ed}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_event_queue_a36b58a1148a1f68a96be72df273d97ed} 
+int {\bfseries Count}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em Number of events currently in the queue. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_event_queue_a3f1a445f504106186bbf4d3dcf6cd194}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_event_queue_a3f1a445f504106186bbf4d3dcf6cd194} 
+bool {\bfseries Has\+Events}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em {\ttfamily true} when the queue contains at least one event; {\ttfamily false} when empty. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Min-\/heap priority queue for simulation events, ordered by time with FIFO tiebreaking. 
+
+Backed by a {\ttfamily Sorted\+Set$<$\+Sim\+Event$>$} which exploits \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event}{Sim\+Event}\textquotesingle{}s {\ttfamily IComparable} implementation to maintain heap order without a separate comparator. A monotonically increasing \+\_\+sequence counter is stamped onto each event at enqueue time to guarantee stable FIFO ordering among events with identical timestamps. 
+
+\label{doc-func-members}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_event_queue_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_event_queue_ad6b54c0bd3b2cdf4afd81560f409da23}\index{Assets.Scripts.Scheduling.Core.EventQueue@{Assets.Scripts.Scheduling.Core.EventQueue}!Clear@{Clear}}
+\index{Clear@{Clear}!Assets.Scripts.Scheduling.Core.EventQueue@{Assets.Scripts.Scheduling.Core.EventQueue}}
+\doxysubsubsection{\texorpdfstring{Clear()}{Clear()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_event_queue_ad6b54c0bd3b2cdf4afd81560f409da23} 
+void Assets.\+Scripts.\+Scheduling.\+Core.\+Event\+Queue.\+Clear (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Removes all events from the queue and resets the sequence counter to zero. 
+
+Should be called during \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a477dc5db6d5bfeea5ec2dd71e9cfd63e}{DESSimulator.\+Reset()} to ensure sequence numbers restart cleanly between simulation runs, preventing counter overflow across long multi-\/run benchmark sessions. \Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_event_queue_ac25bfc5db249e1fb13834aaac8edf50f}\index{Assets.Scripts.Scheduling.Core.EventQueue@{Assets.Scripts.Scheduling.Core.EventQueue}!Dequeue@{Dequeue}}
+\index{Dequeue@{Dequeue}!Assets.Scripts.Scheduling.Core.EventQueue@{Assets.Scripts.Scheduling.Core.EventQueue}}
+\doxysubsubsection{\texorpdfstring{Dequeue()}{Dequeue()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_event_queue_ac25bfc5db249e1fb13834aaac8edf50f} 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event}{Sim\+Event}} Assets.\+Scripts.\+Scheduling.\+Core.\+Event\+Queue.\+Dequeue (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Removes and returns the earliest-\/scheduled event in the queue. 
+
+Retrieves the minimum element from the underlying {\ttfamily Sorted\+Set}, which corresponds to the event with the lowest \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_a607c1c72df770a64614efd6de3cd4698}{Sim\+Event.\+Time} and, among ties, the lowest \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_ab56cee8678fd0b8f95a8aa4b18bf4fc8}{Sim\+Event.\+Sequence\+Number}.
+
+\begin{DoxyReturn}{Returns}
+The \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event}{Sim\+Event} with the highest dispatch priority. 
+\end{DoxyReturn}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_event_queue_a39672842cee05a52d874c80899723254}\index{Assets.Scripts.Scheduling.Core.EventQueue@{Assets.Scripts.Scheduling.Core.EventQueue}!Enqueue@{Enqueue}}
+\index{Enqueue@{Enqueue}!Assets.Scripts.Scheduling.Core.EventQueue@{Assets.Scripts.Scheduling.Core.EventQueue}}
+\doxysubsubsection{\texorpdfstring{Enqueue()}{Enqueue()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_event_queue_a39672842cee05a52d874c80899723254} 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event}{Sim\+Event}} Assets.\+Scripts.\+Scheduling.\+Core.\+Event\+Queue.\+Enqueue (\begin{DoxyParamCaption}\item[{double}]{time}{, }\item[{\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a74e900c350e0673c74e0e62b6f351056}{Event\+Type}}}]{type}{, }\item[{int}]{job\+Id}{ = {\ttfamily -\/1}, }\item[{int}]{machine\+Id}{ = {\ttfamily -\/1}}\end{DoxyParamCaption})}
+
+
+
+Creates and enqueues a new \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event}{Sim\+Event} at the specified simulation time. 
+
+Atomically stamps the event with the next available sequence number before insertion, ensuring FIFO ordering is preserved for same-\/time events regardless of call order.
+
+
+\begin{DoxyParams}{Parameters}
+{\em time} & Simulation time at which the event should fire. \\
+\hline
+{\em type} & The \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a74e900c350e0673c74e0e62b6f351056}{Event\+Type} classifying this event. \\
+\hline
+{\em job\+Id} & ID of the associated job. Defaults to {\ttfamily -\/1} if not applicable. \\
+\hline
+{\em machine\+Id} & ID of the associated machine. Defaults to {\ttfamily -\/1} if not applicable.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The newly created and inserted \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event}{Sim\+Event}. 
+\end{DoxyReturn}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_event_queue_ad8a80432dd7688f7707fc58bd24b713b}\index{Assets.Scripts.Scheduling.Core.EventQueue@{Assets.Scripts.Scheduling.Core.EventQueue}!Peek@{Peek}}
+\index{Peek@{Peek}!Assets.Scripts.Scheduling.Core.EventQueue@{Assets.Scripts.Scheduling.Core.EventQueue}}
+\doxysubsubsection{\texorpdfstring{Peek()}{Peek()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_event_queue_ad8a80432dd7688f7707fc58bd24b713b} 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event}{Sim\+Event}} Assets.\+Scripts.\+Scheduling.\+Core.\+Event\+Queue.\+Peek (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Returns the earliest-\/scheduled event without removing it from the queue. 
+
+\begin{DoxyReturn}{Returns}
+The \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event}{Sim\+Event} with the highest dispatch priority, or {\ttfamily null} if the queue is empty. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Scheduling/\+\+Core/\+Event\+Queue.\+cs\end{DoxyCompactItemize}

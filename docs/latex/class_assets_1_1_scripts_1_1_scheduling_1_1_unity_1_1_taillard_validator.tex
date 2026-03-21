@@ -1,0 +1,97 @@
+\doxysection{Assets.\+Scripts.\+Scheduling.\+Unity.\+Taillard\+Validator Class Reference}
+\hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_unity_1_1_taillard_validator}{}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_unity_1_1_taillard_validator}\index{Assets.Scripts.Scheduling.Unity.TaillardValidator@{Assets.Scripts.Scheduling.Unity.TaillardValidator}}
+
+
+\doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_unity}{Unity} entry point for loading and validating Taillard JSP benchmark instances.  
+
+
+Inheritance diagram for Assets.\+Scripts.\+Scheduling.\+Unity.\+Taillard\+Validator:\+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_assets_1_1_scripts_1_1_scheduling_1_1_unity_1_1_taillard_validator}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_unity_1_1_taillard_validator_af1f835538ee83158a1a47e6c5c695030}{Load\+And\+Validate}} ()
+\begin{DoxyCompactList}\small\item\em Loads the configured Taillard instance and runs the full validation pipeline. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+string \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_unity_1_1_taillard_validator_a2503225f19ffc3f2e69f142c657e366a}{instance\+File\+Name}} = "{}ta01"{}
+\begin{DoxyCompactList}\small\item\em Filename of the Taillard JSON instance to load, without the {\ttfamily }.json extension. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_unity_1_1_taillard_validator_a6af62e9c4c5baa1620e068ae69338cd1}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_unity_1_1_taillard_validator_a6af62e9c4c5baa1620e068ae69338cd1} 
+bool {\bfseries run\+All\+Rules} = true
+\begin{DoxyCompactList}\small\item\em When {\ttfamily true}, runs every value in Dispatching\+Rule and logs a comparative result table. When {\ttfamily false}, runs only \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_unity_1_1_taillard_validator_a9c74720d5f136866a9649fb906071a8f}{single\+Rule}. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_unity_1_1_taillard_validator_a9c74720d5f136866a9649fb906071a8f}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_unity_1_1_taillard_validator_a9c74720d5f136866a9649fb906071a8f} 
+\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87}{Dispatching\+Rule}} {\bfseries single\+Rule} = Dispatching\+Rule.\+SPT\+\_\+\+SMPT
+\begin{DoxyCompactList}\small\item\em The dispatching rule used when \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_unity_1_1_taillard_validator_a6af62e9c4c5baa1620e068ae69338cd1}{run\+All\+Rules} is {\ttfamily false}, and always used for constraint validation in Step 2 of \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_unity_1_1_taillard_validator_af1f835538ee83158a1a47e6c5c695030}{Load\+And\+Validate}. \end{DoxyCompactList}\item 
+bool \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_unity_1_1_taillard_validator_aa4fd787eabc293a0c6abe41296aaf692}{print\+Schedule}} = false
+\begin{DoxyCompactList}\small\item\em When {\ttfamily true}, runs a fresh DESSimulator after validation and prints a Gantt-\/style schedule to the console via DESSimulator.\+Print\+Schedule. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_unity}{Unity} entry point for loading and validating Taillard JSP benchmark instances. 
+
+Attach to any Game\+Object in the scene. On Start, or manually via the {\ttfamily "{}\+Run Validation"{}} context menu entry, the component loads a Taillard\+Instance from {\ttfamily Resources/\+\+Instances/\+}, runs constraint checks through Validation\+Runner, executes one or all Dispatching\+Rule variants, and optionally prints a Gantt schedule to the console via DESSimulator.\+Print\+Schedule.
+
+\begin{DoxyNote}{Note}
+JSON files must be placed at {\ttfamily Assets/\+\+Resources/\+\+Instances/\+} $<$name$>$.json and referenced by filename without the {\ttfamily }.json extension via \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_unity_1_1_taillard_validator_a2503225f19ffc3f2e69f142c657e366a}{instance\+File\+Name}. 
+\end{DoxyNote}
+
+
+\label{doc-func-members}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_unity_1_1_taillard_validator_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_unity_1_1_taillard_validator_af1f835538ee83158a1a47e6c5c695030}\index{Assets.Scripts.Scheduling.Unity.TaillardValidator@{Assets.Scripts.Scheduling.Unity.TaillardValidator}!LoadAndValidate@{LoadAndValidate}}
+\index{LoadAndValidate@{LoadAndValidate}!Assets.Scripts.Scheduling.Unity.TaillardValidator@{Assets.Scripts.Scheduling.Unity.TaillardValidator}}
+\doxysubsubsection{\texorpdfstring{LoadAndValidate()}{LoadAndValidate()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_unity_1_1_taillard_validator_af1f835538ee83158a1a47e6c5c695030} 
+void Assets.\+Scripts.\+Scheduling.\+Unity.\+Taillard\+Validator.\+Load\+And\+Validate (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Loads the configured Taillard instance and runs the full validation pipeline. 
+
+Executes four sequential steps:\+
+\begin{DoxyEnumerate}
+\item Load the JSON instance from {\ttfamily Resources/\+\+Instances/\+} via Load\+Instance. Aborts early if the file is missing or cannot be parsed.
+\item Validate scheduling constraints (precedence, no machine overlap, bound checks) using Validation\+Runner.\+Validate\+Constraints with Dispatching\+Rule.\+SPT\+\_\+\+SMPT. All violations are logged as errors via {\ttfamily Debug.\+Log\+Error}.
+\item Run dispatching rules:\+ all rules via Validation\+Runner.\+Run\+All\+Rules if \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_unity_1_1_taillard_validator_a6af62e9c4c5baa1620e068ae69338cd1}{run\+All\+Rules} is {\ttfamily true}, otherwise a single rule via Validation\+Runner.\+Run\+Single. Results are colour-\/coded green /\+ yellow /\+ red based on gap percentage.
+\item Optionally print a Gantt schedule to the console if \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_unity_1_1_taillard_validator_aa4fd787eabc293a0c6abe41296aaf692}{print\+Schedule} is {\ttfamily true}, using a fresh DESSimulator run with \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_unity_1_1_taillard_validator_a9c74720d5f136866a9649fb906071a8f}{single\+Rule}.
+\end{DoxyEnumerate}
+
+\begin{DoxyNote}{Note}
+Also callable from the \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_unity}{Unity} Inspector via the {\ttfamily "{}\+Run Validation"{}} context menu without entering Play Mode. 
+\end{DoxyNote}
+
+
+\label{doc-variable-members}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_unity_1_1_taillard_validator_doc-variable-members}
+\doxysubsection{Member Data Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_unity_1_1_taillard_validator_a2503225f19ffc3f2e69f142c657e366a}\index{Assets.Scripts.Scheduling.Unity.TaillardValidator@{Assets.Scripts.Scheduling.Unity.TaillardValidator}!instanceFileName@{instanceFileName}}
+\index{instanceFileName@{instanceFileName}!Assets.Scripts.Scheduling.Unity.TaillardValidator@{Assets.Scripts.Scheduling.Unity.TaillardValidator}}
+\doxysubsubsection{\texorpdfstring{instanceFileName}{instanceFileName}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_unity_1_1_taillard_validator_a2503225f19ffc3f2e69f142c657e366a} 
+string Assets.\+Scripts.\+Scheduling.\+Unity.\+Taillard\+Validator.\+instance\+File\+Name = "{}ta01"{}}
+
+
+
+Filename of the Taillard JSON instance to load, without the {\ttfamily }.json extension. 
+
+The file must exist at {\ttfamily Assets/\+\+Resources/\+\+Instances/\+} $<$instance\+File\+Name$>$.json. For example, setting this to {\ttfamily "{}ta01"{}} loads {\ttfamily Assets/\+\+Resources/\+\+Instances/\+ta01.\+json}. \Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_unity_1_1_taillard_validator_aa4fd787eabc293a0c6abe41296aaf692}\index{Assets.Scripts.Scheduling.Unity.TaillardValidator@{Assets.Scripts.Scheduling.Unity.TaillardValidator}!printSchedule@{printSchedule}}
+\index{printSchedule@{printSchedule}!Assets.Scripts.Scheduling.Unity.TaillardValidator@{Assets.Scripts.Scheduling.Unity.TaillardValidator}}
+\doxysubsubsection{\texorpdfstring{printSchedule}{printSchedule}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_unity_1_1_taillard_validator_aa4fd787eabc293a0c6abe41296aaf692} 
+bool Assets.\+Scripts.\+Scheduling.\+Unity.\+Taillard\+Validator.\+print\+Schedule = false}
+
+
+
+When {\ttfamily true}, runs a fresh DESSimulator after validation and prints a Gantt-\/style schedule to the console via DESSimulator.\+Print\+Schedule. 
+
+Uses \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_unity_1_1_taillard_validator_a9c74720d5f136866a9649fb906071a8f}{single\+Rule} regardless of the value of \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_unity_1_1_taillard_validator_a6af62e9c4c5baa1620e068ae69338cd1}{run\+All\+Rules}. 
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Scheduling/\+\+Unity/\+Taillard\+Validator.\+cs\end{DoxyCompactItemize}

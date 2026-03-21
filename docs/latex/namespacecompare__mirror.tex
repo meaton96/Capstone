@@ -1,0 +1,28 @@
+\doxysection{compare\+\_\+mirror Namespace Reference}
+\hypertarget{namespacecompare__mirror}{}\label{namespacecompare__mirror}\index{compare\_mirror@{compare\_mirror}}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{namespacecompare__mirror_aca34071a7c0974ec1e1b2365866106b9}\label{namespacecompare__mirror_aca34071a7c0974ec1e1b2365866106b9} 
+{\bfseries main} ()
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}Compare C# DES against Mirror DES (Python).
+=============================================
+
+Both implement the same architecture:
+  - Event-driven, per-machine queues
+  - Same dispatching rules with same tiebreakers
+
+Any delta here means a real bug in one of the two implementations.
+
+Usage:
+    1. Run C# ValidationExporter  → csharp_makespans.csv
+    2. Run mirror_des.py          → mirror_des_makespans.csv
+    3. Run this script            → comparison report
+
+    python compare_mirror.py
+\end{DoxyVerb}
+ 
