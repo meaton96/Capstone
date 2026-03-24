@@ -1,14 +1,17 @@
 """
 @file heads.py
-@brief Fusion head (with domain randomization) and Actor-Critic output heads.
+@brief Fusion head and Actor-Critic output heads.
 
 @details
 Pipeline: 464-D concat → Fusion (256-D) → Actor (8 PDR actions) + Critic (V).
 
-The fusion head applies domain randomization (dropout + Gaussian noise)
-during training to improve sim-to-real transfer, then projects the
-concatenated encoder features down to a shared 256-D representation
-consumed by both the actor and critic networks.
+The fusion head projects the concatenated encoder features down to a
+shared 256-D representation consumed by both the actor and critic
+networks.
+
+@note Sensor corruption (dropout, noise for sim-to-real transfer) is
+handled by @ref SensorCorruptionWrapper at the observation level, not
+inside the network.
 """
 
 import torch
@@ -17,69 +20,27 @@ import torch.nn.functional as F
 from torch.distributions import Categorical
 
 
-class DomainRandomization(nn.Module):
-    """@brief Domain randomization layer: Dropout + Gaussian noise injection.
-
-    @details
-    Only active during training to improve sim-to-real transfer.
-    During evaluation (@c self.training is False), the layer is a
-    pass-through (standard dropout behaviour, no noise).
-    """
-
-    def __init__(self, dropout_rate: float = 0.1, noise_std: float = 0.01):
-        """@brief Construct the domain randomization layer.
-
-        @param dropout_rate  Probability of zeroing each element (passed to nn.Dropout).
-        @param noise_std     Standard deviation of additive Gaussian noise
-                             injected during training.  Set to 0 to disable.
-        """
-        super().__init__()
-
-        ## @brief Dropout layer applied before noise injection.
-        self.dropout = nn.Dropout(p=dropout_rate)
-        ## @brief Std-dev of the Gaussian noise added during training.
-        self.noise_std = noise_std
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """@brief Apply dropout and (in training mode) additive Gaussian noise.
-
-        @param x  Input tensor of arbitrary shape.
-        @return Regularized tensor of the same shape as @p x.
-        """
-        x = self.dropout(x)
-        if self.training and self.noise_std > 0:
-            noise = torch.randn_like(x) * self.noise_std
-            x = x + noise
-        return x
-
-
 class FusionHead(nn.Module):
     """@brief Fusion MLP: projects concatenated encoder features to a
-    shared representation with domain randomization.
+    shared representation.
 
     @details
-    Architecture: DomainRandomization → Linear(@p input_dim, @p hidden_dim)
-    → LayerNorm → SiLU → Linear(@p hidden_dim, @p output_dim) → LayerNorm → SiLU.
+    Architecture: Linear(@p input_dim, @p hidden_dim) → LayerNorm → SiLU
+    → Linear(@p hidden_dim, @p output_dim) → LayerNorm → SiLU.
 
     Default dimensionality: 464-D → 256-D.
     """
 
     def __init__(self, input_dim: int = 464, hidden_dim: int = 512,
-                 output_dim: int = 256, dropout_rate: float = 0.1,
-                 noise_std: float = 0.01):
+                 output_dim: int = 256):
         """@brief Construct the fusion head.
 
         @param input_dim     Dimensionality of the concatenated encoder output.
         @param hidden_dim    Width of the intermediate fully-connected layer.
         @param output_dim    Dimensionality of the shared representation
                              fed to actor and critic heads.
-        @param dropout_rate  Dropout probability for domain randomization.
-        @param noise_std     Gaussian noise std-dev for domain randomization.
         """
         super().__init__()
-
-        ## @brief Domain randomization layer applied to the raw concatenation.
-        self.domain_rand = DomainRandomization(dropout_rate, noise_std)
 
         ## @brief Two-layer MLP with LayerNorm and SiLU activations.
         self.net = nn.Sequential(
@@ -95,12 +56,11 @@ class FusionHead(nn.Module):
         self.output_dim = output_dim
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """@brief Project concatenated features through domain randomization and MLP.
+        """@brief Project concatenated features through the MLP.
 
         @param x  Concatenated encoder output of shape (B, @p input_dim).
         @return Fused representation of shape (B, @ref output_dim).
         """
-        x = self.domain_rand(x)
         return self.net(x)
 
 

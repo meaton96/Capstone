@@ -29,6 +29,7 @@ from config import (
 )
 from models.network import SchedulingNetwork
 from env.placeholder_env import VectorizedPlaceholderEnv
+from env.sensor_corruption import SensorCorruptionWrapper, SensorCorruptionConfig
 from rollout_buffer import RolloutBuffer
 
 
@@ -85,7 +86,12 @@ def train(ppo_cfg: PPOConfig, device: str = "cpu"):
     optimizer = torch.optim.Adam(net.parameters(), lr=ppo_cfg.lr, eps=1e-5)
 
     # ---- Initialize environments ----
-    vec_env = VectorizedPlaceholderEnv(num_envs=ppo_cfg.num_envs)
+    ## @brief Sensor corruption config applied to each parallel env.
+    corruption_cfg = SensorCorruptionConfig(enabled=True)
+    vec_env = VectorizedPlaceholderEnv(
+        num_envs=ppo_cfg.num_envs,
+        env_wrapper=lambda env: SensorCorruptionWrapper(env, corruption_cfg),
+    )
     obs, infos = vec_env.reset()
 
     ## @brief Per-environment observation shapes used to allocate the

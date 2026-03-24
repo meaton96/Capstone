@@ -63,13 +63,11 @@ class SchedulingNetwork(nn.Module):
         ## @brief Multi-modal encoder producing a 464-D concatenated embedding.
         self.encoder = MultiModalEncoder(encoder_cfg)
 
-        ## @brief Fusion MLP with domain randomization (464-D → 256-D).
+        ## @brief Fusion MLP projecting encoder output (464-D → 256-D).
         self.fusion = FusionHead(
             input_dim=encoder_cfg.concat_dim,
             hidden_dim=fusion_cfg.hidden_dim,
             output_dim=fusion_cfg.output_dim,
-            dropout_rate=fusion_cfg.dropout_rate,
-            noise_std=fusion_cfg.noise_std,
         )
 
         ## @brief Shared actor-critic heads consuming the 256-D fused features.

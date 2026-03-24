@@ -12,6 +12,11 @@ Tests cover:
   6. Checkpoint save/load round-trip
   7. Deterministic vs stochastic action selection
 
+@par Running
+@code{.sh}
+python -m pytest tests/test_architecture.py -v
+# or without pytest:
+python tests/test_architecture.py
 @endcode
 """
 
@@ -26,9 +31,10 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config import EncoderConfig, FusionConfig, ActorCriticConfig, PPOConfig
 from models.encoder import CNNSPPFEncoder, SPPF, MLPEncoder, MultiModalEncoder
-from models.actor_critic import FusionHead, ActorHead, CriticHead, ActorCritic, DomainRandomization
+from models.actor_critic import FusionHead, ActorHead, CriticHead, ActorCritic
 from models.network import SchedulingNetwork
 from env.placeholder_env import PlaceholderSchedulingEnv, VectorizedPlaceholderEnv
+from env.sensor_corruption import SensorCorruptionWrapper, SensorCorruptionConfig, ModalityCorruptionConfig
 from rollout_buffer import RolloutBuffer
 
 
@@ -134,7 +140,7 @@ class TestMultiModalEncoder:
 
 
 class TestFusionHead:
-    """@brief Tests for @ref FusionHead and @ref DomainRandomization."""
+    """@brief Tests for @ref FusionHead."""
 
     def test_shape(self):
         """@brief Fusion output must be (B, 256)."""
@@ -143,24 +149,148 @@ class TestFusionHead:
         out = fusion(x)
         assert out.shape == (BATCH, 256)
 
-    def test_domain_rand_training_vs_eval(self):
-        """@brief Dropout and noise should be active in training mode only.
+    def test_deterministic_eval(self):
+        """@brief Eval-mode forward passes on the same input must match."""
+        fusion = FusionHead(464, 512, 256)
+        fusion.eval()
+        x = torch.randn(1, 464)
+        with torch.no_grad():
+            out1 = fusion(x)
+            out2 = fusion(x)
+        assert torch.allclose(out1, out2)
 
-        @details
-        In training mode with 50% dropout, some output values must be zero.
-        In eval mode the layer should act as identity.
-        """
-        dr = DomainRandomization(dropout_rate=0.5, noise_std=0.1)
-        x = torch.ones(100, 64)
-        dr.train()
-        out_train = dr(x)
-        # In training, some values should be zeroed (dropout)
-        assert (out_train == 0).any(), "Dropout should zero some values"
 
-        dr.eval()
-        out_eval = dr(x)
-        # In eval, no dropout or noise
-        assert torch.allclose(out_eval, x), "Eval should be identity"
+class TestSensorCorruption:
+    """@brief Tests for @ref SensorCorruptionWrapper and per-modality corruption."""
+
+    def test_dropout_zeros_elements(self):
+        """@brief With high dropout and zero noise, some observation
+        values must be exactly zero after corruption."""
+        cfg = SensorCorruptionConfig(
+            factory_grid=ModalityCorruptionConfig(dropout_rate=0.5, noise_std=0.0),
+            sched_matrix=ModalityCorruptionConfig(dropout_rate=0.0, noise_std=0.0),
+            global_scalars=ModalityCorruptionConfig(dropout_rate=0.0, noise_std=0.0),
+            distance_matrix=ModalityCorruptionConfig(dropout_rate=0.0, noise_std=0.0),
+            event_flags=ModalityCorruptionConfig(dropout_rate=0.0, noise_std=0.0),
+            enabled=True,
+        )
+        env = PlaceholderSchedulingEnv(seed=42)
+        env = SensorCorruptionWrapper(env, cfg, seed=0)
+        obs, _ = env.reset()
+        assert (obs["factory_grid"] == 0).any(), "Dropout should zero some grid cells"
+
+    def test_noise_perturbs_values(self):
+        """@brief With noise enabled, corrupted observations must differ
+        from the originals."""
+        cfg = SensorCorruptionConfig(
+            factory_grid=ModalityCorruptionConfig(dropout_rate=0.0, noise_std=0.1),
+            sched_matrix=ModalityCorruptionConfig(dropout_rate=0.0, noise_std=0.0),
+            global_scalars=ModalityCorruptionConfig(dropout_rate=0.0, noise_std=0.0),
+            distance_matrix=ModalityCorruptionConfig(dropout_rate=0.0, noise_std=0.0),
+            event_flags=ModalityCorruptionConfig(dropout_rate=0.0, noise_std=0.0),
+            enabled=True,
+        )
+        env_clean = PlaceholderSchedulingEnv(seed=42)
+        obs_clean, _ = env_clean.reset()
+
+        env_noisy = PlaceholderSchedulingEnv(seed=42)
+        env_noisy = SensorCorruptionWrapper(env_noisy, cfg, seed=0)
+        obs_noisy, _ = env_noisy.reset()
+
+        # Non-zero cells should be perturbed (not identical)
+        grid_clean = obs_clean["factory_grid"]
+        grid_noisy = obs_noisy["factory_grid"]
+        nonzero_mask = grid_clean > 0
+        if nonzero_mask.any():
+            assert not np.allclose(grid_clean[nonzero_mask],
+                                   grid_noisy[nonzero_mask]), \
+                "Noise should perturb non-zero values"
+
+    def test_disabled_is_passthrough(self):
+        """@brief When disabled, wrapper must return observations identical
+        to the unwrapped environment."""
+        cfg = SensorCorruptionConfig(
+            factory_grid=ModalityCorruptionConfig(dropout_rate=0.5, noise_std=0.1),
+            sched_matrix=ModalityCorruptionConfig(dropout_rate=0.5, noise_std=0.1),
+            global_scalars=ModalityCorruptionConfig(dropout_rate=0.5, noise_std=0.1),
+            distance_matrix=ModalityCorruptionConfig(dropout_rate=0.5, noise_std=0.1),
+            event_flags=ModalityCorruptionConfig(dropout_rate=0.5, noise_std=0.1),
+            enabled=False,
+        )
+        env_clean = PlaceholderSchedulingEnv(seed=42)
+        obs_clean, _ = env_clean.reset()
+
+        env_wrapped = PlaceholderSchedulingEnv(seed=42)
+        env_wrapped = SensorCorruptionWrapper(env_wrapped, cfg)
+        obs_wrapped, _ = env_wrapped.reset()
+
+        for key in obs_clean:
+            np.testing.assert_array_equal(
+                obs_clean[key], obs_wrapped[key],
+                err_msg=f"{key} should be identical when corruption is disabled",
+            )
+
+    def test_set_enabled_toggle(self):
+        """@brief @ref SensorCorruptionWrapper.set_enabled must toggle
+        corruption on and off dynamically."""
+        cfg = SensorCorruptionConfig(
+            factory_grid=ModalityCorruptionConfig(dropout_rate=0.5, noise_std=0.0),
+            sched_matrix=ModalityCorruptionConfig(dropout_rate=0.0, noise_std=0.0),
+            global_scalars=ModalityCorruptionConfig(dropout_rate=0.0, noise_std=0.0),
+            distance_matrix=ModalityCorruptionConfig(dropout_rate=0.0, noise_std=0.0),
+            event_flags=ModalityCorruptionConfig(dropout_rate=0.0, noise_std=0.0),
+            enabled=True,
+        )
+        env = PlaceholderSchedulingEnv(seed=42)
+        env = SensorCorruptionWrapper(env, cfg, seed=0)
+
+        # Corruption on
+        obs_on, _ = env.reset()
+
+        # Disable and reset with same seed
+        env.set_enabled(False)
+        env.unwrapped._rng = np.random.default_rng(42)
+        obs_off, _ = env.reset()
+
+        # With dropout disabled, the factory grid should have no
+        # dropout-induced zeros beyond the naturally sparse grid
+        env_ref = PlaceholderSchedulingEnv(seed=42)
+        obs_ref, _ = env_ref.reset()
+        for key in obs_ref:
+            np.testing.assert_array_equal(obs_off[key], obs_ref[key])
+
+    def test_event_flags_untouched_by_default(self):
+        """@brief Default config should not corrupt event flags (discrete
+        binary states, not continuous sensor readings)."""
+        cfg = SensorCorruptionConfig()  # defaults
+        env = PlaceholderSchedulingEnv(seed=42)
+        obs_clean, _ = env.reset()
+
+        env2 = PlaceholderSchedulingEnv(seed=42)
+        env2 = SensorCorruptionWrapper(env2, cfg, seed=0)
+        obs_wrapped, _ = env2.reset()
+
+        np.testing.assert_array_equal(
+            obs_clean["event_flags"], obs_wrapped["event_flags"],
+            err_msg="Event flags should be untouched with default config",
+        )
+
+    def test_obs_clamped_to_bounds(self):
+        """@brief Corrupted observations must remain in [0, 1]."""
+        cfg = SensorCorruptionConfig(
+            factory_grid=ModalityCorruptionConfig(dropout_rate=0.1, noise_std=0.5),
+            sched_matrix=ModalityCorruptionConfig(dropout_rate=0.1, noise_std=0.5),
+            global_scalars=ModalityCorruptionConfig(dropout_rate=0.1, noise_std=0.5),
+            distance_matrix=ModalityCorruptionConfig(dropout_rate=0.1, noise_std=0.5),
+            event_flags=ModalityCorruptionConfig(dropout_rate=0.1, noise_std=0.5),
+            enabled=True,
+        )
+        env = PlaceholderSchedulingEnv(seed=42)
+        env = SensorCorruptionWrapper(env, cfg, seed=0)
+        obs, _ = env.reset()
+        for key, val in obs.items():
+            assert val.min() >= 0.0, f"{key} has negative values after corruption"
+            assert val.max() <= 1.0, f"{key} exceeds 1.0 after corruption"
 
 
 class TestActorCritic:
@@ -472,9 +602,9 @@ def run_tests():
     ## @brief Ordered list of test classes to execute.
     test_classes = [
         TestSPPF, TestCNNSPPFEncoder, TestMLPEncoder,
-        TestMultiModalEncoder, TestFusionHead, TestActorCritic,
-        TestSchedulingNetwork, TestPlaceholderEnv, TestVectorizedEnv,
-        TestRolloutBuffer,
+        TestMultiModalEncoder, TestFusionHead, TestSensorCorruption,
+        TestActorCritic, TestSchedulingNetwork, TestPlaceholderEnv,
+        TestVectorizedEnv, TestRolloutBuffer,
     ]
 
     total = 0

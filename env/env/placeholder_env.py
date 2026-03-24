@@ -36,6 +36,9 @@ from config import EnvConfig, SchedulingMatrixConfig, PDR_ACTIONS
 class PlaceholderSchedulingEnv(gym.Env):
     """@brief Synthetic environment that mimics the Unity factory sim's interface.
 
+    When you connect the real Unity sim, replace this class with a wrapper
+    that translates Unity observations into the same dict format.
+
     @details
     This environment generates random observations that conform to the
     expected observation-space schema, and returns a synthetic shaped
@@ -285,19 +288,25 @@ class VectorizedPlaceholderEnv:
     @note Replace with gymnasium.vector.SyncVectorEnv if preferred.
     """
 
-    def __init__(self, num_envs: int, **env_kwargs):
+    def __init__(self, num_envs: int, env_wrapper=None, **env_kwargs):
         """@brief Create a bank of parallel placeholder environments.
 
-        @param num_envs    Number of independent environment instances.
-        @param env_kwargs  Keyword arguments forwarded to each
-                           PlaceholderSchedulingEnv constructor.
-                           Each env receives its index as the seed.
+        @param num_envs     Number of independent environment instances.
+        @param env_wrapper  Optional callable that wraps each individual
+                            environment (e.g. @ref SensorCorruptionWrapper).
+                            Signature: @c wrapper(env) -> wrapped_env.
+                            Applied after construction, before first reset.
+        @param env_kwargs   Keyword arguments forwarded to each
+                            PlaceholderSchedulingEnv constructor.
+                            Each env receives its index as the seed.
         """
-        ## @brief List of independent environment instances.
-        self.envs = [
-            PlaceholderSchedulingEnv(seed=i, **env_kwargs)
-            for i in range(num_envs)
-        ]
+        ## @brief List of independent environment instances (possibly wrapped).
+        self.envs = []
+        for i in range(num_envs):
+            env = PlaceholderSchedulingEnv(seed=i, **env_kwargs)
+            if env_wrapper is not None:
+                env = env_wrapper(env)
+            self.envs.append(env)
         ## @brief Number of parallel environments.
         self.num_envs = num_envs
 

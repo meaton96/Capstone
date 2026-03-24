@@ -6,6 +6,9 @@
 All dimensions match the thesis architecture diagram.  Each dataclass
 groups a related set of hyperparameters and exposes sensible defaults
 so the system can be instantiated with zero arguments.
+
+Sensor corruption configuration lives in
+@ref env/sensor_corruption.py alongside the wrapper itself.
 """
 
 from dataclasses import dataclass, field
@@ -104,11 +107,13 @@ class EncoderConfig:
 
 @dataclass
 class FusionConfig:
-    """@brief Fusion head and domain-randomization parameters.
+    """@brief Fusion head parameters.
 
     @details
-    Controls the MLP widths, dropout probability, and Gaussian noise
-    standard deviation applied during training for sim-to-real transfer.
+    Controls the MLP widths for the projection from the concatenated
+    encoder output to the shared representation consumed by the
+    actor-critic heads.
+
     """
 
     ## @brief Input dimensionality (must match @ref EncoderConfig.concat_dim).
@@ -117,10 +122,6 @@ class FusionConfig:
     hidden_dim: int = 512
     ## @brief Dimensionality of the fused representation.
     output_dim: int = 256
-    ## @brief Dropout probability for domain randomization.
-    dropout_rate: float = 0.1
-    ## @brief Std-dev of additive Gaussian noise for domain randomization.
-    noise_std: float = 0.01
 
 
 @dataclass

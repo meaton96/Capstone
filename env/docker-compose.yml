@@ -2,9 +2,10 @@ services:
   ml-agents:
     build: .
     container_name: unity-ml-agents
+    user: "${UID:-1000}:${GID:-1000}"
     ports:
-      - "6006:6006"  # Maps host port 6006 to container port 6006 (TensorBoard)
-      - "5004:5004"  # Maps host port 5004 to container port 5004 (Unity ml-agents)
+      - "6006:6006"  # TensorBoard
+      - "5004:5004"  # Unity ML-Agents
     volumes:
-      - .:/code # Mounts the current local directory to /code in the container
+      - .:/code
     restart: unless-stopped
