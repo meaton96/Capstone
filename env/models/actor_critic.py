@@ -1,7 +1,14 @@
 """
-Fusion head (with domain randomization) and Actor-Critic output heads.
+@file heads.py
+@brief Fusion head (with domain randomization) and Actor-Critic output heads.
 
-Pipeline: 464-D concat -> Fusion (256-D) -> Actor (8 PDR actions) + Critic (V)
+@details
+Pipeline: 464-D concat → Fusion (256-D) → Actor (8 PDR actions) + Critic (V).
+
+The fusion head applies domain randomization (dropout + Gaussian noise)
+during training to improve sim-to-real transfer, then projects the
+concatenated encoder features down to a shared 256-D representation
+consumed by both the actor and critic networks.
 """
 
 import torch
@@ -11,17 +18,34 @@ from torch.distributions import Categorical
 
 
 class DomainRandomization(nn.Module):
-    """
-    Domain randomization layer: Dropout + Gaussian noise injection.
+    """@brief Domain randomization layer: Dropout + Gaussian noise injection.
+
+    @details
     Only active during training to improve sim-to-real transfer.
+    During evaluation (@c self.training is False), the layer is a
+    pass-through (standard dropout behaviour, no noise).
     """
 
     def __init__(self, dropout_rate: float = 0.1, noise_std: float = 0.01):
+        """@brief Construct the domain randomization layer.
+
+        @param dropout_rate  Probability of zeroing each element (passed to nn.Dropout).
+        @param noise_std     Standard deviation of additive Gaussian noise
+                             injected during training.  Set to 0 to disable.
+        """
         super().__init__()
+
+        ## @brief Dropout layer applied before noise injection.
         self.dropout = nn.Dropout(p=dropout_rate)
+        ## @brief Std-dev of the Gaussian noise added during training.
         self.noise_std = noise_std
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """@brief Apply dropout and (in training mode) additive Gaussian noise.
+
+        @param x  Input tensor of arbitrary shape.
+        @return Regularized tensor of the same shape as @p x.
+        """
         x = self.dropout(x)
         if self.training and self.noise_std > 0:
             noise = torch.randn_like(x) * self.noise_std
@@ -30,15 +54,34 @@ class DomainRandomization(nn.Module):
 
 
 class FusionHead(nn.Module):
-    """
-    Fusion MLP: 464-D -> 256-D with domain randomization.
+    """@brief Fusion MLP: projects concatenated encoder features to a
+    shared representation with domain randomization.
+
+    @details
+    Architecture: DomainRandomization → Linear(@p input_dim, @p hidden_dim)
+    → LayerNorm → SiLU → Linear(@p hidden_dim, @p output_dim) → LayerNorm → SiLU.
+
+    Default dimensionality: 464-D → 256-D.
     """
 
     def __init__(self, input_dim: int = 464, hidden_dim: int = 512,
                  output_dim: int = 256, dropout_rate: float = 0.1,
                  noise_std: float = 0.01):
+        """@brief Construct the fusion head.
+
+        @param input_dim     Dimensionality of the concatenated encoder output.
+        @param hidden_dim    Width of the intermediate fully-connected layer.
+        @param output_dim    Dimensionality of the shared representation
+                             fed to actor and critic heads.
+        @param dropout_rate  Dropout probability for domain randomization.
+        @param noise_std     Gaussian noise std-dev for domain randomization.
+        """
         super().__init__()
+
+        ## @brief Domain randomization layer applied to the raw concatenation.
         self.domain_rand = DomainRandomization(dropout_rate, noise_std)
+
+        ## @brief Two-layer MLP with LayerNorm and SiLU activations.
         self.net = nn.Sequential(
             nn.Linear(input_dim, hidden_dim),
             nn.LayerNorm(hidden_dim),
@@ -47,45 +90,84 @@ class FusionHead(nn.Module):
             nn.LayerNorm(output_dim),
             nn.SiLU(inplace=True),
         )
+
+        ## @brief Output dimensionality exposed for downstream heads.
         self.output_dim = output_dim
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """@brief Project concatenated features through domain randomization and MLP.
+
+        @param x  Concatenated encoder output of shape (B, @p input_dim).
+        @return Fused representation of shape (B, @ref output_dim).
+        """
         x = self.domain_rand(x)
         return self.net(x)
 
 
 class ActorHead(nn.Module):
-    """
-    Actor network: produces a categorical distribution over 8 PDR rules.
+    """@brief Actor network: produces a categorical distribution over PDR rules.
+
+    @details
+    Architecture: Linear → LayerNorm → SiLU → Linear(num_actions).
+    Output logits are unnormalized log-probabilities.
     """
 
     def __init__(self, input_dim: int = 256, hidden_dim: int = 256,
                  num_actions: int = 8):
+        """@brief Construct the actor head.
+
+        @param input_dim    Dimensionality of the fused feature vector.
+        @param hidden_dim   Width of the hidden layer.
+        @param num_actions  Number of discrete PDR rule actions.
+        """
         super().__init__()
+
+        ## @brief Single-hidden-layer MLP producing action logits.
         self.net = nn.Sequential(
             nn.Linear(input_dim, hidden_dim),
             nn.LayerNorm(hidden_dim),
             nn.SiLU(inplace=True),
             nn.Linear(hidden_dim, num_actions),
         )
+
+        ## @brief Number of discrete actions (PDR rules).
         self.num_actions = num_actions
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Returns action logits (B, num_actions)."""
+        """@brief Compute raw action logits.
+
+        @param x  Fused feature vector of shape (B, @p input_dim).
+        @return Action logits of shape (B, @ref num_actions).
+        """
         return self.net(x)
 
     def get_distribution(self, x: torch.Tensor) -> Categorical:
+        """@brief Build a Categorical distribution from the action logits.
+
+        @param x  Fused feature vector of shape (B, @p input_dim).
+        @return torch.distributions.Categorical over the PDR actions.
+        """
         logits = self.forward(x)
         return Categorical(logits=logits)
 
 
 class CriticHead(nn.Module):
-    """
-    Critic network: estimates state value V(s).
+    """@brief Critic network: estimates the state value V(s).
+
+    @details
+    Architecture mirrors ActorHead but outputs a single scalar per
+    batch element.
     """
 
     def __init__(self, input_dim: int = 256, hidden_dim: int = 256):
+        """@brief Construct the critic head.
+
+        @param input_dim   Dimensionality of the fused feature vector.
+        @param hidden_dim  Width of the hidden layer.
+        """
         super().__init__()
+
+        ## @brief Single-hidden-layer MLP producing a scalar value estimate.
         self.net = nn.Sequential(
             nn.Linear(input_dim, hidden_dim),
             nn.LayerNorm(hidden_dim),
@@ -94,40 +176,56 @@ class CriticHead(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Returns value estimate (B, 1)."""
+        """@brief Compute the state-value estimate.
+
+        @param x  Fused feature vector of shape (B, @p input_dim).
+        @return Value estimate of shape (B, 1).
+        """
         return self.net(x)
 
 
 class ActorCritic(nn.Module):
-    """
-    Combined Actor-Critic using shared fusion features.
+    """@brief Combined Actor-Critic module using shared fusion features.
 
-    Forward pass returns:
-        - action_logits: (B, 8)
-        - value: (B, 1)
+    @details
+    Wraps an ActorHead and a CriticHead that both consume the same
+    256-D fused representation.  Provides convenience methods for
+    action selection (@ref act) and PPO-style evaluation (@ref evaluate).
     """
 
     def __init__(self, input_dim: int = 256, hidden_dim: int = 256,
                  num_actions: int = 8):
+        """@brief Construct the combined actor-critic.
+
+        @param input_dim    Dimensionality of the fused feature vector.
+        @param hidden_dim   Width of hidden layers in both heads.
+        @param num_actions  Number of discrete PDR rule actions.
+        """
         super().__init__()
+
+        ## @brief Policy (actor) head producing action logits.
         self.actor = ActorHead(input_dim, hidden_dim, num_actions)
+        ## @brief Value (critic) head producing V(s).
         self.critic = CriticHead(input_dim, hidden_dim)
 
     def forward(self, features: torch.Tensor):
+        """@brief Forward pass returning both action logits and value.
+
+        @param features  Fused representation of shape (B, @p input_dim).
+        @return Tuple of (action_logits, value) with shapes (B, 8) and (B, 1).
+        """
         return self.actor(features), self.critic(features)
 
     def act(self, features: torch.Tensor, deterministic: bool = False):
-        """
-        Select an action and return (action, log_prob, value).
+        """@brief Select an action and return associated quantities.
 
-        Args:
-            features: (B, 256) fusion output
-            deterministic: if True, take argmax instead of sampling
-
-        Returns:
-            action:   (B,) selected PDR rule index
-            log_prob: (B,) log probability of selected action
-            value:    (B,) state value estimate
+        @param features       Fused representation of shape (B, 256).
+        @param deterministic  If True, take argmax instead of sampling
+                              from the categorical distribution.
+        @return Tuple of:
+                - @c action   (B,) — selected PDR rule index.
+                - @c log_prob (B,) — log-probability of the selected action.
+                - @c value    (B,) — state-value estimate (squeezed).
         """
         logits = self.actor(features)
         value = self.critic(features).squeeze(-1)
@@ -142,13 +240,16 @@ class ActorCritic(nn.Module):
         return action, log_prob, value
 
     def evaluate(self, features: torch.Tensor, actions: torch.Tensor):
-        """
-        Evaluate given actions for PPO update.
+        """@brief Evaluate previously taken actions for the PPO update step.
 
-        Returns:
-            log_probs: (B,) log prob of the given actions
-            values:    (B,) state value estimates
-            entropy:   (B,) distribution entropy
+        @param features  Fused representation of shape (B, 256).
+        @param actions   Previously selected action indices of shape (B,).
+        @return Tuple of:
+                - @c log_probs (B,) — log-probability of @p actions under
+                  the current policy.
+                - @c values    (B,) — state-value estimates (squeezed).
+                - @c entropy   (B,) — categorical distribution entropy for
+                  the entropy bonus.
         """
         logits = self.actor(features)
         value = self.critic(features).squeeze(-1)

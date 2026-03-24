@@ -1,13 +1,16 @@
 """
-PPO Training Loop for the DRL Scheduling Network.
+@file train.py
+@brief PPO Training Loop for the DRL Scheduling Network.
 
-This script runs end-to-end training with the placeholder environment.
-When the Unity simulation is ready, swap PlaceholderSchedulingEnv for
-your Unity wrapper — the rest of the pipeline stays the same.
+@details
+This script runs end-to-end Proximal Policy Optimisation (PPO) training
+with the placeholder environment.  It follows the standard collect →
+compute GAE → update cycle and logs per-update statistics to stdout.
 
-Usage:
-    python train.py
-    python train.py --total-timesteps 500000 --num-envs 4
+@par Usage
+@code{.sh}
+python train.py --total-timesteps 50000 --num-envs 4 --device cpu
+@endcode
 """
 
 import argparse
@@ -30,7 +33,13 @@ from rollout_buffer import RolloutBuffer
 
 
 def obs_to_torch(obs: dict, device: str) -> dict:
-    """Convert numpy obs dict to torch tensors."""
+    """@brief Convert a numpy observation dict to a dict of PyTorch tensors.
+
+    @param obs     Dict mapping observation keys to numpy arrays.
+    @param device  Target torch device string (e.g. @c "cpu" or @c "cuda").
+    @return Dict with the same keys, values cast to float32 tensors on
+            @p device.
+    """
     return {
         k: torch.tensor(v, dtype=torch.float32).to(device)
         for k, v in obs.items()
@@ -38,7 +47,25 @@ def obs_to_torch(obs: dict, device: str) -> dict:
 
 
 def train(ppo_cfg: PPOConfig, device: str = "cpu"):
-    """Main PPO training loop."""
+    """@brief Main PPO training loop.
+
+    @details
+    Orchestrates the full training pipeline:
+      1. Builds and prints the @ref SchedulingNetwork.
+      2. Creates the @ref VectorizedPlaceholderEnv and @ref RolloutBuffer.
+      3. For each update iteration:
+         - Collects a rollout of @c rollout_length × @c num_envs transitions.
+         - Computes GAE advantages and discounted returns.
+         - Runs @c num_epochs of mini-batch PPO updates (clipped surrogate
+           objective, MSE value loss, entropy bonus).
+         - Logs average reward, return, losses, entropy, and throughput.
+      4. Saves a checkpoint containing model weights, optimiser state,
+         global step count, and the full config.
+
+    @param ppo_cfg  PPOConfig dataclass with all training hyperparameters.
+    @param device   Torch device string for network and tensor allocation.
+    @return The trained @ref SchedulingNetwork instance.
+    """
     print("=" * 60)
     print("DRL Scheduling Network — PPO Training")
     print("=" * 60)
@@ -61,6 +88,8 @@ def train(ppo_cfg: PPOConfig, device: str = "cpu"):
     vec_env = VectorizedPlaceholderEnv(num_envs=ppo_cfg.num_envs)
     obs, infos = vec_env.reset()
 
+    ## @brief Per-environment observation shapes used to allocate the
+    ##        @ref RolloutBuffer.
     obs_shapes = {
         "factory_grid": (3, 64, 64),
         "sched_matrix": (3, 100, 40),
@@ -79,9 +108,11 @@ def train(ppo_cfg: PPOConfig, device: str = "cpu"):
     )
 
     # ---- Training loop ----
+    ## @brief Total number of PPO update iterations.
     num_updates = ppo_cfg.total_timesteps // (
         ppo_cfg.rollout_length * ppo_cfg.num_envs
     )
+    ## @brief Cumulative environment steps across all envs.
     global_step = 0
     start_time = time.time()
 
@@ -140,7 +171,7 @@ def train(ppo_cfg: PPOConfig, device: str = "cpu"):
                     batch["obs"], batch["actions"]
                 )
 
-                # Policy loss (clipped PPO)
+                # Policy loss (clipped surrogate objective)
                 ratio = torch.exp(new_log_probs - batch["old_log_probs"])
                 surr1 = ratio * batch["advantages"]
                 surr2 = (
@@ -153,12 +184,13 @@ def train(ppo_cfg: PPOConfig, device: str = "cpu"):
                 )
                 pg_loss = -torch.min(surr1, surr2).mean()
 
-                # Value loss
+                # Value loss (MSE between predicted values and returns)
                 v_loss = nn.functional.mse_loss(new_values, batch["returns"])
 
-                # Entropy bonus
+                # Entropy bonus (negative sign so minimising encourages entropy)
                 ent_loss = -entropy.mean()
 
+                # Combined loss
                 loss = (
                     pg_loss
                     + ppo_cfg.value_coef * v_loss
@@ -220,6 +252,7 @@ def train(ppo_cfg: PPOConfig, device: str = "cpu"):
 
 
 if __name__ == "__main__":
+    ## @brief Argument parser for command-line training configuration.
     parser = argparse.ArgumentParser(description="Train DRL Scheduling Agent")
     parser.add_argument("--total-timesteps", type=int, default=50_000,
                         help="Total training timesteps (default 50k for testing)")

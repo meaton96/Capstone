@@ -1,6 +1,8 @@
 """
-Test suite for the DRL Scheduling Architecture.
+@file test_architecture.py
+@brief Test suite for the DRL Scheduling Architecture.
 
+@details
 Tests cover:
   1. Tensor shape correctness through every layer
   2. Forward/backward pass (gradient flow)
@@ -10,8 +12,7 @@ Tests cover:
   6. Checkpoint save/load round-trip
   7. Deterministic vs stochastic action selection
 
-Run:  python -m pytest tests/test_architecture.py -v
-  or: python tests/test_architecture.py
+@endcode
 """
 
 import sys
@@ -31,12 +32,19 @@ from env.placeholder_env import PlaceholderSchedulingEnv, VectorizedPlaceholderE
 from rollout_buffer import RolloutBuffer
 
 
+## @brief Default batch size used across all tests.
 BATCH = 4
+
+## @brief Device used for tensor allocation in tests.
 DEVICE = "cpu"
 
 
 def make_dummy_obs(batch_size: int = BATCH) -> dict:
-    """Create a batch of dummy observations matching the state space."""
+    """@brief Create a batch of dummy observations matching the state space.
+
+    @param batch_size  Number of samples in the batch.
+    @return Dict of random tensors keyed by observation-space names.
+    """
     return {
         "factory_grid": torch.randn(batch_size, 3, 64, 64),
         "sched_matrix": torch.randn(batch_size, 3, 100, 40),
@@ -51,13 +59,17 @@ def make_dummy_obs(batch_size: int = BATCH) -> dict:
 # ============================================================
 
 class TestSPPF:
+    """@brief Unit tests for the @ref SPPF module."""
+
     def test_output_shape(self):
+        """@brief Verify SPPF produces the expected (B, C, H, W) output."""
         sppf = SPPF(128, 128)
         x = torch.randn(BATCH, 128, 16, 16)
         out = sppf(x)
         assert out.shape == (BATCH, 128, 16, 16), f"SPPF shape: {out.shape}"
 
     def test_preserves_spatial(self):
+        """@brief Spatial dimensions must be preserved through SPPF."""
         sppf = SPPF(64, 64)
         x = torch.randn(2, 64, 8, 8)
         out = sppf(x)
@@ -65,13 +77,17 @@ class TestSPPF:
 
 
 class TestCNNSPPFEncoder:
+    """@brief Shape tests for @ref CNNSPPFEncoder with factory and schedule inputs."""
+
     def test_factory_encoder_shape(self):
+        """@brief Factory-floor grid (3, 64, 64) → 256-D embedding."""
         enc = CNNSPPFEncoder(in_channels=3, out_dim=256)
         x = torch.randn(BATCH, 3, 64, 64)
         out = enc(x)
         assert out.shape == (BATCH, 256), f"Factory encoder: {out.shape}"
 
     def test_sched_encoder_shape(self):
+        """@brief Scheduling-matrix image (3, 100, 40) → 128-D embedding."""
         enc = CNNSPPFEncoder(in_channels=3, out_dim=128)
         x = torch.randn(BATCH, 3, 100, 40)
         out = enc(x)
@@ -79,43 +95,61 @@ class TestCNNSPPFEncoder:
 
 
 class TestMLPEncoder:
+    """@brief Shape tests for @ref MLPEncoder across the three vector modalities."""
+
     def test_global_scalars(self):
+        """@brief 10-D global scalars → 32-D embedding."""
         mlp = MLPEncoder(10, 32)
         out = mlp(torch.randn(BATCH, 10))
         assert out.shape == (BATCH, 32)
 
     def test_distance_matrix(self):
+        """@brief 64-D flattened distances → 32-D embedding."""
         mlp = MLPEncoder(64, 32)
         out = mlp(torch.randn(BATCH, 64))
         assert out.shape == (BATCH, 32)
 
     def test_event_flags(self):
+        """@brief 6-D event flags → 16-D embedding."""
         mlp = MLPEncoder(6, 16)
         out = mlp(torch.randn(BATCH, 6))
         assert out.shape == (BATCH, 16)
 
 
 class TestMultiModalEncoder:
+    """@brief Integration tests for @ref MultiModalEncoder."""
+
     def test_output_dim(self):
+        """@brief Concatenated output must be (B, 464)."""
         enc = MultiModalEncoder()
         obs = make_dummy_obs()
         out = enc(obs)
         assert out.shape == (BATCH, 464), f"Encoder concat: {out.shape}"
 
     def test_output_dim_matches_config(self):
+        """@brief @ref MultiModalEncoder.output_dim must agree with EncoderConfig.concat_dim."""
         cfg = EncoderConfig()
         enc = MultiModalEncoder(cfg)
         assert enc.output_dim == cfg.concat_dim == 464
 
 
 class TestFusionHead:
+    """@brief Tests for @ref FusionHead and @ref DomainRandomization."""
+
     def test_shape(self):
+        """@brief Fusion output must be (B, 256)."""
         fusion = FusionHead(464, 512, 256)
         x = torch.randn(BATCH, 464)
         out = fusion(x)
         assert out.shape == (BATCH, 256)
 
     def test_domain_rand_training_vs_eval(self):
+        """@brief Dropout and noise should be active in training mode only.
+
+        @details
+        In training mode with 50% dropout, some output values must be zero.
+        In eval mode the layer should act as identity.
+        """
         dr = DomainRandomization(dropout_rate=0.5, noise_std=0.1)
         x = torch.ones(100, 64)
         dr.train()
@@ -130,17 +164,24 @@ class TestFusionHead:
 
 
 class TestActorCritic:
+    """@brief Shape and contract tests for @ref ActorHead, @ref CriticHead,
+    and @ref ActorCritic."""
+
     def test_actor_shape(self):
+        """@brief Actor logits must be (B, 8)."""
         actor = ActorHead(256, 256, 8)
         out = actor(torch.randn(BATCH, 256))
         assert out.shape == (BATCH, 8)
 
     def test_critic_shape(self):
+        """@brief Critic value must be (B, 1)."""
         critic = CriticHead(256, 256)
         out = critic(torch.randn(BATCH, 256))
         assert out.shape == (BATCH, 1)
 
     def test_act_outputs(self):
+        """@brief @ref ActorCritic.act must return (action, log_prob, value)
+        with correct shapes and valid action range [0, 8)."""
         ac = ActorCritic(256, 256, 8)
         features = torch.randn(BATCH, 256)
         action, log_prob, value = ac.act(features)
@@ -150,6 +191,8 @@ class TestActorCritic:
         assert (action >= 0).all() and (action < 8).all()
 
     def test_evaluate_outputs(self):
+        """@brief @ref ActorCritic.evaluate must return (log_probs, values, entropy)
+        with non-negative entropy."""
         ac = ActorCritic(256, 256, 8)
         features = torch.randn(BATCH, 256)
         actions = torch.randint(0, 8, (BATCH,))
@@ -165,7 +208,10 @@ class TestActorCritic:
 # ============================================================
 
 class TestSchedulingNetwork:
+    """@brief End-to-end tests for @ref SchedulingNetwork."""
+
     def test_forward_shapes(self):
+        """@brief Forward pass must produce logits (B, 8) and value (B, 1)."""
         net = SchedulingNetwork()
         obs = make_dummy_obs()
         logits, value = net(obs)
@@ -173,12 +219,14 @@ class TestSchedulingNetwork:
         assert value.shape == (BATCH, 1), f"Value: {value.shape}"
 
     def test_act(self):
+        """@brief @ref SchedulingNetwork.act must return actions of shape (B,)."""
         net = SchedulingNetwork()
         obs = make_dummy_obs()
         action, lp, val = net.act(obs)
         assert action.shape == (BATCH,)
 
     def test_evaluate(self):
+        """@brief @ref SchedulingNetwork.evaluate must return log_probs of shape (B,)."""
         net = SchedulingNetwork()
         obs = make_dummy_obs()
         actions = torch.randint(0, 8, (BATCH,))
@@ -186,7 +234,13 @@ class TestSchedulingNetwork:
         assert lp.shape == (BATCH,)
 
     def test_gradient_flow(self):
-        """Verify gradients flow through every parameter."""
+        """@brief Verify gradients flow through every learnable parameter.
+
+        @details
+        Constructs a composite loss from log-probs, values, and entropy,
+        calls @c backward(), then checks that every parameter received a
+        non-None, non-NaN gradient.
+        """
         net = SchedulingNetwork()
         obs = make_dummy_obs()
         actions = torch.randint(0, 8, (BATCH,))
@@ -199,6 +253,8 @@ class TestSchedulingNetwork:
             assert not torch.isnan(param.grad).any(), f"NaN grad in {name}"
 
     def test_deterministic_action(self):
+        """@brief Two deterministic calls on the same input must return
+        the same action."""
         net = SchedulingNetwork()
         net.eval()
         obs = make_dummy_obs(1)
@@ -207,6 +263,8 @@ class TestSchedulingNetwork:
         assert a1.item() == a2.item(), "Deterministic actions should match"
 
     def test_param_summary(self):
+        """@brief @ref SchedulingNetwork.get_param_summary totals must be
+        consistent with submodule counts."""
         net = SchedulingNetwork()
         summary = net.get_param_summary()
         assert summary["total"] > 0
@@ -215,7 +273,13 @@ class TestSchedulingNetwork:
         assert abs(part_sum - summary["total"]) < 100
 
     def test_checkpoint_roundtrip(self):
-        """Save and reload model, verify outputs match."""
+        """@brief Save and reload model weights, verify outputs match.
+
+        @details
+        Serialises the state dict to a temporary file, loads it into a
+        fresh @ref SchedulingNetwork, and asserts that forward-pass outputs
+        are identical within floating-point tolerance.
+        """
         net1 = SchedulingNetwork()
         net1.eval()
         obs = make_dummy_obs(1)
@@ -241,7 +305,11 @@ class TestSchedulingNetwork:
 # ============================================================
 
 class TestPlaceholderEnv:
+    """@brief Interface and contract tests for @ref PlaceholderSchedulingEnv."""
+
     def test_reset(self):
+        """@brief Reset must return an observation dict with the correct
+        keys and shapes."""
         env = PlaceholderSchedulingEnv(seed=42)
         obs, info = env.reset()
         assert set(obs.keys()) == {
@@ -255,6 +323,7 @@ class TestPlaceholderEnv:
         assert obs["event_flags"].shape == (6,)
 
     def test_step(self):
+        """@brief Step must return (obs, float reward, bool term, bool trunc, info)."""
         env = PlaceholderSchedulingEnv(seed=42)
         env.reset()
         obs, reward, term, trunc, info = env.step(0)
@@ -264,6 +333,7 @@ class TestPlaceholderEnv:
         assert "pdr_rule" in info
 
     def test_all_actions_valid(self):
+        """@brief Every action in [0, 7] must be accepted without error."""
         env = PlaceholderSchedulingEnv(seed=42)
         env.reset()
         for a in range(8):
@@ -272,6 +342,7 @@ class TestPlaceholderEnv:
                 env.reset()
 
     def test_episode_terminates(self):
+        """@brief Episode must end within @c max_steps."""
         env = PlaceholderSchedulingEnv(max_steps=10, seed=42)
         env.reset()
         done = False
@@ -283,7 +354,7 @@ class TestPlaceholderEnv:
         assert steps <= 10
 
     def test_obs_ranges(self):
-        """Observations should be in [0, 1] range."""
+        """@brief All observation values must lie in [0, 1]."""
         env = PlaceholderSchedulingEnv(seed=42)
         obs, _ = env.reset()
         for key, val in obs.items():
@@ -292,12 +363,16 @@ class TestPlaceholderEnv:
 
 
 class TestVectorizedEnv:
+    """@brief Tests for @ref VectorizedPlaceholderEnv batched interface."""
+
     def test_batched_obs(self):
+        """@brief Batched reset must prepend the num_envs dimension."""
         vec = VectorizedPlaceholderEnv(num_envs=3)
         obs, infos = vec.reset()
         assert obs["factory_grid"].shape == (3, 3, 64, 64)  # (num_envs, C, H, W)
 
     def test_step_shapes(self):
+        """@brief Batched step must return rewards and dones of shape (num_envs,)."""
         vec = VectorizedPlaceholderEnv(num_envs=3)
         vec.reset()
         obs, rewards, terms, truncs, infos = vec.step([0, 1, 2])
@@ -310,7 +385,17 @@ class TestVectorizedEnv:
 # ============================================================
 
 class TestRolloutBuffer:
+    """@brief Tests for @ref RolloutBuffer GAE computation and batch generation."""
+
     def test_gae_computation(self):
+        """@brief GAE advantages must be non-trivial and returns must
+        equal advantages + values.
+
+        @details
+        Fills the buffer with 8 steps of random data for 2 parallel envs,
+        computes GAE, then verifies the identity
+        @c returns = @c advantages + @c values.
+        """
         obs_shapes = {
             "factory_grid": (3, 64, 64),
             "sched_matrix": (3, 100, 40),
@@ -345,6 +430,12 @@ class TestRolloutBuffer:
         )
 
     def test_batch_generation(self):
+        """@brief Mini-batch iterator must yield the correct number of batches.
+
+        @details
+        With 4 steps × 2 envs = 8 total transitions and a batch size of 4,
+        exactly 2 batches should be produced.
+        """
         obs_shapes = {"global_scalars": (10,)}
         buf = RolloutBuffer(4, 2, obs_shapes)
         for t in range(4):
@@ -367,9 +458,18 @@ class TestRolloutBuffer:
 # ============================================================
 
 def run_tests():
-    """Simple test runner (works without pytest)."""
+    """@brief Simple test runner that works without pytest.
+
+    @details
+    Iterates over all @c Test* classes, discovers methods prefixed with
+    @c test_, executes each, and prints a pass/fail summary.  Returns
+    True if every test passed.
+
+    @return True on success, False if any test failed.
+    """
     import traceback
 
+    ## @brief Ordered list of test classes to execute.
     test_classes = [
         TestSPPF, TestCNNSPPFEncoder, TestMLPEncoder,
         TestMultiModalEncoder, TestFusionHead, TestActorCritic,
