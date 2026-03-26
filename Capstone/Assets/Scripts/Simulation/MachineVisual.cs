@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Assets.Scripts.Scheduling.Core;
+using TMPro;
+
 
 
 
@@ -63,10 +65,10 @@ namespace Assets.Scripts.Simulation
         /// @{
 
         [Header("Overhead UI (world-space canvas children)")]
-        [SerializeField] private Text labelText;      ///< Label displaying machine ID, e.g. "M3".
-        [SerializeField] private Text statusText;      ///< Status text displaying current state, e.g. "IDLE".
+        [SerializeField] private TextMeshProUGUI labelText;      ///< Label displaying machine ID, e.g. "M3".
+        [SerializeField] private TextMeshProUGUI statusText;      ///< Status text displaying current state, e.g. "IDLE".
         [SerializeField] private Slider progressBar;   ///< Slider showing operation completion percentage.
-        [SerializeField] private Text queueLengthText; ///< Text showing queue depth, e.g. "Q: 4".
+        [SerializeField] private TextMeshProUGUI queueLengthText; ///< Text showing queue depth, e.g. "Q: 4".
 
         /// @}
 

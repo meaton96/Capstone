@@ -2,7 +2,8 @@
     "name": "Simulation",
     "rootNamespace": "",
     "references": [
-        "Scheduling"
+        "Scheduling",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
