@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using Assets.Scripts.Scheduling.Core;
 using Assets.Scripts.Scheduling.Data;
+using Newtonsoft.Json;
 
 namespace Assets.Scripts.Simulation
 {
@@ -824,13 +825,7 @@ namespace Assets.Scripts.Simulation
         {
             try
             {
-                // ──────────────────────────────────────────────────
-                //  ADAPT THIS to your TaillardInstance API:
-                //    JsonUtility.FromJson<TaillardInstance>(json.text)
-                //    TaillardInstance.FromJson(json.text)
-                //    TaillardInstance.Load(json)
-                // ──────────────────────────────────────────────────
-                TaillardInstance instance = JsonUtility.FromJson<TaillardInstance>(json.text);
+                TaillardInstance instance = JsonConvert.DeserializeObject<TaillardInstance>(json.text);
 
                 if (instance == null)
                 {
@@ -839,7 +834,8 @@ namespace Assets.Scripts.Simulation
                 }
 
                 Debug.Log($"[SimBridge] Loaded: {instance.Name} " +
-                          $"({instance.JobCount}J × {instance.MachineCount}M)");
+                          $"({instance.JobCount}J × {instance.MachineCount}M), " +
+                          $"optimum={instance.metadata?.optimum ?? 0}");
                 return instance;
             }
             catch (Exception ex)

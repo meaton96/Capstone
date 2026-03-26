@@ -1017,6 +1017,7 @@ GameObject:
   - component: {fileID: 2376054145820469230}
   - component: {fileID: 9173336479045145196}
   - component: {fileID: 3857620222440030767}
+  - component: {fileID: 8659955545630825831}
   m_Layer: 0
   m_Name: MachineUI
   m_TagString: Untagged
@@ -1107,3 +1108,16 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &8659955545630825831
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7542397314579452890}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3efb16544565f43aea8858eddded9634, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BillboardUI
+  lockVertical: 1
