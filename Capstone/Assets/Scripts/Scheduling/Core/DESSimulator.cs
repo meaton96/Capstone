@@ -5,6 +5,25 @@ using Assets.Scripts.Scheduling.Data;
 
 namespace Assets.Scripts.Scheduling.Core
 {
+    /// @brief Result of a single event-processing step.
+    ///
+    /// @details Returned by @ref DESSimulator.ProcessNextEvent to tell the
+    /// caller whether the simulation needs an external dispatch decision,
+    /// can continue autonomously, or has finished.
+    public enum SimStepResult
+    {
+        /// @brief Event was processed and more events remain. No decision needed.
+        Continue,
+
+        /// @brief A machine has become free with a non-empty queue.
+        /// The caller must supply a @ref DispatchingRule via @ref DESSimulator.ApplyDecision
+        /// before calling @ref ProcessNextEvent again.
+        DecisionRequired,
+
+        /// @brief The event queue is empty. All jobs are complete.
+        Done,
+    }
+
     /// @brief Pure discrete-event simulator for Job Shop Problem (JSP) validation.
     ///
     /// @details No Unity dependencies — can run standalone or inside Unity.
@@ -32,10 +51,191 @@ namespace Assets.Scripts.Scheduling.Core
         public int TotalOperationsCompleted { get; private set; }
         public int TotalJobsCompleted { get; private set; }
 
+        /// @brief True when the simulator is paused waiting for an external dispatch decision.
+        ///
+        /// @details Set to true inside @ref ProcessNextEvent when @ref TryStartNextOnMachineStepped
+        /// encounters a non-empty waiting queue. Cleared by @ref ApplyDecision.
+        /// While true, @ref ProcessNextEvent will immediately return
+        /// @ref SimStepResult.DecisionRequired without processing further events.
+        public bool WaitingForDecision { get; private set; }
+
+        /// @brief The machine ID that requires a dispatch decision.
+        ///
+        /// @details Only valid when @ref WaitingForDecision is true. The caller
+        /// should inspect @c Machines[PendingDecisionMachineId].WaitingQueue
+        /// to see the candidate operations, then call @ref ApplyDecision.
+        public int PendingDecisionMachineId { get; private set; } = -1;
+
         public DESSimulator()
         {
             EventQueue = new EventQueue();
             ActiveRule = DispatchingRule.SPT_SMPT;
+        }
+
+        /// @brief Processes a single event from the queue (stepped execution).
+        ///
+        /// @details This is the stepped equivalent of the @ref Run loop. Call it
+        /// repeatedly from the bridge/agent until it returns @ref SimStepResult.Done.
+        ///
+        /// When the return value is @ref SimStepResult.DecisionRequired, the caller
+        /// MUST call @ref ApplyDecision before calling this method again.
+        ///
+        /// @par Event flow
+        /// 1. If already waiting for a decision → return DecisionRequired immediately.
+        /// 2. If queue is empty → compute makespan, return Done.
+        /// 3. Dequeue the next event, advance @ref CurrentTime, and process it.
+        ///    - @ref EventType.JobArrived calls the existing @ref HandleJobArrived
+        ///      (which may auto-start on an idle machine — no decision needed).
+        ///    - @ref EventType.OperationComplete calls @ref HandleOperationCompleteStepped
+        ///      which uses @ref TryStartNextOnMachineStepped instead of the auto-dispatch version.
+        /// 4. If the stepped handler flagged a decision → return DecisionRequired.
+        /// 5. Otherwise → return Continue or Done depending on remaining events.
+        ///
+        /// @returns A @ref SimStepResult indicating what the caller should do next.
+        public SimStepResult ProcessNextEvent()
+        {
+            // Still waiting for a decision from the last step.
+            if (WaitingForDecision)
+                return SimStepResult.DecisionRequired;
+
+            if (!EventQueue.HasEvents)
+            {
+                Makespan = Jobs.Max(j => j.CompletionTime);
+                return SimStepResult.Done;
+            }
+
+            var evt = EventQueue.Dequeue();
+            CurrentTime = evt.Time;
+
+            switch (evt.Type)
+            {
+                case EventType.JobArrived:
+                    HandleJobArrived(evt);
+                    break;
+
+                case EventType.OperationComplete:
+                    HandleOperationCompleteStepped(evt);
+                    break;
+            }
+
+            if (WaitingForDecision)
+                return SimStepResult.DecisionRequired;
+
+            if (!EventQueue.HasEvents)
+            {
+                Makespan = Jobs.Max(j => j.CompletionTime);
+                return SimStepResult.Done;
+            }
+
+            return SimStepResult.Continue;
+        }
+
+        /// @brief Stepped variant of @ref HandleOperationComplete.
+        ///
+        /// @details Identical to the original except it calls
+        /// @ref TryStartNextOnMachineStepped, which pauses for an external
+        /// decision instead of auto-dispatching.
+        ///
+        /// @param evt The OperationComplete event.
+        private void HandleOperationCompleteStepped(SimEvent evt)
+        {
+            var machine = Machines[evt.MachineId];
+            var job = Jobs[evt.JobId];
+
+            machine.FinishProcessing();
+            TotalOperationsCompleted++;
+
+            job.NextOperationIndex++;
+
+            if (job.IsComplete)
+            {
+                job.CompletionTime = CurrentTime;
+                TotalJobsCompleted++;
+            }
+            else
+            {
+                var nextOp = job.CurrentOperation;
+                double transitTime = GetTransitTime(machine.Id, nextOp.MachineId);
+                double arrivalTime = CurrentTime + transitTime;
+
+                if (transitTime <= 0)
+                {
+                    TryDispatchJob(job);
+                }
+                else
+                {
+                    EventQueue.Enqueue(arrivalTime, EventType.JobArrived, jobId: job.Id);
+                }
+            }
+
+            // This is the only line that differs from the original:
+            TryStartNextOnMachineStepped(machine);
+        }
+
+        /// @brief Stepped variant of @ref TryStartNextOnMachine.
+        ///
+        /// @details Instead of auto-selecting the next operation via
+        /// @ref DispatchingRules.SelectNext, this method sets
+        /// @ref WaitingForDecision and @ref PendingDecisionMachineId, then
+        /// returns without dispatching. The external caller must inspect
+        /// the queue and call @ref ApplyDecision with a chosen rule.
+        ///
+        /// If the queue is empty or the machine is not idle, behaves
+        /// identically to the original (no-op).
+        ///
+        /// @param machine The machine that just became free.
+        private void TryStartNextOnMachineStepped(Machine machine)
+        {
+            if (machine.WaitingQueue.Count == 0) return;
+            if (machine.State != MachineState.Idle) return;
+
+            // Pause: the external caller must decide which job to dispatch.
+            WaitingForDecision = true;
+            PendingDecisionMachineId = machine.Id;
+        }
+
+        /// @brief Applies an external dispatch decision and resumes the simulation.
+        ///
+        /// @details Uses the supplied @p rule to select the next operation from the
+        /// pending machine's waiting queue, starts processing it, and enqueues the
+        /// corresponding @ref EventType.OperationComplete event. Clears the
+        /// @ref WaitingForDecision flag so @ref ProcessNextEvent can continue.
+        ///
+        /// @param rule The @ref DispatchingRule the agent/bridge chose (one of the
+        /// 8 composite PDRs, or any single rule for validation).
+        ///
+        /// @pre @ref WaitingForDecision must be true.
+        /// @post @ref WaitingForDecision is false, the chosen operation is running
+        /// on the machine, and a completion event has been enqueued.
+        public void ApplyDecision(DispatchingRule rule)
+        {
+            if (!WaitingForDecision)
+            {
+                throw new InvalidOperationException(
+                    "ApplyDecision called but no decision is pending.");
+            }
+
+            var machine = Machines[PendingDecisionMachineId];
+            var nextOp = DispatchingRules.SelectNext(machine.WaitingQueue, Jobs, rule);
+            machine.WaitingQueue.Remove(nextOp);
+
+            machine.StartProcessing(nextOp, CurrentTime);
+            EventQueue.Enqueue(nextOp.EndTime, EventType.OperationComplete,
+                jobId: nextOp.JobId, machineId: machine.Id);
+
+            WaitingForDecision = false;
+            PendingDecisionMachineId = -1;
+        }
+
+        /// @brief Resets the stepped-execution state.
+        ///
+        /// @details Call this at the END of your existing @ref Reset method body,
+        /// or anywhere after the base reset logic clears the event queue and
+        /// re-enqueues job arrivals.
+        private void ResetSteppedState()
+        {
+            WaitingForDecision = false;
+            PendingDecisionMachineId = -1;
         }
 
         /// @brief Loads a Taillard instance and initializes all jobs and machines.
@@ -107,6 +307,7 @@ namespace Assets.Scripts.Scheduling.Core
             {
                 EventQueue.Enqueue(0, EventType.JobArrived, jobId: j);
             }
+            ResetSteppedState();
         }
 
         /// @brief Runs the full simulation to completion and returns the makespan.

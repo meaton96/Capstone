@@ -14,6 +14,9 @@ namespace Assets.Scripts.Scheduling.Data
         /// @brief Benchmark instance identifier, e.g. @c "ta001".
         public string name;
 
+        public string Name => name;
+
+
         /// @brief Processing time matrix indexed as @c [job][operation].
         /// @details Each entry is the number of time units required for that operation.
         /// Must be rectangular (all rows the same length) for @ref MachineCount to be valid.

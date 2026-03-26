@@ -27,13 +27,13 @@ namespace Assets.Scripts.Simulation
     /// <summary>
     /// Machine operating states — mirrors the core DES Machine states.
     /// </summary>
-    public enum MachineState
-    {
-        Idle,       ///< Machine is idle and waiting for work.
-        Busy,       ///< Machine is actively processing a job.
-        Failed,     ///< Machine has encountered a failure.
-        Repairing   ///< Machine is undergoing repair.
-    }
+    // public enum MachineState
+    // {
+    //     Idle,       ///< Machine is idle and waiting for work.
+    //     Busy,       ///< Machine is actively processing a job.
+    //     Failed,     ///< Machine has encountered a failure.
+    //     Repairing   ///< Machine is undergoing repair.
+    // }
 
     /// <summary>
     /// Visual representation of a single machine on the factory floor.
@@ -551,7 +551,7 @@ namespace Assets.Scripts.Simulation
                 MachineState.Idle => idleColour,
                 MachineState.Busy => busyColour,
                 MachineState.Failed => failedColour,
-                MachineState.Repairing => repairingColour,
+                MachineState.Repair => repairingColour,
                 _ => Color.magenta
             };
         }
