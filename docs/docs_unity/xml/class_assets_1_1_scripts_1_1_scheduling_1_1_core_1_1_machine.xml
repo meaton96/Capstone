@@ -1,0 +1,196 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine" kind="class" language="C#" prot="public">
+    <compoundname>Assets::Scripts::Scheduling::Core::Machine</compoundname>
+    <sectiondef kind="property">
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_1ac71d1813ce216732f2f12483e1441907" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Scheduling.Core.Machine.Id</definition>
+        <argsstring></argsstring>
+        <name>Id</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.Machine.Id</qualifiedname>
+        <briefdescription>
+<para>Unique identifier for this machine, matching its index in DESSimulator.Machines. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Machine.cs" line="25" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Machine.cs" bodystart="25" bodyend="25"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_1a7bc7eeb999dc8f0f3483b981ef94afa5" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="yes" privatesettable="no" protectedsettable="no">
+        <type><ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a3aebc4d18420ccdbcfb891f2835f01b0" kindref="member">MachineState</ref></type>
+        <definition>MachineState Assets.Scripts.Scheduling.Core.Machine.State</definition>
+        <argsstring></argsstring>
+        <name>State</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.Machine.State</qualifiedname>
+        <initializer>= <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a3aebc4d18420ccdbcfb891f2835f01b0ae599161956d626eda4cb0a5ffb85271c" kindref="member">MachineState.Idle</ref></initializer>
+        <briefdescription>
+<para>Current operational state of the machine. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Initialised to <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a3aebc4d18420ccdbcfb891f2835f01b0ae599161956d626eda4cb0a5ffb85271c" kindref="member">MachineState.Idle</ref>. Transitions to <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a3aebc4d18420ccdbcfb891f2835f01b0ad8a942ef2b04672adfafef0ad817a407" kindref="member">MachineState.Busy</ref> on <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_1a5afae06a59815933c3b65c74d889c30c" kindref="member">StartProcessing</ref> and back to <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a3aebc4d18420ccdbcfb891f2835f01b0ae599161956d626eda4cb0a5ffb85271c" kindref="member">MachineState.Idle</ref> on <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_1af09eca5980967cecce42664fcd3f6b6e" kindref="member">FinishProcessing</ref>. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Machine.cs" line="30" column="29" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Machine.cs" bodystart="30" bodyend="30"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_1acc36045a17f281fb2b7e5ce7eb02482e" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="yes" privatesettable="no" protectedsettable="no">
+        <type><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation" kindref="compound">Operation</ref></type>
+        <definition>Operation Assets.Scripts.Scheduling.Core.Machine.CurrentOperation</definition>
+        <argsstring></argsstring>
+        <name>CurrentOperation</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.Machine.CurrentOperation</qualifiedname>
+        <briefdescription>
+<para>The operation currently being processed, or <computeroutput>null</computeroutput> when the machine is idle. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Set by <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_1a5afae06a59815933c3b65c74d889c30c" kindref="member">StartProcessing</ref> and cleared to <computeroutput>null</computeroutput> by <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_1af09eca5980967cecce42664fcd3f6b6e" kindref="member">FinishProcessing</ref>. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Machine.cs" line="34" column="26" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Machine.cs" bodystart="34" bodyend="34"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_1a5941a0fba6b6be337c4cea165c196241" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="yes" privatesettable="no" protectedsettable="no">
+        <type>double</type>
+        <definition>double Assets.Scripts.Scheduling.Core.Machine.BusyUntil</definition>
+        <argsstring></argsstring>
+        <name>BusyUntil</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.Machine.BusyUntil</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+<para><ref refid="namespace_assets_1_1_scripts_1_1_simulation" kindref="compound">Simulation</ref> time at which the current operation will finish. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Mirrors <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_1a5c826ae3e7644df48c3743d2fd2f5acf" kindref="member">Operation.EndTime</ref> of <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_1acc36045a17f281fb2b7e5ce7eb02482e" kindref="member">CurrentOperation</ref> and is used by <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator" kindref="compound">DESSimulator</ref> to schedule the corresponding <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a74e900c350e0673c74e0e62b6f351056a118b996cf01af1910a157f7409f5d0df" kindref="member">EventType.OperationComplete</ref> event. Reset to <computeroutput>0</computeroutput> by <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a477dc5db6d5bfeea5ec2dd71e9cfd63e" kindref="member">DESSimulator.Reset</ref> between runs. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Machine.cs" line="40" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Machine.cs" bodystart="40" bodyend="40"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_1ae56e4992f7199a184ff22c52ae036058" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type>List&lt; <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation" kindref="compound">Operation</ref> &gt;</type>
+        <definition>List&lt;Operation&gt; Assets.Scripts.Scheduling.Core.Machine.WaitingQueue</definition>
+        <argsstring></argsstring>
+        <name>WaitingQueue</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.Machine.WaitingQueue</qualifiedname>
+        <initializer>= new List&lt;<ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation" kindref="compound">Operation</ref>&gt;()</initializer>
+        <briefdescription>
+<para>Ordered list of operations waiting to be processed on this machine. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Operations are appended by DESSimulator.TryDispatchJob when the machine is busy, and removed by DESSimulator.TryStartNextOnMachine when the machine becomes free. Selection order is determined by DispatchingRules.SelectNext. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Machine.cs" line="46" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Machine.cs" bodystart="46" bodyend="46"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_1a951ff37eeafe61f662b33ee6db31d4fe" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>Assets.Scripts.Scheduling.Core.Machine.Machine</definition>
+        <argsstring>(int id)</argsstring>
+        <name>Machine</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.Machine.Machine</qualifiedname>
+        <param>
+          <type>int</type>
+          <declname>id</declname>
+        </param>
+        <briefdescription>
+<para>Constructs an idle machine with an empty waiting queue. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>id</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Unique machine identifier matching its index in DESSimulator.Machines. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Machine.cs" line="51" column="16" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Machine.cs" bodystart="51" bodyend="54"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_1a5afae06a59815933c3b65c74d889c30c" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Scheduling.Core.Machine.StartProcessing</definition>
+        <argsstring>(Operation op, double currentTime)</argsstring>
+        <name>StartProcessing</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.Machine.StartProcessing</qualifiedname>
+        <param>
+          <type><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation" kindref="compound">Operation</ref></type>
+          <declname>op</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>currentTime</declname>
+        </param>
+        <briefdescription>
+<para>Transitions the machine to <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a3aebc4d18420ccdbcfb891f2835f01b0ad8a942ef2b04672adfafef0ad817a407" kindref="member">MachineState.Busy</ref> and begins processing an operation. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Sets <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_1a7bc7eeb999dc8f0f3483b981ef94afa5" kindref="member">State</ref> to <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a3aebc4d18420ccdbcfb891f2835f01b0ad8a942ef2b04672adfafef0ad817a407" kindref="member">MachineState.Busy</ref>, assigns <computeroutput>op</computeroutput> to <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_1acc36045a17f281fb2b7e5ce7eb02482e" kindref="member">CurrentOperation</ref>, stamps <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_1a53d45f1ff0ac549efa8f19bb12c7b07b" kindref="member">Operation.StartTime</ref> with <computeroutput>currentTime</computeroutput>, and computes <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_1a5c826ae3e7644df48c3743d2fd2f5acf" kindref="member">Operation.EndTime</ref> as <computeroutput>currentTime</computeroutput> + <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_1a33c6d6f8ca03df6cacc3cae0ba540b18" kindref="member">Operation.Duration</ref>. <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_1a5941a0fba6b6be337c4cea165c196241" kindref="member">BusyUntil</ref> is updated to match <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_1a5c826ae3e7644df48c3743d2fd2f5acf" kindref="member">Operation.EndTime</ref> so the simulator can schedule the <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a74e900c350e0673c74e0e62b6f351056a118b996cf01af1910a157f7409f5d0df" kindref="member">EventType.OperationComplete</ref> event.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>op</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The operation to begin processing. Must not be <computeroutput>null</computeroutput>. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>currentTime</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The current simulation time at which processing starts. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Machine.cs" line="66" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Machine.cs" bodystart="66" bodyend="73"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_1af09eca5980967cecce42664fcd3f6b6e" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Scheduling.Core.Machine.FinishProcessing</definition>
+        <argsstring>()</argsstring>
+        <name>FinishProcessing</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.Machine.FinishProcessing</qualifiedname>
+        <briefdescription>
+<para>Transitions the machine to <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a3aebc4d18420ccdbcfb891f2835f01b0ae599161956d626eda4cb0a5ffb85271c" kindref="member">MachineState.Idle</ref> after an operation completes. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Clears <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_1acc36045a17f281fb2b7e5ce7eb02482e" kindref="member">CurrentOperation</ref> and sets <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_1a7bc7eeb999dc8f0f3483b981ef94afa5" kindref="member">State</ref> to <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a3aebc4d18420ccdbcfb891f2835f01b0ae599161956d626eda4cb0a5ffb85271c" kindref="member">MachineState.Idle</ref>. Does not select the next operation from <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_1ae56e4992f7199a184ff22c52ae036058" kindref="member">WaitingQueue</ref> — that responsibility belongs to DESSimulator.TryStartNextOnMachine, which is called immediately after this method in DESSimulator.HandleOperationComplete. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Machine.cs" line="81" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Machine.cs" bodystart="81" bodyend="85"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Represents a single machine on the shop floor. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>Maintains the machine&apos;s current <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a3aebc4d18420ccdbcfb891f2835f01b0" kindref="member">MachineState</ref>, the <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation" kindref="compound">Operation</ref> it is actively processing, and a <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_1ae56e4992f7199a184ff22c52ae036058" kindref="member">WaitingQueue</ref> of operations that have arrived but cannot yet start. State transitions are driven exclusively by <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator" kindref="compound">DESSimulator</ref> via <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_1a5afae06a59815933c3b65c74d889c30c" kindref="member">StartProcessing</ref> and <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_1af09eca5980967cecce42664fcd3f6b6e" kindref="member">FinishProcessing</ref>. </para>
+    </detaileddescription>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Machine.cs" line="22" column="11" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Machine.cs" bodystart="23" bodyend="86"/>
+    <listofallmembers>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_1a5941a0fba6b6be337c4cea165c196241" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::Machine</scope><name>BusyUntil</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_1acc36045a17f281fb2b7e5ce7eb02482e" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::Machine</scope><name>CurrentOperation</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_1af09eca5980967cecce42664fcd3f6b6e" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::Machine</scope><name>FinishProcessing</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_1ac71d1813ce216732f2f12483e1441907" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::Machine</scope><name>Id</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_1a951ff37eeafe61f662b33ee6db31d4fe" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::Machine</scope><name>Machine</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_1a5afae06a59815933c3b65c74d889c30c" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::Machine</scope><name>StartProcessing</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_1a7bc7eeb999dc8f0f3483b981ef94afa5" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::Machine</scope><name>State</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_1ae56e4992f7199a184ff22c52ae036058" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::Machine</scope><name>WaitingQueue</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

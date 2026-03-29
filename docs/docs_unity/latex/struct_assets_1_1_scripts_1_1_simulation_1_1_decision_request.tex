@@ -1,0 +1,39 @@
+\doxysection{Assets.\+Scripts.\+Simulation.\+Decision\+Request Struct Reference}
+\hypertarget{struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request}{}\label{struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request}\index{Assets.Scripts.Simulation.DecisionRequest@{Assets.Scripts.Simulation.DecisionRequest}}
+
+
+Snapshot of the DES state at a decision point, presented to the agent (or fixed rule) so it can choose an action.  
+
+
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request_a620182292ac7875cae255f27d4465646}\label{struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request_a620182292ac7875cae255f27d4465646} 
+int {\bfseries Machine\+Id}
+\begin{DoxyCompactList}\small\item\em ID of the machine that just became free and has a non-\/empty queue. \end{DoxyCompactList}\item 
+\Hypertarget{struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request_add88fa31fbced138db6ccd374530bd9d}\label{struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request_add88fa31fbced138db6ccd374530bd9d} 
+double {\bfseries Sim\+Time}
+\begin{DoxyCompactList}\small\item\em Current simulation time. \end{DoxyCompactList}\item 
+\Hypertarget{struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request_a0ec42003c74a246fc95a13037d16ddda}\label{struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request_a0ec42003c74a246fc95a13037d16ddda} 
+int\+[$\,$]\+ {\bfseries Queued\+Job\+Ids}
+\begin{DoxyCompactList}\small\item\em IDs of jobs waiting in the machine\textquotesingle{}s queue. \end{DoxyCompactList}\item 
+\Hypertarget{struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request_ad4c1cf82eb0a034fc2364533bffd8a23}\label{struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request_ad4c1cf82eb0a034fc2364533bffd8a23} 
+double\+[$\,$]\+ {\bfseries Queued\+Durations}
+\begin{DoxyCompactList}\small\item\em Processing times of the queued operations (parallel to Queued\+Job\+Ids). \end{DoxyCompactList}\item 
+\Hypertarget{struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request_a02df458c6ccecffbd9d9fdc8a2523199}\label{struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request_a02df458c6ccecffbd9d9fdc8a2523199} 
+int {\bfseries Decision\+Index}
+\begin{DoxyCompactList}\small\item\em How many decisions have been made so far this episode. \end{DoxyCompactList}\item 
+\Hypertarget{struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request_ab4c7666ddf86cefaab00f997030886b6}\label{struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request_ab4c7666ddf86cefaab00f997030886b6} 
+int {\bfseries Total\+Jobs}
+\begin{DoxyCompactList}\small\item\em Total jobs in the instance. \end{DoxyCompactList}\item 
+\Hypertarget{struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request_a307a860ba84ede3a9dcc159ff5096f02}\label{struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request_a307a860ba84ede3a9dcc159ff5096f02} 
+int {\bfseries Completed\+Jobs}
+\begin{DoxyCompactList}\small\item\em Jobs completed so far. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Snapshot of the DES state at a decision point, presented to the agent (or fixed rule) so it can choose an action. 
+
+The documentation for this struct was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Simulation/\+\doxymbox{\hyperlink{_simulation_bridge_8cs}{Simulation\+Bridge.\+cs}}\end{DoxyCompactItemize}

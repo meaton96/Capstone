@@ -1,0 +1,56 @@
+{
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.1.0",
+        "torch_version": "2.1.1+cpu"
+    },
+    "SchedulingAgent": {
+        "checkpoints": [
+            {
+                "steps": 799,
+                "file_path": "results/test_connection/SchedulingAgent/SchedulingAgent-799.onnx",
+                "reward": 0.0,
+                "creation_time": 1774810443.3062549,
+                "auxillary_file_paths": [
+                    "results/test_connection/SchedulingAgent/SchedulingAgent-799.pt"
+                ]
+            },
+            {
+                "steps": 5044,
+                "file_path": "results/test_connection/SchedulingAgent/SchedulingAgent-5044.onnx",
+                "reward": -4.565552830696106,
+                "creation_time": 1774811037.42598,
+                "auxillary_file_paths": [
+                    "results/test_connection/SchedulingAgent/SchedulingAgent-5044.pt"
+                ]
+            },
+            {
+                "steps": 5044,
+                "file_path": "results/test_connection/SchedulingAgent/SchedulingAgent-5044.onnx",
+                "reward": null,
+                "creation_time": 1774811072.1913068,
+                "auxillary_file_paths": [
+                    "results/test_connection/SchedulingAgent/SchedulingAgent-5044.pt"
+                ]
+            },
+            {
+                "steps": 5044,
+                "file_path": "results/test_connection/SchedulingAgent/SchedulingAgent-5044.onnx",
+                "reward": null,
+                "creation_time": 1774811101.128423,
+                "auxillary_file_paths": [
+                    "results/test_connection/SchedulingAgent/SchedulingAgent-5044.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 5044,
+            "file_path": "results/test_connection/SchedulingAgent.onnx",
+            "reward": null,
+            "creation_time": 1774811101.128423,
+            "auxillary_file_paths": [
+                "results/test_connection/SchedulingAgent/SchedulingAgent-5044.pt"
+            ]
+        }
+    }
+}

@@ -25,7 +25,7 @@ int {\bfseries Id}\hspace{0.3cm}{\ttfamily  \+[get]\+}
 \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation}{Operation}} \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_acc36045a17f281fb2b7e5ce7eb02482e}{Current\+Operation}}\hspace{0.3cm}{\ttfamily  \+[get, set]\+}
 \begin{DoxyCompactList}\small\item\em The operation currently being processed, or {\ttfamily null} when the machine is idle. \end{DoxyCompactList}\item 
 double \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_a5941a0fba6b6be337c4cea165c196241}{Busy\+Until}} = 0\hspace{0.3cm}{\ttfamily  \+[get, set]\+}
-\begin{DoxyCompactList}\small\item\em Simulation time at which the current operation will finish. \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em \doxylink{namespace_assets_1_1_scripts_1_1_simulation}{Simulation} time at which the current operation will finish. \end{DoxyCompactList}\item 
 List$<$ \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation}{Operation}} $>$ \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_ae56e4992f7199a184ff22c52ae036058}{Waiting\+Queue}} = new List$<$\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation}{Operation}}$>$()\hspace{0.3cm}{\ttfamily  \+[get]\+}
 \begin{DoxyCompactList}\small\item\em Ordered list of operations waiting to be processed on this machine. \end{DoxyCompactList}\end{DoxyCompactItemize}
 
@@ -100,7 +100,7 @@ double Assets.\+Scripts.\+Scheduling.\+Core.\+Machine.\+Busy\+Until = 0\hspace{0
 
 
 
-Simulation time at which the current operation will finish. 
+\doxylink{namespace_assets_1_1_scripts_1_1_simulation}{Simulation} time at which the current operation will finish. 
 
 Mirrors \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_a5c826ae3e7644df48c3743d2fd2f5acf}{Operation.\+End\+Time} of \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_acc36045a17f281fb2b7e5ce7eb02482e}{Current\+Operation} and is used by \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator}{DESSimulator} to schedule the corresponding \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a74e900c350e0673c74e0e62b6f351056a118b996cf01af1910a157f7409f5d0df}{Event\+Type.\+Operation\+Complete} event. Reset to {\ttfamily 0} by \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a477dc5db6d5bfeea5ec2dd71e9cfd63e}{DESSimulator.\+Reset} between runs. \Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_acc36045a17f281fb2b7e5ce7eb02482e}\index{Assets.Scripts.Scheduling.Core.Machine@{Assets.Scripts.Scheduling.Core.Machine}!CurrentOperation@{CurrentOperation}}
 \index{CurrentOperation@{CurrentOperation}!Assets.Scripts.Scheduling.Core.Machine@{Assets.Scripts.Scheduling.Core.Machine}}

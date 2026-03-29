@@ -1,19 +1,45 @@
 \doxysection{mirror\+\_\+des.\+Sim\+Event Class Reference}
 \hypertarget{classmirror__des_1_1_sim_event}{}\label{classmirror__des_1_1_sim_event}\index{mirror\_des.SimEvent@{mirror\_des.SimEvent}}
+
+
+Immutable simulation event with (time, sequence) ordering.  
+
+
 \doxysubsubsection*{Static Public Attributes}
 \begin{DoxyCompactItemize}
 \item 
-\Hypertarget{classmirror__des_1_1_sim_event_acfab08ee9f4ccd1dc67478e4d070f347}\label{classmirror__des_1_1_sim_event_acfab08ee9f4ccd1dc67478e4d070f347} 
-\doxymbox{\hyperlink{classmirror__des_1_1_event_type}{Event\+Type}} {\bfseries event\+\_\+type} = field(compare=False)
-\item 
+\doxymbox{\hyperlink{classmirror__des_1_1_event_type}{Event\+Type}} \doxymbox{\hyperlink{classmirror__des_1_1_sim_event_acfab08ee9f4ccd1dc67478e4d070f347}{event\+\_\+type}} = field(compare=False)
+\begin{DoxyCompactList}\small\item\em Simulation time at which this event fires. \end{DoxyCompactList}\item 
 \Hypertarget{classmirror__des_1_1_sim_event_af0c40a3203fa8fc2572953b10ef54079}\label{classmirror__des_1_1_sim_event_af0c40a3203fa8fc2572953b10ef54079} 
 int {\bfseries job\+\_\+id} = field(compare=False)
-\item 
+\begin{DoxyCompactList}\small\item\em ID of the associated job, or {\ttfamily -\/1} if not applicable. \end{DoxyCompactList}\item 
 \Hypertarget{classmirror__des_1_1_sim_event_a58aee16cf6577cd835073d7e27a0e875}\label{classmirror__des_1_1_sim_event_a58aee16cf6577cd835073d7e27a0e875} 
 int {\bfseries machine\+\_\+id} = field(compare=False)
-\end{DoxyCompactItemize}
+\begin{DoxyCompactList}\small\item\em ID of the associated machine, or {\ttfamily -\/1} if not applicable. \end{DoxyCompactList}\end{DoxyCompactItemize}
 
+
+\doxysubsection{Detailed Description}
+Immutable simulation event with (time, sequence) ordering. 
+
+{\ttfamily @dataclass} (order=True) generates {\ttfamily \+\_\+\+\_\+lt\+\_\+\+\_\+} from the field declaration order, so {\ttfamily time} is the primary sort key and {\ttfamily sequence} is the FIFO tiebreaker — matching the {\ttfamily Compare\+To} logic in the C\# \doxylink{classmirror__des_1_1_sim_event}{Sim\+Event} class. Fields after {\ttfamily sequence} are marked {\ttfamily field}(compare=False) to exclude them from ordering. 
+
+\label{doc-variable-members}
+\Hypertarget{classmirror__des_1_1_sim_event_doc-variable-members}
+\doxysubsection{Member Data Documentation}
+\Hypertarget{classmirror__des_1_1_sim_event_acfab08ee9f4ccd1dc67478e4d070f347}\index{mirror\_des.SimEvent@{mirror\_des.SimEvent}!event\_type@{event\_type}}
+\index{event\_type@{event\_type}!mirror\_des.SimEvent@{mirror\_des.SimEvent}}
+\doxysubsubsection{\texorpdfstring{event\_type}{event\_type}}
+{\footnotesize\ttfamily \label{classmirror__des_1_1_sim_event_acfab08ee9f4ccd1dc67478e4d070f347} 
+\doxymbox{\hyperlink{classmirror__des_1_1_event_type}{Event\+Type}} mirror\+\_\+des.\+Sim\+Event.\+event\+\_\+type = field(compare=False)\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Simulation time at which this event fires. 
+
+Monotonically increasing counter used as a FIFO tiebreaker for equal times.
+
+Category of this event; excluded from ordering comparisons. 
 
 The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
 \item 
-C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Scheduling/\+\+Validation/\+mirror\+\_\+des.\+py\end{DoxyCompactItemize}
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Scheduling/\+\+Validation/\+\doxymbox{\hyperlink{mirror__des_8py}{mirror\+\_\+des.\+py}}\end{DoxyCompactItemize}

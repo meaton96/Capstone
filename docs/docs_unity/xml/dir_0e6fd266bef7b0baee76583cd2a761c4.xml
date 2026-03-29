@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="dir_0e6fd266bef7b0baee76583cd2a761c4" kind="dir">
+    <compoundname>C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets</compoundname>
+    <innerdir refid="dir_ba598a975dc4ad21f406233128037d24">C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts</innerdir>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/"/>
+  </compounddef>
+</doxygen>

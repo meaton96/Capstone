@@ -1,0 +1,567 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager" kind="class" language="C#" prot="public">
+    <compoundname>Assets::Scripts::Simulation::FactoryLayoutManager</compoundname>
+    <basecompoundref prot="public" virt="non-virtual">MonoBehaviour</basecompoundref>
+    <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1ab78fe83f10666d9ba96d8bf579585d4f" prot="private" static="no" mutable="no">
+        <type><ref refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual" kindref="compound">MachineVisual</ref></type>
+        <definition>MachineVisual Assets.Scripts.Simulation.FactoryLayoutManager.machinePrefab</definition>
+        <argsstring></argsstring>
+        <name>machinePrefab</name>
+        <qualifiedname>Assets.Scripts.Simulation.FactoryLayoutManager.machinePrefab</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" line="31" column="32" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" bodystart="31" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a29ea8c56d551b08a2c1d0cbaabde4a84" prot="private" static="no" mutable="no">
+        <type>Transform</type>
+        <definition>Transform Assets.Scripts.Simulation.FactoryLayoutManager.floorTransform</definition>
+        <argsstring></argsstring>
+        <name>floorTransform</name>
+        <qualifiedname>Assets.Scripts.Simulation.FactoryLayoutManager.floorTransform</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" line="35" column="28" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" bodystart="35" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a891e3ab0b738ac28212f8a870ca7ab33" prot="private" static="no" mutable="no">
+        <type>Vector2</type>
+        <definition>Vector2 Assets.Scripts.Simulation.FactoryLayoutManager.floorSize</definition>
+        <argsstring></argsstring>
+        <name>floorSize</name>
+        <qualifiedname>Assets.Scripts.Simulation.FactoryLayoutManager.floorSize</qualifiedname>
+        <initializer>= new Vector2(20f, 20f)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" line="38" column="26" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" bodystart="38" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a2f9215e75d6112eeb104499ffad0fc22" prot="private" static="no" mutable="no">
+        <type>float</type>
+        <definition>float Assets.Scripts.Simulation.FactoryLayoutManager.machineYOffset</definition>
+        <argsstring></argsstring>
+        <name>machineYOffset</name>
+        <qualifiedname>Assets.Scripts.Simulation.FactoryLayoutManager.machineYOffset</qualifiedname>
+        <initializer>= 0.5f</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" line="42" column="24" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" bodystart="42" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a804c6741d45c48e55818986800cec67c" prot="private" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool Assets.Scripts.Simulation.FactoryLayoutManager.logDistanceMatrix</definition>
+        <argsstring></argsstring>
+        <name>logDistanceMatrix</name>
+        <qualifiedname>Assets.Scripts.Simulation.FactoryLayoutManager.logDistanceMatrix</qualifiedname>
+        <initializer>= true</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" line="45" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" bodystart="45" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1af92991a5dbf106dceb818f1455d8b20b" prot="private" static="no" mutable="no">
+        <type><ref refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual" kindref="compound">MachineVisual</ref>[]</type>
+        <definition>MachineVisual [] Assets.Scripts.Simulation.FactoryLayoutManager.machineVisuals</definition>
+        <argsstring></argsstring>
+        <name>machineVisuals</name>
+        <qualifiedname>Assets.Scripts.Simulation.FactoryLayoutManager.machineVisuals</qualifiedname>
+        <briefdescription>
+<para>All instantiated machine visuals, indexed by machine ID. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" line="52" column="31" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" bodystart="52" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1ac57d7d5a80dabc73cd796faf1d1732a1" prot="private" static="no" mutable="no">
+        <type>float[,]</type>
+        <definition>float [,] Assets.Scripts.Simulation.FactoryLayoutManager.distanceMatrix</definition>
+        <argsstring></argsstring>
+        <name>distanceMatrix</name>
+        <qualifiedname>Assets.Scripts.Simulation.FactoryLayoutManager.distanceMatrix</qualifiedname>
+        <briefdescription>
+<para>NxN pairwise distance matrix (world-space Euclidean). </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" line="55" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" bodystart="55" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a31123ee1ddc050256a2acadb0a7310b0" prot="private" static="no" mutable="no">
+        <type>float[]</type>
+        <definition>float [] Assets.Scripts.Simulation.FactoryLayoutManager.distanceMatrixFlat</definition>
+        <argsstring></argsstring>
+        <name>distanceMatrixFlat</name>
+        <qualifiedname>Assets.Scripts.Simulation.FactoryLayoutManager.distanceMatrixFlat</qualifiedname>
+        <briefdescription>
+<para>Flattened distance matrix for the observation space. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Always 64 elements (8×8). Padded with zeros when fewer than 8 machines are present, truncated if more than 8 — matching the fixed observation shape defined in the architecture. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" line="61" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" bodystart="61" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a0d72a124cb7cd8f7e4539a6fc5e48b71" prot="private" static="no" mutable="no">
+        <type>Vector3[]</type>
+        <definition>Vector3 [] Assets.Scripts.Simulation.FactoryLayoutManager.customPositions</definition>
+        <argsstring></argsstring>
+        <name>customPositions</name>
+        <qualifiedname>Assets.Scripts.Simulation.FactoryLayoutManager.customPositions</qualifiedname>
+        <briefdescription>
+<para>Optional user-supplied grid positions. If non-null, overrides the built-in layout tables. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" line="65" column="25" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" bodystart="65" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="property">
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a2dde4ad22ee9a8ced743877155bb6c41" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type>IReadOnlyList&lt; <ref refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual" kindref="compound">MachineVisual</ref> &gt;</type>
+        <definition>IReadOnlyList&lt;MachineVisual&gt; Assets.Scripts.Simulation.FactoryLayoutManager.MachineVisuals</definition>
+        <argsstring></argsstring>
+        <name>MachineVisuals</name>
+        <qualifiedname>Assets.Scripts.Simulation.FactoryLayoutManager.MachineVisuals</qualifiedname>
+        <briefdescription>
+<para>Read-only access to all spawned machine visuals. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" line="72" column="30" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" bodystart="72" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a041514b745b9cc7724a02bcc73ffc0a3" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Simulation.FactoryLayoutManager.MachineCount</definition>
+        <argsstring></argsstring>
+        <name>MachineCount</name>
+        <qualifiedname>Assets.Scripts.Simulation.FactoryLayoutManager.MachineCount</qualifiedname>
+        <briefdescription>
+<para>Number of machines currently on the floor. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" line="75" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" bodystart="75" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a4c3feaec7b7cee317d28ff6c8c1aee2b" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type>float[,]</type>
+        <definition>float [,] Assets.Scripts.Simulation.FactoryLayoutManager.DistanceMatrix</definition>
+        <argsstring></argsstring>
+        <name>DistanceMatrix</name>
+        <qualifiedname>Assets.Scripts.Simulation.FactoryLayoutManager.DistanceMatrix</qualifiedname>
+        <briefdescription>
+<para>The full NxN distance matrix (world-space units). </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" line="78" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" bodystart="78" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a366c7593af85347d9ea8d1e4ad1b52b4" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type>float[]</type>
+        <definition>float [] Assets.Scripts.Simulation.FactoryLayoutManager.DistanceMatrixFlat</definition>
+        <argsstring></argsstring>
+        <name>DistanceMatrixFlat</name>
+        <qualifiedname>Assets.Scripts.Simulation.FactoryLayoutManager.DistanceMatrixFlat</qualifiedname>
+        <briefdescription>
+<para>The flattened 64-D distance vector for the observation space. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" line="81" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" bodystart="81" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a7a226551a808f177f0d6480968708755" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.FactoryLayoutManager.BuildFloor</definition>
+        <argsstring>(DESSimulator simulator)</argsstring>
+        <name>BuildFloor</name>
+        <qualifiedname>Assets.Scripts.Simulation.FactoryLayoutManager.BuildFloor</qualifiedname>
+        <param>
+          <type><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator" kindref="compound">DESSimulator</ref></type>
+          <declname>simulator</declname>
+        </param>
+        <briefdescription>
+<para>Builds the factory floor for the given simulator. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Instantiates one MachinePrefab per machine in the simulator, places them on the grid, wires each <ref refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual" kindref="compound">MachineVisual</ref> to its core Machine, and computes the distance matrix.</para>
+<para>Call this once per episode from <ref refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge" kindref="compound">SimulationBridge</ref> after the DES has been initialised with a Taillard instance.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>simulator</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The initialised DES simulator whose <computeroutput>Machines</computeroutput> array determines how many prefabs to spawn. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" line="98" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" bodystart="98" bodyend="131"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1af2937e59fdf0ecd15dc767389e9df526" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.FactoryLayoutManager.ClearFloor</definition>
+        <argsstring>()</argsstring>
+        <name>ClearFloor</name>
+        <qualifiedname>Assets.Scripts.Simulation.FactoryLayoutManager.ClearFloor</qualifiedname>
+        <briefdescription>
+<para>Destroys all spawned machine visuals and clears cached data. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Called automatically at the start of <ref refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a7a226551a808f177f0d6480968708755" kindref="member">BuildFloor</ref> so consecutive episodes don&apos;t accumulate GameObjects. Safe to call externally for a manual teardown. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" line="138" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" bodystart="138" bodyend="151"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1aca89f5dd21c153c843649acb1e517499" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.FactoryLayoutManager.SetCustomLayout</definition>
+        <argsstring>(Vector3[] positions)</argsstring>
+        <name>SetCustomLayout</name>
+        <qualifiedname>Assets.Scripts.Simulation.FactoryLayoutManager.SetCustomLayout</qualifiedname>
+        <param>
+          <type>Vector3[]</type>
+          <declname>positions</declname>
+        </param>
+        <briefdescription>
+<para>Supplies a custom set of grid positions, bypassing the built-in layout tables. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Call before <ref refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a7a226551a808f177f0d6480968708755" kindref="member">BuildFloor</ref>. The array length must match the simulator&apos;s machine count or an exception is thrown at build time.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>positions</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>World-space offsets from the floor centre (Y is ignored). </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" line="160" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" bodystart="160" bodyend="163"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1ad4b98d994d23d82bf6ade518dd3b34b4" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual" kindref="compound">MachineVisual</ref></type>
+        <definition>MachineVisual Assets.Scripts.Simulation.FactoryLayoutManager.GetMachineVisual</definition>
+        <argsstring>(int machineId)</argsstring>
+        <name>GetMachineVisual</name>
+        <qualifiedname>Assets.Scripts.Simulation.FactoryLayoutManager.GetMachineVisual</qualifiedname>
+        <param>
+          <type>int</type>
+          <declname>machineId</declname>
+        </param>
+        <briefdescription>
+<para>Returns the <ref refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual" kindref="compound">MachineVisual</ref> for a given machine ID. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>machineId</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Zero-based machine index. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>The corresponding visual, or <computeroutput>null</computeroutput> if the floor has not been built. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" line="169" column="30" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" bodystart="169" bodyend="174"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="private-func">
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a8a1aab5b1790e5447470ec4cd98c7e94" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>Vector3[]</type>
+        <definition>Vector3[] Assets.Scripts.Simulation.FactoryLayoutManager.ResolvePositions</definition>
+        <argsstring>(int count)</argsstring>
+        <name>ResolvePositions</name>
+        <qualifiedname>Assets.Scripts.Simulation.FactoryLayoutManager.ResolvePositions</qualifiedname>
+        <param>
+          <type>int</type>
+          <declname>count</declname>
+        </param>
+        <briefdescription>
+<para>Selects grid positions for <computeroutput>count</computeroutput> machines. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Checks for a custom layout first, then falls back to hardcoded tables for 8, 15, and 20 machines. If no table matches, generates positions automatically with GenerateGridPositions.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>count</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Number of machines to place. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>Array of local-space offset positions (Y = 0). </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" line="188" column="25" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" bodystart="188" bodyend="205"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a4f3f4c514209093d627a6c23c61a1437" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>Vector3[]</type>
+        <definition>Vector3[] Assets.Scripts.Simulation.FactoryLayoutManager.GenerateGridPositions</definition>
+        <argsstring>(int count)</argsstring>
+        <name>GenerateGridPositions</name>
+        <qualifiedname>Assets.Scripts.Simulation.FactoryLayoutManager.GenerateGridPositions</qualifiedname>
+        <param>
+          <type>int</type>
+          <declname>count</declname>
+        </param>
+        <briefdescription>
+<para>Automatic grid generation for arbitrary machine counts. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Arranges machines in a roughly square grid centred on the floor. Spacing is computed from floorSize with a margin so machines don&apos;t sit on the very edge.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>count</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Number of machines. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>Array of centred grid positions. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" line="215" column="25" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" bodystart="215" bodyend="240"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1ab9c63198ce28d6cf495cf5d8401b7c62" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.FactoryLayoutManager.ComputeDistanceMatrix</definition>
+        <argsstring>()</argsstring>
+        <name>ComputeDistanceMatrix</name>
+        <qualifiedname>Assets.Scripts.Simulation.FactoryLayoutManager.ComputeDistanceMatrix</qualifiedname>
+        <briefdescription>
+<para>Computes the NxN pairwise Euclidean distance matrix from the actual world-space transforms of the spawned machines. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Also produces distanceMatrixFlat, an 8×8 = 64-element array that maps directly to the <computeroutput>distance_matrix</computeroutput> observation channel. When fewer than 8 machines exist the trailing elements are zero-padded; when more than 8 exist only the first 8 are used.</para>
+<para>Distances are computed on the XZ plane (Y is ignored) since all machines share the same vertical position. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" line="352" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" bodystart="352" bodyend="404"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1ac5e9c4c14fa8ee7c15486dadcda27bd0" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.FactoryLayoutManager.LogDistanceMatrix</definition>
+        <argsstring>()</argsstring>
+        <name>LogDistanceMatrix</name>
+        <qualifiedname>Assets.Scripts.Simulation.FactoryLayoutManager.LogDistanceMatrix</qualifiedname>
+        <briefdescription>
+<para>Logs the full NxN distance matrix and the normalised 64-D flat vector to the Unity console. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" line="412" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" bodystart="412" bodyend="433"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a92aded01f51eae88309d02e0ba26e50b" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>string[]</type>
+        <definition>string[] Assets.Scripts.Simulation.FactoryLayoutManager.FormatFlat</definition>
+        <argsstring>()</argsstring>
+        <name>FormatFlat</name>
+        <qualifiedname>Assets.Scripts.Simulation.FactoryLayoutManager.FormatFlat</qualifiedname>
+        <briefdescription>
+<para>Formats the flat distance vector as an array of two-decimal strings for logging. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" line="437" column="24" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" bodystart="437" bodyend="443"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a15904cab824b43b57f39ab00e2cdc3ff" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.FactoryLayoutManager.OnDrawGizmosSelected</definition>
+        <argsstring>()</argsstring>
+        <name>OnDrawGizmosSelected</name>
+        <qualifiedname>Assets.Scripts.Simulation.FactoryLayoutManager.OnDrawGizmosSelected</qualifiedname>
+        <briefdescription>
+<para>Draws grid position previews in the Scene view when the manager is selected, even before Play mode. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" line="451" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" bodystart="451" bodyend="472"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="private-static-func">
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a2a9a8caf8f9c4ae08d5871aeaab524cc" prot="private" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>Vector3[]</type>
+        <definition>static Vector3[] Assets.Scripts.Simulation.FactoryLayoutManager.GetLayout8</definition>
+        <argsstring>()</argsstring>
+        <name>GetLayout8</name>
+        <qualifiedname>Assets.Scripts.Simulation.FactoryLayoutManager.GetLayout8</qualifiedname>
+        <briefdescription>
+<para>8-machine layout — 2 rows × 4 columns with aisle gaps. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Designed for the Taillard ta01–ta10 (15×15) instances when using the 8-machine distance-matrix observation. Positioned on a 20×20 floor with ~4-unit column spacing and ~6-unit row spacing, leaving wide aisles for AGV pathing.</para>
+<para><verbatim>///   Row 1:  M0   M1   M2   M3       z = +3
+///                                    (aisle)
+///   Row 0:  M4   M5   M6   M7       z = -3
+///
+///           x: -6  -2  +2  +6
+/// </verbatim> </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" line="260" column="32" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" bodystart="260" bodyend="275"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1aeb4316a2baf4547e40f60018f2db44d5" prot="private" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>Vector3[]</type>
+        <definition>static Vector3[] Assets.Scripts.Simulation.FactoryLayoutManager.GetLayout15</definition>
+        <argsstring>()</argsstring>
+        <name>GetLayout15</name>
+        <qualifiedname>Assets.Scripts.Simulation.FactoryLayoutManager.GetLayout15</qualifiedname>
+        <briefdescription>
+<para>15-machine layout — 3 rows × 5 columns. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Covers Taillard ta01–ta10 (15 jobs × 15 machines). Column spacing ~3.5 units, row spacing ~4 units.</para>
+<para><verbatim>///   Row 2:  M10  M11  M12  M13  M14     z = +4
+///   Row 1:  M5   M6   M7   M8   M9      z =  0
+///   Row 0:  M0   M1   M2   M3   M4      z = -4
+///
+///           x: -7  -3.5  0  +3.5  +7
+/// </verbatim> </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" line="289" column="32" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" bodystart="289" bodyend="305"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1af26eaccf7571fc13e09e5219c58dc248" prot="private" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>Vector3[]</type>
+        <definition>static Vector3[] Assets.Scripts.Simulation.FactoryLayoutManager.GetLayout20</definition>
+        <argsstring>()</argsstring>
+        <name>GetLayout20</name>
+        <qualifiedname>Assets.Scripts.Simulation.FactoryLayoutManager.GetLayout20</qualifiedname>
+        <briefdescription>
+<para>20-machine layout — 4 rows × 5 columns. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Covers Taillard ta11–ta20 (20 jobs × 20 machines). Tighter spacing (~3.5 × 3 units) to fit within the 20×20 floor.</para>
+<para><verbatim>///   Row 3:  M15  M16  M17  M18  M19     z = +4.5
+///   Row 2:  M10  M11  M12  M13  M14     z = +1.5
+///   Row 1:  M5   M6   M7   M8   M9      z = -1.5
+///   Row 0:  M0   M1   M2   M3   M4      z = -4.5
+///
+///           x: -7  -3.5  0  +3.5  +7
+/// </verbatim> </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" line="320" column="32" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" bodystart="320" bodyend="336"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="1">
+        <label>Assets.Scripts.Simulation.FactoryLayoutManager</label>
+        <link refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>MonoBehaviour</label>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="1">
+        <label>Assets.Scripts.Simulation.FactoryLayoutManager</label>
+        <link refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>MonoBehaviour</label>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" line="23" column="11" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" bodystart="24" bodyend="473"/>
+    <listofallmembers>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a7a226551a808f177f0d6480968708755" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::FactoryLayoutManager</scope><name>BuildFloor</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1af2937e59fdf0ecd15dc767389e9df526" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::FactoryLayoutManager</scope><name>ClearFloor</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1ab9c63198ce28d6cf495cf5d8401b7c62" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::FactoryLayoutManager</scope><name>ComputeDistanceMatrix</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a0d72a124cb7cd8f7e4539a6fc5e48b71" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::FactoryLayoutManager</scope><name>customPositions</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a4c3feaec7b7cee317d28ff6c8c1aee2b" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::FactoryLayoutManager</scope><name>DistanceMatrix</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1ac57d7d5a80dabc73cd796faf1d1732a1" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::FactoryLayoutManager</scope><name>distanceMatrix</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a366c7593af85347d9ea8d1e4ad1b52b4" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::FactoryLayoutManager</scope><name>DistanceMatrixFlat</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a31123ee1ddc050256a2acadb0a7310b0" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::FactoryLayoutManager</scope><name>distanceMatrixFlat</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a891e3ab0b738ac28212f8a870ca7ab33" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::FactoryLayoutManager</scope><name>floorSize</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a29ea8c56d551b08a2c1d0cbaabde4a84" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::FactoryLayoutManager</scope><name>floorTransform</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a92aded01f51eae88309d02e0ba26e50b" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::FactoryLayoutManager</scope><name>FormatFlat</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a4f3f4c514209093d627a6c23c61a1437" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::FactoryLayoutManager</scope><name>GenerateGridPositions</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1aeb4316a2baf4547e40f60018f2db44d5" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::FactoryLayoutManager</scope><name>GetLayout15</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1af26eaccf7571fc13e09e5219c58dc248" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::FactoryLayoutManager</scope><name>GetLayout20</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a2a9a8caf8f9c4ae08d5871aeaab524cc" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::FactoryLayoutManager</scope><name>GetLayout8</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1ad4b98d994d23d82bf6ade518dd3b34b4" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::FactoryLayoutManager</scope><name>GetMachineVisual</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1ac5e9c4c14fa8ee7c15486dadcda27bd0" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::FactoryLayoutManager</scope><name>LogDistanceMatrix</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a804c6741d45c48e55818986800cec67c" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::FactoryLayoutManager</scope><name>logDistanceMatrix</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a041514b745b9cc7724a02bcc73ffc0a3" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::FactoryLayoutManager</scope><name>MachineCount</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1ab78fe83f10666d9ba96d8bf579585d4f" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::FactoryLayoutManager</scope><name>machinePrefab</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a2dde4ad22ee9a8ced743877155bb6c41" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::FactoryLayoutManager</scope><name>MachineVisuals</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1af92991a5dbf106dceb818f1455d8b20b" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::FactoryLayoutManager</scope><name>machineVisuals</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a2f9215e75d6112eeb104499ffad0fc22" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::FactoryLayoutManager</scope><name>machineYOffset</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a15904cab824b43b57f39ab00e2cdc3ff" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::FactoryLayoutManager</scope><name>OnDrawGizmosSelected</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1a8a1aab5b1790e5447470ec4cd98c7e94" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::FactoryLayoutManager</scope><name>ResolvePositions</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_1aca89f5dd21c153c843649acb1e517499" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::FactoryLayoutManager</scope><name>SetCustomLayout</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

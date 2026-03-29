@@ -92,6 +92,9 @@ $(function(){initNavTree('classmirror__des_1_1_machine.html','','classmirror__de
   <div class="headertitle"><div class="title">mirror_des.Machine Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Single shop-floor machine with a waiting queue, mirroring C# <a class="el" href="classmirror__des_1_1_machine.html" title="Machine">Machine</a>.  
+ <a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -102,15 +105,76 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-static-attribs" class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
-<tr class="memitem:a03199794a7e8b218175444d26a40252e" id="r_a03199794a7e8b218175444d26a40252e"><td class="memItemLeft"><a id="a03199794a7e8b218175444d26a40252e" name="a03199794a7e8b218175444d26a40252e"></a>
-<a class="el" href="classmirror__des_1_1_machine_state.html">MachineState</a>&#160;</td><td class="memItemRight"><b>state</b> = MachineState.IDLE</td></tr>
-<tr class="memitem:aeb50646a4da8418790f7521136407980" id="r_aeb50646a4da8418790f7521136407980"><td class="memItemLeft"><a id="aeb50646a4da8418790f7521136407980" name="aeb50646a4da8418790f7521136407980"></a>
-Optional&#160;</td><td class="memItemRight"><b>current_op</b> = None</td></tr>
+<tr class="memitem:a03199794a7e8b218175444d26a40252e" id="r_a03199794a7e8b218175444d26a40252e"><td class="memItemLeft"><a class="el" href="classmirror__des_1_1_machine_state.html">MachineState</a>&#160;</td><td class="memItemRight"><a class="el" href="#a03199794a7e8b218175444d26a40252e">state</a> = <a class="el" href="classmirror__des_1_1_machine_state.html#a33e0aa350e8af127c79cb06b2595f13c">MachineState.IDLE</a></td></tr>
+<tr class="memdesc:a03199794a7e8b218175444d26a40252e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unique machine identifier matching its index in <a class="el" href="classmirror__des_1_1_d_e_s_simulator.html#ac92dd2252135c0274611e2ec72ee2365" title="DESSimulator.machines">DESSimulator.machines</a>.  <br /></td></tr>
+<tr class="memitem:aeb50646a4da8418790f7521136407980" id="r_aeb50646a4da8418790f7521136407980"><td class="memItemLeft">Optional&#160;</td><td class="memItemRight"><a class="el" href="#aeb50646a4da8418790f7521136407980">current_op</a> = None</td></tr>
+<tr class="memdesc:aeb50646a4da8418790f7521136407980"><td class="mdescLeft">&#160;</td><td class="mdescRight">The operation currently being processed, or <code>None</code> when idle.  <br /></td></tr>
 <tr class="memitem:a36d2866505ccccb7e26414bed8e8b367" id="r_a36d2866505ccccb7e26414bed8e8b367"><td class="memItemLeft"><a id="a36d2866505ccccb7e26414bed8e8b367" name="a36d2866505ccccb7e26414bed8e8b367"></a>
 list&#160;</td><td class="memItemRight"><b>waiting_queue</b> = field(default_factory=list)</td></tr>
+<tr class="memdesc:a36d2866505ccccb7e26414bed8e8b367"><td class="mdescLeft">&#160;</td><td class="mdescRight">Operations waiting to be processed, in arrival order. <br /></td></tr>
 </table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Single shop-floor machine with a waiting queue, mirroring C# <a class="el" href="classmirror__des_1_1_machine.html" title="Machine">Machine</a>. </p>
+<p>State transitions are driven exclusively by <a class="el" href="classmirror__des_1_1_d_e_s_simulator.html" title="DESSimulator">DESSimulator</a> via start_processing and finish_processing, matching the C# design. </p>
+</div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="aeb50646a4da8418790f7521136407980" name="aeb50646a4da8418790f7521136407980"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb50646a4da8418790f7521136407980">&#9670;&#160;</a></span>current_op</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Optional mirror_des.Machine.current_op = None</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>The operation currently being processed, or <code>None</code> when idle. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">op</td><td>The operation to begin processing. </td></tr>
+    <tr><td class="paramname">current_time</td><td>The simulation time at which processing starts. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a03199794a7e8b218175444d26a40252e" name="a03199794a7e8b218175444d26a40252e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a03199794a7e8b218175444d26a40252e">&#9670;&#160;</a></span>state</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classmirror__des_1_1_machine_state.html">MachineState</a> mirror_des.Machine.state = <a class="el" href="classmirror__des_1_1_machine_state.html#a33e0aa350e8af127c79cb06b2595f13c">MachineState.IDLE</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Unique machine identifier matching its index in <a class="el" href="classmirror__des_1_1_d_e_s_simulator.html#ac92dd2252135c0274611e2ec72ee2365" title="DESSimulator.machines">DESSimulator.machines</a>. </p>
+<p>Current operational state. Starts <code>IDLE</code>. </p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/<b>mirror_des.py</b></li>
+<li>C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/<a class="el" href="mirror__des_8py.html">mirror_des.py</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -125,7 +189,7 @@ list&#160;</td><td class="memItemRight"><b>waiting_queue</b> = field(default_fac
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="namespacemirror__des.html">mirror_des</a></li><li class="navelem"><a href="classmirror__des_1_1_machine.html">Machine</a></li>
+    <li class="navelem"><b>mirror_des</b></li><li class="navelem"><a href="classmirror__des_1_1_machine.html">Machine</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.16.1 </li>
   </ul>
 </div>

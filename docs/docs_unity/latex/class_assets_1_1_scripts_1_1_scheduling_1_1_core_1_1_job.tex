@@ -22,9 +22,9 @@ int {\bfseries Id}\hspace{0.3cm}{\ttfamily  \+[get]\+}
 int \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_a95c34ede07918ec6b705d42d89ddba3e}{Next\+Operation\+Index}} = 0\hspace{0.3cm}{\ttfamily  \+[get, set]\+}
 \begin{DoxyCompactList}\small\item\em Index of the next operation to be dispatched or currently in progress. \end{DoxyCompactList}\item 
 double \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_aa1c1d8a26ce8148b5a2ccea8113c9890}{Arrival\+Time}}\hspace{0.3cm}{\ttfamily  \+[get]\+}
-\begin{DoxyCompactList}\small\item\em Simulation time at which this job entered the system. \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em \doxylink{namespace_assets_1_1_scripts_1_1_simulation}{Simulation} time at which this job entered the system. \end{DoxyCompactList}\item 
 double \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_a26d164bc9562e761d35d5d13d2156036}{Completion\+Time}} = -\/1\hspace{0.3cm}{\ttfamily  \+[get, set]\+}
-\begin{DoxyCompactList}\small\item\em Simulation time at which the job\textquotesingle{}s final operation completed. \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em \doxylink{namespace_assets_1_1_scripts_1_1_simulation}{Simulation} time at which the job\textquotesingle{}s final operation completed. \end{DoxyCompactList}\item 
 \Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_a08059999b9beefced19f84b58f8d422c}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_a08059999b9beefced19f84b58f8d422c} 
 bool {\bfseries Is\+Complete}\hspace{0.3cm}{\ttfamily  \+[get]\+}
 \begin{DoxyCompactList}\small\item\em {\ttfamily true} when all operations have been processed; {\ttfamily false} otherwise. \end{DoxyCompactList}\item 
@@ -57,7 +57,7 @@ Constructs a job with a fixed operation sequence and an optional arrival time.
 \hline
 {\em operations} & Ordered array of operations to execute. Must not be null or empty. \\
 \hline
-{\em arrival\+Time} & Simulation time at which the job enters the system. Defaults to {\ttfamily 0}. \\
+{\em arrival\+Time} & \doxylink{namespace_assets_1_1_scripts_1_1_simulation}{Simulation} time at which the job enters the system. Defaults to {\ttfamily 0}. \\
 \hline
 \end{DoxyParams}
 
@@ -73,7 +73,7 @@ double Assets.\+Scripts.\+Scheduling.\+Core.\+Job.\+Arrival\+Time\hspace{0.3cm}{
 
 
 
-Simulation time at which this job entered the system. 
+\doxylink{namespace_assets_1_1_scripts_1_1_simulation}{Simulation} time at which this job entered the system. 
 
 Currently fixed at {\ttfamily 0} for all jobs in Taillard benchmark instances. Reserved for future dynamic arrival scheduling. \Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_a26d164bc9562e761d35d5d13d2156036}\index{Assets.Scripts.Scheduling.Core.Job@{Assets.Scripts.Scheduling.Core.Job}!CompletionTime@{CompletionTime}}
 \index{CompletionTime@{CompletionTime}!Assets.Scripts.Scheduling.Core.Job@{Assets.Scripts.Scheduling.Core.Job}}
@@ -83,7 +83,7 @@ double Assets.\+Scripts.\+Scheduling.\+Core.\+Job.\+Completion\+Time = -\/1\hspa
 
 
 
-Simulation time at which the job\textquotesingle{}s final operation completed. 
+\doxylink{namespace_assets_1_1_scripts_1_1_simulation}{Simulation} time at which the job\textquotesingle{}s final operation completed. 
 
 Initialised to {\ttfamily -\/1} and set by DESSimulator.\+Handle\+Operation\+Complete when \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_a08059999b9beefced19f84b58f8d422c}{Is\+Complete} first becomes {\ttfamily true}. Used to compute the makespan. \Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_a95c34ede07918ec6b705d42d89ddba3e}\index{Assets.Scripts.Scheduling.Core.Job@{Assets.Scripts.Scheduling.Core.Job}!NextOperationIndex@{NextOperationIndex}}
 \index{NextOperationIndex@{NextOperationIndex}!Assets.Scripts.Scheduling.Core.Job@{Assets.Scripts.Scheduling.Core.Job}}

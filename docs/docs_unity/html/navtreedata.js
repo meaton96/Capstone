@@ -25,18 +25,10 @@
 var NAVTREE =
 [
   [ "DRL Scheduling", "index.html", [
-    [ "Scheduling Module Documentation", "md__c_1_2_users_2_mike_2_documents_2_git_hub_2_capstone_2_capstone_2_assets_2_scripts_2_scheduling_2doc.html", [
-      [ "Folder Structure", "md__c_1_2_users_2_mike_2_documents_2_git_hub_2_capstone_2_capstone_2_assets_2_scripts_2_scheduling_2doc.html#autotoc_md1", null ],
-      [ "<span class=\"tt\">Core/</span>", "md__c_1_2_users_2_mike_2_documents_2_git_hub_2_capstone_2_capstone_2_assets_2_scripts_2_scheduling_2doc.html#autotoc_md3", null ],
-      [ "<span class=\"tt\">Data/</span>", "md__c_1_2_users_2_mike_2_documents_2_git_hub_2_capstone_2_capstone_2_assets_2_scripts_2_scheduling_2doc.html#autotoc_md5", null ],
-      [ "<span class=\"tt\">Unity/</span>", "md__c_1_2_users_2_mike_2_documents_2_git_hub_2_capstone_2_capstone_2_assets_2_scripts_2_scheduling_2doc.html#autotoc_md7", null ],
-      [ "<span class=\"tt\">Validation/</span>", "md__c_1_2_users_2_mike_2_documents_2_git_hub_2_capstone_2_capstone_2_assets_2_scripts_2_scheduling_2doc.html#autotoc_md9", null ]
-    ] ],
     [ "Packages", "namespaces.html", [
       [ "Package List", "namespaces.html", "namespaces_dup" ],
       [ "Package Members", "namespacemembers.html", [
         [ "All", "namespacemembers.html", null ],
-        [ "Functions", "namespacemembers_func.html", null ],
         [ "Enumerations", "namespacemembers_enum.html", null ]
       ] ]
     ] ],
@@ -50,13 +42,17 @@ var NAVTREE =
         [ "Variables", "functions_vars.html", null ],
         [ "Properties", "functions_prop.html", null ]
       ] ]
+    ] ],
+    [ "Files", "files.html", [
+      [ "File List", "files.html", "files_dup" ]
     ] ]
   ] ]
 ];
 
 var NAVTREEINDEX =
 [
-"annotated.html"
+"_factory_layout_manager_8cs.html",
+"classmirror__des_1_1_d_e_s_simulator.html#ac92dd2252135c0274611e2ec72ee2365"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronization';

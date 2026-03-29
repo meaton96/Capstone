@@ -1,0 +1,64 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="_taillard_instance_8cs" kind="file" language="C#">
+    <compoundname>TaillardInstance.cs</compoundname>
+    <innerclass refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance" prot="public">Assets::Scripts::Scheduling::Data::TaillardInstance</innerclass>
+    <innerclass refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata" prot="public">Assets::Scripts::Scheduling::Data::TaillardMetadata</innerclass>
+    <innernamespace refid="namespace_assets">Assets</innernamespace>
+    <innernamespace refid="namespace_assets_1_1_scripts">Assets::Scripts</innernamespace>
+    <innernamespace refid="namespace_assets_1_1_scripts_1_1_scheduling">Assets::Scripts::Scheduling</innernamespace>
+    <innernamespace refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_data">Assets::Scripts::Scheduling::Data</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="keyword">using<sp/></highlight><highlight class="normal">System;</highlight></codeline>
+<codeline lineno="2" refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_data" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal"><ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_data" kindref="compound">Assets.Scripts.Scheduling.Data</ref></highlight></codeline>
+<codeline lineno="3"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="11"><highlight class="normal"><sp/><sp/><sp/><sp/>[Serializable]</highlight></codeline>
+<codeline lineno="12" refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance" refkind="compound"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance" kindref="compound">TaillardInstance</ref></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline lineno="15"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">string</highlight><highlight class="normal"><sp/><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1a98a30393472294f14fa27c0bacd36822" kindref="member">name</ref>;</highlight></codeline>
+<codeline lineno="16"><highlight class="normal"></highlight></codeline>
+<codeline lineno="17"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">string</highlight><highlight class="normal"><sp/>Name<sp/>=&gt;<sp/><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1a98a30393472294f14fa27c0bacd36822" kindref="member">name</ref>;</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight></codeline>
+<codeline lineno="19"><highlight class="normal"></highlight></codeline>
+<codeline lineno="23"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal">[][]<sp/><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1a7590980360c981cb8e7a63498bb96f77" kindref="member">duration_matrix</ref>;</highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight></codeline>
+<codeline lineno="28"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal">[][]<sp/><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1a9ee0366b1709a54f08fb45a32e4fb0e9" kindref="member">machines_matrix</ref>;</highlight></codeline>
+<codeline lineno="29"><highlight class="normal"></highlight></codeline>
+<codeline lineno="32"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal"><sp/><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata" kindref="compound">TaillardMetadata</ref><sp/><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1ae360821e88eccf4c53083e43ac7bb179" kindref="member">metadata</ref>;</highlight></codeline>
+<codeline lineno="33"><highlight class="normal"></highlight></codeline>
+<codeline lineno="35"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1af2bd50c21201cbe57bd256239db584d6" kindref="member">JobCount</ref><sp/>=&gt;<sp/><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1a7590980360c981cb8e7a63498bb96f77" kindref="member">duration_matrix</ref>.Length;</highlight></codeline>
+<codeline lineno="36"><highlight class="normal"></highlight></codeline>
+<codeline lineno="41"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1a7207f47edf07e7ec6704d88cadebd4c4" kindref="member">MachineCount</ref><sp/>=&gt;<sp/><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1a7590980360c981cb8e7a63498bb96f77" kindref="member">duration_matrix</ref>[0].Length;</highlight></codeline>
+<codeline lineno="42"><highlight class="normal"></highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal"><sp/>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1ac09a835ada8df416bbaac2ed3cea788f" kindref="member">machine</ref>,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>duration)[]<sp/>GetJobOperations(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>jobIndex)</highlight></codeline>
+<codeline lineno="56"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline lineno="57"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>opCount<sp/>=<sp/><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1a9ee0366b1709a54f08fb45a32e4fb0e9" kindref="member">machines_matrix</ref>[jobIndex].Length;</highlight></codeline>
+<codeline lineno="58"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>var<sp/>ops<sp/>=<sp/></highlight><highlight class="keyword">new</highlight><highlight class="normal"><sp/>(int,<sp/>int)[opCount];</highlight></codeline>
+<codeline lineno="59"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i<sp/>=<sp/>0;<sp/>i<sp/>&lt;<sp/>opCount;<sp/>i++)</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline lineno="61"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>ops[i]<sp/>=<sp/>(<ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1a9ee0366b1709a54f08fb45a32e4fb0e9" kindref="member">machines_matrix</ref>[jobIndex][i],<sp/><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1a7590980360c981cb8e7a63498bb96f77" kindref="member">duration_matrix</ref>[jobIndex][i]);</highlight></codeline>
+<codeline lineno="62"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="63"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>ops;</highlight></codeline>
+<codeline lineno="64"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="65"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="66"><highlight class="normal"></highlight></codeline>
+<codeline lineno="73"><highlight class="normal"><sp/><sp/><sp/><sp/>[Serializable]</highlight></codeline>
+<codeline lineno="74" refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata" refkind="compound"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata" kindref="compound">TaillardMetadata</ref></highlight></codeline>
+<codeline lineno="75"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline lineno="77"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata_1a7b26e31ea7dd8a1c471511ef4da5f50c" kindref="member">optimum</ref>;</highlight></codeline>
+<codeline lineno="78"><highlight class="normal"></highlight></codeline>
+<codeline lineno="81"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata_1aa246d492d3b2d770d686dc6e4e734c93" kindref="member">upper_bound</ref>;</highlight></codeline>
+<codeline lineno="82"><highlight class="normal"></highlight></codeline>
+<codeline lineno="85"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata_1a05c0ecab1d6fc933930a88c799590b30" kindref="member">lower_bound</ref>;</highlight></codeline>
+<codeline lineno="86"><highlight class="normal"></highlight></codeline>
+<codeline lineno="89"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">string</highlight><highlight class="normal"><sp/><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata_1a611b1a8070c6e02d37f63854a1487c04" kindref="member">reference</ref>;</highlight></codeline>
+<codeline lineno="90"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="91"><highlight class="normal">}</highlight></codeline>
+    </programlisting>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data/TaillardInstance.cs"/>
+  </compounddef>
+</doxygen>

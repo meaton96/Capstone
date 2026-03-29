@@ -1,5 +1,10 @@
 \doxysection{mirror\+\_\+des.\+Job Class Reference}
 \hypertarget{classmirror__des_1_1_job}{}\label{classmirror__des_1_1_job}\index{mirror\_des.Job@{mirror\_des.Job}}
+
+
+Ordered sequence of operations representing a single job, mirroring C\# \doxylink{classmirror__des_1_1_job}{Job}.  
+
+
 \doxysubsubsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
@@ -14,21 +19,58 @@ Optional\+[\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}}]\+ {
 \item 
 \Hypertarget{classmirror__des_1_1_job_aa126bca53bbdd3b46713b617341b3c94}\label{classmirror__des_1_1_job_aa126bca53bbdd3b46713b617341b3c94} 
 {\bfseries is\+\_\+complete}
-\end{DoxyCompactItemize}
+\begin{DoxyCompactList}\small\item\em The next operation awaiting dispatch, or {\ttfamily None} if the job is complete. \end{DoxyCompactList}\end{DoxyCompactItemize}
 \doxysubsubsection*{Static Public Attributes}
 \begin{DoxyCompactItemize}
 \item 
-\Hypertarget{classmirror__des_1_1_job_a3c1b8a7e9a85c72e8f7cbdbccef84ee8}\label{classmirror__des_1_1_job_a3c1b8a7e9a85c72e8f7cbdbccef84ee8} 
-list {\bfseries operations} \+[\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}}]\+
-\item 
-\Hypertarget{classmirror__des_1_1_job_a09fcea2d5fa35b5a2a81c2bbd698d433}\label{classmirror__des_1_1_job_a09fcea2d5fa35b5a2a81c2bbd698d433} 
-int {\bfseries next\+\_\+op\+\_\+index} = 0
-\item 
-\Hypertarget{classmirror__des_1_1_job_a7fbc3ad37c87f7ae99fcb348396eb75a}\label{classmirror__des_1_1_job_a7fbc3ad37c87f7ae99fcb348396eb75a} 
-float {\bfseries completion\+\_\+time} = -\/1.\+0
-\end{DoxyCompactItemize}
+list \doxymbox{\hyperlink{classmirror__des_1_1_job_a3c1b8a7e9a85c72e8f7cbdbccef84ee8}{operations}} \+[\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}}]\+
+\begin{DoxyCompactList}\small\item\em Unique job identifier matching its index in \doxylink{classmirror__des_1_1_d_e_s_simulator_ace4a32fa136af3b7ed3802372c2571c3}{DESSimulator.\+jobs}. \end{DoxyCompactList}\item 
+int \doxymbox{\hyperlink{classmirror__des_1_1_job_a09fcea2d5fa35b5a2a81c2bbd698d433}{next\+\_\+op\+\_\+index}} = 0
+\begin{DoxyCompactList}\small\item\em Index of the next operation awaiting dispatch. \end{DoxyCompactList}\item 
+float \doxymbox{\hyperlink{classmirror__des_1_1_job_a7fbc3ad37c87f7ae99fcb348396eb75a}{completion\+\_\+time}} = -\/1.\+0
+\begin{DoxyCompactList}\small\item\em Simulation time at which the final operation completed. \end{DoxyCompactList}\end{DoxyCompactItemize}
 
+
+\doxysubsection{Detailed Description}
+Ordered sequence of operations representing a single job, mirroring C\# \doxylink{classmirror__des_1_1_job}{Job}. 
+
+Tracks execution progress via {\ttfamily next\+\_\+op\+\_\+index}, advanced by DESSimulator.\+\_\+handle\+\_\+operation\+\_\+complete after each operation completes. {\ttfamily is\+\_\+complete} and {\ttfamily current\+\_\+operation} are derived properties with no side effects. 
+
+\label{doc-variable-members}
+\Hypertarget{classmirror__des_1_1_job_doc-variable-members}
+\doxysubsection{Member Data Documentation}
+\Hypertarget{classmirror__des_1_1_job_a7fbc3ad37c87f7ae99fcb348396eb75a}\index{mirror\_des.Job@{mirror\_des.Job}!completion\_time@{completion\_time}}
+\index{completion\_time@{completion\_time}!mirror\_des.Job@{mirror\_des.Job}}
+\doxysubsubsection{\texorpdfstring{completion\_time}{completion\_time}}
+{\footnotesize\ttfamily \label{classmirror__des_1_1_job_a7fbc3ad37c87f7ae99fcb348396eb75a} 
+float mirror\+\_\+des.\+Job.\+completion\+\_\+time = -\/1.\+0\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Simulation time at which the final operation completed. 
+
+{\ttfamily -\/1.\+0} until done. \Hypertarget{classmirror__des_1_1_job_a09fcea2d5fa35b5a2a81c2bbd698d433}\index{mirror\_des.Job@{mirror\_des.Job}!next\_op\_index@{next\_op\_index}}
+\index{next\_op\_index@{next\_op\_index}!mirror\_des.Job@{mirror\_des.Job}}
+\doxysubsubsection{\texorpdfstring{next\_op\_index}{next\_op\_index}}
+{\footnotesize\ttfamily \label{classmirror__des_1_1_job_a09fcea2d5fa35b5a2a81c2bbd698d433} 
+int mirror\+\_\+des.\+Job.\+next\+\_\+op\+\_\+index = 0\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Index of the next operation awaiting dispatch. 
+
+Starts at {\ttfamily 0}. \Hypertarget{classmirror__des_1_1_job_a3c1b8a7e9a85c72e8f7cbdbccef84ee8}\index{mirror\_des.Job@{mirror\_des.Job}!operations@{operations}}
+\index{operations@{operations}!mirror\_des.Job@{mirror\_des.Job}}
+\doxysubsubsection{\texorpdfstring{operations}{operations}}
+{\footnotesize\ttfamily \label{classmirror__des_1_1_job_a3c1b8a7e9a85c72e8f7cbdbccef84ee8} 
+list mirror\+\_\+des.\+Job.\+operations \+[\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}}]\+\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Unique job identifier matching its index in \doxylink{classmirror__des_1_1_d_e_s_simulator_ace4a32fa136af3b7ed3802372c2571c3}{DESSimulator.\+jobs}. 
+
+Ordered list of operations to execute sequentially. 
 
 The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
 \item 
-C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Scheduling/\+\+Validation/\+mirror\+\_\+des.\+py\end{DoxyCompactItemize}
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Scheduling/\+\+Validation/\+\doxymbox{\hyperlink{mirror__des_8py}{mirror\+\_\+des.\+py}}\end{DoxyCompactItemize}

@@ -111,17 +111,16 @@ Public Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="namespace_assets_1_1_scripts_1_1_scheduling_1_1_unity.html">Unity</a> entry point that exports C# makespan results for cross-validation against job_shop_lib. </p>
-<p>Attach to any GameObject in the scene. On Play, the component locates all Taillard JSON files in <a class="el" href="#a874643c3bab4c70ffecb10fd871e963e" title="instanceDirectory">instanceDirectory</a>, runs ValidationExporter.RunAndExport to simulate every instance under every DispatchingRule, and writes <code>csharp_makespans.csv</code> and <code>csharp_schedules.json</code> to <a class="el" href="#a80ede1968dc597c505ef36ec96837d23" title="outputDirectory">outputDirectory</a>. The exported files are then consumed by <code>compare_results.py</code> to diff C# results against the Python job_shop_lib reference.</p>
+<p>Attach to any GameObject in the scene. On Play, the component locates all Taillard JSON files in <a class="el" href="#a874643c3bab4c70ffecb10fd871e963e" title="instanceDirectory">instanceDirectory</a>, runs ValidationExporter.RunAndExport to simulate every instance under every DispatchingRule, and writes <code>csharp_makespans.csv</code> and <code>csharp_schedules.json</code> to <a class="el" href="#a80ede1968dc597c505ef36ec96837d23" title="outputDirectory">outputDirectory</a>. The exported files are then consumed by <code><a class="el" href="compare__results_8py.html" title="Cross-validates C# DES output against the job_shop_lib Python reference (v2).">compare_results.py</a></code> to diff C# results against the Python job_shop_lib reference.</p>
 <dl class="section user"><dt>Setup</dt><dd><ol type="1">
 <li>Place Taillard JSON files in <code>Assets/Resources/Instances/</code>.</li>
 <li>Copy the same files to a regular folder (e.g. <code>Assets/StreamingAssets/Instances/</code>) because ValidationExporter reads directly from disk, not via <code>Resources.Load</code>.</li>
 <li>Set <a class="el" href="#a874643c3bab4c70ffecb10fd871e963e" title="instanceDirectory">instanceDirectory</a> and <a class="el" href="#a80ede1968dc597c505ef36ec96837d23" title="outputDirectory">outputDirectory</a> in the Inspector.</li>
 <li>Enter Play Mode.</li>
-<li>Run <code>compare_results.py</code> from the output directory: <div class="fragment"><div class="line">cd <a class="code hl_namespace" href="namespace_assets.html">Assets</a>/StreamingAssets/<a class="code hl_namespace" href="namespace_assets_1_1_scripts_1_1_scheduling_1_1_validation.html">Validation</a></div>
-<div class="line">python <a class="code hl_namespace" href="namespacecompare__results.html">compare_results</a>.py</div>
+<li>Run <code><a class="el" href="compare__results_8py.html" title="Cross-validates C# DES output against the job_shop_lib Python reference (v2).">compare_results.py</a></code> from the output directory: <div class="fragment"><div class="line">cd <a class="code hl_namespace" href="namespace_assets.html">Assets</a>/StreamingAssets/<a class="code hl_namespace" href="namespace_assets_1_1_scripts_1_1_scheduling_1_1_validation.html">Validation</a></div>
+<div class="line">python compare_results.py</div>
 <div class="ttc" id="anamespace_assets_1_1_scripts_1_1_scheduling_1_1_validation_html"><div class="ttname"><a href="namespace_assets_1_1_scripts_1_1_scheduling_1_1_validation.html">Assets.Scripts.Scheduling.Validation</a></div><div class="ttdef"><b>Definition</b> CrossValidator.cs:4</div></div>
 <div class="ttc" id="anamespace_assets_html"><div class="ttname"><a href="namespace_assets.html">Assets</a></div><div class="ttdef"><b>Definition</b> DESSimulator.cs:7</div></div>
-<div class="ttc" id="anamespacecompare__results_html"><div class="ttname"><a href="namespacecompare__results.html">compare_results</a></div><div class="ttdef"><b>Definition</b> compare_results.py:1</div></div>
 </div><!-- fragment --></li>
 </ol>
 </dd></dl>

@@ -8,6 +8,10 @@ Pure discrete-\/event simulator for \doxylink{class_assets_1_1_scripts_1_1_sched
 \doxysubsubsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
+\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a23eac89d613aa8e377b767e1cbc93875}{Sim\+Step\+Result}} \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_ad29bf585fd01242b65ab5bd4ad24b9ee}{Process\+Next\+Event}} ()
+\begin{DoxyCompactList}\small\item\em Processes a single event from the queue (stepped execution). \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a914e8fe3b5d0d08e5c46bf76a73114d9}{Apply\+Decision}} (\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87}{Dispatching\+Rule}} rule)
+\begin{DoxyCompactList}\small\item\em Applies an external dispatch decision and resumes the simulation. \end{DoxyCompactList}\item 
 void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_aa79c7f08fc10bc3b96c14e2b6137b95f}{Load\+Instance}} (\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance}{Taillard\+Instance}} instance)
 \begin{DoxyCompactList}\small\item\em Loads a Taillard instance and initializes all jobs and machines. \end{DoxyCompactList}\item 
 void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a477dc5db6d5bfeea5ec2dd71e9cfd63e}{Reset}} ()
@@ -46,7 +50,11 @@ int {\bfseries Total\+Operations\+Completed}\hspace{0.3cm}{\ttfamily  \+[get]\+}
 \item 
 \Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a387acb9f195c44157a016a4d475179ea}\label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a387acb9f195c44157a016a4d475179ea} 
 int {\bfseries Total\+Jobs\+Completed}\hspace{0.3cm}{\ttfamily  \+[get]\+}
-\end{DoxyCompactItemize}
+\item 
+bool \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_abd336966a0fbc46b2b346e93847c7523}{Waiting\+For\+Decision}}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em True when the simulator is paused waiting for an external dispatch decision. \end{DoxyCompactList}\item 
+int \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a93aa938262803d69cd75fb7265f9ad97}{Pending\+Decision\+Machine\+Id}} = -\/1\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em The machine ID that requires a dispatch decision. \end{DoxyCompactList}\end{DoxyCompactItemize}
 
 
 \doxysubsection{Detailed Description}
@@ -57,6 +65,29 @@ No \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_unity}{Unity} depen
 \label{doc-func-members}
 \Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_doc-func-members}
 \doxysubsection{Member Function Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a914e8fe3b5d0d08e5c46bf76a73114d9}\index{Assets.Scripts.Scheduling.Core.DESSimulator@{Assets.Scripts.Scheduling.Core.DESSimulator}!ApplyDecision@{ApplyDecision}}
+\index{ApplyDecision@{ApplyDecision}!Assets.Scripts.Scheduling.Core.DESSimulator@{Assets.Scripts.Scheduling.Core.DESSimulator}}
+\doxysubsubsection{\texorpdfstring{ApplyDecision()}{ApplyDecision()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a914e8fe3b5d0d08e5c46bf76a73114d9} 
+void Assets.\+Scripts.\+Scheduling.\+Core.\+DESSimulator.\+Apply\+Decision (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87}{Dispatching\+Rule}}}]{rule}{}\end{DoxyParamCaption})}
+
+
+
+Applies an external dispatch decision and resumes the simulation. 
+
+Uses the supplied {\ttfamily rule} to select the next operation from the pending machine\textquotesingle{}s waiting queue, starts processing it, and enqueues the corresponding \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a74e900c350e0673c74e0e62b6f351056a118b996cf01af1910a157f7409f5d0df}{Event\+Type.\+Operation\+Complete} event. Clears the \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_abd336966a0fbc46b2b346e93847c7523}{Waiting\+For\+Decision} flag so \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_ad29bf585fd01242b65ab5bd4ad24b9ee}{Process\+Next\+Event} can continue.
+
+
+\begin{DoxyParams}{Parameters}
+{\em rule} & The \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87}{Dispatching\+Rule} the agent/\+bridge chose (one of the 8 composite PDRs, or any single rule for validation).\\
+\hline
+\end{DoxyParams}
+\begin{DoxyPrecond}{Precondition}
+\doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_abd336966a0fbc46b2b346e93847c7523}{Waiting\+For\+Decision} must be true. 
+\end{DoxyPrecond}
+\begin{DoxyPostcond}{Postcondition}
+\doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_abd336966a0fbc46b2b346e93847c7523}{Waiting\+For\+Decision} is false, the chosen operation is running on the machine, and a completion event has been enqueued. 
+\end{DoxyPostcond}
 \Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_aa79c7f08fc10bc3b96c14e2b6137b95f}\index{Assets.Scripts.Scheduling.Core.DESSimulator@{Assets.Scripts.Scheduling.Core.DESSimulator}!LoadInstance@{LoadInstance}}
 \index{LoadInstance@{LoadInstance}!Assets.Scripts.Scheduling.Core.DESSimulator@{Assets.Scripts.Scheduling.Core.DESSimulator}}
 \doxysubsubsection{\texorpdfstring{LoadInstance()}{LoadInstance()}}
@@ -84,7 +115,38 @@ void Assets.\+Scripts.\+Scheduling.\+Core.\+DESSimulator.\+Print\+Schedule (\beg
 
 Prints a Gantt-\/style schedule summary to stdout for debugging. 
 
-Outputs the makespan, job and machine counts, total operations completed, and a per-\/machine timeline showing each operation as {\ttfamily }\+[J\{job\+Id\} \{start\+Time\}-\/\{end\+Time\}]\+, sorted by start time. \Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a477dc5db6d5bfeea5ec2dd71e9cfd63e}\index{Assets.Scripts.Scheduling.Core.DESSimulator@{Assets.Scripts.Scheduling.Core.DESSimulator}!Reset@{Reset}}
+Outputs the makespan, job and machine counts, total operations completed, and a per-\/machine timeline showing each operation as {\ttfamily }\+[J\{job\+Id\} \{start\+Time\}-\/\{end\+Time\}]\+, sorted by start time. \Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_ad29bf585fd01242b65ab5bd4ad24b9ee}\index{Assets.Scripts.Scheduling.Core.DESSimulator@{Assets.Scripts.Scheduling.Core.DESSimulator}!ProcessNextEvent@{ProcessNextEvent}}
+\index{ProcessNextEvent@{ProcessNextEvent}!Assets.Scripts.Scheduling.Core.DESSimulator@{Assets.Scripts.Scheduling.Core.DESSimulator}}
+\doxysubsubsection{\texorpdfstring{ProcessNextEvent()}{ProcessNextEvent()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_ad29bf585fd01242b65ab5bd4ad24b9ee} 
+\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a23eac89d613aa8e377b767e1cbc93875}{Sim\+Step\+Result}} Assets.\+Scripts.\+Scheduling.\+Core.\+DESSimulator.\+Process\+Next\+Event (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Processes a single event from the queue (stepped execution). 
+
+This is the stepped equivalent of the \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a73e213e5d37b0db03a31962243bf1045}{Run} loop. Call it repeatedly from the bridge/\+agent until it returns \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a23eac89d613aa8e377b767e1cbc93875af92965e2c8a7afb3c1b9a5c09a263636}{Sim\+Step\+Result.\+Done}.
+
+When the return value is \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a23eac89d613aa8e377b767e1cbc93875a0cac3c7b6d9e33208ee147431e86725d}{Sim\+Step\+Result.\+Decision\+Required}, the caller MUST call \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a914e8fe3b5d0d08e5c46bf76a73114d9}{Apply\+Decision} before calling this method again.
+
+\begin{DoxyParagraph}{Event flow}
+
+\begin{DoxyEnumerate}
+\item If already waiting for a decision → return Decision\+Required immediately.
+\item If queue is empty → compute makespan, return Done.
+\item Dequeue the next event, advance Current\+Time, and process it.
+\begin{DoxyItemize}
+\item \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a74e900c350e0673c74e0e62b6f351056a3beaa4602cbdfa387e4c483abe9933ab}{Event\+Type.\+Job\+Arrived} calls the existing Handle\+Job\+Arrived (which may auto-\/start on an idle machine — no decision needed).
+\item \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a74e900c350e0673c74e0e62b6f351056a118b996cf01af1910a157f7409f5d0df}{Event\+Type.\+Operation\+Complete} calls Handle\+Operation\+Complete\+Stepped which uses Try\+Start\+Next\+On\+Machine\+Stepped instead of the auto-\/dispatch version.
+\end{DoxyItemize}
+\item If the stepped handler flagged a decision → return Decision\+Required.
+\item Otherwise → return Continue or Done depending on remaining events.
+\end{DoxyEnumerate}
+\end{DoxyParagraph}
+\begin{DoxyReturn}{Returns}
+A \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a23eac89d613aa8e377b767e1cbc93875}{Sim\+Step\+Result} indicating what the caller should do next. 
+\end{DoxyReturn}
+\Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a477dc5db6d5bfeea5ec2dd71e9cfd63e}\index{Assets.Scripts.Scheduling.Core.DESSimulator@{Assets.Scripts.Scheduling.Core.DESSimulator}!Reset@{Reset}}
 \index{Reset@{Reset}!Assets.Scripts.Scheduling.Core.DESSimulator@{Assets.Scripts.Scheduling.Core.DESSimulator}}
 \doxysubsubsection{\texorpdfstring{Reset()}{Reset()}}
 {\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a477dc5db6d5bfeea5ec2dd71e9cfd63e} 
@@ -104,7 +166,7 @@ double Assets.\+Scripts.\+Scheduling.\+Core.\+DESSimulator.\+Run (\begin{DoxyPar
 
 Runs the full simulation to completion and returns the makespan. 
 
-Processes all events in the \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_event_queue}{Event\+Queue} in chronological order, advancing Current\+Time to each event\textquotesingle{}s timestamp and dispatching to either Handle\+Job\+Arrived or Handle\+Operation\+Complete as appropriate. Simulation ends when the queue is empty.
+Processes all events in the \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_event_queue}{Event\+Queue} in chronological order, advancing Current\+Time to each event\textquotesingle{}s timestamp and dispatching to either Handle\+Job\+Arrived or Handle\+Operation\+Complete as appropriate. \doxylink{namespace_assets_1_1_scripts_1_1_simulation}{Simulation} ends when the queue is empty.
 
 \begin{DoxyReturn}{Returns}
 The makespan, defined as the latest completion time across all jobs. 
@@ -134,7 +196,27 @@ Action$<$int$>$ Assets.\+Scripts.\+Scheduling.\+Core.\+DESSimulator.\+On\+Dispat
 
 Callback for RL integration, invoked when a machine requires a dispatch decision. 
 
-The integer parameter passed to the action represents the machine ID that is awaiting a dispatch assignment. 
+The integer parameter passed to the action represents the machine ID that is awaiting a dispatch assignment. \Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a93aa938262803d69cd75fb7265f9ad97}\index{Assets.Scripts.Scheduling.Core.DESSimulator@{Assets.Scripts.Scheduling.Core.DESSimulator}!PendingDecisionMachineId@{PendingDecisionMachineId}}
+\index{PendingDecisionMachineId@{PendingDecisionMachineId}!Assets.Scripts.Scheduling.Core.DESSimulator@{Assets.Scripts.Scheduling.Core.DESSimulator}}
+\doxysubsubsection{\texorpdfstring{PendingDecisionMachineId}{PendingDecisionMachineId}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a93aa938262803d69cd75fb7265f9ad97} 
+int Assets.\+Scripts.\+Scheduling.\+Core.\+DESSimulator.\+Pending\+Decision\+Machine\+Id = -\/1\hspace{0.3cm}{\ttfamily [get]}}
+
+
+
+The machine ID that requires a dispatch decision. 
+
+Only valid when \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_abd336966a0fbc46b2b346e93847c7523}{Waiting\+For\+Decision} is true. The caller should inspect {\ttfamily Machines}\+[Pending\+Decision\+Machine\+Id]\+.Waiting\+Queue to see the candidate operations, then call \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a914e8fe3b5d0d08e5c46bf76a73114d9}{Apply\+Decision}. \Hypertarget{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_abd336966a0fbc46b2b346e93847c7523}\index{Assets.Scripts.Scheduling.Core.DESSimulator@{Assets.Scripts.Scheduling.Core.DESSimulator}!WaitingForDecision@{WaitingForDecision}}
+\index{WaitingForDecision@{WaitingForDecision}!Assets.Scripts.Scheduling.Core.DESSimulator@{Assets.Scripts.Scheduling.Core.DESSimulator}}
+\doxysubsubsection{\texorpdfstring{WaitingForDecision}{WaitingForDecision}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_abd336966a0fbc46b2b346e93847c7523} 
+bool Assets.\+Scripts.\+Scheduling.\+Core.\+DESSimulator.\+Waiting\+For\+Decision\hspace{0.3cm}{\ttfamily [get]}}
+
+
+
+True when the simulator is paused waiting for an external dispatch decision. 
+
+Set to true inside \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_ad29bf585fd01242b65ab5bd4ad24b9ee}{Process\+Next\+Event} when Try\+Start\+Next\+On\+Machine\+Stepped encounters a non-\/empty waiting queue. Cleared by \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a914e8fe3b5d0d08e5c46bf76a73114d9}{Apply\+Decision}. While true, \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_ad29bf585fd01242b65ab5bd4ad24b9ee}{Process\+Next\+Event} will immediately return \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a23eac89d613aa8e377b767e1cbc93875a0cac3c7b6d9e33208ee147431e86725d}{Sim\+Step\+Result.\+Decision\+Required} without processing further events. 
 
 The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
 \item 

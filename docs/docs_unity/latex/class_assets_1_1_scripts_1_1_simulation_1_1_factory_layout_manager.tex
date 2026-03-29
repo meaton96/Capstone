@@ -1,0 +1,108 @@
+\doxysection{Assets.\+Scripts.\+Simulation.\+Factory\+Layout\+Manager Class Reference}
+\hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager}{}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager}\index{Assets.Scripts.Simulation.FactoryLayoutManager@{Assets.Scripts.Simulation.FactoryLayoutManager}}
+Inheritance diagram for Assets.\+Scripts.\+Simulation.\+Factory\+Layout\+Manager:\+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_a7a226551a808f177f0d6480968708755}{Build\+Floor}} (\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator}{DESSimulator}} simulator)
+\begin{DoxyCompactList}\small\item\em Builds the factory floor for the given simulator. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_af2937e59fdf0ecd15dc767389e9df526}{Clear\+Floor}} ()
+\begin{DoxyCompactList}\small\item\em Destroys all spawned machine visuals and clears cached data. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_aca89f5dd21c153c843649acb1e517499}{Set\+Custom\+Layout}} (Vector3\+[$\,$]\+ positions)
+\begin{DoxyCompactList}\small\item\em Supplies a custom set of grid positions, bypassing the built-\/in layout tables. \end{DoxyCompactList}\item 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual}{Machine\+Visual}} \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_ad4b98d994d23d82bf6ade518dd3b34b4}{Get\+Machine\+Visual}} (int machine\+Id)
+\begin{DoxyCompactList}\small\item\em Returns the \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual}{Machine\+Visual} for a given machine ID. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_a2dde4ad22ee9a8ced743877155bb6c41}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_a2dde4ad22ee9a8ced743877155bb6c41} 
+IRead\+Only\+List$<$ \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual}{Machine\+Visual}} $>$ {\bfseries Machine\+Visuals}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em Read-\/only access to all spawned machine visuals. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_a041514b745b9cc7724a02bcc73ffc0a3}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_a041514b745b9cc7724a02bcc73ffc0a3} 
+int {\bfseries Machine\+Count}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em Number of machines currently on the floor. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_a4c3feaec7b7cee317d28ff6c8c1aee2b}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_a4c3feaec7b7cee317d28ff6c8c1aee2b} 
+float\+[,]\+ {\bfseries Distance\+Matrix}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em The full NxN distance matrix (world-\/space units). \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_a366c7593af85347d9ea8d1e4ad1b52b4}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_a366c7593af85347d9ea8d1e4ad1b52b4} 
+float\+[$\,$]\+ {\bfseries Distance\+Matrix\+Flat}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em The flattened 64-\/D distance vector for the observation space. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\label{doc-func-members}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_a7a226551a808f177f0d6480968708755}\index{Assets.Scripts.Simulation.FactoryLayoutManager@{Assets.Scripts.Simulation.FactoryLayoutManager}!BuildFloor@{BuildFloor}}
+\index{BuildFloor@{BuildFloor}!Assets.Scripts.Simulation.FactoryLayoutManager@{Assets.Scripts.Simulation.FactoryLayoutManager}}
+\doxysubsubsection{\texorpdfstring{BuildFloor()}{BuildFloor()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_a7a226551a808f177f0d6480968708755} 
+void Assets.\+Scripts.\+Simulation.\+Factory\+Layout\+Manager.\+Build\+Floor (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator}{DESSimulator}}}]{simulator}{}\end{DoxyParamCaption})}
+
+
+
+Builds the factory floor for the given simulator. 
+
+Instantiates one Machine\+Prefab per machine in the simulator, places them on the grid, wires each \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual}{Machine\+Visual} to its core Machine, and computes the distance matrix.
+
+Call this once per episode from \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge}{Simulation\+Bridge} after the DES has been initialised with a Taillard instance.
+
+
+\begin{DoxyParams}{Parameters}
+{\em simulator} & The initialised DES simulator whose {\ttfamily Machines} array determines how many prefabs to spawn. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_af2937e59fdf0ecd15dc767389e9df526}\index{Assets.Scripts.Simulation.FactoryLayoutManager@{Assets.Scripts.Simulation.FactoryLayoutManager}!ClearFloor@{ClearFloor}}
+\index{ClearFloor@{ClearFloor}!Assets.Scripts.Simulation.FactoryLayoutManager@{Assets.Scripts.Simulation.FactoryLayoutManager}}
+\doxysubsubsection{\texorpdfstring{ClearFloor()}{ClearFloor()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_af2937e59fdf0ecd15dc767389e9df526} 
+void Assets.\+Scripts.\+Simulation.\+Factory\+Layout\+Manager.\+Clear\+Floor (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Destroys all spawned machine visuals and clears cached data. 
+
+Called automatically at the start of \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_a7a226551a808f177f0d6480968708755}{Build\+Floor} so consecutive episodes don\textquotesingle{}t accumulate Game\+Objects. Safe to call externally for a manual teardown. \Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_ad4b98d994d23d82bf6ade518dd3b34b4}\index{Assets.Scripts.Simulation.FactoryLayoutManager@{Assets.Scripts.Simulation.FactoryLayoutManager}!GetMachineVisual@{GetMachineVisual}}
+\index{GetMachineVisual@{GetMachineVisual}!Assets.Scripts.Simulation.FactoryLayoutManager@{Assets.Scripts.Simulation.FactoryLayoutManager}}
+\doxysubsubsection{\texorpdfstring{GetMachineVisual()}{GetMachineVisual()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_ad4b98d994d23d82bf6ade518dd3b34b4} 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual}{Machine\+Visual}} Assets.\+Scripts.\+Simulation.\+Factory\+Layout\+Manager.\+Get\+Machine\+Visual (\begin{DoxyParamCaption}\item[{int}]{machine\+Id}{}\end{DoxyParamCaption})}
+
+
+
+Returns the \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual}{Machine\+Visual} for a given machine ID. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em machine\+Id} & Zero-\/based machine index. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The corresponding visual, or {\ttfamily null} if the floor has not been built. 
+\end{DoxyReturn}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_aca89f5dd21c153c843649acb1e517499}\index{Assets.Scripts.Simulation.FactoryLayoutManager@{Assets.Scripts.Simulation.FactoryLayoutManager}!SetCustomLayout@{SetCustomLayout}}
+\index{SetCustomLayout@{SetCustomLayout}!Assets.Scripts.Simulation.FactoryLayoutManager@{Assets.Scripts.Simulation.FactoryLayoutManager}}
+\doxysubsubsection{\texorpdfstring{SetCustomLayout()}{SetCustomLayout()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_aca89f5dd21c153c843649acb1e517499} 
+void Assets.\+Scripts.\+Simulation.\+Factory\+Layout\+Manager.\+Set\+Custom\+Layout (\begin{DoxyParamCaption}\item[{Vector3\+[$\,$]\+}]{positions}{}\end{DoxyParamCaption})}
+
+
+
+Supplies a custom set of grid positions, bypassing the built-\/in layout tables. 
+
+Call before \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager_a7a226551a808f177f0d6480968708755}{Build\+Floor}. The array length must match the simulator\textquotesingle{}s machine count or an exception is thrown at build time.
+
+
+\begin{DoxyParams}{Parameters}
+{\em positions} & World-\/space offsets from the floor centre (Y is ignored). \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Simulation/\+\doxymbox{\hyperlink{_factory_layout_manager_8cs}{Factory\+Layout\+Manager.\+cs}}\end{DoxyCompactItemize}

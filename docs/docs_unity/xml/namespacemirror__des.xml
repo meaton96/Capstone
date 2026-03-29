@@ -1,0 +1,415 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="namespacemirror__des" kind="namespace" language="Python">
+    <compoundname>mirror_des</compoundname>
+    <innerclass refid="classmirror__des_1_1_event_type" prot="public">mirror_des::EventType</innerclass>
+    <innerclass refid="classmirror__des_1_1_sim_event" prot="public">mirror_des::SimEvent</innerclass>
+    <innerclass refid="classmirror__des_1_1_operation" prot="public">mirror_des::Operation</innerclass>
+    <innerclass refid="classmirror__des_1_1_job" prot="public">mirror_des::Job</innerclass>
+    <innerclass refid="classmirror__des_1_1_machine_state" prot="public">mirror_des::MachineState</innerclass>
+    <innerclass refid="classmirror__des_1_1_machine" prot="public">mirror_des::Machine</innerclass>
+    <innerclass refid="classmirror__des_1_1_d_e_s_simulator" prot="public">mirror_des::DESSimulator</innerclass>
+    <sectiondef kind="var">
+      <memberdef kind="variable" id="mirror__des_8py_1abc2a48719d4bf0c7201a1a0057f04b6b" prot="public" static="no" mutable="no">
+        <type>dict</type>
+        <definition>dict mirror_des.RULES</definition>
+        <argsstring></argsstring>
+        <name>RULES</name>
+        <qualifiedname>mirror_des.RULES</qualifiedname>
+        <initializer>=  {
+    &quot;SPT&quot;: <ref refid="mirror__des_8py_1af63d758a2857c1058e7d718f88704d49" kindref="member">rule_spt</ref>,
+    &quot;LPT&quot;: <ref refid="mirror__des_8py_1a28fe22601ebf8f3e8492ddca8e078c7f" kindref="member">rule_lpt</ref>,
+    &quot;MWR&quot;: <ref refid="mirror__des_8py_1a9e69b7fc7cddb1c2fd72d11f79aeec49" kindref="member">rule_mwr</ref>,
+    &quot;MOR&quot;: <ref refid="mirror__des_8py_1aaae55895a1f19d2b208f5d7564f96ccd" kindref="member">rule_mor</ref>,
+    &quot;FCFS&quot;: <ref refid="mirror__des_8py_1a7b27e8381d97b9dec160f36014023b90" kindref="member">rule_fcfs</ref>,
+}</initializer>
+        <briefdescription>
+<para>Registry mapping short rule keys to their dispatching functions. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Keys must match the <computeroutput>rule</computeroutput> column values in <computeroutput>mirror_des_makespans.csv</computeroutput> and correspond to the same short keys used in <computeroutput>ValidationExporter.RuleMap</computeroutput> and <computeroutput>RULE_MAP</computeroutput> in <computeroutput><ref refid="generate__reference_8py" kindref="compound">generate_reference.py</ref></computeroutput>, ensuring all three CSVs can be merged on the <computeroutput>rule</computeroutput> column without translation. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="239" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="239" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="mirror__des_8py_1a0a5a4097bb51078032c804fa387ea642" prot="public" static="no" mutable="no">
+        <type>dict</type>
+        <definition>dict mirror_des.RULE_FULL_NAMES</definition>
+        <argsstring></argsstring>
+        <name>RULE_FULL_NAMES</name>
+        <qualifiedname>mirror_des.RULE_FULL_NAMES</qualifiedname>
+        <initializer>=  {
+    &quot;SPT&quot;: &quot;shortest_processing_time&quot;,
+    &quot;LPT&quot;: &quot;largest_processing_time&quot;,
+    &quot;MWR&quot;: &quot;most_work_remaining&quot;,
+    &quot;MOR&quot;: &quot;most_operations_remaining&quot;,
+    &quot;FCFS&quot;: &quot;first_come_first_served&quot;,
+}</initializer>
+        <briefdescription>
+<para>Maps short rule keys to job_shop_lib full rule name strings. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Written to the <computeroutput>rule_full</computeroutput> column of <computeroutput>mirror_des_makespans.csv</computeroutput>. Values must match the <computeroutput>rule_full</computeroutput> column in <computeroutput>reference_makespans.csv</computeroutput> so that consumers can join on either <computeroutput>rule</computeroutput> or <computeroutput>rule_full</computeroutput>. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="252" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="252" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="func">
+      <memberdef kind="function" id="mirror__des_8py_1a14fd2a448c1f3bde337d405884daee98" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition> int mirror_des.remaining_work</definition>
+        <argsstring>(Operation op, list[Job] jobs)</argsstring>
+        <name>remaining_work</name>
+        <qualifiedname>mirror_des.remaining_work</qualifiedname>
+        <param>
+          <type><ref refid="classmirror__des_1_1_operation" kindref="compound">Operation</ref></type>
+          <declname>op</declname>
+        </param>
+        <param>
+          <type>list</type>
+          <declname>jobs</declname>
+          <array>[Job]</array>
+        </param>
+        <briefdescription>
+<para>Computes total remaining processing time for a job from <computeroutput>op</computeroutput> onward. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Sums durations from <computeroutput>op.op_index</computeroutput> to the end of the job&apos;s operation list. Used as the sort key for <ref refid="mirror__des_8py_1a9e69b7fc7cddb1c2fd72d11f79aeec49" kindref="member">rule_mwr</ref>. Mirrors C# <computeroutput>DispatchingRules.RemainingWork</computeroutput>.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>op</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The reference operation whose index marks the start of summation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>jobs</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The full job list used to retrieve the owning job&apos;s operations. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>Total remaining duration including <computeroutput>op</computeroutput> itself. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="168" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="168" bodyend="172"/>
+      </memberdef>
+      <memberdef kind="function" id="mirror__des_8py_1ab07ae90bfd2e2d94051503f25659fd6c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition> int mirror_des.remaining_ops</definition>
+        <argsstring>(Operation op, list[Job] jobs)</argsstring>
+        <name>remaining_ops</name>
+        <qualifiedname>mirror_des.remaining_ops</qualifiedname>
+        <param>
+          <type><ref refid="classmirror__des_1_1_operation" kindref="compound">Operation</ref></type>
+          <declname>op</declname>
+        </param>
+        <param>
+          <type>list</type>
+          <declname>jobs</declname>
+          <array>[Job]</array>
+        </param>
+        <briefdescription>
+<para>Computes the number of unprocessed operations remaining for a job from <computeroutput>op</computeroutput> onward. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Used as the sort key for <ref refid="mirror__des_8py_1aaae55895a1f19d2b208f5d7564f96ccd" kindref="member">rule_mor</ref>. Mirrors the inline lambda in the C# <computeroutput>DispatchingRule.MOR</computeroutput> switch arm.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>op</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The reference operation whose index marks the start of counting. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>jobs</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The full job list used to retrieve the owning job&apos;s operations. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>Count of remaining operations including <computeroutput>op</computeroutput> itself. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="181" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="181" bodyend="185"/>
+      </memberdef>
+      <memberdef kind="function" id="mirror__des_8py_1af63d758a2857c1058e7d718f88704d49" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="classmirror__des_1_1_operation" kindref="compound">Operation</ref></type>
+        <definition> Operation mirror_des.rule_spt</definition>
+        <argsstring>(list[Operation] waiting, list[Job] jobs)</argsstring>
+        <name>rule_spt</name>
+        <qualifiedname>mirror_des.rule_spt</qualifiedname>
+        <param>
+          <type>list</type>
+          <declname>waiting</declname>
+          <array>[Operation]</array>
+        </param>
+        <param>
+          <type>list</type>
+          <declname>jobs</declname>
+          <array>[Job]</array>
+        </param>
+        <briefdescription>
+<para>Shortest Processing Time — selects the operation with the smallest duration. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Tiebreaker: lowest <computeroutput>job_id</computeroutput>. Mirrors C# <computeroutput>DispatchingRule.SPT_SMPT</computeroutput>. <parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>waiting</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Non-empty list of queued operations. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>jobs</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Full job list (unused by this rule). </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>The operation with the minimum <computeroutput></computeroutput>(duration, job_id). </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="191" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="191" bodyend="194"/>
+      </memberdef>
+      <memberdef kind="function" id="mirror__des_8py_1a28fe22601ebf8f3e8492ddca8e078c7f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="classmirror__des_1_1_operation" kindref="compound">Operation</ref></type>
+        <definition> Operation mirror_des.rule_lpt</definition>
+        <argsstring>(list[Operation] waiting, list[Job] jobs)</argsstring>
+        <name>rule_lpt</name>
+        <qualifiedname>mirror_des.rule_lpt</qualifiedname>
+        <param>
+          <type>list</type>
+          <declname>waiting</declname>
+          <array>[Operation]</array>
+        </param>
+        <param>
+          <type>list</type>
+          <declname>jobs</declname>
+          <array>[Job]</array>
+        </param>
+        <briefdescription>
+<para>Longest Processing Time — selects the operation with the largest duration. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Tiebreaker: lowest <computeroutput>job_id</computeroutput>. Mirrors C# <computeroutput>DispatchingRule.LPT_MMUR</computeroutput>. <parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>waiting</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Non-empty list of queued operations. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>jobs</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Full job list (unused by this rule). </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>The operation with the minimum <computeroutput></computeroutput>(-duration, job_id). </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="200" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="200" bodyend="203"/>
+      </memberdef>
+      <memberdef kind="function" id="mirror__des_8py_1a9e69b7fc7cddb1c2fd72d11f79aeec49" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="classmirror__des_1_1_operation" kindref="compound">Operation</ref></type>
+        <definition> Operation mirror_des.rule_mwr</definition>
+        <argsstring>(list[Operation] waiting, list[Job] jobs)</argsstring>
+        <name>rule_mwr</name>
+        <qualifiedname>mirror_des.rule_mwr</qualifiedname>
+        <param>
+          <type>list</type>
+          <declname>waiting</declname>
+          <array>[Operation]</array>
+        </param>
+        <param>
+          <type>list</type>
+          <declname>jobs</declname>
+          <array>[Job]</array>
+        </param>
+        <briefdescription>
+<para>Most Work Remaining — selects the operation whose job has the most remaining work. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Equivalent to Longest Remaining Time. Tiebreaker: lowest <computeroutput>job_id</computeroutput>. Mirrors C# <computeroutput>DispatchingRule.LRT_MMUR</computeroutput>. <parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>waiting</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Non-empty list of queued operations. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>jobs</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Full job list used to compute <ref refid="mirror__des_8py_1a14fd2a448c1f3bde337d405884daee98" kindref="member">remaining_work</ref>. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>The operation with the minimum <computeroutput></computeroutput>(-remaining_work, job_id). </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="210" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="210" bodyend="213"/>
+      </memberdef>
+      <memberdef kind="function" id="mirror__des_8py_1aaae55895a1f19d2b208f5d7564f96ccd" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="classmirror__des_1_1_operation" kindref="compound">Operation</ref></type>
+        <definition> Operation mirror_des.rule_mor</definition>
+        <argsstring>(list[Operation] waiting, list[Job] jobs)</argsstring>
+        <name>rule_mor</name>
+        <qualifiedname>mirror_des.rule_mor</qualifiedname>
+        <param>
+          <type>list</type>
+          <declname>waiting</declname>
+          <array>[Operation]</array>
+        </param>
+        <param>
+          <type>list</type>
+          <declname>jobs</declname>
+          <array>[Job]</array>
+        </param>
+        <briefdescription>
+<para>Most Operations Remaining — selects the operation whose job has the most ops left. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Tiebreaker: lowest <computeroutput>job_id</computeroutput>. Mirrors C# <computeroutput>DispatchingRule.MOR</computeroutput>. <parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>waiting</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Non-empty list of queued operations. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>jobs</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Full job list used to compute <ref refid="mirror__des_8py_1ab07ae90bfd2e2d94051503f25659fd6c" kindref="member">remaining_ops</ref>. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>The operation with the minimum <computeroutput></computeroutput>(-remaining_ops, job_id). </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="219" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="219" bodyend="222"/>
+      </memberdef>
+      <memberdef kind="function" id="mirror__des_8py_1a7b27e8381d97b9dec160f36014023b90" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="classmirror__des_1_1_operation" kindref="compound">Operation</ref></type>
+        <definition> Operation mirror_des.rule_fcfs</definition>
+        <argsstring>(list[Operation] waiting, list[Job] jobs)</argsstring>
+        <name>rule_fcfs</name>
+        <qualifiedname>mirror_des.rule_fcfs</qualifiedname>
+        <param>
+          <type>list</type>
+          <declname>waiting</declname>
+          <array>[Operation]</array>
+        </param>
+        <param>
+          <type>list</type>
+          <declname>jobs</declname>
+          <array>[Job]</array>
+        </param>
+        <briefdescription>
+<para>First Come First Served — returns the first operation in the queue. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>No sorting is applied; insertion order is preserved, matching C# <computeroutput>DispatchingRule.SDT_SRWT</computeroutput> which returns <computeroutput>waitingOps</computeroutput>[0]. <parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>waiting</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Non-empty list of queued operations. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>jobs</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Full job list (unused by this rule). </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>The first element of <computeroutput>waiting</computeroutput>. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="229" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="229" bodyend="232"/>
+      </memberdef>
+      <memberdef kind="function" id="mirror__des_8py_1aded3fd37ef177df3a00d19adb174e832" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>list[str]</type>
+        <definition> list[str] mirror_des.find_json_files</definition>
+        <argsstring>(str directory)</argsstring>
+        <name>find_json_files</name>
+        <qualifiedname>mirror_des.find_json_files</qualifiedname>
+        <param>
+          <type>str</type>
+          <declname>directory</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="498" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="498" bodyend="512"/>
+      </memberdef>
+      <memberdef kind="function" id="mirror__des_8py_1a151325a665863a91fa6e507ef6646e9d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>mirror_des.main</definition>
+        <argsstring>()</argsstring>
+        <name>main</name>
+        <qualifiedname>mirror_des.main</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="513" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="513" bodyend="635"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="1" column="1"/>
+  </compounddef>
+</doxygen>

@@ -1,5 +1,10 @@
 \doxysection{mirror\+\_\+des.\+Machine Class Reference}
 \hypertarget{classmirror__des_1_1_machine}{}\label{classmirror__des_1_1_machine}\index{mirror\_des.Machine@{mirror\_des.Machine}}
+
+
+Single shop-\/floor machine with a waiting queue, mirroring C\# \doxylink{classmirror__des_1_1_machine}{Machine}.  
+
+
 \doxysubsubsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
@@ -12,17 +17,52 @@
 \doxysubsubsection*{Static Public Attributes}
 \begin{DoxyCompactItemize}
 \item 
-\Hypertarget{classmirror__des_1_1_machine_a03199794a7e8b218175444d26a40252e}\label{classmirror__des_1_1_machine_a03199794a7e8b218175444d26a40252e} 
-\doxymbox{\hyperlink{classmirror__des_1_1_machine_state}{Machine\+State}} {\bfseries state} = Machine\+State.\+IDLE
-\item 
-\Hypertarget{classmirror__des_1_1_machine_aeb50646a4da8418790f7521136407980}\label{classmirror__des_1_1_machine_aeb50646a4da8418790f7521136407980} 
-Optional {\bfseries current\+\_\+op} = None
-\item 
+\doxymbox{\hyperlink{classmirror__des_1_1_machine_state}{Machine\+State}} \doxymbox{\hyperlink{classmirror__des_1_1_machine_a03199794a7e8b218175444d26a40252e}{state}} = \doxymbox{\hyperlink{classmirror__des_1_1_machine_state_a33e0aa350e8af127c79cb06b2595f13c}{Machine\+State.\+IDLE}}
+\begin{DoxyCompactList}\small\item\em Unique machine identifier matching its index in \doxylink{classmirror__des_1_1_d_e_s_simulator_ac92dd2252135c0274611e2ec72ee2365}{DESSimulator.\+machines}. \end{DoxyCompactList}\item 
+Optional \doxymbox{\hyperlink{classmirror__des_1_1_machine_aeb50646a4da8418790f7521136407980}{current\+\_\+op}} = None
+\begin{DoxyCompactList}\small\item\em The operation currently being processed, or {\ttfamily None} when idle. \end{DoxyCompactList}\item 
 \Hypertarget{classmirror__des_1_1_machine_a36d2866505ccccb7e26414bed8e8b367}\label{classmirror__des_1_1_machine_a36d2866505ccccb7e26414bed8e8b367} 
 list {\bfseries waiting\+\_\+queue} = field(default\+\_\+factory=list)
-\end{DoxyCompactItemize}
+\begin{DoxyCompactList}\small\item\em Operations waiting to be processed, in arrival order. \end{DoxyCompactList}\end{DoxyCompactItemize}
 
+
+\doxysubsection{Detailed Description}
+Single shop-\/floor machine with a waiting queue, mirroring C\# \doxylink{classmirror__des_1_1_machine}{Machine}. 
+
+State transitions are driven exclusively by \doxylink{classmirror__des_1_1_d_e_s_simulator}{DESSimulator} via start\+\_\+processing and finish\+\_\+processing, matching the C\# design. 
+
+\label{doc-variable-members}
+\Hypertarget{classmirror__des_1_1_machine_doc-variable-members}
+\doxysubsection{Member Data Documentation}
+\Hypertarget{classmirror__des_1_1_machine_aeb50646a4da8418790f7521136407980}\index{mirror\_des.Machine@{mirror\_des.Machine}!current\_op@{current\_op}}
+\index{current\_op@{current\_op}!mirror\_des.Machine@{mirror\_des.Machine}}
+\doxysubsubsection{\texorpdfstring{current\_op}{current\_op}}
+{\footnotesize\ttfamily \label{classmirror__des_1_1_machine_aeb50646a4da8418790f7521136407980} 
+Optional mirror\+\_\+des.\+Machine.\+current\+\_\+op = None\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+The operation currently being processed, or {\ttfamily None} when idle. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em op} & The operation to begin processing. \\
+\hline
+{\em current\+\_\+time} & The simulation time at which processing starts. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classmirror__des_1_1_machine_a03199794a7e8b218175444d26a40252e}\index{mirror\_des.Machine@{mirror\_des.Machine}!state@{state}}
+\index{state@{state}!mirror\_des.Machine@{mirror\_des.Machine}}
+\doxysubsubsection{\texorpdfstring{state}{state}}
+{\footnotesize\ttfamily \label{classmirror__des_1_1_machine_a03199794a7e8b218175444d26a40252e} 
+\doxymbox{\hyperlink{classmirror__des_1_1_machine_state}{Machine\+State}} mirror\+\_\+des.\+Machine.\+state = \doxymbox{\hyperlink{classmirror__des_1_1_machine_state_a33e0aa350e8af127c79cb06b2595f13c}{Machine\+State.\+IDLE}}\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Unique machine identifier matching its index in \doxylink{classmirror__des_1_1_d_e_s_simulator_ac92dd2252135c0274611e2ec72ee2365}{DESSimulator.\+machines}. 
+
+Current operational state. Starts {\ttfamily IDLE}. 
 
 The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
 \item 
-C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Scheduling/\+\+Validation/\+mirror\+\_\+des.\+py\end{DoxyCompactItemize}
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Scheduling/\+\+Validation/\+\doxymbox{\hyperlink{mirror__des_8py}{mirror\+\_\+des.\+py}}\end{DoxyCompactItemize}

@@ -1,0 +1,33 @@
+\doxysection{Assets.\+Scripts.\+Simulation.\+Step\+Result Struct Reference}
+\hypertarget{struct_assets_1_1_scripts_1_1_simulation_1_1_step_result}{}\label{struct_assets_1_1_scripts_1_1_simulation_1_1_step_result}\index{Assets.Scripts.Simulation.StepResult@{Assets.Scripts.Simulation.StepResult}}
+
+
+Returned by \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a54f762ba8e222fcc8cfde852c459562e}{Simulation\+Bridge.\+Step} after the agent\textquotesingle{}s action is applied.  
+
+
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{struct_assets_1_1_scripts_1_1_simulation_1_1_step_result_ade439e5302961b07a430526c14f16286}\label{struct_assets_1_1_scripts_1_1_simulation_1_1_step_result_ade439e5302961b07a430526c14f16286} 
+float {\bfseries Reward}
+\begin{DoxyCompactList}\small\item\em Reward signal for this step. \end{DoxyCompactList}\item 
+\Hypertarget{struct_assets_1_1_scripts_1_1_simulation_1_1_step_result_aee1e19dd4a9e7aad17d7ce87b8cfe706}\label{struct_assets_1_1_scripts_1_1_simulation_1_1_step_result_aee1e19dd4a9e7aad17d7ce87b8cfe706} 
+bool {\bfseries Done}
+\begin{DoxyCompactList}\small\item\em True if the episode is finished (all jobs complete). \end{DoxyCompactList}\item 
+\Hypertarget{struct_assets_1_1_scripts_1_1_simulation_1_1_step_result_aa183196bf333d5a9ce5fbaf75a7b8562}\label{struct_assets_1_1_scripts_1_1_simulation_1_1_step_result_aa183196bf333d5a9ce5fbaf75a7b8562} 
+\doxymbox{\hyperlink{struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request}{Decision\+Request}} {\bfseries Next\+Decision}
+\begin{DoxyCompactList}\small\item\em The next decision request, if not done. Check \doxylink{struct_assets_1_1_scripts_1_1_simulation_1_1_step_result_aee1e19dd4a9e7aad17d7ce87b8cfe706}{Done} first. \end{DoxyCompactList}\item 
+\Hypertarget{struct_assets_1_1_scripts_1_1_simulation_1_1_step_result_afbc80d28f6d9e2c0a5d772a3f8771e9c}\label{struct_assets_1_1_scripts_1_1_simulation_1_1_step_result_afbc80d28f6d9e2c0a5d772a3f8771e9c} 
+double {\bfseries Current\+Makespan}
+\begin{DoxyCompactList}\small\item\em Current makespan estimate (max end-\/time so far). \end{DoxyCompactList}\item 
+\Hypertarget{struct_assets_1_1_scripts_1_1_simulation_1_1_step_result_af2b408e9aecc948a02d0644644be0324}\label{struct_assets_1_1_scripts_1_1_simulation_1_1_step_result_af2b408e9aecc948a02d0644644be0324} 
+int {\bfseries Operations\+Completed}
+\begin{DoxyCompactList}\small\item\em Number of operations completed so far. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Returned by \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a54f762ba8e222fcc8cfde852c459562e}{Simulation\+Bridge.\+Step} after the agent\textquotesingle{}s action is applied. 
+
+The documentation for this struct was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Simulation/\+\doxymbox{\hyperlink{_simulation_bridge_8cs}{Simulation\+Bridge.\+cs}}\end{DoxyCompactItemize}

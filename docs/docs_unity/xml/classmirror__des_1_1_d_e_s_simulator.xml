@@ -1,0 +1,370 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="classmirror__des_1_1_d_e_s_simulator" kind="class" language="Python" prot="public">
+    <compoundname>mirror_des::DESSimulator</compoundname>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="classmirror__des_1_1_d_e_s_simulator_1ace4a32fa136af3b7ed3802372c2571c3" prot="public" static="no" mutable="no">
+        <type>list</type>
+        <definition>mirror_des.DESSimulator::jobs</definition>
+        <argsstring></argsstring>
+        <name>jobs</name>
+        <qualifiedname>mirror_des.DESSimulator.jobs</qualifiedname>
+        <initializer>=  []</initializer>
+        <briefdescription>
+<para>All jobs in the loaded instance. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="273" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="273" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classmirror__des_1_1_d_e_s_simulator_1ac92dd2252135c0274611e2ec72ee2365" prot="public" static="no" mutable="no">
+        <type>list</type>
+        <definition>list mirror_des.DESSimulator::machines</definition>
+        <argsstring></argsstring>
+        <name>machines</name>
+        <qualifiedname>mirror_des.DESSimulator.machines</qualifiedname>
+        <initializer>=  []</initializer>
+        <briefdescription>
+<para>All machines in the loaded instance. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Clears the event heap, resets <computeroutput>current_time</computeroutput> and <computeroutput>sequence</computeroutput> to zero, restores all machines to <computeroutput>IDLE</computeroutput> with empty waiting queues, resets all job and operation timestamps to <computeroutput>-1.0</computeroutput>, and enqueues a <computeroutput>JOB_ARRIVED</computeroutput> event for every job at <computeroutput>t=0</computeroutput>. Mirrors C# <computeroutput>DESSimulator.Reset</computeroutput>. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="275" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="275" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classmirror__des_1_1_d_e_s_simulator_1a38953ec7b97ce8301f3dba0bbb27f68d" prot="public" static="no" mutable="no">
+        <type>list</type>
+        <definition>mirror_des.DESSimulator::event_queue</definition>
+        <argsstring></argsstring>
+        <name>event_queue</name>
+        <qualifiedname>mirror_des.DESSimulator.event_queue</qualifiedname>
+        <initializer>=  []</initializer>
+        <briefdescription>
+<para>Min-heap event queue, ordered by <computeroutput></computeroutput>(time, sequence). </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Clears the event heap, resets <computeroutput>current_time</computeroutput> and <computeroutput>sequence</computeroutput> to zero, restores all machines to <computeroutput>IDLE</computeroutput> with empty waiting queues, resets all job and operation timestamps to <computeroutput>-1.0</computeroutput>, and enqueues a <computeroutput>JOB_ARRIVED</computeroutput> event for every job at <computeroutput>t=0</computeroutput>. Mirrors C# <computeroutput>DESSimulator.Reset</computeroutput>. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="277" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="277" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classmirror__des_1_1_d_e_s_simulator_1afbf76c3bcad3bdf8d77fe19788e19d41" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int mirror_des.DESSimulator::sequence</definition>
+        <argsstring></argsstring>
+        <name>sequence</name>
+        <qualifiedname>mirror_des.DESSimulator.sequence</qualifiedname>
+        <initializer>=  0</initializer>
+        <briefdescription>
+<para>Monotonically increasing counter stamped onto each enqueued event. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Clears the event heap, resets <computeroutput>current_time</computeroutput> and <computeroutput>sequence</computeroutput> to zero, restores all machines to <computeroutput>IDLE</computeroutput> with empty waiting queues, resets all job and operation timestamps to <computeroutput>-1.0</computeroutput>, and enqueues a <computeroutput>JOB_ARRIVED</computeroutput> event for every job at <computeroutput>t=0</computeroutput>. Mirrors C# <computeroutput>DESSimulator.Reset</computeroutput>. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="279" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="279" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classmirror__des_1_1_d_e_s_simulator_1a76dadf3da9d54c3e22e82b381289671c" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>mirror_des.DESSimulator::current_time</definition>
+        <argsstring></argsstring>
+        <name>current_time</name>
+        <qualifiedname>mirror_des.DESSimulator.current_time</qualifiedname>
+        <initializer>=  0.0</initializer>
+        <briefdescription>
+<para>Current simulation time, advanced on each event dequeue. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Clears the event heap, resets <computeroutput>current_time</computeroutput> and <computeroutput>sequence</computeroutput> to zero, restores all machines to <computeroutput>IDLE</computeroutput> with empty waiting queues, resets all job and operation timestamps to <computeroutput>-1.0</computeroutput>, and enqueues a <computeroutput>JOB_ARRIVED</computeroutput> event for every job at <computeroutput>t=0</computeroutput>. Mirrors C# <computeroutput>DESSimulator.Reset</computeroutput>. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="281" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="281" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classmirror__des_1_1_d_e_s_simulator_1a44f3a32cf14a1d53ddac89ac827c069d" prot="public" static="no" mutable="no">
+        <type>Callable</type>
+        <definition>Callable mirror_des.DESSimulator::rule_fn</definition>
+        <argsstring></argsstring>
+        <name>rule_fn</name>
+        <qualifiedname>mirror_des.DESSimulator.rule_fn</qualifiedname>
+        <initializer>=  <ref refid="mirror__des_8py_1af63d758a2857c1058e7d718f88704d49" kindref="member">rule_spt</ref></initializer>
+        <briefdescription>
+<para>Active dispatching function, set at the start of each run call. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Sets <computeroutput>rule_fn</computeroutput> as the active dispatching function, calls reset, then processes events from the min-heap in chronological order until the queue is empty. Mirrors C# <computeroutput>DESSimulator.Run</computeroutput>.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername><ref refid="classmirror__des_1_1_d_e_s_simulator_1a44f3a32cf14a1d53ddac89ac827c069d" kindref="member">rule_fn</ref></parametername>
+</parameternamelist>
+<parameterdescription>
+<para>A dispatching function from <ref refid="mirror__des_8py_1abc2a48719d4bf0c7201a1a0057f04b6b" kindref="member">RULES</ref> to use for queue selection. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>The makespan, defined as the maximum <computeroutput>completion_time</computeroutput> across all jobs. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="283" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="283" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="classmirror__des_1_1_d_e_s_simulator_1a1e40c656006ddb0e9f3fcd8dfdbacf4b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>mirror_des.DESSimulator.__init__</definition>
+        <argsstring>(self)</argsstring>
+        <name>__init__</name>
+        <qualifiedname>mirror_des.DESSimulator.__init__</qualifiedname>
+        <param>
+          <type>self</type>
+          <defname>self</defname>
+        </param>
+        <briefdescription>
+<para>Event-driven DES with per-machine queues, mirroring C# <computeroutput><ref refid="classmirror__des_1_1_d_e_s_simulator" kindref="compound">DESSimulator</ref></computeroutput> exactly. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>All event handling, dispatch logic, and queue management are intentionally structured to match the C# implementation method-for-method. Any behavioural divergence from the C# <computeroutput><ref refid="classmirror__des_1_1_d_e_s_simulator" kindref="compound">DESSimulator</ref></computeroutput> is a bug. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="271" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="271" bodyend="284"/>
+      </memberdef>
+      <memberdef kind="function" id="classmirror__des_1_1_d_e_s_simulator_1ab6f24bcc8319d6ab33b45ac4c173c684" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>mirror_des.DESSimulator.load_instance</definition>
+        <argsstring>(self, dict data)</argsstring>
+        <name>load_instance</name>
+        <qualifiedname>mirror_des.DESSimulator.load_instance</qualifiedname>
+        <param>
+          <type>self</type>
+          <defname>self</defname>
+        </param>
+        <param>
+          <type>dict</type>
+          <declname>data</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="285" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="285" bodyend="316"/>
+      </memberdef>
+      <memberdef kind="function" id="classmirror__des_1_1_d_e_s_simulator_1ade6423930beac196872c94c04b58e953" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>mirror_des.DESSimulator.reset</definition>
+        <argsstring>(self)</argsstring>
+        <name>reset</name>
+        <qualifiedname>mirror_des.DESSimulator.reset</qualifiedname>
+        <param>
+          <type>self</type>
+          <defname>self</defname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="317" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="317" bodyend="342"/>
+      </memberdef>
+      <memberdef kind="function" id="classmirror__des_1_1_d_e_s_simulator_1aa005313dcbe52d0ab815b0401ec6667c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>float</type>
+        <definition> float mirror_des.DESSimulator.run</definition>
+        <argsstring>(self, Callable rule_fn)</argsstring>
+        <name>run</name>
+        <qualifiedname>mirror_des.DESSimulator.run</qualifiedname>
+        <param>
+          <type>self</type>
+          <defname>self</defname>
+        </param>
+        <param>
+          <type>Callable</type>
+          <declname>rule_fn</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="360" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="360" bodyend="383"/>
+      </memberdef>
+      <memberdef kind="function" id="classmirror__des_1_1_d_e_s_simulator_1aabbce29825591d89b5e1389f8d95d14b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>list[dict]</type>
+        <definition> list[dict] mirror_des.DESSimulator.get_schedule</definition>
+        <argsstring>(self)</argsstring>
+        <name>get_schedule</name>
+        <qualifiedname>mirror_des.DESSimulator.get_schedule</qualifiedname>
+        <param>
+          <type>self</type>
+          <defname>self</defname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="468" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="468" bodyend="497"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="protected-func">
+      <memberdef kind="function" id="classmirror__des_1_1_d_e_s_simulator_1a7afbe2a437d8e16f61a0aea3fd9cc9dd" prot="protected" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>mirror_des.DESSimulator._enqueue</definition>
+        <argsstring>(self, float time, EventType event_type, int job_id, int machine_id)</argsstring>
+        <name>_enqueue</name>
+        <qualifiedname>mirror_des.DESSimulator._enqueue</qualifiedname>
+        <param>
+          <type>self</type>
+          <defname>self</defname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>time</declname>
+        </param>
+        <param>
+          <type><ref refid="classmirror__des_1_1_event_type" kindref="compound">EventType</ref></type>
+          <declname>event_type</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>job_id</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>machine_id</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="343" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="345" bodyend="359"/>
+      </memberdef>
+      <memberdef kind="function" id="classmirror__des_1_1_d_e_s_simulator_1a6856e8f621e022e83ebd8de00a9f2a6f" prot="protected" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>mirror_des.DESSimulator._handle_job_arrived</definition>
+        <argsstring>(self, SimEvent evt)</argsstring>
+        <name>_handle_job_arrived</name>
+        <qualifiedname>mirror_des.DESSimulator._handle_job_arrived</qualifiedname>
+        <param>
+          <type>self</type>
+          <defname>self</defname>
+        </param>
+        <param>
+          <type><ref refid="classmirror__des_1_1_sim_event" kindref="compound">SimEvent</ref></type>
+          <declname>evt</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="384" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="384" bodyend="395"/>
+      </memberdef>
+      <memberdef kind="function" id="classmirror__des_1_1_d_e_s_simulator_1a0370816330e873df194441743ded6388" prot="protected" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>mirror_des.DESSimulator._handle_operation_complete</definition>
+        <argsstring>(self, SimEvent evt)</argsstring>
+        <name>_handle_operation_complete</name>
+        <qualifiedname>mirror_des.DESSimulator._handle_operation_complete</qualifiedname>
+        <param>
+          <type>self</type>
+          <defname>self</defname>
+        </param>
+        <param>
+          <type><ref refid="classmirror__des_1_1_sim_event" kindref="compound">SimEvent</ref></type>
+          <declname>evt</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="396" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="396" bodyend="417"/>
+      </memberdef>
+      <memberdef kind="function" id="classmirror__des_1_1_d_e_s_simulator_1a4ba93a6288c45ba2f9089bc2eaea0322" prot="protected" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>mirror_des.DESSimulator._try_dispatch_job</definition>
+        <argsstring>(self, Job job)</argsstring>
+        <name>_try_dispatch_job</name>
+        <qualifiedname>mirror_des.DESSimulator._try_dispatch_job</qualifiedname>
+        <param>
+          <type>self</type>
+          <defname>self</defname>
+        </param>
+        <param>
+          <type><ref refid="classmirror__des_1_1_job" kindref="compound">Job</ref></type>
+          <declname>job</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="418" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="418" bodyend="442"/>
+      </memberdef>
+      <memberdef kind="function" id="classmirror__des_1_1_d_e_s_simulator_1a679553f33b8cfcde52e312641542d82e" prot="protected" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>mirror_des.DESSimulator._try_start_next_on_machine</definition>
+        <argsstring>(self, Machine machine)</argsstring>
+        <name>_try_start_next_on_machine</name>
+        <qualifiedname>mirror_des.DESSimulator._try_start_next_on_machine</qualifiedname>
+        <param>
+          <type>self</type>
+          <defname>self</defname>
+        </param>
+        <param>
+          <type><ref refid="classmirror__des_1_1_machine" kindref="compound">Machine</ref></type>
+          <declname>machine</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="443" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="443" bodyend="467"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="264" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="264" bodyend="497"/>
+    <listofallmembers>
+      <member refid="classmirror__des_1_1_d_e_s_simulator_1a1e40c656006ddb0e9f3fcd8dfdbacf4b" prot="public" virt="non-virtual"><scope>mirror_des::DESSimulator</scope><name>__init__</name></member>
+      <member refid="classmirror__des_1_1_d_e_s_simulator_1a7afbe2a437d8e16f61a0aea3fd9cc9dd" prot="protected" virt="non-virtual"><scope>mirror_des::DESSimulator</scope><name>_enqueue</name></member>
+      <member refid="classmirror__des_1_1_d_e_s_simulator_1a6856e8f621e022e83ebd8de00a9f2a6f" prot="protected" virt="non-virtual"><scope>mirror_des::DESSimulator</scope><name>_handle_job_arrived</name></member>
+      <member refid="classmirror__des_1_1_d_e_s_simulator_1a0370816330e873df194441743ded6388" prot="protected" virt="non-virtual"><scope>mirror_des::DESSimulator</scope><name>_handle_operation_complete</name></member>
+      <member refid="classmirror__des_1_1_d_e_s_simulator_1a4ba93a6288c45ba2f9089bc2eaea0322" prot="protected" virt="non-virtual"><scope>mirror_des::DESSimulator</scope><name>_try_dispatch_job</name></member>
+      <member refid="classmirror__des_1_1_d_e_s_simulator_1a679553f33b8cfcde52e312641542d82e" prot="protected" virt="non-virtual"><scope>mirror_des::DESSimulator</scope><name>_try_start_next_on_machine</name></member>
+      <member refid="classmirror__des_1_1_d_e_s_simulator_1a76dadf3da9d54c3e22e82b381289671c" prot="public" virt="non-virtual"><scope>mirror_des::DESSimulator</scope><name>current_time</name></member>
+      <member refid="classmirror__des_1_1_d_e_s_simulator_1a38953ec7b97ce8301f3dba0bbb27f68d" prot="public" virt="non-virtual"><scope>mirror_des::DESSimulator</scope><name>event_queue</name></member>
+      <member refid="classmirror__des_1_1_d_e_s_simulator_1aabbce29825591d89b5e1389f8d95d14b" prot="public" virt="non-virtual"><scope>mirror_des::DESSimulator</scope><name>get_schedule</name></member>
+      <member refid="classmirror__des_1_1_d_e_s_simulator_1ace4a32fa136af3b7ed3802372c2571c3" prot="public" virt="non-virtual"><scope>mirror_des::DESSimulator</scope><name>jobs</name></member>
+      <member refid="classmirror__des_1_1_d_e_s_simulator_1ab6f24bcc8319d6ab33b45ac4c173c684" prot="public" virt="non-virtual"><scope>mirror_des::DESSimulator</scope><name>load_instance</name></member>
+      <member refid="classmirror__des_1_1_d_e_s_simulator_1ac92dd2252135c0274611e2ec72ee2365" prot="public" virt="non-virtual"><scope>mirror_des::DESSimulator</scope><name>machines</name></member>
+      <member refid="classmirror__des_1_1_d_e_s_simulator_1ade6423930beac196872c94c04b58e953" prot="public" virt="non-virtual"><scope>mirror_des::DESSimulator</scope><name>reset</name></member>
+      <member refid="classmirror__des_1_1_d_e_s_simulator_1a44f3a32cf14a1d53ddac89ac827c069d" prot="public" virt="non-virtual"><scope>mirror_des::DESSimulator</scope><name>rule_fn</name></member>
+      <member refid="classmirror__des_1_1_d_e_s_simulator_1aa005313dcbe52d0ab815b0401ec6667c" prot="public" virt="non-virtual"><scope>mirror_des::DESSimulator</scope><name>run</name></member>
+      <member refid="classmirror__des_1_1_d_e_s_simulator_1afbf76c3bcad3bdf8d77fe19788e19d41" prot="public" virt="non-virtual"><scope>mirror_des::DESSimulator</scope><name>sequence</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,219 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core" kind="namespace" language="C#">
+    <compoundname>Assets::Scripts::Scheduling::Core</compoundname>
+    <innerclass refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator" prot="public">Assets::Scripts::Scheduling::Core::DESSimulator</innerclass>
+    <innerclass refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_dispatching_rules" prot="public">Assets::Scripts::Scheduling::Core::DispatchingRules</innerclass>
+    <innerclass refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event" prot="public">Assets::Scripts::Scheduling::Core::SimEvent</innerclass>
+    <innerclass refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_event_queue" prot="public">Assets::Scripts::Scheduling::Core::EventQueue</innerclass>
+    <innerclass refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation" prot="public">Assets::Scripts::Scheduling::Core::Operation</innerclass>
+    <innerclass refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job" prot="public">Assets::Scripts::Scheduling::Core::Job</innerclass>
+    <innerclass refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine" prot="public">Assets::Scripts::Scheduling::Core::Machine</innerclass>
+    <sectiondef kind="enum">
+      <memberdef kind="enum" id="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a23eac89d613aa8e377b767e1cbc93875" prot="public" static="no" strong="yes">
+        <type></type>
+        <name>SimStepResult</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.SimStepResult</qualifiedname>
+        <enumvalue id="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a23eac89d613aa8e377b767e1cbc93875aa0bfb8e59e6c13fc8d990781f77694fe" prot="public">
+          <name>Continue</name>
+          <briefdescription>
+<para>Event was processed and more events remain. No decision needed. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a23eac89d613aa8e377b767e1cbc93875a0cac3c7b6d9e33208ee147431e86725d" prot="public">
+          <name>DecisionRequired</name>
+          <briefdescription>
+<para>A machine has become free with a non-empty queue. The caller must supply a <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1af841dd07c9c38276e117696a4dd6fe87" kindref="member">DispatchingRule</ref> via <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a914e8fe3b5d0d08e5c46bf76a73114d9" kindref="member">DESSimulator.ApplyDecision</ref> before calling ProcessNextEvent again. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a23eac89d613aa8e377b767e1cbc93875af92965e2c8a7afb3c1b9a5c09a263636" prot="public">
+          <name>Done</name>
+          <briefdescription>
+<para>The event queue is empty. All jobs are complete. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Result of a single event-processing step. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Returned by <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1ad29bf585fd01242b65ab5bd4ad24b9ee" kindref="member">DESSimulator.ProcessNextEvent</ref> to tell the caller whether the simulation needs an external dispatch decision, can continue autonomously, or has finished. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" line="13" column="11" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" bodystart="14" bodyend="25"/>
+      </memberdef>
+      <memberdef kind="enum" id="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1af841dd07c9c38276e117696a4dd6fe87" prot="public" static="no" strong="yes">
+        <type></type>
+        <name>DispatchingRule</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.DispatchingRule</qualifiedname>
+        <enumvalue id="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1af841dd07c9c38276e117696a4dd6fe87ade91ab1cd38237cb688634ed2b95a62e" prot="public">
+          <name>SPT_SMPT</name>
+          <briefdescription>
+<para>Shortest Processing Time — primary sort by <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_1a33c6d6f8ca03df6cacc3cae0ba540b18" kindref="member">Operation.Duration</ref> ascending. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1af841dd07c9c38276e117696a4dd6fe87a18355950aa0d135000b56aba39667cf3" prot="public">
+          <name>SPT_SRWT</name>
+          <briefdescription>
+<para>Shortest Processing Time with Shortest Remaining Work Time secondary metric. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1af841dd07c9c38276e117696a4dd6fe87a40b3eb67035d572136df047c40dc195d" prot="public">
+          <name>LPT_MMUR</name>
+          <briefdescription>
+<para>Longest Processing Time — primary sort by <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation_1a33c6d6f8ca03df6cacc3cae0ba540b18" kindref="member">Operation.Duration</ref> descending. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1af841dd07c9c38276e117696a4dd6fe87a335656bc8a6ee16400e89f426971c4e5" prot="public">
+          <name>LPT_SMPT</name>
+          <briefdescription>
+<para>Longest Processing Time with Smallest Most Urgent Remaining Time secondary metric. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1af841dd07c9c38276e117696a4dd6fe87a9207d43f78389b34a02df21e4c33f724" prot="public">
+          <name>SRT_SRWT</name>
+          <briefdescription>
+<para>Shortest Remaining Time — primary sort by total remaining work ascending. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1af841dd07c9c38276e117696a4dd6fe87a43f08a6810a17732c5bf5f20644ca7d6" prot="public">
+          <name>SRT_SMPT</name>
+          <briefdescription>
+<para>Shortest Remaining Time with Smallest Most Urgent Remaining Time secondary metric. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1af841dd07c9c38276e117696a4dd6fe87a3ead285f50958d8aa6e59cf3fe61b421" prot="public">
+          <name>LRT_MMUR</name>
+          <briefdescription>
+<para>Longest Remaining Time — primary sort by total remaining work descending. Equivalent to <computeroutput>most_work_remaining</computeroutput> in job_shop_lib. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1af841dd07c9c38276e117696a4dd6fe87ab3532cf9795624618f89ea415c2e173a" prot="public">
+          <name>SDT_SRWT</name>
+          <briefdescription>
+<para>Smallest Due Time — FIFO based on arrival order. Equivalent to <computeroutput>first_come_first_served</computeroutput> in job_shop_lib. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1af841dd07c9c38276e117696a4dd6fe87ae69ac1079473dee4c15dc7bb67c1cad3" prot="public">
+          <name>MOR</name>
+          <briefdescription>
+<para>Most Operations Remaining — primary sort by count of unprocessed operations descending. Equivalent to <computeroutput>most_operations_remaining</computeroutput> in job_shop_lib. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Composite primary dispatching rules for machine queue selection. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Tiebreaking is always by lowest job ID to match job_shop_lib&apos;s default internal ordering, ensuring identical makespans when the primary sort key is equal. Each enumerator name encodes its primary heuristic and secondary metric separated by an underscore, except MOR which has no secondary metric. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DispatchingRules.cs" line="12" column="11" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DispatchingRules.cs" bodystart="13" bodyend="23"/>
+      </memberdef>
+      <memberdef kind="enum" id="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a74e900c350e0673c74e0e62b6f351056" prot="public" static="no" strong="yes">
+        <type></type>
+        <name>EventType</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.EventType</qualifiedname>
+        <enumvalue id="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a74e900c350e0673c74e0e62b6f351056a3beaa4602cbdfa387e4c483abe9933ab" prot="public">
+          <name>JobArrived</name>
+          <briefdescription>
+<para>A job has arrived at its next required machine and is ready to be queued or started. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a74e900c350e0673c74e0e62b6f351056a118b996cf01af1910a157f7409f5d0df" prot="public">
+          <name>OperationComplete</name>
+          <briefdescription>
+<para>An operation that was running on a machine has finished processing. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Discriminated union of simulation event types processed by <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator" kindref="compound">DESSimulator</ref>. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/EventQueue.cs" line="6" column="11" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/EventQueue.cs" bodystart="7" bodyend="10"/>
+      </memberdef>
+      <memberdef kind="enum" id="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a3aebc4d18420ccdbcfb891f2835f01b0" prot="public" static="no" strong="yes">
+        <type></type>
+        <name>MachineState</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.MachineState</qualifiedname>
+        <enumvalue id="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a3aebc4d18420ccdbcfb891f2835f01b0ae599161956d626eda4cb0a5ffb85271c" prot="public">
+          <name>Idle</name>
+          <briefdescription>
+<para><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine" kindref="compound">Machine</ref> is free and ready to accept a new operation. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a3aebc4d18420ccdbcfb891f2835f01b0ad8a942ef2b04672adfafef0ad817a407" prot="public">
+          <name>Busy</name>
+          <briefdescription>
+<para><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine" kindref="compound">Machine</ref> is currently processing an operation. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a3aebc4d18420ccdbcfb891f2835f01b0ad7c8c85bf79bbe1b7188497c32c3b0ca" prot="public">
+          <name>Failed</name>
+          <briefdescription>
+<para><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine" kindref="compound">Machine</ref> has experienced a fault and cannot accept work. Reserved for future use. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a3aebc4d18420ccdbcfb891f2835f01b0a0493d27e20d11e356e53e0a730b0ad08" prot="public">
+          <name>Repair</name>
+          <briefdescription>
+<para><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine" kindref="compound">Machine</ref> is undergoing repair after a fault. Reserved for future use. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Operational states a machine can occupy during simulation. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a3aebc4d18420ccdbcfb891f2835f01b0ad7c8c85bf79bbe1b7188497c32c3b0ca" kindref="member">MachineState.Failed</ref> and <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a3aebc4d18420ccdbcfb891f2835f01b0a0493d27e20d11e356e53e0a730b0ad08" kindref="member">MachineState.Repair</ref> are reserved for future fault-injection extensions and are not currently handled by <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator" kindref="compound">DESSimulator</ref>. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Machine.cs" line="8" column="11" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Machine.cs" bodystart="9" bodyend="14"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" line="6" column="1"/>
+  </compounddef>
+</doxygen>

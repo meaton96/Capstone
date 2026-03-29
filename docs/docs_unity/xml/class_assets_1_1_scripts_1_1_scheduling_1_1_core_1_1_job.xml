@@ -1,0 +1,191 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job" kind="class" language="C#" prot="public">
+    <compoundname>Assets::Scripts::Scheduling::Core::Job</compoundname>
+    <sectiondef kind="property">
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_1a6d359a8dff65848142a8a6e8cc32440e" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Scheduling.Core.Job.Id</definition>
+        <argsstring></argsstring>
+        <name>Id</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.Job.Id</qualifiedname>
+        <briefdescription>
+<para>Unique identifier for this job, matching its index in DESSimulator.Jobs. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Job.cs" line="55" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Job.cs" bodystart="55" bodyend="55"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_1a0d323e363dfe893aae602c1d6541943b" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation" kindref="compound">Operation</ref>[]</type>
+        <definition>Operation [] Assets.Scripts.Scheduling.Core.Job.Operations</definition>
+        <argsstring></argsstring>
+        <name>Operations</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.Job.Operations</qualifiedname>
+        <briefdescription>
+<para>Ordered array of operations that must be executed sequentially. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Job.cs" line="58" column="26" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Job.cs" bodystart="58" bodyend="58"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_1a95c34ede07918ec6b705d42d89ddba3e" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="yes" privatesettable="no" protectedsettable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Scheduling.Core.Job.NextOperationIndex</definition>
+        <argsstring></argsstring>
+        <name>NextOperationIndex</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.Job.NextOperationIndex</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+<para>Index of the next operation to be dispatched or currently in progress. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Starts at <computeroutput>0</computeroutput> and is incremented by <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator" kindref="compound">DESSimulator</ref> after each <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a74e900c350e0673c74e0e62b6f351056a118b996cf01af1910a157f7409f5d0df" kindref="member">EventType.OperationComplete</ref> event. When equal to <computeroutput>Operations.Length</computeroutput> the job is considered complete. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Job.cs" line="64" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Job.cs" bodystart="64" bodyend="64"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_1aa1c1d8a26ce8148b5a2ccea8113c9890" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type>double</type>
+        <definition>double Assets.Scripts.Scheduling.Core.Job.ArrivalTime</definition>
+        <argsstring></argsstring>
+        <name>ArrivalTime</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.Job.ArrivalTime</qualifiedname>
+        <briefdescription>
+<para><ref refid="namespace_assets_1_1_scripts_1_1_simulation" kindref="compound">Simulation</ref> time at which this job entered the system. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Currently fixed at <computeroutput>0</computeroutput> for all jobs in Taillard benchmark instances. Reserved for future dynamic arrival scheduling. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Job.cs" line="69" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Job.cs" bodystart="69" bodyend="69"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_1a26d164bc9562e761d35d5d13d2156036" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="yes" privatesettable="no" protectedsettable="no">
+        <type>double</type>
+        <definition>double Assets.Scripts.Scheduling.Core.Job.CompletionTime</definition>
+        <argsstring></argsstring>
+        <name>CompletionTime</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.Job.CompletionTime</qualifiedname>
+        <initializer>= -1</initializer>
+        <briefdescription>
+<para><ref refid="namespace_assets_1_1_scripts_1_1_simulation" kindref="compound">Simulation</ref> time at which the job&apos;s final operation completed. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Initialised to <computeroutput>-1</computeroutput> and set by DESSimulator.HandleOperationComplete when <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_1a08059999b9beefced19f84b58f8d422c" kindref="member">IsComplete</ref> first becomes <computeroutput>true</computeroutput>. Used to compute the makespan. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Job.cs" line="74" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Job.cs" bodystart="74" bodyend="74"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_1a08059999b9beefced19f84b58f8d422c" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type>bool</type>
+        <definition>bool Assets.Scripts.Scheduling.Core.Job.IsComplete</definition>
+        <argsstring></argsstring>
+        <name>IsComplete</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.Job.IsComplete</qualifiedname>
+        <briefdescription>
+<para><computeroutput>true</computeroutput> when all operations have been processed; <computeroutput>false</computeroutput> otherwise. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Job.cs" line="77" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Job.cs" bodystart="77" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_1a8c8ffe232d70f7afde4cd9074a3b2fa8" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation" kindref="compound">Operation</ref></type>
+        <definition>Operation Assets.Scripts.Scheduling.Core.Job.CurrentOperation</definition>
+        <argsstring></argsstring>
+        <name>CurrentOperation</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.Job.CurrentOperation</qualifiedname>
+        <briefdescription>
+<para>The next operation awaiting dispatch, or <computeroutput>null</computeroutput> if the job is complete. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Job.cs" line="80" column="26" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Job.cs" bodystart="80" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_1a21cff90377b064a30e0cee59774de3a7" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>Assets.Scripts.Scheduling.Core.Job.Job</definition>
+        <argsstring>(int id, Operation[] operations, double arrivalTime=0)</argsstring>
+        <name>Job</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.Job.Job</qualifiedname>
+        <param>
+          <type>int</type>
+          <declname>id</declname>
+        </param>
+        <param>
+          <type><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation" kindref="compound">Operation</ref>[]</type>
+          <declname>operations</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>arrivalTime</declname>
+          <defval>0</defval>
+        </param>
+        <briefdescription>
+<para>Constructs a job with a fixed operation sequence and an optional arrival time. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>id</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Unique job identifier. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>operations</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Ordered array of operations to execute. Must not be null or empty. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>arrivalTime</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><ref refid="namespace_assets_1_1_scripts_1_1_simulation" kindref="compound">Simulation</ref> time at which the job enters the system. Defaults to <computeroutput>0</computeroutput>. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Job.cs" line="87" column="16" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Job.cs" bodystart="87" bodyend="92"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>An ordered sequence of <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation" kindref="compound">Operation</ref> objects representing a single job. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>Tracks execution progress via <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_1a95c34ede07918ec6b705d42d89ddba3e" kindref="member">NextOperationIndex</ref>, which advances each time an operation completes inside DESSimulator.HandleOperationComplete. <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_1a8c8ffe232d70f7afde4cd9074a3b2fa8" kindref="member">CurrentOperation</ref> and <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_1a08059999b9beefced19f84b58f8d422c" kindref="member">IsComplete</ref> are derived directly from this index and require no additional state. </para>
+    </detaileddescription>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Job.cs" line="52" column="11" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/Job.cs" bodystart="53" bodyend="93"/>
+    <listofallmembers>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_1aa1c1d8a26ce8148b5a2ccea8113c9890" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::Job</scope><name>ArrivalTime</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_1a26d164bc9562e761d35d5d13d2156036" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::Job</scope><name>CompletionTime</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_1a8c8ffe232d70f7afde4cd9074a3b2fa8" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::Job</scope><name>CurrentOperation</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_1a6d359a8dff65848142a8a6e8cc32440e" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::Job</scope><name>Id</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_1a08059999b9beefced19f84b58f8d422c" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::Job</scope><name>IsComplete</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_1a21cff90377b064a30e0cee59774de3a7" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::Job</scope><name>Job</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_1a95c34ede07918ec6b705d42d89ddba3e" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::Job</scope><name>NextOperationIndex</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_1a0d323e363dfe893aae602c1d6541943b" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::Job</scope><name>Operations</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

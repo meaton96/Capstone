@@ -248,6 +248,7 @@ namespace Assets.Scripts.Scheduling.Core
         /// machine count, and per-job operation sequences with durations.
         public void LoadInstance(TaillardInstance instance)
         {
+            
             int jobCount = instance.JobCount;
             int machineCount = instance.MachineCount;
 

@@ -22,14 +22,22 @@ var annotated_dup =
             [ "CrossValidator", "class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator.html", "class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator" ],
             [ "ValidationRunner", "class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner.html", "class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner" ]
           ] ]
+        ] ],
+        [ "Simulation", "namespace_assets_1_1_scripts_1_1_simulation.html", [
+          [ "FactoryLayoutManager", "class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager.html", "class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager" ],
+          [ "MachineVisual", "class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual.html", "class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual" ],
+          [ "DecisionRequest", "struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request.html", "struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request" ],
+          [ "StepResult", "struct_assets_1_1_scripts_1_1_simulation_1_1_step_result.html", "struct_assets_1_1_scripts_1_1_simulation_1_1_step_result" ],
+          [ "EpisodeResult", "struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result.html", "struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result" ],
+          [ "SimulationBridge", "class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html", "class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge" ]
         ] ]
       ] ]
     ] ],
-    [ "mirror_des", "namespacemirror__des.html", [
+    [ "mirror_des", null, [
       [ "EventType", "classmirror__des_1_1_event_type.html", null ],
       [ "SimEvent", "classmirror__des_1_1_sim_event.html", null ],
       [ "Operation", "classmirror__des_1_1_operation.html", null ],
-      [ "Job", "classmirror__des_1_1_job.html", null ],
+      [ "Job", "classmirror__des_1_1_job.html", "classmirror__des_1_1_job" ],
       [ "MachineState", "classmirror__des_1_1_machine_state.html", null ],
       [ "Machine", "classmirror__des_1_1_machine.html", null ],
       [ "DESSimulator", "classmirror__des_1_1_d_e_s_simulator.html", "classmirror__des_1_1_d_e_s_simulator" ]

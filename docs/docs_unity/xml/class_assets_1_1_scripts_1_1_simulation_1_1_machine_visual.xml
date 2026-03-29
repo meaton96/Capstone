@@ -1,0 +1,1276 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual" kind="class" language="C#" prot="public">
+    <compoundname>Assets::Scripts::Simulation::MachineVisual</compoundname>
+    <basecompoundref prot="public" virt="non-virtual">MonoBehaviour</basecompoundref>
+    <sectiondef kind="user-defined">
+      <header>Inspector References — Identity</header>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1ae30e66dcf5887a33933630393fd02635" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Simulation.MachineVisual.machineId</definition>
+        <argsstring></argsstring>
+        <name>machineId</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.machineId</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="52" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="52" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="user-defined">
+      <header>Inspector References — Rendering</header>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a1e76f6ece7101b374653716dd162bcb9" prot="private" static="no" mutable="no">
+        <type>MeshRenderer</type>
+        <definition>MeshRenderer Assets.Scripts.Simulation.MachineVisual.meshRenderer</definition>
+        <argsstring></argsstring>
+        <name>meshRenderer</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.meshRenderer</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="60" column="31" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="60" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="user-defined">
+      <header>Inspector References — Overhead UI (world-space canvas children)</header>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a2b03852b6e1de99750b4bb630dd75059" prot="private" static="no" mutable="no">
+        <type>TextMeshProUGUI</type>
+        <definition>TextMeshProUGUI Assets.Scripts.Simulation.MachineVisual.labelText</definition>
+        <argsstring></argsstring>
+        <name>labelText</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.labelText</qualifiedname>
+        <briefdescription>
+<para>Label displaying machine ID, e.g. &quot;M3&quot;. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="68" column="34" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="68" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a319f910b995d9e91394224b427b3179b" prot="private" static="no" mutable="no">
+        <type>TextMeshProUGUI</type>
+        <definition>TextMeshProUGUI Assets.Scripts.Simulation.MachineVisual.statusText</definition>
+        <argsstring></argsstring>
+        <name>statusText</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.statusText</qualifiedname>
+        <briefdescription>
+<para>Status text displaying current state, e.g. &quot;IDLE&quot;. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="69" column="34" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="69" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a41782273fba7eaa01191c36095d778ee" prot="private" static="no" mutable="no">
+        <type>Slider</type>
+        <definition>Slider Assets.Scripts.Simulation.MachineVisual.progressBar</definition>
+        <argsstring></argsstring>
+        <name>progressBar</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.progressBar</qualifiedname>
+        <briefdescription>
+<para>Slider showing operation completion percentage. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="70" column="25" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="70" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a151883ca48681fad53f1ec0911c8b8b0" prot="private" static="no" mutable="no">
+        <type>TextMeshProUGUI</type>
+        <definition>TextMeshProUGUI Assets.Scripts.Simulation.MachineVisual.queueLengthText</definition>
+        <argsstring></argsstring>
+        <name>queueLengthText</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.queueLengthText</qualifiedname>
+        <briefdescription>
+<para>Text showing queue depth, e.g. &quot;Q: 4&quot;. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="71" column="34" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="71" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="user-defined">
+      <header>Inspector References — State Colours</header>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a6412a03155153fd6f36f557b70f025bc" prot="private" static="no" mutable="no">
+        <type>Color</type>
+        <definition>Color Assets.Scripts.Simulation.MachineVisual.idleColour</definition>
+        <argsstring></argsstring>
+        <name>idleColour</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.idleColour</qualifiedname>
+        <initializer>= new Color(0.30f, 0.85f, 0.40f)</initializer>
+        <briefdescription>
+<para>Green. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="79" column="24" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="79" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a110bf450aa7bdf17229377542ae04645" prot="private" static="no" mutable="no">
+        <type>Color</type>
+        <definition>Color Assets.Scripts.Simulation.MachineVisual.busyColour</definition>
+        <argsstring></argsstring>
+        <name>busyColour</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.busyColour</qualifiedname>
+        <initializer>= new Color(0.95f, 0.80f, 0.20f)</initializer>
+        <briefdescription>
+<para>Yellow. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="80" column="24" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="80" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a3b12a9154bcb8da9311ed164307e0f14" prot="private" static="no" mutable="no">
+        <type>Color</type>
+        <definition>Color Assets.Scripts.Simulation.MachineVisual.failedColour</definition>
+        <argsstring></argsstring>
+        <name>failedColour</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.failedColour</qualifiedname>
+        <initializer>= new Color(0.90f, 0.25f, 0.25f)</initializer>
+        <briefdescription>
+<para>Red. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="81" column="24" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="81" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a91f745aa1ec0ef5bd3d8035ca6deec08" prot="private" static="no" mutable="no">
+        <type>Color</type>
+        <definition>Color Assets.Scripts.Simulation.MachineVisual.repairingColour</definition>
+        <argsstring></argsstring>
+        <name>repairingColour</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.repairingColour</qualifiedname>
+        <initializer>= new Color(0.30f, 0.55f, 0.95f)</initializer>
+        <briefdescription>
+<para>Blue. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="82" column="24" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="82" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="user-defined">
+      <header>Inspector References — Decision-Point Flash (Step 8)</header>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a2239db8d8ce29e909a5aa2e13970e037" prot="private" static="no" mutable="no">
+        <type>Color</type>
+        <definition>Color Assets.Scripts.Simulation.MachineVisual.flashColour</definition>
+        <argsstring></argsstring>
+        <name>flashColour</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.flashColour</qualifiedname>
+        <initializer>= Color.white</initializer>
+        <briefdescription>
+<para>Colour used during the decision-point flash. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="90" column="24" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="90" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1ac6970d776225326a3aee28c24962a1c3" prot="private" static="no" mutable="no">
+        <type>float</type>
+        <definition>float Assets.Scripts.Simulation.MachineVisual.flashDuration</definition>
+        <argsstring></argsstring>
+        <name>flashDuration</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.flashDuration</qualifiedname>
+        <initializer>= 0.25f</initializer>
+        <briefdescription>
+<para>Duration of the flash in seconds. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="91" column="24" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="91" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="user-defined">
+      <header>Inspector References — Queue Layout (Step 6)</header>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a96a9b78cc64b7914c647e65d572a7204" prot="private" static="no" mutable="no">
+        <type>Vector3</type>
+        <definition>Vector3 Assets.Scripts.Simulation.MachineVisual.queueDirection</definition>
+        <argsstring></argsstring>
+        <name>queueDirection</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.queueDirection</qualifiedname>
+        <initializer>= Vector3.back</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="100" column="26" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="100" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1abc1e5d0edde1ed9035eec6561ee1d0ca" prot="private" static="no" mutable="no">
+        <type>float</type>
+        <definition>float Assets.Scripts.Simulation.MachineVisual.queueSpacing</definition>
+        <argsstring></argsstring>
+        <name>queueSpacing</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.queueSpacing</qualifiedname>
+        <initializer>= 1.2f</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="102" column="24" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="102" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a21dc2e217516bd8cd4b7d41285cbe097" prot="private" static="no" mutable="no">
+        <type>float</type>
+        <definition>float Assets.Scripts.Simulation.MachineVisual.queueStartOffset</definition>
+        <argsstring></argsstring>
+        <name>queueStartOffset</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.queueStartOffset</qualifiedname>
+        <initializer>= 1.5f</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="104" column="24" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="104" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="user-defined">
+      <header>Runtime State</header>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a09447ca45ee29da8bcb504009de8b434" prot="private" static="no" mutable="no">
+        <type><ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a3aebc4d18420ccdbcfb891f2835f01b0" kindref="member">MachineState</ref></type>
+        <definition>MachineState Assets.Scripts.Simulation.MachineVisual.currentState</definition>
+        <argsstring></argsstring>
+        <name>currentState</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.currentState</qualifiedname>
+        <initializer>= MachineState.Idle</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="111" column="30" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="111" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1aaa347fb078fc8ab072344ef8367edcad" prot="private" static="no" mutable="no">
+        <type>Material</type>
+        <definition>Material Assets.Scripts.Simulation.MachineVisual.instanceMaterial</definition>
+        <argsstring></argsstring>
+        <name>instanceMaterial</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.instanceMaterial</qualifiedname>
+        <briefdescription>
+<para>Per-instance material so colour changes don&apos;t leak. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="112" column="26" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="112" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="user-defined">
+      <header>Progress Tracking</header>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a2d876771580e9defebd159c545c3fdf2" prot="private" static="no" mutable="no">
+        <type>float</type>
+        <definition>float Assets.Scripts.Simulation.MachineVisual.operationStartTime</definition>
+        <argsstring></argsstring>
+        <name>operationStartTime</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.operationStartTime</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="119" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="119" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1aece2bf2bcb8e852936defd73b507b707" prot="private" static="no" mutable="no">
+        <type>float</type>
+        <definition>float Assets.Scripts.Simulation.MachineVisual.operationDuration</definition>
+        <argsstring></argsstring>
+        <name>operationDuration</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.operationDuration</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="120" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="120" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a7f5139c1830cf6d9baf66c171a74d5f0" prot="private" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool Assets.Scripts.Simulation.MachineVisual.isTrackingProgress</definition>
+        <argsstring></argsstring>
+        <name>isTrackingProgress</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.isTrackingProgress</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="121" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="121" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="user-defined">
+      <header>Queue State</header>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a3e6200c992abd8aff0a630752814b9db" prot="private" static="no" mutable="no">
+        <type>readonly List&lt; GameObject &gt;</type>
+        <definition>readonly List&lt;GameObject&gt; Assets.Scripts.Simulation.MachineVisual.queuedJobs</definition>
+        <argsstring></argsstring>
+        <name>queuedJobs</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.queuedJobs</qualifiedname>
+        <initializer>= new List&lt;GameObject&gt;()</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="128" column="31" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="128" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="user-defined">
+      <header>Decision-Point Stats</header>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a444f58865f54738b8a820ec9f89a1515" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Simulation.MachineVisual.decisionPointCount</definition>
+        <argsstring></argsstring>
+        <name>decisionPointCount</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.decisionPointCount</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="135" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="135" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="user-defined">
+      <header>Public Properties</header>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1acc59b8396bb8447c6dde0862eec97a4a" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Simulation.MachineVisual.MachineId</definition>
+        <argsstring></argsstring>
+        <name>MachineId</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.MachineId</qualifiedname>
+        <briefdescription>
+<para><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine" kindref="compound">Machine</ref> index inside the Taillard instance. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="168" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="168" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a1c7b3ec6da258ddbeb40781c8923fbe6" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type><ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a3aebc4d18420ccdbcfb891f2835f01b0" kindref="member">MachineState</ref></type>
+        <definition>MachineState Assets.Scripts.Simulation.MachineVisual.CurrentState</definition>
+        <argsstring></argsstring>
+        <name>CurrentState</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.CurrentState</qualifiedname>
+        <briefdescription>
+<para>Current visual state. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="171" column="29" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="171" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a0f5fdaf7692fa9077248dee658a8159e" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Simulation.MachineVisual.QueueLength</definition>
+        <argsstring></argsstring>
+        <name>QueueLength</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.QueueLength</qualifiedname>
+        <briefdescription>
+<para>Number of jobs visually queued at this machine. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="174" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="174" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a2499263d81fddd0db9a377150fc4190a" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Simulation.MachineVisual.DecisionPointCount</definition>
+        <argsstring></argsstring>
+        <name>DecisionPointCount</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.DecisionPointCount</qualifiedname>
+        <briefdescription>
+<para>Total dispatching decisions made at this machine. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="177" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="177" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1abd7f98a1fcda382fa69f334ced3aba78" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type>IReadOnlyList&lt; string &gt;</type>
+        <definition>IReadOnlyList&lt;string&gt; Assets.Scripts.Simulation.MachineVisual.HistoryLog</definition>
+        <argsstring></argsstring>
+        <name>HistoryLog</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.HistoryLog</qualifiedname>
+        <briefdescription>
+<para>Read-only view of the history log. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="180" column="30" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="180" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="user-defined">
+      <header>Lifecycle</header>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1ab627002c33fcfdad698022c489710cd9" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.MachineVisual.Awake</definition>
+        <argsstring>()</argsstring>
+        <name>Awake</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.Awake</qualifiedname>
+        <briefdescription>
+<para>Creates a per-instance material clone so <ref refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a1216e5e0d70f2df45404ea6a3f34d71d" kindref="member">SetState</ref> colour changes are isolated to this machine, and hides the progress bar. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="191" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="191" bodyend="200"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1ac93ec7e9b0dc3788956d39ab0f1b5dcf" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.MachineVisual.Update</definition>
+        <argsstring>()</argsstring>
+        <name>Update</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.Update</qualifiedname>
+        <briefdescription>
+<para>Drives the fallback real-time progress bar each frame when active. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="205" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="205" bodyend="211"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a1a745f906ea3c94729969699c0ddc703" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.MachineVisual.OnDestroy</definition>
+        <argsstring>()</argsstring>
+        <name>OnDestroy</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.OnDestroy</qualifiedname>
+        <briefdescription>
+<para>Cleans up the cloned material to avoid memory leaks. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="216" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="216" bodyend="222"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="user-defined">
+      <header>Progress Bar</header>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1ab94826e61620dbbd5c2bd86069f03f25" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.MachineVisual.StartProgress</definition>
+        <argsstring>(float startTime, float duration)</argsstring>
+        <name>StartProgress</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.StartProgress</qualifiedname>
+        <param>
+          <type>float</type>
+          <declname>startTime</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>duration</declname>
+        </param>
+        <briefdescription>
+<para>Initialises and shows the progress bar for a new operation. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>startTime</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><ref refid="namespace_assets_1_1_scripts_1_1_simulation" kindref="compound">Simulation</ref> time when the operation begins.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>duration</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Total duration of the operation in sim-time units.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="318" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="318" bodyend="327"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a8419ffb5f25d6a69bfd1038e15f57cb8" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.MachineVisual.StopProgress</definition>
+        <argsstring>()</argsstring>
+        <name>StopProgress</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.StopProgress</qualifiedname>
+        <briefdescription>
+<para>Stops tracking progress and hides the progress bar. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="332" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="332" bodyend="336"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1afa7ccffcccc87aff30c070fbbcec79fb" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.MachineVisual.UpdateProgressBar</definition>
+        <argsstring>()</argsstring>
+        <name>UpdateProgressBar</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.UpdateProgressBar</qualifiedname>
+        <briefdescription>
+<para>Fallback progress update using Unity real-time. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>This path is only hit when <ref refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1aa51d6e9ea8ab3860990ba43f453157e2" kindref="member">UpdateProgress</ref> is NOT being called by the bridge. Override with sim time for accurate display. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="359" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="359" bodyend="366"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a67d2f2ba358f040cbc9e0c03c23a5900" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.MachineVisual.SetProgressBarVisible</definition>
+        <argsstring>(bool visible)</argsstring>
+        <name>SetProgressBarVisible</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.SetProgressBarVisible</qualifiedname>
+        <param>
+          <type>bool</type>
+          <declname>visible</declname>
+        </param>
+        <briefdescription>
+<para>Shows or hides the progress bar GameObject. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>visible</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><computeroutput>true</computeroutput> to show; <computeroutput>false</computeroutput> to hide.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="372" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="372" bodyend="376"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1aa51d6e9ea8ab3860990ba43f453157e2" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.MachineVisual.UpdateProgress</definition>
+        <argsstring>(float currentSimTime)</argsstring>
+        <name>UpdateProgress</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.UpdateProgress</qualifiedname>
+        <param>
+          <type>float</type>
+          <declname>currentSimTime</declname>
+        </param>
+        <briefdescription>
+<para>Drives the progress bar from an external simulation time. The <ref refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge" kindref="compound">SimulationBridge</ref> should call this each frame with the current simulation clock value. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>currentSimTime</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Current simulation clock time.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="344" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="344" bodyend="350"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="user-defined">
+      <header>Queue Visualisation (Step 6)</header>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1af1c49024477afb558fc3fd557e13de65" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.MachineVisual.RebuildQueuePositions</definition>
+        <argsstring>()</argsstring>
+        <name>RebuildQueuePositions</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.RebuildQueuePositions</qualifiedname>
+        <briefdescription>
+<para>Snaps all queued job visuals to their correct slot positions. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Currently snaps instantly. Replace with a tween or coroutine for polish. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="435" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="435" bodyend="444"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1abd0b7cf16fbdb6a6effcf080f8f6d045" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.MachineVisual.UpdateQueueLabel</definition>
+        <argsstring>()</argsstring>
+        <name>UpdateQueueLabel</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.UpdateQueueLabel</qualifiedname>
+        <briefdescription>
+<para>Updates the queue-length UI label to reflect the current count. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="449" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="449" bodyend="453"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a2942314ec9597a1b32b3f982932ff67d" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>Vector3</type>
+        <definition>Vector3 Assets.Scripts.Simulation.MachineVisual.EnqueueJob</definition>
+        <argsstring>(GameObject jobVisual)</argsstring>
+        <name>EnqueueJob</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.EnqueueJob</qualifiedname>
+        <param>
+          <type>GameObject</type>
+          <declname>jobVisual</declname>
+        </param>
+        <briefdescription>
+<para>Adds a job visual to this machine&apos;s queue. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>jobVisual</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The GameObject representing the queued job.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>The world-space position the job should move to.</para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="388" column="24" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="388" bodyend="393"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1aca8228fdb2dbdfa4830411dc62c90c9d" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.MachineVisual.DequeueJob</definition>
+        <argsstring>(GameObject jobVisual)</argsstring>
+        <name>DequeueJob</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.DequeueJob</qualifiedname>
+        <param>
+          <type>GameObject</type>
+          <declname>jobVisual</declname>
+        </param>
+        <briefdescription>
+<para>Removes a specific job from the queue (it is being processed or rerouted). Remaining jobs shift forward to fill the gap. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>jobVisual</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The GameObject to remove.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="400" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="400" bodyend="405"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1afbf499fc284321f2311b5e00d44ab4cb" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>Vector3</type>
+        <definition>Vector3 Assets.Scripts.Simulation.MachineVisual.GetProcessingPosition</definition>
+        <argsstring>()</argsstring>
+        <name>GetProcessingPosition</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.GetProcessingPosition</qualifiedname>
+        <briefdescription>
+<para>Gets the world-space position of the &quot;processing&quot; slot where the active job sits while the machine is busy. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>World-space position above the machine.</para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="412" column="24" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="412" bodyend="415"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a36d3d6f7f51df8753d18ebc772707ee2" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>Vector3</type>
+        <definition>Vector3 Assets.Scripts.Simulation.MachineVisual.GetQueueSlotPosition</definition>
+        <argsstring>(int slotIndex)</argsstring>
+        <name>GetQueueSlotPosition</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.GetQueueSlotPosition</qualifiedname>
+        <param>
+          <type>int</type>
+          <declname>slotIndex</declname>
+        </param>
+        <briefdescription>
+<para>Gets the world-space position for the Nth queued job slot. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>slotIndex</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Zero-based index in the queue.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>World-space position for the slot.</para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="422" column="24" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="422" bodyend="427"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="user-defined">
+      <header>Decision-Point Flash (Step 8)</header>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a0272154b6b5668bb805a87e62634edf3" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>IEnumerator</type>
+        <definition>IEnumerator Assets.Scripts.Simulation.MachineVisual.FlashRoutine</definition>
+        <argsstring>()</argsstring>
+        <name>FlashRoutine</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.FlashRoutine</qualifiedname>
+        <briefdescription>
+<para>Coroutine that sets the material to the flash colour, waits, then restores the state-based colour. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>An IEnumerator for the coroutine.</para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="509" column="29" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="509" bodyend="516"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1ae94e1ca6d18daeb71be468600b6f5c7e" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.MachineVisual.RecordDecisionPoint</definition>
+        <argsstring>(float simTime, int[] queuedJobIds, int chosenJobId, string ruleName, bool flash=true)</argsstring>
+        <name>RecordDecisionPoint</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.RecordDecisionPoint</qualifiedname>
+        <param>
+          <type>float</type>
+          <declname>simTime</declname>
+        </param>
+        <param>
+          <type>int[]</type>
+          <declname>queuedJobIds</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>chosenJobId</declname>
+        </param>
+        <param>
+          <type>string</type>
+          <declname>ruleName</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>flash</declname>
+          <defval>true</defval>
+        </param>
+        <briefdescription>
+<para>Records a dispatching decision at this machine and optionally flashes the visual. Called when the DES makes a dispatching decision (i.e., queue is non-empty when the machine becomes free). </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>simTime</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Current simulation time.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>queuedJobIds</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>IDs of jobs in the queue at decision time.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>chosenJobId</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The job the dispatching rule selected.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ruleName</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Name of the dispatching rule.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>flash</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>If <computeroutput>true</computeroutput>, briefly flashes the machine white.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="470" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="470" bodyend="488"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1aca10d307c1fed4ef8165c56167a43827" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.MachineVisual.Flash</definition>
+        <argsstring>()</argsstring>
+        <name>Flash</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.Flash</qualifiedname>
+        <briefdescription>
+<para>Triggers a brief white flash on the machine to visually mark a dispatching decision. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="494" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="494" bodyend="502"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="user-defined">
+      <header>Helpers</header>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1acacb964b9487c97f3017b94291b16727" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>Color</type>
+        <definition>Color Assets.Scripts.Simulation.MachineVisual.GetColourForState</definition>
+        <argsstring>(MachineState state)</argsstring>
+        <name>GetColourForState</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.GetColourForState</qualifiedname>
+        <param>
+          <type><ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a3aebc4d18420ccdbcfb891f2835f01b0" kindref="member">MachineState</ref></type>
+          <declname>state</declname>
+        </param>
+        <briefdescription>
+<para>Maps a <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a3aebc4d18420ccdbcfb891f2835f01b0" kindref="member">MachineState</ref> to its corresponding display colour. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>state</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The state to look up.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>The Color assigned to the given state.</para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="547" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="547" bodyend="557"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a78023a2a723f276f826c3f9197a64aa5" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.MachineVisual.Log</definition>
+        <argsstring>(string message)</argsstring>
+        <name>Log</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.Log</qualifiedname>
+        <param>
+          <type>string</type>
+          <declname>message</declname>
+        </param>
+        <briefdescription>
+<para>Appends a timestamped message to the history log. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>message</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The message to record.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="563" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="563" bodyend="566"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="user-defined">
+      <header>Initialisation</header>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1aa1787017cc68754d952ad76e7876dd23" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.MachineVisual.Initialise</definition>
+        <argsstring>(int id, Machine coreMachineRef=null)</argsstring>
+        <name>Initialise</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.Initialise</qualifiedname>
+        <param>
+          <type>int</type>
+          <declname>id</declname>
+        </param>
+        <param>
+          <type><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine" kindref="compound">Machine</ref></type>
+          <declname>coreMachineRef</declname>
+          <defval>null</defval>
+        </param>
+        <briefdescription>
+<para>One-time setup after instantiation. Called by <ref refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager" kindref="compound">FactoryLayoutManager</ref>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>id</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine" kindref="compound">Machine</ref> index from the TaillardInstance.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>coreMachineRef</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Reference to the core DES <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine" kindref="compound">Machine</ref> object (<computeroutput><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine" kindref="compound">Scheduling.Core.Machine</ref></computeroutput>). Stored as System.Object to avoid a compile-time dependency. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="237" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="237" bodyend="247"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="user-defined">
+      <header>State Management (Step 2)</header>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a1216e5e0d70f2df45404ea6a3f34d71d" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.MachineVisual.SetState</definition>
+        <argsstring>(MachineState newState)</argsstring>
+        <name>SetState</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.SetState</qualifiedname>
+        <param>
+          <type><ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a3aebc4d18420ccdbcfb891f2835f01b0" kindref="member">MachineState</ref></type>
+          <declname>newState</declname>
+        </param>
+        <briefdescription>
+<para>Transitions to a new visual state. Updates colour, status label, and progress bar visibility. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>newState</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The target <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a3aebc4d18420ccdbcfb891f2835f01b0" kindref="member">MachineState</ref>.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="259" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="259" bodyend="280"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a7b0ae515b56d33896c72289b6c7708be" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.MachineVisual.BeginOperation</definition>
+        <argsstring>(int jobId, float simStartTime, float duration)</argsstring>
+        <name>BeginOperation</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.BeginOperation</qualifiedname>
+        <param>
+          <type>int</type>
+          <declname>jobId</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>simStartTime</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>duration</declname>
+        </param>
+        <briefdescription>
+<para>Begins an operation — sets state to MachineState.Busy and starts the progress bar. Called by <ref refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge" kindref="compound">SimulationBridge</ref> on OperationStarted events. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>jobId</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job" kindref="compound">Job</ref> being processed.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>simStartTime</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>DES simulation start time of the operation.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>duration</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Processing time in sim-time units.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="289" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="289" bodyend="294"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a25b9f563aed0335aa7ac6552a2592012" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.MachineVisual.CompleteOperation</definition>
+        <argsstring>(int jobId)</argsstring>
+        <name>CompleteOperation</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.CompleteOperation</qualifiedname>
+        <param>
+          <type>int</type>
+          <declname>jobId</declname>
+        </param>
+        <briefdescription>
+<para>Completes the current operation — sets state to MachineState.Idle. Called by <ref refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge" kindref="compound">SimulationBridge</ref> on OperationCompleted events. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>jobId</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job" kindref="compound">Job</ref> that finished.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="301" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="301" bodyend="306"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="user-defined">
+      <header>Reset</header>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a8774b5d5b8c4b83431f2af419baa9cb4" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.MachineVisual.ResetMachine</definition>
+        <argsstring>()</argsstring>
+        <name>ResetMachine</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.ResetMachine</qualifiedname>
+        <briefdescription>
+<para>Resets all runtime state for a new episode. Called between episodes. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="526" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="526" bodyend="535"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1abc140b200ddea536ad33f97bc5214c18" prot="private" static="no" mutable="no">
+        <type>Coroutine</type>
+        <definition>Coroutine Assets.Scripts.Simulation.MachineVisual.activeFlash</definition>
+        <argsstring></argsstring>
+        <name>activeFlash</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.activeFlash</qualifiedname>
+        <briefdescription>
+<para>Handle to the active flash coroutine, allowing cancellation of overlapping flashes. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="142" column="27" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="142" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1aaa0ddd56f2d5efae2d839887585a3771" prot="private" static="no" mutable="no">
+        <type><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine" kindref="compound">Machine</ref></type>
+        <definition>Machine Assets.Scripts.Simulation.MachineVisual.coreMachine</definition>
+        <argsstring></argsstring>
+        <name>coreMachine</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.coreMachine</qualifiedname>
+        <briefdescription>
+<para>Reference to the core DES <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine" kindref="compound">Machine</ref> object, wired by <ref refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge" kindref="compound">SimulationBridge</ref>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Stored as System.Object so this file compiles without a hard dependency on the <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core" kindref="compound">Core</ref> assembly. Cast to your <computeroutput><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine" kindref="compound">Scheduling.Core.Machine</ref></computeroutput> when you wire it up. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="152" column="25" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="152" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a1cb0c82983eb973a73090bb36ca408aa" prot="private" static="no" mutable="no">
+        <type>readonly List&lt; string &gt;</type>
+        <definition>readonly List&lt;string&gt; Assets.Scripts.Simulation.MachineVisual.historyLog</definition>
+        <argsstring></argsstring>
+        <name>historyLog</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.historyLog</qualifiedname>
+        <initializer>= new List&lt;string&gt;()</initializer>
+        <briefdescription>
+<para>History log entries for the machine inspector (Step 9). </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="162" column="31" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="162" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="property">
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a43fe884dd60566a3bd279af66f221384" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine" kindref="compound">Machine</ref></type>
+        <definition>Machine Assets.Scripts.Simulation.MachineVisual.CoreMachine</definition>
+        <argsstring></argsstring>
+        <name>CoreMachine</name>
+        <qualifiedname>Assets.Scripts.Simulation.MachineVisual.CoreMachine</qualifiedname>
+        <briefdescription>
+<para>Gets the core DES <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine" kindref="compound">Machine</ref> reference. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="157" column="24" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="157" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine" kindref="compound">Machine</ref> operating states — mirrors the core DES <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine" kindref="compound">Machine</ref> states. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>Visual representation of a single machine on the factory floor.</para>
+<para>Attach this to the MachinePrefab cube alongside a MeshRenderer and a child world-space Canvas for the overhead UI. </para>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="1">
+        <label>Assets.Scripts.Simulation.MachineVisual</label>
+        <link refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>MonoBehaviour</label>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="1">
+        <label>Assets.Scripts.Simulation.MachineVisual</label>
+        <link refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>MonoBehaviour</label>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" line="45" column="11" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/MachineVisual.cs" bodystart="46" bodyend="569"/>
+    <listofallmembers>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1abc140b200ddea536ad33f97bc5214c18" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>activeFlash</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1ab627002c33fcfdad698022c489710cd9" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>Awake</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a7b0ae515b56d33896c72289b6c7708be" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>BeginOperation</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a110bf450aa7bdf17229377542ae04645" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>busyColour</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a25b9f563aed0335aa7ac6552a2592012" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>CompleteOperation</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a43fe884dd60566a3bd279af66f221384" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>CoreMachine</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1aaa0ddd56f2d5efae2d839887585a3771" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>coreMachine</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a1c7b3ec6da258ddbeb40781c8923fbe6" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>CurrentState</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a09447ca45ee29da8bcb504009de8b434" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>currentState</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a2499263d81fddd0db9a377150fc4190a" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>DecisionPointCount</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a444f58865f54738b8a820ec9f89a1515" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>decisionPointCount</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1aca8228fdb2dbdfa4830411dc62c90c9d" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>DequeueJob</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a2942314ec9597a1b32b3f982932ff67d" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>EnqueueJob</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a3b12a9154bcb8da9311ed164307e0f14" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>failedColour</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1aca10d307c1fed4ef8165c56167a43827" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>Flash</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a2239db8d8ce29e909a5aa2e13970e037" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>flashColour</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1ac6970d776225326a3aee28c24962a1c3" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>flashDuration</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a0272154b6b5668bb805a87e62634edf3" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>FlashRoutine</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1acacb964b9487c97f3017b94291b16727" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>GetColourForState</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1afbf499fc284321f2311b5e00d44ab4cb" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>GetProcessingPosition</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a36d3d6f7f51df8753d18ebc772707ee2" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>GetQueueSlotPosition</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1abd7f98a1fcda382fa69f334ced3aba78" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>HistoryLog</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a1cb0c82983eb973a73090bb36ca408aa" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>historyLog</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a6412a03155153fd6f36f557b70f025bc" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>idleColour</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1aa1787017cc68754d952ad76e7876dd23" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>Initialise</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1aaa347fb078fc8ab072344ef8367edcad" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>instanceMaterial</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a7f5139c1830cf6d9baf66c171a74d5f0" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>isTrackingProgress</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a2b03852b6e1de99750b4bb630dd75059" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>labelText</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a78023a2a723f276f826c3f9197a64aa5" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>Log</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1acc59b8396bb8447c6dde0862eec97a4a" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>MachineId</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1ae30e66dcf5887a33933630393fd02635" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>machineId</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a1e76f6ece7101b374653716dd162bcb9" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>meshRenderer</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a1a745f906ea3c94729969699c0ddc703" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>OnDestroy</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1aece2bf2bcb8e852936defd73b507b707" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>operationDuration</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a2d876771580e9defebd159c545c3fdf2" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>operationStartTime</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a41782273fba7eaa01191c36095d778ee" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>progressBar</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a96a9b78cc64b7914c647e65d572a7204" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>queueDirection</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a3e6200c992abd8aff0a630752814b9db" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>queuedJobs</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a0f5fdaf7692fa9077248dee658a8159e" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>QueueLength</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a151883ca48681fad53f1ec0911c8b8b0" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>queueLengthText</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1abc1e5d0edde1ed9035eec6561ee1d0ca" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>queueSpacing</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a21dc2e217516bd8cd4b7d41285cbe097" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>queueStartOffset</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1af1c49024477afb558fc3fd557e13de65" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>RebuildQueuePositions</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1ae94e1ca6d18daeb71be468600b6f5c7e" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>RecordDecisionPoint</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a91f745aa1ec0ef5bd3d8035ca6deec08" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>repairingColour</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a8774b5d5b8c4b83431f2af419baa9cb4" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>ResetMachine</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a67d2f2ba358f040cbc9e0c03c23a5900" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>SetProgressBarVisible</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a1216e5e0d70f2df45404ea6a3f34d71d" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>SetState</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1ab94826e61620dbbd5c2bd86069f03f25" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>StartProgress</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a319f910b995d9e91394224b427b3179b" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>statusText</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1a8419ffb5f25d6a69bfd1038e15f57cb8" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>StopProgress</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1ac93ec7e9b0dc3788956d39ab0f1b5dcf" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>Update</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1aa51d6e9ea8ab3860990ba43f453157e2" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>UpdateProgress</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1afa7ccffcccc87aff30c070fbbcec79fb" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>UpdateProgressBar</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_1abd0b7cf16fbdb6a6effcf080f8f6d045" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::MachineVisual</scope><name>UpdateQueueLabel</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,120 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="struct_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1_1_visual_event" kind="struct" language="C#" prot="private">
+    <compoundname>Assets::Scripts::Simulation::SimulationBridge::VisualEvent</compoundname>
+    <sectiondef kind="public-type">
+      <memberdef kind="enum" id="struct_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1_1_visual_event_1ad99cbf570cabb2414ce1cecf66df2546" prot="public" static="no" strong="yes">
+        <type></type>
+        <name>Kind</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.VisualEvent.Kind</qualifiedname>
+        <enumvalue id="struct_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1_1_visual_event_1ad99cbf570cabb2414ce1cecf66df2546adf415eda2a915bebb604d19e58012777" prot="public">
+          <name>OperationStarted</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="struct_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1_1_visual_event_1ad99cbf570cabb2414ce1cecf66df2546a282e855dcbf86943f63b510c5bbd580d" prot="public">
+          <name>OperationCompleted</name>
+          <briefdescription>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="620" column="19" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="621" bodyend="624"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1_1_visual_event_1a1f39e4023f16ef0043bbe99f9c1c6eeb" prot="public" static="no" mutable="no">
+        <type>Kind</type>
+        <definition>Kind Assets.Scripts.Simulation.SimulationBridge.VisualEvent.Type</definition>
+        <argsstring></argsstring>
+        <name>Type</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.VisualEvent.Type</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="626" column="25" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="626" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1_1_visual_event_1a4e5dc110b12551f4889511496920e998" prot="public" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Assets.Scripts.Simulation.SimulationBridge.VisualEvent.Time</definition>
+        <argsstring></argsstring>
+        <name>Time</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.VisualEvent.Time</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="627" column="27" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="627" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1_1_visual_event_1a32c2c41f3e7d5671378d922e5a0c4a6a" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Simulation.SimulationBridge.VisualEvent.JobId</definition>
+        <argsstring></argsstring>
+        <name>JobId</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.VisualEvent.JobId</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="628" column="24" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="628" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1_1_visual_event_1a396fd097bba855a0d0f08c2dbd5f31c2" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Simulation.SimulationBridge.VisualEvent.MachineId</definition>
+        <argsstring></argsstring>
+        <name>MachineId</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.VisualEvent.MachineId</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="629" column="24" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="629" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1_1_visual_event_1a1fdd6ab280107cf6354eb2a56be44b72" prot="public" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Assets.Scripts.Simulation.SimulationBridge.VisualEvent.Duration</definition>
+        <argsstring></argsstring>
+        <name>Duration</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.VisualEvent.Duration</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="630" column="27" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="630" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Lightweight record of a single visual event for buffered playback. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="618" column="16" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="619" bodyend="631"/>
+    <listofallmembers>
+      <member refid="struct_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1_1_visual_event_1a1fdd6ab280107cf6354eb2a56be44b72" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge::VisualEvent</scope><name>Duration</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1_1_visual_event_1a32c2c41f3e7d5671378d922e5a0c4a6a" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge::VisualEvent</scope><name>JobId</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1_1_visual_event_1ad99cbf570cabb2414ce1cecf66df2546" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge::VisualEvent</scope><name>Kind</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1_1_visual_event_1a396fd097bba855a0d0f08c2dbd5f31c2" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge::VisualEvent</scope><name>MachineId</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1_1_visual_event_1a4e5dc110b12551f4889511496920e998" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge::VisualEvent</scope><name>Time</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1_1_visual_event_1a1f39e4023f16ef0043bbe99f9c1c6eeb" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge::VisualEvent</scope><name>Type</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

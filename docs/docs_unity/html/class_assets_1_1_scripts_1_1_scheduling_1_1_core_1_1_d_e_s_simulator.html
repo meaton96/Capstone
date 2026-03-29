@@ -98,6 +98,10 @@ $(function(){initNavTree('class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
+<tr class="memitem:ad29bf585fd01242b65ab5bd4ad24b9ee" id="r_ad29bf585fd01242b65ab5bd4ad24b9ee"><td class="memItemLeft"><a class="el" href="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core.html#a23eac89d613aa8e377b767e1cbc93875">SimStepResult</a>&#160;</td><td class="memItemRight"><a class="el" href="#ad29bf585fd01242b65ab5bd4ad24b9ee">ProcessNextEvent</a> ()</td></tr>
+<tr class="memdesc:ad29bf585fd01242b65ab5bd4ad24b9ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Processes a single event from the queue (stepped execution).  <br /></td></tr>
+<tr class="memitem:a914e8fe3b5d0d08e5c46bf76a73114d9" id="r_a914e8fe3b5d0d08e5c46bf76a73114d9"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a914e8fe3b5d0d08e5c46bf76a73114d9">ApplyDecision</a> (<a class="el" href="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core.html#af841dd07c9c38276e117696a4dd6fe87">DispatchingRule</a> rule)</td></tr>
+<tr class="memdesc:a914e8fe3b5d0d08e5c46bf76a73114d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Applies an external dispatch decision and resumes the simulation.  <br /></td></tr>
 <tr class="memitem:aa79c7f08fc10bc3b96c14e2b6137b95f" id="r_aa79c7f08fc10bc3b96c14e2b6137b95f"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#aa79c7f08fc10bc3b96c14e2b6137b95f">LoadInstance</a> (<a class="el" href="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance.html">TaillardInstance</a> instance)</td></tr>
 <tr class="memdesc:aa79c7f08fc10bc3b96c14e2b6137b95f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads a Taillard instance and initializes all jobs and machines.  <br /></td></tr>
 <tr class="memitem:a477dc5db6d5bfeea5ec2dd71e9cfd63e" id="r_a477dc5db6d5bfeea5ec2dd71e9cfd63e"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a477dc5db6d5bfeea5ec2dd71e9cfd63e">Reset</a> ()</td></tr>
@@ -129,11 +133,43 @@ double&#160;</td><td class="memItemRight"><b>Makespan</b><code> [get]</code></td
 int&#160;</td><td class="memItemRight"><b>TotalOperationsCompleted</b><code> [get]</code></td></tr>
 <tr class="memitem:a387acb9f195c44157a016a4d475179ea" id="r_a387acb9f195c44157a016a4d475179ea"><td class="memItemLeft"><a id="a387acb9f195c44157a016a4d475179ea" name="a387acb9f195c44157a016a4d475179ea"></a>
 int&#160;</td><td class="memItemRight"><b>TotalJobsCompleted</b><code> [get]</code></td></tr>
+<tr class="memitem:abd336966a0fbc46b2b346e93847c7523" id="r_abd336966a0fbc46b2b346e93847c7523"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#abd336966a0fbc46b2b346e93847c7523">WaitingForDecision</a><code> [get]</code></td></tr>
+<tr class="memdesc:abd336966a0fbc46b2b346e93847c7523"><td class="mdescLeft">&#160;</td><td class="mdescRight">True when the simulator is paused waiting for an external dispatch decision.  <br /></td></tr>
+<tr class="memitem:a93aa938262803d69cd75fb7265f9ad97" id="r_a93aa938262803d69cd75fb7265f9ad97"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a93aa938262803d69cd75fb7265f9ad97">PendingDecisionMachineId</a> = -1<code> [get]</code></td></tr>
+<tr class="memdesc:a93aa938262803d69cd75fb7265f9ad97"><td class="mdescLeft">&#160;</td><td class="mdescRight">The machine ID that requires a dispatch decision.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Pure discrete-event simulator for <a class="el" href="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job.html" title="An ordered sequence of Operation objects representing a single job.">Job</a> Shop Problem (JSP) validation. </p>
 <p>No <a class="el" href="namespace_assets_1_1_scripts_1_1_scheduling_1_1_unity.html">Unity</a> dependencies — can run standalone or inside <a class="el" href="namespace_assets_1_1_scripts_1_1_scheduling_1_1_unity.html">Unity</a>. Transit times are zero for benchmark validation. The RL layer will later wrap this and inject non-zero transit via AGVs. </p>
 </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
+<a id="a914e8fe3b5d0d08e5c46bf76a73114d9" name="a914e8fe3b5d0d08e5c46bf76a73114d9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a914e8fe3b5d0d08e5c46bf76a73114d9">&#9670;&#160;</a></span>ApplyDecision()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Assets.Scripts.Scheduling.Core.DESSimulator.ApplyDecision </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core.html#af841dd07c9c38276e117696a4dd6fe87">DispatchingRule</a></td>          <td class="paramname"><span class="paramname"><em>rule</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Applies an external dispatch decision and resumes the simulation. </p>
+<p>Uses the supplied <code class="param">rule</code> to select the next operation from the pending machine's waiting queue, starts processing it, and enqueues the corresponding <a class="el" href="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core.html#a74e900c350e0673c74e0e62b6f351056a118b996cf01af1910a157f7409f5d0df" title="EventType.OperationComplete">EventType.OperationComplete</a> event. Clears the <a class="el" href="#abd336966a0fbc46b2b346e93847c7523" title="WaitingForDecision">WaitingForDecision</a> flag so <a class="el" href="#ad29bf585fd01242b65ab5bd4ad24b9ee" title="ProcessNextEvent">ProcessNextEvent</a> can continue.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">rule</td><td>The <a class="el" href="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core.html#af841dd07c9c38276e117696a4dd6fe87" title="DispatchingRule">DispatchingRule</a> the agent/bridge chose (one of the 8 composite PDRs, or any single rule for validation).</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section pre"><dt>Precondition</dt><dd><a class="el" href="#abd336966a0fbc46b2b346e93847c7523" title="WaitingForDecision">WaitingForDecision</a> must be true. </dd></dl>
+<dl class="section post"><dt>Postcondition</dt><dd><a class="el" href="#abd336966a0fbc46b2b346e93847c7523" title="WaitingForDecision">WaitingForDecision</a> is false, the chosen operation is running on the machine, and a completion event has been enqueued. </dd></dl>
+
+</div>
+</div>
 <a id="aa79c7f08fc10bc3b96c14e2b6137b95f" name="aa79c7f08fc10bc3b96c14e2b6137b95f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa79c7f08fc10bc3b96c14e2b6137b95f">&#9670;&#160;</a></span>LoadInstance()</h2>
 
@@ -180,6 +216,40 @@ int&#160;</td><td class="memItemRight"><b>TotalJobsCompleted</b><code> [get]</co
 
 </div>
 </div>
+<a id="ad29bf585fd01242b65ab5bd4ad24b9ee" name="ad29bf585fd01242b65ab5bd4ad24b9ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad29bf585fd01242b65ab5bd4ad24b9ee">&#9670;&#160;</a></span>ProcessNextEvent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core.html#a23eac89d613aa8e377b767e1cbc93875">SimStepResult</a> Assets.Scripts.Scheduling.Core.DESSimulator.ProcessNextEvent </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Processes a single event from the queue (stepped execution). </p>
+<p>This is the stepped equivalent of the <a class="el" href="#a73e213e5d37b0db03a31962243bf1045" title="Run">Run</a> loop. Call it repeatedly from the bridge/agent until it returns <a class="el" href="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core.html#a23eac89d613aa8e377b767e1cbc93875af92965e2c8a7afb3c1b9a5c09a263636" title="SimStepResult.Done">SimStepResult.Done</a>.</p>
+<p>When the return value is <a class="el" href="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core.html#a23eac89d613aa8e377b767e1cbc93875a0cac3c7b6d9e33208ee147431e86725d" title="SimStepResult.DecisionRequired">SimStepResult.DecisionRequired</a>, the caller MUST call <a class="el" href="#a914e8fe3b5d0d08e5c46bf76a73114d9" title="ApplyDecision">ApplyDecision</a> before calling this method again.</p>
+<dl class="section user"><dt>Event flow</dt><dd><ol type="1">
+<li>If already waiting for a decision → return DecisionRequired immediately.</li>
+<li>If queue is empty → compute makespan, return Done.</li>
+<li>Dequeue the next event, advance CurrentTime, and process it.<ul>
+<li><a class="el" href="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core.html#a74e900c350e0673c74e0e62b6f351056a3beaa4602cbdfa387e4c483abe9933ab" title="EventType.JobArrived">EventType.JobArrived</a> calls the existing HandleJobArrived (which may auto-start on an idle machine — no decision needed).</li>
+<li><a class="el" href="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core.html#a74e900c350e0673c74e0e62b6f351056a118b996cf01af1910a157f7409f5d0df" title="EventType.OperationComplete">EventType.OperationComplete</a> calls HandleOperationCompleteStepped which uses TryStartNextOnMachineStepped instead of the auto-dispatch version.</li>
+</ul>
+</li>
+<li>If the stepped handler flagged a decision → return DecisionRequired.</li>
+<li>Otherwise → return Continue or Done depending on remaining events.</li>
+</ol>
+</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A <a class="el" href="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core.html#a23eac89d613aa8e377b767e1cbc93875" title="SimStepResult">SimStepResult</a> indicating what the caller should do next. </dd></dl>
+
+</div>
+</div>
 <a id="a477dc5db6d5bfeea5ec2dd71e9cfd63e" name="a477dc5db6d5bfeea5ec2dd71e9cfd63e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a477dc5db6d5bfeea5ec2dd71e9cfd63e">&#9670;&#160;</a></span>Reset()</h2>
 
@@ -216,7 +286,7 @@ int&#160;</td><td class="memItemRight"><b>TotalJobsCompleted</b><code> [get]</co
 </div><div class="memdoc">
 
 <p>Runs the full simulation to completion and returns the makespan. </p>
-<p>Processes all events in the <a class="el" href="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_event_queue.html" title="EventQueue">EventQueue</a> in chronological order, advancing CurrentTime to each event's timestamp and dispatching to either HandleJobArrived or HandleOperationComplete as appropriate. Simulation ends when the queue is empty.</p>
+<p>Processes all events in the <a class="el" href="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_event_queue.html" title="EventQueue">EventQueue</a> in chronological order, advancing CurrentTime to each event's timestamp and dispatching to either HandleJobArrived or HandleOperationComplete as appropriate. <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation.html">Simulation</a> ends when the queue is empty.</p>
 <dl class="section return"><dt>Returns</dt><dd>The makespan, defined as the latest completion time across all jobs. </dd></dl>
 
 </div>
@@ -269,6 +339,56 @@ int&#160;</td><td class="memItemRight"><b>TotalJobsCompleted</b><code> [get]</co
 
 <p>Callback for RL integration, invoked when a machine requires a dispatch decision. </p>
 <p>The integer parameter passed to the action represents the machine ID that is awaiting a dispatch assignment. </p>
+
+</div>
+</div>
+<a id="a93aa938262803d69cd75fb7265f9ad97" name="a93aa938262803d69cd75fb7265f9ad97"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a93aa938262803d69cd75fb7265f9ad97">&#9670;&#160;</a></span>PendingDecisionMachineId</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Assets.Scripts.Scheduling.Core.DESSimulator.PendingDecisionMachineId = -1</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel get">get</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>The machine ID that requires a dispatch decision. </p>
+<p>Only valid when <a class="el" href="#abd336966a0fbc46b2b346e93847c7523" title="WaitingForDecision">WaitingForDecision</a> is true. The caller should inspect <code>Machines</code>[PendingDecisionMachineId].WaitingQueue to see the candidate operations, then call <a class="el" href="#a914e8fe3b5d0d08e5c46bf76a73114d9" title="ApplyDecision">ApplyDecision</a>. </p>
+
+</div>
+</div>
+<a id="abd336966a0fbc46b2b346e93847c7523" name="abd336966a0fbc46b2b346e93847c7523"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abd336966a0fbc46b2b346e93847c7523">&#9670;&#160;</a></span>WaitingForDecision</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Assets.Scripts.Scheduling.Core.DESSimulator.WaitingForDecision</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel get">get</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>True when the simulator is paused waiting for an external dispatch decision. </p>
+<p>Set to true inside <a class="el" href="#ad29bf585fd01242b65ab5bd4ad24b9ee" title="ProcessNextEvent">ProcessNextEvent</a> when TryStartNextOnMachineStepped encounters a non-empty waiting queue. Cleared by <a class="el" href="#a914e8fe3b5d0d08e5c46bf76a73114d9" title="ApplyDecision">ApplyDecision</a>. While true, <a class="el" href="#ad29bf585fd01242b65ab5bd4ad24b9ee" title="ProcessNextEvent">ProcessNextEvent</a> will immediately return <a class="el" href="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core.html#a23eac89d613aa8e377b767e1cbc93875a0cac3c7b6d9e33208ee147431e86725d" title="SimStepResult.DecisionRequired">SimStepResult.DecisionRequired</a> without processing further events. </p>
 
 </div>
 </div>

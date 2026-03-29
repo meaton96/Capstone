@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="classmirror__des_1_1_machine_state" kind="class" language="Python" prot="public">
+    <compoundname>mirror_des::MachineState</compoundname>
+    <basecompoundref prot="public" virt="non-virtual">Enum</basecompoundref>
+    <sectiondef kind="public-static-attrib">
+      <memberdef kind="variable" id="classmirror__des_1_1_machine_state_1a33e0aa350e8af127c79cb06b2595f13c" prot="public" static="yes" mutable="no">
+        <type></type>
+        <definition>mirror_des.MachineState::IDLE</definition>
+        <argsstring></argsstring>
+        <name>IDLE</name>
+        <qualifiedname>mirror_des.MachineState.IDLE</qualifiedname>
+        <initializer>=  auto()</initializer>
+        <briefdescription>
+<para><ref refid="classmirror__des_1_1_machine" kindref="compound">Machine</ref> is free and ready to accept a new operation. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="118" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="118" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classmirror__des_1_1_machine_state_1adcbaf2b9705b5049c68d2d4cd60fbc80" prot="public" static="yes" mutable="no">
+        <type></type>
+        <definition>mirror_des.MachineState::BUSY</definition>
+        <argsstring></argsstring>
+        <name>BUSY</name>
+        <qualifiedname>mirror_des.MachineState.BUSY</qualifiedname>
+        <initializer>=  auto()</initializer>
+        <briefdescription>
+<para><ref refid="classmirror__des_1_1_machine" kindref="compound">Machine</ref> is currently processing an operation. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="119" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="119" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Operational states for a machine, mirroring the C# <ref refid="classmirror__des_1_1_machine_state" kindref="compound">MachineState</ref> enum. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="2">
+        <label>Enum</label>
+      </node>
+      <node id="1">
+        <label>mirror_des.MachineState</label>
+        <link refid="classmirror__des_1_1_machine_state"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="2">
+        <label>Enum</label>
+      </node>
+      <node id="1">
+        <label>mirror_des.MachineState</label>
+        <link refid="classmirror__des_1_1_machine_state"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="117" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="117" bodyend="121"/>
+    <listofallmembers>
+      <member refid="classmirror__des_1_1_machine_state_1adcbaf2b9705b5049c68d2d4cd60fbc80" prot="public" virt="non-virtual"><scope>mirror_des::MachineState</scope><name>BUSY</name></member>
+      <member refid="classmirror__des_1_1_machine_state_1a33e0aa350e8af127c79cb06b2595f13c" prot="public" virt="non-virtual"><scope>mirror_des::MachineState</scope><name>IDLE</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,64 @@
+\doxysection{C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Scheduling/\+\+Validation/\+compare\+\_\+results.py File Reference}
+\hypertarget{compare__results_8py}{}\label{compare__results_8py}\index{C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/compare\_results.py@{C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/compare\_results.py}}
+
+
+Cross-\/validates C\# DES output against the job\+\_\+shop\+\_\+lib Python reference (v2).  
+
+
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{compare__results_8py_a35e05c33e420d53d64f7325d97474630}\label{compare__results_8py_a35e05c33e420d53d64f7325d97474630} 
+{\bfseries compare\+\_\+results.\+load\+\_\+data} ()
+\item 
+\Hypertarget{compare__results_8py_af50d8fe016b615bbccbf5a7a18781ea1}\label{compare__results_8py_af50d8fe016b615bbccbf5a7a18781ea1} 
+{\bfseries compare\+\_\+results.\+find\+\_\+first\+\_\+divergence} (ref\+\_\+ops, cs\+\_\+ops)
+\item 
+\Hypertarget{compare__results_8py_a5a767a970869d2fce924e91254c7bd90}\label{compare__results_8py_a5a767a970869d2fce924e91254c7bd90} 
+{\bfseries compare\+\_\+results.\+main} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{compare__results_8py_ac23ae493a134781afbd626b2d1de7cb9}\label{compare__results_8py_ac23ae493a134781afbd626b2d1de7cb9} 
+{\bfseries compare\+\_\+results.\+data\+\_\+dir} = Path("{}../\+../\+../\+Resources/\+Validation"{})
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Cross-\/validates C\# DES output against the job\+\_\+shop\+\_\+lib Python reference (v2). 
+
+Compares makespan CSVs and full operation schedules produced by the C\# {\ttfamily Validation\+Exporter} against the job\+\_\+shop\+\_\+lib reference generator. Designed to be robust against common data quality issues:\+ duplicate rows from re-\/runs, missing rules on either side, and large-\/scale mismatch sets requiring triage.
+
+\begin{DoxyParagraph}{Prerequisites}
+
+\begin{DoxyEnumerate}
+\item Run the C\# {\ttfamily Validation\+Exporter} to produce {\ttfamily csharp\+\_\+makespans.\+csv} and {\ttfamily csharp\+\_\+schedules.\+json}.
+\item Run the Python reference generator to produce {\ttfamily reference\+\_\+makespans.\+csv} and {\ttfamily reference\+\_\+schedules.\+json}.
+\item Run this script from the directory containing all four files:\+ 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{python\ compare\_results.py}
+
+\end{DoxyCode}
+
+\end{DoxyEnumerate}
+\end{DoxyParagraph}
+\begin{DoxyParagraph}{Output}
+
+\begin{DoxyItemize}
+\item Coverage report:\+ rows and instances found on each side, and any asymmetric pairs.
+\item Overall exact-\/match /\+ mismatch counts.
+\item Per-\/rule summary showing match rate, average absolute delta, and maximum delta.
+\item Instance × rule comparison table showing {\ttfamily OK} or a signed integer delta.
+\item Top-\/10 worst mismatches by absolute delta, each with the first divergent operation.
+\item Diagnosis hints inferring the likely bug class from the sign distribution of deltas and FCFS match rate.
+\item Full merged Data\+Frame saved to {\ttfamily comparison\+\_\+results.\+csv}.
+\end{DoxyItemize}
+\end{DoxyParagraph}
+\begin{DoxyParagraph}{Exit codes}
+
+\begin{DoxyItemize}
+\item {\ttfamily 0} — all comparable pairs matched exactly.
+\item {\ttfamily 1} — one or more mismatches found, or no common pairs could be compared. 
+\end{DoxyItemize}
+\end{DoxyParagraph}

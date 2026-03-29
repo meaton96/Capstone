@@ -1,0 +1,197 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance" kind="class" language="C#" prot="public">
+    <compoundname>Assets::Scripts::Scheduling::Data::TaillardInstance</compoundname>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1a98a30393472294f14fa27c0bacd36822" prot="public" static="no" mutable="no">
+        <type>string</type>
+        <definition>string Assets.Scripts.Scheduling.Data.TaillardInstance.name</definition>
+        <argsstring></argsstring>
+        <name>name</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Data.TaillardInstance.name</qualifiedname>
+        <briefdescription>
+<para>Benchmark instance identifier, e.g. <computeroutput>&quot;ta001&quot;</computeroutput>. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data/TaillardInstance.cs" line="15" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data/TaillardInstance.cs" bodystart="15" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1a7590980360c981cb8e7a63498bb96f77" prot="public" static="no" mutable="no">
+        <type>int[][]</type>
+        <definition>int [][] Assets.Scripts.Scheduling.Data.TaillardInstance.duration_matrix</definition>
+        <argsstring></argsstring>
+        <name>duration_matrix</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Data.TaillardInstance.duration_matrix</qualifiedname>
+        <briefdescription>
+<para>Processing time matrix indexed as <computeroutput></computeroutput>[job][operation]. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Each entry is the number of time units required for that operation. Must be rectangular (all rows the same length) for <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1a7207f47edf07e7ec6704d88cadebd4c4" kindref="member">MachineCount</ref> to be valid. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data/TaillardInstance.cs" line="23" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data/TaillardInstance.cs" bodystart="23" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1a9ee0366b1709a54f08fb45a32e4fb0e9" prot="public" static="no" mutable="no">
+        <type>int[][]</type>
+        <definition>int [][] Assets.Scripts.Scheduling.Data.TaillardInstance.machines_matrix</definition>
+        <argsstring></argsstring>
+        <name>machines_matrix</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Data.TaillardInstance.machines_matrix</qualifiedname>
+        <briefdescription>
+<para>Machine assignment matrix indexed as <computeroutput></computeroutput>[job][operation]. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Each entry is the zero-based index of the machine that must process that operation. Dimensions must match <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1a7590980360c981cb8e7a63498bb96f77" kindref="member">duration_matrix</ref> exactly. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data/TaillardInstance.cs" line="28" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data/TaillardInstance.cs" bodystart="28" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1ae360821e88eccf4c53083e43ac7bb179" prot="public" static="no" mutable="no">
+        <type><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata" kindref="compound">TaillardMetadata</ref></type>
+        <definition>TaillardMetadata Assets.Scripts.Scheduling.Data.TaillardInstance.metadata</definition>
+        <argsstring></argsstring>
+        <name>metadata</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Data.TaillardInstance.metadata</qualifiedname>
+        <briefdescription>
+<para>Known bounds and bibliographic reference for this instance. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>May be <computeroutput>null</computeroutput> if the JSON source omits the metadata block. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data/TaillardInstance.cs" line="32" column="33" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data/TaillardInstance.cs" bodystart="32" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1ac09a835ada8df416bbaac2ed3cea788f" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Scheduling.Data.TaillardInstance.machine</definition>
+        <argsstring></argsstring>
+        <name>machine</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Data.TaillardInstance.machine</qualifiedname>
+        <briefdescription>
+<para>Returns the ordered operation sequence for a single job as typed value tuples. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Zips <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1a9ee0366b1709a54f08fb45a32e4fb0e9" kindref="member">machines_matrix</ref> and <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1a7590980360c981cb8e7a63498bb96f77" kindref="member">duration_matrix</ref> for the given job index into an array of <computeroutput></computeroutput>(machine, duration) pairs in operation order. This is the primary data accessor used by DESSimulator.LoadInstance when constructing Operation objects.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>jobIndex</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Zero-based index of the job to query. Must be in the range <computeroutput></computeroutput>[0, JobCount).</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>An array of <computeroutput></computeroutput>(int machine, int duration) tuples, one per operation, in the order they must be executed. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data/TaillardInstance.cs" line="55" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data/TaillardInstance.cs" bodystart="55" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="property">
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1a46fab40f86bb631453294c3a5f25b092" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type>string</type>
+        <definition>string Assets.Scripts.Scheduling.Data.TaillardInstance.Name</definition>
+        <argsstring></argsstring>
+        <name>Name</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Data.TaillardInstance.Name</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data/TaillardInstance.cs" line="17" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data/TaillardInstance.cs" bodystart="17" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1af2bd50c21201cbe57bd256239db584d6" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Scheduling.Data.TaillardInstance.JobCount</definition>
+        <argsstring></argsstring>
+        <name>JobCount</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Data.TaillardInstance.JobCount</qualifiedname>
+        <briefdescription>
+<para>Number of jobs in the instance, derived from the row count of <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1a7590980360c981cb8e7a63498bb96f77" kindref="member">duration_matrix</ref>. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data/TaillardInstance.cs" line="35" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data/TaillardInstance.cs" bodystart="35" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1a7207f47edf07e7ec6704d88cadebd4c4" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Scheduling.Data.TaillardInstance.MachineCount</definition>
+        <argsstring></argsstring>
+        <name>MachineCount</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Data.TaillardInstance.MachineCount</qualifiedname>
+        <briefdescription>
+<para>Number of machines in the instance, derived from the column count of <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1a7590980360c981cb8e7a63498bb96f77" kindref="member">duration_matrix</ref>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Taillard benchmark instances are always square (jobs × machines = machines × machines), so <computeroutput>duration_matrix</computeroutput>[0].Length is a reliable column count. Behaviour is undefined if <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1a7590980360c981cb8e7a63498bb96f77" kindref="member">duration_matrix</ref> is empty or jagged. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data/TaillardInstance.cs" line="41" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data/TaillardInstance.cs" bodystart="41" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1ada37d37bc9f9beb703f74cbdb5b4ab62" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>int int duration[]</type>
+        <definition>int int duration[] Assets.Scripts.Scheduling.Data.TaillardInstance.GetJobOperations</definition>
+        <argsstring>(int jobIndex)</argsstring>
+        <name>GetJobOperations</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Data.TaillardInstance.GetJobOperations</qualifiedname>
+        <param>
+          <type>int</type>
+          <declname>jobIndex</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data/TaillardInstance.cs" line="55" column="41" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data/TaillardInstance.cs" bodystart="55" bodyend="64"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Direct deserialization target for the Taillard JSON benchmark format. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>Field names match the JSON keys exactly to allow zero-configuration deserialization via <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_unity" kindref="compound">Unity</ref>&apos;s <computeroutput>JsonUtility</computeroutput> or <computeroutput>System.Text.Json</computeroutput>. After deserialization, <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1af2bd50c21201cbe57bd256239db584d6" kindref="member">JobCount</ref> and <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1a7207f47edf07e7ec6704d88cadebd4c4" kindref="member">MachineCount</ref> are derived from the matrix dimensions, and GetJobOperations provides the typed operation pairs consumed by DESSimulator.LoadInstance. </para>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="1">
+        <label>Assets.Scripts.Scheduling.Data.TaillardInstance</label>
+        <link refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance"/>
+        <childnode refid="2" relation="usage">
+          <edgelabel>metadata</edgelabel>
+        </childnode>
+      </node>
+      <node id="2">
+        <label>Assets.Scripts.Scheduling.Data.TaillardMetadata</label>
+        <link refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata"/>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data/TaillardInstance.cs" line="12" column="11" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data/TaillardInstance.cs" bodystart="13" bodyend="65"/>
+    <listofallmembers>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1a7590980360c981cb8e7a63498bb96f77" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Data::TaillardInstance</scope><name>duration_matrix</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1ada37d37bc9f9beb703f74cbdb5b4ab62" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Data::TaillardInstance</scope><name>GetJobOperations</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1af2bd50c21201cbe57bd256239db584d6" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Data::TaillardInstance</scope><name>JobCount</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1ac09a835ada8df416bbaac2ed3cea788f" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Data::TaillardInstance</scope><name>machine</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1a7207f47edf07e7ec6704d88cadebd4c4" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Data::TaillardInstance</scope><name>MachineCount</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1a9ee0366b1709a54f08fb45a32e4fb0e9" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Data::TaillardInstance</scope><name>machines_matrix</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1ae360821e88eccf4c53083e43ac7bb179" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Data::TaillardInstance</scope><name>metadata</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1a46fab40f86bb631453294c3a5f25b092" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Data::TaillardInstance</scope><name>Name</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance_1a98a30393472294f14fa27c0bacd36822" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Data::TaillardInstance</scope><name>name</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,88 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="classmirror__des_1_1_sim_event" kind="class" language="Python" prot="public">
+    <compoundname>mirror_des::SimEvent</compoundname>
+    <sectiondef kind="public-static-attrib">
+      <memberdef kind="variable" id="classmirror__des_1_1_sim_event_1acfab08ee9f4ccd1dc67478e4d070f347" prot="public" static="yes" mutable="no">
+        <type><ref refid="classmirror__des_1_1_event_type" kindref="compound">EventType</ref></type>
+        <definition>EventType mirror_des.SimEvent::event_type</definition>
+        <argsstring></argsstring>
+        <name>event_type</name>
+        <qualifiedname>mirror_des.SimEvent.event_type</qualifiedname>
+        <initializer>=  field(compare=False)</initializer>
+        <briefdescription>
+<para>Simulation time at which this event fires. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Monotonically increasing counter used as a FIFO tiebreaker for equal times.</para>
+<para>Category of this event; excluded from ordering comparisons. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="59" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="59" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classmirror__des_1_1_sim_event_1af0c40a3203fa8fc2572953b10ef54079" prot="public" static="yes" mutable="no">
+        <type>int</type>
+        <definition>int mirror_des.SimEvent::job_id</definition>
+        <argsstring></argsstring>
+        <name>job_id</name>
+        <qualifiedname>mirror_des.SimEvent.job_id</qualifiedname>
+        <initializer>=  field(compare=False)</initializer>
+        <briefdescription>
+<para>ID of the associated job, or <computeroutput>-1</computeroutput> if not applicable. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="61" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="61" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classmirror__des_1_1_sim_event_1a58aee16cf6577cd835073d7e27a0e875" prot="public" static="yes" mutable="no">
+        <type>int</type>
+        <definition>int mirror_des.SimEvent::machine_id</definition>
+        <argsstring></argsstring>
+        <name>machine_id</name>
+        <qualifiedname>mirror_des.SimEvent.machine_id</qualifiedname>
+        <initializer>=  field(compare=False)</initializer>
+        <briefdescription>
+<para>ID of the associated machine, or <computeroutput>-1</computeroutput> if not applicable. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="63" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="63" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Immutable simulation event with (time, sequence) ordering. </para>
+    </briefdescription>
+    <detaileddescription>
+<para><computeroutput>@dataclass</computeroutput> (order=True) generates <computeroutput>__lt__</computeroutput> from the field declaration order, so <computeroutput>time</computeroutput> is the primary sort key and <computeroutput>sequence</computeroutput> is the FIFO tiebreaker — matching the <computeroutput>CompareTo</computeroutput> logic in the C# <ref refid="classmirror__des_1_1_sim_event" kindref="compound">SimEvent</ref> class. Fields after <computeroutput>sequence</computeroutput> are marked <computeroutput>field</computeroutput>(compare=False) to exclude them from ordering. </para>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="3">
+        <label>Enum</label>
+      </node>
+      <node id="1">
+        <label>mirror_des.SimEvent</label>
+        <link refid="classmirror__des_1_1_sim_event"/>
+        <childnode refid="2" relation="usage">
+          <edgelabel>event_type</edgelabel>
+        </childnode>
+      </node>
+      <node id="2">
+        <label>mirror_des.EventType</label>
+        <link refid="classmirror__des_1_1_event_type"/>
+        <childnode refid="3" relation="public-inheritance">
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="53" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="53" bodyend="65"/>
+    <listofallmembers>
+      <member refid="classmirror__des_1_1_sim_event_1acfab08ee9f4ccd1dc67478e4d070f347" prot="public" virt="non-virtual"><scope>mirror_des::SimEvent</scope><name>event_type</name></member>
+      <member refid="classmirror__des_1_1_sim_event_1af0c40a3203fa8fc2572953b10ef54079" prot="public" virt="non-virtual"><scope>mirror_des::SimEvent</scope><name>job_id</name></member>
+      <member refid="classmirror__des_1_1_sim_event_1a58aee16cf6577cd835073d7e27a0e875" prot="public" virt="non-virtual"><scope>mirror_des::SimEvent</scope><name>machine_id</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

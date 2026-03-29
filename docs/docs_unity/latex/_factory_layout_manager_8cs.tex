@@ -1,0 +1,28 @@
+\doxysection{C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Simulation/\+\+Factory\+Layout\+Manager.cs File Reference}
+\hypertarget{_factory_layout_manager_8cs}{}\label{_factory_layout_manager_8cs}\index{C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs@{C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs}}
+
+
+Spawns machine prefabs on a spatial grid and computes the pairwise distance matrix.  
+
+
+\doxysubsubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager}{Assets.\+Scripts.\+Simulation.\+Factory\+Layout\+Manager}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Spawns machine prefabs on a spatial grid and computes the pairwise distance matrix. 
+
+This is the entry point for building the visual factory floor. It reads the machine count from a DESSimulator instance, places Machine\+Prefab instances at predetermined grid positions, and produces the flattened 64-\/D distance matrix that feeds the observation space.
+
+Layout tables are provided for 8, 15, and 20 machines on a 20×20 unit floor. Custom layouts can be supplied at runtime via Set\+Custom\+Layout.
+
+\begin{DoxyParagraph}{Phase 1 coverage}
+
+\begin{DoxyItemize}
+\item Step 1 — Scene skeleton and grid layout
+\item Partial Step 5 — Exposes machine visuals array for Simulation\+Bridge wiring 
+\end{DoxyItemize}
+\end{DoxyParagraph}

@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="dir_ca3fa1fa37845d8ecf3502401146acc0" kind="dir">
+    <compoundname>C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling</compoundname>
+    <innerdir refid="dir_7138718215ff9bfa8b62bac4f139a6e7">C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core</innerdir>
+    <innerdir refid="dir_72746341560f01a8fb0e5e008d25d99b">C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data</innerdir>
+    <innerdir refid="dir_79b71f77ec1956ac4a8531fd80bac31a">C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Unity</innerdir>
+    <innerdir refid="dir_ee574da298a6152c10d731ba7c14242a">C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation</innerdir>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/"/>
+  </compounddef>
+</doxygen>

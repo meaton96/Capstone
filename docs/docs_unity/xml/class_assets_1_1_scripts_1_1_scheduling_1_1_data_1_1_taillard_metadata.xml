@@ -1,0 +1,81 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata" kind="class" language="C#" prot="public">
+    <compoundname>Assets::Scripts::Scheduling::Data::TaillardMetadata</compoundname>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata_1a7b26e31ea7dd8a1c471511ef4da5f50c" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Scheduling.Data.TaillardMetadata.optimum</definition>
+        <argsstring></argsstring>
+        <name>optimum</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Data.TaillardMetadata.optimum</qualifiedname>
+        <briefdescription>
+<para>Proven optimal makespan for this instance, or <computeroutput>0</computeroutput> if unknown. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data/TaillardInstance.cs" line="77" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data/TaillardInstance.cs" bodystart="77" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata_1aa246d492d3b2d770d686dc6e4e734c93" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Scheduling.Data.TaillardMetadata.upper_bound</definition>
+        <argsstring></argsstring>
+        <name>upper_bound</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Data.TaillardMetadata.upper_bound</qualifiedname>
+        <briefdescription>
+<para>Best known upper bound on the makespan, i.e. the lowest makespan achieved by any published algorithm for this instance. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data/TaillardInstance.cs" line="81" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data/TaillardInstance.cs" bodystart="81" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata_1a05c0ecab1d6fc933930a88c799590b30" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Scheduling.Data.TaillardMetadata.lower_bound</definition>
+        <argsstring></argsstring>
+        <name>lower_bound</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Data.TaillardMetadata.lower_bound</qualifiedname>
+        <briefdescription>
+<para>Theoretical lower bound on the makespan, below which no valid schedule can exist. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data/TaillardInstance.cs" line="85" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data/TaillardInstance.cs" bodystart="85" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata_1a611b1a8070c6e02d37f63854a1487c04" prot="public" static="no" mutable="no">
+        <type>string</type>
+        <definition>string Assets.Scripts.Scheduling.Data.TaillardMetadata.reference</definition>
+        <argsstring></argsstring>
+        <name>reference</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Data.TaillardMetadata.reference</qualifiedname>
+        <briefdescription>
+<para>Bibliographic reference identifying the source of the bound values, e.g. <computeroutput>&quot;Taillard 1993&quot;</computeroutput>. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data/TaillardInstance.cs" line="89" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data/TaillardInstance.cs" bodystart="89" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Known optimality bounds and bibliographic metadata for a <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance" kindref="compound">TaillardInstance</ref>. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>Populated from the JSON metadata block alongside the problem matrices. Used for post-simulation validation: comparing DESSimulator.Makespan against <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata_1a7b26e31ea7dd8a1c471511ef4da5f50c" kindref="member">optimum</ref> or <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata_1aa246d492d3b2d770d686dc6e4e734c93" kindref="member">upper_bound</ref> confirms correctness of the dispatching rules. All fields default to <computeroutput>0</computeroutput> if absent from the JSON source. </para>
+    </detaileddescription>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data/TaillardInstance.cs" line="74" column="11" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Data/TaillardInstance.cs" bodystart="75" bodyend="90"/>
+    <listofallmembers>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata_1a05c0ecab1d6fc933930a88c799590b30" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Data::TaillardMetadata</scope><name>lower_bound</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata_1a7b26e31ea7dd8a1c471511ef4da5f50c" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Data::TaillardMetadata</scope><name>optimum</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata_1a611b1a8070c6e02d37f63854a1487c04" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Data::TaillardMetadata</scope><name>reference</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata_1aa246d492d3b2d770d686dc6e4e734c93" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Data::TaillardMetadata</scope><name>upper_bound</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

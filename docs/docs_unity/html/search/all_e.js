@@ -1,10 +1,7 @@
 var searchData=
 [
-  ['ondispatchrequired_0',['OnDispatchRequired',['../class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator.html#acb07dc5ba5008808680172d6113b91b0',1,'Assets::Scripts::Scheduling::Core::DESSimulator']]],
-  ['operation_1',['Operation',['../class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation.html',1,'Assets.Scripts.Scheduling.Core.Operation'],['../classmirror__des_1_1_operation.html',1,'mirror_des.Operation'],['../class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation.html#ad95eabd51be0fc1f460848715e8ecfb3',1,'Assets.Scripts.Scheduling.Core.Operation.Operation()']]],
-  ['operationcomplete_2',['OperationComplete',['../namespace_assets_1_1_scripts_1_1_scheduling_1_1_core.html#a74e900c350e0673c74e0e62b6f351056a118b996cf01af1910a157f7409f5d0df',1,'Assets::Scripts::Scheduling::Core']]],
-  ['operationindex_3',['OperationIndex',['../class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation.html#acdc6f217ecabd0032093b6ca0a4842dd',1,'Assets::Scripts::Scheduling::Core::Operation']]],
-  ['operations_4',['Operations',['../class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job.html#a0d323e363dfe893aae602c1d6541943b',1,'Assets::Scripts::Scheduling::Core::Job']]],
-  ['optimum_5',['optimum',['../class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata.html#a7b26e31ea7dd8a1c471511ef4da5f50c',1,'Assets::Scripts::Scheduling::Data::TaillardMetadata']]],
-  ['outputdirectory_6',['outputDirectory',['../class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator.html#a80ede1968dc597c505ef36ec96837d23',1,'Assets::Scripts::Scheduling::Validation::CrossValidator']]]
+  ['name_0',['name',['../class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance.html#a98a30393472294f14fa27c0bacd36822',1,'Assets::Scripts::Scheduling::Data::TaillardInstance']]],
+  ['next_5fop_5findex_1',['next_op_index',['../classmirror__des_1_1_job.html#a09fcea2d5fa35b5a2a81c2bbd698d433',1,'mirror_des::Job']]],
+  ['nextdecision_2',['NextDecision',['../struct_assets_1_1_scripts_1_1_simulation_1_1_step_result.html#aa183196bf333d5a9ce5fbaf75a7b8562',1,'Assets::Scripts::Simulation::StepResult']]],
+  ['nextoperationindex_3',['NextOperationIndex',['../class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job.html#a95c34ede07918ec6b705d42d89ddba3e',1,'Assets::Scripts::Scheduling::Core::Job']]]
 ];

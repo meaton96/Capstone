@@ -92,18 +92,53 @@ $(function(){initNavTree('classmirror__des_1_1_sim_event.html','','classmirror__
   <div class="headertitle"><div class="title">mirror_des.SimEvent Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Immutable simulation event with (time, sequence) ordering.  
+ <a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-static-attribs" class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
-<tr class="memitem:acfab08ee9f4ccd1dc67478e4d070f347" id="r_acfab08ee9f4ccd1dc67478e4d070f347"><td class="memItemLeft"><a id="acfab08ee9f4ccd1dc67478e4d070f347" name="acfab08ee9f4ccd1dc67478e4d070f347"></a>
-<a class="el" href="classmirror__des_1_1_event_type.html">EventType</a>&#160;</td><td class="memItemRight"><b>event_type</b> = field(compare=False)</td></tr>
+<tr class="memitem:acfab08ee9f4ccd1dc67478e4d070f347" id="r_acfab08ee9f4ccd1dc67478e4d070f347"><td class="memItemLeft"><a class="el" href="classmirror__des_1_1_event_type.html">EventType</a>&#160;</td><td class="memItemRight"><a class="el" href="#acfab08ee9f4ccd1dc67478e4d070f347">event_type</a> = field(compare=False)</td></tr>
+<tr class="memdesc:acfab08ee9f4ccd1dc67478e4d070f347"><td class="mdescLeft">&#160;</td><td class="mdescRight">Simulation time at which this event fires.  <br /></td></tr>
 <tr class="memitem:af0c40a3203fa8fc2572953b10ef54079" id="r_af0c40a3203fa8fc2572953b10ef54079"><td class="memItemLeft"><a id="af0c40a3203fa8fc2572953b10ef54079" name="af0c40a3203fa8fc2572953b10ef54079"></a>
 int&#160;</td><td class="memItemRight"><b>job_id</b> = field(compare=False)</td></tr>
+<tr class="memdesc:af0c40a3203fa8fc2572953b10ef54079"><td class="mdescLeft">&#160;</td><td class="mdescRight">ID of the associated job, or <code>-1</code> if not applicable. <br /></td></tr>
 <tr class="memitem:a58aee16cf6577cd835073d7e27a0e875" id="r_a58aee16cf6577cd835073d7e27a0e875"><td class="memItemLeft"><a id="a58aee16cf6577cd835073d7e27a0e875" name="a58aee16cf6577cd835073d7e27a0e875"></a>
 int&#160;</td><td class="memItemRight"><b>machine_id</b> = field(compare=False)</td></tr>
+<tr class="memdesc:a58aee16cf6577cd835073d7e27a0e875"><td class="mdescLeft">&#160;</td><td class="mdescRight">ID of the associated machine, or <code>-1</code> if not applicable. <br /></td></tr>
 </table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Immutable simulation event with (time, sequence) ordering. </p>
+<p><code>@dataclass</code> (order=True) generates <code>__lt__</code> from the field declaration order, so <code>time</code> is the primary sort key and <code>sequence</code> is the FIFO tiebreaker — matching the <code>CompareTo</code> logic in the C# <a class="el" href="classmirror__des_1_1_sim_event.html" title="SimEvent">SimEvent</a> class. Fields after <code>sequence</code> are marked <code>field</code>(compare=False) to exclude them from ordering. </p>
+</div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="acfab08ee9f4ccd1dc67478e4d070f347" name="acfab08ee9f4ccd1dc67478e4d070f347"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acfab08ee9f4ccd1dc67478e4d070f347">&#9670;&#160;</a></span>event_type</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classmirror__des_1_1_event_type.html">EventType</a> mirror_des.SimEvent.event_type = field(compare=False)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Simulation time at which this event fires. </p>
+<p>Monotonically increasing counter used as a FIFO tiebreaker for equal times.</p>
+<p>Category of this event; excluded from ordering comparisons. </p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/<b>mirror_des.py</b></li>
+<li>C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/<a class="el" href="mirror__des_8py.html">mirror_des.py</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -118,7 +153,7 @@ int&#160;</td><td class="memItemRight"><b>machine_id</b> = field(compare=False)<
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="namespacemirror__des.html">mirror_des</a></li><li class="navelem"><a href="classmirror__des_1_1_sim_event.html">SimEvent</a></li>
+    <li class="navelem"><b>mirror_des</b></li><li class="navelem"><a href="classmirror__des_1_1_sim_event.html">SimEvent</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.16.1 </li>
   </ul>
 </div>

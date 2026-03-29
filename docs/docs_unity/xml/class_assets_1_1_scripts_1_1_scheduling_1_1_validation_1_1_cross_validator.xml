@@ -1,0 +1,116 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator" kind="class" language="C#" prot="public">
+    <compoundname>Assets::Scripts::Scheduling::Validation::CrossValidator</compoundname>
+    <basecompoundref prot="public" virt="non-virtual">MonoBehaviour</basecompoundref>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_1a874643c3bab4c70ffecb10fd871e963e" prot="public" static="no" mutable="no">
+        <type>string</type>
+        <definition>string Assets.Scripts.Scheduling.Validation.CrossValidator.instanceDirectory</definition>
+        <argsstring></argsstring>
+        <name>instanceDirectory</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Validation.CrossValidator.instanceDirectory</qualifiedname>
+        <initializer>= &quot;Assets/StreamingAssets/Instances&quot;</initializer>
+        <briefdescription>
+<para>Absolute or project-relative path to the folder containing Taillard <computeroutput></computeroutput>.json files. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Must be a real filesystem path readable by <computeroutput>System.IO</computeroutput> — not a <computeroutput>Resources/</computeroutput> virtual path. Defaults to <computeroutput>Assets/StreamingAssets/Instances</computeroutput>. Validated on Start; a missing directory aborts the export with a <computeroutput>Debug.LogError</computeroutput>. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/CrossValidator.cs" line="35" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/CrossValidator.cs" bodystart="35" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_1a80ede1968dc597c505ef36ec96837d23" prot="public" static="no" mutable="no">
+        <type>string</type>
+        <definition>string Assets.Scripts.Scheduling.Validation.CrossValidator.outputDirectory</definition>
+        <argsstring></argsstring>
+        <name>outputDirectory</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Validation.CrossValidator.outputDirectory</qualifiedname>
+        <initializer>= &quot;Assets/StreamingAssets/Validation&quot;</initializer>
+        <briefdescription>
+<para>Absolute or project-relative path to the folder where export files will be written. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Created automatically by Start if it does not already exist. ValidationExporter.RunAndExport writes <computeroutput>csharp_makespans.csv</computeroutput> and <computeroutput>csharp_schedules.json</computeroutput> to this location. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/CrossValidator.cs" line="42" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/CrossValidator.cs" bodystart="42" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="private-func">
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_1a3b5711480affff328113726e95820724" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Scheduling.Validation.CrossValidator.Start</definition>
+        <argsstring>()</argsstring>
+        <name>Start</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Validation.CrossValidator.Start</qualifiedname>
+        <briefdescription>
+<para><ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_unity" kindref="compound">Unity</ref> lifecycle callback — runs the full export pipeline on scene start. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Performs the following steps in order:<orderedlist>
+<listitem><para>Creates <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_1a80ede1968dc597c505ef36ec96837d23" kindref="member">outputDirectory</ref> if it does not exist.</para>
+</listitem><listitem><para>Validates that <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_1a874643c3bab4c70ffecb10fd871e963e" kindref="member">instanceDirectory</ref> exists; logs a <computeroutput>Debug.LogError</computeroutput> and aborts if not.</para>
+</listitem><listitem><para>Logs the resolved paths for both directories.</para>
+</listitem><listitem><para>Delegates to ValidationExporter.RunAndExport to simulate all instances and write output files.</para>
+</listitem><listitem><para>Logs the <computeroutput><ref refid="compare__results_8py" kindref="compound">compare_results.py</ref></computeroutput> invocation command for convenience. </para>
+</listitem></orderedlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/CrossValidator.cs" line="52" column="14" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/CrossValidator.cs" bodystart="52" bodyend="72"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para><ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_unity" kindref="compound">Unity</ref> entry point that exports C# makespan results for cross-validation against job_shop_lib. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>Attach to any GameObject in the scene. On Play, the component locates all Taillard JSON files in <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_1a874643c3bab4c70ffecb10fd871e963e" kindref="member">instanceDirectory</ref>, runs ValidationExporter.RunAndExport to simulate every instance under every DispatchingRule, and writes <computeroutput>csharp_makespans.csv</computeroutput> and <computeroutput>csharp_schedules.json</computeroutput> to <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_1a80ede1968dc597c505ef36ec96837d23" kindref="member">outputDirectory</ref>. The exported files are then consumed by <computeroutput><ref refid="compare__results_8py" kindref="compound">compare_results.py</ref></computeroutput> to diff C# results against the Python job_shop_lib reference.</para>
+<para><simplesect kind="par"><title>Setup</title><para><orderedlist>
+<listitem><para>Place Taillard JSON files in <computeroutput>Assets/Resources/Instances/</computeroutput>.</para>
+</listitem><listitem><para>Copy the same files to a regular folder (e.g. <computeroutput>Assets/StreamingAssets/Instances/</computeroutput>) because ValidationExporter reads directly from disk, not via <computeroutput>Resources.Load</computeroutput>.</para>
+</listitem><listitem><para>Set <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_1a874643c3bab4c70ffecb10fd871e963e" kindref="member">instanceDirectory</ref> and <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_1a80ede1968dc597c505ef36ec96837d23" kindref="member">outputDirectory</ref> in the Inspector.</para>
+</listitem><listitem><para>Enter Play Mode.</para>
+</listitem><listitem><para>Run <computeroutput><ref refid="compare__results_8py" kindref="compound">compare_results.py</ref></computeroutput> from the output directory: <programlisting><codeline><highlight class="normal">cd<sp/>Assets/StreamingAssets/Validation</highlight></codeline>
+<codeline><highlight class="normal">python<sp/>compare_results.py</highlight></codeline>
+</programlisting></para>
+</listitem></orderedlist>
+</para>
+</simplesect>
+<simplesect kind="note"><para>This component does not use the <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_unity" kindref="compound">Unity</ref> Resources system. Both directories must be accessible as real filesystem paths at runtime, not <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_unity" kindref="compound">Unity</ref> virtual paths. </para>
+</simplesect>
+</para>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="1">
+        <label>Assets.Scripts.Scheduling.Validation.CrossValidator</label>
+        <link refid="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>MonoBehaviour</label>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="1">
+        <label>Assets.Scripts.Scheduling.Validation.CrossValidator</label>
+        <link refid="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>MonoBehaviour</label>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/CrossValidator.cs" line="27" column="11" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/CrossValidator.cs" bodystart="28" bodyend="73"/>
+    <listofallmembers>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_1a874643c3bab4c70ffecb10fd871e963e" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Validation::CrossValidator</scope><name>instanceDirectory</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_1a80ede1968dc597c505ef36ec96837d23" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Validation::CrossValidator</scope><name>outputDirectory</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_1a3b5711480affff328113726e95820724" prot="private" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Validation::CrossValidator</scope><name>Start</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

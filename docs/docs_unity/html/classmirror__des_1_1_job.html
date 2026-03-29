@@ -92,6 +92,9 @@ $(function(){initNavTree('classmirror__des_1_1_job.html','','classmirror__des_1_
   <div class="headertitle"><div class="title">mirror_des.Job Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Ordered sequence of operations representing a single job, mirroring C# <a class="el" href="classmirror__des_1_1_job.html" title="Job">Job</a>.  
+ <a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -104,18 +107,98 @@ Optional[<a class="el" href="classmirror__des_1_1_operation.html">Operation</a>]
 Public Attributes</h2></td></tr>
 <tr class="memitem:aa126bca53bbdd3b46713b617341b3c94" id="r_aa126bca53bbdd3b46713b617341b3c94"><td class="memItemLeft"><a id="aa126bca53bbdd3b46713b617341b3c94" name="aa126bca53bbdd3b46713b617341b3c94"></a>
 &#160;</td><td class="memItemRight"><b>is_complete</b></td></tr>
+<tr class="memdesc:aa126bca53bbdd3b46713b617341b3c94"><td class="mdescLeft">&#160;</td><td class="mdescRight">The next operation awaiting dispatch, or <code>None</code> if the job is complete. <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-static-attribs" class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
-<tr class="memitem:a3c1b8a7e9a85c72e8f7cbdbccef84ee8" id="r_a3c1b8a7e9a85c72e8f7cbdbccef84ee8"><td class="memItemLeft"><a id="a3c1b8a7e9a85c72e8f7cbdbccef84ee8" name="a3c1b8a7e9a85c72e8f7cbdbccef84ee8"></a>
-list&#160;</td><td class="memItemRight"><b>operations</b> [<a class="el" href="classmirror__des_1_1_operation.html">Operation</a>]</td></tr>
-<tr class="memitem:a09fcea2d5fa35b5a2a81c2bbd698d433" id="r_a09fcea2d5fa35b5a2a81c2bbd698d433"><td class="memItemLeft"><a id="a09fcea2d5fa35b5a2a81c2bbd698d433" name="a09fcea2d5fa35b5a2a81c2bbd698d433"></a>
-int&#160;</td><td class="memItemRight"><b>next_op_index</b> = 0</td></tr>
-<tr class="memitem:a7fbc3ad37c87f7ae99fcb348396eb75a" id="r_a7fbc3ad37c87f7ae99fcb348396eb75a"><td class="memItemLeft"><a id="a7fbc3ad37c87f7ae99fcb348396eb75a" name="a7fbc3ad37c87f7ae99fcb348396eb75a"></a>
-float&#160;</td><td class="memItemRight"><b>completion_time</b> = -1.0</td></tr>
+<tr class="memitem:a3c1b8a7e9a85c72e8f7cbdbccef84ee8" id="r_a3c1b8a7e9a85c72e8f7cbdbccef84ee8"><td class="memItemLeft">list&#160;</td><td class="memItemRight"><a class="el" href="#a3c1b8a7e9a85c72e8f7cbdbccef84ee8">operations</a> [<a class="el" href="classmirror__des_1_1_operation.html">Operation</a>]</td></tr>
+<tr class="memdesc:a3c1b8a7e9a85c72e8f7cbdbccef84ee8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unique job identifier matching its index in <a class="el" href="classmirror__des_1_1_d_e_s_simulator.html#ace4a32fa136af3b7ed3802372c2571c3" title="DESSimulator.jobs">DESSimulator.jobs</a>.  <br /></td></tr>
+<tr class="memitem:a09fcea2d5fa35b5a2a81c2bbd698d433" id="r_a09fcea2d5fa35b5a2a81c2bbd698d433"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a09fcea2d5fa35b5a2a81c2bbd698d433">next_op_index</a> = 0</td></tr>
+<tr class="memdesc:a09fcea2d5fa35b5a2a81c2bbd698d433"><td class="mdescLeft">&#160;</td><td class="mdescRight">Index of the next operation awaiting dispatch.  <br /></td></tr>
+<tr class="memitem:a7fbc3ad37c87f7ae99fcb348396eb75a" id="r_a7fbc3ad37c87f7ae99fcb348396eb75a"><td class="memItemLeft">float&#160;</td><td class="memItemRight"><a class="el" href="#a7fbc3ad37c87f7ae99fcb348396eb75a">completion_time</a> = -1.0</td></tr>
+<tr class="memdesc:a7fbc3ad37c87f7ae99fcb348396eb75a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Simulation time at which the final operation completed.  <br /></td></tr>
 </table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Ordered sequence of operations representing a single job, mirroring C# <a class="el" href="classmirror__des_1_1_job.html" title="Job">Job</a>. </p>
+<p>Tracks execution progress via <code>next_op_index</code>, advanced by DESSimulator._handle_operation_complete after each operation completes. <code>is_complete</code> and <code>current_operation</code> are derived properties with no side effects. </p>
+</div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="a7fbc3ad37c87f7ae99fcb348396eb75a" name="a7fbc3ad37c87f7ae99fcb348396eb75a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7fbc3ad37c87f7ae99fcb348396eb75a">&#9670;&#160;</a></span>completion_time</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">float mirror_des.Job.completion_time = -1.0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Simulation time at which the final operation completed. </p>
+<p><code>-1.0</code> until done. </p>
+
+</div>
+</div>
+<a id="a09fcea2d5fa35b5a2a81c2bbd698d433" name="a09fcea2d5fa35b5a2a81c2bbd698d433"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a09fcea2d5fa35b5a2a81c2bbd698d433">&#9670;&#160;</a></span>next_op_index</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int mirror_des.Job.next_op_index = 0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Index of the next operation awaiting dispatch. </p>
+<p>Starts at <code>0</code>. </p>
+
+</div>
+</div>
+<a id="a3c1b8a7e9a85c72e8f7cbdbccef84ee8" name="a3c1b8a7e9a85c72e8f7cbdbccef84ee8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3c1b8a7e9a85c72e8f7cbdbccef84ee8">&#9670;&#160;</a></span>operations</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">list mirror_des.Job.operations [<a class="el" href="classmirror__des_1_1_operation.html">Operation</a>]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Unique job identifier matching its index in <a class="el" href="classmirror__des_1_1_d_e_s_simulator.html#ace4a32fa136af3b7ed3802372c2571c3" title="DESSimulator.jobs">DESSimulator.jobs</a>. </p>
+<p>Ordered list of operations to execute sequentially. </p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/<b>mirror_des.py</b></li>
+<li>C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/<a class="el" href="mirror__des_8py.html">mirror_des.py</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -130,7 +213,7 @@ float&#160;</td><td class="memItemRight"><b>completion_time</b> = -1.0</td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="namespacemirror__des.html">mirror_des</a></li><li class="navelem"><a href="classmirror__des_1_1_job.html">Job</a></li>
+    <li class="navelem"><b>mirror_des</b></li><li class="navelem"><a href="classmirror__des_1_1_job.html">Job</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.16.1 </li>
   </ul>
 </div>

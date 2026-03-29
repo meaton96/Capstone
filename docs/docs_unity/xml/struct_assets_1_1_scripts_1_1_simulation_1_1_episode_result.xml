@@ -1,0 +1,184 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result" kind="struct" language="C#" prot="public">
+    <compoundname>Assets::Scripts::Simulation::EpisodeResult</compoundname>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result_1af5226c19895f7db0a2176bd4bacd4864" prot="public" static="no" mutable="no">
+        <type>string</type>
+        <definition>string Assets.Scripts.Simulation.EpisodeResult.InstanceName</definition>
+        <argsstring></argsstring>
+        <name>InstanceName</name>
+        <qualifiedname>Assets.Scripts.Simulation.EpisodeResult.InstanceName</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="99" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="99" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result_1a2349f8698873ef8139f1c81f98e5ee03" prot="public" static="no" mutable="no">
+        <type>string</type>
+        <definition>string Assets.Scripts.Simulation.EpisodeResult.RuleName</definition>
+        <argsstring></argsstring>
+        <name>RuleName</name>
+        <qualifiedname>Assets.Scripts.Simulation.EpisodeResult.RuleName</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="100" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="100" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result_1aae656e914839051b141db4ddd856bd95" prot="public" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Assets.Scripts.Simulation.EpisodeResult.Makespan</definition>
+        <argsstring></argsstring>
+        <name>Makespan</name>
+        <qualifiedname>Assets.Scripts.Simulation.EpisodeResult.Makespan</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="101" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="101" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result_1aff5fffb775c499a4c58974a47847c259" prot="public" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Assets.Scripts.Simulation.EpisodeResult.OptimalMakespan</definition>
+        <argsstring></argsstring>
+        <name>OptimalMakespan</name>
+        <qualifiedname>Assets.Scripts.Simulation.EpisodeResult.OptimalMakespan</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="102" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="102" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result_1a17f7d1fdb07d9a6434d73a854741fd19" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Simulation.EpisodeResult.TotalJobs</definition>
+        <argsstring></argsstring>
+        <name>TotalJobs</name>
+        <qualifiedname>Assets.Scripts.Simulation.EpisodeResult.TotalJobs</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="103" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="103" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result_1a9f9d4c182c7668da2f7f187df687e921" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Simulation.EpisodeResult.TotalOperations</definition>
+        <argsstring></argsstring>
+        <name>TotalOperations</name>
+        <qualifiedname>Assets.Scripts.Simulation.EpisodeResult.TotalOperations</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="104" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="104" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result_1a745691302cf5d45df2fbce04b8bfe657" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Simulation.EpisodeResult.CompletedJobs</definition>
+        <argsstring></argsstring>
+        <name>CompletedJobs</name>
+        <qualifiedname>Assets.Scripts.Simulation.EpisodeResult.CompletedJobs</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="105" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="105" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result_1ab03e7e8391920b1d8fef8ad2aee58b5e" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Simulation.EpisodeResult.DecisionPoints</definition>
+        <argsstring></argsstring>
+        <name>DecisionPoints</name>
+        <qualifiedname>Assets.Scripts.Simulation.EpisodeResult.DecisionPoints</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="106" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="106" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result_1abd12f456a040a29e8e1f49759ff77355" prot="public" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Assets.Scripts.Simulation.EpisodeResult.TotalReward</definition>
+        <argsstring></argsstring>
+        <name>TotalReward</name>
+        <qualifiedname>Assets.Scripts.Simulation.EpisodeResult.TotalReward</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="107" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="107" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result_1aea2cb65266c08d48b399c081cfbffc24" prot="public" static="no" mutable="no">
+        <type>int[]</type>
+        <definition>int [] Assets.Scripts.Simulation.EpisodeResult.PerMachineDecisions</definition>
+        <argsstring></argsstring>
+        <name>PerMachineDecisions</name>
+        <qualifiedname>Assets.Scripts.Simulation.EpisodeResult.PerMachineDecisions</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="108" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="108" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="property">
+      <memberdef kind="property" id="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result_1ad741973946c34801784f7be91cb28641" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type>double</type>
+        <definition>double Assets.Scripts.Simulation.EpisodeResult.OptimalityGap</definition>
+        <argsstring></argsstring>
+        <name>OptimalityGap</name>
+        <qualifiedname>Assets.Scripts.Simulation.EpisodeResult.OptimalityGap</qualifiedname>
+        <briefdescription>
+<para>Percentage gap from optimal: (makespan - optimal) / optimal × 100. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="111" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="111" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Final episode statistics, emitted via SimulationBridge.OnEpisodeFinished. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="97" column="11" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="98" bodyend="115"/>
+    <listofallmembers>
+      <member refid="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result_1a745691302cf5d45df2fbce04b8bfe657" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::EpisodeResult</scope><name>CompletedJobs</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result_1ab03e7e8391920b1d8fef8ad2aee58b5e" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::EpisodeResult</scope><name>DecisionPoints</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result_1af5226c19895f7db0a2176bd4bacd4864" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::EpisodeResult</scope><name>InstanceName</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result_1aae656e914839051b141db4ddd856bd95" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::EpisodeResult</scope><name>Makespan</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result_1ad741973946c34801784f7be91cb28641" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::EpisodeResult</scope><name>OptimalityGap</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result_1aff5fffb775c499a4c58974a47847c259" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::EpisodeResult</scope><name>OptimalMakespan</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result_1aea2cb65266c08d48b399c081cfbffc24" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::EpisodeResult</scope><name>PerMachineDecisions</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result_1a2349f8698873ef8139f1c81f98e5ee03" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::EpisodeResult</scope><name>RuleName</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result_1a17f7d1fdb07d9a6434d73a854741fd19" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::EpisodeResult</scope><name>TotalJobs</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result_1a9f9d4c182c7668da2f7f187df687e921" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::EpisodeResult</scope><name>TotalOperations</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result_1abd12f456a040a29e8e1f49759ff77355" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::EpisodeResult</scope><name>TotalReward</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

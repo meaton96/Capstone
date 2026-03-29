@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="dir_519d472a5ebddd53e84f5e1bc3410c69" kind="dir">
+    <compoundname>C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation</compoundname>
+    <innerfile refid="_factory_layout_manager_8cs">FactoryLayoutManager.cs</innerfile>
+    <innerfile refid="_machine_visual_8cs">MachineVisual.cs</innerfile>
+    <innerfile refid="_simulation_bridge_8cs">SimulationBridge.cs</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/"/>
+  </compounddef>
+</doxygen>

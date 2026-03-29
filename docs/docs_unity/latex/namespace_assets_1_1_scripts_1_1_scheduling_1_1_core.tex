@@ -20,6 +20,11 @@ class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_
 \doxysubsubsection*{Enumerations}
 \begin{DoxyCompactItemize}
 \item 
+enum \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a23eac89d613aa8e377b767e1cbc93875}{Sim\+Step\+Result}} \{ \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a23eac89d613aa8e377b767e1cbc93875aa0bfb8e59e6c13fc8d990781f77694fe}{Continue}}
+, \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a23eac89d613aa8e377b767e1cbc93875a0cac3c7b6d9e33208ee147431e86725d}{Decision\+Required}}
+, \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a23eac89d613aa8e377b767e1cbc93875af92965e2c8a7afb3c1b9a5c09a263636}{Done}}
+ \}
+\begin{DoxyCompactList}\small\item\em Result of a single event-\/processing step. \end{DoxyCompactList}\item 
 enum \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87}{Dispatching\+Rule}} \{ \newline
 \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87ade91ab1cd38237cb688634ed2b95a62e}{SPT\+\_\+\+SMPT}}
 , \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87a18355950aa0d135000b56aba39667cf3}{SPT\+\_\+\+SRWT}}
@@ -172,6 +177,36 @@ Failed&\doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine}{M
 \index{Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}!Repair@{Repair}}
 }\Hypertarget{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0a0493d27e20d11e356e53e0a730b0ad08}\label{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0a0493d27e20d11e356e53e0a730b0ad08} 
 Repair&\doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine}{Machine} is undergoing repair after a fault. Reserved for future use. \\
+\hline
+
+\end{DoxyEnumFields}
+\Hypertarget{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a23eac89d613aa8e377b767e1cbc93875}\index{Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}!SimStepResult@{SimStepResult}}
+\index{SimStepResult@{SimStepResult}!Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}}
+\doxysubsubsection{\texorpdfstring{SimStepResult}{SimStepResult}}
+{\footnotesize\ttfamily \label{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a23eac89d613aa8e377b767e1cbc93875} 
+enum \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a23eac89d613aa8e377b767e1cbc93875}{Assets.\+Scripts.\+Scheduling.\+Core.\+Sim\+Step\+Result}}}
+
+
+
+Result of a single event-\/processing step. 
+
+Returned by \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_ad29bf585fd01242b65ab5bd4ad24b9ee}{DESSimulator.\+Process\+Next\+Event} to tell the caller whether the simulation needs an external dispatch decision, can continue autonomously, or has finished. \begin{DoxyEnumFields}[2]{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{Continue@{Continue}!Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}}
+\index{Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}!Continue@{Continue}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a23eac89d613aa8e377b767e1cbc93875aa0bfb8e59e6c13fc8d990781f77694fe}\label{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a23eac89d613aa8e377b767e1cbc93875aa0bfb8e59e6c13fc8d990781f77694fe} 
+Continue&Event was processed and more events remain. No decision needed. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{DecisionRequired@{DecisionRequired}!Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}}
+\index{Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}!DecisionRequired@{DecisionRequired}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a23eac89d613aa8e377b767e1cbc93875a0cac3c7b6d9e33208ee147431e86725d}\label{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a23eac89d613aa8e377b767e1cbc93875a0cac3c7b6d9e33208ee147431e86725d} 
+Decision\+Required&A machine has become free with a non-\/empty queue. The caller must supply a \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_af841dd07c9c38276e117696a4dd6fe87}{Dispatching\+Rule} via \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_a914e8fe3b5d0d08e5c46bf76a73114d9}{DESSimulator.\+Apply\+Decision} before calling Process\+Next\+Event again. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{Done@{Done}!Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}}
+\index{Assets.Scripts.Scheduling.Core@{Assets.Scripts.Scheduling.Core}!Done@{Done}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a23eac89d613aa8e377b767e1cbc93875af92965e2c8a7afb3c1b9a5c09a263636}\label{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a23eac89d613aa8e377b767e1cbc93875af92965e2c8a7afb3c1b9a5c09a263636} 
+Done&The event queue is empty. All jobs are complete. \\
 \hline
 
 \end{DoxyEnumFields}

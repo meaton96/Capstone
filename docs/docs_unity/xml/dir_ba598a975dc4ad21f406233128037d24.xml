@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="dir_ba598a975dc4ad21f406233128037d24" kind="dir">
+    <compoundname>C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts</compoundname>
+    <innerdir refid="dir_ca3fa1fa37845d8ecf3502401146acc0">C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling</innerdir>
+    <innerdir refid="dir_519d472a5ebddd53e84f5e1bc3410c69">C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation</innerdir>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/"/>
+  </compounddef>
+</doxygen>

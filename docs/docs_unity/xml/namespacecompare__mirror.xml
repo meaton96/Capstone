@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="namespacecompare__mirror" kind="namespace" language="Python">
+    <compoundname>compare_mirror</compoundname>
+    <sectiondef kind="func">
+      <memberdef kind="function" id="compare__mirror_8py_1aca34071a7c0974ec1e1b2365866106b9" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>compare_mirror.main</definition>
+        <argsstring>()</argsstring>
+        <name>main</name>
+        <qualifiedname>compare_mirror.main</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/compare_mirror.py" line="38" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/compare_mirror.py" bodystart="38" bodyend="191"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/compare_mirror.py" line="1" column="1"/>
+  </compounddef>
+</doxygen>

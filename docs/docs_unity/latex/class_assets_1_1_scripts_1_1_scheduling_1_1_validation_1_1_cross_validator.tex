@@ -23,7 +23,7 @@ string \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_validati
 \doxysubsection{Detailed Description}
 \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_unity}{Unity} entry point that exports C\# makespan results for cross-\/validation against job\+\_\+shop\+\_\+lib. 
 
-Attach to any Game\+Object in the scene. On Play, the component locates all Taillard JSON files in \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_a874643c3bab4c70ffecb10fd871e963e}{instance\+Directory}, runs Validation\+Exporter.\+Run\+And\+Export to simulate every instance under every Dispatching\+Rule, and writes {\ttfamily csharp\+\_\+makespans.\+csv} and {\ttfamily csharp\+\_\+schedules.\+json} to \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_a80ede1968dc597c505ef36ec96837d23}{output\+Directory}. The exported files are then consumed by {\ttfamily compare\+\_\+results.\+py} to diff C\# results against the Python job\+\_\+shop\+\_\+lib reference.
+Attach to any Game\+Object in the scene. On Play, the component locates all Taillard JSON files in \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_a874643c3bab4c70ffecb10fd871e963e}{instance\+Directory}, runs Validation\+Exporter.\+Run\+And\+Export to simulate every instance under every Dispatching\+Rule, and writes {\ttfamily csharp\+\_\+makespans.\+csv} and {\ttfamily csharp\+\_\+schedules.\+json} to \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_a80ede1968dc597c505ef36ec96837d23}{output\+Directory}. The exported files are then consumed by {\ttfamily \doxylink{compare__results_8py}{compare\+\_\+results.\+py}} to diff C\# results against the Python job\+\_\+shop\+\_\+lib reference.
 
 \begin{DoxyParagraph}{Setup}
 
@@ -32,7 +32,7 @@ Attach to any Game\+Object in the scene. On Play, the component locates all Tail
 \item Copy the same files to a regular folder (e.\+g. {\ttfamily Assets/\+\+Streaming\+Assets/\+\+Instances/\+}) because Validation\+Exporter reads directly from disk, not via {\ttfamily Resources.\+Load}.
 \item Set \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_a874643c3bab4c70ffecb10fd871e963e}{instance\+Directory} and \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_a80ede1968dc597c505ef36ec96837d23}{output\+Directory} in the Inspector.
 \item Enter Play Mode.
-\item Run {\ttfamily compare\+\_\+results.\+py} from the output directory:\+ 
+\item Run {\ttfamily \doxylink{compare__results_8py}{compare\+\_\+results.\+py}} from the output directory:\+ 
 \begin{DoxyCode}{0}
 \DoxyCodeLine{cd\ Assets/StreamingAssets/Validation}
 \DoxyCodeLine{python\ compare\_results.py}

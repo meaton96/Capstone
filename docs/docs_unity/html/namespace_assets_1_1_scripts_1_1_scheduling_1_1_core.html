@@ -111,6 +111,11 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
+<tr class="memitem:a23eac89d613aa8e377b767e1cbc93875" id="r_a23eac89d613aa8e377b767e1cbc93875"><td class="memItemLeft">enum &#160;</td><td class="memItemRight"><a class="el" href="#a23eac89d613aa8e377b767e1cbc93875">SimStepResult</a> { <a class="el" href="#a23eac89d613aa8e377b767e1cbc93875aa0bfb8e59e6c13fc8d990781f77694fe">Continue</a>
+, <a class="el" href="#a23eac89d613aa8e377b767e1cbc93875a0cac3c7b6d9e33208ee147431e86725d">DecisionRequired</a>
+, <a class="el" href="#a23eac89d613aa8e377b767e1cbc93875af92965e2c8a7afb3c1b9a5c09a263636">Done</a>
+ }</td></tr>
+<tr class="memdesc:a23eac89d613aa8e377b767e1cbc93875"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result of a single event-processing step.  <a href="#a23eac89d613aa8e377b767e1cbc93875">More...</a><br /></td></tr>
 <tr class="memitem:af841dd07c9c38276e117696a4dd6fe87" id="r_af841dd07c9c38276e117696a4dd6fe87"><td class="memItemLeft">enum &#160;</td><td class="memItemRight"><a class="el" href="#af841dd07c9c38276e117696a4dd6fe87">DispatchingRule</a> { <br />
 &#160;&#160;<a class="el" href="#af841dd07c9c38276e117696a4dd6fe87ade91ab1cd38237cb688634ed2b95a62e">SPT_SMPT</a>
 , <a class="el" href="#af841dd07c9c38276e117696a4dd6fe87a18355950aa0d135000b56aba39667cf3">SPT_SRWT</a>
@@ -219,6 +224,31 @@ Enumerations</h2></td></tr>
 <tr><td class="fieldname"><a id="a3aebc4d18420ccdbcfb891f2835f01b0ad7c8c85bf79bbe1b7188497c32c3b0ca" name="a3aebc4d18420ccdbcfb891f2835f01b0ad7c8c85bf79bbe1b7188497c32c3b0ca"></a>Failed&#160;</td><td class="fielddoc"><p><a class="el" href="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine.html" title="Represents a single machine on the shop floor.">Machine</a> has experienced a fault and cannot accept work. Reserved for future use. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="a3aebc4d18420ccdbcfb891f2835f01b0a0493d27e20d11e356e53e0a730b0ad08" name="a3aebc4d18420ccdbcfb891f2835f01b0a0493d27e20d11e356e53e0a730b0ad08"></a>Repair&#160;</td><td class="fielddoc"><p><a class="el" href="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine.html" title="Represents a single machine on the shop floor.">Machine</a> is undergoing repair after a fault. Reserved for future use. </p>
+</td></tr>
+</table>
+
+</div>
+</div>
+<a id="a23eac89d613aa8e377b767e1cbc93875" name="a23eac89d613aa8e377b767e1cbc93875"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a23eac89d613aa8e377b767e1cbc93875">&#9670;&#160;</a></span>SimStepResult</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="#a23eac89d613aa8e377b767e1cbc93875">Assets.Scripts.Scheduling.Core.SimStepResult</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Result of a single event-processing step. </p>
+<p>Returned by <a class="el" href="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator.html#ad29bf585fd01242b65ab5bd4ad24b9ee" title="DESSimulator.ProcessNextEvent">DESSimulator.ProcessNextEvent</a> to tell the caller whether the simulation needs an external dispatch decision, can continue autonomously, or has finished. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a23eac89d613aa8e377b767e1cbc93875aa0bfb8e59e6c13fc8d990781f77694fe" name="a23eac89d613aa8e377b767e1cbc93875aa0bfb8e59e6c13fc8d990781f77694fe"></a>Continue&#160;</td><td class="fielddoc"><p>Event was processed and more events remain. No decision needed. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a23eac89d613aa8e377b767e1cbc93875a0cac3c7b6d9e33208ee147431e86725d" name="a23eac89d613aa8e377b767e1cbc93875a0cac3c7b6d9e33208ee147431e86725d"></a>DecisionRequired&#160;</td><td class="fielddoc"><p>A machine has become free with a non-empty queue. The caller must supply a <a class="el" href="#af841dd07c9c38276e117696a4dd6fe87" title="DispatchingRule">DispatchingRule</a> via <a class="el" href="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator.html#a914e8fe3b5d0d08e5c46bf76a73114d9" title="DESSimulator.ApplyDecision">DESSimulator.ApplyDecision</a> before calling ProcessNextEvent again. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a23eac89d613aa8e377b767e1cbc93875af92965e2c8a7afb3c1b9a5c09a263636" name="a23eac89d613aa8e377b767e1cbc93875af92965e2c8a7afb3c1b9a5c09a263636"></a>Done&#160;</td><td class="fielddoc"><p>The event queue is empty. All jobs are complete. </p>
 </td></tr>
 </table>
 

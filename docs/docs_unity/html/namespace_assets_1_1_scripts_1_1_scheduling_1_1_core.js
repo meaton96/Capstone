@@ -26,5 +26,10 @@ var namespace_assets_1_1_scripts_1_1_scheduling_1_1_core =
       [ "Busy", "namespace_assets_1_1_scripts_1_1_scheduling_1_1_core.html#a3aebc4d18420ccdbcfb891f2835f01b0ad8a942ef2b04672adfafef0ad817a407", null ],
       [ "Failed", "namespace_assets_1_1_scripts_1_1_scheduling_1_1_core.html#a3aebc4d18420ccdbcfb891f2835f01b0ad7c8c85bf79bbe1b7188497c32c3b0ca", null ],
       [ "Repair", "namespace_assets_1_1_scripts_1_1_scheduling_1_1_core.html#a3aebc4d18420ccdbcfb891f2835f01b0a0493d27e20d11e356e53e0a730b0ad08", null ]
+    ] ],
+    [ "SimStepResult", "namespace_assets_1_1_scripts_1_1_scheduling_1_1_core.html#a23eac89d613aa8e377b767e1cbc93875", [
+      [ "Continue", "namespace_assets_1_1_scripts_1_1_scheduling_1_1_core.html#a23eac89d613aa8e377b767e1cbc93875aa0bfb8e59e6c13fc8d990781f77694fe", null ],
+      [ "DecisionRequired", "namespace_assets_1_1_scripts_1_1_scheduling_1_1_core.html#a23eac89d613aa8e377b767e1cbc93875a0cac3c7b6d9e33208ee147431e86725d", null ],
+      [ "Done", "namespace_assets_1_1_scripts_1_1_scheduling_1_1_core.html#a23eac89d613aa8e377b767e1cbc93875af92965e2c8a7afb3c1b9a5c09a263636", null ]
     ] ]
 ];

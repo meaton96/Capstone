@@ -112,9 +112,9 @@ int&#160;</td><td class="memItemRight"><b>Id</b><code> [get]</code></td></tr>
 <tr class="memitem:a95c34ede07918ec6b705d42d89ddba3e" id="r_a95c34ede07918ec6b705d42d89ddba3e"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a95c34ede07918ec6b705d42d89ddba3e">NextOperationIndex</a> = 0<code> [get, set]</code></td></tr>
 <tr class="memdesc:a95c34ede07918ec6b705d42d89ddba3e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Index of the next operation to be dispatched or currently in progress.  <br /></td></tr>
 <tr class="memitem:aa1c1d8a26ce8148b5a2ccea8113c9890" id="r_aa1c1d8a26ce8148b5a2ccea8113c9890"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#aa1c1d8a26ce8148b5a2ccea8113c9890">ArrivalTime</a><code> [get]</code></td></tr>
-<tr class="memdesc:aa1c1d8a26ce8148b5a2ccea8113c9890"><td class="mdescLeft">&#160;</td><td class="mdescRight">Simulation time at which this job entered the system.  <br /></td></tr>
+<tr class="memdesc:aa1c1d8a26ce8148b5a2ccea8113c9890"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="namespace_assets_1_1_scripts_1_1_simulation.html">Simulation</a> time at which this job entered the system.  <br /></td></tr>
 <tr class="memitem:a26d164bc9562e761d35d5d13d2156036" id="r_a26d164bc9562e761d35d5d13d2156036"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#a26d164bc9562e761d35d5d13d2156036">CompletionTime</a> = -1<code> [get, set]</code></td></tr>
-<tr class="memdesc:a26d164bc9562e761d35d5d13d2156036"><td class="mdescLeft">&#160;</td><td class="mdescRight">Simulation time at which the job's final operation completed.  <br /></td></tr>
+<tr class="memdesc:a26d164bc9562e761d35d5d13d2156036"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="namespace_assets_1_1_scripts_1_1_simulation.html">Simulation</a> time at which the job's final operation completed.  <br /></td></tr>
 <tr class="memitem:a08059999b9beefced19f84b58f8d422c" id="r_a08059999b9beefced19f84b58f8d422c"><td class="memItemLeft"><a id="a08059999b9beefced19f84b58f8d422c" name="a08059999b9beefced19f84b58f8d422c"></a>
 bool&#160;</td><td class="memItemRight"><b>IsComplete</b><code> [get]</code></td></tr>
 <tr class="memdesc:a08059999b9beefced19f84b58f8d422c"><td class="mdescLeft">&#160;</td><td class="mdescRight"><code>true</code> when all operations have been processed; <code>false</code> otherwise. <br /></td></tr>
@@ -155,7 +155,7 @@ bool&#160;</td><td class="memItemRight"><b>IsComplete</b><code> [get]</code></td
   <table class="params">
     <tr><td class="paramname">id</td><td>Unique job identifier. </td></tr>
     <tr><td class="paramname">operations</td><td>Ordered array of operations to execute. Must not be null or empty. </td></tr>
-    <tr><td class="paramname">arrivalTime</td><td>Simulation time at which the job enters the system. Defaults to <code>0</code>. </td></tr>
+    <tr><td class="paramname">arrivalTime</td><td><a class="el" href="namespace_assets_1_1_scripts_1_1_simulation.html">Simulation</a> time at which the job enters the system. Defaults to <code>0</code>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -183,7 +183,7 @@ bool&#160;</td><td class="memItemRight"><b>IsComplete</b><code> [get]</code></td
 </table>
 </div><div class="memdoc">
 
-<p>Simulation time at which this job entered the system. </p>
+<p><a class="el" href="namespace_assets_1_1_scripts_1_1_simulation.html">Simulation</a> time at which this job entered the system. </p>
 <p>Currently fixed at <code>0</code> for all jobs in Taillard benchmark instances. Reserved for future dynamic arrival scheduling. </p>
 
 </div>
@@ -208,7 +208,7 @@ bool&#160;</td><td class="memItemRight"><b>IsComplete</b><code> [get]</code></td
 </table>
 </div><div class="memdoc">
 
-<p>Simulation time at which the job's final operation completed. </p>
+<p><a class="el" href="namespace_assets_1_1_scripts_1_1_simulation.html">Simulation</a> time at which the job's final operation completed. </p>
 <p>Initialised to <code>-1</code> and set by DESSimulator.HandleOperationComplete when <a class="el" href="#a08059999b9beefced19f84b58f8d422c" title="IsComplete">IsComplete</a> first becomes <code>true</code>. Used to compute the makespan. </p>
 
 </div>

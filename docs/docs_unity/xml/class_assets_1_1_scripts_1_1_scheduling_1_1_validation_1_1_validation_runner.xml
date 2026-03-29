@@ -1,0 +1,160 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner" kind="class" language="C#" prot="public">
+    <compoundname>Assets::Scripts::Scheduling::Validation::ValidationRunner</compoundname>
+    <innerclass refid="struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result" prot="public">Assets::Scripts::Scheduling::Validation::ValidationRunner::ValidationResult</innerclass>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1acc29f6fc8de3820b1229ea52786a8c68" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result" kindref="compound">ValidationResult</ref></type>
+        <definition>ValidationResult Assets.Scripts.Scheduling.Validation.ValidationRunner.RunSingle</definition>
+        <argsstring>(TaillardInstance instance, DispatchingRule rule)</argsstring>
+        <name>RunSingle</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Validation.ValidationRunner.RunSingle</qualifiedname>
+        <param>
+          <type><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance" kindref="compound">TaillardInstance</ref></type>
+          <declname>instance</declname>
+        </param>
+        <param>
+          <type><ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1af841dd07c9c38276e117696a4dd6fe87" kindref="member">DispatchingRule</ref></type>
+          <declname>rule</declname>
+        </param>
+        <briefdescription>
+<para>Simulates a single instance with one dispatching rule and returns a gap analysis. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Constructs a fresh DESSimulator, loads <computeroutput>instance</computeroutput>, sets <computeroutput>rule</computeroutput> as the active dispatching rule, runs to completion, and packages the result into a <ref refid="struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result" kindref="compound">ValidationResult</ref>. The gap percentage is computed relative to TaillardMetadata.optimum and will be infinite or undefined if optimum is <computeroutput>0</computeroutput>.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>instance</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The benchmark instance to simulate. Must have valid TaillardInstance.metadata with a non-zero TaillardMetadata.optimum for gap analysis to be meaningful. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>rule</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The DispatchingRule to apply during the simulation run.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>A <ref refid="struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result" kindref="compound">ValidationResult</ref> containing the makespan, gap, and bound values for this rule and instance combination. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/ValidationRunner.cs" line="87" column="33" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/ValidationRunner.cs" bodystart="87" bodyend="107"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1a8024432bea5a9a1908488f3611bd2efd" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>List&lt; <ref refid="struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result" kindref="compound">ValidationResult</ref> &gt;</type>
+        <definition>List&lt; ValidationResult &gt; Assets.Scripts.Scheduling.Validation.ValidationRunner.RunAllRules</definition>
+        <argsstring>(TaillardInstance instance)</argsstring>
+        <name>RunAllRules</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Validation.ValidationRunner.RunAllRules</qualifiedname>
+        <param>
+          <type><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance" kindref="compound">TaillardInstance</ref></type>
+          <declname>instance</declname>
+        </param>
+        <briefdescription>
+<para>Runs every DispatchingRule on an instance and returns results sorted by makespan. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Iterates all values of the DispatchingRule enum via <computeroutput>Enum.GetValues</computeroutput>, delegates each to <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1acc29f6fc8de3820b1229ea52786a8c68" kindref="member">RunSingle</ref>, and sorts the collected results by <ref refid="struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_1a1b4e8e889bb4876f00515d4376cbcf92" kindref="member">ValidationResult.Makespan</ref> ascending so the best-performing heuristic appears first. Useful for identifying the strongest baseline rule for a given instance before applying RL-based scheduling.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>instance</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The benchmark instance to run all rules against.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>A list of <ref refid="struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result" kindref="compound">ValidationResult</ref> values, one per DispatchingRule, sorted by makespan ascending. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/ValidationRunner.cs" line="121" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/ValidationRunner.cs" bodystart="121" bodyend="132"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1a68a76d37888dd4b0aaadc15867c029b9" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>List&lt; string &gt;</type>
+        <definition>List&lt; string &gt; Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidateConstraints</definition>
+        <argsstring>(TaillardInstance instance, DispatchingRule rule)</argsstring>
+        <name>ValidateConstraints</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidateConstraints</qualifiedname>
+        <param>
+          <type><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance" kindref="compound">TaillardInstance</ref></type>
+          <declname>instance</declname>
+        </param>
+        <param>
+          <type><ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1af841dd07c9c38276e117696a4dd6fe87" kindref="member">DispatchingRule</ref></type>
+          <declname>rule</declname>
+        </param>
+        <briefdescription>
+<para>Verifies correctness invariants of the DESSimulator against a benchmark instance. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Runs a fresh simulation with <computeroutput>rule</computeroutput> and performs four sequential checks. All violations found across all checks are collected and returned — execution does not stop at the first error. A correct implementation should always return an empty list.</para>
+<para>The four checks are:<orderedlist>
+<listitem><para><bold>Valid times</bold>: every Operation has non-negative Operation.StartTime and Operation.EndTime. A value of <computeroutput>-1</computeroutput> indicates the operation was never scheduled.</para>
+</listitem><listitem><para><bold>Precedence</bold>: for each job, operation <computeroutput>i</computeroutput> must start no earlier than operation <computeroutput>i-1</computeroutput> ends. Violations indicate a sequencing bug in DESSimulator.</para>
+</listitem><listitem><para><bold>No machine overlap</bold>: no two operations assigned to the same machine may overlap in time. Operations are sorted by start time and checked pairwise. Violations indicate a machine contention bug.</para>
+</listitem><listitem><para><bold>Makespan lower bound</bold>: the achieved makespan must be at or above TaillardMetadata.lower_bound. A violation indicates a bug that produces a schedule that is theoretically impossible.</para>
+</listitem></orderedlist>
+</para>
+<para><simplesect kind="note"><para>A floating-point epsilon of <computeroutput>1e-9</computeroutput> is applied to all time comparisons to guard against rounding errors in double arithmetic.</para>
+</simplesect>
+<parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>instance</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The benchmark instance to validate against. Must have valid TaillardMetadata with a meaningful TaillardMetadata.lower_bound. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>rule</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The DispatchingRule to use for the validation simulation run.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>A list of human-readable error strings describing each violation found. Returns an empty list if all constraints are satisfied. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/ValidationRunner.cs" line="161" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/ValidationRunner.cs" bodystart="161" bodyend="231"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Validates the DESSimulator against Taillard JSP benchmark instances. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>Provides three levels of validation:<itemizedlist>
+<listitem><para><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1acc29f6fc8de3820b1229ea52786a8c68" kindref="member">RunSingle</ref> — simulate one instance with one DispatchingRule and measure the gap to optimum.</para>
+</listitem><listitem><para><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1a8024432bea5a9a1908488f3611bd2efd" kindref="member">RunAllRules</ref> — sweep every DispatchingRule and return results sorted by makespan.</para>
+</listitem><listitem><para><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1a68a76d37888dd4b0aaadc15867c029b9" kindref="member">ValidateConstraints</ref> — verify correctness invariants (valid times, precedence, no machine overlap, makespan above lower bound).</para>
+</listitem></itemizedlist>
+</para>
+<para>Usage outside <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_unity" kindref="compound">Unity</ref>: <programlisting><codeline><highlight class="normal">var<sp/>runner<sp/>=<sp/></highlight><highlight class="keyword">new</highlight><highlight class="normal"><sp/>ValidationRunner();</highlight></codeline>
+<codeline><highlight class="normal">runner.RunValidation(taillardInstance);</highlight></codeline>
+</programlisting></para>
+<para>Usage inside <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_unity" kindref="compound">Unity</ref>: <programlisting><codeline><highlight class="comment">//<sp/>Call<sp/>from<sp/>a<sp/>MonoBehaviour<sp/>via<sp/>the<sp/>TaillardValidator<sp/>component.</highlight></codeline>
+</programlisting> </para>
+    </detaileddescription>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/ValidationRunner.cs" line="26" column="11" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/ValidationRunner.cs" bodystart="27" bodyend="232"/>
+    <listofallmembers>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1a8024432bea5a9a1908488f3611bd2efd" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Validation::ValidationRunner</scope><name>RunAllRules</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1acc29f6fc8de3820b1229ea52786a8c68" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Validation::ValidationRunner</scope><name>RunSingle</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1a68a76d37888dd4b0aaadc15867c029b9" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Validation::ValidationRunner</scope><name>ValidateConstraints</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

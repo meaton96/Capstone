@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="namespace_assets_1_1_scripts_1_1_simulation" kind="namespace" language="C#">
+    <compoundname>Assets::Scripts::Simulation</compoundname>
+    <innerclass refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager" prot="public">Assets::Scripts::Simulation::FactoryLayoutManager</innerclass>
+    <innerclass refid="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual" prot="public">Assets::Scripts::Simulation::MachineVisual</innerclass>
+    <innerclass refid="struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request" prot="public">Assets::Scripts::Simulation::DecisionRequest</innerclass>
+    <innerclass refid="struct_assets_1_1_scripts_1_1_simulation_1_1_step_result" prot="public">Assets::Scripts::Simulation::StepResult</innerclass>
+    <innerclass refid="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result" prot="public">Assets::Scripts::Simulation::EpisodeResult</innerclass>
+    <innerclass refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge" prot="public">Assets::Scripts::Simulation::SimulationBridge</innerclass>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/FactoryLayoutManager.cs" line="6" column="1"/>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,56 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="classmirror__des_1_1_operation" kind="class" language="Python" prot="public">
+    <compoundname>mirror_des::Operation</compoundname>
+    <sectiondef kind="public-static-attrib">
+      <memberdef kind="variable" id="classmirror__des_1_1_operation_1ac920f20906e796539a78cf589de02490" prot="public" static="yes" mutable="no">
+        <type>float</type>
+        <definition>float mirror_des.Operation::start_time</definition>
+        <argsstring></argsstring>
+        <name>start_time</name>
+        <qualifiedname>mirror_des.Operation.start_time</qualifiedname>
+        <initializer>=  -1.0</initializer>
+        <briefdescription>
+<para>ID of the owning job. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Zero-based index of this operation within its job&apos;s sequence.</para>
+<para>ID of the machine that must process this operation.</para>
+<para>Processing time in simulation time units.</para>
+<para>Simulation time at which processing began. <computeroutput>-1.0</computeroutput> until scheduled. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="82" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="82" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classmirror__des_1_1_operation_1ab72ee8ac3fe75554adf944662413e1e2" prot="public" static="yes" mutable="no">
+        <type>float</type>
+        <definition>float mirror_des.Operation::end_time</definition>
+        <argsstring></argsstring>
+        <name>end_time</name>
+        <qualifiedname>mirror_des.Operation.end_time</qualifiedname>
+        <initializer>=  -1.0</initializer>
+        <briefdescription>
+<para>Simulation time at which processing finished. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><computeroutput>-1.0</computeroutput> until scheduled. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="84" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="84" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Single operation within a job, mirroring the C# <ref refid="classmirror__des_1_1_operation" kindref="compound">Operation</ref> class. </para>
+    </briefdescription>
+    <detaileddescription>
+<para><computeroutput>start_time</computeroutput> and <computeroutput>end_time</computeroutput> are initialised to <computeroutput>-1.0</computeroutput> and stamped by Machine.start_processing during the simulation run, matching the C# behaviour where <computeroutput>-1</computeroutput> sentinel values indicate an unscheduled operation. </para>
+    </detaileddescription>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="72" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="72" bodyend="86"/>
+    <listofallmembers>
+      <member refid="classmirror__des_1_1_operation_1ab72ee8ac3fe75554adf944662413e1e2" prot="public" virt="non-virtual"><scope>mirror_des::Operation</scope><name>end_time</name></member>
+      <member refid="classmirror__des_1_1_operation_1ac920f20906e796539a78cf589de02490" prot="public" virt="non-virtual"><scope>mirror_des::Operation</scope><name>start_time</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

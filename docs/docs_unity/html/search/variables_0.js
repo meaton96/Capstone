@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['duration_5fmatrix_0',['duration_matrix',['../class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance.html#a7590980360c981cb8e7a63498bb96f77',1,'Assets::Scripts::Scheduling::Data::TaillardInstance']]]
+  ['busy_0',['BUSY',['../classmirror__des_1_1_machine_state.html#adcbaf2b9705b5049c68d2d4cd60fbc80',1,'mirror_des::MachineState']]]
 ];

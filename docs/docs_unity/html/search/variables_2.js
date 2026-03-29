@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['instancedirectory_0',['instanceDirectory',['../class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator.html#a874643c3bab4c70ffecb10fd871e963e',1,'Assets::Scripts::Scheduling::Validation::CrossValidator']]],
-  ['instancefilename_1',['instanceFileName',['../class_assets_1_1_scripts_1_1_scheduling_1_1_unity_1_1_taillard_validator.html#a2503225f19ffc3f2e69f142c657e366a',1,'Assets::Scripts::Scheduling::Unity::TaillardValidator']]],
-  ['instancename_2',['InstanceName',['../struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result.html#a0926bf1f8fc15ac009860d1b985d105a',1,'Assets::Scripts::Scheduling::Validation::ValidationRunner::ValidationResult']]]
+  ['decisionindex_0',['DecisionIndex',['../struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request.html#a02df458c6ccecffbd9d9fdc8a2523199',1,'Assets::Scripts::Simulation::DecisionRequest']]],
+  ['done_1',['Done',['../struct_assets_1_1_scripts_1_1_simulation_1_1_step_result.html#aee1e19dd4a9e7aad17d7ce87b8cfe706',1,'Assets::Scripts::Simulation::StepResult']]],
+  ['duration_5fmatrix_2',['duration_matrix',['../class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance.html#a7590980360c981cb8e7a63498bb96f77',1,'Assets::Scripts::Scheduling::Data::TaillardInstance']]]
 ];

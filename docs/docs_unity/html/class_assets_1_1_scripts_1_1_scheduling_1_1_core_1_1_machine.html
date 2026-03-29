@@ -115,7 +115,7 @@ int&#160;</td><td class="memItemRight"><b>Id</b><code> [get]</code></td></tr>
 <tr class="memitem:acc36045a17f281fb2b7e5ce7eb02482e" id="r_acc36045a17f281fb2b7e5ce7eb02482e"><td class="memItemLeft"><a class="el" href="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation.html">Operation</a>&#160;</td><td class="memItemRight"><a class="el" href="#acc36045a17f281fb2b7e5ce7eb02482e">CurrentOperation</a><code> [get, set]</code></td></tr>
 <tr class="memdesc:acc36045a17f281fb2b7e5ce7eb02482e"><td class="mdescLeft">&#160;</td><td class="mdescRight">The operation currently being processed, or <code>null</code> when the machine is idle.  <br /></td></tr>
 <tr class="memitem:a5941a0fba6b6be337c4cea165c196241" id="r_a5941a0fba6b6be337c4cea165c196241"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#a5941a0fba6b6be337c4cea165c196241">BusyUntil</a> = 0<code> [get, set]</code></td></tr>
-<tr class="memdesc:a5941a0fba6b6be337c4cea165c196241"><td class="mdescLeft">&#160;</td><td class="mdescRight">Simulation time at which the current operation will finish.  <br /></td></tr>
+<tr class="memdesc:a5941a0fba6b6be337c4cea165c196241"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="namespace_assets_1_1_scripts_1_1_simulation.html">Simulation</a> time at which the current operation will finish.  <br /></td></tr>
 <tr class="memitem:ae56e4992f7199a184ff22c52ae036058" id="r_ae56e4992f7199a184ff22c52ae036058"><td class="memItemLeft">List&lt; <a class="el" href="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation.html">Operation</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ae56e4992f7199a184ff22c52ae036058">WaitingQueue</a> = new List&lt;<a class="el" href="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation.html">Operation</a>&gt;()<code> [get]</code></td></tr>
 <tr class="memdesc:ae56e4992f7199a184ff22c52ae036058"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ordered list of operations waiting to be processed on this machine.  <br /></td></tr>
 </table>
@@ -221,7 +221,7 @@ int&#160;</td><td class="memItemRight"><b>Id</b><code> [get]</code></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Simulation time at which the current operation will finish. </p>
+<p><a class="el" href="namespace_assets_1_1_scripts_1_1_simulation.html">Simulation</a> time at which the current operation will finish. </p>
 <p>Mirrors <a class="el" href="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation.html#a5c826ae3e7644df48c3743d2fd2f5acf" title="Operation.EndTime">Operation.EndTime</a> of <a class="el" href="#acc36045a17f281fb2b7e5ce7eb02482e" title="CurrentOperation">CurrentOperation</a> and is used by <a class="el" href="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator.html" title="DESSimulator">DESSimulator</a> to schedule the corresponding <a class="el" href="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core.html#a74e900c350e0673c74e0e62b6f351056a118b996cf01af1910a157f7409f5d0df" title="EventType.OperationComplete">EventType.OperationComplete</a> event. Reset to <code>0</code> by <a class="el" href="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator.html#a477dc5db6d5bfeea5ec2dd71e9cfd63e" title="DESSimulator.Reset">DESSimulator.Reset</a> between runs. </p>
 
 </div>

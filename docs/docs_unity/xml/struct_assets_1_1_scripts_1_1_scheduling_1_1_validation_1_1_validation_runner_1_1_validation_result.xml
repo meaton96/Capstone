@@ -1,0 +1,152 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result" kind="struct" language="C#" prot="public">
+    <compoundname>Assets::Scripts::Scheduling::Validation::ValidationRunner::ValidationResult</compoundname>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_1a0926bf1f8fc15ac009860d1b985d105a" prot="public" static="no" mutable="no">
+        <type>string</type>
+        <definition>string Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidationResult.InstanceName</definition>
+        <argsstring></argsstring>
+        <name>InstanceName</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidationResult.InstanceName</qualifiedname>
+        <briefdescription>
+<para>Name of the benchmark instance, sourced from TaillardInstance.name. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/ValidationRunner.cs" line="36" column="27" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/ValidationRunner.cs" bodystart="36" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_1a517920986cf8204bea22af51ce7a823d" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidationResult.KnownOptimum</definition>
+        <argsstring></argsstring>
+        <name>KnownOptimum</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidationResult.KnownOptimum</qualifiedname>
+        <briefdescription>
+<para>Proven optimal makespan for this instance, sourced from TaillardMetadata.optimum. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Used as the denominator in <ref refid="struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_1a7e469c74087c89fb0c85b2544085d7b8" kindref="member">GapPercent</ref>. If <computeroutput>0</computeroutput>, gap calculation will produce undefined results. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/ValidationRunner.cs" line="41" column="24" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/ValidationRunner.cs" bodystart="41" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_1aeb38fc30e0ecf984b8fc04e70fa4a663" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidationResult.LowerBound</definition>
+        <argsstring></argsstring>
+        <name>LowerBound</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidationResult.LowerBound</qualifiedname>
+        <briefdescription>
+<para>Theoretical lower bound on the makespan, below which no valid schedule can exist. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/ValidationRunner.cs" line="44" column="24" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/ValidationRunner.cs" bodystart="44" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_1a22ebc7de4f255381a4584ef47c152017" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidationResult.UpperBound</definition>
+        <argsstring></argsstring>
+        <name>UpperBound</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidationResult.UpperBound</qualifiedname>
+        <briefdescription>
+<para>Best known upper bound on the makespan from the published literature. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/ValidationRunner.cs" line="47" column="24" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/ValidationRunner.cs" bodystart="47" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_1a1b4e8e889bb4876f00515d4376cbcf92" prot="public" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidationResult.Makespan</definition>
+        <argsstring></argsstring>
+        <name>Makespan</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidationResult.Makespan</qualifiedname>
+        <briefdescription>
+<para>Makespan achieved by the simulation run, in simulation time units. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/ValidationRunner.cs" line="50" column="27" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/ValidationRunner.cs" bodystart="50" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_1a6a683f8b0bd00e2262f6c1247ebb49d7" prot="public" static="no" mutable="no">
+        <type><ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1af841dd07c9c38276e117696a4dd6fe87" kindref="member">DispatchingRule</ref></type>
+        <definition>DispatchingRule Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidationResult.RuleUsed</definition>
+        <argsstring></argsstring>
+        <name>RuleUsed</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidationResult.RuleUsed</qualifiedname>
+        <briefdescription>
+<para>The DispatchingRule used to produce this result. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/ValidationRunner.cs" line="53" column="36" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/ValidationRunner.cs" bodystart="53" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_1a7e469c74087c89fb0c85b2544085d7b8" prot="public" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidationResult.GapPercent</definition>
+        <argsstring></argsstring>
+        <name>GapPercent</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidationResult.GapPercent</qualifiedname>
+        <briefdescription>
+<para>Percentage gap between <ref refid="struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_1a1b4e8e889bb4876f00515d4376cbcf92" kindref="member">Makespan</ref> and <ref refid="struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_1a517920986cf8204bea22af51ce7a823d" kindref="member">KnownOptimum</ref>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Computed as <computeroutput></computeroutput>(Makespan - KnownOptimum) / KnownOptimum * 100. A value of <computeroutput>0</computeroutput> indicates an optimal schedule was found. Negative values indicate a bug, since no schedule can beat the proven optimum. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/ValidationRunner.cs" line="59" column="27" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/ValidationRunner.cs" bodystart="59" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_1aff1c63ea0501a57ab4246a8c63e07674" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>override string</type>
+        <definition>override string Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidationResult.ToString</definition>
+        <argsstring>()</argsstring>
+        <name>ToString</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Validation.ValidationRunner.ValidationResult.ToString</qualifiedname>
+        <briefdescription>
+<para>Returns a single-line summary of the result suitable for console logging. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>A formatted string containing instance name, rule, makespan, optimum, gap percentage, and bound range. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/ValidationRunner.cs" line="65" column="36" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/ValidationRunner.cs" bodystart="65" bodyend="70"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Encapsulates the outcome of a single simulation run against a benchmark instance. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>Captures the instance identity, all known bound values from TaillardMetadata, the achieved makespan, the rule used, and the optimality gap so results from different rules can be compared directly. </para>
+    </detaileddescription>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/ValidationRunner.cs" line="33" column="15" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/ValidationRunner.cs" bodystart="34" bodyend="71"/>
+    <listofallmembers>
+      <member refid="struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_1a7e469c74087c89fb0c85b2544085d7b8" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Validation::ValidationRunner::ValidationResult</scope><name>GapPercent</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_1a0926bf1f8fc15ac009860d1b985d105a" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Validation::ValidationRunner::ValidationResult</scope><name>InstanceName</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_1a517920986cf8204bea22af51ce7a823d" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Validation::ValidationRunner::ValidationResult</scope><name>KnownOptimum</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_1aeb38fc30e0ecf984b8fc04e70fa4a663" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Validation::ValidationRunner::ValidationResult</scope><name>LowerBound</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_1a1b4e8e889bb4876f00515d4376cbcf92" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Validation::ValidationRunner::ValidationResult</scope><name>Makespan</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_1a6a683f8b0bd00e2262f6c1247ebb49d7" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Validation::ValidationRunner::ValidationResult</scope><name>RuleUsed</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_1aff1c63ea0501a57ab4246a8c63e07674" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Validation::ValidationRunner::ValidationResult</scope><name>ToString</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_runner_1_1_validation_result_1a22ebc7de4f255381a4584ef47c152017" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Validation::ValidationRunner::ValidationResult</scope><name>UpperBound</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

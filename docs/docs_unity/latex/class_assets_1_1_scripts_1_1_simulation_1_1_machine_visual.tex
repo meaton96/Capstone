@@ -1,0 +1,271 @@
+\doxysection{Assets.\+Scripts.\+Simulation.\+Machine\+Visual Class Reference}
+\hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual}{}\label{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual}\index{Assets.Scripts.Simulation.MachineVisual@{Assets.Scripts.Simulation.MachineVisual}}
+
+
+\doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine}{Machine} operating states — mirrors the core DES \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine}{Machine} states.  
+
+
+Inheritance diagram for Assets.\+Scripts.\+Simulation.\+Machine\+Visual:\+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{Indent}\textbf{ Initialisation}\par
+\begin{DoxyCompactItemize}
+\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_aa1787017cc68754d952ad76e7876dd23}{Initialise}} (int id, \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine}{Machine}} core\+Machine\+Ref=null)
+\begin{DoxyCompactList}\small\item\em One-\/time setup after instantiation. Called by \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager}{Factory\+Layout\+Manager}. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\end{Indent}
+\begin{Indent}\textbf{ State Management (Step 2)}\par
+\begin{DoxyCompactItemize}
+\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_a1216e5e0d70f2df45404ea6a3f34d71d}{Set\+State}} (\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0}{Machine\+State}} new\+State)
+\begin{DoxyCompactList}\small\item\em Transitions to a new visual state. Updates colour, status label, and progress bar visibility. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_a7b0ae515b56d33896c72289b6c7708be}{Begin\+Operation}} (int job\+Id, float sim\+Start\+Time, float duration)
+\begin{DoxyCompactList}\small\item\em Begins an operation — sets state to Machine\+State.\+Busy and starts the progress bar. Called by \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge}{Simulation\+Bridge} on Operation\+Started events. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_a25b9f563aed0335aa7ac6552a2592012}{Complete\+Operation}} (int job\+Id)
+\begin{DoxyCompactList}\small\item\em Completes the current operation — sets state to Machine\+State.\+Idle. Called by \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge}{Simulation\+Bridge} on Operation\+Completed events. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\end{Indent}
+\begin{Indent}\textbf{ Reset}\par
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_a8774b5d5b8c4b83431f2af419baa9cb4}\label{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_a8774b5d5b8c4b83431f2af419baa9cb4} 
+void {\bfseries Reset\+Machine} ()
+\begin{DoxyCompactList}\small\item\em Resets all runtime state for a new episode. Called between episodes. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\end{Indent}
+\doxysubsubsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_a43fe884dd60566a3bd279af66f221384}\label{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_a43fe884dd60566a3bd279af66f221384} 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine}{Machine}} {\bfseries Core\+Machine}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em Gets the core DES \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine}{Machine} reference. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\begin{Indent}\textbf{ Public Properties}\par
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_acc59b8396bb8447c6dde0862eec97a4a}\label{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_acc59b8396bb8447c6dde0862eec97a4a} 
+int {\bfseries Machine\+Id}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine}{Machine} index inside the Taillard instance. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_a1c7b3ec6da258ddbeb40781c8923fbe6}\label{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_a1c7b3ec6da258ddbeb40781c8923fbe6} 
+\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0}{Machine\+State}} {\bfseries Current\+State}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em Current visual state. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_a0f5fdaf7692fa9077248dee658a8159e}\label{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_a0f5fdaf7692fa9077248dee658a8159e} 
+int {\bfseries Queue\+Length}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em Number of jobs visually queued at this machine. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_a2499263d81fddd0db9a377150fc4190a}\label{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_a2499263d81fddd0db9a377150fc4190a} 
+int {\bfseries Decision\+Point\+Count}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em Total dispatching decisions made at this machine. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_abd7f98a1fcda382fa69f334ced3aba78}\label{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_abd7f98a1fcda382fa69f334ced3aba78} 
+IRead\+Only\+List$<$ string $>$ {\bfseries History\+Log}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em Read-\/only view of the history log. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\end{Indent}
+\doxysubsubsection*{Progress Bar}
+\begin{DoxyCompactItemize}
+\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_aa51d6e9ea8ab3860990ba43f453157e2}{Update\+Progress}} (float current\+Sim\+Time)
+\begin{DoxyCompactList}\small\item\em Drives the progress bar from an external simulation time. The \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge}{Simulation\+Bridge} should call this each frame with the current simulation clock value. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Queue Visualisation (Step 6)}
+\begin{DoxyCompactItemize}
+\item 
+Vector3 \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_a2942314ec9597a1b32b3f982932ff67d}{Enqueue\+Job}} (Game\+Object job\+Visual)
+\begin{DoxyCompactList}\small\item\em Adds a job visual to this machine\textquotesingle{}s queue. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_aca8228fdb2dbdfa4830411dc62c90c9d}{Dequeue\+Job}} (Game\+Object job\+Visual)
+\begin{DoxyCompactList}\small\item\em Removes a specific job from the queue (it is being processed or rerouted). Remaining jobs shift forward to fill the gap. \end{DoxyCompactList}\item 
+Vector3 \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_afbf499fc284321f2311b5e00d44ab4cb}{Get\+Processing\+Position}} ()
+\begin{DoxyCompactList}\small\item\em Gets the world-\/space position of the "{}processing"{} slot where the active job sits while the machine is busy. \end{DoxyCompactList}\item 
+Vector3 \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_a36d3d6f7f51df8753d18ebc772707ee2}{Get\+Queue\+Slot\+Position}} (int slot\+Index)
+\begin{DoxyCompactList}\small\item\em Gets the world-\/space position for the Nth queued job slot. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Decision-\/\+Point Flash (Step 8)}
+\begin{DoxyCompactItemize}
+\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_ae94e1ca6d18daeb71be468600b6f5c7e}{Record\+Decision\+Point}} (float sim\+Time, int\+[$\,$]\+ queued\+Job\+Ids, int chosen\+Job\+Id, string rule\+Name, bool flash=true)
+\begin{DoxyCompactList}\small\item\em Records a dispatching decision at this machine and optionally flashes the visual. Called when the DES makes a dispatching decision (i.\+e., queue is non-\/empty when the machine becomes free). \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_aca10d307c1fed4ef8165c56167a43827}\label{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_aca10d307c1fed4ef8165c56167a43827} 
+void {\bfseries Flash} ()
+\begin{DoxyCompactList}\small\item\em Triggers a brief white flash on the machine to visually mark a dispatching decision. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine}{Machine} operating states — mirrors the core DES \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine}{Machine} states. 
+
+Visual representation of a single machine on the factory floor.
+
+Attach this to the Machine\+Prefab cube alongside a Mesh\+Renderer and a child world-\/space Canvas for the overhead UI. 
+
+\label{doc-func-members}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_a7b0ae515b56d33896c72289b6c7708be}\index{Assets.Scripts.Simulation.MachineVisual@{Assets.Scripts.Simulation.MachineVisual}!BeginOperation@{BeginOperation}}
+\index{BeginOperation@{BeginOperation}!Assets.Scripts.Simulation.MachineVisual@{Assets.Scripts.Simulation.MachineVisual}}
+\doxysubsubsection{\texorpdfstring{BeginOperation()}{BeginOperation()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_a7b0ae515b56d33896c72289b6c7708be} 
+void Assets.\+Scripts.\+Simulation.\+Machine\+Visual.\+Begin\+Operation (\begin{DoxyParamCaption}\item[{int}]{job\+Id}{, }\item[{float}]{sim\+Start\+Time}{, }\item[{float}]{duration}{}\end{DoxyParamCaption})}
+
+
+
+Begins an operation — sets state to Machine\+State.\+Busy and starts the progress bar. Called by \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge}{Simulation\+Bridge} on Operation\+Started events. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em job\+Id} & \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job}{Job} being processed.\\
+\hline
+{\em sim\+Start\+Time} & DES simulation start time of the operation.\\
+\hline
+{\em duration} & Processing time in sim-\/time units.\\
+\hline
+\end{DoxyParams}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_a25b9f563aed0335aa7ac6552a2592012}\index{Assets.Scripts.Simulation.MachineVisual@{Assets.Scripts.Simulation.MachineVisual}!CompleteOperation@{CompleteOperation}}
+\index{CompleteOperation@{CompleteOperation}!Assets.Scripts.Simulation.MachineVisual@{Assets.Scripts.Simulation.MachineVisual}}
+\doxysubsubsection{\texorpdfstring{CompleteOperation()}{CompleteOperation()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_a25b9f563aed0335aa7ac6552a2592012} 
+void Assets.\+Scripts.\+Simulation.\+Machine\+Visual.\+Complete\+Operation (\begin{DoxyParamCaption}\item[{int}]{job\+Id}{}\end{DoxyParamCaption})}
+
+
+
+Completes the current operation — sets state to Machine\+State.\+Idle. Called by \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge}{Simulation\+Bridge} on Operation\+Completed events. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em job\+Id} & \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job}{Job} that finished.\\
+\hline
+\end{DoxyParams}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_aca8228fdb2dbdfa4830411dc62c90c9d}\index{Assets.Scripts.Simulation.MachineVisual@{Assets.Scripts.Simulation.MachineVisual}!DequeueJob@{DequeueJob}}
+\index{DequeueJob@{DequeueJob}!Assets.Scripts.Simulation.MachineVisual@{Assets.Scripts.Simulation.MachineVisual}}
+\doxysubsubsection{\texorpdfstring{DequeueJob()}{DequeueJob()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_aca8228fdb2dbdfa4830411dc62c90c9d} 
+void Assets.\+Scripts.\+Simulation.\+Machine\+Visual.\+Dequeue\+Job (\begin{DoxyParamCaption}\item[{Game\+Object}]{job\+Visual}{}\end{DoxyParamCaption})}
+
+
+
+Removes a specific job from the queue (it is being processed or rerouted). Remaining jobs shift forward to fill the gap. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em job\+Visual} & The Game\+Object to remove.\\
+\hline
+\end{DoxyParams}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_a2942314ec9597a1b32b3f982932ff67d}\index{Assets.Scripts.Simulation.MachineVisual@{Assets.Scripts.Simulation.MachineVisual}!EnqueueJob@{EnqueueJob}}
+\index{EnqueueJob@{EnqueueJob}!Assets.Scripts.Simulation.MachineVisual@{Assets.Scripts.Simulation.MachineVisual}}
+\doxysubsubsection{\texorpdfstring{EnqueueJob()}{EnqueueJob()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_a2942314ec9597a1b32b3f982932ff67d} 
+Vector3 Assets.\+Scripts.\+Simulation.\+Machine\+Visual.\+Enqueue\+Job (\begin{DoxyParamCaption}\item[{Game\+Object}]{job\+Visual}{}\end{DoxyParamCaption})}
+
+
+
+Adds a job visual to this machine\textquotesingle{}s queue. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em job\+Visual} & The Game\+Object representing the queued job.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The world-\/space position the job should move to.
+\end{DoxyReturn}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_afbf499fc284321f2311b5e00d44ab4cb}\index{Assets.Scripts.Simulation.MachineVisual@{Assets.Scripts.Simulation.MachineVisual}!GetProcessingPosition@{GetProcessingPosition}}
+\index{GetProcessingPosition@{GetProcessingPosition}!Assets.Scripts.Simulation.MachineVisual@{Assets.Scripts.Simulation.MachineVisual}}
+\doxysubsubsection{\texorpdfstring{GetProcessingPosition()}{GetProcessingPosition()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_afbf499fc284321f2311b5e00d44ab4cb} 
+Vector3 Assets.\+Scripts.\+Simulation.\+Machine\+Visual.\+Get\+Processing\+Position (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Gets the world-\/space position of the "{}processing"{} slot where the active job sits while the machine is busy. 
+
+\begin{DoxyReturn}{Returns}
+World-\/space position above the machine.
+\end{DoxyReturn}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_a36d3d6f7f51df8753d18ebc772707ee2}\index{Assets.Scripts.Simulation.MachineVisual@{Assets.Scripts.Simulation.MachineVisual}!GetQueueSlotPosition@{GetQueueSlotPosition}}
+\index{GetQueueSlotPosition@{GetQueueSlotPosition}!Assets.Scripts.Simulation.MachineVisual@{Assets.Scripts.Simulation.MachineVisual}}
+\doxysubsubsection{\texorpdfstring{GetQueueSlotPosition()}{GetQueueSlotPosition()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_a36d3d6f7f51df8753d18ebc772707ee2} 
+Vector3 Assets.\+Scripts.\+Simulation.\+Machine\+Visual.\+Get\+Queue\+Slot\+Position (\begin{DoxyParamCaption}\item[{int}]{slot\+Index}{}\end{DoxyParamCaption})}
+
+
+
+Gets the world-\/space position for the Nth queued job slot. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em slot\+Index} & Zero-\/based index in the queue.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+World-\/space position for the slot.
+\end{DoxyReturn}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_aa1787017cc68754d952ad76e7876dd23}\index{Assets.Scripts.Simulation.MachineVisual@{Assets.Scripts.Simulation.MachineVisual}!Initialise@{Initialise}}
+\index{Initialise@{Initialise}!Assets.Scripts.Simulation.MachineVisual@{Assets.Scripts.Simulation.MachineVisual}}
+\doxysubsubsection{\texorpdfstring{Initialise()}{Initialise()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_aa1787017cc68754d952ad76e7876dd23} 
+void Assets.\+Scripts.\+Simulation.\+Machine\+Visual.\+Initialise (\begin{DoxyParamCaption}\item[{int}]{id}{, }\item[{\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine}{Machine}}}]{core\+Machine\+Ref}{ = {\ttfamily null}}\end{DoxyParamCaption})}
+
+
+
+One-\/time setup after instantiation. Called by \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager}{Factory\+Layout\+Manager}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em id} & \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine}{Machine} index from the Taillard\+Instance.\\
+\hline
+{\em core\+Machine\+Ref} & Reference to the core DES \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine}{Machine} object ({\ttfamily \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine}{Scheduling.\+Core.\+Machine}}). Stored as System.\+Object to avoid a compile-\/time dependency. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_ae94e1ca6d18daeb71be468600b6f5c7e}\index{Assets.Scripts.Simulation.MachineVisual@{Assets.Scripts.Simulation.MachineVisual}!RecordDecisionPoint@{RecordDecisionPoint}}
+\index{RecordDecisionPoint@{RecordDecisionPoint}!Assets.Scripts.Simulation.MachineVisual@{Assets.Scripts.Simulation.MachineVisual}}
+\doxysubsubsection{\texorpdfstring{RecordDecisionPoint()}{RecordDecisionPoint()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_ae94e1ca6d18daeb71be468600b6f5c7e} 
+void Assets.\+Scripts.\+Simulation.\+Machine\+Visual.\+Record\+Decision\+Point (\begin{DoxyParamCaption}\item[{float}]{sim\+Time}{, }\item[{int\+[$\,$]\+}]{queued\+Job\+Ids}{, }\item[{int}]{chosen\+Job\+Id}{, }\item[{string}]{rule\+Name}{, }\item[{bool}]{flash}{ = {\ttfamily true}}\end{DoxyParamCaption})}
+
+
+
+Records a dispatching decision at this machine and optionally flashes the visual. Called when the DES makes a dispatching decision (i.\+e., queue is non-\/empty when the machine becomes free). 
+
+
+\begin{DoxyParams}{Parameters}
+{\em sim\+Time} & Current simulation time.\\
+\hline
+{\em queued\+Job\+Ids} & IDs of jobs in the queue at decision time.\\
+\hline
+{\em chosen\+Job\+Id} & The job the dispatching rule selected.\\
+\hline
+{\em rule\+Name} & Name of the dispatching rule.\\
+\hline
+{\em flash} & If {\ttfamily true}, briefly flashes the machine white.\\
+\hline
+\end{DoxyParams}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_a1216e5e0d70f2df45404ea6a3f34d71d}\index{Assets.Scripts.Simulation.MachineVisual@{Assets.Scripts.Simulation.MachineVisual}!SetState@{SetState}}
+\index{SetState@{SetState}!Assets.Scripts.Simulation.MachineVisual@{Assets.Scripts.Simulation.MachineVisual}}
+\doxysubsubsection{\texorpdfstring{SetState()}{SetState()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_a1216e5e0d70f2df45404ea6a3f34d71d} 
+void Assets.\+Scripts.\+Simulation.\+Machine\+Visual.\+Set\+State (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0}{Machine\+State}}}]{new\+State}{}\end{DoxyParamCaption})}
+
+
+
+Transitions to a new visual state. Updates colour, status label, and progress bar visibility. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em new\+State} & The target \doxylink{namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_a3aebc4d18420ccdbcfb891f2835f01b0}{Machine\+State}.\\
+\hline
+\end{DoxyParams}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_aa51d6e9ea8ab3860990ba43f453157e2}\index{Assets.Scripts.Simulation.MachineVisual@{Assets.Scripts.Simulation.MachineVisual}!UpdateProgress@{UpdateProgress}}
+\index{UpdateProgress@{UpdateProgress}!Assets.Scripts.Simulation.MachineVisual@{Assets.Scripts.Simulation.MachineVisual}}
+\doxysubsubsection{\texorpdfstring{UpdateProgress()}{UpdateProgress()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual_aa51d6e9ea8ab3860990ba43f453157e2} 
+void Assets.\+Scripts.\+Simulation.\+Machine\+Visual.\+Update\+Progress (\begin{DoxyParamCaption}\item[{float}]{current\+Sim\+Time}{}\end{DoxyParamCaption})}
+
+
+
+Drives the progress bar from an external simulation time. The \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge}{Simulation\+Bridge} should call this each frame with the current simulation clock value. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em current\+Sim\+Time} & Current simulation clock time.\\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Simulation/\+\doxymbox{\hyperlink{_machine_visual_8cs}{Machine\+Visual.\+cs}}\end{DoxyCompactItemize}

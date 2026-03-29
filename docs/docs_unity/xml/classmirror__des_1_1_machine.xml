@@ -1,0 +1,153 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="classmirror__des_1_1_machine" kind="class" language="Python" prot="public">
+    <compoundname>mirror_des::Machine</compoundname>
+    <sectiondef kind="public-static-attrib">
+      <memberdef kind="variable" id="classmirror__des_1_1_machine_1a03199794a7e8b218175444d26a40252e" prot="public" static="yes" mutable="no">
+        <type><ref refid="classmirror__des_1_1_machine_state" kindref="compound">MachineState</ref></type>
+        <definition>MachineState mirror_des.Machine::state</definition>
+        <argsstring></argsstring>
+        <name>state</name>
+        <qualifiedname>mirror_des.Machine.state</qualifiedname>
+        <initializer>=  <ref refid="classmirror__des_1_1_machine_state_1a33e0aa350e8af127c79cb06b2595f13c" kindref="member">MachineState.IDLE</ref></initializer>
+        <briefdescription>
+<para>Unique machine identifier matching its index in <ref refid="classmirror__des_1_1_d_e_s_simulator_1ac92dd2252135c0274611e2ec72ee2365" kindref="member">DESSimulator.machines</ref>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Current operational state. Starts <computeroutput>IDLE</computeroutput>. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="131" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="131" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classmirror__des_1_1_machine_1aeb50646a4da8418790f7521136407980" prot="public" static="yes" mutable="no">
+        <type>Optional</type>
+        <definition>Optional mirror_des.Machine::current_op</definition>
+        <argsstring></argsstring>
+        <name>current_op</name>
+        <qualifiedname>mirror_des.Machine.current_op</qualifiedname>
+        <initializer>=  None</initializer>
+        <briefdescription>
+<para>The operation currently being processed, or <computeroutput>None</computeroutput> when idle. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>op</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The operation to begin processing. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>current_time</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The simulation time at which processing starts. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="133" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="133" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classmirror__des_1_1_machine_1a36d2866505ccccb7e26414bed8e8b367" prot="public" static="yes" mutable="no">
+        <type>list</type>
+        <definition>list mirror_des.Machine::waiting_queue</definition>
+        <argsstring></argsstring>
+        <name>waiting_queue</name>
+        <qualifiedname>mirror_des.Machine.waiting_queue</qualifiedname>
+        <initializer>=  field(default_factory=list)</initializer>
+        <briefdescription>
+<para>Operations waiting to be processed, in arrival order. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="135" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="135" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="classmirror__des_1_1_machine_1abc84f3cf4d87f05481b323a67ca5ef9f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>mirror_des.Machine.start_processing</definition>
+        <argsstring>(self, Operation op, float current_time)</argsstring>
+        <name>start_processing</name>
+        <qualifiedname>mirror_des.Machine.start_processing</qualifiedname>
+        <param>
+          <type>self</type>
+          <defname>self</defname>
+        </param>
+        <param>
+          <type><ref refid="classmirror__des_1_1_operation" kindref="compound">Operation</ref></type>
+          <declname>op</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>current_time</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="137" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="137" bodyend="146"/>
+      </memberdef>
+      <memberdef kind="function" id="classmirror__des_1_1_machine_1aeb73536ec5229bff117a689ab6fd0b61" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>mirror_des.Machine.finish_processing</definition>
+        <argsstring>(self)</argsstring>
+        <name>finish_processing</name>
+        <qualifiedname>mirror_des.Machine.finish_processing</qualifiedname>
+        <param>
+          <type>self</type>
+          <defname>self</defname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="147" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="147" bodyend="159"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Single shop-floor machine with a waiting queue, mirroring C# <ref refid="classmirror__des_1_1_machine" kindref="compound">Machine</ref>. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>State transitions are driven exclusively by <ref refid="classmirror__des_1_1_d_e_s_simulator" kindref="compound">DESSimulator</ref> via start_processing and finish_processing, matching the C# design. </para>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="3">
+        <label>Enum</label>
+      </node>
+      <node id="1">
+        <label>mirror_des.Machine</label>
+        <link refid="classmirror__des_1_1_machine"/>
+        <childnode refid="2" relation="usage">
+          <edgelabel>state</edgelabel>
+        </childnode>
+      </node>
+      <node id="2">
+        <label>mirror_des.MachineState</label>
+        <link refid="classmirror__des_1_1_machine_state"/>
+        <childnode refid="3" relation="public-inheritance">
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="127" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="127" bodyend="159"/>
+    <listofallmembers>
+      <member refid="classmirror__des_1_1_machine_1aeb50646a4da8418790f7521136407980" prot="public" virt="non-virtual"><scope>mirror_des::Machine</scope><name>current_op</name></member>
+      <member refid="classmirror__des_1_1_machine_1aeb73536ec5229bff117a689ab6fd0b61" prot="public" virt="non-virtual"><scope>mirror_des::Machine</scope><name>finish_processing</name></member>
+      <member refid="classmirror__des_1_1_machine_1abc84f3cf4d87f05481b323a67ca5ef9f" prot="public" virt="non-virtual"><scope>mirror_des::Machine</scope><name>start_processing</name></member>
+      <member refid="classmirror__des_1_1_machine_1a03199794a7e8b218175444d26a40252e" prot="public" virt="non-virtual"><scope>mirror_des::Machine</scope><name>state</name></member>
+      <member refid="classmirror__des_1_1_machine_1a36d2866505ccccb7e26414bed8e8b367" prot="public" virt="non-virtual"><scope>mirror_des::Machine</scope><name>waiting_queue</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

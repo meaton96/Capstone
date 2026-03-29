@@ -92,16 +92,76 @@ $(function(){initNavTree('classmirror__des_1_1_operation.html','','classmirror__
   <div class="headertitle"><div class="title">mirror_des.Operation Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Single operation within a job, mirroring the C# <a class="el" href="classmirror__des_1_1_operation.html" title="Operation">Operation</a> class.  
+ <a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-static-attribs" class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
-<tr class="memitem:ac920f20906e796539a78cf589de02490" id="r_ac920f20906e796539a78cf589de02490"><td class="memItemLeft"><a id="ac920f20906e796539a78cf589de02490" name="ac920f20906e796539a78cf589de02490"></a>
-float&#160;</td><td class="memItemRight"><b>start_time</b> = -1.0</td></tr>
-<tr class="memitem:ab72ee8ac3fe75554adf944662413e1e2" id="r_ab72ee8ac3fe75554adf944662413e1e2"><td class="memItemLeft"><a id="ab72ee8ac3fe75554adf944662413e1e2" name="ab72ee8ac3fe75554adf944662413e1e2"></a>
-float&#160;</td><td class="memItemRight"><b>end_time</b> = -1.0</td></tr>
+<tr class="memitem:ac920f20906e796539a78cf589de02490" id="r_ac920f20906e796539a78cf589de02490"><td class="memItemLeft">float&#160;</td><td class="memItemRight"><a class="el" href="#ac920f20906e796539a78cf589de02490">start_time</a> = -1.0</td></tr>
+<tr class="memdesc:ac920f20906e796539a78cf589de02490"><td class="mdescLeft">&#160;</td><td class="mdescRight">ID of the owning job.  <br /></td></tr>
+<tr class="memitem:ab72ee8ac3fe75554adf944662413e1e2" id="r_ab72ee8ac3fe75554adf944662413e1e2"><td class="memItemLeft">float&#160;</td><td class="memItemRight"><a class="el" href="#ab72ee8ac3fe75554adf944662413e1e2">end_time</a> = -1.0</td></tr>
+<tr class="memdesc:ab72ee8ac3fe75554adf944662413e1e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Simulation time at which processing finished.  <br /></td></tr>
 </table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Single operation within a job, mirroring the C# <a class="el" href="classmirror__des_1_1_operation.html" title="Operation">Operation</a> class. </p>
+<p><code>start_time</code> and <code>end_time</code> are initialised to <code>-1.0</code> and stamped by Machine.start_processing during the simulation run, matching the C# behaviour where <code>-1</code> sentinel values indicate an unscheduled operation. </p>
+</div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="ab72ee8ac3fe75554adf944662413e1e2" name="ab72ee8ac3fe75554adf944662413e1e2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab72ee8ac3fe75554adf944662413e1e2">&#9670;&#160;</a></span>end_time</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">float mirror_des.Operation.end_time = -1.0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Simulation time at which processing finished. </p>
+<p><code>-1.0</code> until scheduled. </p>
+
+</div>
+</div>
+<a id="ac920f20906e796539a78cf589de02490" name="ac920f20906e796539a78cf589de02490"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac920f20906e796539a78cf589de02490">&#9670;&#160;</a></span>start_time</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">float mirror_des.Operation.start_time = -1.0</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>ID of the owning job. </p>
+<p>Zero-based index of this operation within its job's sequence.</p>
+<p>ID of the machine that must process this operation.</p>
+<p>Processing time in simulation time units.</p>
+<p>Simulation time at which processing began. <code>-1.0</code> until scheduled. </p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/<b>mirror_des.py</b></li>
+<li>C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/<a class="el" href="mirror__des_8py.html">mirror_des.py</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -116,7 +176,7 @@ float&#160;</td><td class="memItemRight"><b>end_time</b> = -1.0</td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="namespacemirror__des.html">mirror_des</a></li><li class="navelem"><a href="classmirror__des_1_1_operation.html">Operation</a></li>
+    <li class="navelem"><b>mirror_des</b></li><li class="navelem"><a href="classmirror__des_1_1_operation.html">Operation</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.16.1 </li>
   </ul>
 </div>

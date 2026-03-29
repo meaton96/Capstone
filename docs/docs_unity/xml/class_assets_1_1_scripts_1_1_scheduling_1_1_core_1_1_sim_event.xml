@@ -1,0 +1,234 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event" kind="class" language="C#" prot="public">
+    <compoundname>Assets::Scripts::Scheduling::Core::SimEvent</compoundname>
+    <basecompoundref prot="public" virt="non-virtual">IComparable</basecompoundref>
+    <sectiondef kind="property">
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_1a607c1c72df770a64614efd6de3cd4698" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type>double</type>
+        <definition>double Assets.Scripts.Scheduling.Core.SimEvent.Time</definition>
+        <argsstring></argsstring>
+        <name>Time</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.SimEvent.Time</qualifiedname>
+        <briefdescription>
+<para><ref refid="namespace_assets_1_1_scripts_1_1_simulation" kindref="compound">Simulation</ref> time at which this event is scheduled to occur. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/EventQueue.cs" line="20" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/EventQueue.cs" bodystart="20" bodyend="20"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_1a20b87a79a2dacebe9f166401c6de4e42" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type><ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a74e900c350e0673c74e0e62b6f351056" kindref="member">EventType</ref></type>
+        <definition>EventType Assets.Scripts.Scheduling.Core.SimEvent.Type</definition>
+        <argsstring></argsstring>
+        <name>Type</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.SimEvent.Type</qualifiedname>
+        <briefdescription>
+<para>The category of this event, determining how <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator" kindref="compound">DESSimulator</ref> dispatches it. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/EventQueue.cs" line="23" column="26" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/EventQueue.cs" bodystart="23" bodyend="23"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_1a646915578862335b3d02e19d7c8cecfa" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Scheduling.Core.SimEvent.JobId</definition>
+        <argsstring></argsstring>
+        <name>JobId</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.SimEvent.JobId</qualifiedname>
+        <briefdescription>
+<para>ID of the job associated with this event. Set to <computeroutput>-1</computeroutput> if not applicable. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/EventQueue.cs" line="26" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/EventQueue.cs" bodystart="26" bodyend="26"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_1a1841b4f5aeb5d322f195f89393e14f5c" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Scheduling.Core.SimEvent.MachineId</definition>
+        <argsstring></argsstring>
+        <name>MachineId</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.SimEvent.MachineId</qualifiedname>
+        <briefdescription>
+<para>ID of the machine associated with this event. Set to <computeroutput>-1</computeroutput> if not applicable. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/EventQueue.cs" line="29" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/EventQueue.cs" bodystart="29" bodyend="29"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_1ab56cee8678fd0b8f95a8aa4b18bf4fc8" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type>long</type>
+        <definition>long Assets.Scripts.Scheduling.Core.SimEvent.SequenceNumber</definition>
+        <argsstring></argsstring>
+        <name>SequenceNumber</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.SimEvent.SequenceNumber</qualifiedname>
+        <briefdescription>
+<para>Monotonically increasing counter assigned at enqueue time. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Used as a FIFO tiebreaker so that events with identical <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_1a607c1c72df770a64614efd6de3cd4698" kindref="member">Time</ref> values are processed in the order they were enqueued. A lower sequence number indicates higher priority. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/EventQueue.cs" line="36" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/EventQueue.cs" bodystart="36" bodyend="36"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_1a01cabb80c276b0048a8d365665624cec" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>Assets.Scripts.Scheduling.Core.SimEvent.SimEvent</definition>
+        <argsstring>(double time, EventType type, int jobId, int machineId, long seq)</argsstring>
+        <name>SimEvent</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.SimEvent.SimEvent</qualifiedname>
+        <param>
+          <type>double</type>
+          <declname>time</declname>
+        </param>
+        <param>
+          <type><ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a74e900c350e0673c74e0e62b6f351056" kindref="member">EventType</ref></type>
+          <declname>type</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>jobId</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>machineId</declname>
+        </param>
+        <param>
+          <type>long</type>
+          <declname>seq</declname>
+        </param>
+        <briefdescription>
+<para>Constructs a fully specified, immutable simulation event. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>time</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><ref refid="namespace_assets_1_1_scripts_1_1_simulation" kindref="compound">Simulation</ref> time at which the event fires. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>type</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a74e900c350e0673c74e0e62b6f351056" kindref="member">EventType</ref> that classifies this event. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>jobId</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>ID of the relevant job, or <computeroutput>-1</computeroutput> if not applicable. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>machineId</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>ID of the relevant machine, or <computeroutput>-1</computeroutput> if not applicable. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>seq</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Sequence number assigned by <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_event_queue" kindref="compound">EventQueue</ref> to enforce FIFO ordering. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/EventQueue.cs" line="45" column="16" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/EventQueue.cs" bodystart="45" bodyend="52"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_1aa4e08bba070a7378ed02e997f574435a" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>int</type>
+        <definition>int Assets.Scripts.Scheduling.Core.SimEvent.CompareTo</definition>
+        <argsstring>(SimEvent other)</argsstring>
+        <name>CompareTo</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.SimEvent.CompareTo</qualifiedname>
+        <param>
+          <type><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_1a01cabb80c276b0048a8d365665624cec" kindref="member">SimEvent</ref></type>
+          <declname>other</declname>
+        </param>
+        <briefdescription>
+<para>Compares this event to another for priority queue ordering. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Primary sort is by <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_1a607c1c72df770a64614efd6de3cd4698" kindref="member">Time</ref> ascending. When two events share the same time, <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_1ab56cee8678fd0b8f95a8aa4b18bf4fc8" kindref="member">SequenceNumber</ref> is used as a FIFO tiebreaker, ensuring earlier-enqueued events are processed first.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>other</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The event to compare against. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>A negative value if this event should be processed before <computeroutput>other</computeroutput>, zero if they are equal, or a positive value if <computeroutput>other</computeroutput> has higher priority. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/EventQueue.cs" line="63" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/EventQueue.cs" bodystart="63" bodyend="68"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Immutable record representing a single scheduled event in the simulation timeline. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>Implements <computeroutput>IComparable&lt;SimEvent&gt;</computeroutput> so that instances can be stored directly in a <computeroutput>SortedSet</computeroutput> inside <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_event_queue" kindref="compound">EventQueue</ref>. Ordering is by <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_1a607c1c72df770a64614efd6de3cd4698" kindref="member">Time</ref> ascending, with <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_1ab56cee8678fd0b8f95a8aa4b18bf4fc8" kindref="member">SequenceNumber</ref> as a FIFO tiebreaker for events scheduled at the same instant. </para>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="1">
+        <label>Assets.Scripts.Scheduling.Core.SimEvent</label>
+        <link refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>IComparable&lt; SimEvent &gt;</label>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="1">
+        <label>Assets.Scripts.Scheduling.Core.SimEvent</label>
+        <link refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>IComparable&lt; SimEvent &gt;</label>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/EventQueue.cs" line="17" column="11" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/EventQueue.cs" bodystart="18" bodyend="69"/>
+    <listofallmembers>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_1aa4e08bba070a7378ed02e997f574435a" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::SimEvent</scope><name>CompareTo</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_1a646915578862335b3d02e19d7c8cecfa" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::SimEvent</scope><name>JobId</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_1a1841b4f5aeb5d322f195f89393e14f5c" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::SimEvent</scope><name>MachineId</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_1ab56cee8678fd0b8f95a8aa4b18bf4fc8" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::SimEvent</scope><name>SequenceNumber</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_1a01cabb80c276b0048a8d365665624cec" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::SimEvent</scope><name>SimEvent</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_1a607c1c72df770a64614efd6de3cd4698" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::SimEvent</scope><name>Time</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event_1a20b87a79a2dacebe9f166401c6de4e42" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::SimEvent</scope><name>Type</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

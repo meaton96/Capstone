@@ -3,7 +3,8 @@
     "rootNamespace": "",
     "references": [
         "Scheduling",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "Unity.ML-Agents"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

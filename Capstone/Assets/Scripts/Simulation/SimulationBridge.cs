@@ -37,13 +37,7 @@ namespace Assets.Scripts.Simulation
     /// - **Visual debug mode**: Visuals are driven between decision points via a
     ///   coroutine. @ref Step still returns immediately, but visual playback catches
     ///   up asynchronously. Toggle with @ref enableVisuals.
-    ///
-    /// @par Phase 1 coverage
-    /// - Step 5  — DES-to-Unity bridge (stepped)
-    /// - Step 7  — Job lifecycle counters, episode-end stats
-    /// - Step 8  — Decision-point detection, logging, flash
-    /// - Step 9  — Inspector controls, HUD data
-    /// - Step 10 — @ref RunEpisodeWithFixedRule for batch validation
+
 
     // ═════════════════════════════════════════════════════════════
     //  Supporting types
@@ -74,6 +68,8 @@ namespace Assets.Scripts.Simulation
 
         /// @brief Jobs completed so far.
         public int CompletedJobs;
+
+
 
         // TODO Phase 2: Add full observation dict (grid, sched_matrix, scalars,
         //               distances, event_flags) once ObservationBuilder exists.
@@ -162,6 +158,12 @@ namespace Assets.Scripts.Simulation
         [Header("Visual Playback")]
         [Tooltip("Enable visual playback between decision points. Disable for training throughput.")]
         [SerializeField] private bool enableVisuals = true;
+
+        public bool EnableVisuals
+        {
+            get => enableVisuals;
+            set => enableVisuals = value;
+        }
 
         [Tooltip("Speed multiplier for visual playback between decisions.")]
         [Range(0.1f, 100f)]
@@ -825,7 +827,8 @@ namespace Assets.Scripts.Simulation
         {
             try
             {
-                TaillardInstance instance = JsonConvert.DeserializeObject<TaillardInstance>(json.text);
+
+                var instance = JsonConvert.DeserializeObject<TaillardInstance>(json.text);
 
                 if (instance == null)
                 {
@@ -833,14 +836,18 @@ namespace Assets.Scripts.Simulation
                     return null;
                 }
 
-                Debug.Log($"[SimBridge] Loaded: {instance.Name} " +
-                          $"({instance.JobCount}J × {instance.MachineCount}M), " +
-                          $"optimum={instance.metadata?.optimum ?? 0}");
+                Debug.Log($"[SimBridge] Loaded: {instance.Name} ");
+                Debug.Log($"[SimBridge] Loaded: {instance.JobCount} ");
+                Debug.Log($"[SimBridge] Loaded: {instance.MachineCount} ");
+
+                // Debug.Log($"[SimBridge] Loaded: {instance.Name} " +
+                //           $"({instance.JobCount}J × {instance.MachineCount}M)");
                 return instance;
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[SimBridge] Parse error: {ex.Message}");
+
+                Debug.LogError($"[SimBridge] Parse error: {ex}");
                 return null;
             }
         }

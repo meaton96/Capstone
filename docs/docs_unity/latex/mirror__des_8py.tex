@@ -1,0 +1,284 @@
+\doxysection{C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Scheduling/\+\+Validation/\+mirror\+\_\+des.py File Reference}
+\hypertarget{mirror__des_8py}{}\label{mirror__des_8py}\index{C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror\_des.py@{C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror\_des.py}}
+
+
+Python DES implementation mirroring the C\# {\ttfamily DESSimulator} exactly.  
+
+
+\doxysubsubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \doxymbox{\hyperlink{classmirror__des_1_1_event_type}{mirror\+\_\+des.\+Event\+Type}}
+\begin{DoxyCompactList}\small\item\em Discriminated union of simulation event types, mirroring C\# {\ttfamily \doxylink{classmirror__des_1_1_event_type}{Event\+Type}}. \end{DoxyCompactList}\item 
+class \doxymbox{\hyperlink{classmirror__des_1_1_sim_event}{mirror\+\_\+des.\+Sim\+Event}}
+\begin{DoxyCompactList}\small\item\em Immutable simulation event with (time, sequence) ordering. \end{DoxyCompactList}\item 
+class \doxymbox{\hyperlink{classmirror__des_1_1_operation}{mirror\+\_\+des.\+Operation}}
+\begin{DoxyCompactList}\small\item\em Single operation within a job, mirroring the C\# \doxylink{classmirror__des_1_1_operation}{Operation} class. \end{DoxyCompactList}\item 
+class \doxymbox{\hyperlink{classmirror__des_1_1_job}{mirror\+\_\+des.\+Job}}
+\begin{DoxyCompactList}\small\item\em Ordered sequence of operations representing a single job, mirroring C\# \doxylink{classmirror__des_1_1_job}{Job}. \end{DoxyCompactList}\item 
+class \doxymbox{\hyperlink{classmirror__des_1_1_machine_state}{mirror\+\_\+des.\+Machine\+State}}
+\begin{DoxyCompactList}\small\item\em Operational states for a machine, mirroring the C\# \doxylink{classmirror__des_1_1_machine_state}{Machine\+State} enum. \end{DoxyCompactList}\item 
+class \doxymbox{\hyperlink{classmirror__des_1_1_machine}{mirror\+\_\+des.\+Machine}}
+\begin{DoxyCompactList}\small\item\em Single shop-\/floor machine with a waiting queue, mirroring C\# \doxylink{classmirror__des_1_1_machine}{Machine}. \end{DoxyCompactList}\item 
+class \doxymbox{\hyperlink{classmirror__des_1_1_d_e_s_simulator}{mirror\+\_\+des.\+DESSimulator}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \doxymbox{\hyperlink{mirror__des_8py_a14fd2a448c1f3bde337d405884daee98}{mirror\+\_\+des.\+remaining\+\_\+work}} (\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}} op, list\+[\doxymbox{\hyperlink{classmirror__des_1_1_job}{Job}}]\+ jobs)
+\begin{DoxyCompactList}\small\item\em Computes total remaining processing time for a job from {\ttfamily op} onward. \end{DoxyCompactList}\item 
+int \doxymbox{\hyperlink{mirror__des_8py_ab07ae90bfd2e2d94051503f25659fd6c}{mirror\+\_\+des.\+remaining\+\_\+ops}} (\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}} op, list\+[\doxymbox{\hyperlink{classmirror__des_1_1_job}{Job}}]\+ jobs)
+\begin{DoxyCompactList}\small\item\em Computes the number of unprocessed operations remaining for a job from {\ttfamily op} onward. \end{DoxyCompactList}\item 
+\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}} \doxymbox{\hyperlink{mirror__des_8py_af63d758a2857c1058e7d718f88704d49}{mirror\+\_\+des.\+rule\+\_\+spt}} (list\+[\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}}]\+ waiting, list\+[\doxymbox{\hyperlink{classmirror__des_1_1_job}{Job}}]\+ jobs)
+\begin{DoxyCompactList}\small\item\em Shortest Processing Time — selects the operation with the smallest duration. \end{DoxyCompactList}\item 
+\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}} \doxymbox{\hyperlink{mirror__des_8py_a28fe22601ebf8f3e8492ddca8e078c7f}{mirror\+\_\+des.\+rule\+\_\+lpt}} (list\+[\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}}]\+ waiting, list\+[\doxymbox{\hyperlink{classmirror__des_1_1_job}{Job}}]\+ jobs)
+\begin{DoxyCompactList}\small\item\em Longest Processing Time — selects the operation with the largest duration. \end{DoxyCompactList}\item 
+\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}} \doxymbox{\hyperlink{mirror__des_8py_a9e69b7fc7cddb1c2fd72d11f79aeec49}{mirror\+\_\+des.\+rule\+\_\+mwr}} (list\+[\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}}]\+ waiting, list\+[\doxymbox{\hyperlink{classmirror__des_1_1_job}{Job}}]\+ jobs)
+\begin{DoxyCompactList}\small\item\em Most Work Remaining — selects the operation whose job has the most remaining work. \end{DoxyCompactList}\item 
+\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}} \doxymbox{\hyperlink{mirror__des_8py_aaae55895a1f19d2b208f5d7564f96ccd}{mirror\+\_\+des.\+rule\+\_\+mor}} (list\+[\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}}]\+ waiting, list\+[\doxymbox{\hyperlink{classmirror__des_1_1_job}{Job}}]\+ jobs)
+\begin{DoxyCompactList}\small\item\em Most Operations Remaining — selects the operation whose job has the most ops left. \end{DoxyCompactList}\item 
+\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}} \doxymbox{\hyperlink{mirror__des_8py_a7b27e8381d97b9dec160f36014023b90}{mirror\+\_\+des.\+rule\+\_\+fcfs}} (list\+[\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}}]\+ waiting, list\+[\doxymbox{\hyperlink{classmirror__des_1_1_job}{Job}}]\+ jobs)
+\begin{DoxyCompactList}\small\item\em First Come First Served — returns the first operation in the queue. \end{DoxyCompactList}\item 
+\Hypertarget{mirror__des_8py_aded3fd37ef177df3a00d19adb174e832}\label{mirror__des_8py_aded3fd37ef177df3a00d19adb174e832} 
+list\+[str]\+ {\bfseries mirror\+\_\+des.\+find\+\_\+json\+\_\+files} (str directory)
+\item 
+\Hypertarget{mirror__des_8py_a151325a665863a91fa6e507ef6646e9d}\label{mirror__des_8py_a151325a665863a91fa6e507ef6646e9d} 
+{\bfseries mirror\+\_\+des.\+main} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+dict \doxymbox{\hyperlink{mirror__des_8py_abc2a48719d4bf0c7201a1a0057f04b6b}{mirror\+\_\+des.\+RULES}}
+\begin{DoxyCompactList}\small\item\em Registry mapping short rule keys to their dispatching functions. \end{DoxyCompactList}\item 
+dict \doxymbox{\hyperlink{mirror__des_8py_a0a5a4097bb51078032c804fa387ea642}{mirror\+\_\+des.\+RULE\+\_\+\+FULL\+\_\+\+NAMES}}
+\begin{DoxyCompactList}\small\item\em Maps short rule keys to job\+\_\+shop\+\_\+lib full rule name strings. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Python DES implementation mirroring the C\# {\ttfamily DESSimulator} exactly. 
+
+Implements the same event-\/driven architecture as {\ttfamily DESSimulator.\+cs} so that any makespan delta between the two is a definitive indicator of a real bug rather than an expected implementation divergence:\+
+\begin{DoxyItemize}
+\item Priority queue sorted by {\ttfamily }(time, sequence\+\_\+number), matching Sim\+Event.\+Compare\+To.
+\item Per-\/machine waiting queues with the same idle/\+busy state machine as Machine.
+\item Identical dispatch logic:\+ immediate start if idle, queue append if busy.
+\item Tiebreaker on all rules:\+ lowest {\ttfamily job\+\_\+id}, matching C\# {\ttfamily }.Then\+By(op =\texorpdfstring{$>$}{>} op.\+Job\+Id).
+\end{DoxyItemize}
+
+\begin{DoxyParagraph}{Usage}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{python\ mirror\_des.py\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{\#\ runs\ all\ ta*.json\ files\ in\ current\ dir}}
+\DoxyCodeLine{python\ mirror\_des.py\ -\/-\/instance\ ta01.json\ \ \ \textcolor{comment}{\#\ runs\ a\ single\ instance}}
+\DoxyCodeLine{python\ mirror\_des.py\ -\/-\/rules\ SPT,FCFS\ \ \ \ \ \ \ \textcolor{comment}{\#\ runs\ a\ subset\ of\ rules}}
+
+\end{DoxyCode}
+
+\end{DoxyParagraph}
+\begin{DoxyParagraph}{Output}
+
+\begin{DoxyItemize}
+\item {\ttfamily mirror\+\_\+des\+\_\+makespans.\+csv} — one row per instance/\+rule, column schema matching {\ttfamily csharp\+\_\+makespans.\+csv} and {\ttfamily reference\+\_\+makespans.\+csv} for direct merging.
+\item {\ttfamily mirror\+\_\+des\+\_\+schedules.\+json} — full operation schedules keyed as {\ttfamily "{}\{instance\}\+\_\+\{rule\+\_\+key\}"{}}, matching the format written by {\ttfamily Validation\+Exporter.\+Run\+And\+Export}.
+\end{DoxyItemize}
+\end{DoxyParagraph}
+\begin{DoxyParagraph}{Exit codes}
+This script does not currently return a non-\/zero exit code on mismatch. Use {\ttfamily \doxylink{compare__mirror_8py}{compare\+\_\+mirror.\+py}} to diff its output against the C\# results. 
+\end{DoxyParagraph}
+
+
+\label{doc-func-members}
+\Hypertarget{mirror__des_8py_doc-func-members}
+\doxysubsection{Function Documentation}
+\Hypertarget{mirror__des_8py_ab07ae90bfd2e2d94051503f25659fd6c}\index{mirror\_des.py@{mirror\_des.py}!remaining\_ops@{remaining\_ops}}
+\index{remaining\_ops@{remaining\_ops}!mirror\_des.py@{mirror\_des.py}}
+\doxysubsubsection{\texorpdfstring{remaining\_ops()}{remaining\_ops()}}
+{\footnotesize\ttfamily \label{mirror__des_8py_ab07ae90bfd2e2d94051503f25659fd6c} 
+ int mirror\+\_\+des.\+remaining\+\_\+ops (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}}}]{op}{, }\item[{list\+[\doxymbox{\hyperlink{classmirror__des_1_1_job}{Job}}]\+}]{jobs}{}\end{DoxyParamCaption})}
+
+
+
+Computes the number of unprocessed operations remaining for a job from {\ttfamily op} onward. 
+
+Used as the sort key for rule\+\_\+mor. Mirrors the inline lambda in the C\# {\ttfamily Dispatching\+Rule.\+MOR} switch arm.
+
+
+\begin{DoxyParams}{Parameters}
+{\em op} & The reference operation whose index marks the start of counting. \\
+\hline
+{\em jobs} & The full job list used to retrieve the owning job\textquotesingle{}s operations. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Count of remaining operations including {\ttfamily op} itself. 
+\end{DoxyReturn}
+\Hypertarget{mirror__des_8py_a14fd2a448c1f3bde337d405884daee98}\index{mirror\_des.py@{mirror\_des.py}!remaining\_work@{remaining\_work}}
+\index{remaining\_work@{remaining\_work}!mirror\_des.py@{mirror\_des.py}}
+\doxysubsubsection{\texorpdfstring{remaining\_work()}{remaining\_work()}}
+{\footnotesize\ttfamily \label{mirror__des_8py_a14fd2a448c1f3bde337d405884daee98} 
+ int mirror\+\_\+des.\+remaining\+\_\+work (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}}}]{op}{, }\item[{list\+[\doxymbox{\hyperlink{classmirror__des_1_1_job}{Job}}]\+}]{jobs}{}\end{DoxyParamCaption})}
+
+
+
+Computes total remaining processing time for a job from {\ttfamily op} onward. 
+
+Sums durations from {\ttfamily op.\+op\+\_\+index} to the end of the job\textquotesingle{}s operation list. Used as the sort key for rule\+\_\+mwr. Mirrors C\# {\ttfamily Dispatching\+Rules.\+Remaining\+Work}.
+
+
+\begin{DoxyParams}{Parameters}
+{\em op} & The reference operation whose index marks the start of summation. \\
+\hline
+{\em jobs} & The full job list used to retrieve the owning job\textquotesingle{}s operations. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Total remaining duration including {\ttfamily op} itself. 
+\end{DoxyReturn}
+\Hypertarget{mirror__des_8py_a7b27e8381d97b9dec160f36014023b90}\index{mirror\_des.py@{mirror\_des.py}!rule\_fcfs@{rule\_fcfs}}
+\index{rule\_fcfs@{rule\_fcfs}!mirror\_des.py@{mirror\_des.py}}
+\doxysubsubsection{\texorpdfstring{rule\_fcfs()}{rule\_fcfs()}}
+{\footnotesize\ttfamily \label{mirror__des_8py_a7b27e8381d97b9dec160f36014023b90} 
+ Operation mirror\+\_\+des.\+rule\+\_\+fcfs (\begin{DoxyParamCaption}\item[{list\+[\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}}]\+}]{waiting}{, }\item[{list\+[\doxymbox{\hyperlink{classmirror__des_1_1_job}{Job}}]\+}]{jobs}{}\end{DoxyParamCaption})}
+
+
+
+First Come First Served — returns the first operation in the queue. 
+
+No sorting is applied; insertion order is preserved, matching C\# {\ttfamily Dispatching\+Rule.\+SDT\+\_\+\+SRWT} which returns {\ttfamily waiting\+Ops}\+[0]\+. 
+\begin{DoxyParams}{Parameters}
+{\em waiting} & Non-\/empty list of queued operations. \\
+\hline
+{\em jobs} & Full job list (unused by this rule). \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The first element of {\ttfamily waiting}. 
+\end{DoxyReturn}
+\Hypertarget{mirror__des_8py_a28fe22601ebf8f3e8492ddca8e078c7f}\index{mirror\_des.py@{mirror\_des.py}!rule\_lpt@{rule\_lpt}}
+\index{rule\_lpt@{rule\_lpt}!mirror\_des.py@{mirror\_des.py}}
+\doxysubsubsection{\texorpdfstring{rule\_lpt()}{rule\_lpt()}}
+{\footnotesize\ttfamily \label{mirror__des_8py_a28fe22601ebf8f3e8492ddca8e078c7f} 
+ Operation mirror\+\_\+des.\+rule\+\_\+lpt (\begin{DoxyParamCaption}\item[{list\+[\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}}]\+}]{waiting}{, }\item[{list\+[\doxymbox{\hyperlink{classmirror__des_1_1_job}{Job}}]\+}]{jobs}{}\end{DoxyParamCaption})}
+
+
+
+Longest Processing Time — selects the operation with the largest duration. 
+
+Tiebreaker:\+ lowest {\ttfamily job\+\_\+id}. Mirrors C\# {\ttfamily Dispatching\+Rule.\+LPT\+\_\+\+MMUR}. 
+\begin{DoxyParams}{Parameters}
+{\em waiting} & Non-\/empty list of queued operations. \\
+\hline
+{\em jobs} & Full job list (unused by this rule). \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The operation with the minimum {\ttfamily }(-\/duration, job\+\_\+id). 
+\end{DoxyReturn}
+\Hypertarget{mirror__des_8py_aaae55895a1f19d2b208f5d7564f96ccd}\index{mirror\_des.py@{mirror\_des.py}!rule\_mor@{rule\_mor}}
+\index{rule\_mor@{rule\_mor}!mirror\_des.py@{mirror\_des.py}}
+\doxysubsubsection{\texorpdfstring{rule\_mor()}{rule\_mor()}}
+{\footnotesize\ttfamily \label{mirror__des_8py_aaae55895a1f19d2b208f5d7564f96ccd} 
+ Operation mirror\+\_\+des.\+rule\+\_\+mor (\begin{DoxyParamCaption}\item[{list\+[\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}}]\+}]{waiting}{, }\item[{list\+[\doxymbox{\hyperlink{classmirror__des_1_1_job}{Job}}]\+}]{jobs}{}\end{DoxyParamCaption})}
+
+
+
+Most Operations Remaining — selects the operation whose job has the most ops left. 
+
+Tiebreaker:\+ lowest {\ttfamily job\+\_\+id}. Mirrors C\# {\ttfamily Dispatching\+Rule.\+MOR}. 
+\begin{DoxyParams}{Parameters}
+{\em waiting} & Non-\/empty list of queued operations. \\
+\hline
+{\em jobs} & Full job list used to compute remaining\+\_\+ops. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The operation with the minimum {\ttfamily }(-\/remaining\+\_\+ops, job\+\_\+id). 
+\end{DoxyReturn}
+\Hypertarget{mirror__des_8py_a9e69b7fc7cddb1c2fd72d11f79aeec49}\index{mirror\_des.py@{mirror\_des.py}!rule\_mwr@{rule\_mwr}}
+\index{rule\_mwr@{rule\_mwr}!mirror\_des.py@{mirror\_des.py}}
+\doxysubsubsection{\texorpdfstring{rule\_mwr()}{rule\_mwr()}}
+{\footnotesize\ttfamily \label{mirror__des_8py_a9e69b7fc7cddb1c2fd72d11f79aeec49} 
+ Operation mirror\+\_\+des.\+rule\+\_\+mwr (\begin{DoxyParamCaption}\item[{list\+[\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}}]\+}]{waiting}{, }\item[{list\+[\doxymbox{\hyperlink{classmirror__des_1_1_job}{Job}}]\+}]{jobs}{}\end{DoxyParamCaption})}
+
+
+
+Most Work Remaining — selects the operation whose job has the most remaining work. 
+
+Equivalent to Longest Remaining Time. Tiebreaker:\+ lowest {\ttfamily job\+\_\+id}. Mirrors C\# {\ttfamily Dispatching\+Rule.\+LRT\+\_\+\+MMUR}. 
+\begin{DoxyParams}{Parameters}
+{\em waiting} & Non-\/empty list of queued operations. \\
+\hline
+{\em jobs} & Full job list used to compute remaining\+\_\+work. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The operation with the minimum {\ttfamily }(-\/remaining\+\_\+work, job\+\_\+id). 
+\end{DoxyReturn}
+\Hypertarget{mirror__des_8py_af63d758a2857c1058e7d718f88704d49}\index{mirror\_des.py@{mirror\_des.py}!rule\_spt@{rule\_spt}}
+\index{rule\_spt@{rule\_spt}!mirror\_des.py@{mirror\_des.py}}
+\doxysubsubsection{\texorpdfstring{rule\_spt()}{rule\_spt()}}
+{\footnotesize\ttfamily \label{mirror__des_8py_af63d758a2857c1058e7d718f88704d49} 
+ Operation mirror\+\_\+des.\+rule\+\_\+spt (\begin{DoxyParamCaption}\item[{list\+[\doxymbox{\hyperlink{classmirror__des_1_1_operation}{Operation}}]\+}]{waiting}{, }\item[{list\+[\doxymbox{\hyperlink{classmirror__des_1_1_job}{Job}}]\+}]{jobs}{}\end{DoxyParamCaption})}
+
+
+
+Shortest Processing Time — selects the operation with the smallest duration. 
+
+Tiebreaker:\+ lowest {\ttfamily job\+\_\+id}. Mirrors C\# {\ttfamily Dispatching\+Rule.\+SPT\+\_\+\+SMPT}. 
+\begin{DoxyParams}{Parameters}
+{\em waiting} & Non-\/empty list of queued operations. \\
+\hline
+{\em jobs} & Full job list (unused by this rule). \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The operation with the minimum {\ttfamily }(duration, job\+\_\+id). 
+\end{DoxyReturn}
+
+
+\label{doc-var-members}
+\Hypertarget{mirror__des_8py_doc-var-members}
+\doxysubsection{Variable Documentation}
+\Hypertarget{mirror__des_8py_a0a5a4097bb51078032c804fa387ea642}\index{mirror\_des.py@{mirror\_des.py}!RULE\_FULL\_NAMES@{RULE\_FULL\_NAMES}}
+\index{RULE\_FULL\_NAMES@{RULE\_FULL\_NAMES}!mirror\_des.py@{mirror\_des.py}}
+\doxysubsubsection{\texorpdfstring{RULE\_FULL\_NAMES}{RULE\_FULL\_NAMES}}
+{\footnotesize\ttfamily \label{mirror__des_8py_a0a5a4097bb51078032c804fa387ea642} 
+dict mirror\+\_\+des.\+RULE\+\_\+\+FULL\+\_\+\+NAMES}
+
+{\bfseries Initial value:\+}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ =\ \ \{}
+\DoxyCodeLine{00002\ \ \ \ \ \textcolor{stringliteral}{"{}SPT"{}}:\ \textcolor{stringliteral}{"{}shortest\_processing\_time"{}},}
+\DoxyCodeLine{00003\ \ \ \ \ \textcolor{stringliteral}{"{}LPT"{}}:\ \textcolor{stringliteral}{"{}largest\_processing\_time"{}},}
+\DoxyCodeLine{00004\ \ \ \ \ \textcolor{stringliteral}{"{}MWR"{}}:\ \textcolor{stringliteral}{"{}most\_work\_remaining"{}},}
+\DoxyCodeLine{00005\ \ \ \ \ \textcolor{stringliteral}{"{}MOR"{}}:\ \textcolor{stringliteral}{"{}most\_operations\_remaining"{}},}
+\DoxyCodeLine{00006\ \ \ \ \ \textcolor{stringliteral}{"{}FCFS"{}}:\ \textcolor{stringliteral}{"{}first\_come\_first\_served"{}},}
+\DoxyCodeLine{00007\ \}}
+
+\end{DoxyCode}
+
+
+Maps short rule keys to job\+\_\+shop\+\_\+lib full rule name strings. 
+
+Written to the {\ttfamily rule\+\_\+full} column of {\ttfamily mirror\+\_\+des\+\_\+makespans.\+csv}. Values must match the {\ttfamily rule\+\_\+full} column in {\ttfamily reference\+\_\+makespans.\+csv} so that consumers can join on either {\ttfamily rule} or {\ttfamily rule\+\_\+full}. \Hypertarget{mirror__des_8py_abc2a48719d4bf0c7201a1a0057f04b6b}\index{mirror\_des.py@{mirror\_des.py}!RULES@{RULES}}
+\index{RULES@{RULES}!mirror\_des.py@{mirror\_des.py}}
+\doxysubsubsection{\texorpdfstring{RULES}{RULES}}
+{\footnotesize\ttfamily \label{mirror__des_8py_abc2a48719d4bf0c7201a1a0057f04b6b} 
+dict mirror\+\_\+des.\+RULES}
+
+{\bfseries Initial value:\+}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ =\ \ \{}
+\DoxyCodeLine{00002\ \ \ \ \ \textcolor{stringliteral}{"{}SPT"{}}:\ rule\_spt,}
+\DoxyCodeLine{00003\ \ \ \ \ \textcolor{stringliteral}{"{}LPT"{}}:\ rule\_lpt,}
+\DoxyCodeLine{00004\ \ \ \ \ \textcolor{stringliteral}{"{}MWR"{}}:\ rule\_mwr,}
+\DoxyCodeLine{00005\ \ \ \ \ \textcolor{stringliteral}{"{}MOR"{}}:\ rule\_mor,}
+\DoxyCodeLine{00006\ \ \ \ \ \textcolor{stringliteral}{"{}FCFS"{}}:\ rule\_fcfs,}
+\DoxyCodeLine{00007\ \}}
+
+\end{DoxyCode}
+
+
+Registry mapping short rule keys to their dispatching functions. 
+
+Keys must match the {\ttfamily rule} column values in {\ttfamily mirror\+\_\+des\+\_\+makespans.\+csv} and correspond to the same short keys used in {\ttfamily Validation\+Exporter.\+Rule\+Map} and {\ttfamily RULE\+\_\+\+MAP} in {\ttfamily \doxylink{generate__reference_8py}{generate\+\_\+reference.\+py}}, ensuring all three CSVs can be merged on the {\ttfamily rule} column without translation. 

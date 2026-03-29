@@ -1,16 +1,55 @@
 \doxysection{mirror\+\_\+des.\+Operation Class Reference}
 \hypertarget{classmirror__des_1_1_operation}{}\label{classmirror__des_1_1_operation}\index{mirror\_des.Operation@{mirror\_des.Operation}}
+
+
+Single operation within a job, mirroring the C\# \doxylink{classmirror__des_1_1_operation}{Operation} class.  
+
+
 \doxysubsubsection*{Static Public Attributes}
 \begin{DoxyCompactItemize}
 \item 
-\Hypertarget{classmirror__des_1_1_operation_ac920f20906e796539a78cf589de02490}\label{classmirror__des_1_1_operation_ac920f20906e796539a78cf589de02490} 
-float {\bfseries start\+\_\+time} = -\/1.\+0
-\item 
-\Hypertarget{classmirror__des_1_1_operation_ab72ee8ac3fe75554adf944662413e1e2}\label{classmirror__des_1_1_operation_ab72ee8ac3fe75554adf944662413e1e2} 
-float {\bfseries end\+\_\+time} = -\/1.\+0
-\end{DoxyCompactItemize}
+float \doxymbox{\hyperlink{classmirror__des_1_1_operation_ac920f20906e796539a78cf589de02490}{start\+\_\+time}} = -\/1.\+0
+\begin{DoxyCompactList}\small\item\em ID of the owning job. \end{DoxyCompactList}\item 
+float \doxymbox{\hyperlink{classmirror__des_1_1_operation_ab72ee8ac3fe75554adf944662413e1e2}{end\+\_\+time}} = -\/1.\+0
+\begin{DoxyCompactList}\small\item\em Simulation time at which processing finished. \end{DoxyCompactList}\end{DoxyCompactItemize}
 
+
+\doxysubsection{Detailed Description}
+Single operation within a job, mirroring the C\# \doxylink{classmirror__des_1_1_operation}{Operation} class. 
+
+{\ttfamily start\+\_\+time} and {\ttfamily end\+\_\+time} are initialised to {\ttfamily -\/1.\+0} and stamped by Machine.\+start\+\_\+processing during the simulation run, matching the C\# behaviour where {\ttfamily -\/1} sentinel values indicate an unscheduled operation. 
+
+\label{doc-variable-members}
+\Hypertarget{classmirror__des_1_1_operation_doc-variable-members}
+\doxysubsection{Member Data Documentation}
+\Hypertarget{classmirror__des_1_1_operation_ab72ee8ac3fe75554adf944662413e1e2}\index{mirror\_des.Operation@{mirror\_des.Operation}!end\_time@{end\_time}}
+\index{end\_time@{end\_time}!mirror\_des.Operation@{mirror\_des.Operation}}
+\doxysubsubsection{\texorpdfstring{end\_time}{end\_time}}
+{\footnotesize\ttfamily \label{classmirror__des_1_1_operation_ab72ee8ac3fe75554adf944662413e1e2} 
+float mirror\+\_\+des.\+Operation.\+end\+\_\+time = -\/1.\+0\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Simulation time at which processing finished. 
+
+{\ttfamily -\/1.\+0} until scheduled. \Hypertarget{classmirror__des_1_1_operation_ac920f20906e796539a78cf589de02490}\index{mirror\_des.Operation@{mirror\_des.Operation}!start\_time@{start\_time}}
+\index{start\_time@{start\_time}!mirror\_des.Operation@{mirror\_des.Operation}}
+\doxysubsubsection{\texorpdfstring{start\_time}{start\_time}}
+{\footnotesize\ttfamily \label{classmirror__des_1_1_operation_ac920f20906e796539a78cf589de02490} 
+float mirror\+\_\+des.\+Operation.\+start\+\_\+time = -\/1.\+0\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+ID of the owning job. 
+
+Zero-\/based index of this operation within its job\textquotesingle{}s sequence.
+
+ID of the machine that must process this operation.
+
+Processing time in simulation time units.
+
+Simulation time at which processing began. {\ttfamily -\/1.\+0} until scheduled. 
 
 The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
 \item 
-C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Scheduling/\+\+Validation/\+mirror\+\_\+des.\+py\end{DoxyCompactItemize}
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Scheduling/\+\+Validation/\+\doxymbox{\hyperlink{mirror__des_8py}{mirror\+\_\+des.\+py}}\end{DoxyCompactItemize}

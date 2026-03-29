@@ -1,0 +1,395 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="namespacegenerate__reference" kind="namespace" language="Python">
+    <compoundname>generate_reference</compoundname>
+    <sectiondef kind="var">
+      <memberdef kind="variable" id="generate__reference_8py_1a493124dd130711573e9c3ca60796b6f8" prot="public" static="no" mutable="no">
+        <type>list</type>
+        <definition>list generate_reference.INSTANCES</definition>
+        <argsstring></argsstring>
+        <name>INSTANCES</name>
+        <qualifiedname>generate_reference.INSTANCES</qualifiedname>
+        <initializer>=  [&quot;ta01&quot;, &quot;ta11&quot;, &quot;ta21&quot;, &quot;ta31&quot;]</initializer>
+        <briefdescription>
+<para>Taillard benchmark instance names to process. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Kept small by default for fast iteration during debugging. Expand to the full Taillard set (e.g. <computeroutput>ta01</computeroutput> – <computeroutput>ta80</computeroutput>) once the C# and Python outputs are confirmed to match on this subset. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" line="45" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" bodystart="45" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="generate__reference_8py_1a8f37d81a04a4ffb2bab4c3c0ac21f5dd" prot="public" static="no" mutable="no">
+        <type>list</type>
+        <definition>list generate_reference.RULES</definition>
+        <argsstring></argsstring>
+        <name>RULES</name>
+        <qualifiedname>generate_reference.RULES</qualifiedname>
+        <initializer>=  [
+    &quot;shortest_processing_time&quot;,  ##&lt; Maps to C# DispatchingRule.SPT_SMPT.
+    &quot;largest_processing_time&quot;,  ##&lt; Maps to C# DispatchingRule.LPT_MMUR / LPT_SMPT.
+    &quot;most_work_remaining&quot;,  ##&lt; Maps to C# DispatchingRule.LRT_MMUR.
+    &quot;first_come_first_served&quot;,  ##&lt; Maps to C# DispatchingRule.SDT_SRWT (FIFO fallback).
+    &quot;most_operations_remaining&quot;,  ##&lt; Maps to C# DispatchingRule.MOR.
+]</initializer>
+        <briefdescription>
+<para>Fully qualified job_shop_lib rule names to simulate. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Only rules that have a confirmed 1:1 mapping to a C# <computeroutput>DispatchingRule</computeroutput> are included. The inline comments document the corresponding C# enum value for each rule. Rules without a C# equivalent (e.g. <computeroutput>most_operations_remaining</computeroutput>) can be included here for reference but will produce unmatched rows in the comparison. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" line="53" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" bodystart="53" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="generate__reference_8py_1ae652fb0bedf7b56a7fdc6f7e93a0d42a" prot="public" static="no" mutable="no">
+        <type>dict</type>
+        <definition>dict generate_reference.RULE_MAP</definition>
+        <argsstring></argsstring>
+        <name>RULE_MAP</name>
+        <qualifiedname>generate_reference.RULE_MAP</qualifiedname>
+        <initializer>=  {
+    &quot;shortest_processing_time&quot;: &quot;SPT&quot;,
+    &quot;largest_processing_time&quot;: &quot;LPT&quot;,
+    &quot;most_work_remaining&quot;: &quot;MWR&quot;,
+    &quot;first_come_first_served&quot;: &quot;FCFS&quot;,
+    &quot;most_operations_remaining&quot;: &quot;MOR&quot;,
+}</initializer>
+        <briefdescription>
+<para>Maps job_shop_lib full rule names to the short keys used in both CSV outputs. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Short keys must match the <computeroutput>key</computeroutput> field in <computeroutput>ValidationExporter.RuleMap</computeroutput> exactly so that <computeroutput><ref refid="compare__results_8py" kindref="compound">compare_results.py</ref></computeroutput> can merge the two DataFrames on the <computeroutput>rule</computeroutput> column without any name translation. Adding a rule here without a corresponding entry in <computeroutput>ValidationExporter.RuleMap</computeroutput> will produce unmatched rows in the comparison. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" line="67" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" bodystart="67" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="generate__reference_8py_1a0ce5801d14d41da22d906db1e6e8c1ce" prot="public" static="no" mutable="no">
+        <type>list</type>
+        <definition>list generate_reference.records</definition>
+        <argsstring></argsstring>
+        <name>records</name>
+        <qualifiedname>generate_reference.records</qualifiedname>
+        <initializer>=  []</initializer>
+        <briefdescription>
+<para>Accumulates one record dict per instance/rule combination for CSV output. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Populated during the main simulation loop and converted to a DataFrame at the end. Each entry matches the column schema of <computeroutput>csharp_makespans.csv</computeroutput>. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" line="79" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" bodystart="79" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="generate__reference_8py_1a794e7007a1652061ec93a8071a61644a" prot="public" static="no" mutable="no">
+        <type>dict</type>
+        <definition>generate_reference.schedules</definition>
+        <argsstring></argsstring>
+        <name>schedules</name>
+        <qualifiedname>generate_reference.schedules</qualifiedname>
+        <initializer>=  {}</initializer>
+        <briefdescription>
+<para>Accumulates full operation schedules keyed by <computeroutput>&quot;{instance}_{rule_key}&quot;</computeroutput>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Populated during the main simulation loop and serialized to <computeroutput>reference_schedules.json</computeroutput>. Key format must match <computeroutput>ValidationExporter.RunAndExport</computeroutput> and <computeroutput><ref refid="mirror__des_8py" kindref="compound">mirror_des.py</ref></computeroutput> so that <computeroutput><ref refid="compare__results_8py" kindref="compound">compare_results.py</ref></computeroutput> can look up schedules by the same key used in the merged DataFrame. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" line="86" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" bodystart="86" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="generate__reference_8py_1afc398a343f97dbe649a3ae8c2b026f0e" prot="public" static="no" mutable="no">
+        <type></type>
+        <definition>generate_reference.instance</definition>
+        <argsstring></argsstring>
+        <name>instance</name>
+        <qualifiedname>generate_reference.instance</qualifiedname>
+        <initializer>=  load_benchmark_instance(instance_name)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" line="93" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" bodystart="93" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="generate__reference_8py_1aef818737e9cd2aaa800a7250ff56d72e" prot="public" static="no" mutable="no">
+        <type></type>
+        <definition>generate_reference.metadata</definition>
+        <argsstring></argsstring>
+        <name>metadata</name>
+        <qualifiedname>generate_reference.metadata</qualifiedname>
+        <initializer>=  instance.metadata if hasattr(instance, &quot;metadata&quot;) else {}</initializer>
+        <briefdescription>
+<para>Extract the optimum from instance metadata if available. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>job_shop_lib exposes metadata as a dict on some instance types. The <computeroutput>hasattr</computeroutput> guard handles instances that do not carry metadata, in which case <computeroutput>optimum</computeroutput> is <computeroutput>None</computeroutput> and gap percentage is skipped for that instance. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" line="99" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" bodystart="99" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="generate__reference_8py_1a7d96a4d690ee85bf8d8bbb399a18ae5c" prot="public" static="no" mutable="no">
+        <type></type>
+        <definition>generate_reference.optimum</definition>
+        <argsstring></argsstring>
+        <name>optimum</name>
+        <qualifiedname>generate_reference.optimum</qualifiedname>
+        <initializer>=  metadata.get(&quot;optimum&quot;)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" line="100" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" bodystart="100" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="generate__reference_8py_1a158a86752364fc76c6038061fcd1bdd1" prot="public" static="no" mutable="no">
+        <type></type>
+        <definition>generate_reference.solver</definition>
+        <argsstring></argsstring>
+        <name>solver</name>
+        <qualifiedname>generate_reference.solver</qualifiedname>
+        <initializer>=  DispatchingRuleSolver(rule_name)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" line="103" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" bodystart="103" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="generate__reference_8py_1ae5b35572db3aac5b20dbdf83fd41c71c" prot="public" static="no" mutable="no">
+        <type></type>
+        <definition>generate_reference.start</definition>
+        <argsstring></argsstring>
+        <name>start</name>
+        <qualifiedname>generate_reference.start</qualifiedname>
+        <initializer>=  time.perf_counter()</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" line="104" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" bodystart="104" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="generate__reference_8py_1a5272eed0e3c4514f435683c4fbdfd54e" prot="public" static="no" mutable="no">
+        <type></type>
+        <definition>generate_reference.schedule</definition>
+        <argsstring></argsstring>
+        <name>schedule</name>
+        <qualifiedname>generate_reference.schedule</qualifiedname>
+        <initializer>=  solver(instance)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" line="105" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" bodystart="105" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="generate__reference_8py_1a13b607cf1b5d85180e92c7f1f42e7d8f" prot="public" static="no" mutable="no">
+        <type></type>
+        <definition>generate_reference.elapsed</definition>
+        <argsstring></argsstring>
+        <name>elapsed</name>
+        <qualifiedname>generate_reference.elapsed</qualifiedname>
+        <initializer>=  time.perf_counter() - start</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" line="106" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" bodystart="106" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="generate__reference_8py_1a0c306efa0318e61b976d4dd3b1f76e97" prot="public" static="no" mutable="no">
+        <type></type>
+        <definition>generate_reference.makespan</definition>
+        <argsstring></argsstring>
+        <name>makespan</name>
+        <qualifiedname>generate_reference.makespan</qualifiedname>
+        <initializer>=  schedule.makespan()</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" line="107" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" bodystart="107" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="generate__reference_8py_1a682eb0184cf4de85d8fbc527b93a1e0f" prot="public" static="no" mutable="no">
+        <type>tuple</type>
+        <definition>tuple generate_reference.gap</definition>
+        <argsstring></argsstring>
+        <name>gap</name>
+        <qualifiedname>generate_reference.gap</qualifiedname>
+        <initializer>=  ((makespan - optimum) / optimum * 100) if optimum else None</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" line="109" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" bodystart="109" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="generate__reference_8py_1af8944d6458c6e77db9b67e76f45a9338" prot="public" static="no" mutable="no">
+        <type>dict</type>
+        <definition>dict generate_reference.rule_key</definition>
+        <argsstring></argsstring>
+        <name>rule_key</name>
+        <qualifiedname>generate_reference.rule_key</qualifiedname>
+        <initializer>=  <ref refid="generate__reference_8py_1ae652fb0bedf7b56a7fdc6f7e93a0d42a" kindref="member">RULE_MAP</ref>[rule_name]</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" line="110" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" bodystart="110" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="generate__reference_8py_1ad3861235ed2150dbd7f52c14e78b0bd4" prot="public" static="no" mutable="no">
+        <type>str</type>
+        <definition>str generate_reference.instance_schedule_key</definition>
+        <argsstring></argsstring>
+        <name>instance_schedule_key</name>
+        <qualifiedname>generate_reference.instance_schedule_key</qualifiedname>
+        <initializer>=  f&quot;{instance_name}_{rule_key}&quot;</initializer>
+        <briefdescription>
+<para>Extract the full operation-level schedule for this instance/rule pair. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><computeroutput>schedule.schedule</computeroutput> is a list of lists indexed by machine ID. Each inner list contains <computeroutput>ScheduledOperation</computeroutput> objects whose <computeroutput></computeroutput>.operation field exposes <computeroutput>position_in_job</computeroutput> and <computeroutput>duration</computeroutput>. The extracted dicts are sorted by start time, then machine ID, then job ID — matching the sort order used by <computeroutput>ValidationExporter.RunAndExport</computeroutput> — so that <computeroutput><ref refid="compare__results_8py" kindref="compound">compare_results.py</ref></computeroutput> can diff the two schedule JSONs entry-by-entry without re-sorting. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" line="138" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" bodystart="138" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="generate__reference_8py_1a21624b655cc1f1753c44151614930288" prot="public" static="no" mutable="no">
+        <type>list</type>
+        <definition>list generate_reference.op_list</definition>
+        <argsstring></argsstring>
+        <name>op_list</name>
+        <qualifiedname>generate_reference.op_list</qualifiedname>
+        <initializer>=  []</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" line="139" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" bodystart="139" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="generate__reference_8py_1ac8da0c01c2e1d54f91cd013f56ed5466" prot="public" static="no" mutable="no">
+        <type></type>
+        <definition>generate_reference.op</definition>
+        <argsstring></argsstring>
+        <name>op</name>
+        <qualifiedname>generate_reference.op</qualifiedname>
+        <initializer>=  sched_op.operation</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" line="143" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" bodystart="143" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="generate__reference_8py_1af995fe1a69d0c08c863b36c860467d67" prot="public" static="no" mutable="no">
+        <type></type>
+        <definition>generate_reference.job_id</definition>
+        <argsstring></argsstring>
+        <name>job_id</name>
+        <qualifiedname>generate_reference.job_id</qualifiedname>
+        <initializer>=  sched_op.job_id</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" line="144" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" bodystart="144" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="generate__reference_8py_1a76d14a879f2cb92c9737ed543b50256d" prot="public" static="no" mutable="no">
+        <type></type>
+        <definition>generate_reference.key</definition>
+        <argsstring></argsstring>
+        <name>key</name>
+        <qualifiedname>generate_reference.key</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" line="156" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" bodystart="156" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="generate__reference_8py_1a0447d1f7738d53b5e920fad4088c4c64" prot="public" static="no" mutable="no">
+        <type></type>
+        <definition>generate_reference.df</definition>
+        <argsstring></argsstring>
+        <name>df</name>
+        <qualifiedname>generate_reference.df</qualifiedname>
+        <initializer>=  pd.DataFrame(<ref refid="generate__reference_8py_1a0ce5801d14d41da22d906db1e6e8c1ce" kindref="member">records</ref>)</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" line="161" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" bodystart="161" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="generate__reference_8py_1ae3c096124f4b7c70b87a72fdf507d860" prot="public" static="no" mutable="no">
+        <type></type>
+        <definition>generate_reference.index</definition>
+        <argsstring></argsstring>
+        <name>index</name>
+        <qualifiedname>generate_reference.index</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" line="162" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" bodystart="162" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="generate__reference_8py_1a61fb39e699b5fa3cee03c3d5379955c8" prot="public" static="no" mutable="no">
+        <type></type>
+        <definition>generate_reference.f</definition>
+        <argsstring></argsstring>
+        <name>f</name>
+        <qualifiedname>generate_reference.f</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" line="167" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" bodystart="167" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="generate__reference_8py_1a0fc40c9e7d0bebcce3a01bbdb314403c" prot="public" static="no" mutable="no">
+        <type></type>
+        <definition>generate_reference.indent</definition>
+        <argsstring></argsstring>
+        <name>indent</name>
+        <qualifiedname>generate_reference.indent</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" line="167" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" bodystart="167" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py" line="1" column="1"/>
+  </compounddef>
+</doxygen>

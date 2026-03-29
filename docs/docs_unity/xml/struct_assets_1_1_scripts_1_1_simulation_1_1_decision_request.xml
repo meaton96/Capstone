@@ -1,0 +1,128 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request" kind="struct" language="C#" prot="public">
+    <compoundname>Assets::Scripts::Simulation::DecisionRequest</compoundname>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request_1a620182292ac7875cae255f27d4465646" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Simulation.DecisionRequest.MachineId</definition>
+        <argsstring></argsstring>
+        <name>MachineId</name>
+        <qualifiedname>Assets.Scripts.Simulation.DecisionRequest.MachineId</qualifiedname>
+        <briefdescription>
+<para>ID of the machine that just became free and has a non-empty queue. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="51" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="51" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request_1add88fa31fbced138db6ccd374530bd9d" prot="public" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Assets.Scripts.Simulation.DecisionRequest.SimTime</definition>
+        <argsstring></argsstring>
+        <name>SimTime</name>
+        <qualifiedname>Assets.Scripts.Simulation.DecisionRequest.SimTime</qualifiedname>
+        <briefdescription>
+<para>Current simulation time. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="54" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="54" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request_1a0ec42003c74a246fc95a13037d16ddda" prot="public" static="no" mutable="no">
+        <type>int[]</type>
+        <definition>int [] Assets.Scripts.Simulation.DecisionRequest.QueuedJobIds</definition>
+        <argsstring></argsstring>
+        <name>QueuedJobIds</name>
+        <qualifiedname>Assets.Scripts.Simulation.DecisionRequest.QueuedJobIds</qualifiedname>
+        <briefdescription>
+<para>IDs of jobs waiting in the machine&apos;s queue. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="57" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="57" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request_1ad4c1cf82eb0a034fc2364533bffd8a23" prot="public" static="no" mutable="no">
+        <type>double[]</type>
+        <definition>double [] Assets.Scripts.Simulation.DecisionRequest.QueuedDurations</definition>
+        <argsstring></argsstring>
+        <name>QueuedDurations</name>
+        <qualifiedname>Assets.Scripts.Simulation.DecisionRequest.QueuedDurations</qualifiedname>
+        <briefdescription>
+<para>Processing times of the queued operations (parallel to QueuedJobIds). </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="60" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="60" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request_1a02df458c6ccecffbd9d9fdc8a2523199" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Simulation.DecisionRequest.DecisionIndex</definition>
+        <argsstring></argsstring>
+        <name>DecisionIndex</name>
+        <qualifiedname>Assets.Scripts.Simulation.DecisionRequest.DecisionIndex</qualifiedname>
+        <briefdescription>
+<para>How many decisions have been made so far this episode. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="63" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="63" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request_1ab4c7666ddf86cefaab00f997030886b6" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Simulation.DecisionRequest.TotalJobs</definition>
+        <argsstring></argsstring>
+        <name>TotalJobs</name>
+        <qualifiedname>Assets.Scripts.Simulation.DecisionRequest.TotalJobs</qualifiedname>
+        <briefdescription>
+<para>Total jobs in the instance. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="66" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="66" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request_1a307a860ba84ede3a9dcc159ff5096f02" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Simulation.DecisionRequest.CompletedJobs</definition>
+        <argsstring></argsstring>
+        <name>CompletedJobs</name>
+        <qualifiedname>Assets.Scripts.Simulation.DecisionRequest.CompletedJobs</qualifiedname>
+        <briefdescription>
+<para>Jobs completed so far. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="69" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="69" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Snapshot of the DES state at a decision point, presented to the agent (or fixed rule) so it can choose an action. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="48" column="11" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="49" bodyend="73"/>
+    <listofallmembers>
+      <member refid="struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request_1a307a860ba84ede3a9dcc159ff5096f02" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::DecisionRequest</scope><name>CompletedJobs</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request_1a02df458c6ccecffbd9d9fdc8a2523199" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::DecisionRequest</scope><name>DecisionIndex</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request_1a620182292ac7875cae255f27d4465646" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::DecisionRequest</scope><name>MachineId</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request_1ad4c1cf82eb0a034fc2364533bffd8a23" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::DecisionRequest</scope><name>QueuedDurations</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request_1a0ec42003c74a246fc95a13037d16ddda" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::DecisionRequest</scope><name>QueuedJobIds</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request_1add88fa31fbced138db6ccd374530bd9d" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::DecisionRequest</scope><name>SimTime</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request_1ab4c7666ddf86cefaab00f997030886b6" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::DecisionRequest</scope><name>TotalJobs</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

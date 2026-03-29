@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="namespace_assets_1_1_scripts_1_1_scheduling" kind="namespace" language="C#">
+    <compoundname>Assets::Scripts::Scheduling</compoundname>
+    <innernamespace refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core">Assets::Scripts::Scheduling::Core</innernamespace>
+    <innernamespace refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_data">Assets::Scripts::Scheduling::Data</innernamespace>
+    <innernamespace refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_unity">Assets::Scripts::Scheduling::Unity</innernamespace>
+    <innernamespace refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_validation">Assets::Scripts::Scheduling::Validation</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" line="6" column="1"/>
+  </compounddef>
+</doxygen>

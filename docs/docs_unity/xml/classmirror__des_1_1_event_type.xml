@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="classmirror__des_1_1_event_type" kind="class" language="Python" prot="public">
+    <compoundname>mirror_des::EventType</compoundname>
+    <basecompoundref prot="public" virt="non-virtual">Enum</basecompoundref>
+    <sectiondef kind="public-static-attrib">
+      <memberdef kind="variable" id="classmirror__des_1_1_event_type_1ae12acf3f727c9afe9ece79e11c714df5" prot="public" static="yes" mutable="no">
+        <type></type>
+        <definition>mirror_des.EventType::JOB_ARRIVED</definition>
+        <argsstring></argsstring>
+        <name>JOB_ARRIVED</name>
+        <qualifiedname>mirror_des.EventType.JOB_ARRIVED</qualifiedname>
+        <initializer>=  auto()</initializer>
+        <briefdescription>
+<para>A job has arrived at its next required machine. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="42" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="42" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classmirror__des_1_1_event_type_1a19da4cb6f133dcb6134160e6f55743f8" prot="public" static="yes" mutable="no">
+        <type></type>
+        <definition>mirror_des.EventType::OPERATION_COMPLETE</definition>
+        <argsstring></argsstring>
+        <name>OPERATION_COMPLETE</name>
+        <qualifiedname>mirror_des.EventType.OPERATION_COMPLETE</qualifiedname>
+        <initializer>=  auto()</initializer>
+        <briefdescription>
+<para>An operation running on a machine has finished. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="43" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="43" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Discriminated union of simulation event types, mirroring C# <computeroutput><ref refid="classmirror__des_1_1_event_type" kindref="compound">EventType</ref></computeroutput>. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="2">
+        <label>Enum</label>
+      </node>
+      <node id="1">
+        <label>mirror_des.EventType</label>
+        <link refid="classmirror__des_1_1_event_type"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="2">
+        <label>Enum</label>
+      </node>
+      <node id="1">
+        <label>mirror_des.EventType</label>
+        <link refid="classmirror__des_1_1_event_type"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" line="41" column="1" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/mirror_des.py" bodystart="41" bodyend="45"/>
+    <listofallmembers>
+      <member refid="classmirror__des_1_1_event_type_1ae12acf3f727c9afe9ece79e11c714df5" prot="public" virt="non-virtual"><scope>mirror_des::EventType</scope><name>JOB_ARRIVED</name></member>
+      <member refid="classmirror__des_1_1_event_type_1a19da4cb6f133dcb6134160e6f55743f8" prot="public" virt="non-virtual"><scope>mirror_des::EventType</scope><name>OPERATION_COMPLETE</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

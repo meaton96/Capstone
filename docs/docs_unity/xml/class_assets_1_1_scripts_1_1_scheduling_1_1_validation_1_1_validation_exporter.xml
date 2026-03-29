@@ -1,0 +1,123 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_exporter" kind="class" language="C#" prot="public">
+    <compoundname>Assets::Scripts::Scheduling::Validation::ValidationExporter</compoundname>
+    <sectiondef kind="private-static-func">
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_exporter_1addbd3662cdf9300c21c51a90c59ea01e" prot="private" static="yes" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>static</type>
+        <definition>static Assets.Scripts.Scheduling.Validation.ValidationExporter.readonly</definition>
+        <argsstring>(DispatchingRule rule, string key, string fullName)[] RuleMap</argsstring>
+        <name>readonly</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Validation.ValidationExporter.readonly</qualifiedname>
+        <param>
+          <type><ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1af841dd07c9c38276e117696a4dd6fe87" kindref="member">DispatchingRule</ref></type>
+          <declname>rule</declname>
+        </param>
+        <param>
+          <type>string</type>
+          <declname>key</declname>
+        </param>
+        <param>
+          <type>string</type>
+          <declname>fullName</declname>
+        </param>
+        <briefdescription>
+<para>Mapping from DispatchingRule enum values to the short keys and full names used by the Python reference generator. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Each entry is a <computeroutput></computeroutput>(rule, key, fullName) tuple where:<itemizedlist>
+<listitem><para><computeroutput>rule</computeroutput> is the DispatchingRule enum value used to configure DESSimulator.</para>
+</listitem><listitem><para><computeroutput>key</computeroutput> is the abbreviated column identifier written to <computeroutput>csharp_makespans.csv</computeroutput> (e.g. <computeroutput>&quot;SPT&quot;</computeroutput>), matching the Python script&apos;s short-form keys.</para>
+</listitem><listitem><para><computeroutput>fullName</computeroutput> is the snake_case name written to the <computeroutput>rule_full</computeroutput> CSV column (e.g. <computeroutput>&quot;shortest_processing_time&quot;</computeroutput>), matching the Python script&apos;s full-form keys.</para>
+</listitem></itemizedlist>
+</para>
+<para><simplesect kind="note"><para>Only rules present in this map are simulated and exported by RunAndExport. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/ValidationExporter.cs" line="47" column="24"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-static-func">
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_exporter_1a68c82689a2fa95f2a747813911ba7dd5" prot="public" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>static void Assets.Scripts.Scheduling.Validation.ValidationExporter.RunAndExport</definition>
+        <argsstring>(string instanceDir, string outputDir)</argsstring>
+        <name>RunAndExport</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Validation.ValidationExporter.RunAndExport</qualifiedname>
+        <param>
+          <type>string</type>
+          <declname>instanceDir</declname>
+        </param>
+        <param>
+          <type>string</type>
+          <declname>outputDir</declname>
+        </param>
+        <briefdescription>
+<para>Simulates all Taillard instances in a directory under every mapped rule and writes the results to CSV and JSON export files. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Processes files in the following sequence:<orderedlist>
+<listitem><para>Discovers all <computeroutput>*</computeroutput>.json files in <computeroutput>instanceDir</computeroutput>, sorted alphabetically.</para>
+</listitem><listitem><para>For each file, deserializes a TaillardInstance via Newtonsoft.Json. Files that fail to parse or produce null/incomplete data are skipped with a console warning; processing continues with the next file.</para>
+</listitem><listitem><para>For each instance, iterates every entry in RuleMap, running a fresh DESSimulator per rule. Computes the optimality gap if TaillardMetadata.optimum is non-zero; otherwise leaves the gap column empty.</para>
+</listitem><listitem><para>Appends one CSV row per instance/rule combination to an in-memory list.</para>
+</listitem><listitem><para>Builds a per-instance/rule operation schedule list, sorted by start time, then machine ID, then job ID, and stores it under the key <computeroutput>&quot;{name}_{key}&quot;</computeroutput> in the schedules dictionary.</para>
+</listitem><listitem><para>Writes <computeroutput>csharp_makespans.csv</computeroutput> to <computeroutput>outputDir</computeroutput> containing all CSV rows.</para>
+</listitem><listitem><para>Writes <computeroutput>csharp_schedules.json</computeroutput> to <computeroutput>outputDir</computeroutput> containing all schedules, serialized with indented formatting for human readability.</para>
+</listitem></orderedlist>
+</para>
+<para><simplesect kind="par"><title>CSV columns</title><para><computeroutput>instance</computeroutput>, <computeroutput>rule</computeroutput>, <computeroutput>rule_full</computeroutput>, <computeroutput>makespan</computeroutput>, <computeroutput>optimum</computeroutput>, <computeroutput>gap_pct</computeroutput>, <computeroutput>num_jobs</computeroutput>, <computeroutput>num_machines</computeroutput> </para>
+</simplesect>
+<simplesect kind="par"><title>Schedule JSON structure</title><para>A top-level object keyed by <computeroutput>&quot;{instanceName}_{ruleKey}&quot;</computeroutput>. Each value is an array of operation objects with fields: <computeroutput>job</computeroutput>, <computeroutput>op_index</computeroutput>, <computeroutput>machine</computeroutput>, <computeroutput>start</computeroutput>, <computeroutput>end</computeroutput>, <computeroutput>duration</computeroutput>.</para>
+</simplesect>
+<parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>instanceDir</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Filesystem path to the directory containing Taillard <computeroutput></computeroutput>.json files. Must be a real disk path — not a <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_unity" kindref="compound">Unity</ref> <computeroutput>Resources/</computeroutput> virtual path. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>outputDir</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Filesystem path to the directory where output files will be written. Must exist before this method is called; CrossValidator.Start creates it if needed. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/ValidationExporter.cs" line="88" column="28" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/ValidationExporter.cs" bodystart="88" bodyend="195"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Exports makespan results and full operation schedules in the same format as the Python reference generator, enabling direct diff against job_shop_lib output. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>Produces two output files whose column and key names are kept deliberately in sync with the Python reference scripts:<itemizedlist>
+<listitem><para><computeroutput>csharp_makespans.csv</computeroutput> — one row per instance/rule combination, matching the column layout of <computeroutput>reference_makespans.csv</computeroutput>.</para>
+</listitem><listitem><para><computeroutput>csharp_schedules.json</computeroutput> — one entry per instance/rule combination containing the full sorted operation schedule, matching the structure of <computeroutput>reference_schedules.json</computeroutput>.</para>
+</listitem></itemizedlist>
+</para>
+<para>Usage inside <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_unity" kindref="compound">Unity</ref>: <programlisting><codeline><highlight class="normal">ValidationExporter.RunAndExport(instanceDir,<sp/>outputDir);</highlight></codeline>
+</programlisting></para>
+<para>Usage as a standalone console app: <programlisting><codeline><highlight class="normal">ValidationExporter.RunAndExport(</highlight><highlight class="stringliteral">&quot;path/to/instances&quot;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;path/to/output&quot;</highlight><highlight class="normal">);</highlight></codeline>
+</programlisting></para>
+<para><simplesect kind="note"><para>Only the five rules present in RuleMap are exported. This subset matches the rules implemented in the Python reference generator; additional DispatchingRule values are intentionally excluded to keep the comparison columns aligned. </para>
+</simplesect>
+</para>
+    </detaileddescription>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/ValidationExporter.cs" line="34" column="19" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/ValidationExporter.cs" bodystart="35" bodyend="196"/>
+    <listofallmembers>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_exporter_1addbd3662cdf9300c21c51a90c59ea01e" prot="private" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Validation::ValidationExporter</scope><name>readonly</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_validation_exporter_1a68c82689a2fa95f2a747813911ba7dd5" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Validation::ValidationExporter</scope><name>RunAndExport</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

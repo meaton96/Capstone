@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="_cross_validator_8cs" kind="file" language="C#">
+    <compoundname>CrossValidator.cs</compoundname>
+    <innerclass refid="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator" prot="public">Assets::Scripts::Scheduling::Validation::CrossValidator</innerclass>
+    <innernamespace refid="namespace_assets">Assets</innernamespace>
+    <innernamespace refid="namespace_assets_1_1_scripts">Assets::Scripts</innernamespace>
+    <innernamespace refid="namespace_assets_1_1_scripts_1_1_scheduling">Assets::Scripts::Scheduling</innernamespace>
+    <innernamespace refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_validation">Assets::Scripts::Scheduling::Validation</innernamespace>
+    <innernamespace refid="namespace_system_1_1_i_o">System::IO</innernamespace>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="keyword">using<sp/></highlight><highlight class="normal">UnityEngine;</highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="keyword">using<sp/></highlight><highlight class="normal">System.IO;</highlight></codeline>
+<codeline lineno="3" refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_validation" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal"><ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_validation" kindref="compound">Assets.Scripts.Scheduling.Validation</ref></highlight></codeline>
+<codeline lineno="4"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="27" refid="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator" refkind="compound"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator" kindref="compound">CrossValidator</ref><sp/>:<sp/>MonoBehaviour</highlight></codeline>
+<codeline lineno="28"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline lineno="33"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>[Header(</highlight><highlight class="stringliteral">&quot;Paths&quot;</highlight><highlight class="normal">)]</highlight></codeline>
+<codeline lineno="34"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>[Tooltip(</highlight><highlight class="stringliteral">&quot;Folder<sp/>containing<sp/>Taillard<sp/>.json<sp/>files&quot;</highlight><highlight class="normal">)]</highlight></codeline>
+<codeline lineno="35"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">string</highlight><highlight class="normal"><sp/><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_1a874643c3bab4c70ffecb10fd871e963e" kindref="member">instanceDirectory</ref><sp/>=<sp/></highlight><highlight class="stringliteral">&quot;Assets/StreamingAssets/Instances&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="36"><highlight class="normal"></highlight></codeline>
+<codeline lineno="41"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>[Tooltip(</highlight><highlight class="stringliteral">&quot;Folder<sp/>to<sp/>write<sp/>csharp_makespans.csv<sp/>and<sp/>csharp_schedules.json&quot;</highlight><highlight class="normal">)]</highlight></codeline>
+<codeline lineno="42"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">string</highlight><highlight class="normal"><sp/><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_1a80ede1968dc597c505ef36ec96837d23" kindref="member">outputDirectory</ref><sp/>=<sp/></highlight><highlight class="stringliteral">&quot;Assets/StreamingAssets/Validation&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="43"><highlight class="normal"></highlight></codeline>
+<codeline lineno="52"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>Start()</highlight></codeline>
+<codeline lineno="53"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline lineno="54"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(!Directory.Exists(<ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_1a80ede1968dc597c505ef36ec96837d23" kindref="member">outputDirectory</ref>))</highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Directory.CreateDirectory(<ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_1a80ede1968dc597c505ef36ec96837d23" kindref="member">outputDirectory</ref>);</highlight></codeline>
+<codeline lineno="56"><highlight class="normal"></highlight></codeline>
+<codeline lineno="57"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(!Directory.Exists(<ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_1a874643c3bab4c70ffecb10fd871e963e" kindref="member">instanceDirectory</ref>))</highlight></codeline>
+<codeline lineno="58"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline lineno="59"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Debug.LogError($</highlight><highlight class="stringliteral">&quot;Instance<sp/>directory<sp/>not<sp/>found:<sp/>{instanceDirectory}&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="61"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="62"><highlight class="normal"></highlight></codeline>
+<codeline lineno="63"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Debug.Log($</highlight><highlight class="stringliteral">&quot;&lt;color=cyan&gt;Running<sp/>cross-validation<sp/>export...&lt;/color&gt;&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="64"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Debug.Log($</highlight><highlight class="stringliteral">&quot;<sp/><sp/>Instances:<sp/>{instanceDirectory}&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="65"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Debug.Log($</highlight><highlight class="stringliteral">&quot;<sp/><sp/>Output:<sp/><sp/><sp/><sp/>{outputDirectory}&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="66"><highlight class="normal"></highlight></codeline>
+<codeline lineno="67"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>ValidationExporter.RunAndExport(<ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_1a874643c3bab4c70ffecb10fd871e963e" kindref="member">instanceDirectory</ref>,<sp/><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_validation_1_1_cross_validator_1a80ede1968dc597c505ef36ec96837d23" kindref="member">outputDirectory</ref>);</highlight></codeline>
+<codeline lineno="68"><highlight class="normal"></highlight></codeline>
+<codeline lineno="69"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Debug.Log(</highlight><highlight class="stringliteral">&quot;&lt;color=green&gt;Export<sp/>complete.<sp/>Now<sp/>run<sp/>compare_results.py:&lt;/color&gt;&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="70"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Debug.Log($</highlight><highlight class="stringliteral">&quot;<sp/><sp/>cd<sp/>{outputDirectory}&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="71"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Debug.Log($</highlight><highlight class="stringliteral">&quot;<sp/><sp/>python<sp/>compare_results.py&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="72"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="73"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="74"><highlight class="normal">}</highlight></codeline>
+    </programlisting>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/CrossValidator.cs"/>
+  </compounddef>
+</doxygen>

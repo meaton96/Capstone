@@ -1,0 +1,211 @@
+\doxysection{C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Scheduling/\+\+Validation/\+generate\+\_\+reference.py File Reference}
+\hypertarget{generate__reference_8py}{}\label{generate__reference_8py}\index{C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate\_reference.py@{C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate\_reference.py}}
+
+
+Generates ground-\/truth makespans and operation schedules from job\+\_\+shop\+\_\+lib for cross-\/validation against the C\# DES simulator.  
+
+
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+list \doxymbox{\hyperlink{generate__reference_8py_a493124dd130711573e9c3ca60796b6f8}{generate\+\_\+reference.\+INSTANCES}} = \+["{}ta01"{}, "{}ta11"{}, "{}ta21"{}, "{}ta31"{}]\+
+\begin{DoxyCompactList}\small\item\em Taillard benchmark instance names to process. \end{DoxyCompactList}\item 
+list \doxymbox{\hyperlink{generate__reference_8py_a8f37d81a04a4ffb2bab4c3c0ac21f5dd}{generate\+\_\+reference.\+RULES}}
+\begin{DoxyCompactList}\small\item\em Fully qualified job\+\_\+shop\+\_\+lib rule names to simulate. \end{DoxyCompactList}\item 
+dict \doxymbox{\hyperlink{generate__reference_8py_ae652fb0bedf7b56a7fdc6f7e93a0d42a}{generate\+\_\+reference.\+RULE\+\_\+\+MAP}}
+\begin{DoxyCompactList}\small\item\em Maps job\+\_\+shop\+\_\+lib full rule names to the short keys used in both CSV outputs. \end{DoxyCompactList}\item 
+list \doxymbox{\hyperlink{generate__reference_8py_a0ce5801d14d41da22d906db1e6e8c1ce}{generate\+\_\+reference.\+records}} = \+[$\,$]\+
+\begin{DoxyCompactList}\small\item\em Accumulates one record dict per instance/\+rule combination for CSV output. \end{DoxyCompactList}\item 
+dict \doxymbox{\hyperlink{generate__reference_8py_a794e7007a1652061ec93a8071a61644a}{generate\+\_\+reference.\+schedules}} = \{\}
+\begin{DoxyCompactList}\small\item\em Accumulates full operation schedules keyed by {\ttfamily "{}\{instance\}\+\_\+\{rule\+\_\+key\}"{}}. \end{DoxyCompactList}\item 
+\Hypertarget{generate__reference_8py_afc398a343f97dbe649a3ae8c2b026f0e}\label{generate__reference_8py_afc398a343f97dbe649a3ae8c2b026f0e} 
+{\bfseries generate\+\_\+reference.\+instance} = load\+\_\+benchmark\+\_\+instance(instance\+\_\+name)
+\item 
+\doxymbox{\hyperlink{generate__reference_8py_aef818737e9cd2aaa800a7250ff56d72e}{generate\+\_\+reference.\+metadata}} = instance.\+metadata if hasattr(instance, "{}metadata"{}) else \{\}
+\begin{DoxyCompactList}\small\item\em Extract the optimum from instance metadata if available. \end{DoxyCompactList}\item 
+\Hypertarget{generate__reference_8py_a7d96a4d690ee85bf8d8bbb399a18ae5c}\label{generate__reference_8py_a7d96a4d690ee85bf8d8bbb399a18ae5c} 
+{\bfseries generate\+\_\+reference.\+optimum} = metadata.\+get("{}optimum"{})
+\item 
+\Hypertarget{generate__reference_8py_a158a86752364fc76c6038061fcd1bdd1}\label{generate__reference_8py_a158a86752364fc76c6038061fcd1bdd1} 
+{\bfseries generate\+\_\+reference.\+solver} = Dispatching\+Rule\+Solver(rule\+\_\+name)
+\item 
+\Hypertarget{generate__reference_8py_ae5b35572db3aac5b20dbdf83fd41c71c}\label{generate__reference_8py_ae5b35572db3aac5b20dbdf83fd41c71c} 
+{\bfseries generate\+\_\+reference.\+start} = time.\+perf\+\_\+counter()
+\item 
+\Hypertarget{generate__reference_8py_a5272eed0e3c4514f435683c4fbdfd54e}\label{generate__reference_8py_a5272eed0e3c4514f435683c4fbdfd54e} 
+{\bfseries generate\+\_\+reference.\+schedule} = solver(instance)
+\item 
+\Hypertarget{generate__reference_8py_a13b607cf1b5d85180e92c7f1f42e7d8f}\label{generate__reference_8py_a13b607cf1b5d85180e92c7f1f42e7d8f} 
+{\bfseries generate\+\_\+reference.\+elapsed} = time.\+perf\+\_\+counter() -\/ start
+\item 
+\Hypertarget{generate__reference_8py_a0c306efa0318e61b976d4dd3b1f76e97}\label{generate__reference_8py_a0c306efa0318e61b976d4dd3b1f76e97} 
+{\bfseries generate\+\_\+reference.\+makespan} = schedule.\+makespan()
+\item 
+\Hypertarget{generate__reference_8py_a682eb0184cf4de85d8fbc527b93a1e0f}\label{generate__reference_8py_a682eb0184cf4de85d8fbc527b93a1e0f} 
+tuple {\bfseries generate\+\_\+reference.\+gap} = ((makespan -\/ optimum) /\+ optimum \texorpdfstring{$\ast$}{*} 100) if optimum else None
+\item 
+\Hypertarget{generate__reference_8py_af8944d6458c6e77db9b67e76f45a9338}\label{generate__reference_8py_af8944d6458c6e77db9b67e76f45a9338} 
+dict {\bfseries generate\+\_\+reference.\+rule\+\_\+key} = \doxymbox{\hyperlink{generate__reference_8py_ae652fb0bedf7b56a7fdc6f7e93a0d42a}{RULE\+\_\+\+MAP}}\+[rule\+\_\+name]\+
+\item 
+str \doxymbox{\hyperlink{generate__reference_8py_ad3861235ed2150dbd7f52c14e78b0bd4}{generate\+\_\+reference.\+instance\+\_\+schedule\+\_\+key}} = f"{}\{instance\+\_\+name\}\+\_\+\{rule\+\_\+key\}"{}
+\begin{DoxyCompactList}\small\item\em Extract the full operation-\/level schedule for this instance/\+rule pair. \end{DoxyCompactList}\item 
+\Hypertarget{generate__reference_8py_a21624b655cc1f1753c44151614930288}\label{generate__reference_8py_a21624b655cc1f1753c44151614930288} 
+list {\bfseries generate\+\_\+reference.\+op\+\_\+list} = \+[$\,$]\+
+\item 
+\Hypertarget{generate__reference_8py_ac8da0c01c2e1d54f91cd013f56ed5466}\label{generate__reference_8py_ac8da0c01c2e1d54f91cd013f56ed5466} 
+{\bfseries generate\+\_\+reference.\+op} = sched\+\_\+op.\+operation
+\item 
+\Hypertarget{generate__reference_8py_af995fe1a69d0c08c863b36c860467d67}\label{generate__reference_8py_af995fe1a69d0c08c863b36c860467d67} 
+{\bfseries generate\+\_\+reference.\+job\+\_\+id} = sched\+\_\+op.\+job\+\_\+id
+\item 
+\Hypertarget{generate__reference_8py_a76d14a879f2cb92c9737ed543b50256d}\label{generate__reference_8py_a76d14a879f2cb92c9737ed543b50256d} 
+{\bfseries generate\+\_\+reference.\+key}
+\item 
+\Hypertarget{generate__reference_8py_a0447d1f7738d53b5e920fad4088c4c64}\label{generate__reference_8py_a0447d1f7738d53b5e920fad4088c4c64} 
+{\bfseries generate\+\_\+reference.\+df} = pd.\+Data\+Frame(\doxymbox{\hyperlink{generate__reference_8py_a0ce5801d14d41da22d906db1e6e8c1ce}{records}})
+\item 
+\Hypertarget{generate__reference_8py_ae3c096124f4b7c70b87a72fdf507d860}\label{generate__reference_8py_ae3c096124f4b7c70b87a72fdf507d860} 
+{\bfseries generate\+\_\+reference.\+index}
+\item 
+\Hypertarget{generate__reference_8py_a61fb39e699b5fa3cee03c3d5379955c8}\label{generate__reference_8py_a61fb39e699b5fa3cee03c3d5379955c8} 
+{\bfseries generate\+\_\+reference.\+f}
+\item 
+\Hypertarget{generate__reference_8py_a0fc40c9e7d0bebcce3a01bbdb314403c}\label{generate__reference_8py_a0fc40c9e7d0bebcce3a01bbdb314403c} 
+{\bfseries generate\+\_\+reference.\+indent}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Generates ground-\/truth makespans and operation schedules from job\+\_\+shop\+\_\+lib for cross-\/validation against the C\# DES simulator. 
+
+Runs every rule in RULES against every instance in INSTANCES using job\+\_\+shop\+\_\+lib\textquotesingle{}s {\ttfamily Dispatching\+Rule\+Solver}, then writes two output files whose structure is kept deliberately in sync with the C\# {\ttfamily Validation\+Exporter} outputs:\+
+\begin{DoxyItemize}
+\item {\ttfamily reference\+\_\+makespans.\+csv} — one row per instance/\+rule combination, with columns matching {\ttfamily csharp\+\_\+makespans.\+csv} for direct Data\+Frame merging in {\ttfamily \doxylink{compare__results_8py}{compare\+\_\+results.\+py}}.
+\item {\ttfamily reference\+\_\+schedules.\+json} — full operation-\/level schedule per instance/\+rule, keyed as {\ttfamily "{}\{instance\}\+\_\+\{rule\+\_\+key\}"{}}, for divergence analysis in {\ttfamily \doxylink{compare__results_8py}{compare\+\_\+results.\+py}} and {\ttfamily \doxylink{compare__mirror_8py}{compare\+\_\+mirror.\+py}}.
+\end{DoxyItemize}
+
+\begin{DoxyParagraph}{Prerequisites}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{pip\ install\ job-\/shop-\/lib\ pandas}
+
+\end{DoxyCode}
+
+\end{DoxyParagraph}
+\begin{DoxyParagraph}{Usage}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{python\ generate\_reference.py}
+
+\end{DoxyCode}
+
+\end{DoxyParagraph}
+\begin{DoxyParagraph}{Output}
+
+\begin{DoxyItemize}
+\item {\ttfamily reference\+\_\+makespans.\+csv} — ground-\/truth makespans for all instance/\+rule pairs.
+\item {\ttfamily reference\+\_\+schedules.\+json} — per-\/instance/\+rule operation lists sorted by start time, then machine ID, then job ID.
+\item A pivot table printed to stdout summarising makespan by instance × rule.
+\end{DoxyItemize}
+\end{DoxyParagraph}
+\begin{DoxyNote}{Note}
+The C\# simulator should produce identical makespans for all mapped rules. If not, the schedule JSON lets {\ttfamily \doxylink{compare__results_8py}{compare\+\_\+results.\+py}} identify exactly which operation first diverges between the two implementations. 
+\end{DoxyNote}
+
+
+\label{doc-var-members}
+\Hypertarget{generate__reference_8py_doc-var-members}
+\doxysubsection{Variable Documentation}
+\Hypertarget{generate__reference_8py_ad3861235ed2150dbd7f52c14e78b0bd4}\index{generate\_reference.py@{generate\_reference.py}!instance\_schedule\_key@{instance\_schedule\_key}}
+\index{instance\_schedule\_key@{instance\_schedule\_key}!generate\_reference.py@{generate\_reference.py}}
+\doxysubsubsection{\texorpdfstring{instance\_schedule\_key}{instance\_schedule\_key}}
+{\footnotesize\ttfamily \label{generate__reference_8py_ad3861235ed2150dbd7f52c14e78b0bd4} 
+str generate\+\_\+reference.\+instance\+\_\+schedule\+\_\+key = f"{}\{instance\+\_\+name\}\+\_\+\{rule\+\_\+key\}"{}}
+
+
+
+Extract the full operation-\/level schedule for this instance/\+rule pair. 
+
+{\ttfamily schedule.\+schedule} is a list of lists indexed by machine ID. Each inner list contains {\ttfamily Scheduled\+Operation} objects whose {\ttfamily }.operation field exposes {\ttfamily position\+\_\+in\+\_\+job} and {\ttfamily duration}. The extracted dicts are sorted by start time, then machine ID, then job ID — matching the sort order used by {\ttfamily Validation\+Exporter.\+Run\+And\+Export} — so that {\ttfamily \doxylink{compare__results_8py}{compare\+\_\+results.\+py}} can diff the two schedule JSONs entry-\/by-\/entry without re-\/sorting. \Hypertarget{generate__reference_8py_a493124dd130711573e9c3ca60796b6f8}\index{generate\_reference.py@{generate\_reference.py}!INSTANCES@{INSTANCES}}
+\index{INSTANCES@{INSTANCES}!generate\_reference.py@{generate\_reference.py}}
+\doxysubsubsection{\texorpdfstring{INSTANCES}{INSTANCES}}
+{\footnotesize\ttfamily \label{generate__reference_8py_a493124dd130711573e9c3ca60796b6f8} 
+list generate\+\_\+reference.\+INSTANCES = \+["{}ta01"{}, "{}ta11"{}, "{}ta21"{}, "{}ta31"{}]\+}
+
+
+
+Taillard benchmark instance names to process. 
+
+Kept small by default for fast iteration during debugging. Expand to the full Taillard set (e.\+g. {\ttfamily ta01} – {\ttfamily ta80}) once the C\# and Python outputs are confirmed to match on this subset. \Hypertarget{generate__reference_8py_aef818737e9cd2aaa800a7250ff56d72e}\index{generate\_reference.py@{generate\_reference.py}!metadata@{metadata}}
+\index{metadata@{metadata}!generate\_reference.py@{generate\_reference.py}}
+\doxysubsubsection{\texorpdfstring{metadata}{metadata}}
+{\footnotesize\ttfamily \label{generate__reference_8py_aef818737e9cd2aaa800a7250ff56d72e} 
+generate\+\_\+reference.\+metadata = instance.\+metadata if hasattr(instance, "{}metadata"{}) else \{\}}
+
+
+
+Extract the optimum from instance metadata if available. 
+
+job\+\_\+shop\+\_\+lib exposes metadata as a dict on some instance types. The {\ttfamily hasattr} guard handles instances that do not carry metadata, in which case {\ttfamily optimum} is {\ttfamily None} and gap percentage is skipped for that instance. \Hypertarget{generate__reference_8py_a0ce5801d14d41da22d906db1e6e8c1ce}\index{generate\_reference.py@{generate\_reference.py}!records@{records}}
+\index{records@{records}!generate\_reference.py@{generate\_reference.py}}
+\doxysubsubsection{\texorpdfstring{records}{records}}
+{\footnotesize\ttfamily \label{generate__reference_8py_a0ce5801d14d41da22d906db1e6e8c1ce} 
+list generate\+\_\+reference.\+records = \+[$\,$]\+}
+
+
+
+Accumulates one record dict per instance/\+rule combination for CSV output. 
+
+Populated during the main simulation loop and converted to a Data\+Frame at the end. Each entry matches the column schema of {\ttfamily csharp\+\_\+makespans.\+csv}. \Hypertarget{generate__reference_8py_ae652fb0bedf7b56a7fdc6f7e93a0d42a}\index{generate\_reference.py@{generate\_reference.py}!RULE\_MAP@{RULE\_MAP}}
+\index{RULE\_MAP@{RULE\_MAP}!generate\_reference.py@{generate\_reference.py}}
+\doxysubsubsection{\texorpdfstring{RULE\_MAP}{RULE\_MAP}}
+{\footnotesize\ttfamily \label{generate__reference_8py_ae652fb0bedf7b56a7fdc6f7e93a0d42a} 
+dict generate\+\_\+reference.\+RULE\+\_\+\+MAP}
+
+{\bfseries Initial value:\+}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ =\ \ \{}
+\DoxyCodeLine{00002\ \ \ \ \ \textcolor{stringliteral}{"{}shortest\_processing\_time"{}}:\ \textcolor{stringliteral}{"{}SPT"{}},}
+\DoxyCodeLine{00003\ \ \ \ \ \textcolor{stringliteral}{"{}largest\_processing\_time"{}}:\ \textcolor{stringliteral}{"{}LPT"{}},}
+\DoxyCodeLine{00004\ \ \ \ \ \textcolor{stringliteral}{"{}most\_work\_remaining"{}}:\ \textcolor{stringliteral}{"{}MWR"{}},}
+\DoxyCodeLine{00005\ \ \ \ \ \textcolor{stringliteral}{"{}first\_come\_first\_served"{}}:\ \textcolor{stringliteral}{"{}FCFS"{}},}
+\DoxyCodeLine{00006\ \ \ \ \ \textcolor{stringliteral}{"{}most\_operations\_remaining"{}}:\ \textcolor{stringliteral}{"{}MOR"{}},}
+\DoxyCodeLine{00007\ \}}
+
+\end{DoxyCode}
+
+
+Maps job\+\_\+shop\+\_\+lib full rule names to the short keys used in both CSV outputs. 
+
+Short keys must match the {\ttfamily key} field in {\ttfamily Validation\+Exporter.\+Rule\+Map} exactly so that {\ttfamily \doxylink{compare__results_8py}{compare\+\_\+results.\+py}} can merge the two Data\+Frames on the {\ttfamily rule} column without any name translation. Adding a rule here without a corresponding entry in {\ttfamily Validation\+Exporter.\+Rule\+Map} will produce unmatched rows in the comparison. \Hypertarget{generate__reference_8py_a8f37d81a04a4ffb2bab4c3c0ac21f5dd}\index{generate\_reference.py@{generate\_reference.py}!RULES@{RULES}}
+\index{RULES@{RULES}!generate\_reference.py@{generate\_reference.py}}
+\doxysubsubsection{\texorpdfstring{RULES}{RULES}}
+{\footnotesize\ttfamily \label{generate__reference_8py_a8f37d81a04a4ffb2bab4c3c0ac21f5dd} 
+list generate\+\_\+reference.\+RULES}
+
+{\bfseries Initial value:\+}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ =\ \ [}
+\DoxyCodeLine{00002\ \ \ \ \ \textcolor{stringliteral}{"{}shortest\_processing\_time"{}},\ \ }
+\DoxyCodeLine{00003\ \ \ \ \ \textcolor{stringliteral}{"{}largest\_processing\_time"{}},\ \ }
+\DoxyCodeLine{00004\ \ \ \ \ \textcolor{stringliteral}{"{}most\_work\_remaining"{}},\ \ }
+\DoxyCodeLine{00005\ \ \ \ \ \textcolor{stringliteral}{"{}first\_come\_first\_served"{}},\ \ }
+\DoxyCodeLine{00006\ \ \ \ \ \textcolor{stringliteral}{"{}most\_operations\_remaining"{}},\ \ }
+\DoxyCodeLine{00007\ ]}
+
+\end{DoxyCode}
+
+
+Fully qualified job\+\_\+shop\+\_\+lib rule names to simulate. 
+
+Only rules that have a confirmed 1:\+1 mapping to a C\# {\ttfamily Dispatching\+Rule} are included. The inline comments document the corresponding C\# enum value for each rule. Rules without a C\# equivalent (e.\+g. {\ttfamily most\+\_\+operations\+\_\+remaining}) can be included here for reference but will produce unmatched rows in the comparison. \Hypertarget{generate__reference_8py_a794e7007a1652061ec93a8071a61644a}\index{generate\_reference.py@{generate\_reference.py}!schedules@{schedules}}
+\index{schedules@{schedules}!generate\_reference.py@{generate\_reference.py}}
+\doxysubsubsection{\texorpdfstring{schedules}{schedules}}
+{\footnotesize\ttfamily \label{generate__reference_8py_a794e7007a1652061ec93a8071a61644a} 
+generate\+\_\+reference.\+schedules = \{\}}
+
+
+
+Accumulates full operation schedules keyed by {\ttfamily "{}\{instance\}\+\_\+\{rule\+\_\+key\}"{}}. 
+
+Populated during the main simulation loop and serialized to {\ttfamily reference\+\_\+schedules.\+json}. Key format must match {\ttfamily Validation\+Exporter.\+Run\+And\+Export} and {\ttfamily \doxylink{mirror__des_8py}{mirror\+\_\+des.\+py}} so that {\ttfamily \doxylink{compare__results_8py}{compare\+\_\+results.\+py}} can look up schedules by the same key used in the merged Data\+Frame. 

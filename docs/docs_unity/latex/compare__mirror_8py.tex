@@ -1,0 +1,49 @@
+\doxysection{C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Scheduling/\+\+Validation/\+compare\+\_\+mirror.py File Reference}
+\hypertarget{compare__mirror_8py}{}\label{compare__mirror_8py}\index{C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/compare\_mirror.py@{C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/compare\_mirror.py}}
+
+
+Compares C\# DES makespan results against the Python mirror DES implementation.  
+
+
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{compare__mirror_8py_aca34071a7c0974ec1e1b2365866106b9}\label{compare__mirror_8py_aca34071a7c0974ec1e1b2365866106b9} 
+{\bfseries compare\+\_\+mirror.\+main} ()
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Compares C\# DES makespan results against the Python mirror DES implementation. 
+
+Both implementations share the same architecture — event-\/driven simulation with per-\/machine queues and identical dispatching rules with identical tiebreakers — so any delta in their output indicates a real bug in one of the two implementations, not an expected divergence.
+
+\begin{DoxyParagraph}{Prerequisites}
+
+\begin{DoxyEnumerate}
+\item Run the C\# {\ttfamily Validation\+Exporter} to produce {\ttfamily csharp\+\_\+makespans.\+csv} and {\ttfamily csharp\+\_\+schedules.\+json}.
+\item Run {\ttfamily \doxylink{mirror__des_8py}{mirror\+\_\+des.\+py}} to produce {\ttfamily mirror\+\_\+des\+\_\+makespans.\+csv} and {\ttfamily mirror\+\_\+des\+\_\+schedules.\+json}.
+\item Run this script from the directory containing all four files:\+ 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{python\ compare\_mirror.py}
+
+\end{DoxyCode}
+
+\end{DoxyEnumerate}
+\end{DoxyParagraph}
+\begin{DoxyParagraph}{Output}
+
+\begin{DoxyItemize}
+\item A per-\/rule exact-\/match summary printed to stdout.
+\item An instance × rule comparison table showing {\ttfamily OK} or a signed integer delta.
+\item For any mismatches, the first divergent operation (by job/\+op key) is identified by diffing {\ttfamily csharp\+\_\+schedules.\+json} against {\ttfamily mirror\+\_\+des\+\_\+schedules.\+json}.
+\item {\ttfamily mirror\+\_\+comparison.\+csv} written to the working directory containing the full merged Data\+Frame with {\ttfamily match} and {\ttfamily delta} columns.
+\end{DoxyItemize}
+\end{DoxyParagraph}
+\begin{DoxyParagraph}{Exit codes}
+
+\begin{DoxyItemize}
+\item {\ttfamily 0} — all compared pairs matched exactly.
+\item {\ttfamily 1} — one or more mismatches found, or required input files were missing. 
+\end{DoxyItemize}
+\end{DoxyParagraph}

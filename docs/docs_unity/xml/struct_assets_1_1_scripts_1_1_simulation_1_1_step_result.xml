@@ -1,0 +1,109 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="struct_assets_1_1_scripts_1_1_simulation_1_1_step_result" kind="struct" language="C#" prot="public">
+    <compoundname>Assets::Scripts::Simulation::StepResult</compoundname>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_simulation_1_1_step_result_1ade439e5302961b07a430526c14f16286" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float Assets.Scripts.Simulation.StepResult.Reward</definition>
+        <argsstring></argsstring>
+        <name>Reward</name>
+        <qualifiedname>Assets.Scripts.Simulation.StepResult.Reward</qualifiedname>
+        <briefdescription>
+<para>Reward signal for this step. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="80" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="80" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_simulation_1_1_step_result_1aee1e19dd4a9e7aad17d7ce87b8cfe706" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool Assets.Scripts.Simulation.StepResult.Done</definition>
+        <argsstring></argsstring>
+        <name>Done</name>
+        <qualifiedname>Assets.Scripts.Simulation.StepResult.Done</qualifiedname>
+        <briefdescription>
+<para>True if the episode is finished (all jobs complete). </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="83" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="83" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_simulation_1_1_step_result_1aa183196bf333d5a9ce5fbaf75a7b8562" prot="public" static="no" mutable="no">
+        <type><ref refid="struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request" kindref="compound">DecisionRequest</ref></type>
+        <definition>DecisionRequest Assets.Scripts.Simulation.StepResult.NextDecision</definition>
+        <argsstring></argsstring>
+        <name>NextDecision</name>
+        <qualifiedname>Assets.Scripts.Simulation.StepResult.NextDecision</qualifiedname>
+        <briefdescription>
+<para>The next decision request, if not done. Check <ref refid="struct_assets_1_1_scripts_1_1_simulation_1_1_step_result_1aee1e19dd4a9e7aad17d7ce87b8cfe706" kindref="member">Done</ref> first. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="86" column="32" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="86" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_simulation_1_1_step_result_1afbc80d28f6d9e2c0a5d772a3f8771e9c" prot="public" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Assets.Scripts.Simulation.StepResult.CurrentMakespan</definition>
+        <argsstring></argsstring>
+        <name>CurrentMakespan</name>
+        <qualifiedname>Assets.Scripts.Simulation.StepResult.CurrentMakespan</qualifiedname>
+        <briefdescription>
+<para>Current makespan estimate (max end-time so far). </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="89" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="89" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="struct_assets_1_1_scripts_1_1_simulation_1_1_step_result_1af2b408e9aecc948a02d0644644be0324" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Simulation.StepResult.OperationsCompleted</definition>
+        <argsstring></argsstring>
+        <name>OperationsCompleted</name>
+        <qualifiedname>Assets.Scripts.Simulation.StepResult.OperationsCompleted</qualifiedname>
+        <briefdescription>
+<para>Number of operations completed so far. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="92" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="92" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Returned by <ref refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a54f762ba8e222fcc8cfde852c459562e" kindref="member">SimulationBridge.Step</ref> after the agent&apos;s action is applied. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="1">
+        <label>Assets.Scripts.Simulation.StepResult</label>
+        <link refid="struct_assets_1_1_scripts_1_1_simulation_1_1_step_result"/>
+        <childnode refid="2" relation="usage">
+          <edgelabel>NextDecision</edgelabel>
+        </childnode>
+      </node>
+      <node id="2">
+        <label>Assets.Scripts.Simulation.DecisionRequest</label>
+        <link refid="struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request"/>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="77" column="11" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="78" bodyend="93"/>
+    <listofallmembers>
+      <member refid="struct_assets_1_1_scripts_1_1_simulation_1_1_step_result_1afbc80d28f6d9e2c0a5d772a3f8771e9c" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::StepResult</scope><name>CurrentMakespan</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_simulation_1_1_step_result_1aee1e19dd4a9e7aad17d7ce87b8cfe706" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::StepResult</scope><name>Done</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_simulation_1_1_step_result_1aa183196bf333d5a9ce5fbaf75a7b8562" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::StepResult</scope><name>NextDecision</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_simulation_1_1_step_result_1af2b408e9aecc948a02d0644644be0324" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::StepResult</scope><name>OperationsCompleted</name></member>
+      <member refid="struct_assets_1_1_scripts_1_1_simulation_1_1_step_result_1ade439e5302961b07a430526c14f16286" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::StepResult</scope><name>Reward</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

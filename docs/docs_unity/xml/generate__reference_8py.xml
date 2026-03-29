@@ -1,0 +1,149 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="generate__reference_8py" kind="file" language="Python">
+    <compoundname>generate_reference.py</compoundname>
+    <innernamespace refid="namespacegenerate__reference">generate_reference</innernamespace>
+    <briefdescription>
+<para>Generates ground-truth makespans and operation schedules from job_shop_lib for cross-validation against the C# DES simulator. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>Runs every rule in RULES against every instance in INSTANCES using job_shop_lib&apos;s <computeroutput>DispatchingRuleSolver</computeroutput>, then writes two output files whose structure is kept deliberately in sync with the C# <computeroutput>ValidationExporter</computeroutput> outputs:<itemizedlist>
+<listitem><para><computeroutput>reference_makespans.csv</computeroutput> — one row per instance/rule combination, with columns matching <computeroutput>csharp_makespans.csv</computeroutput> for direct DataFrame merging in <computeroutput><ref refid="compare__results_8py" kindref="compound">compare_results.py</ref></computeroutput>.</para>
+</listitem><listitem><para><computeroutput>reference_schedules.json</computeroutput> — full operation-level schedule per instance/rule, keyed as <computeroutput>&quot;{instance}_{rule_key}&quot;</computeroutput>, for divergence analysis in <computeroutput><ref refid="compare__results_8py" kindref="compound">compare_results.py</ref></computeroutput> and <computeroutput><ref refid="compare__mirror_8py" kindref="compound">compare_mirror.py</ref></computeroutput>.</para>
+</listitem></itemizedlist>
+</para>
+<para><simplesect kind="par"><title>Prerequisites</title><para><programlisting><codeline><highlight class="normal">pip<sp/>install<sp/>job-shop-lib<sp/>pandas</highlight></codeline>
+</programlisting></para>
+</simplesect>
+<simplesect kind="par"><title>Usage</title><para><programlisting><codeline><highlight class="normal">python<sp/>generate_reference.py</highlight></codeline>
+</programlisting></para>
+</simplesect>
+<simplesect kind="par"><title>Output</title><para><itemizedlist>
+<listitem><para><computeroutput>reference_makespans.csv</computeroutput> — ground-truth makespans for all instance/rule pairs.</para>
+</listitem><listitem><para><computeroutput>reference_schedules.json</computeroutput> — per-instance/rule operation lists sorted by start time, then machine ID, then job ID.</para>
+</listitem><listitem><para>A pivot table printed to stdout summarising makespan by instance × rule.</para>
+</listitem></itemizedlist>
+</para>
+</simplesect>
+<simplesect kind="note"><para>The C# simulator should produce identical makespans for all mapped rules. If not, the schedule JSON lets <computeroutput><ref refid="compare__results_8py" kindref="compound">compare_results.py</ref></computeroutput> identify exactly which operation first diverges between the two implementations. </para>
+</simplesect>
+</para>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="normal"></highlight></codeline>
+<codeline lineno="33"><highlight class="normal"></highlight></codeline>
+<codeline lineno="34"><highlight class="normal"></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>json</highlight></codeline>
+<codeline lineno="35"><highlight class="normal"></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>time</highlight></codeline>
+<codeline lineno="36"><highlight class="normal"></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>pandas<sp/></highlight><highlight class="keyword">as</highlight><highlight class="normal"><sp/>pd</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>job_shop_lib.benchmarking<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>load_benchmark_instance</highlight></codeline>
+<codeline lineno="38"><highlight class="normal"></highlight><highlight class="keyword">from</highlight><highlight class="normal"><sp/>job_shop_lib.dispatching.rules<sp/></highlight><highlight class="keyword">import</highlight><highlight class="normal"><sp/>DispatchingRuleSolver</highlight></codeline>
+<codeline lineno="39"><highlight class="normal"></highlight></codeline>
+<codeline lineno="40"><highlight class="normal"></highlight></codeline>
+<codeline lineno="45"><highlight class="normal">INSTANCES<sp/>=<sp/>[</highlight><highlight class="stringliteral">&quot;ta01&quot;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;ta11&quot;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;ta21&quot;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;ta31&quot;</highlight><highlight class="normal">]</highlight></codeline>
+<codeline lineno="46"><highlight class="normal"></highlight></codeline>
+<codeline lineno="47"><highlight class="normal"></highlight></codeline>
+<codeline lineno="53"><highlight class="normal">RULES<sp/>=<sp/>[</highlight></codeline>
+<codeline lineno="54"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;shortest_processing_time&quot;</highlight><highlight class="normal">,<sp/><sp/></highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;largest_processing_time&quot;</highlight><highlight class="normal">,<sp/><sp/></highlight></codeline>
+<codeline lineno="56"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;most_work_remaining&quot;</highlight><highlight class="normal">,<sp/><sp/></highlight></codeline>
+<codeline lineno="57"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;first_come_first_served&quot;</highlight><highlight class="normal">,<sp/><sp/></highlight></codeline>
+<codeline lineno="58"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;most_operations_remaining&quot;</highlight><highlight class="normal">,<sp/><sp/></highlight></codeline>
+<codeline lineno="59"><highlight class="normal">]</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"></highlight></codeline>
+<codeline lineno="61"><highlight class="normal"></highlight></codeline>
+<codeline lineno="67"><highlight class="normal">RULE_MAP<sp/>=<sp/>{</highlight></codeline>
+<codeline lineno="68"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;shortest_processing_time&quot;</highlight><highlight class="normal">:<sp/></highlight><highlight class="stringliteral">&quot;SPT&quot;</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="69"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;largest_processing_time&quot;</highlight><highlight class="normal">:<sp/></highlight><highlight class="stringliteral">&quot;LPT&quot;</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="70"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;most_work_remaining&quot;</highlight><highlight class="normal">:<sp/></highlight><highlight class="stringliteral">&quot;MWR&quot;</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="71"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;first_come_first_served&quot;</highlight><highlight class="normal">:<sp/></highlight><highlight class="stringliteral">&quot;FCFS&quot;</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="72"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;most_operations_remaining&quot;</highlight><highlight class="normal">:<sp/></highlight><highlight class="stringliteral">&quot;MOR&quot;</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="73"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="74"><highlight class="normal"></highlight></codeline>
+<codeline lineno="75"><highlight class="normal"></highlight></codeline>
+<codeline lineno="76"><highlight class="normal"></highlight></codeline>
+<codeline lineno="79"><highlight class="normal">records<sp/>=<sp/>[]</highlight></codeline>
+<codeline lineno="80"><highlight class="normal"></highlight></codeline>
+<codeline lineno="81"><highlight class="normal"></highlight></codeline>
+<codeline lineno="86"><highlight class="normal">schedules<sp/>=<sp/>{}</highlight></codeline>
+<codeline lineno="87"><highlight class="normal"></highlight></codeline>
+<codeline lineno="88"><highlight class="normal"></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>instance_name<sp/></highlight><highlight class="keywordflow">in</highlight><highlight class="normal"><sp/>INSTANCES:</highlight></codeline>
+<codeline lineno="89"><highlight class="normal"><sp/><sp/><sp/><sp/>print(f</highlight><highlight class="stringliteral">&quot;\n{&apos;=&apos;*60}&quot;</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="90"><highlight class="normal"><sp/><sp/><sp/><sp/>print(f</highlight><highlight class="stringliteral">&quot;Instance:<sp/>{instance_name}&quot;</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="91"><highlight class="normal"><sp/><sp/><sp/><sp/>print(f</highlight><highlight class="stringliteral">&quot;{&apos;=&apos;*60}&quot;</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="92"><highlight class="normal"></highlight></codeline>
+<codeline lineno="93"><highlight class="normal"><sp/><sp/><sp/><sp/>instance<sp/>=<sp/>load_benchmark_instance(instance_name)</highlight></codeline>
+<codeline lineno="94"><highlight class="normal"></highlight></codeline>
+<codeline lineno="95"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="99"><highlight class="normal"><sp/><sp/><sp/><sp/>metadata<sp/>=<sp/>instance.metadata<sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>hasattr(instance,<sp/></highlight><highlight class="stringliteral">&quot;metadata&quot;</highlight><highlight class="normal">)<sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"><sp/>{}</highlight></codeline>
+<codeline lineno="100"><highlight class="normal"><sp/><sp/><sp/><sp/>optimum<sp/>=<sp/>metadata.get(</highlight><highlight class="stringliteral">&quot;optimum&quot;</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="101"><highlight class="normal"></highlight></codeline>
+<codeline lineno="102"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>rule_name<sp/></highlight><highlight class="keywordflow">in</highlight><highlight class="normal"><sp/>RULES:</highlight></codeline>
+<codeline lineno="103"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>solver<sp/>=<sp/>DispatchingRuleSolver(rule_name)</highlight></codeline>
+<codeline lineno="104"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>start<sp/>=<sp/>time.perf_counter()</highlight></codeline>
+<codeline lineno="105"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>schedule<sp/>=<sp/>solver(instance)</highlight></codeline>
+<codeline lineno="106"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>elapsed<sp/>=<sp/>time.perf_counter()<sp/>-<sp/>start</highlight></codeline>
+<codeline lineno="107"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>makespan<sp/>=<sp/>schedule.makespan()</highlight></codeline>
+<codeline lineno="108"><highlight class="normal"></highlight></codeline>
+<codeline lineno="109"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>gap<sp/>=<sp/>((makespan<sp/>-<sp/>optimum)<sp/>/<sp/>optimum<sp/>*<sp/>100)<sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>optimum<sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="110"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>rule_key<sp/>=<sp/>RULE_MAP[rule_name]</highlight></codeline>
+<codeline lineno="111"><highlight class="normal"></highlight></codeline>
+<codeline lineno="112"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>print(</highlight></codeline>
+<codeline lineno="113"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>f</highlight><highlight class="stringliteral">&quot;<sp/><sp/>{rule_key:6s}<sp/>→<sp/>makespan={makespan:6d}<sp/><sp/>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="114"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>f</highlight><highlight class="stringliteral">&quot;optimum={optimum}<sp/><sp/>gap={gap:.1f}%<sp/><sp/>({elapsed:.4f}s)&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="115"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>)</highlight></codeline>
+<codeline lineno="116"><highlight class="normal"></highlight></codeline>
+<codeline lineno="117"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>records.append(</highlight></codeline>
+<codeline lineno="118"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline lineno="119"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;instance&quot;</highlight><highlight class="normal">:<sp/>instance_name,</highlight></codeline>
+<codeline lineno="120"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;rule&quot;</highlight><highlight class="normal">:<sp/>rule_key,</highlight></codeline>
+<codeline lineno="121"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;rule_full&quot;</highlight><highlight class="normal">:<sp/>rule_name,</highlight></codeline>
+<codeline lineno="122"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;makespan&quot;</highlight><highlight class="normal">:<sp/>makespan,</highlight></codeline>
+<codeline lineno="123"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;optimum&quot;</highlight><highlight class="normal">:<sp/>optimum,</highlight></codeline>
+<codeline lineno="124"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;gap_pct&quot;</highlight><highlight class="normal">:<sp/>round(gap,<sp/>4)<sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>gap<sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">None</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="125"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;num_jobs&quot;</highlight><highlight class="normal">:<sp/>instance.num_jobs,</highlight></codeline>
+<codeline lineno="126"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;num_machines&quot;</highlight><highlight class="normal">:<sp/>instance.num_machines,</highlight></codeline>
+<codeline lineno="127"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="128"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>)</highlight></codeline>
+<codeline lineno="129"><highlight class="normal"></highlight></codeline>
+<codeline lineno="130"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="138"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>instance_schedule_key<sp/>=<sp/>f</highlight><highlight class="stringliteral">&quot;{instance_name}_{rule_key}&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="139"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>op_list<sp/>=<sp/>[]</highlight></codeline>
+<codeline lineno="140"><highlight class="normal"></highlight></codeline>
+<codeline lineno="141"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>machine_id,<sp/>machine_ops<sp/></highlight><highlight class="keywordflow">in</highlight><highlight class="normal"><sp/>enumerate(schedule.schedule):</highlight></codeline>
+<codeline lineno="142"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>sched_op<sp/></highlight><highlight class="keywordflow">in</highlight><highlight class="normal"><sp/>machine_ops:</highlight></codeline>
+<codeline lineno="143"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>op<sp/>=<sp/>sched_op.operation</highlight></codeline>
+<codeline lineno="144"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>job_id<sp/>=<sp/>sched_op.job_id</highlight></codeline>
+<codeline lineno="145"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>op_list.append(</highlight></codeline>
+<codeline lineno="146"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline lineno="147"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;job&quot;</highlight><highlight class="normal">:<sp/>job_id,</highlight></codeline>
+<codeline lineno="148"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;op_index&quot;</highlight><highlight class="normal">:<sp/>op.position_in_job,</highlight></codeline>
+<codeline lineno="149"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;machine&quot;</highlight><highlight class="normal">:<sp/>machine_id,</highlight></codeline>
+<codeline lineno="150"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;start&quot;</highlight><highlight class="normal">:<sp/>sched_op.start_time,</highlight></codeline>
+<codeline lineno="151"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;end&quot;</highlight><highlight class="normal">:<sp/>sched_op.end_time,</highlight></codeline>
+<codeline lineno="152"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="stringliteral">&quot;duration&quot;</highlight><highlight class="normal">:<sp/>op.duration,</highlight></codeline>
+<codeline lineno="153"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="154"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>)</highlight></codeline>
+<codeline lineno="155"><highlight class="normal"></highlight></codeline>
+<codeline lineno="156"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>op_list.sort(key=</highlight><highlight class="keyword">lambda</highlight><highlight class="normal"><sp/>x:<sp/>(x[</highlight><highlight class="stringliteral">&quot;start&quot;</highlight><highlight class="normal">],<sp/>x[</highlight><highlight class="stringliteral">&quot;machine&quot;</highlight><highlight class="normal">],<sp/>x[</highlight><highlight class="stringliteral">&quot;job&quot;</highlight><highlight class="normal">]))</highlight></codeline>
+<codeline lineno="157"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>schedules[instance_schedule_key]<sp/>=<sp/>op_list</highlight></codeline>
+<codeline lineno="158"><highlight class="normal"></highlight></codeline>
+<codeline lineno="159"><highlight class="normal"></highlight></codeline>
+<codeline lineno="160"><highlight class="normal"></highlight><highlight class="comment">#<sp/>Save<sp/>CSV</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="161"><highlight class="normal">df<sp/>=<sp/>pd.DataFrame(records)</highlight></codeline>
+<codeline lineno="162"><highlight class="normal">df.to_csv(</highlight><highlight class="stringliteral">&quot;reference_makespans.csv&quot;</highlight><highlight class="normal">,<sp/>index=</highlight><highlight class="keyword">False</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="163"><highlight class="normal">print(f</highlight><highlight class="stringliteral">&quot;\nSaved<sp/>{len(df)}<sp/>rows<sp/>to<sp/>reference_makespans.csv&quot;</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="164"><highlight class="normal"></highlight></codeline>
+<codeline lineno="165"><highlight class="normal"></highlight><highlight class="comment">#<sp/>Save<sp/>detailed<sp/>schedules</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="166"><highlight class="normal"></highlight><highlight class="keyword">with</highlight><highlight class="normal"><sp/>open(</highlight><highlight class="stringliteral">&quot;reference_schedules.json&quot;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;w&quot;</highlight><highlight class="normal">)<sp/></highlight><highlight class="keyword">as</highlight><highlight class="normal"><sp/>f:</highlight></codeline>
+<codeline lineno="167"><highlight class="normal"><sp/><sp/><sp/><sp/>json.dump(schedules,<sp/>f,<sp/>indent=2)</highlight></codeline>
+<codeline lineno="168"><highlight class="normal">print(f</highlight><highlight class="stringliteral">&quot;Saved<sp/>{len(schedules)}<sp/>schedules<sp/>to<sp/>reference_schedules.json&quot;</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="169"><highlight class="normal"></highlight></codeline>
+<codeline lineno="170"><highlight class="normal"></highlight><highlight class="comment">#<sp/>Print<sp/>pivot<sp/>summary</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="171"><highlight class="normal">print(f</highlight><highlight class="stringliteral">&quot;\n{&apos;=&apos;*60}&quot;</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="172"><highlight class="normal">print(</highlight><highlight class="stringliteral">&quot;REFERENCE<sp/>SUMMARY&quot;</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="173"><highlight class="normal">print(f</highlight><highlight class="stringliteral">&quot;{&apos;=&apos;*60}&quot;</highlight><highlight class="normal">)</highlight></codeline>
+<codeline lineno="174"><highlight class="normal">print(df.pivot(index=</highlight><highlight class="stringliteral">&quot;instance&quot;</highlight><highlight class="normal">,<sp/>columns=</highlight><highlight class="stringliteral">&quot;rule&quot;</highlight><highlight class="normal">,<sp/>values=</highlight><highlight class="stringliteral">&quot;makespan&quot;</highlight><highlight class="normal">).to_string())</highlight></codeline>
+    </programlisting>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Validation/generate_reference.py"/>
+  </compounddef>
+</doxygen>

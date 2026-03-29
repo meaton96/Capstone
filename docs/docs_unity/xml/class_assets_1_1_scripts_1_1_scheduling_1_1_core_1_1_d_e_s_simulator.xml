@@ -1,0 +1,584 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator" kind="class" language="C#" prot="public">
+    <compoundname>Assets::Scripts::Scheduling::Core::DESSimulator</compoundname>
+    <sectiondef kind="property">
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a5444d7f73303a58d3914a10f3eba12bf" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="yes" protectedsettable="no">
+        <type><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job" kindref="compound">Job</ref>[]</type>
+        <definition>Job [] Assets.Scripts.Scheduling.Core.DESSimulator.Jobs</definition>
+        <argsstring></argsstring>
+        <name>Jobs</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.DESSimulator.Jobs</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" line="34" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" bodystart="34" bodyend="34"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1aa0cabb24c437a170b19350cd4e02ab4f" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="yes" protectedsettable="no">
+        <type><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine" kindref="compound">Machine</ref>[]</type>
+        <definition>Machine [] Assets.Scripts.Scheduling.Core.DESSimulator.Machines</definition>
+        <argsstring></argsstring>
+        <name>Machines</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.DESSimulator.Machines</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" line="35" column="24" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" bodystart="35" bodyend="35"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a560d61cfcac94c39f1dc27e1faaac1c7" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="yes" protectedsettable="no">
+        <type>EventQueue</type>
+        <definition>EventQueue Assets.Scripts.Scheduling.Core.DESSimulator.EventQueue</definition>
+        <argsstring></argsstring>
+        <name>EventQueue</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.DESSimulator.EventQueue</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" line="36" column="27" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" bodystart="36" bodyend="36"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1af4a2072abe638bff842a288eda6a6655" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="yes" protectedsettable="no">
+        <type>double</type>
+        <definition>double Assets.Scripts.Scheduling.Core.DESSimulator.CurrentTime</definition>
+        <argsstring></argsstring>
+        <name>CurrentTime</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.DESSimulator.CurrentTime</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" line="37" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" bodystart="37" bodyend="37"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a2c5124a8b4dbad41b87d7ee29032e52a" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="yes" protectedsettable="no">
+        <type>double</type>
+        <definition>double Assets.Scripts.Scheduling.Core.DESSimulator.Makespan</definition>
+        <argsstring></argsstring>
+        <name>Makespan</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.DESSimulator.Makespan</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" line="38" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" bodystart="38" bodyend="38"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1aa7e8ec191cee7cb93220103c04414873" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="yes" privatesettable="no" protectedsettable="no">
+        <type><ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1af841dd07c9c38276e117696a4dd6fe87" kindref="member">DispatchingRule</ref></type>
+        <definition>DispatchingRule Assets.Scripts.Scheduling.Core.DESSimulator.ActiveRule</definition>
+        <argsstring></argsstring>
+        <name>ActiveRule</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.DESSimulator.ActiveRule</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" line="39" column="32" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" bodystart="39" bodyend="39"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a455511e83b7e16697ab4e36379dffbc8" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="yes" privatesettable="no" protectedsettable="no">
+        <type>Func&lt; int, int, double &gt;</type>
+        <definition>Func&lt;int, int, double&gt; Assets.Scripts.Scheduling.Core.DESSimulator.GetTransitTime</definition>
+        <argsstring></argsstring>
+        <name>GetTransitTime</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.DESSimulator.GetTransitTime</qualifiedname>
+        <initializer>= (from, to) =&gt; 0.0</initializer>
+        <briefdescription>
+<para>Transit time delegate injected by the spatial layer. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Defaults to zero for benchmark validation. Parameters represent the source machine ID and destination machine ID respectively. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" line="44" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" bodystart="44" bodyend="44"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1acb07dc5ba5008808680172d6113b91b0" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="yes" privatesettable="no" protectedsettable="no">
+        <type>Action&lt; int &gt;</type>
+        <definition>Action&lt;int&gt; Assets.Scripts.Scheduling.Core.DESSimulator.OnDispatchRequired</definition>
+        <argsstring></argsstring>
+        <name>OnDispatchRequired</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.DESSimulator.OnDispatchRequired</qualifiedname>
+        <briefdescription>
+<para>Callback for RL integration, invoked when a machine requires a dispatch decision. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>The integer parameter passed to the action represents the machine ID that is awaiting a dispatch assignment. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" line="49" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" bodystart="49" bodyend="49"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a4d391494c10566eabc3f53549089c310" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="yes" protectedsettable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Scheduling.Core.DESSimulator.TotalOperationsCompleted</definition>
+        <argsstring></argsstring>
+        <name>TotalOperationsCompleted</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.DESSimulator.TotalOperationsCompleted</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" line="51" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" bodystart="51" bodyend="51"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a387acb9f195c44157a016a4d475179ea" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="yes" protectedsettable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Scheduling.Core.DESSimulator.TotalJobsCompleted</definition>
+        <argsstring></argsstring>
+        <name>TotalJobsCompleted</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.DESSimulator.TotalJobsCompleted</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" line="52" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" bodystart="52" bodyend="52"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1abd336966a0fbc46b2b346e93847c7523" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="yes" protectedsettable="no">
+        <type>bool</type>
+        <definition>bool Assets.Scripts.Scheduling.Core.DESSimulator.WaitingForDecision</definition>
+        <argsstring></argsstring>
+        <name>WaitingForDecision</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.DESSimulator.WaitingForDecision</qualifiedname>
+        <briefdescription>
+<para>True when the simulator is paused waiting for an external dispatch decision. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Set to true inside <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1ad29bf585fd01242b65ab5bd4ad24b9ee" kindref="member">ProcessNextEvent</ref> when TryStartNextOnMachineStepped encounters a non-empty waiting queue. Cleared by <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a914e8fe3b5d0d08e5c46bf76a73114d9" kindref="member">ApplyDecision</ref>. While true, <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1ad29bf585fd01242b65ab5bd4ad24b9ee" kindref="member">ProcessNextEvent</ref> will immediately return <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a23eac89d613aa8e377b767e1cbc93875a0cac3c7b6d9e33208ee147431e86725d" kindref="member">SimStepResult.DecisionRequired</ref> without processing further events. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" line="60" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" bodystart="60" bodyend="60"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a93aa938262803d69cd75fb7265f9ad97" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="yes" protectedsettable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Scheduling.Core.DESSimulator.PendingDecisionMachineId</definition>
+        <argsstring></argsstring>
+        <name>PendingDecisionMachineId</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.DESSimulator.PendingDecisionMachineId</qualifiedname>
+        <initializer>= -1</initializer>
+        <briefdescription>
+<para>The machine ID that requires a dispatch decision. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Only valid when <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1abd336966a0fbc46b2b346e93847c7523" kindref="member">WaitingForDecision</ref> is true. The caller should inspect <computeroutput>Machines</computeroutput>[PendingDecisionMachineId].WaitingQueue to see the candidate operations, then call <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a914e8fe3b5d0d08e5c46bf76a73114d9" kindref="member">ApplyDecision</ref>. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" line="67" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" bodystart="67" bodyend="67"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a5563245d57847659cf5b390c02088652" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type></type>
+        <definition>Assets.Scripts.Scheduling.Core.DESSimulator.DESSimulator</definition>
+        <argsstring>()</argsstring>
+        <name>DESSimulator</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.DESSimulator.DESSimulator</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" line="69" column="16" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" bodystart="69" bodyend="73"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1ad29bf585fd01242b65ab5bd4ad24b9ee" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a23eac89d613aa8e377b767e1cbc93875" kindref="member">SimStepResult</ref></type>
+        <definition>SimStepResult Assets.Scripts.Scheduling.Core.DESSimulator.ProcessNextEvent</definition>
+        <argsstring>()</argsstring>
+        <name>ProcessNextEvent</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.DESSimulator.ProcessNextEvent</qualifiedname>
+        <briefdescription>
+<para>Processes a single event from the queue (stepped execution). </para>
+        </briefdescription>
+        <detaileddescription>
+<para>This is the stepped equivalent of the <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a73e213e5d37b0db03a31962243bf1045" kindref="member">Run</ref> loop. Call it repeatedly from the bridge/agent until it returns <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a23eac89d613aa8e377b767e1cbc93875af92965e2c8a7afb3c1b9a5c09a263636" kindref="member">SimStepResult.Done</ref>.</para>
+<para>When the return value is <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a23eac89d613aa8e377b767e1cbc93875a0cac3c7b6d9e33208ee147431e86725d" kindref="member">SimStepResult.DecisionRequired</ref>, the caller MUST call <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a914e8fe3b5d0d08e5c46bf76a73114d9" kindref="member">ApplyDecision</ref> before calling this method again.</para>
+<para><simplesect kind="par"><title>Event flow</title><para><orderedlist>
+<listitem><para>If already waiting for a decision → return DecisionRequired immediately.</para>
+</listitem><listitem><para>If queue is empty → compute makespan, return Done.</para>
+</listitem><listitem><para>Dequeue the next event, advance CurrentTime, and process it.<itemizedlist>
+<listitem><para><ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a74e900c350e0673c74e0e62b6f351056a3beaa4602cbdfa387e4c483abe9933ab" kindref="member">EventType.JobArrived</ref> calls the existing HandleJobArrived (which may auto-start on an idle machine — no decision needed).</para>
+</listitem><listitem><para><ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a74e900c350e0673c74e0e62b6f351056a118b996cf01af1910a157f7409f5d0df" kindref="member">EventType.OperationComplete</ref> calls HandleOperationCompleteStepped which uses TryStartNextOnMachineStepped instead of the auto-dispatch version.</para>
+</listitem></itemizedlist>
+</para>
+</listitem><listitem><para>If the stepped handler flagged a decision → return DecisionRequired.</para>
+</listitem><listitem><para>Otherwise → return Continue or Done depending on remaining events.</para>
+</listitem></orderedlist>
+</para>
+</simplesect>
+<simplesect kind="return"><para>A <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a23eac89d613aa8e377b767e1cbc93875" kindref="member">SimStepResult</ref> indicating what the caller should do next. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" line="95" column="30" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" bodystart="95" bodyend="131"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a914e8fe3b5d0d08e5c46bf76a73114d9" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Scheduling.Core.DESSimulator.ApplyDecision</definition>
+        <argsstring>(DispatchingRule rule)</argsstring>
+        <name>ApplyDecision</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.DESSimulator.ApplyDecision</qualifiedname>
+        <param>
+          <type><ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1af841dd07c9c38276e117696a4dd6fe87" kindref="member">DispatchingRule</ref></type>
+          <declname>rule</declname>
+        </param>
+        <briefdescription>
+<para>Applies an external dispatch decision and resumes the simulation. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Uses the supplied <computeroutput>rule</computeroutput> to select the next operation from the pending machine&apos;s waiting queue, starts processing it, and enqueues the corresponding <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a74e900c350e0673c74e0e62b6f351056a118b996cf01af1910a157f7409f5d0df" kindref="member">EventType.OperationComplete</ref> event. Clears the <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1abd336966a0fbc46b2b346e93847c7523" kindref="member">WaitingForDecision</ref> flag so <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1ad29bf585fd01242b65ab5bd4ad24b9ee" kindref="member">ProcessNextEvent</ref> can continue.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>rule</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1af841dd07c9c38276e117696a4dd6fe87" kindref="member">DispatchingRule</ref> the agent/bridge chose (one of the 8 composite PDRs, or any single rule for validation).</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="pre"><para><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1abd336966a0fbc46b2b346e93847c7523" kindref="member">WaitingForDecision</ref> must be true. </para>
+</simplesect>
+<simplesect kind="post"><para><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1abd336966a0fbc46b2b346e93847c7523" kindref="member">WaitingForDecision</ref> is false, the chosen operation is running on the machine, and a completion event has been enqueued. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" line="210" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" bodystart="210" bodyend="228"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1aa79c7f08fc10bc3b96c14e2b6137b95f" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Scheduling.Core.DESSimulator.LoadInstance</definition>
+        <argsstring>(TaillardInstance instance)</argsstring>
+        <name>LoadInstance</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.DESSimulator.LoadInstance</qualifiedname>
+        <param>
+          <type><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance" kindref="compound">TaillardInstance</ref></type>
+          <declname>instance</declname>
+        </param>
+        <briefdescription>
+<para>Loads a Taillard instance and initializes all jobs and machines. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Constructs <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine" kindref="compound">Machine</ref> and <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job" kindref="compound">Job</ref> arrays from the provided instance, mapping raw operation data into typed <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_operation" kindref="compound">Operation</ref> objects, then calls <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a477dc5db6d5bfeea5ec2dd71e9cfd63e" kindref="member">Reset()</ref> to prepare the simulator for execution.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>instance</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The Taillard benchmark instance to load, containing job count, machine count, and per-job operation sequences with durations. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" line="249" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" bodystart="249" bodyend="271"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a477dc5db6d5bfeea5ec2dd71e9cfd63e" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Scheduling.Core.DESSimulator.Reset</definition>
+        <argsstring>()</argsstring>
+        <name>Reset</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.DESSimulator.Reset</qualifiedname>
+        <briefdescription>
+<para>Resets all simulator state without reloading the instance. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Clears the event queue, resets time and statistics counters, restores all machines to <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a3aebc4d18420ccdbcfb891f2835f01b0ae599161956d626eda4cb0a5ffb85271c" kindref="member">MachineState.Idle</ref>, clears all machine waiting queues, and re-enqueues a <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a74e900c350e0673c74e0e62b6f351056a3beaa4602cbdfa387e4c483abe9933ab" kindref="member">EventType.JobArrived</ref> event at t=0 for every job. Call this to re-run the same instance under a different dispatching rule. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" line="279" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" bodystart="279" bodyend="311"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a73e213e5d37b0db03a31962243bf1045" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>double</type>
+        <definition>double Assets.Scripts.Scheduling.Core.DESSimulator.Run</definition>
+        <argsstring>()</argsstring>
+        <name>Run</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.DESSimulator.Run</qualifiedname>
+        <briefdescription>
+<para>Runs the full simulation to completion and returns the makespan. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Processes all events in the <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_event_queue" kindref="compound">EventQueue</ref> in chronological order, advancing CurrentTime to each event&apos;s timestamp and dispatching to either HandleJobArrived or HandleOperationComplete as appropriate. <ref refid="namespace_assets_1_1_scripts_1_1_simulation" kindref="compound">Simulation</ref> ends when the queue is empty.</para>
+<para><simplesect kind="return"><para>The makespan, defined as the latest completion time across all jobs. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" line="321" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" bodystart="321" bodyend="341"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a093526a79b3cd12b3013b50b6158a4fd" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Scheduling.Core.DESSimulator.PrintSchedule</definition>
+        <argsstring>()</argsstring>
+        <name>PrintSchedule</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.DESSimulator.PrintSchedule</qualifiedname>
+        <briefdescription>
+<para>Prints a Gantt-style schedule summary to stdout for debugging. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Outputs the makespan, job and machine counts, total operations completed, and a per-machine timeline showing each operation as <computeroutput></computeroutput>[J{jobId} {startTime}-{endTime}], sorted by start time. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" line="456" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" bodystart="456" bodyend="478"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="private-func">
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a6d75d6ab10c081c5bddfb27826812d36" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Scheduling.Core.DESSimulator.HandleOperationCompleteStepped</definition>
+        <argsstring>(SimEvent evt)</argsstring>
+        <name>HandleOperationCompleteStepped</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.DESSimulator.HandleOperationCompleteStepped</qualifiedname>
+        <param>
+          <type><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event" kindref="compound">SimEvent</ref></type>
+          <declname>evt</declname>
+        </param>
+        <briefdescription>
+<para>Stepped variant of HandleOperationComplete. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Identical to the original except it calls TryStartNextOnMachineStepped, which pauses for an external decision instead of auto-dispatching.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>evt</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The OperationComplete event. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" line="140" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" bodystart="140" bodyend="173"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1ac5b636bea65c01978352d527d7f4f599" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Scheduling.Core.DESSimulator.TryStartNextOnMachineStepped</definition>
+        <argsstring>(Machine machine)</argsstring>
+        <name>TryStartNextOnMachineStepped</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.DESSimulator.TryStartNextOnMachineStepped</qualifiedname>
+        <param>
+          <type><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine" kindref="compound">Machine</ref></type>
+          <declname>machine</declname>
+        </param>
+        <briefdescription>
+<para>Stepped variant of TryStartNextOnMachine. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Instead of auto-selecting the next operation via DispatchingRules.SelectNext, this method sets <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1abd336966a0fbc46b2b346e93847c7523" kindref="member">WaitingForDecision</ref> and <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a93aa938262803d69cd75fb7265f9ad97" kindref="member">PendingDecisionMachineId</ref>, then returns without dispatching. The external caller must inspect the queue and call <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a914e8fe3b5d0d08e5c46bf76a73114d9" kindref="member">ApplyDecision</ref> with a chosen rule.</para>
+<para>If the queue is empty or the machine is not idle, behaves identically to the original (no-op).</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>machine</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The machine that just became free. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" line="187" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" bodystart="187" bodyend="195"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1ab80ab4d932ad3b54187a55c988c21a77" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Scheduling.Core.DESSimulator.ResetSteppedState</definition>
+        <argsstring>()</argsstring>
+        <name>ResetSteppedState</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.DESSimulator.ResetSteppedState</qualifiedname>
+        <briefdescription>
+<para>Resets the stepped-execution state. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Call this at the END of your existing <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a477dc5db6d5bfeea5ec2dd71e9cfd63e" kindref="member">Reset</ref> method body, or anywhere after the base reset logic clears the event queue and re-enqueues job arrivals. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" line="235" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" bodystart="235" bodyend="239"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a7294f375588b9875af46faae613f4d0f" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Scheduling.Core.DESSimulator.HandleJobArrived</definition>
+        <argsstring>(SimEvent evt)</argsstring>
+        <name>HandleJobArrived</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.DESSimulator.HandleJobArrived</qualifiedname>
+        <param>
+          <type><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event" kindref="compound">SimEvent</ref></type>
+          <declname>evt</declname>
+        </param>
+        <briefdescription>
+<para>Handles a <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a74e900c350e0673c74e0e62b6f351056a3beaa4602cbdfa387e4c483abe9933ab" kindref="member">EventType.JobArrived</ref> event. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Retrieves the arriving job and calls TryDispatchJob if it is not already complete. Early-exits silently if the job has no remaining operations.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>evt</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The simulation event containing the ID of the arriving job. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" line="349" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" bodystart="349" bodyend="355"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1ab95efa345de133a199151763b2037bc4" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Scheduling.Core.DESSimulator.HandleOperationComplete</definition>
+        <argsstring>(SimEvent evt)</argsstring>
+        <name>HandleOperationComplete</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.DESSimulator.HandleOperationComplete</qualifiedname>
+        <param>
+          <type><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_sim_event" kindref="compound">SimEvent</ref></type>
+          <declname>evt</declname>
+        </param>
+        <briefdescription>
+<para>Handles a <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a74e900c350e0673c74e0e62b6f351056a118b996cf01af1910a157f7409f5d0df" kindref="member">EventType.OperationComplete</ref> event. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Marks the current operation finished on the machine, increments TotalOperationsCompleted, and advances the job&apos;s operation index. If the job is now fully complete its <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_1a26d164bc9562e761d35d5d13d2156036" kindref="member">Job.CompletionTime</ref> is recorded and TotalJobsCompleted is incremented. Otherwise, the transit time to the next machine is queried via GetTransitTime: if zero the job is dispatched immediately, otherwise a future <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a74e900c350e0673c74e0e62b6f351056a3beaa4602cbdfa387e4c483abe9933ab" kindref="member">EventType.JobArrived</ref> event is enqueued. Finally, TryStartNextOnMachine is called to assign a waiting job to the newly freed machine.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>evt</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The simulation event containing the completing job ID and machine ID. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" line="369" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" bodystart="369" bodyend="401"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a21c03dd19f4123abfe21051683021f30" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Scheduling.Core.DESSimulator.TryDispatchJob</definition>
+        <argsstring>(Job job)</argsstring>
+        <name>TryDispatchJob</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.DESSimulator.TryDispatchJob</qualifiedname>
+        <param>
+          <type><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job" kindref="compound">Job</ref></type>
+          <declname>job</declname>
+        </param>
+        <briefdescription>
+<para>Attempts to assign a job&apos;s current operation to its required machine. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>If the target machine is <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a3aebc4d18420ccdbcfb891f2835f01b0ae599161956d626eda4cb0a5ffb85271c" kindref="member">MachineState.Idle</ref> the operation starts immediately and a corresponding <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a74e900c350e0673c74e0e62b6f351056a118b996cf01af1910a157f7409f5d0df" kindref="member">EventType.OperationComplete</ref> event is enqueued. If the machine is busy the operation is appended to the machine&apos;s <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine_1ae56e4992f7199a184ff22c52ae036058" kindref="member">Machine.WaitingQueue</ref> to be picked up when the machine next becomes free.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>job</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The job whose <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job_1a8c8ffe232d70f7afde4cd9074a3b2fa8" kindref="member">Job.CurrentOperation</ref> should be dispatched. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" line="411" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" bodystart="411" bodyend="428"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a77fa70459439583c34cd738efba1d9b0" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Scheduling.Core.DESSimulator.TryStartNextOnMachine</definition>
+        <argsstring>(Machine machine)</argsstring>
+        <name>TryStartNextOnMachine</name>
+        <qualifiedname>Assets.Scripts.Scheduling.Core.DESSimulator.TryStartNextOnMachine</qualifiedname>
+        <param>
+          <type><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine" kindref="compound">Machine</ref></type>
+          <declname>machine</declname>
+        </param>
+        <briefdescription>
+<para>Selects and starts the next operation from a machine&apos;s waiting queue. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>No-ops if the queue is empty or the machine is not yet idle. Otherwise delegates selection to DispatchingRules.SelectNext using ActiveRule, removes the chosen operation from the queue, starts processing, and enqueues the resulting <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1a74e900c350e0673c74e0e62b6f351056a118b996cf01af1910a157f7409f5d0df" kindref="member">EventType.OperationComplete</ref> event.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>machine</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The machine that has just become free and requires a new assignment. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" line="438" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" bodystart="438" bodyend="449"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Pure discrete-event simulator for <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job" kindref="compound">Job</ref> Shop Problem (JSP) validation. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>No <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_unity" kindref="compound">Unity</ref> dependencies — can run standalone or inside <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_unity" kindref="compound">Unity</ref>. Transit times are zero for benchmark validation. The RL layer will later wrap this and inject non-zero transit via AGVs. </para>
+    </detaileddescription>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" line="32" column="11" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Scheduling/Core/DESSimulator.cs" bodystart="33" bodyend="479"/>
+    <listofallmembers>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1aa7e8ec191cee7cb93220103c04414873" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::DESSimulator</scope><name>ActiveRule</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a914e8fe3b5d0d08e5c46bf76a73114d9" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::DESSimulator</scope><name>ApplyDecision</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1af4a2072abe638bff842a288eda6a6655" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::DESSimulator</scope><name>CurrentTime</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a5563245d57847659cf5b390c02088652" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::DESSimulator</scope><name>DESSimulator</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a560d61cfcac94c39f1dc27e1faaac1c7" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::DESSimulator</scope><name>EventQueue</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a455511e83b7e16697ab4e36379dffbc8" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::DESSimulator</scope><name>GetTransitTime</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a7294f375588b9875af46faae613f4d0f" prot="private" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::DESSimulator</scope><name>HandleJobArrived</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1ab95efa345de133a199151763b2037bc4" prot="private" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::DESSimulator</scope><name>HandleOperationComplete</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a6d75d6ab10c081c5bddfb27826812d36" prot="private" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::DESSimulator</scope><name>HandleOperationCompleteStepped</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a5444d7f73303a58d3914a10f3eba12bf" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::DESSimulator</scope><name>Jobs</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1aa79c7f08fc10bc3b96c14e2b6137b95f" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::DESSimulator</scope><name>LoadInstance</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1aa0cabb24c437a170b19350cd4e02ab4f" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::DESSimulator</scope><name>Machines</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a2c5124a8b4dbad41b87d7ee29032e52a" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::DESSimulator</scope><name>Makespan</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1acb07dc5ba5008808680172d6113b91b0" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::DESSimulator</scope><name>OnDispatchRequired</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a93aa938262803d69cd75fb7265f9ad97" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::DESSimulator</scope><name>PendingDecisionMachineId</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a093526a79b3cd12b3013b50b6158a4fd" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::DESSimulator</scope><name>PrintSchedule</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1ad29bf585fd01242b65ab5bd4ad24b9ee" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::DESSimulator</scope><name>ProcessNextEvent</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a477dc5db6d5bfeea5ec2dd71e9cfd63e" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::DESSimulator</scope><name>Reset</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1ab80ab4d932ad3b54187a55c988c21a77" prot="private" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::DESSimulator</scope><name>ResetSteppedState</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a73e213e5d37b0db03a31962243bf1045" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::DESSimulator</scope><name>Run</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a387acb9f195c44157a016a4d475179ea" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::DESSimulator</scope><name>TotalJobsCompleted</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a4d391494c10566eabc3f53549089c310" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::DESSimulator</scope><name>TotalOperationsCompleted</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a21c03dd19f4123abfe21051683021f30" prot="private" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::DESSimulator</scope><name>TryDispatchJob</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1a77fa70459439583c34cd738efba1d9b0" prot="private" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::DESSimulator</scope><name>TryStartNextOnMachine</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1ac5b636bea65c01978352d527d7f4f599" prot="private" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::DESSimulator</scope><name>TryStartNextOnMachineStepped</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator_1abd336966a0fbc46b2b346e93847c7523" prot="public" virt="non-virtual"><scope>Assets::Scripts::Scheduling::Core::DESSimulator</scope><name>WaitingForDecision</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

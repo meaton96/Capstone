@@ -1,0 +1,954 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.16.1" xml:lang="en-US">
+  <compounddef id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge" kind="class" language="C#" prot="public">
+    <compoundname>Assets::Scripts::Simulation::SimulationBridge</compoundname>
+    <basecompoundref prot="public" virt="non-virtual">MonoBehaviour</basecompoundref>
+    <innerclass refid="struct_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1_1_visual_event" prot="private">Assets::Scripts::Simulation::SimulationBridge::VisualEvent</innerclass>
+    <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a85c3fe94266dda187b952e26ab0a4347" prot="private" static="no" mutable="no">
+        <type><ref refid="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager" kindref="compound">FactoryLayoutManager</ref></type>
+        <definition>FactoryLayoutManager Assets.Scripts.Simulation.SimulationBridge.layoutManager</definition>
+        <argsstring></argsstring>
+        <name>layoutManager</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.layoutManager</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="128" column="39" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="128" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a2a6bc55dadc675b8df8cc6b80eaa776c" prot="private" static="no" mutable="no">
+        <type>TextAsset</type>
+        <definition>TextAsset Assets.Scripts.Simulation.SimulationBridge.taillardJson</definition>
+        <argsstring></argsstring>
+        <name>taillardJson</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.taillardJson</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="139" column="28" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="139" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a04b809ce62050f2720eb7f0d0016a71f" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Simulation.SimulationBridge.fixedRuleIndex</definition>
+        <argsstring></argsstring>
+        <name>fixedRuleIndex</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.fixedRuleIndex</qualifiedname>
+        <initializer>= 0</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="143" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="143" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1aa8ef9b0cb5129cd5845f66eb2a1d74bf" prot="private" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool Assets.Scripts.Simulation.SimulationBridge.useFixedRule</definition>
+        <argsstring></argsstring>
+        <name>useFixedRule</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.useFixedRule</qualifiedname>
+        <initializer>= true</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="146" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="146" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1aaa1eabc65ffac8c8941c1233046bc610" prot="private" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool Assets.Scripts.Simulation.SimulationBridge.autoStartOnPlay</definition>
+        <argsstring></argsstring>
+        <name>autoStartOnPlay</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.autoStartOnPlay</qualifiedname>
+        <initializer>= true</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="149" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="149" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a7713cd85738ce138084f91a1cb01be5e" prot="private" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool Assets.Scripts.Simulation.SimulationBridge.enableVisuals</definition>
+        <argsstring></argsstring>
+        <name>enableVisuals</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.enableVisuals</qualifiedname>
+        <initializer>= true</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="157" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="157" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1ac9ec72953f55e3bf6e2b67a9b1e11002" prot="private" static="no" mutable="no">
+        <type>float</type>
+        <definition>float Assets.Scripts.Simulation.SimulationBridge.speedMultiplier</definition>
+        <argsstring></argsstring>
+        <name>speedMultiplier</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.speedMultiplier</qualifiedname>
+        <initializer>= 5f</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="161" column="24" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="161" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a0ee937f3c15b0a0758e5cd1b634160ba" prot="private" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool Assets.Scripts.Simulation.SimulationBridge.flashOnDecision</definition>
+        <argsstring></argsstring>
+        <name>flashOnDecision</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.flashOnDecision</qualifiedname>
+        <initializer>= true</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="164" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="164" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1afaca4224c7011f8a3572f834abe6e6c2" prot="private" static="no" mutable="no">
+        <type><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator" kindref="compound">DESSimulator</ref></type>
+        <definition>DESSimulator Assets.Scripts.Simulation.SimulationBridge.simulator</definition>
+        <argsstring></argsstring>
+        <name>simulator</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.simulator</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="204" column="30" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="204" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a415171a0f397d77f089c0ba451f7dfce" prot="private" static="no" mutable="no">
+        <type><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance" kindref="compound">TaillardInstance</ref></type>
+        <definition>TaillardInstance Assets.Scripts.Simulation.SimulationBridge.currentInstance</definition>
+        <argsstring></argsstring>
+        <name>currentInstance</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.currentInstance</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="205" column="34" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="205" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a4275fc21249d6c031802ca01891d3cd6" prot="private" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool Assets.Scripts.Simulation.SimulationBridge.episodeActive</definition>
+        <argsstring></argsstring>
+        <name>episodeActive</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.episodeActive</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="206" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="206" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a71f131d7230c7f048dd31ce072713acc" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Simulation.SimulationBridge.decisionCount</definition>
+        <argsstring></argsstring>
+        <name>decisionCount</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.decisionCount</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="207" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="207" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a667aa7b91785d967943e23fa931e6fc2" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Assets.Scripts.Simulation.SimulationBridge.totalReward</definition>
+        <argsstring></argsstring>
+        <name>totalReward</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.totalReward</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="208" column="24" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="208" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a107300b79f6d61713fcd438d28bac542" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Assets.Scripts.Simulation.SimulationBridge.previousMakespan</definition>
+        <argsstring></argsstring>
+        <name>previousMakespan</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.previousMakespan</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="209" column="24" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="209" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a6d57efdeaa8fcfc2d698d30ee35ede07" prot="private" static="no" mutable="no">
+        <type>int[]</type>
+        <definition>int [] Assets.Scripts.Simulation.SimulationBridge.perMachineDecisions</definition>
+        <argsstring></argsstring>
+        <name>perMachineDecisions</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.perMachineDecisions</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="210" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="210" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1afca94b52bccc9a7a8de211fbbf63d17a" prot="private" static="no" mutable="no">
+        <type>readonly List&lt; VisualEvent &gt;</type>
+        <definition>readonly List&lt;VisualEvent&gt; Assets.Scripts.Simulation.SimulationBridge.pendingVisualEvents</definition>
+        <argsstring></argsstring>
+        <name>pendingVisualEvents</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.pendingVisualEvents</qualifiedname>
+        <initializer>= new List&lt;VisualEvent&gt;()</initializer>
+        <briefdescription>
+<para>Visual command buffer: events that occurred between the previous decision point and the current one, replayed visually when enableVisuals is true. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="215" column="31" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="215" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a854e0579243796cdd6203ec77df9c936" prot="public" static="no" mutable="no">
+        <type>UnityEvent&lt; <ref refid="struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request" kindref="compound">DecisionRequest</ref> &gt;</type>
+        <definition>UnityEvent&lt;DecisionRequest&gt; Assets.Scripts.Simulation.SimulationBridge.OnDecisionRequired</definition>
+        <argsstring></argsstring>
+        <name>OnDecisionRequired</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.OnDecisionRequired</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="171" column="27" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="171" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a528fc679c192f759c4db16c4ae0ce1fc" prot="public" static="no" mutable="no">
+        <type>UnityEvent&lt; <ref refid="struct_assets_1_1_scripts_1_1_simulation_1_1_step_result" kindref="compound">StepResult</ref> &gt;</type>
+        <definition>UnityEvent&lt;StepResult&gt; Assets.Scripts.Simulation.SimulationBridge.OnStepCompleted</definition>
+        <argsstring></argsstring>
+        <name>OnStepCompleted</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.OnStepCompleted</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="172" column="27" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="172" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1aab6fdcaf7d8e8335dffe96b903f62438" prot="public" static="no" mutable="no">
+        <type>UnityEvent&lt; <ref refid="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result" kindref="compound">EpisodeResult</ref> &gt;</type>
+        <definition>UnityEvent&lt;EpisodeResult&gt; Assets.Scripts.Simulation.SimulationBridge.OnEpisodeFinished</definition>
+        <argsstring></argsstring>
+        <name>OnEpisodeFinished</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.OnEpisodeFinished</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="173" column="27" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="173" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="private-static-attrib">
+      <memberdef kind="variable" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1aec0ade1e9093fa41304c89b687cad988" prot="private" static="yes" mutable="no">
+        <type>readonly <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1af841dd07c9c38276e117696a4dd6fe87" kindref="member">DispatchingRule</ref>[]</type>
+        <definition>readonly DispatchingRule [] Assets.Scripts.Simulation.SimulationBridge.ActionToRule</definition>
+        <argsstring></argsstring>
+        <name>ActionToRule</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.ActionToRule</qualifiedname>
+        <initializer>                                                     = new <ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1af841dd07c9c38276e117696a4dd6fe87" kindref="member">DispatchingRule</ref>[]
+{
+    DispatchingRule.SPT_SMPT,   
+    DispatchingRule.SPT_SRWT,   
+    DispatchingRule.LPT_MMUR,   
+    DispatchingRule.SRT_SRWT,   
+    DispatchingRule.LPT_SMPT,   
+    DispatchingRule.LRT_MMUR,   
+    DispatchingRule.SRT_SMPT,   
+    DispatchingRule.SDT_SRWT,   
+
+}</initializer>
+        <briefdescription>
+<para>Maps agent action index (0-7) to the composite PDR enum. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Matches the action table in Environment.md: | 0 | SPT-SMPT | 1 | SPT-SRWT | 2 | LPT-MMUR | 3 | SRT-SRWT | | 4 | LRT-SMPT | 5 | LRT-MMUR | 6 | SRT-SMPT | 7 | SDT-SRWT | </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="184" column="49" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="184" bodyend="195"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="property">
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a191796bd323709a5d2f02d2b121187f6" prot="public" static="yes" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Simulation.SimulationBridge.ActionCount</definition>
+        <argsstring></argsstring>
+        <name>ActionCount</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.ActionCount</qualifiedname>
+        <briefdescription>
+<para>Total number of discrete actions in the action space. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="198" column="27" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="198" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a904630e03924813c79e016df46629df4" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type>bool</type>
+        <definition>bool Assets.Scripts.Simulation.SimulationBridge.IsEpisodeActive</definition>
+        <argsstring></argsstring>
+        <name>IsEpisodeActive</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.IsEpisodeActive</qualifiedname>
+        <briefdescription>
+<para>True while an episode is in progress. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="222" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="222" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a436e69beba136fb322c737933d6e8d79" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type>bool</type>
+        <definition>bool Assets.Scripts.Simulation.SimulationBridge.IsDone</definition>
+        <argsstring></argsstring>
+        <name>IsDone</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.IsDone</qualifiedname>
+        <briefdescription>
+<para>True when the episode has ended (all jobs scheduled). </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="225" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="225" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a47b78b3fb2e0b63dae2f6e11aa7e3b55" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="yes" protectedsettable="no">
+        <type><ref refid="struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request" kindref="compound">DecisionRequest</ref></type>
+        <definition>DecisionRequest Assets.Scripts.Simulation.SimulationBridge.CurrentDecision</definition>
+        <argsstring></argsstring>
+        <name>CurrentDecision</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.CurrentDecision</qualifiedname>
+        <briefdescription>
+<para>The current decision request. Only valid when the DES is waiting and the episode is active. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="229" column="32" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="229" bodyend="229"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a02ba2996adfc6bd0d53afa83757af5a8" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type>bool</type>
+        <definition>bool Assets.Scripts.Simulation.SimulationBridge.IsWaitingForAction</definition>
+        <argsstring></argsstring>
+        <name>IsWaitingForAction</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.IsWaitingForAction</qualifiedname>
+        <briefdescription>
+<para>True if the DES is paused waiting for an action. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="232" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="232" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a168e40a044c13acbb3ba00642036fe13" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type>double</type>
+        <definition>double Assets.Scripts.Simulation.SimulationBridge.SimTime</definition>
+        <argsstring></argsstring>
+        <name>SimTime</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.SimTime</qualifiedname>
+        <briefdescription>
+<para>Current simulation time. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="235" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="235" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1ad70f13ea069d844466f1ee17a485dc8e" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type>double</type>
+        <definition>double Assets.Scripts.Simulation.SimulationBridge.CurrentMakespan</definition>
+        <argsstring></argsstring>
+        <name>CurrentMakespan</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.CurrentMakespan</qualifiedname>
+        <briefdescription>
+<para>Running makespan estimate (max operation end-time so far). </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="238" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="238" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a7bf9fa029b239d6fbd5c6250d535a57f" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="yes" privatesettable="no" protectedsettable="no">
+        <type>float</type>
+        <definition>float Assets.Scripts.Simulation.SimulationBridge.SpeedMultiplier</definition>
+        <argsstring></argsstring>
+        <name>SpeedMultiplier</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.SpeedMultiplier</qualifiedname>
+        <briefdescription>
+<para>Visual playback speed. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="241" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="242" bodyend="245"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1adf8da4488fdeb8bb688dd615f21c5ef2" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type>int</type>
+        <definition>int Assets.Scripts.Simulation.SimulationBridge.DecisionCount</definition>
+        <argsstring></argsstring>
+        <name>DecisionCount</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.DecisionCount</qualifiedname>
+        <briefdescription>
+<para>Decisions made so far this episode. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="248" column="20" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="248" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="property" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a5d61c103d95c8c657e545075ad4ee559" prot="public" static="no" readable="no" writable="no" gettable="yes" privategettable="no" protectedgettable="no" settable="no" privatesettable="no" protectedsettable="no">
+        <type><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator" kindref="compound">DESSimulator</ref></type>
+        <definition>DESSimulator Assets.Scripts.Simulation.SimulationBridge.Simulator</definition>
+        <argsstring></argsstring>
+        <name>Simulator</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.Simulator</qualifiedname>
+        <briefdescription>
+<para>The underlying DES simulator for advanced queries. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="251" column="29" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="251" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="private-func">
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a6ce5d8929ea7fccc53df901bac93b4a5" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.SimulationBridge.Awake</definition>
+        <argsstring>()</argsstring>
+        <name>Awake</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.Awake</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="257" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="257" bodyend="260"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a9d5d0839d67486fd25ff50a393cfa17a" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.SimulationBridge.Start</definition>
+        <argsstring>()</argsstring>
+        <name>Start</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.Start</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="262" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="262" bodyend="275"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1acbaafc97d1764cfd4e8ddb2b2a1797eb" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.SimulationBridge.AdvanceToNextDecision</definition>
+        <argsstring>()</argsstring>
+        <name>AdvanceToNextDecision</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.AdvanceToNextDecision</qualifiedname>
+        <briefdescription>
+<para>Advances the DES event-by-event until it either hits a decision point or runs out of events. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Between decision points, many events may fire (job arrivals that auto-start on idle machines, operation completions on machines with empty queues). These are all processed automatically. Only when TryStartNextOnMachineStepped finds a non-empty queue does the DES pause and return SimStepResult.DecisionRequired.</para>
+<para>Visual events are buffered into pendingVisualEvents for optional playback after the step completes. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="460" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="460" bodyend="492"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a6417bbc4204b46900812d53f9d4a224e" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request" kindref="compound">DecisionRequest</ref></type>
+        <definition>DecisionRequest Assets.Scripts.Simulation.SimulationBridge.BuildDecisionRequest</definition>
+        <argsstring>()</argsstring>
+        <name>BuildDecisionRequest</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.BuildDecisionRequest</qualifiedname>
+        <briefdescription>
+<para>Builds a <ref refid="struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request" kindref="compound">DecisionRequest</ref> from the current DES state. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Captures the pending machine&apos;s queue contents and episode-level counters so the agent has everything it needs to choose an action. The full observation tensor (grid, sched matrix, etc.) will be added in Phase 2 via an ObservationBuilder. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="500" column="33" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="500" bodyend="520"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a662a4705217bcae04fac92ef163b0c27" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>float</type>
+        <definition>float Assets.Scripts.Simulation.SimulationBridge.ComputeReward</definition>
+        <argsstring>(double currentMakespan)</argsstring>
+        <name>ComputeReward</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.ComputeReward</qualifiedname>
+        <param>
+          <type>double</type>
+          <declname>currentMakespan</declname>
+        </param>
+        <briefdescription>
+<para>Computes the step reward from delta-makespan. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>The primary signal is the negative change in running makespan since the last decision. This gives a dense, per-step gradient that directly penalises schedule elongation:</para>
+<para><programlisting><codeline><highlight class="normal">reward<sp/>=<sp/>-(currentMakespan<sp/>-<sp/>previousMakespan)<sp/>/<sp/>normaliser</highlight></codeline>
+</programlisting></para>
+<para>A completion bonus proportional to the optimality ratio is added on the final step to reinforce good terminal performance.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>currentMakespan</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Running makespan after this step. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>Scalar reward. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="541" column="23" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="541" bodyend="561"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1ac88ec5eb25c4ab25df5177b1a3e5ef3f" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>double</type>
+        <definition>double Assets.Scripts.Simulation.SimulationBridge.ComputeRunningMakespan</definition>
+        <argsstring>()</argsstring>
+        <name>ComputeRunningMakespan</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.ComputeRunningMakespan</qualifiedname>
+        <briefdescription>
+<para>Max end-time across all operations that have started processing. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="564" column="24" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="564" bodyend="579"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a7821ed5b4179419e2ec70c2aa912b702" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>IEnumerator</type>
+        <definition>IEnumerator Assets.Scripts.Simulation.SimulationBridge.RunFixedRuleCoroutine</definition>
+        <argsstring>()</argsstring>
+        <name>RunFixedRuleCoroutine</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.RunFixedRuleCoroutine</qualifiedname>
+        <briefdescription>
+<para>Coroutine that auto-plays every decision with the configured fixedRuleIndex, yielding between steps so visuals can update. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="588" column="29" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="588" bodyend="611"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1ac0a72bf0abe5fd66f0ab892ff6f1464c" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.SimulationBridge.SnapshotVisualState</definition>
+        <argsstring>()</argsstring>
+        <name>SnapshotVisualState</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.SnapshotVisualState</qualifiedname>
+        <briefdescription>
+<para>Snapshots any new operation starts/completions from the DES. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Called after each ProcessNextEvent in the advance loop. Checks every machine for state transitions at the current time. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="637" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="637" bodyend="685"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a351a61ff15c099a396aefb48dfeb7f17" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.SimulationBridge.EmitDecisionVisual</definition>
+        <argsstring>(int machineId, int[] queueSnapshot, DispatchingRule rule, int actionIndex)</argsstring>
+        <name>EmitDecisionVisual</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.EmitDecisionVisual</qualifiedname>
+        <param>
+          <type>int</type>
+          <declname>machineId</declname>
+        </param>
+        <param>
+          <type>int[]</type>
+          <declname>queueSnapshot</declname>
+        </param>
+        <param>
+          <type><ref refid="namespace_assets_1_1_scripts_1_1_scheduling_1_1_core_1af841dd07c9c38276e117696a4dd6fe87" kindref="member">DispatchingRule</ref></type>
+          <declname>rule</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>actionIndex</declname>
+        </param>
+        <briefdescription>
+<para>Records a decision-point flash and log on the machine visual. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="688" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="688" bodyend="704"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a8cfc7d7e0cc57a483c5b644606f5423d" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.SimulationBridge.FlushVisualEvents</definition>
+        <argsstring>()</argsstring>
+        <name>FlushVisualEvents</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.FlushVisualEvents</qualifiedname>
+        <briefdescription>
+<para>Pushes all buffered visual events to the machine visuals. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="707" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="707" bodyend="729"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1ae54ba31422bedf0ad4eca743fed8a07b" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>IEnumerator</type>
+        <definition>IEnumerator Assets.Scripts.Simulation.SimulationBridge.WaitForVisualPlayback</definition>
+        <argsstring>()</argsstring>
+        <name>WaitForVisualPlayback</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.WaitForVisualPlayback</qualifiedname>
+        <briefdescription>
+<para>Waits for visual playback to display between decision points. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Computes the sim-time span of buffered events and converts to a real-time wait via the speed multiplier. Replace with event-driven AGV completion in Phase 1 Step 4. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="736" column="29" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="736" bodyend="755"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1ae9b79e36fe192c2841de7809d2fa7d8a" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.SimulationBridge.UpdateAllProgressBars</definition>
+        <argsstring>()</argsstring>
+        <name>UpdateAllProgressBars</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.UpdateAllProgressBars</qualifiedname>
+        <briefdescription>
+<para>Drives all busy machine progress bars to the current sim time. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="758" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="758" bodyend="768"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a4855c2ab08556efc2e7ef7f42cedebb9" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.SimulationBridge.FinaliseEpisode</definition>
+        <argsstring>()</argsstring>
+        <name>FinaliseEpisode</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.FinaliseEpisode</qualifiedname>
+        <briefdescription>
+<para>Logs final stats and fires OnEpisodeFinished. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="775" column="22" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="775" bodyend="787"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1ac84539cec74c64621ea41b04125e2de7" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result" kindref="compound">EpisodeResult</ref></type>
+        <definition>EpisodeResult Assets.Scripts.Simulation.SimulationBridge.BuildEpisodeResult</definition>
+        <argsstring>()</argsstring>
+        <name>BuildEpisodeResult</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.BuildEpisodeResult</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="789" column="31" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="789" bodyend="808"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1ab5a14593908132090365a300bbd92ba8" prot="private" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance" kindref="compound">TaillardInstance</ref></type>
+        <definition>TaillardInstance Assets.Scripts.Simulation.SimulationBridge.LoadInstance</definition>
+        <argsstring>(TextAsset json)</argsstring>
+        <name>LoadInstance</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.LoadInstance</qualifiedname>
+        <param>
+          <type>TextAsset</type>
+          <declname>json</declname>
+        </param>
+        <briefdescription>
+<para>Deserialises a Taillard JSON TextAsset. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="note"><para>Adapt the deserialisation call to match your <ref refid="class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance" kindref="compound">TaillardInstance</ref> API. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="817" column="34" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="817" bodyend="844"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a5d8b43c53cd38a61470816de22f1fd0c" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.SimulationBridge.StartEpisode</definition>
+        <argsstring>()</argsstring>
+        <name>StartEpisode</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.StartEpisode</qualifiedname>
+        <briefdescription>
+<para>Initialises a new episode using the Inspector-configured instance. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Loads the Taillard JSON, resets the DES, optionally builds the visual floor, and advances to the first decision point. After this call, <ref refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a47b78b3fb2e0b63dae2f6e11aa7e3b55" kindref="member">CurrentDecision</ref> is populated and <ref refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a02ba2996adfc6bd0d53afa83757af5a8" kindref="member">IsWaitingForAction</ref> is true (assuming the instance produces at least one queuing conflict). </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="287" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="287" bodyend="290"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a4e6daadbb23b0bfd1927806e2cf8ba58" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void Assets.Scripts.Simulation.SimulationBridge.StartEpisode</definition>
+        <argsstring>(TextAsset json)</argsstring>
+        <name>StartEpisode</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.StartEpisode</qualifiedname>
+        <param>
+          <type>TextAsset</type>
+          <declname>json</declname>
+        </param>
+        <briefdescription>
+<para>Starts an episode with an explicit Taillard JSON asset. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>json</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>TextAsset containing the Taillard instance JSON. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="295" column="21" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="295" bodyend="330"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a54f762ba8e222fcc8cfde852c459562e" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="struct_assets_1_1_scripts_1_1_simulation_1_1_step_result" kindref="compound">StepResult</ref></type>
+        <definition>StepResult Assets.Scripts.Simulation.SimulationBridge.Step</definition>
+        <argsstring>(int action)</argsstring>
+        <name>Step</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.Step</qualifiedname>
+        <param>
+          <type>int</type>
+          <declname>action</declname>
+        </param>
+        <briefdescription>
+<para>The core Gymnasium-style step function. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><orderedlist>
+<listitem><para>Validates that the DES is actually waiting for a decision.</para>
+</listitem><listitem><para>Maps the action index (0-7) to a composite DispatchingRule.</para>
+</listitem><listitem><para>Snapshots the queue state for logging/visuals.</para>
+</listitem><listitem><para>Calls DESSimulator.ApplyDecision with the chosen rule.</para>
+</listitem><listitem><para>Advances the DES event-by-event to the next decision point (or end).</para>
+</listitem><listitem><para>Computes the step reward from delta-makespan.</para>
+</listitem><listitem><para>If visuals are enabled, plays back the intermediate events.</para>
+</listitem><listitem><para>Returns a <ref refid="struct_assets_1_1_scripts_1_1_simulation_1_1_step_result" kindref="compound">StepResult</ref>.</para>
+</listitem></orderedlist>
+</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>action</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Index into the composite PDR action space (0-7). </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>A <ref refid="struct_assets_1_1_scripts_1_1_simulation_1_1_step_result" kindref="compound">StepResult</ref> with reward, done flag, and next decision. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="346" column="27" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="346" bodyend="414"/>
+      </memberdef>
+      <memberdef kind="function" id="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1ac7294ac378f1337ee5815db40489fd8d" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type><ref refid="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result" kindref="compound">EpisodeResult</ref></type>
+        <definition>EpisodeResult Assets.Scripts.Simulation.SimulationBridge.RunEpisodeWithFixedRule</definition>
+        <argsstring>(TextAsset json, int ruleIndex)</argsstring>
+        <name>RunEpisodeWithFixedRule</name>
+        <qualifiedname>Assets.Scripts.Simulation.SimulationBridge.RunEpisodeWithFixedRule</qualifiedname>
+        <param>
+          <type>TextAsset</type>
+          <declname>json</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>ruleIndex</declname>
+        </param>
+        <briefdescription>
+<para>Runs an entire episode synchronously with a fixed rule. No visuals. Returns the result immediately. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Used for Phase 1 Step 10 batch validation: <programlisting><codeline><highlight class="keywordflow">foreach</highlight><highlight class="normal"><sp/>(TextAsset<sp/>ta<sp/></highlight><highlight class="keywordflow">in</highlight><highlight class="normal"><sp/>taillardAssets)</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">foreach</highlight><highlight class="normal"><sp/>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>rule<sp/>=<sp/>0;<sp/>rule<sp/>&lt;<sp/>8;<sp/>rule++)</highlight></codeline>
+<codeline><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>EpisodeResult<sp/>r<sp/>=<sp/>bridge.RunEpisodeWithFixedRule(ta,<sp/>rule);</highlight></codeline>
+</programlisting></para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>json</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The Taillard instance. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ruleIndex</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Action index (0-7). </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>Final <ref refid="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result" kindref="compound">EpisodeResult</ref>. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="429" column="30" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="429" bodyend="443"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <inheritancegraph>
+      <node id="1">
+        <label>Assets.Scripts.Simulation.SimulationBridge</label>
+        <link refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>MonoBehaviour</label>
+      </node>
+    </inheritancegraph>
+    <collaborationgraph>
+      <node id="1">
+        <label>Assets.Scripts.Simulation.SimulationBridge</label>
+        <link refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge"/>
+        <childnode refid="2" relation="public-inheritance">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>MonoBehaviour</label>
+      </node>
+    </collaborationgraph>
+    <location file="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" line="121" column="11" bodyfile="C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs" bodystart="122" bodyend="845"/>
+    <listofallmembers>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a191796bd323709a5d2f02d2b121187f6" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>ActionCount</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1aec0ade1e9093fa41304c89b687cad988" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>ActionToRule</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1acbaafc97d1764cfd4e8ddb2b2a1797eb" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>AdvanceToNextDecision</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1aaa1eabc65ffac8c8941c1233046bc610" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>autoStartOnPlay</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a6ce5d8929ea7fccc53df901bac93b4a5" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>Awake</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a6417bbc4204b46900812d53f9d4a224e" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>BuildDecisionRequest</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1ac84539cec74c64621ea41b04125e2de7" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>BuildEpisodeResult</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a662a4705217bcae04fac92ef163b0c27" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>ComputeReward</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1ac88ec5eb25c4ab25df5177b1a3e5ef3f" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>ComputeRunningMakespan</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a47b78b3fb2e0b63dae2f6e11aa7e3b55" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>CurrentDecision</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a415171a0f397d77f089c0ba451f7dfce" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>currentInstance</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1ad70f13ea069d844466f1ee17a485dc8e" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>CurrentMakespan</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1adf8da4488fdeb8bb688dd615f21c5ef2" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>DecisionCount</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a71f131d7230c7f048dd31ce072713acc" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>decisionCount</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a351a61ff15c099a396aefb48dfeb7f17" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>EmitDecisionVisual</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a7713cd85738ce138084f91a1cb01be5e" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>enableVisuals</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a4275fc21249d6c031802ca01891d3cd6" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>episodeActive</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a4855c2ab08556efc2e7ef7f42cedebb9" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>FinaliseEpisode</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a04b809ce62050f2720eb7f0d0016a71f" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>fixedRuleIndex</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a0ee937f3c15b0a0758e5cd1b634160ba" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>flashOnDecision</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a8cfc7d7e0cc57a483c5b644606f5423d" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>FlushVisualEvents</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a436e69beba136fb322c737933d6e8d79" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>IsDone</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a904630e03924813c79e016df46629df4" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>IsEpisodeActive</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a02ba2996adfc6bd0d53afa83757af5a8" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>IsWaitingForAction</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a85c3fe94266dda187b952e26ab0a4347" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>layoutManager</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1ab5a14593908132090365a300bbd92ba8" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>LoadInstance</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a854e0579243796cdd6203ec77df9c936" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>OnDecisionRequired</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1aab6fdcaf7d8e8335dffe96b903f62438" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>OnEpisodeFinished</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a528fc679c192f759c4db16c4ae0ce1fc" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>OnStepCompleted</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1afca94b52bccc9a7a8de211fbbf63d17a" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>pendingVisualEvents</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a6d57efdeaa8fcfc2d698d30ee35ede07" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>perMachineDecisions</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a107300b79f6d61713fcd438d28bac542" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>previousMakespan</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1ac7294ac378f1337ee5815db40489fd8d" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>RunEpisodeWithFixedRule</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a7821ed5b4179419e2ec70c2aa912b702" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>RunFixedRuleCoroutine</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a168e40a044c13acbb3ba00642036fe13" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>SimTime</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a5d61c103d95c8c657e545075ad4ee559" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>Simulator</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1afaca4224c7011f8a3572f834abe6e6c2" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>simulator</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1ac0a72bf0abe5fd66f0ab892ff6f1464c" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>SnapshotVisualState</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a7bf9fa029b239d6fbd5c6250d535a57f" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>SpeedMultiplier</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1ac9ec72953f55e3bf6e2b67a9b1e11002" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>speedMultiplier</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a9d5d0839d67486fd25ff50a393cfa17a" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>Start</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a5d8b43c53cd38a61470816de22f1fd0c" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>StartEpisode</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a4e6daadbb23b0bfd1927806e2cf8ba58" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>StartEpisode</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a54f762ba8e222fcc8cfde852c459562e" prot="public" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>Step</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a2a6bc55dadc675b8df8cc6b80eaa776c" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>taillardJson</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1a667aa7b91785d967943e23fa931e6fc2" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>totalReward</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1ae9b79e36fe192c2841de7809d2fa7d8a" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>UpdateAllProgressBars</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1aa8ef9b0cb5129cd5845f66eb2a1d74bf" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>useFixedRule</name></member>
+      <member refid="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_1ae54ba31422bedf0ad4eca743fed8a07b" prot="private" virt="non-virtual"><scope>Assets::Scripts::Simulation::SimulationBridge</scope><name>WaitForVisualPlayback</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

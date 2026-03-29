@@ -1,0 +1,46 @@
+\doxysection{C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Simulation/\+\+Simulation\+Bridge.cs File Reference}
+\hypertarget{_simulation_bridge_8cs}{}\label{_simulation_bridge_8cs}\index{C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs@{C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/SimulationBridge.cs}}
+
+
+Stepped DES orchestrator that pauses at every dispatch decision point, accepts an action (from a fixed rule or RL agent), then advances to the next.  
+
+
+\doxysubsubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \doxymbox{\hyperlink{struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request}{Assets.\+Scripts.\+Simulation.\+Decision\+Request}}
+\begin{DoxyCompactList}\small\item\em Snapshot of the DES state at a decision point, presented to the agent (or fixed rule) so it can choose an action. \end{DoxyCompactList}\item 
+struct \doxymbox{\hyperlink{struct_assets_1_1_scripts_1_1_simulation_1_1_step_result}{Assets.\+Scripts.\+Simulation.\+Step\+Result}}
+\begin{DoxyCompactList}\small\item\em Returned by \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a54f762ba8e222fcc8cfde852c459562e}{Simulation\+Bridge.\+Step} after the agent\textquotesingle{}s action is applied. \end{DoxyCompactList}\item 
+struct \doxymbox{\hyperlink{struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result}{Assets.\+Scripts.\+Simulation.\+Episode\+Result}}
+\begin{DoxyCompactList}\small\item\em Final episode statistics, emitted via Simulation\+Bridge.\+On\+Episode\+Finished. \end{DoxyCompactList}\item 
+class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge}{Assets.\+Scripts.\+Simulation.\+Simulation\+Bridge}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Stepped DES orchestrator that pauses at every dispatch decision point, accepts an action (from a fixed rule or RL agent), then advances to the next. 
+
+The simulation loop is:\+ 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{bridge.StartEpisode(instance);}
+\DoxyCodeLine{\textcolor{keywordflow}{while}\ (!bridge.IsDone)}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{\ \ \ \ DecisionRequest\ req\ =\ bridge.CurrentDecision;}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordtype}{int}\ action\ =\ agent.GetAction(req);\ \ \ \textcolor{comment}{//\ or\ fixedRuleIndex}}
+\DoxyCodeLine{\ \ \ \ StepResult\ result\ =\ bridge.Step(action);}
+\DoxyCodeLine{\ \ \ \ \textcolor{comment}{//\ result.Reward,\ result.Done,\ result.Observation...}}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+
+
+This is the Gymnasium {\ttfamily step()} pattern. The bridge owns the DES, the visual layer, and the reward computation. It exposes the same interface whether the caller is a fixed-\/rule validator (Phase 1), an ML-\/\+Agents policy (Phase 3), or a Python training loop over a socket (Phase 3 alt).
+
+\begin{DoxyParagraph}{Execution modes}
+
+\begin{DoxyItemize}
+\item {\bfseries{Training mode}} (default):\+ No visuals. Step returns synchronously. Maximum throughput for PPO data collection.
+\item {\bfseries{Visual debug mode}}:\+ Visuals are driven between decision points via a coroutine. Step still returns immediately, but visual playback catches up asynchronously. Toggle with enable\+Visuals. 
+\end{DoxyItemize}
+\end{DoxyParagraph}
