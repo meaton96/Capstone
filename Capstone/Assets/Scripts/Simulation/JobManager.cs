@@ -177,6 +177,38 @@ namespace Assets.Scripts.Simulation
             if (t.Visual != null) t.Visual.SetState(t.State);
         }
 
+        public void BeginTransit(int jobId, int destinationMachineId, double simTime)
+        {
+            JobTracker t = GetJobTracker(jobId);
+            if (t == null) return;
+
+            t.State = JobLifecycleState.InTransit;
+            t.NextMachineId = destinationMachineId;
+
+            // Log how long it was waiting in the queue before the AGV arrived
+            t.TotalWaitTime += (simTime - t.StateEntryTime);
+            t.StateEntryTime = simTime;
+
+            // Force the visual to update to the Transit color (Blue)
+            if (t.Visual != null) t.Visual.SetState(t.State);
+        }
+
+        public void CompleteTransit(int jobId, int machineId, double simTime)
+        {
+            JobTracker t = GetJobTracker(jobId);
+            if (t == null) return;
+
+            // 1. Log how long the Uber ride took
+            double transitDuration = simTime - t.StateEntryTime;
+            t.TotalTransitTime += transitDuration;
+
+            // 2. We don't set the state to Queued here! 
+            // We just clear the transit state. The PhysicalMachine's 
+            // OnTriggerEnter will handle setting it to Queued a split second later.
+            t.NextMachineId = machineId;
+            t.StateEntryTime = simTime;
+        }
+
         public void MarkOperationComplete(int jobId, double simTime)
         {
             if (!initialized) return;
