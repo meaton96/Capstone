@@ -27,7 +27,7 @@ public class OrbitCamera : MonoBehaviour
         }
 
         // 1. Calculate the rotation based on time and speed
-        _currentAngle += orbitSpeed * Time.deltaTime;
+        _currentAngle += orbitSpeed * Time.deltaTime / Time.timeScale;
         Quaternion rotation = Quaternion.Euler(0, _currentAngle, 0);
 
         // 2. Calculate the new position

@@ -1,6 +1,7 @@
 using UnityEngine;
-using TMPro; // Make sure you have TextMeshPro imported!
+using TMPro;
 using Assets.Scripts.Simulation;
+using UnityEngine.UI;
 
 namespace Assets.Scripts.UI
 {
@@ -11,6 +12,47 @@ namespace Assets.Scripts.UI
         [SerializeField] private TextMeshProUGUI ruleText;
         [SerializeField] private TextMeshProUGUI jobsText;
         [SerializeField] private TextMeshProUGUI decisionsText;
+        [Header("Time Controls")]
+        [SerializeField] private Slider timeScaleSlider;
+        [SerializeField] private TextMeshProUGUI timeScaleValueText;
+
+        private void Start()
+        {
+            // Set up the slider if it has been assigned in the Inspector
+            if (timeScaleSlider != null)
+            {
+                // Sync the slider's starting value with the current game time scale
+                timeScaleSlider.value = Time.timeScale;
+
+                // Add a listener so the method is called automatically when you drag the slider
+                timeScaleSlider.onValueChanged.AddListener(OnTimeScaleChanged);
+
+                // Initialize the text label
+                UpdateScaleText(Time.timeScale);
+            }
+        }
+        private void OnDestroy()
+        {
+            if (timeScaleSlider != null)
+            {
+                timeScaleSlider.onValueChanged.RemoveListener(OnTimeScaleChanged);
+            }
+        }
+        private void UpdateScaleText(float scale)
+        {
+            if (timeScaleValueText != null)
+            {
+                timeScaleValueText.text = $"SPEED: {scale:F1}x";
+            }
+        }
+
+        // This method fires whenever the slider is moved
+        public void OnTimeScaleChanged(float newScale)
+        {
+            // Unity's built-in way to speed up, slow down, or pause time
+            Time.timeScale = newScale;
+            UpdateScaleText(newScale);
+        }
 
         private void Update()
         {
