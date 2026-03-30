@@ -7,6 +7,7 @@ using Assets.Scripts.Scheduling.Data;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 
+
 namespace Assets.Scripts.Simulation
 {
     [Serializable]
@@ -52,6 +53,8 @@ namespace Assets.Scripts.Simulation
 
     public class SimulationBridge : MonoBehaviour
     {
+
+        public string LastAppliedRule { get; private set; } = "Waiting...";
         private Queue<int> pendingDecisions = new Queue<int>();
         [Header("Scene References")]
         [SerializeField] private FactoryLayoutManager layoutManager;
@@ -84,6 +87,7 @@ namespace Assets.Scripts.Simulation
         private TaillardInstance currentInstance;
         private bool episodeActive;
         private int decisionCount;
+        public int DecisionCount => decisionCount;
         private double totalReward;
         private double previousMakespan;
         private int[] perMachineDecisions;
@@ -207,6 +211,7 @@ namespace Assets.Scripts.Simulation
         public StepResult Step(int actionIndex)
         {
             IsWaitingForAction = false;
+            LastAppliedRule = ActionToRule[actionIndex].ToString();
             int chosenJobId = ApplyDispatchingRule(actionIndex, CurrentDecision.MachineId);
             float duration = GetDurationFromTaillardData(chosenJobId, CurrentDecision.MachineId);
 

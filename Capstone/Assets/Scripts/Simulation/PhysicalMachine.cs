@@ -8,6 +8,8 @@ namespace Assets.Scripts.Simulation
     /// @brief Acts as the physical anchor for a machine in the scene.
     /// Manages the actual passage of time and listens for Unity Physics collisions.
     [RequireComponent(typeof(Collider))]
+    [RequireComponent(typeof(Rigidbody))]
+    [RequireComponent(typeof(MachineVisual))]
     public class PhysicalMachine : MonoBehaviour
     {
         public int MachineId { get; private set; }
@@ -45,8 +47,6 @@ namespace Assets.Scripts.Simulation
                 JobVisual job = other.GetComponent<JobVisual>();
                 if (job != null)
                 {
-                    // LOGIC FIX: Check the shipping label!
-                    // Only accept the job if the DES actually routed it to this specific machine.
                     JobTracker tracker = SimulationBridge.Instance.JobManager.GetJobTracker(job.JobId);
                     if (tracker != null && tracker.NextMachineId != MachineId)
                     {
