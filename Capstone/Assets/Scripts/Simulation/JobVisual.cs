@@ -23,7 +23,12 @@ namespace Assets.Scripts.Simulation
 
         [Header("Movement")]
         [Tooltip("How quickly the token moves toward its target position.")]
-        [SerializeField] private float moveSpeed = 8f;
+        [SerializeField] private float moveSpeed = 2f;
+        [Tooltip("How high the job hops when moving between machines.")]
+        [SerializeField] private float hopHeight = 3.0f;
+
+        private Vector3 startPosition;
+        private float travelProgress = 1f;
 
         [Header("State Colors")]
         [SerializeField] private Color notStartedColor = new Color(0.5f, 0.5f, 0.5f, 0.6f);
@@ -32,6 +37,8 @@ namespace Assets.Scripts.Simulation
         [SerializeField] private Color waitingColor = new Color(1.0f, 0.5f, 0.1f, 1f);
         [SerializeField] private Color inTransitColor = new Color(0.3f, 0.6f, 1.0f, 1f);
         [SerializeField] private Color completeColor = new Color(0.3f, 0.3f, 0.3f, 0.4f);
+
+
 
         // ─────────────────────────────────────────────────────────
         //  Runtime state
@@ -70,14 +77,23 @@ namespace Assets.Scripts.Simulation
 
         private void Update()
         {
-            // Smooth movement toward target
-            if (Vector3.SqrMagnitude(transform.position - targetPosition) > 0.001f)
+            // If we haven't reached the destination yet
+            if (travelProgress < 1f)
             {
-                transform.position = Vector3.Lerp(
-                    transform.position,
-                    targetPosition,
-                    Time.deltaTime * moveSpeed
-                );
+                travelProgress += Time.deltaTime * moveSpeed;
+
+                // Clamp it so we don't overshoot
+                if (travelProgress > 1f) travelProgress = 1f;
+
+                // 1. Move linearly along the X/Z floor
+                Vector3 currentPos = Vector3.Lerp(startPosition, targetPosition, travelProgress);
+
+                // 2. Add the vertical hop using a Sine wave
+                // Mathf.PI ensures the wave goes from 0 (start) up to 1 (middle) and back to 0 (end)
+                float currentHeight = Mathf.Sin(travelProgress * Mathf.PI) * hopHeight;
+                currentPos.y += currentHeight;
+
+                transform.position = currentPos;
             }
         }
 
@@ -112,7 +128,10 @@ namespace Assets.Scripts.Simulation
         /// @brief Sets the position the token should move toward.
         public void SetTargetPosition(Vector3 pos)
         {
+            startPosition = transform.position;
             targetPosition = pos;
+            travelProgress = 0f; // Reset progress to trigger the animation
+
         }
 
         /// @brief Updates the token scale to reflect operation progress (0-1).

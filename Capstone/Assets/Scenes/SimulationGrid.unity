@@ -535,14 +535,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Simulation::Assets.Scripts.Simulation.SimulationBridge
   layoutManager: {fileID: 909580045}
-  jobManager: {fileID: 0}
+  JobManager: {fileID: 0}
   taillardJson: {fileID: 4900000, guid: 9c66d6335055314478d787ef69e2ac32, type: 3}
-  fixedRuleIndex: 0
-  useFixedRule: 1
   autoStartOnPlay: 1
-  enableVisuals: 1
-  speedMultiplier: 20
-  flashOnDecision: 1
   OnDecisionRequired:
     m_PersistentCalls:
       m_Calls: []
@@ -718,7 +713,6 @@ MonoBehaviour:
   bridge: {fileID: 1562084950}
   instanceJson: {fileID: 4900000, guid: 9c66d6335055314478d787ef69e2ac32, type: 3}
   maxQueueSlots: 10
-  decisionInterval: 0.5
 --- !u!4 &516692883
 Transform:
   m_ObjectHideFlags: 0
@@ -778,6 +772,38 @@ MonoBehaviour:
   m_UseChildSensors: 1
   m_UseChildActuators: 1
   m_ObservableAttributeHandling: 0
+--- !u!1 &806201106 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 415867845008372083, guid: eb115477829c8429faf15169815647ac, type: 3}
+  m_PrefabInstance: {fileID: 1335901345878530000}
+  m_PrefabAsset: {fileID: 0}
+--- !u!54 &806201112
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 806201106}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &909580044
 GameObject:
   m_ObjectHideFlags: 0
@@ -807,7 +833,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eea145d2124a05444a294d6fbd7049a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Simulation::Assets.Scripts.Simulation.FactoryLayoutManager
-  machinePrefab: {fileID: 1469864124081689482, guid: 52beb639f07b3a94e81b96b233969ff7, type: 3}
+  machinePrefab: {fileID: -1989336749945410295, guid: 52beb639f07b3a94e81b96b233969ff7, type: 3}
   floorTransform: {fileID: 473100912}
   floorSize: {x: 20, y: 20}
   machineYOffset: 0.5
@@ -969,14 +995,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Simulation::Assets.Scripts.Simulation.SimulationBridge
   layoutManager: {fileID: 909580045}
-  jobManager: {fileID: 263971909}
+  JobManager: {fileID: 263971909}
   taillardJson: {fileID: 4900000, guid: 9c66d6335055314478d787ef69e2ac32, type: 3}
-  fixedRuleIndex: 0
-  useFixedRule: 0
   autoStartOnPlay: 0
-  enableVisuals: 1
-  speedMultiplier: 1
-  flashOnDecision: 1
   OnDecisionRequired:
     m_PersistentCalls:
       m_Calls: []
@@ -1091,7 +1112,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 415867845008372083, guid: eb115477829c8429faf15169815647ac, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 806201112}
   m_SourcePrefab: {fileID: 100100000, guid: eb115477829c8429faf15169815647ac, type: 3}
 --- !u!1001 &5692756437812913161
 PrefabInstance:

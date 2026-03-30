@@ -14,86 +14,74 @@ namespace Assets.Scripts.Simulation
         [Header("Observation Config")]
         [SerializeField] private int maxQueueSlots = 10;
 
-        [Header("Spectator Settings")]
-        [SerializeField] private bool visualWait = true;
-        [SerializeField] private float decisionInterval = 0.5f; // Seconds between actions
-        private float lastDecisionTime;
+        // ─── Unity Lifecycle ─────────────────────────────────
 
-        /// <summary>
-        /// True when the bridge failed to start and we need to
-        /// end the episode on the next Academy step (not inside
-        /// OnEpisodeBegin, which would cause recursion).
-        /// </summary>
-        private bool needsDeferredReset;
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+            if (bridge != null)
+            {
+                // Listen for the Bridge to tell us a machine is physically ready
+                bridge.OnDecisionRequired.AddListener(HandleDecisionRequired);
+            }
+        }
 
-        // ─── ML-Agents lifecycle ─────────────────────────────
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+            if (bridge != null)
+            {
+                bridge.OnDecisionRequired.RemoveListener(HandleDecisionRequired);
+            }
+        }
+
+        // ─── ML-Agents Lifecycle ─────────────────────────────
 
         public override void Initialize()
         {
-            // Turn off visuals for training throughput.
-            // bridge.EnableVisuals = false;  // uncomment once you add the setter
-            if (visualWait)
-            {
-                Time.timeScale = 0.5f;
-            }
+            // You can safely manage your time scale from here or a global manager
+            // Time.timeScale = 1.0f; // Set to 100f for fast training later
         }
 
         public override void OnEpisodeBegin()
         {
-            // The Academy may call this before SimulationBridge.Awake()
-            // has initialized the simulator. Guard against that.
-            if (bridge == null || bridge.Simulator == null)
+            if (bridge == null)
             {
-                Debug.LogWarning("[Agent] Bridge not ready yet. Deferring.");
-                needsDeferredReset = true;
+                Debug.LogWarning("[Agent] Bridge not assigned.");
                 return;
             }
 
-            bridge.StartEpisode(instanceJson);
+            // Start the physics episode. 
+            // 1. The Bridge will spawn jobs.
+            // 2. The jobs will physically drop into the Machine trigger colliders.
+            // 3. The PhysicalMachine will tell the Bridge.
+            // 4. The Bridge will fire OnDecisionRequired to wake this agent up.
+            bridge.TaillardJson = instanceJson;
+            bridge.StartEpisode();
+        }
 
-            if (bridge.IsDone)
-            {
-                Debug.LogWarning("[Agent] Episode had no decisions. Deferring reset.");
-                needsDeferredReset = true;
-                return;
-            }
+        // ─── Event Handlers ──────────────────────────────────
 
-            needsDeferredReset = false;
+        private void HandleDecisionRequired(DecisionRequest req)
+        {
+            // This wakes up the ML-Agent, forcing it to CollectObservations 
+            // and output an action to OnActionReceived.
             RequestDecision();
         }
 
-        private void FixedUpdate()
-        {
-            // Handle the deferred reset outside of OnEpisodeBegin.
-            if (needsDeferredReset)
-            {
-                needsDeferredReset = false;
-                EndEpisode();
-            }
-            // Only request a new decision if enough time has passed
-            if (bridge.IsEpisodeActive && !bridge.IsWaitingForAction)
-            {
-                if (Time.time >= lastDecisionTime + decisionInterval)
-                {
-                    RequestDecision();
-                    lastDecisionTime = Time.time;
-                }
-            }
-        }
+        // ─── Agent Logic ─────────────────────────────────────
 
         public override void CollectObservations(VectorSensor sensor)
         {
             DecisionRequest req = bridge.CurrentDecision;
 
-            // Guard: if the bridge hasn't produced a decision yet,
-            // write zeros so the observation size still matches.
+            // Guard: if the bridge isn't waiting for us, write zeros
             bool valid = bridge.IsEpisodeActive
                          && req.QueuedJobIds != null
                          && req.QueuedDurations != null;
 
             if (!valid)
             {
-                // Write the correct number of zeros.
                 for (int i = 0; i < ObservationSize; i++)
                     sensor.AddObservation(0f);
                 return;
@@ -125,21 +113,23 @@ namespace Assets.Scripts.Simulation
 
         public override void OnActionReceived(ActionBuffers actions)
         {
-            if (!bridge.IsWaitingForAction)
-            {
-                return;
-            }
+            // Double check that the bridge actually wants an action
+            if (!bridge.IsWaitingForAction) return;
 
             int pdrIndex = actions.DiscreteActions[0];
-            Debug.Log($"[Agent] Decision #{bridge.DecisionCount}: chose action {pdrIndex}");
 
+            // Apply the step to the physical machine
             StepResult result = bridge.Step(pdrIndex);
+
+            // Log the reward from the elapsed physics time
             AddReward(result.Reward);
 
             if (result.Done)
+            {
                 EndEpisode();
-            else if (visualWait)
-                RequestDecision();
+            }
+            // Notice there is no RequestDecision() here anymore!
+            // We patiently wait for the next HandleDecisionRequired event.
         }
 
         public override void Heuristic(in ActionBuffers actionsOut)
