@@ -14,6 +14,11 @@ namespace Assets.Scripts.Simulation
         [Header("Observation Config")]
         [SerializeField] private int maxQueueSlots = 10;
 
+        [Header("Spectator Settings")]
+        [SerializeField] private bool visualWait = true;
+        [SerializeField] private float decisionInterval = 0.5f; // Seconds between actions
+        private float lastDecisionTime;
+
         /// <summary>
         /// True when the bridge failed to start and we need to
         /// end the episode on the next Academy step (not inside
@@ -27,6 +32,10 @@ namespace Assets.Scripts.Simulation
         {
             // Turn off visuals for training throughput.
             // bridge.EnableVisuals = false;  // uncomment once you add the setter
+            if (visualWait)
+            {
+                Time.timeScale = 0.5f;
+            }
         }
 
         public override void OnEpisodeBegin()
@@ -44,8 +53,6 @@ namespace Assets.Scripts.Simulation
 
             if (bridge.IsDone)
             {
-                // Can't call EndEpisode() here — ML-Agents forbids it
-                // inside OnEpisodeBegin. Defer to next FixedUpdate.
                 Debug.LogWarning("[Agent] Episode had no decisions. Deferring reset.");
                 needsDeferredReset = true;
                 return;
@@ -61,7 +68,16 @@ namespace Assets.Scripts.Simulation
             if (needsDeferredReset)
             {
                 needsDeferredReset = false;
-                EndEpisode(); // safe here — not inside OnEpisodeBegin
+                EndEpisode();
+            }
+            // Only request a new decision if enough time has passed
+            if (bridge.IsEpisodeActive && !bridge.IsWaitingForAction)
+            {
+                if (Time.time >= lastDecisionTime + decisionInterval)
+                {
+                    RequestDecision();
+                    lastDecisionTime = Time.time;
+                }
             }
         }
 
@@ -122,7 +138,7 @@ namespace Assets.Scripts.Simulation
 
             if (result.Done)
                 EndEpisode();
-            else
+            else if (visualWait)
                 RequestDecision();
         }
 

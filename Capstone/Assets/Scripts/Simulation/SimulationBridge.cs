@@ -130,7 +130,7 @@ namespace Assets.Scripts.Simulation
         [Header("Scene References")]
         [SerializeField] private FactoryLayoutManager layoutManager;
 
-        // TODO Step 3: [SerializeField] private JobManager jobManager;
+        [SerializeField] private JobManager jobManager;
         // TODO Step 4: [SerializeField] private AGVPool agvPool;
 
         // ─────────────────────────────────────────────────────────
@@ -164,6 +164,10 @@ namespace Assets.Scripts.Simulation
             get => enableVisuals;
             set => enableVisuals = value;
         }
+
+        /// @brief The job tracking manager. Used by ObservationBuilder to
+        /// query per-job state, positions, and scheduling matrix data.
+        public JobManager JobManager => jobManager;
 
         [Tooltip("Speed multiplier for visual playback between decisions.")]
         [Range(0.1f, 100f)]
@@ -320,7 +324,10 @@ namespace Assets.Scripts.Simulation
             if (enableVisuals && layoutManager != null)
             {
                 layoutManager.BuildFloor(simulator);
-                // TODO Step 3: jobManager.SpawnJobs(simulator);
+            }
+            if (jobManager != null)
+            {
+                jobManager.Initialize(simulator, enableVisuals);
             }
 
             // ── Reset episode tracking ───────────────────────────
@@ -336,6 +343,12 @@ namespace Assets.Scripts.Simulation
 
             // ── Advance to the first decision point ──────────────
             AdvanceToNextDecision();
+
+            if (jobManager != null)
+            {
+                jobManager.SyncFromDES(simulator.CurrentTime);
+            }
+
         }
 
         /// @brief The core Gymnasium-style step function.
@@ -388,6 +401,12 @@ namespace Assets.Scripts.Simulation
 
             // ── 4. Advance to next decision or episode end ──────
             AdvanceToNextDecision();
+
+            // ── 4b.Sync job tracking ───────────────────────────
+            if (jobManager != null)
+            {
+                jobManager.SyncFromDES(simulator.CurrentTime);
+            }
 
             // ── 5. Compute reward ───────────────────────────────
             double currentMakespan = ComputeRunningMakespan();
