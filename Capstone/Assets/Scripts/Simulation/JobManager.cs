@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using Assets.Scripts.Scheduling.Core;
+using Assets.Scripts.Scheduling.Data;
 
 namespace Assets.Scripts.Simulation
 {
@@ -28,7 +28,6 @@ namespace Assets.Scripts.Simulation
         public int CurrentMachineId;
         public int NextMachineId;
         public double StateEntryTime;
-        public double TimeInCurrentState;
         public double TotalWaitTime;
         public double TotalTransitTime;
         public float OperationProgress;
@@ -38,6 +37,7 @@ namespace Assets.Scripts.Simulation
         public bool PhysicallyAtMachine;
         public int IncomingQueueSlot;
         public JobVisual Visual;
+        public int TimeInCurrentState;
     }
 
     public class JobManager : MonoBehaviour
@@ -62,11 +62,7 @@ namespace Assets.Scripts.Simulation
         [SerializeField] private Transform exitAreaMarker;
         [SerializeField] private Vector3 exitAreaOrigin = new Vector3(-5f, 0f, 10f);
 
-        [Header("Machine Queue")]
-        [SerializeField] private Vector3 machineQueueDirection = Vector3.back;
-
         private JobTracker[] trackers;
-        private DESSimulator simulator;
         private bool initialized;
         private Transform jobTokenParent;
 
@@ -74,10 +70,13 @@ namespace Assets.Scripts.Simulation
         public int JobCount => trackers?.Length ?? 0;
         public bool IsInitialized => initialized;
 
-        public void Initialize(DESSimulator sim, bool spawnVisuals = true)
+        // ─────────────────────────────────────────────────────────
+        //  Initialization
+        // ─────────────────────────────────────────────────────────
+
+        public void Initialize(TaillardInstance instance, bool spawnVisuals = true)
         {
-            simulator = sim;
-            int jobCount = sim.Jobs.Length;
+            int jobCount = instance.JobCount;
             Cleanup();
 
             if (spawnVisuals)
@@ -90,8 +89,7 @@ namespace Assets.Scripts.Simulation
 
             for (int j = 0; j < jobCount; j++)
             {
-                Job job = sim.Jobs[j];
-                int opCount = job.Operations.Length;
+                int opCount = instance.MachineCount; // Taillard instances visit every machine
 
                 var tracker = new JobTracker
                 {
@@ -102,7 +100,7 @@ namespace Assets.Scripts.Simulation
                     CompletedOperations = 0,
                     WorldPosition = GetIncomingQueuePosition(j),
                     CurrentMachineId = -1,
-                    NextMachineId = opCount > 0 ? job.Operations[0].MachineId : -1,
+                    NextMachineId = instance.machines_matrix[j][0],
                     StateEntryTime = 0,
                     TimeInCurrentState = 0,
                     TotalWaitTime = 0,
@@ -117,8 +115,8 @@ namespace Assets.Scripts.Simulation
 
                 for (int o = 0; o < opCount; o++)
                 {
-                    tracker.OperationMachineIds[o] = job.Operations[o].MachineId;
-                    tracker.OperationDurations[o] = (float)job.Operations[o].Duration;
+                    tracker.OperationMachineIds[o] = instance.machines_matrix[j][o];
+                    tracker.OperationDurations[o] = (float)instance.duration_matrix[j][o];
                     tracker.OperationStatuses[o] = 0f;
                 }
 
@@ -137,40 +135,7 @@ namespace Assets.Scripts.Simulation
                 trackers[j] = tracker;
             }
             initialized = true;
-        }
-
-        public void SyncFromDES(double currentSimTime)
-        {
-            if (!initialized || simulator?.Jobs == null) return;
-
-            for (int j = 0; j < trackers.Length; j++)
-            {
-                JobTracker tracker = trackers[j];
-                Job job = simulator.Jobs[j];
-                JobLifecycleState previousState = tracker.State;
-                UpdateTrackerState(tracker, job, currentSimTime);
-
-                if (tracker.State != previousState)
-                {
-                    double elapsed = currentSimTime - tracker.StateEntryTime;
-                    if (previousState == JobLifecycleState.Queued)
-                        tracker.TotalWaitTime += elapsed;
-                    else if (previousState == JobLifecycleState.InTransit)
-                        tracker.TotalTransitTime += elapsed;
-
-                    tracker.StateEntryTime = currentSimTime;
-                }
-
-                tracker.TimeInCurrentState = currentSimTime - tracker.StateEntryTime;
-                UpdateTrackerPosition(tracker);
-
-                if (tracker.Visual != null)
-                {
-                    tracker.Visual.SetState(tracker.State);
-                    tracker.Visual.SetTargetPosition(tracker.WorldPosition);
-                    tracker.Visual.SetProgress(tracker.OperationProgress);
-                }
-            }
+            Debug.Log($"[JobManager] Initialized {jobCount} job trackers directly from JSON data.");
         }
 
         public void Cleanup()
@@ -180,156 +145,89 @@ namespace Assets.Scripts.Simulation
             initialized = false;
         }
 
-        private void UpdateTrackerState(JobTracker tracker, Job job, double currentSimTime)
+        // ─────────────────────────────────────────────────────────
+        //  Manual State Tracking (Driven by Physics)
+        // ─────────────────────────────────────────────────────────
+
+        public void MarkJobArrivedAtMachine(int jobId, int machineId)
         {
-            int completedOps = 0;
-            int activeOpIndex = -1;
-            Operation activeOp = null;
+            JobTracker t = GetJobTracker(jobId);
+            if (t == null) return;
 
-            for (int o = 0; o < job.Operations.Length; o++)
-            {
-                Operation op = job.Operations[o];
-                if (op.EndTime > 0)
-                {
-                    completedOps++;
-                    tracker.OperationStatuses[o] = 1.0f;
-                }
-                else if (op.StartTime > 0)
-                {
-                    activeOpIndex = o;
-                    activeOp = op;
-                    tracker.OperationStatuses[o] = 0.5f;
-                }
-                else
-                {
-                    tracker.OperationStatuses[o] = 0f;
-                }
-            }
+            t.State = JobLifecycleState.Queued;
+            t.CurrentMachineId = machineId;
+            t.PhysicallyAtMachine = true;
 
-            tracker.CompletedOperations = completedOps;
+            if (t.Visual != null) t.Visual.SetState(t.State);
+        }
 
-            if (completedOps == job.Operations.Length)
-            {
-                tracker.State = JobLifecycleState.Complete;
-                tracker.CurrentOperationIndex = job.Operations.Length;
-                tracker.CurrentMachineId = -1;
-                tracker.NextMachineId = -1;
-                tracker.OperationProgress = 0f;
-                tracker.PhysicallyAtMachine = false;
-            }
-            else if (activeOp != null)
-            {
-                tracker.State = JobLifecycleState.Processing;
-                tracker.CurrentOperationIndex = activeOpIndex;
-                tracker.CurrentMachineId = activeOp.MachineId;
-                tracker.OperationProgress = ComputeProgress(activeOp, currentSimTime);
-                tracker.PhysicallyAtMachine = true;
-                int nextIdx = activeOpIndex + 1;
-                tracker.NextMachineId = nextIdx < job.Operations.Length ? job.Operations[nextIdx].MachineId : -1;
-            }
-            else if (completedOps > 0)
-            {
-                tracker.CurrentOperationIndex = completedOps;
-                tracker.OperationProgress = 0f;
-                int nextMachineId = job.Operations[completedOps].MachineId;
-                Machine nextMachine = simulator.Machines[nextMachineId];
-                bool inDESQueue = nextMachine.WaitingQueue.Any(op => op.JobId == tracker.JobId);
+        public void MarkOperationStarted(int jobId, double simTime)
+        {
+            JobTracker t = GetJobTracker(jobId);
+            if (t == null) return;
 
-                if (inDESQueue)
+            t.State = JobLifecycleState.Processing;
+
+            // Accurately log wait time from when it arrived until now
+            t.TotalWaitTime += (simTime - t.StateEntryTime);
+            t.StateEntryTime = simTime;
+
+            t.OperationStatuses[t.CurrentOperationIndex] = 0.5f;
+
+            if (t.Visual != null) t.Visual.SetState(t.State);
+        }
+
+        public void MarkOperationComplete(int jobId, double simTime)
+        {
+            if (!initialized) return;
+
+            JobTracker t = trackers[jobId];
+            if (t.CurrentOperationIndex >= t.TotalOperations) return;
+
+            t.CompletedOperations++;
+            t.OperationStatuses[t.CurrentOperationIndex] = 1.0f; // Mark as done
+            t.StateEntryTime = simTime;
+
+            // Check if entire job is complete
+            if (t.CompletedOperations >= t.TotalOperations)
+            {
+                t.State = JobLifecycleState.Complete;
+                t.CurrentMachineId = -1;
+                t.NextMachineId = -1;
+                t.OperationProgress = 0f;
+
+                if (t.Visual != null)
                 {
-                    tracker.State = JobLifecycleState.Queued;
-                    tracker.CurrentMachineId = nextMachineId;
-                    tracker.PhysicallyAtMachine = true;
+                    t.Visual.SetState(t.State);
+                    t.Visual.SetTargetPosition(GetExitAreaPosition(t.IncomingQueueSlot));
                 }
-                else
-                {
-                    tracker.State = JobLifecycleState.WaitingForTransport;
-                    tracker.CurrentMachineId = -1;
-                    tracker.PhysicallyAtMachine = false;
-                }
-                tracker.NextMachineId = nextMachineId;
             }
             else
             {
-                int firstMachineId = job.Operations[0].MachineId;
-                Machine firstMachine = simulator.Machines[firstMachineId];
-                bool inFirstQueue = firstMachine.WaitingQueue.Any(op => op.JobId == tracker.JobId);
+                t.State = JobLifecycleState.WaitingForTransport;
+                t.CurrentOperationIndex++;
+                t.NextMachineId = t.OperationMachineIds[t.CurrentOperationIndex];
+                t.CurrentMachineId = -1;
+                t.OperationProgress = 0f;
 
-                if (inFirstQueue)
-                {
-                    tracker.State = JobLifecycleState.Queued;
-                    tracker.CurrentMachineId = firstMachineId;
-                    tracker.PhysicallyAtMachine = true;
-                }
-                else
-                {
-                    tracker.State = JobLifecycleState.NotStarted;
-                    tracker.CurrentMachineId = -1;
-                    tracker.PhysicallyAtMachine = false;
-                }
-
-                tracker.NextMachineId = firstMachineId;
-                tracker.CurrentOperationIndex = 0;
-                tracker.OperationProgress = 0f;
+                if (t.Visual != null) t.Visual.SetState(t.State);
             }
         }
 
-        private float ComputeProgress(Operation op, double currentSimTime)
+        public bool AreAllJobsComplete()
         {
-            if (op.Duration <= 0) return 1f;
-            double elapsed = currentSimTime - op.StartTime;
-            return Mathf.Clamp01((float)(elapsed / op.Duration));
-        }
+            if (!initialized) return false;
 
-        private void UpdateTrackerPosition(JobTracker tracker)
-        {
-            switch (tracker.State)
+            foreach (var t in trackers)
             {
-                case JobLifecycleState.NotStarted:
-                case JobLifecycleState.WaitingForTransport:
-                    tracker.WorldPosition = GetIncomingQueuePosition(tracker.IncomingQueueSlot);
-                    break;
-
-                case JobLifecycleState.Complete:
-                    tracker.WorldPosition = GetExitAreaPosition(tracker.IncomingQueueSlot);
-                    break;
-
-                case JobLifecycleState.Processing:
-                    if (tracker.CurrentMachineId >= 0 && layoutManager != null)
-                    {
-                        // FIXED: Uses GetMachine() to get the PhysicalMachine
-                        PhysicalMachine pm = layoutManager.GetMachine(tracker.CurrentMachineId);
-                        if (pm != null)
-                        {
-                            tracker.WorldPosition = pm.transform.position + Vector3.up * jobTokenHeight;
-                        }
-                    }
-                    break;
-
-                case JobLifecycleState.Queued:
-                    if (tracker.CurrentMachineId >= 0 && layoutManager != null)
-                    {
-                        // FIXED: Uses GetMachine() to get the PhysicalMachine
-                        PhysicalMachine pm = layoutManager.GetMachine(tracker.CurrentMachineId);
-                        if (pm != null)
-                        {
-                            float offset = GetMachineQueueSlotOffset(tracker.CurrentMachineId, tracker.JobId);
-                            tracker.WorldPosition = pm.transform.position +
-                                Vector3.up * jobTokenHeight +
-                                machineQueueDirection.normalized * (offset + queueSpacing);
-                        }
-                    }
-                    else
-                    {
-                        tracker.WorldPosition = GetIncomingQueuePosition(tracker.IncomingQueueSlot);
-                    }
-                    break;
-
-                case JobLifecycleState.InTransit:
-                    tracker.WorldPosition = GetIncomingQueuePosition(tracker.IncomingQueueSlot);
-                    break;
+                if (t.State != JobLifecycleState.Complete) return false;
             }
+            return true;
         }
+
+        // ─────────────────────────────────────────────────────────
+        //  Grid layout helpers
+        // ─────────────────────────────────────────────────────────
 
         private Vector3 GetIncomingQueuePosition(int slot)
         {
@@ -351,18 +249,6 @@ namespace Assets.Scripts.Simulation
             return origin + rowDir * (col * queueGridSpacing) + colDir * (row * queueGridSpacing) + Vector3.up * jobTokenHeight;
         }
 
-        private float GetMachineQueueSlotOffset(int machineId, int jobId)
-        {
-            Machine machine = simulator.Machines[machineId];
-            int slotIndex = 0;
-            foreach (Operation op in machine.WaitingQueue)
-            {
-                if (op.JobId == jobId) break;
-                slotIndex++;
-            }
-            return slotIndex * queueSpacing;
-        }
-
         // ─────────────────────────────────────────────────────────
         //  Query API
         // ─────────────────────────────────────────────────────────
@@ -373,12 +259,23 @@ namespace Assets.Scripts.Simulation
             return trackers[jobId];
         }
 
-        public Vector3 GetJobPosition(int jobId) => GetJobTracker(jobId)?.WorldPosition ?? Vector3.zero;
-        public JobLifecycleState GetJobState(int jobId) => GetJobTracker(jobId)?.State ?? JobLifecycleState.NotStarted;
-        public float GetOperationProgress(int jobId) => GetJobTracker(jobId)?.OperationProgress ?? 0f;
-        public double GetWaitTime(int jobId) => GetJobTracker(jobId)?.TotalWaitTime ?? 0;
-        public double GetTransitTime(int jobId) => GetJobTracker(jobId)?.TotalTransitTime ?? 0;
+        public float[] GetJobPositionsFlat()
+        {
+            if (!initialized) return null;
+            float[] positions = new float[trackers.Length * 2];
+            for (int j = 0; j < trackers.Length; j++)
+            {
+                // In physics mode, the Visual object holds the true physical location
+                Vector3 pos = trackers[j].WorldPosition;
+                if (trackers[j].Visual != null) pos = trackers[j].Visual.transform.position;
 
+                positions[j * 2 + 0] = pos.x;
+                positions[j * 2 + 1] = pos.z;
+            }
+            return positions;
+        }
+
+        // GetJobScalarsFlat and GetSchedulingMatrixFlat remain the same...
         public float[] GetSchedulingMatrixFlat(int numMachines)
         {
             if (!initialized) return null;
@@ -403,18 +300,6 @@ namespace Assets.Scripts.Simulation
                 }
             }
             return matrix;
-        }
-
-        public float[] GetJobPositionsFlat()
-        {
-            if (!initialized) return null;
-            float[] positions = new float[trackers.Length * 2];
-            for (int j = 0; j < trackers.Length; j++)
-            {
-                positions[j * 2 + 0] = trackers[j].WorldPosition.x;
-                positions[j * 2 + 1] = trackers[j].WorldPosition.z;
-            }
-            return positions;
         }
 
         public float[] GetJobScalarsFlat(double currentSimTime)
@@ -446,75 +331,6 @@ namespace Assets.Scripts.Simulation
                 JobLifecycleState.Complete => 1.0f,
                 _ => 0.0f,
             };
-        }
-
-        public void BeginTransit(int jobId, int destinationMachineId, double simTime)
-        {
-            JobTracker t = GetJobTracker(jobId);
-            if (t == null) return;
-            t.State = JobLifecycleState.InTransit;
-            t.NextMachineId = destinationMachineId;
-            t.StateEntryTime = simTime;
-        }
-
-        public void CompleteTransit(int jobId, int machineId, double simTime)
-        {
-            JobTracker t = GetJobTracker(jobId);
-            if (t == null) return;
-            double transitDuration = simTime - t.StateEntryTime;
-            t.TotalTransitTime += transitDuration;
-            t.State = JobLifecycleState.Queued;
-            t.CurrentMachineId = machineId;
-            t.StateEntryTime = simTime;
-        }
-
-        // ─────────────────────────────────────────────────────────
-        //  NEW: Manual tracking for Unity Physics Clock updates
-        // ─────────────────────────────────────────────────────────
-
-        public void MarkOperationComplete(int jobId)
-        {
-            if (!initialized) return;
-
-            JobTracker t = trackers[jobId];
-            if (t.CurrentOperationIndex >= t.TotalOperations) return;
-
-            t.CompletedOperations++;
-            t.OperationStatuses[t.CurrentOperationIndex] = 1.0f; // Mark as done
-
-            // Check if entire job is complete
-            if (t.CompletedOperations >= t.TotalOperations)
-            {
-                t.State = JobLifecycleState.Complete;
-                t.CurrentMachineId = -1;
-                t.NextMachineId = -1;
-                t.OperationProgress = 0f;
-            }
-            else
-            {
-                t.State = JobLifecycleState.WaitingForTransport;
-                t.CurrentOperationIndex++;
-                t.NextMachineId = t.OperationMachineIds[t.CurrentOperationIndex];
-                t.CurrentMachineId = -1;
-                t.OperationProgress = 0f;
-            }
-
-            // Immediately force a visual update
-            if (t.Visual != null)
-            {
-                t.Visual.SetState(t.State);
-            }
-        }
-
-        public bool AreAllJobsComplete()
-        {
-            if (!initialized) return false;
-
-            foreach (var t in trackers)
-            {
-                if (t.State != JobLifecycleState.Complete) return false;
-            }
-            return true;
         }
     }
 }

@@ -126,7 +126,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6798081679bdd479aafd59daa8842c73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Simulation::Assets.Scripts.Simulation.JobVisual
-  moveSpeed: 8
+  moveSpeed: 1
+  hopHeight: 3
   notStartedColor: {r: 0.5, g: 0.5, b: 0.5, a: 0.6}
   queuedColor: {r: 1, g: 0.85, b: 0.2, a: 1}
   processingColor: {r: 0.2, g: 0.8, b: 0.2, a: 1}

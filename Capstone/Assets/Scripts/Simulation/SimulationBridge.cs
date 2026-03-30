@@ -5,6 +5,7 @@ using UnityEngine.Events;
 using Assets.Scripts.Scheduling.Core;
 using Assets.Scripts.Scheduling.Data;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace Assets.Scripts.Simulation
 {
@@ -51,6 +52,7 @@ namespace Assets.Scripts.Simulation
 
     public class SimulationBridge : MonoBehaviour
     {
+        private Queue<int> pendingDecisions = new Queue<int>();
         [Header("Scene References")]
         [SerializeField] private FactoryLayoutManager layoutManager;
         public JobManager JobManager;
@@ -130,7 +132,7 @@ namespace Assets.Scripts.Simulation
             }
             if (JobManager != null)
             {
-                JobManager.Initialize(simulator, spawnVisuals: true);
+                JobManager.Initialize(currentInstance, spawnVisuals: true);
             }
 
             episodeActive = true;
@@ -139,6 +141,7 @@ namespace Assets.Scripts.Simulation
             previousMakespan = 0;
             perMachineDecisions = new int[simulator.Machines.Length];
             IsWaitingForAction = false;
+            pendingDecisions.Clear();
 
             StartTime = Time.time;
 
@@ -156,13 +159,15 @@ namespace Assets.Scripts.Simulation
 
         public void OnJobArrivedInQueue(int machineId, int jobId)
         {
+            JobManager.MarkJobArrivedAtMachine(jobId, machineId);
             CheckIfDecisionNeeded(machineId);
         }
 
         public void OnMachineFinished(int machineId, int jobId)
         {
             // Update tracking
-            JobManager.MarkOperationComplete(jobId);
+            JobManager.MarkOperationComplete(jobId, SimTime);
+
 
             // Check for Win State
             if (JobManager.AreAllJobsComplete())
@@ -187,9 +192,11 @@ namespace Assets.Scripts.Simulation
 
             if (machine != null && machine.IsIdle && machine.PhysicalQueue.Count > 0)
             {
-                CurrentDecision = BuildDecisionRequest(machine);
-                IsWaitingForAction = true;
-                OnDecisionRequired?.Invoke(CurrentDecision);
+                // Only add it if it's not already standing in line
+                if (!pendingDecisions.Contains(machineId))
+                {
+                    pendingDecisions.Enqueue(machineId);
+                }
             }
         }
 
@@ -205,7 +212,7 @@ namespace Assets.Scripts.Simulation
 
             PhysicalMachine machine = layoutManager.GetMachine(CurrentDecision.MachineId);
             machine.StartProcessing(chosenJobId, duration);
-
+            JobManager.MarkOperationStarted(chosenJobId, SimTime);
             float stepReward = CalculateReward();
             totalReward += stepReward;
             perMachineDecisions[CurrentDecision.MachineId]++;
@@ -314,6 +321,34 @@ namespace Assets.Scripts.Simulation
 
             Debug.Log($"[SimBridge] Episode complete: makespan={result.Makespan:F1}, decisions={result.DecisionPoints}");
             OnEpisodeFinished?.Invoke(result);
+        }
+        private void Update()
+        {
+            if (!episodeActive) return;
+
+            // If the ML-Agent is currently thinking about a decision, pause and wait.
+            if (IsWaitingForAction) return;
+
+            // If the Agent is free, and we have machines waiting for instructions...
+            while (pendingDecisions.Count > 0)
+            {
+                int nextMachineId = pendingDecisions.Dequeue();
+                PhysicalMachine machine = layoutManager.GetMachine(nextMachineId);
+
+                // Double check the machine didn't already start processing somehow
+                if (machine != null && machine.IsIdle && machine.PhysicalQueue.Count > 0)
+                {
+                    CurrentDecision = BuildDecisionRequest(machine);
+                    IsWaitingForAction = true;
+
+                    // Wake up the Agent!
+                    OnDecisionRequired?.Invoke(CurrentDecision);
+
+                    // Break out of the loop so we don't ask the Agent for 
+                    // another decision until it finishes this one.
+                    return;
+                }
+            }
         }
 
         private void DispatchGhostAGV(int jobId, int targetMachineId)

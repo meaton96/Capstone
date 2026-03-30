@@ -101,6 +101,7 @@ namespace Assets.Scripts.Simulation
             if (visualLayer != null)
             {
                 visualLayer.BeginOperation(jobId, Time.time, realTimeDuration);
+                visualLayer.UpdateQueueLabel(PhysicalQueue.Count);
             }
 
             StartCoroutine(ProcessJobRoutine(jobId, realTimeDuration));
