@@ -571,7 +571,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Simulation::Assets.Scripts.Simulation.SimulationBridge
   layoutManager: {fileID: 909580045}
   JobManager: {fileID: 0}
-  taillardJson: {fileID: 4900000, guid: 9c66d6335055314478d787ef69e2ac32, type: 3}
+  taillardJson: {fileID: 0}
   autoStartOnPlay: 1
   OnDecisionRequired:
     m_PersistentCalls:
@@ -869,7 +869,6 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   bridge: {fileID: 1562084950}
-  instanceJson: {fileID: 4900000, guid: 9c66d6335055314478d787ef69e2ac32, type: 3}
   maxQueueSlots: 10
 --- !u!4 &516692883
 Transform:

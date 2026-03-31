@@ -9,7 +9,7 @@ namespace Assets.Scripts.Simulation
     {
         [Header("References")]
         [SerializeField] private SimulationBridge bridge;
-        [SerializeField] private TextAsset instanceJson;
+        private TextAsset instanceJson;
 
         [Header("Observation Config")]
         [SerializeField] private int maxQueueSlots = 10;
@@ -56,7 +56,8 @@ namespace Assets.Scripts.Simulation
             // 2. The jobs will physically drop into the Machine trigger colliders.
             // 3. The PhysicalMachine will tell the Bridge.
             // 4. The Bridge will fire OnDecisionRequired to wake this agent up.
-            bridge.TaillardJson = instanceJson;
+            //bridge.TaillardJson = instanceJson;
+            instanceJson = bridge.TaillardJson;
             bridge.StartEpisode();
         }
 
