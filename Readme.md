@@ -2,7 +2,7 @@
 
 A real-time 3D visualisation of a job shop scheduling problem, where an AI agent learns to assign jobs to machines as efficiently as possible.
 
-**[⬇ Download Latest Release](https://github.com/meaton96/Capstone/releases/tag/v0.0.1)**
+**[⬇ Download Latest Release](https://github.com/meaton96/Capstone/releases/latest)**
 
 ---
 
