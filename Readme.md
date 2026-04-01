@@ -9,7 +9,7 @@ A real-time 3D visualisation of a job shop scheduling problem, where an AI agent
 ## Getting Started
 
 1. Download and unzip the release
-2. Run `JobShopSim.exe`
+2. Run `Capstone.exe`
 3. Select an instance from the dropdown and click **Start Sim**
 
 No installation required.
