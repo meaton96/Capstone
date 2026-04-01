@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Assets.Scripts.Scheduling.Data;
 
@@ -248,7 +249,7 @@ namespace Assets.Scripts.Scheduling.Core
         /// machine count, and per-job operation sequences with durations.
         public void LoadInstance(TaillardInstance instance)
         {
-            
+
             int jobCount = instance.JobCount;
             int machineCount = instance.MachineCount;
 
@@ -267,7 +268,6 @@ namespace Assets.Scripts.Scheduling.Core
                 }
                 Jobs[j] = new Job(j, operations, arrivalTime: 0);
             }
-
             Reset();
         }
 

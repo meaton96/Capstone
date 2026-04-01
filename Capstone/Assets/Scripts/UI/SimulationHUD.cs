@@ -5,6 +5,12 @@ using UnityEngine.UI;
 
 namespace Assets.Scripts.UI
 {
+    /// @brief Heads-up display that polls @c SimulationBridge each frame and
+    ///        surfaces key episode metrics to the player.
+    ///
+    /// @details Displays current simulation time, the last dispatching rule applied,
+    /// total decision count, and a completed-jobs tally. Also owns a time-scale
+    /// slider that directly modifies @c Time.timeScale.
     public class SimulationHUD : MonoBehaviour
     {
         [Header("UI Text References")]
@@ -12,25 +18,28 @@ namespace Assets.Scripts.UI
         [SerializeField] private TextMeshProUGUI ruleText;
         [SerializeField] private TextMeshProUGUI jobsText;
         [SerializeField] private TextMeshProUGUI decisionsText;
+
         [Header("Time Controls")]
         [SerializeField] private Slider timeScaleSlider;
         [SerializeField] private TextMeshProUGUI timeScaleValueText;
 
+        // ─────────────────────────────────────────────────────────
+        //  Unity Lifecycle
+        // ─────────────────────────────────────────────────────────
+
+        /// @brief Syncs the slider's initial value with @c Time.timeScale and
+        ///        registers the value-changed listener.
         private void Start()
         {
-            // Set up the slider if it has been assigned in the Inspector
             if (timeScaleSlider != null)
             {
-                // Sync the slider's starting value with the current game time scale
                 timeScaleSlider.value = Time.timeScale;
-
-                // Add a listener so the method is called automatically when you drag the slider
                 timeScaleSlider.onValueChanged.AddListener(OnTimeScaleChanged);
-
-                // Initialize the text label
                 UpdateScaleText(Time.timeScale);
             }
         }
+
+        /// @brief Removes the slider listener to prevent stale callbacks after destruction.
         private void OnDestroy()
         {
             if (timeScaleSlider != null)
@@ -38,63 +47,58 @@ namespace Assets.Scripts.UI
                 timeScaleSlider.onValueChanged.RemoveListener(OnTimeScaleChanged);
             }
         }
-        private void UpdateScaleText(float scale)
-        {
-            if (timeScaleValueText != null)
-            {
-                timeScaleValueText.text = $"SPEED: {scale:F1}x";
-            }
-        }
 
-        // This method fires whenever the slider is moved
-        public void OnTimeScaleChanged(float newScale)
-        {
-            // Unity's built-in way to speed up, slow down, or pause time
-            Time.timeScale = newScale;
-            UpdateScaleText(newScale);
-        }
-
+        /// @brief Polls the bridge and refreshes all HUD labels once per frame.
+        /// @details Exits early if no active episode is running.
         private void Update()
         {
-            // Don't update if the bridge isn't ready or the episode is over
             if (SimulationBridge.Instance == null || !SimulationBridge.Instance.IsEpisodeActive)
                 return;
 
-            // 1. Current Simulation Time (Makespan)
             if (timeText != null)
-            {
                 timeText.text = $"SIM TIME: {SimulationBridge.Instance.SimTime:F1}s";
-            }
 
-            // 2. Last Applied Dispatching Rule
             if (ruleText != null)
-            {
                 ruleText.text = $"LAST RULE: {SimulationBridge.Instance.LastAppliedRule}";
-            }
 
-            // 3. Decisions Made
             if (decisionsText != null)
-            {
                 decisionsText.text = $"DECISIONS: {SimulationBridge.Instance.DecisionCount}";
-            }
 
-            // 4. Job Progress
-            if (jobsText != null && SimulationBridge.Instance.JobManager != null && SimulationBridge.Instance.JobManager.IsInitialized)
+            if (jobsText != null
+                && SimulationBridge.Instance.JobManager != null
+                && SimulationBridge.Instance.JobManager.IsInitialized)
             {
                 int totalJobs = SimulationBridge.Instance.JobManager.JobCount;
                 int completedJobs = 0;
 
-                // Quickly tally up how many jobs are totally finished
                 foreach (var tracker in SimulationBridge.Instance.JobManager.JobTrackers)
                 {
                     if (tracker.State == JobLifecycleState.Complete)
-                    {
                         completedJobs++;
-                    }
                 }
 
                 jobsText.text = $"JOBS DONE: {completedJobs} / {totalJobs}";
             }
+        }
+
+        // ─────────────────────────────────────────────────────────
+        //  Time Scale Controls
+        // ─────────────────────────────────────────────────────────
+
+        /// @brief Slider callback that applies @p newScale to @c Time.timeScale.
+        /// @param newScale  The value chosen by the user on the slider.
+        public void OnTimeScaleChanged(float newScale)
+        {
+            Time.timeScale = newScale;
+            UpdateScaleText(newScale);
+        }
+
+        /// @brief Refreshes the speed label to reflect the current time scale.
+        /// @param scale  The time scale value to display.
+        private void UpdateScaleText(float scale)
+        {
+            if (timeScaleValueText != null)
+                timeScaleValueText.text = $"SPEED: {scale:F1}x";
         }
     }
 }

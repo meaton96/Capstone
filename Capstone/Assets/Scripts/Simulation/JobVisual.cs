@@ -2,19 +2,17 @@ using UnityEngine;
 
 namespace Assets.Scripts.Simulation
 {
-    /// @file JobVisual.cs
     /// @brief Visual token representing a single job on the factory floor.
     ///
     /// @details Attach this to a small prefab (e.g., a colored cube or sphere).
-    /// The JobManager sets its position and state each sync cycle. The token
-    /// smoothly interpolates to its target position so it doesn't teleport
-    /// when the DES jumps forward in time.
+    /// The @c JobManager sets its target position and state each time a physics
+    /// event fires. The token smoothly interpolates toward its destination using
+    /// a parabolic arc so it visually hops between machines.
     ///
     /// @par Prefab Setup
-    /// Create a small GameObject (0.3-0.5 scale) with a MeshRenderer.
-    /// Add this component. The JobManager will call Initialize() at episode start.
-    /// Colors are set automatically based on lifecycle state.
-
+    /// Create a small GameObject (0.3–0.5 scale) with a @c MeshRenderer.
+    /// Add this component. @c JobManager.Initialize() will call @c Initialize()
+    /// at episode start. Colors are set automatically from lifecycle state.
     public class JobVisual : MonoBehaviour
     {
         // ─────────────────────────────────────────────────────────
@@ -24,11 +22,9 @@ namespace Assets.Scripts.Simulation
         [Header("Movement")]
         [Tooltip("How quickly the token moves toward its target position.")]
         [SerializeField] private float moveSpeed = 2f;
+
         [Tooltip("How high the job hops when moving between machines.")]
         [SerializeField] private float hopHeight = 3.0f;
-
-        private Vector3 startPosition;
-        private float travelProgress = 1f;
 
         [Header("State Colors")]
         [SerializeField] private Color notStartedColor = new Color(0.5f, 0.5f, 0.5f, 0.6f);
@@ -38,31 +34,36 @@ namespace Assets.Scripts.Simulation
         [SerializeField] private Color inTransitColor = new Color(0.3f, 0.6f, 1.0f, 1f);
         [SerializeField] private Color completeColor = new Color(0.3f, 0.3f, 0.3f, 0.4f);
 
-
-
         // ─────────────────────────────────────────────────────────
-        //  Runtime state
+        //  Runtime State
         // ─────────────────────────────────────────────────────────
 
         private int jobId;
         private int totalOperations;
         private Vector3 targetPosition;
+        private Vector3 startPosition;
+        private float travelProgress = 1f;
         private Renderer meshRenderer;
         private MaterialPropertyBlock propBlock;
         private JobLifecycleState currentState;
 
         // ─────────────────────────────────────────────────────────
-        //  Public accessors
+        //  Public Accessors
         // ─────────────────────────────────────────────────────────
 
+        /// @brief The job ID this token represents.
         public int JobId => jobId;
+
+        /// @brief The token's current lifecycle state.
         public JobLifecycleState CurrentState => currentState;
 
         // ─────────────────────────────────────────────────────────
         //  Lifecycle
         // ─────────────────────────────────────────────────────────
 
-        /// @brief Called by JobManager when the tracker is created.
+        /// @brief Called by @c JobManager when the tracker is created.
+        /// @param id       Zero-based job index.
+        /// @param opCount  Total number of operations this job must complete.
         public void Initialize(int id, int opCount)
         {
             jobId = id;
@@ -75,21 +76,15 @@ namespace Assets.Scripts.Simulation
             SetState(JobLifecycleState.NotStarted);
         }
 
+        /// @brief Advances the token along the arc toward its target position each frame.
         private void Update()
         {
-            // If we haven't reached the destination yet
             if (travelProgress < 1f)
             {
                 travelProgress += Time.deltaTime * moveSpeed;
-
-                // Clamp it so we don't overshoot
                 if (travelProgress > 1f) travelProgress = 1f;
 
-                // 1. Move linearly along the X/Z floor
                 Vector3 currentPos = Vector3.Lerp(startPosition, targetPosition, travelProgress);
-
-                // 2. Add the vertical hop using a Sine wave
-                // Mathf.PI ensures the wave goes from 0 (start) up to 1 (middle) and back to 0 (end)
                 float currentHeight = Mathf.Sin(travelProgress * Mathf.PI) * hopHeight;
                 currentPos.y += currentHeight;
 
@@ -98,10 +93,11 @@ namespace Assets.Scripts.Simulation
         }
 
         // ─────────────────────────────────────────────────────────
-        //  State management
+        //  Public API
         // ─────────────────────────────────────────────────────────
 
-        /// @brief Updates the visual appearance based on lifecycle state.
+        /// @brief Updates the token's tint to reflect its current lifecycle state.
+        /// @param state  The new @c JobLifecycleState to display.
         public void SetState(JobLifecycleState state)
         {
             currentState = state;
@@ -125,21 +121,21 @@ namespace Assets.Scripts.Simulation
             meshRenderer.SetPropertyBlock(propBlock);
         }
 
-        /// @brief Sets the position the token should move toward.
+        /// @brief Begins animating the token toward a new world position.
+        /// @param pos  The destination position in world space.
         public void SetTargetPosition(Vector3 pos)
         {
             startPosition = transform.position;
             targetPosition = pos;
-            travelProgress = 0f; // Reset progress to trigger the animation
-
+            travelProgress = 0f;
         }
 
-        /// @brief Updates the token scale to reflect operation progress (0-1).
-        /// A subtle vertical stretch so the user can see which jobs are
-        /// further along in their current operation.
+        /// @brief Scales the token vertically to reflect progress through the current operation.
+        /// @details Y scale grows from 1.0 to 1.3 as @p progress advances from 0 to 1,
+        ///          providing a subtle visual cue of how far along an operation is.
+        /// @param progress  Normalised operation progress in [0, 1].
         public void SetProgress(float progress)
         {
-            // Gentle pulse: scale Y from 1.0 to 1.3 as progress advances
             float scaleY = 1f + progress * 0.3f;
             transform.localScale = new Vector3(1f, scaleY, 1f) * 0.4f;
         }

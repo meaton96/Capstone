@@ -2,32 +2,44 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Assets.Scripts.Scheduling.Core;
+using Assets.Scripts.Logging;
 
 namespace Assets.Scripts.Simulation
 {
-    /// @brief Acts as the physical anchor for a machine in the scene.
-    /// Manages the actual passage of time and listens for Unity Physics collisions.
+    /// @brief Physical anchor for a machine in the Unity scene.
+    ///
+    /// @details Manages real-time coroutine processing and Unity Physics trigger
+    /// events for job arrival and departure. Delegates visual updates to the
+    /// attached @c MachineVisual component.
     [RequireComponent(typeof(Collider))]
     [RequireComponent(typeof(Rigidbody))]
     [RequireComponent(typeof(MachineVisual))]
     public class PhysicalMachine : MonoBehaviour
     {
+        /// @brief Unique identifier matching the logical machine index.
         public int MachineId { get; private set; }
+
+        /// @brief True when the machine is not currently processing a job.
         public bool IsIdle { get; private set; } = true;
 
-        /// @brief The list of job IDs currently sitting in the physical trigger zone.
+        /// @brief Job IDs currently inside this machine's trigger zone.
         public List<int> PhysicalQueue = new List<int>();
 
         private MachineVisual visualLayer;
 
-        /// @brief Wires up the physical machine to the logical instance and visual layer.
+        // ─────────────────────────────────────────────────────────
+        //  Initialization
+        // ─────────────────────────────────────────────────────────
+
+        /// @brief Wires this physical machine to its logical data and visual layer.
+        /// @param id         The machine index used throughout the simulation.
+        /// @param coreMachineData  The logical @c Machine object carrying scheduling metadata.
         public void Initialize(int id, Machine coreMachineData)
         {
             MachineId = id;
             IsIdle = true;
             PhysicalQueue.Clear();
 
-            // Link up the visual layer so we can still flash colors and update progress bars
             visualLayer = GetComponent<MachineVisual>();
             if (visualLayer != null)
             {
@@ -36,10 +48,13 @@ namespace Assets.Scripts.Simulation
         }
 
         // ─────────────────────────────────────────────────────────
-        //  Physics Event: A Job Arrives
+        //  Physics Events
         // ─────────────────────────────────────────────────────────
 
-        /// @brief Fired when a Job's collider enters the Machine's trigger zone.
+        /// @brief Called when a job's collider enters this machine's trigger zone.
+        /// @details Validates that the arriving job is actually routed to this
+        ///          machine before adding it to the physical queue and notifying
+        ///          the @c SimulationBridge.
         private void OnTriggerEnter(Collider other)
         {
             if (other.CompareTag("Job"))
@@ -50,7 +65,7 @@ namespace Assets.Scripts.Simulation
                     JobTracker tracker = SimulationBridge.Instance.JobManager.GetJobTracker(job.JobId);
                     if (tracker != null && tracker.NextMachineId != MachineId)
                     {
-                        return; // It's just flying past us. Ignore it!
+                        return;
                     }
 
                     if (!PhysicalQueue.Contains(job.JobId))
@@ -59,7 +74,7 @@ namespace Assets.Scripts.Simulation
 
                         if (visualLayer != null) visualLayer.UpdateQueueLabel(PhysicalQueue.Count);
 
-                        Debug.Log($"[PhysicalMachine {MachineId}] Job {job.JobId} physically arrived in queue.");
+                        SimLogger.High($"[PhysicalMachine {MachineId}] Job {job.JobId} physically arrived in queue.");
 
                         if (SimulationBridge.Instance != null)
                         {
@@ -70,6 +85,8 @@ namespace Assets.Scripts.Simulation
             }
         }
 
+        /// @brief Called when a job's collider exits this machine's trigger zone.
+        /// @details Removes the job from the physical queue if it was registered.
         private void OnTriggerExit(Collider other)
         {
             if (other.CompareTag("Job"))
@@ -77,7 +94,6 @@ namespace Assets.Scripts.Simulation
                 JobVisual job = other.GetComponent<JobVisual>();
                 if (job != null)
                 {
-                    // Ensure we only remove it if it was actually in our queue
                     if (PhysicalQueue.Contains(job.JobId))
                     {
                         PhysicalQueue.Remove(job.JobId);
@@ -89,10 +105,12 @@ namespace Assets.Scripts.Simulation
         }
 
         // ─────────────────────────────────────────────────────────
-        //  Time Management: Processing a Job
+        //  Processing
         // ─────────────────────────────────────────────────────────
 
-        /// @brief Starts the actual Unity Coroutine timer for processing.
+        /// @brief Begins the coroutine timer that simulates job processing.
+        /// @param jobId            The job to process.
+        /// @param realTimeDuration Wall-clock seconds the operation should take.
         public void StartProcessing(int jobId, float realTimeDuration)
         {
             IsIdle = false;
@@ -107,18 +125,21 @@ namespace Assets.Scripts.Simulation
             StartCoroutine(ProcessJobRoutine(jobId, realTimeDuration));
         }
 
+        /// @brief Coroutine that advances a progress bar each frame and fires
+        ///        @c SimulationBridge.OnMachineFinished when complete.
+        /// @param jobId    The job being processed.
+        /// @param duration Total wall-clock seconds for the operation.
         private IEnumerator ProcessJobRoutine(int jobId, float duration)
         {
             float elapsed = 0f;
 
-            // Loop yielding per frame allows us to update the visual progress bar smoothly
             while (elapsed < duration)
             {
                 elapsed += Time.deltaTime;
 
                 if (visualLayer != null)
                 {
-                    visualLayer.UpdateProgress(elapsed / duration); // Assuming UpdateProgress takes a 0-1 float now
+                    visualLayer.UpdateProgress(elapsed / duration);
                 }
 
                 yield return null;
@@ -131,9 +152,8 @@ namespace Assets.Scripts.Simulation
                 visualLayer.CompleteOperation(jobId);
             }
 
-            Debug.Log($"[PhysicalMachine {MachineId}] Finished processing Job {jobId}.");
+            SimLogger.High($"[PhysicalMachine {MachineId}] Finished processing Job {jobId}.");
 
-            // Tell the bridge we are done so it can dispatch an AGV and schedule the next job
             if (SimulationBridge.Instance != null)
             {
                 SimulationBridge.Instance.OnMachineFinished(MachineId, jobId);

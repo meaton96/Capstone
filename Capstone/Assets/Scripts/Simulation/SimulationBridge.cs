@@ -6,32 +6,57 @@ using Assets.Scripts.Scheduling.Core;
 using Assets.Scripts.Scheduling.Data;
 using Newtonsoft.Json;
 using System.Collections.Generic;
-
+using Assets.Scripts.Logging;
 
 namespace Assets.Scripts.Simulation
 {
+    /// @brief Snapshot of the state presented to the agent when a scheduling decision is needed.
     [Serializable]
     public struct DecisionRequest
     {
+        /// @brief ID of the machine waiting for a job to be dispatched.
         public int MachineId;
+
+        /// @brief Current simulation time in seconds when the decision was raised.
         public double SimTime;
+
+        /// @brief Job IDs currently queued at the machine.
         public int[] QueuedJobIds;
+
+        /// @brief Processing durations (in sim-seconds) corresponding to each queued job.
         public double[] QueuedDurations;
+
+        /// @brief Sequential index of this decision point across the episode.
         public int DecisionIndex;
+
+        /// @brief Total number of jobs in the current instance.
         public int TotalJobs;
+
+        /// @brief Number of jobs that have completed all operations so far.
         public int CompletedJobs;
     }
 
+    /// @brief Result returned by @c SimulationBridge.Step() after applying a dispatching rule.
     [Serializable]
     public struct StepResult
     {
+        /// @brief Reward signal for the agent based on elapsed makespan delta.
         public float Reward;
+
+        /// @brief True when the episode has ended (all jobs complete).
         public bool Done;
+
+        /// @brief The next decision context, if one is immediately available.
         public DecisionRequest NextDecision;
+
+        /// @brief Makespan at the time this step was resolved.
         public double CurrentMakespan;
+
+        /// @brief Total operations completed across all jobs at this step.
         public int OperationsCompleted;
     }
 
+    /// @brief Summary statistics produced when an episode ends.
     [Serializable]
     public struct EpisodeResult
     {
@@ -46,33 +71,51 @@ namespace Assets.Scripts.Simulation
         public double TotalReward;
         public int[] PerMachineDecisions;
 
+        /// @brief Percentage deviation of achieved makespan from the known optimum.
         public double OptimalityGap => OptimalMakespan > 0
             ? (Makespan - OptimalMakespan) / OptimalMakespan * 100.0
             : 0;
     }
 
+    /// @brief Central coordinator between the Unity physics simulation and the scheduling agent.
+    ///
+    /// @details The bridge owns the episode lifecycle: loading a Taillard instance,
+    /// spawning physical jobs and machines, reacting to physics events from
+    /// @c PhysicalMachine, maintaining a queue of pending scheduling decisions,
+    /// and surfacing one decision at a time to the @c SchedulingAgent via
+    /// @c OnDecisionRequired. It also computes per-step rewards and fires
+    /// @c OnEpisodeFinished when all jobs are complete.
     public class SimulationBridge : MonoBehaviour
     {
-
+        /// @brief The dispatching rule last applied during @c Step().
         public string LastAppliedRule { get; private set; } = "Waiting...";
+
         private Queue<int> pendingDecisions = new Queue<int>();
+
         [Header("Scene References")]
         [SerializeField] private FactoryLayoutManager layoutManager;
         public JobManager JobManager;
 
+        /// @brief Singleton instance accessible from @c PhysicalMachine and @c JobManager.
         public static SimulationBridge Instance;
+
+        /// @brief Wall-clock time when the current episode started.
         public float StartTime { get; private set; }
 
         [Header("Episode Configuration")]
-        [SerializeField] private TextAsset taillardJson;
+        [SerializeField] private TextAsset taillardJsonDefault;
         public TextAsset TaillardJson { get; set; }
-        [SerializeField] private bool autoStartOnPlay = true;
+        [SerializeField] private bool autoStartOnPlay = false;
 
         [Header("Events")]
         public UnityEvent<DecisionRequest> OnDecisionRequired;
         public UnityEvent<StepResult> OnStepCompleted;
         public UnityEvent<EpisodeResult> OnEpisodeFinished;
 
+        [Header("Logging")]
+        [SerializeField] private LogLevel logLevel = LogLevel.Low;
+
+        /// @brief Ordered mapping from discrete action index to @c DispatchingRule enum value.
         private static readonly DispatchingRule[] ActionToRule = new DispatchingRule[]
         {
             DispatchingRule.SPT_SMPT, DispatchingRule.SPT_SRWT,
@@ -81,26 +124,33 @@ namespace Assets.Scripts.Simulation
             DispatchingRule.SRT_SMPT, DispatchingRule.SDT_SRWT,
         };
 
+        /// @brief Number of discrete actions available to the agent.
         public static int ActionCount => ActionToRule.Length;
 
         private DESSimulator simulator;
         private TaillardInstance currentInstance;
         private bool episodeActive;
         private int decisionCount;
-        public int DecisionCount => decisionCount;
         private double totalReward;
         private double previousMakespan;
         private int[] perMachineDecisions;
 
+        public int DecisionCount => decisionCount;
         public bool IsEpisodeActive => episodeActive;
         public bool IsDone => !episodeActive;
+
+        /// @brief The decision context the agent is currently expected to respond to.
         public DecisionRequest CurrentDecision { get; private set; }
 
-        // In the new system, we are waiting for action anytime the episode is active 
-        // and we have broadcasted a DecisionRequest.
+        /// @brief True from the moment @c OnDecisionRequired fires until @c Step() is called.
         public bool IsWaitingForAction { get; private set; }
 
+        /// @brief Seconds elapsed since the episode started, derived from Unity wall time.
         public double SimTime => Time.time - StartTime;
+
+        // ─────────────────────────────────────────────────────────
+        //  Unity Lifecycle
+        // ─────────────────────────────────────────────────────────
 
         private void Awake()
         {
@@ -111,22 +161,37 @@ namespace Assets.Scripts.Simulation
             }
             Instance = this;
             simulator = new DESSimulator();
+            SimLogger.ActiveLevel = logLevel;
         }
 
         private void Start()
         {
-            if (autoStartOnPlay && taillardJson != null)
+            if (autoStartOnPlay && TaillardJson != null)
             {
+                SimLogger.Medium("[Sim Bridge] Auto Starting Episode...");
                 StartEpisode();
             }
         }
 
+        // ─────────────────────────────────────────────────────────
+        //  Episode Management
+        // ─────────────────────────────────────────────────────────
+
+        /// @brief Loads the configured Taillard instance, builds the factory floor,
+        ///        spawns job visuals, and dispatches every job toward its first machine.
         public void StartEpisode()
         {
-            if (taillardJson == null) return;
+            if (TaillardJson == null)
+            {
+                TaillardJson = taillardJsonDefault;
+            }
 
-            currentInstance = LoadInstance(taillardJson);
+            currentInstance = LoadInstance(TaillardJson);
             if (currentInstance == null) return;
+
+            SimLogger.Medium($"[Sim Bridge] Loaded : {currentInstance.name}");
+            SimLogger.Medium($"[Sim Bridge] Loaded : {currentInstance.MachineCount} machines");
+            SimLogger.Medium($"[Sim Bridge] Loaded : {currentInstance.JobCount} jobs");
 
             simulator.LoadInstance(currentInstance);
 
@@ -149,7 +214,7 @@ namespace Assets.Scripts.Simulation
 
             StartTime = Time.time;
 
-            Debug.Log($"[SimBridge] Episode started: {currentInstance.Name}");
+            SimLogger.High($"[SimBridge] Episode started: {currentInstance.Name}");
             for (int i = 0; i < currentInstance.JobCount; i++)
             {
                 int firstMachineId = currentInstance.machines_matrix[i][0];
@@ -161,42 +226,48 @@ namespace Assets.Scripts.Simulation
         //  Physics Event Listeners
         // ─────────────────────────────────────────────────────────
 
+        /// @brief Called by @c PhysicalMachine when a job enters its trigger zone.
+        /// @param machineId  The machine the job arrived at.
+        /// @param jobId      The job that physically arrived.
         public void OnJobArrivedInQueue(int machineId, int jobId)
         {
             JobManager.MarkJobArrivedAtMachine(jobId, machineId);
             CheckIfDecisionNeeded(machineId);
         }
 
+        /// @brief Called by @c PhysicalMachine when it finishes processing a job.
+        /// @details Updates job tracking, checks for episode completion, dispatches
+        ///          an AGV to carry the job to its next machine, and checks whether
+        ///          the now-idle machine has further jobs waiting.
+        /// @param machineId  The machine that finished.
+        /// @param jobId      The job that was completed.
         public void OnMachineFinished(int machineId, int jobId)
         {
-            // Update tracking
             JobManager.MarkOperationComplete(jobId, SimTime);
 
-
-            // Check for Win State
             if (JobManager.AreAllJobsComplete())
             {
                 FinaliseEpisode();
                 return;
             }
 
-            // TODO: In the future, this is where you will dispatch an AGV to pick up `jobId`
             JobTracker tracker = JobManager.GetJobTracker(jobId);
             if (tracker != null && tracker.NextMachineId != -1)
             {
                 DispatchGhostAGV(jobId, tracker.NextMachineId);
             }
-            // Check if the machine we just freed up has other jobs waiting
+
             CheckIfDecisionNeeded(machineId);
         }
 
+        /// @brief Enqueues @p machineId as a pending decision if it is idle and has jobs waiting.
+        /// @param machineId  Machine to evaluate.
         private void CheckIfDecisionNeeded(int machineId)
         {
             PhysicalMachine machine = layoutManager.GetMachine(machineId);
 
             if (machine != null && machine.IsIdle && machine.PhysicalQueue.Count > 0)
             {
-                // Only add it if it's not already standing in line
                 if (!pendingDecisions.Contains(machineId))
                 {
                     pendingDecisions.Enqueue(machineId);
@@ -205,9 +276,17 @@ namespace Assets.Scripts.Simulation
         }
 
         // ─────────────────────────────────────────────────────────
-        //  The Core Step
+        //  Core Step
         // ─────────────────────────────────────────────────────────
 
+        /// @brief Applies the agent's chosen dispatching rule to @c CurrentDecision.
+        ///
+        /// @details Selects the best job from the machine's physical queue according
+        ///          to the rule identified by @p actionIndex, starts physical processing
+        ///          on that machine, and returns a @c StepResult carrying the reward.
+        ///
+        /// @param actionIndex  Index into @c ActionToRule; selects the dispatching rule.
+        /// @return             A @c StepResult with reward and episode-done flag.
         public StepResult Step(int actionIndex)
         {
             IsWaitingForAction = false;
@@ -218,6 +297,7 @@ namespace Assets.Scripts.Simulation
             PhysicalMachine machine = layoutManager.GetMachine(CurrentDecision.MachineId);
             machine.StartProcessing(chosenJobId, duration);
             JobManager.MarkOperationStarted(chosenJobId, SimTime);
+
             float stepReward = CalculateReward();
             totalReward += stepReward;
             perMachineDecisions[CurrentDecision.MachineId]++;
@@ -234,9 +314,39 @@ namespace Assets.Scripts.Simulation
         }
 
         // ─────────────────────────────────────────────────────────
+        //  Update Loop
+        // ─────────────────────────────────────────────────────────
+
+        /// @brief Drains the pending-decision queue one entry per frame while the
+        ///        agent is free, firing @c OnDecisionRequired for the next machine.
+        private void Update()
+        {
+            if (!episodeActive) return;
+            if (IsWaitingForAction) return;
+
+            while (pendingDecisions.Count > 0)
+            {
+                int nextMachineId = pendingDecisions.Dequeue();
+                PhysicalMachine machine = layoutManager.GetMachine(nextMachineId);
+
+                if (machine != null && machine.IsIdle && machine.PhysicalQueue.Count > 0)
+                {
+                    CurrentDecision = BuildDecisionRequest(machine);
+                    IsWaitingForAction = true;
+
+                    OnDecisionRequired?.Invoke(CurrentDecision);
+                    return;
+                }
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────
         //  Helpers
         // ─────────────────────────────────────────────────────────
 
+        /// @brief Constructs a @c DecisionRequest snapshot for the given machine.
+        /// @param machine  The idle machine with pending jobs.
+        /// @return         Fully populated @c DecisionRequest.
         private DecisionRequest BuildDecisionRequest(PhysicalMachine machine)
         {
             int[] jobIds = machine.PhysicalQueue.ToArray();
@@ -255,10 +365,15 @@ namespace Assets.Scripts.Simulation
                 QueuedDurations = durations,
                 DecisionIndex = decisionCount++,
                 TotalJobs = currentInstance.JobCount,
-                CompletedJobs = 0 // Update if you track global completion differently later
+                CompletedJobs = 0
             };
         }
 
+        /// @brief Looks up the processing duration for @p jobId on @p machineId
+        ///        using the Taillard instance's duration matrix.
+        /// @param jobId      Job whose duration is queried.
+        /// @param machineId  Machine performing the operation.
+        /// @return           Duration in simulation seconds, or 0 if not found.
         private float GetDurationFromTaillardData(int jobId, int machineId)
         {
             if (currentInstance == null) return 0f;
@@ -274,6 +389,8 @@ namespace Assets.Scripts.Simulation
             return 0f;
         }
 
+        /// @brief Computes a per-step reward as the negative normalised makespan delta.
+        /// @return Negative float in the range (-1, 0].
         private float CalculateReward()
         {
             float currentSimTime = (float)SimTime;
@@ -284,6 +401,11 @@ namespace Assets.Scripts.Simulation
             return -delta / Math.Max(totalOps, 1);
         }
 
+        /// @brief Selects the best job from a machine's physical queue using the
+        ///        dispatching rule identified by @p actionIndex.
+        /// @param actionIndex  Index into @c ActionToRule.
+        /// @param machineId    Machine whose queue is evaluated.
+        /// @return             ID of the job that should be processed next.
         private int ApplyDispatchingRule(int actionIndex, int machineId)
         {
             DispatchingRule rule = ActionToRule[actionIndex];
@@ -296,7 +418,6 @@ namespace Assets.Scripts.Simulation
             {
                 float duration = GetDurationFromTaillardData(jobId, machineId);
 
-                // Temp SPT Logic for testing compilation
                 if (rule == DispatchingRule.SPT_SMPT || rule == DispatchingRule.SPT_SRWT)
                 {
                     if (duration < shortestDuration)
@@ -310,6 +431,8 @@ namespace Assets.Scripts.Simulation
             return bestJobId;
         }
 
+        /// @brief Marks the episode as finished, computes final statistics, and
+        ///        broadcasts an @c EpisodeResult via @c OnEpisodeFinished.
         private void FinaliseEpisode()
         {
             episodeActive = false;
@@ -324,38 +447,13 @@ namespace Assets.Scripts.Simulation
                 PerMachineDecisions = perMachineDecisions
             };
 
-            Debug.Log($"[SimBridge] Episode complete: makespan={result.Makespan:F1}, decisions={result.DecisionPoints}");
+            SimLogger.High($"[SimBridge] Episode complete: makespan={result.Makespan:F1}, decisions={result.DecisionPoints}");
             OnEpisodeFinished?.Invoke(result);
         }
-        private void Update()
-        {
-            if (!episodeActive) return;
 
-            // If the ML-Agent is currently thinking about a decision, pause and wait.
-            if (IsWaitingForAction) return;
-
-            // If the Agent is free, and we have machines waiting for instructions...
-            while (pendingDecisions.Count > 0)
-            {
-                int nextMachineId = pendingDecisions.Dequeue();
-                PhysicalMachine machine = layoutManager.GetMachine(nextMachineId);
-
-                // Double check the machine didn't already start processing somehow
-                if (machine != null && machine.IsIdle && machine.PhysicalQueue.Count > 0)
-                {
-                    CurrentDecision = BuildDecisionRequest(machine);
-                    IsWaitingForAction = true;
-
-                    // Wake up the Agent!
-                    OnDecisionRequired?.Invoke(CurrentDecision);
-
-                    // Break out of the loop so we don't ask the Agent for 
-                    // another decision until it finishes this one.
-                    return;
-                }
-            }
-        }
-
+        /// @brief Instructs a job's visual token to travel toward a target machine.
+        /// @param jobId            Job to move.
+        /// @param targetMachineId  Destination machine index.
         private void DispatchGhostAGV(int jobId, int targetMachineId)
         {
             PhysicalMachine targetMachine = layoutManager.GetMachine(targetMachineId);
@@ -363,17 +461,16 @@ namespace Assets.Scripts.Simulation
 
             if (targetMachine != null && tracker != null && tracker.Visual != null)
             {
-                // 1. Visually set the job to "In Transit" (Blue color)
                 tracker.Visual.SetState(JobLifecycleState.InTransit);
-
-                // 2. Set the destination to the machine. 
-                // The JobVisual's Update() loop will smoothly glide it across the floor!
                 tracker.Visual.SetTargetPosition(targetMachine.transform.position);
 
-                Debug.Log($"[Ghost AGV] Dispatched Job {jobId} to Machine {targetMachineId}");
+                SimLogger.High($"[Ghost AGV] Dispatched Job {jobId} to Machine {targetMachineId}");
             }
         }
 
+        /// @brief Deserialises a @c TaillardInstance from a JSON @c TextAsset.
+        /// @param json  Unity @c TextAsset containing the serialised instance.
+        /// @return      Parsed instance, or @c null on failure.
         private TaillardInstance LoadInstance(TextAsset json)
         {
             try
@@ -382,7 +479,7 @@ namespace Assets.Scripts.Simulation
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[SimBridge] Parse error: {ex}");
+                SimLogger.Error($"[SimBridge] Parse error: {ex}");
                 return null;
             }
         }

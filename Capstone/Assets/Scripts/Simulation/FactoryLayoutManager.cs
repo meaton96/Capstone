@@ -2,9 +2,16 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Assets.Scripts.Scheduling.Core;
+using Assets.Scripts.Logging;
 
 namespace Assets.Scripts.Simulation
 {
+    /// @brief Instantiates and positions @c PhysicalMachine prefabs on the factory floor.
+    ///
+    /// @details Selects a hard-coded layout for known machine counts (8, 15, 20) and
+    /// falls back to a generated grid for all other counts. After building, it
+    /// computes and exposes a normalised pairwise distance matrix for use as
+    /// agent observations.
     public class FactoryLayoutManager : MonoBehaviour
     {
         // ─────────────────────────────────────────────────────────
@@ -13,7 +20,7 @@ namespace Assets.Scripts.Simulation
 
         [Header("Prefabs")]
         [Tooltip("Machine prefab with a PhysicalMachine component attached.")]
-        [SerializeField] private PhysicalMachine machinePrefab; // <-- CHANGED
+        [SerializeField] private PhysicalMachine machinePrefab;
 
         [Header("Floor")]
         [Tooltip("Reference to the ground plane Transform so we can centre the layout.")]
@@ -30,29 +37,38 @@ namespace Assets.Scripts.Simulation
         [SerializeField] private bool logDistanceMatrix = true;
 
         // ─────────────────────────────────────────────────────────
-        //  Runtime state
+        //  Runtime State
         // ─────────────────────────────────────────────────────────
 
-        /// @brief All instantiated physical machines, indexed by machine ID.
-        private PhysicalMachine[] machines; // <-- CHANGED
-
+        private PhysicalMachine[] machines;
         private float[,] distanceMatrix;
         private float[] distanceMatrixFlat;
         private Vector3[] customPositions;
 
         // ─────────────────────────────────────────────────────────
-        //  Public accessors
+        //  Public Accessors
         // ─────────────────────────────────────────────────────────
 
-        public IReadOnlyList<PhysicalMachine> Machines => machines; // <-- CHANGED
+        /// @brief Read-only view of all instantiated physical machines.
+        public IReadOnlyList<PhysicalMachine> Machines => machines;
+
+        /// @brief Number of machines currently on the floor.
         public int MachineCount => machines?.Length ?? 0;
+
+        /// @brief Raw pairwise world-unit distance matrix (n × n).
         public float[,] DistanceMatrix => distanceMatrix;
+
+        /// @brief Normalised flat distance matrix padded to 8×8 = 64 values.
         public float[] DistanceMatrixFlat => distanceMatrixFlat;
 
         // ─────────────────────────────────────────────────────────
         //  Public API
         // ─────────────────────────────────────────────────────────
 
+        /// @brief Clears any existing floor, then instantiates and initialises
+        ///        machines according to the simulator's machine count.
+        /// @param simulator  Loaded @c DESSimulator carrying machine metadata.
+        /// @exception ArgumentNullException Thrown when @p simulator is null.
         public void BuildFloor(DESSimulator simulator)
         {
             if (simulator == null)
@@ -73,13 +89,9 @@ namespace Assets.Scripts.Simulation
                 Vector3 worldPos = floorCentre + positions[i];
                 worldPos.y = machineYOffset;
 
-                // <-- CHANGED to spawn PhysicalMachine
                 PhysicalMachine physicalMachine = Instantiate(machinePrefab, worldPos, Quaternion.identity, transform);
                 physicalMachine.gameObject.name = $"Machine_{i}";
-
-                // Initialize the physical logic and the visual component
                 physicalMachine.Initialize(i, simulator.Machines[i]);
-
                 machines[i] = physicalMachine;
             }
 
@@ -88,10 +100,11 @@ namespace Assets.Scripts.Simulation
             if (logDistanceMatrix)
                 LogDistanceMatrix();
 
-            Debug.Log($"[FactoryLayout] Built floor: {count} machines, " +
+            SimLogger.Medium($"[FactoryLayout] Built floor: {count} machines, " +
                       $"floor {floorSize.x}×{floorSize.y}");
         }
 
+        /// @brief Destroys all instantiated machines and resets runtime state.
         public void ClearFloor()
         {
             if (machines == null) return;
@@ -107,12 +120,16 @@ namespace Assets.Scripts.Simulation
             distanceMatrixFlat = null;
         }
 
+        /// @brief Overrides the automatic layout with a caller-supplied position array.
+        /// @param positions  World-space offsets relative to @c floorTransform, one per machine.
         public void SetCustomLayout(Vector3[] positions)
         {
             customPositions = positions;
         }
 
-        // <-- CHANGED NAME AND RETURN TYPE
+        /// @brief Returns the @c PhysicalMachine at the given index, or @c null if out of range.
+        /// @param machineId  Zero-based machine index.
+        /// @return           The corresponding @c PhysicalMachine, or @c null.
         public PhysicalMachine GetMachine(int machineId)
         {
             if (machines == null || machineId < 0 || machineId >= machines.Length)
@@ -121,9 +138,14 @@ namespace Assets.Scripts.Simulation
         }
 
         // ─────────────────────────────────────────────────────────
-        //  Position resolution & Layout Tables (Unchanged)
+        //  Position Resolution
         // ─────────────────────────────────────────────────────────
 
+        /// @brief Returns the appropriate position array for @p count machines,
+        ///        preferring a custom layout, then hard-coded layouts, then a grid.
+        /// @param count  Number of machines to place.
+        /// @return       Array of local offsets relative to @c floorTransform.
+        /// @exception InvalidOperationException Thrown when a custom layout has the wrong count.
         private Vector3[] ResolvePositions(int count)
         {
             if (customPositions != null)
@@ -142,6 +164,9 @@ namespace Assets.Scripts.Simulation
             };
         }
 
+        /// @brief Generates a uniform grid layout for an arbitrary machine count.
+        /// @param count  Number of machines to position.
+        /// @return       Array of local offsets filling the floor area.
         private Vector3[] GenerateGridPositions(int count)
         {
             int cols = Mathf.CeilToInt(Mathf.Sqrt(count));
@@ -164,6 +189,7 @@ namespace Assets.Scripts.Simulation
             return positions;
         }
 
+        /// @brief Hard-coded symmetric 2-row layout for 8 machines.
         private static Vector3[] GetLayout8()
         {
             return new[] {
@@ -172,6 +198,7 @@ namespace Assets.Scripts.Simulation
             };
         }
 
+        /// @brief Hard-coded 5×3 grid layout for 15 machines.
         private static Vector3[] GetLayout15()
         {
             Vector3[] positions = new Vector3[15];
@@ -184,6 +211,7 @@ namespace Assets.Scripts.Simulation
             return positions;
         }
 
+        /// @brief Hard-coded 5×4 grid layout for 20 machines.
         private static Vector3[] GetLayout20()
         {
             Vector3[] positions = new Vector3[20];
@@ -197,9 +225,11 @@ namespace Assets.Scripts.Simulation
         }
 
         // ─────────────────────────────────────────────────────────
-        //  Distance matrix (Updated to use machines array)
+        //  Distance Matrix
         // ─────────────────────────────────────────────────────────
 
+        /// @brief Builds a symmetric n×n Euclidean distance matrix and a
+        ///        normalised 64-element flat version capped at the first 8 machines.
         private void ComputeDistanceMatrix()
         {
             int n = machines.Length;
@@ -237,23 +267,25 @@ namespace Assets.Scripts.Simulation
                     distanceMatrixFlat[k] /= maxDist;
         }
 
+        /// @brief Prints the full distance matrix and the normalised flat vector to the console.
         private void LogDistanceMatrix()
         {
             if (distanceMatrix == null) return;
             int n = machines.Length;
             string header = "     ";
             for (int j = 0; j < n; j++) header += $"  M{j,-4}";
-            Debug.Log($"[FactoryLayout] Distance matrix ({n}×{n}) — world units:\n{header}");
+            SimLogger.Medium($"[FactoryLayout] Distance matrix ({n}×{n}) — world units:\n{header}");
 
             for (int i = 0; i < n; i++)
             {
                 string row = $"M{i,-3} ";
                 for (int j = 0; j < n; j++) row += $"{distanceMatrix[i, j],6:F1} ";
-                Debug.Log(row);
+                SimLogger.High(row);
             }
-            Debug.Log($"[FactoryLayout] Flat 64-D (normalised): [{string.Join(", ", FormatFlat())}]");
+            SimLogger.Medium($"[FactoryLayout] Flat 64-D (normalised): [{string.Join(", ", FormatFlat())}]");
         }
 
+        /// @brief Formats the flat distance array as fixed-precision strings for logging.
         private string[] FormatFlat()
         {
             string[] result = new string[distanceMatrixFlat.Length];
@@ -262,6 +294,11 @@ namespace Assets.Scripts.Simulation
             return result;
         }
 
+        // ─────────────────────────────────────────────────────────
+        //  Editor Gizmos
+        // ─────────────────────────────────────────────────────────
+
+        /// @brief Draws floor bounds and an 8-machine layout preview in the Scene view.
         private void OnDrawGizmosSelected()
         {
             if (floorTransform == null) return;
