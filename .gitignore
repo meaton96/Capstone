@@ -78,3 +78,6 @@ Capstone/[Aa]ssets/[Ss]treamingAssets/aa/*
 #Capstone/Assets/Resources/Instances
 #Capstone/Assets/Resources/Validation
 /env/env/__pycache__
+
+
+/builds
