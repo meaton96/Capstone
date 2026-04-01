@@ -1,3 +1,4 @@
+using Assets.Scripts.Logging;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
@@ -5,101 +6,111 @@ using UnityEngine;
 
 namespace Assets.Scripts.Simulation
 {
+    /// @brief ML-Agents @c Agent subclass that drives job-shop scheduling decisions.
+    ///
+    /// @details Listens for @c DecisionRequest events from the @c SimulationBridge,
+    /// collects a fixed-width observation vector describing the current machine queue,
+    /// and maps a discrete action index to a dispatching rule applied via
+    /// @c SimulationBridge.Step().
     public class SchedulingAgent : Agent
     {
         [Header("References")]
         [SerializeField] private SimulationBridge bridge;
-        [SerializeField] private TextAsset instanceJson;
+        private TextAsset instanceJson;
 
         [Header("Observation Config")]
         [SerializeField] private int maxQueueSlots = 10;
 
-        [Header("Spectator Settings")]
-        [SerializeField] private bool visualWait = true;
-        [SerializeField] private float decisionInterval = 0.5f; // Seconds between actions
-        private float lastDecisionTime;
+        // ─────────────────────────────────────────────────────────
+        //  Unity Lifecycle
+        // ─────────────────────────────────────────────────────────
 
-        /// <summary>
-        /// True when the bridge failed to start and we need to
-        /// end the episode on the next Academy step (not inside
-        /// OnEpisodeBegin, which would cause recursion).
-        /// </summary>
-        private bool needsDeferredReset;
-
-        // ─── ML-Agents lifecycle ─────────────────────────────
-
-        public override void Initialize()
+        /// @brief Subscribes to the bridge's decision-required event.
+        protected override void OnEnable()
         {
-            // Turn off visuals for training throughput.
-            // bridge.EnableVisuals = false;  // uncomment once you add the setter
-            if (visualWait)
+            base.OnEnable();
+            if (bridge != null)
             {
-                Time.timeScale = 0.5f;
+                bridge.OnDecisionRequired.AddListener(HandleDecisionRequired);
             }
         }
 
+        /// @brief Unsubscribes from the bridge's decision-required event.
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+            if (bridge != null)
+            {
+                bridge.OnDecisionRequired.RemoveListener(HandleDecisionRequired);
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────
+        //  ML-Agents Lifecycle
+        // ─────────────────────────────────────────────────────────
+
+        /// @brief One-time agent setup called by ML-Agents on first activation.
+        public override void Initialize()
+        {
+        }
+
+        /// @brief Resets the simulation and begins a new physics episode.
+        /// @details Delegates full episode setup to @c SimulationBridge.StartEpisode().
+        ///          The bridge spawns jobs which physically enter machine trigger
+        ///          colliders, causing @c HandleDecisionRequired to fire and wake
+        ///          this agent when the first scheduling decision is needed.
         public override void OnEpisodeBegin()
         {
-            // The Academy may call this before SimulationBridge.Awake()
-            // has initialized the simulator. Guard against that.
-            if (bridge == null || bridge.Simulator == null)
+            if (bridge == null)
             {
-                Debug.LogWarning("[Agent] Bridge not ready yet. Deferring.");
-                needsDeferredReset = true;
+                SimLogger.Error("[Agent] Bridge not assigned.");
                 return;
             }
 
-            bridge.StartEpisode(instanceJson);
-
-            if (bridge.IsDone)
-            {
-                Debug.LogWarning("[Agent] Episode had no decisions. Deferring reset.");
-                needsDeferredReset = true;
+            if (bridge.TaillardJson == null)
                 return;
-            }
 
-            needsDeferredReset = false;
+            bridge.StartEpisode();
+        }
+
+        // ─────────────────────────────────────────────────────────
+        //  Event Handlers
+        // ─────────────────────────────────────────────────────────
+
+        /// @brief Invoked by the bridge when a machine needs a scheduling decision.
+        /// @param req  Contextual data describing the waiting machine and its queue.
+        private void HandleDecisionRequired(DecisionRequest req)
+        {
             RequestDecision();
         }
 
-        private void FixedUpdate()
-        {
-            // Handle the deferred reset outside of OnEpisodeBegin.
-            if (needsDeferredReset)
-            {
-                needsDeferredReset = false;
-                EndEpisode();
-            }
-            // Only request a new decision if enough time has passed
-            if (bridge.IsEpisodeActive && !bridge.IsWaitingForAction)
-            {
-                if (Time.time >= lastDecisionTime + decisionInterval)
-                {
-                    RequestDecision();
-                    lastDecisionTime = Time.time;
-                }
-            }
-        }
+        // ─────────────────────────────────────────────────────────
+        //  Agent Logic
+        // ─────────────────────────────────────────────────────────
 
+        /// @brief Builds the observation vector sent to the neural network.
+        ///
+        /// @details Writes six scalar context values followed by a fixed-width
+        ///          padded block of @c maxQueueSlots (job-id, duration) pairs.
+        ///          All slots beyond the actual queue length are zero-padded so
+        ///          the vector size remains constant across episodes.
+        ///
+        /// @param sensor  The @c VectorSensor provided by ML-Agents.
         public override void CollectObservations(VectorSensor sensor)
         {
             DecisionRequest req = bridge.CurrentDecision;
 
-            // Guard: if the bridge hasn't produced a decision yet,
-            // write zeros so the observation size still matches.
             bool valid = bridge.IsEpisodeActive
                          && req.QueuedJobIds != null
                          && req.QueuedDurations != null;
 
             if (!valid)
             {
-                // Write the correct number of zeros.
                 for (int i = 0; i < ObservationSize; i++)
                     sensor.AddObservation(0f);
                 return;
             }
 
-            // ── Scalar context ───────────────────────────────
             sensor.AddObservation(req.MachineId);
             sensor.AddObservation((float)req.SimTime);
             sensor.AddObservation(req.DecisionIndex);
@@ -107,7 +118,6 @@ namespace Assets.Scripts.Simulation
             sensor.AddObservation(req.CompletedJobs);
             sensor.AddObservation(req.QueuedJobIds.Length);
 
-            // ── Queue contents (fixed-width, zero-padded) ────
             for (int i = 0; i < maxQueueSlots; i++)
             {
                 if (i < req.QueuedJobIds.Length)
@@ -123,30 +133,39 @@ namespace Assets.Scripts.Simulation
             }
         }
 
+        /// @brief Receives the network's chosen action and applies it to the simulation.
+        ///
+        /// @details Maps the discrete action index to a dispatching rule via
+        ///          @c SimulationBridge.Step(), accumulates the returned reward,
+        ///          and ends the episode if the bridge signals completion.
+        ///          The next @c RequestDecision() call is driven by the
+        ///          @c HandleDecisionRequired event, not called here directly.
+        ///
+        /// @param actions  Action buffers provided by ML-Agents.
         public override void OnActionReceived(ActionBuffers actions)
         {
-            if (!bridge.IsWaitingForAction)
-            {
-                return;
-            }
+            if (!bridge.IsWaitingForAction) return;
 
             int pdrIndex = actions.DiscreteActions[0];
-            Debug.Log($"[Agent] Decision #{bridge.DecisionCount}: chose action {pdrIndex}");
 
             StepResult result = bridge.Step(pdrIndex);
+
             AddReward(result.Reward);
 
             if (result.Done)
+            {
                 EndEpisode();
-            else if (visualWait)
-                RequestDecision();
+            }
         }
 
+        /// @brief Heuristic fallback: always selects action 0 (first dispatching rule).
+        /// @param actionsOut  Action buffer to write the heuristic choice into.
         public override void Heuristic(in ActionBuffers actionsOut)
         {
             actionsOut.DiscreteActions.Array[0] = 0;
         }
 
+        /// @brief Total number of floats in one observation vector.
         public int ObservationSize => 6 + (maxQueueSlots * 2);
     }
 }

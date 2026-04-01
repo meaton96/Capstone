@@ -4,7 +4,8 @@
     "references": [
         "Scheduling",
         "Unity.TextMeshPro",
-        "Unity.ML-Agents"
+        "Unity.ML-Agents",
+        "Logging"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
