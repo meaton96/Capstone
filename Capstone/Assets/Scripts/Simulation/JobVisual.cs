@@ -23,8 +23,9 @@ namespace Assets.Scripts.Simulation
         [Tooltip("How quickly the token moves toward its target position.")]
         [SerializeField] private float moveSpeed = 2f;
 
-        [Tooltip("How high the job hops when moving between machines.")]
-        [SerializeField] private float hopHeight = 3.0f;
+
+
+        private bool isCarried = false;
 
         [Header("State Colors")]
         [SerializeField] private Color notStartedColor = new Color(0.5f, 0.5f, 0.5f, 0.6f);
@@ -76,21 +77,7 @@ namespace Assets.Scripts.Simulation
             SetState(JobLifecycleState.NotStarted);
         }
 
-        /// @brief Advances the token along the arc toward its target position each frame.
-        private void Update()
-        {
-            if (travelProgress < 1f)
-            {
-                travelProgress += Time.deltaTime * moveSpeed;
-                if (travelProgress > 1f) travelProgress = 1f;
 
-                Vector3 currentPos = Vector3.Lerp(startPosition, targetPosition, travelProgress);
-                float currentHeight = Mathf.Sin(travelProgress * Mathf.PI) * hopHeight;
-                currentPos.y += currentHeight;
-
-                transform.position = currentPos;
-            }
-        }
 
         // ─────────────────────────────────────────────────────────
         //  Public API
@@ -123,11 +110,49 @@ namespace Assets.Scripts.Simulation
 
         /// @brief Begins animating the token toward a new world position.
         /// @param pos  The destination position in world space.
-        public void SetTargetPosition(Vector3 pos)
+        public void SetTargetPosition(Vector3 worldPos)
         {
+            if (isCarried) return;  // ignore position commands while on an AGV
             startPosition = transform.position;
-            targetPosition = pos;
+            targetPosition = worldPos;
             travelProgress = 0f;
+        }
+        public void SnapToPosition(Vector3 worldPos)
+        {
+            transform.position = worldPos;
+            startPosition = worldPos;
+            targetPosition = worldPos;
+            travelProgress = 1f;
+        }
+
+        // Replace AttachToCarrier to use local position correctly:
+        public void AttachToCarrier(Transform carrier)
+        {
+            isCarried = true;
+            travelProgress = 1f;
+            transform.SetParent(carrier);
+            transform.localPosition = new Vector3(0f, 0.5f, 0f); // local, not world
+            transform.localRotation = Quaternion.identity;
+        }
+
+        // Replace DetachFromCarrier to snap cleanly:
+        public void DetachFromCarrier(Vector3 worldSnapPos)
+        {
+            transform.SetParent(null);          // unparent first
+            isCarried = false;
+            SnapToPosition(worldSnapPos);       // then snap — order matters
+        }
+
+        // Guard Update against carrying state and redundant lerps:
+        private void Update()
+        {
+            if (isCarried) return;
+            if (travelProgress >= 1f) return;
+
+            travelProgress += Time.deltaTime * moveSpeed;
+            if (travelProgress > 1f) travelProgress = 1f;
+
+            transform.position = Vector3.Lerp(startPosition, targetPosition, travelProgress);
         }
 
         /// @brief Scales the token vertically to reflect progress through the current operation.
@@ -136,8 +161,8 @@ namespace Assets.Scripts.Simulation
         /// @param progress  Normalised operation progress in [0, 1].
         public void SetProgress(float progress)
         {
-            float scaleY = 1f + progress * 0.3f;
-            transform.localScale = new Vector3(1f, scaleY, 1f) * 0.4f;
+            // float scaleY = 1f + progress * 0.3f;
+            // transform.localScale = new Vector3(1f, scaleY, 1f) * 0.4f;
         }
     }
 }

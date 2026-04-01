@@ -23,9 +23,24 @@ namespace Assets.Scripts.Simulation
         public bool IsIdle { get; private set; } = true;
 
         /// @brief Job IDs currently inside this machine's trigger zone.
-        public List<int> PhysicalQueue = new List<int>();
+        [Header("Queue Areas")]
+        [Header("Queue Staging Areas")]
+        [SerializeField] private Transform incomingStageRoot;  // child GO, offset to the left
+        [SerializeField] private Transform outgoingStageRoot;  // child GO, offset to the right
+        [SerializeField] private float slotSpacing = 0.75f;
+        [SerializeField] private int maxSlots = 5;
+
+        // Separate the existing PhysicalQueue into two explicit queues
+        public List<int> IncomingQueue = new List<int>(); // waiting to be processed
+        public List<int> OutgoingQueue = new List<int>(); // waiting for AGV pickup
+
+        // Keep PhysicalQueue as a passthrough so SimulationBridge doesn't break yet
+        public List<int> PhysicalQueue => IncomingQueue;
 
         private MachineVisual visualLayer;
+
+        private Dictionary<int, Vector3> reservedIncomingSlots = new Dictionary<int, Vector3>();
+        private int nextIncomingSlotIndex = 0;
 
         // ─────────────────────────────────────────────────────────
         //  Initialization
@@ -47,66 +62,69 @@ namespace Assets.Scripts.Simulation
             }
         }
 
-        // ─────────────────────────────────────────────────────────
-        //  Physics Events
-        // ─────────────────────────────────────────────────────────
-
-        /// @brief Called when a job's collider enters this machine's trigger zone.
-        /// @details Validates that the arriving job is actually routed to this
-        ///          machine before adding it to the physical queue and notifying
-        ///          the @c SimulationBridge.
-        private void OnTriggerEnter(Collider other)
+        public Vector3 ReserveIncomingSlot(int jobId)
         {
-            if (other.CompareTag("Job"))
-            {
-                JobVisual job = other.GetComponent<JobVisual>();
-                if (job != null)
-                {
-                    JobTracker tracker = SimulationBridge.Instance.JobManager.GetJobTracker(job.JobId);
-                    if (tracker != null && tracker.NextMachineId != MachineId)
-                    {
-                        return;
-                    }
+            if (reservedIncomingSlots.TryGetValue(jobId, out Vector3 existing))
+                return existing;
 
-                    if (!PhysicalQueue.Contains(job.JobId))
-                    {
-                        PhysicalQueue.Add(job.JobId);
+            Vector3 root = incomingStageRoot != null
+                ? incomingStageRoot.position
+                : transform.position + transform.TransformDirection(new Vector3(-2.5f, 0, 0));
 
-                        if (visualLayer != null) visualLayer.UpdateQueueLabel(PhysicalQueue.Count);
+            Vector3 pos = root + transform.right * (nextIncomingSlotIndex * slotSpacing)
+                               + Vector3.up * 0.5f;
 
-                        SimLogger.High($"[PhysicalMachine {MachineId}] Job {job.JobId} physically arrived in queue.");
-
-                        if (SimulationBridge.Instance != null)
-                        {
-                            SimulationBridge.Instance.OnJobArrivedInQueue(MachineId, job.JobId);
-                        }
-                    }
-                }
-            }
+            reservedIncomingSlots[jobId] = pos;
+            nextIncomingSlotIndex++;
+            return pos;
         }
 
-        /// @brief Called when a job's collider exits this machine's trigger zone.
-        /// @details Removes the job from the physical queue if it was registered.
-        private void OnTriggerExit(Collider other)
+        public Vector3 GetIncomingSlotPosition(int index)
         {
-            if (other.CompareTag("Job"))
-            {
-                JobVisual job = other.GetComponent<JobVisual>();
-                if (job != null)
-                {
-                    if (PhysicalQueue.Contains(job.JobId))
-                    {
-                        PhysicalQueue.Remove(job.JobId);
-
-                        if (visualLayer != null) visualLayer.UpdateQueueLabel(PhysicalQueue.Count);
-                    }
-                }
-            }
+            Vector3 root = incomingStageRoot != null
+                ? incomingStageRoot.position
+                : transform.position + transform.TransformDirection(new Vector3(2.5f, 0, 0));
+            return root + transform.right * (index * slotSpacing) + Vector3.up * 0.5f;
         }
 
-        // ─────────────────────────────────────────────────────────
-        //  Processing
-        // ─────────────────────────────────────────────────────────
+        public Vector3 GetOutgoingSlotPosition(int index)
+        {
+            Vector3 root = outgoingStageRoot != null
+                ? outgoingStageRoot.position
+                : transform.position + transform.TransformDirection(new Vector3(2.5f, 0, 0));
+            return root + transform.right * (index * slotSpacing) + Vector3.up * 0.5f;
+        }
+
+        // AGV calls this to know exactly where to drive to for pickup
+        public Vector3 GetPickupPositionForJob(int jobId)
+        {
+            int idx = OutgoingQueue.IndexOf(jobId);
+            return idx >= 0 ? GetOutgoingSlotPosition(idx) : transform.position;
+        }
+
+        // AGV calls this on dropoff to know where to place the visual
+        public Vector3 GetNextIncomingDropoffPosition()
+            => GetIncomingSlotPosition(IncomingQueue.Count);
+
+        public void ResetQueues()
+        {
+            IncomingQueue.Clear();
+            OutgoingQueue.Clear();
+            reservedIncomingSlots.Clear();
+            nextIncomingSlotIndex = 0;
+        }
+        public void ReceiveJob(int jobId, JobVisual visual)
+        {
+            if (IncomingQueue.Contains(jobId)) return;
+            IncomingQueue.Add(jobId);
+
+            // Use the pre-reserved position — never recalculate
+            if (visual != null && reservedIncomingSlots.TryGetValue(jobId, out Vector3 slotPos))
+                visual.SnapToPosition(slotPos);
+
+            visualLayer?.UpdateIncomingQueueLabel(IncomingQueue.Count);
+            SimulationBridge.Instance?.OnJobArrivedInQueue(MachineId, jobId);
+        }
 
         /// @brief Begins the coroutine timer that simulates job processing.
         /// @param jobId            The job to process.
@@ -114,16 +132,40 @@ namespace Assets.Scripts.Simulation
         public void StartProcessing(int jobId, float realTimeDuration)
         {
             IsIdle = false;
-            PhysicalQueue.Remove(jobId);
+            IncomingQueue.Remove(jobId);
+            reservedIncomingSlots.Remove(jobId);
 
-            if (visualLayer != null)
+            // Zoop the job visual into the machine body
+            JobTracker tracker = SimulationBridge.Instance.JobManager.GetJobTracker(jobId);
+            if (tracker?.Visual != null)
             {
-                visualLayer.BeginOperation(jobId, Time.time, realTimeDuration);
-                visualLayer.UpdateQueueLabel(PhysicalQueue.Count);
+                tracker.Visual.SetState(JobLifecycleState.Processing);
+                tracker.Visual.SetTargetPosition(transform.position + Vector3.up * 0.5f);
             }
 
+            visualLayer?.BeginOperation(jobId, Time.time, realTimeDuration);
+            visualLayer?.UpdateIncomingQueueLabel(IncomingQueue.Count);
             StartCoroutine(ProcessJobRoutine(jobId, realTimeDuration));
         }
+
+        // Called by AGVController.HandlePickup() to formally release the job
+        public void ReleaseFromOutgoing(int jobId)
+        {
+            OutgoingQueue.Remove(jobId);
+            for (int i = 0; i < OutgoingQueue.Count; i++)
+            {
+                JobTracker t = SimulationBridge.Instance.JobManager.GetJobTracker(OutgoingQueue[i]);
+                t?.Visual?.SnapToPosition(GetOutgoingSlotPosition(i)); // snap, not hop
+            }
+            visualLayer?.UpdateOutgoingQueueLabel(OutgoingQueue.Count);
+        }
+
+        // ─────────────────────────────────────────────────────────
+        //  Processing
+        // ─────────────────────────────────────────────────────────
+
+
+
 
         /// @brief Coroutine that advances a progress bar each frame and fires
         ///        @c SimulationBridge.OnMachineFinished when complete.
@@ -137,27 +179,27 @@ namespace Assets.Scripts.Simulation
             {
                 elapsed += Time.deltaTime;
 
-                if (visualLayer != null)
-                {
-                    visualLayer.UpdateProgress(elapsed / duration);
-                }
+                visualLayer?.UpdateProgress(elapsed / duration);
 
                 yield return null;
             }
 
             IsIdle = true;
 
-            if (visualLayer != null)
+            IsIdle = true;
+            visualLayer?.CompleteOperation(jobId);
+
+            // Move job visual to outgoing staging area
+            JobTracker tracker = SimulationBridge.Instance.JobManager.GetJobTracker(jobId);
+            OutgoingQueue.Add(jobId);
+            int outSlot = OutgoingQueue.Count - 1;
+            if (tracker?.Visual != null)
             {
-                visualLayer.CompleteOperation(jobId);
+                tracker.Visual.SnapToPosition(GetOutgoingSlotPosition(outSlot)); // not SetTargetPosition
+                tracker.Visual.SetState(JobLifecycleState.WaitingForTransport);
             }
 
-            SimLogger.High($"[PhysicalMachine {MachineId}] Finished processing Job {jobId}.");
-
-            if (SimulationBridge.Instance != null)
-            {
-                SimulationBridge.Instance.OnMachineFinished(MachineId, jobId);
-            }
+            SimulationBridge.Instance?.OnMachineFinished(MachineId, jobId);
         }
     }
 }

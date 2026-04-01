@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Assets.Scripts.Scheduling.Core;
 using Assets.Scripts.Logging;
+using Unity.AI.Navigation;
 
 namespace Assets.Scripts.Simulation
 {
@@ -17,6 +18,8 @@ namespace Assets.Scripts.Simulation
         // ─────────────────────────────────────────────────────────
         //  Inspector
         // ─────────────────────────────────────────────────────────
+
+        [SerializeField] private NavMeshSurface navMeshSurface;
 
         [Header("Prefabs")]
         [Tooltip("Machine prefab with a PhysicalMachine component attached.")]
@@ -100,6 +103,9 @@ namespace Assets.Scripts.Simulation
             if (logDistanceMatrix)
                 LogDistanceMatrix();
 
+            navMeshSurface.BuildNavMesh();
+
+
             SimLogger.Medium($"[FactoryLayout] Built floor: {count} machines, " +
                       $"floor {floorSize.x}×{floorSize.y}");
         }
@@ -118,6 +124,7 @@ namespace Assets.Scripts.Simulation
             machines = null;
             distanceMatrix = null;
             distanceMatrixFlat = null;
+            navMeshSurface.RemoveData();
         }
 
         /// @brief Overrides the automatic layout with a caller-supplied position array.

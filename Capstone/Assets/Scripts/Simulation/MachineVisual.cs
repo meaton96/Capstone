@@ -21,11 +21,15 @@ namespace Assets.Scripts.Simulation
         [Header("Rendering")]
         [SerializeField] private MeshRenderer meshRenderer;
 
+        [SerializeField] private Vector3 incomingOffset = new Vector3(-2.5f, -.5f, 0f);
+        [SerializeField] private Vector3 outgoingOffset = new Vector3(2.5f, -.5f, 0f);
+
         [Header("Overhead UI")]
         [SerializeField] private TextMeshProUGUI labelText;
         [SerializeField] private TextMeshProUGUI statusText;
         [SerializeField] private Slider progressBar;
-        [SerializeField] private TextMeshProUGUI queueLengthText;
+        [SerializeField] private TextMeshProUGUI incomingQueueLabel;
+        [SerializeField] private TextMeshProUGUI outgoingQueueLabel;
 
         [Header("State Colours")]
         [SerializeField] private Color idleColour = new Color(0.30f, 0.85f, 0.40f);
@@ -72,7 +76,8 @@ namespace Assets.Scripts.Simulation
                 meshRenderer.material = instanceMaterial;
             }
             SetProgressBarVisible(false);
-            UpdateQueueLabel(0);
+            UpdateIncomingQueueLabel(0);
+            UpdateOutgoingQueueLabel(0);
         }
 
         /// @brief Destroys the per-instance material to prevent memory leaks.
@@ -171,10 +176,34 @@ namespace Assets.Scripts.Simulation
         /// @brief Updates the overhead queue-length label.
         /// @details Called by @c PhysicalMachine whenever its physical queue changes.
         /// @param queueCount  Current number of jobs waiting in the machine's trigger zone.
-        public void UpdateQueueLabel(int queueCount)
+        public void UpdateIncomingQueueLabel(int count)
         {
-            if (queueLengthText != null)
-                queueLengthText.text = $"Q: {queueCount}";
+            if (incomingQueueLabel != null) incomingQueueLabel.text = $"IN: {count}";
+        }
+
+        public void UpdateOutgoingQueueLabel(int count)
+        {
+            if (outgoingQueueLabel != null) outgoingQueueLabel.text = $"OUT: {count}";
+        }
+        private void OnDrawGizmosSelected()
+        {
+            // Draw incoming slots
+            Gizmos.color = Color.cyan;
+            for (int i = 0; i < 4; i++)
+            {
+                // Approximate the slot positions without needing the full PhysicalMachine ref
+                Vector3 inSlot = transform.position + transform.TransformDirection(incomingOffset)
+                               + transform.right * (i * 0.75f);
+                Gizmos.DrawWireCube(inSlot, Vector3.one * 0.3f);
+            }
+            // Draw outgoing slots
+            Gizmos.color = Color.yellow;
+            for (int i = 0; i < 4; i++)
+            {
+                Vector3 outSlot = transform.position + transform.TransformDirection(outgoingOffset)
+                                + transform.right * (i * 0.75f);
+                Gizmos.DrawWireCube(outSlot, Vector3.one * 0.3f);
+            }
         }
 
         // ─────────────────────────────────────────────────────────

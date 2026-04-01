@@ -90,14 +90,14 @@ namespace Assets.Scripts.Simulation
         /// @brief The dispatching rule last applied during @c Step().
         public string LastAppliedRule { get; private set; } = "Waiting...";
 
-
-
         private Queue<int> pendingDecisions = new Queue<int>();
 
         [Header("Scene References")]
         [SerializeField] private FactoryLayoutManager layoutManager;
+        [SerializeField] private AGVPool agvPool;           // ← Fix 1: field was missing
         public JobManager JobManager;
         [SerializeField] private SchedulingAgent agent;
+
         /// @brief Singleton instance accessible from @c PhysicalMachine and @c JobManager.
         public static SimulationBridge Instance;
 
@@ -168,6 +168,7 @@ namespace Assets.Scripts.Simulation
 
         private void Start()
         {
+            // ← Fix 2: removed stray DispatchRealAGV(i, null, firstMachineId) that was here
             if (autoStartOnPlay && TaillardJson != null)
             {
                 SimLogger.Medium("[Sim Bridge] Auto Starting Episode...");
@@ -205,6 +206,10 @@ namespace Assets.Scripts.Simulation
             {
                 JobManager.Initialize(currentInstance, spawnVisuals: true);
             }
+            if (agvPool != null)
+            {
+                agvPool.InitializeFleet();
+            }
 
             episodeActive = true;
             decisionCount = 0;
@@ -217,10 +222,15 @@ namespace Assets.Scripts.Simulation
             StartTime = Time.time;
 
             SimLogger.High($"[SimBridge] Episode started: {currentInstance.Name}");
+
             for (int i = 0; i < currentInstance.JobCount; i++)
             {
                 int firstMachineId = currentInstance.machines_matrix[i][0];
-                DispatchGhostAGV(i, firstMachineId);
+                PhysicalMachine target = layoutManager.GetMachine(firstMachineId);
+                Vector3 pickupPos = JobManager.GetJobTracker(i)?.WorldPosition ?? Vector3.zero;
+                Vector3 dropoffSlotPos = target.ReserveIncomingSlot(i);
+
+                agvPool.TryDispatchStaggered(i, pickupPos, dropoffSlotPos, null, target, i);
             }
         }
 
@@ -256,7 +266,8 @@ namespace Assets.Scripts.Simulation
             JobTracker tracker = JobManager.GetJobTracker(jobId);
             if (tracker != null && tracker.NextMachineId != -1)
             {
-                DispatchGhostAGV(jobId, tracker.NextMachineId);
+                PhysicalMachine finishedMachine = layoutManager.GetMachine(machineId);
+                DispatchRealAGV(jobId, finishedMachine, tracker.NextMachineId);
             }
 
             CheckIfDecisionNeeded(machineId);
@@ -284,8 +295,8 @@ namespace Assets.Scripts.Simulation
         /// @brief Applies the agent's chosen dispatching rule to @c CurrentDecision.
         ///
         /// @details Selects the best job from the machine's physical queue according
-        ///          to the rule identified by @p actionIndex, starts physical processing
-        ///          on that machine, and returns a @c StepResult carrying the reward.
+        /// to the rule identified by @p actionIndex, starts physical processing
+        /// on that machine, and returns a @c StepResult carrying the reward.
         ///
         /// @param actionIndex  Index into @c ActionToRule; selects the dispatching rule.
         /// @return             A @c StepResult with reward and episode-done flag.
@@ -453,21 +464,30 @@ namespace Assets.Scripts.Simulation
             OnEpisodeFinished?.Invoke(result);
         }
 
-        /// @brief Instructs a job's visual token to travel toward a target machine.
-        /// @param jobId            Job to move.
+        /// @brief Dispatches a real AGV to carry @p jobId from its current location
+        ///        to the incoming staging area of the target machine.
+        /// @param jobId            Job to transport.
+        /// @param source           Machine the job is leaving (null for initial dispatch from spawn).
         /// @param targetMachineId  Destination machine index.
-        private void DispatchGhostAGV(int jobId, int targetMachineId)
+        private void DispatchRealAGV(int jobId, PhysicalMachine source, int targetMachineId)
         {
+            if (agvPool == null) { SimLogger.Error("[SimBridge] AGVPool not assigned!"); return; }
+
             PhysicalMachine targetMachine = layoutManager.GetMachine(targetMachineId);
-            JobTracker tracker = JobManager.GetJobTracker(jobId);
+            if (targetMachine == null) return;
 
-            if (targetMachine != null && tracker != null && tracker.Visual != null)
-            {
-                tracker.Visual.SetState(JobLifecycleState.InTransit);
-                tracker.Visual.SetTargetPosition(targetMachine.transform.position);
+            // Reserve the slot NOW — one authoritative position flows through the whole chain
+            Vector3 dropoffSlotPos = targetMachine.ReserveIncomingSlot(jobId);
 
-                SimLogger.High($"[Ghost AGV] Dispatched Job {jobId} to Machine {targetMachineId}");
-            }
+            Vector3 pickupPos = source != null
+                ? source.GetPickupPositionForJob(jobId)
+                : JobManager.GetJobTracker(jobId)?.WorldPosition ?? Vector3.zero;
+
+            if (pickupPos == Vector3.zero)
+                SimLogger.Error($"[SimBridge] Job {jobId} has zero pickup position — check WorldPosition init");
+
+            JobManager.GetJobTracker(jobId)?.Visual?.SetState(JobLifecycleState.WaitingForTransport);
+            agvPool.TryDispatch(jobId, pickupPos, dropoffSlotPos, source, targetMachine);
         }
 
         /// @brief Immediately halts the active episode and tears down all scene objects.
@@ -486,8 +506,6 @@ namespace Assets.Scripts.Simulation
             if (layoutManager != null) layoutManager.ClearFloor();
             if (JobManager != null) JobManager.Cleanup();
 
-            // Tell ML-Agents the episode is over so it resets cleanly
-            // SchedulingAgent agent = FindObjectOfType<SchedulingAgent>();
             if (agent != null) agent.EndEpisode();
 
             SimLogger.Low("[SimBridge] Episode stopped by user.");
