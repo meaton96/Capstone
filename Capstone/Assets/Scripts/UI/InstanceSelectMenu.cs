@@ -77,6 +77,12 @@ namespace Assets.Scripts.UI
                 instanceDropdown.onValueChanged.RemoveListener(OnSelectionChanged);
         }
 
+        /// @brief Re-shows the menu and refreshes the dropdown for a new selection.
+        public void Show()
+        {
+            if (menuPanel != null) menuPanel.SetActive(true);
+        }
+
         // ─────────────────────────────────────────────────────────
         //  UI Callbacks
         // ─────────────────────────────────────────────────────────

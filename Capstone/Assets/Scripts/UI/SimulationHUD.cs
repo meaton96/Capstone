@@ -19,6 +19,10 @@ namespace Assets.Scripts.UI
         [SerializeField] private TextMeshProUGUI jobsText;
         [SerializeField] private TextMeshProUGUI decisionsText;
 
+        [Header("Session Controls")]
+        [SerializeField] private Button stopButton;
+        [SerializeField] private InstanceSelectMenu instanceSelectMenu;
+
         [Header("Time Controls")]
         [SerializeField] private Slider timeScaleSlider;
         [SerializeField] private TextMeshProUGUI timeScaleValueText;
@@ -37,6 +41,9 @@ namespace Assets.Scripts.UI
                 timeScaleSlider.onValueChanged.AddListener(OnTimeScaleChanged);
                 UpdateScaleText(Time.timeScale);
             }
+
+            if (stopButton != null)
+                stopButton.onClick.AddListener(OnStopClicked);
         }
 
         /// @brief Removes the slider listener to prevent stale callbacks after destruction.
@@ -46,6 +53,19 @@ namespace Assets.Scripts.UI
             {
                 timeScaleSlider.onValueChanged.RemoveListener(OnTimeScaleChanged);
             }
+
+            if (stopButton != null)
+                stopButton.onClick.RemoveListener(OnStopClicked);
+        }
+
+        /// @brief Stops the active episode and returns to the instance select menu.
+        private void OnStopClicked()
+        {
+            if (SimulationBridge.Instance != null)
+                SimulationBridge.Instance.StopEpisode();
+
+            if (instanceSelectMenu != null)
+                instanceSelectMenu.Show();
         }
 
         /// @brief Polls the bridge and refreshes all HUD labels once per frame.

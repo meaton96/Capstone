@@ -90,12 +90,14 @@ namespace Assets.Scripts.Simulation
         /// @brief The dispatching rule last applied during @c Step().
         public string LastAppliedRule { get; private set; } = "Waiting...";
 
+
+
         private Queue<int> pendingDecisions = new Queue<int>();
 
         [Header("Scene References")]
         [SerializeField] private FactoryLayoutManager layoutManager;
         public JobManager JobManager;
-
+        [SerializeField] private SchedulingAgent agent;
         /// @brief Singleton instance accessible from @c PhysicalMachine and @c JobManager.
         public static SimulationBridge Instance;
 
@@ -466,6 +468,29 @@ namespace Assets.Scripts.Simulation
 
                 SimLogger.High($"[Ghost AGV] Dispatched Job {jobId} to Machine {targetMachineId}");
             }
+        }
+
+        /// @brief Immediately halts the active episode and tears down all scene objects.
+        /// @details Safe to call mid-episode. Notifies the SchedulingAgent via
+        ///          EndEpisode() so ML-Agents doesn't get stuck waiting for an action.
+        public void StopEpisode()
+        {
+            if (!episodeActive) return;
+
+            episodeActive = false;
+            IsWaitingForAction = false;
+            pendingDecisions.Clear();
+
+            TaillardJson = null;
+
+            if (layoutManager != null) layoutManager.ClearFloor();
+            if (JobManager != null) JobManager.Cleanup();
+
+            // Tell ML-Agents the episode is over so it resets cleanly
+            // SchedulingAgent agent = FindObjectOfType<SchedulingAgent>();
+            if (agent != null) agent.EndEpisode();
+
+            SimLogger.Low("[SimBridge] Episode stopped by user.");
         }
 
         /// @brief Deserialises a @c TaillardInstance from a JSON @c TextAsset.
