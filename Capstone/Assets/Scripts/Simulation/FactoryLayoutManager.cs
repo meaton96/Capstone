@@ -4,6 +4,7 @@ using UnityEngine;
 using Assets.Scripts.Scheduling.Core;
 using Assets.Scripts.Logging;
 using Unity.AI.Navigation;
+using Assets.Scripts.Simulation.Machines;
 
 namespace Assets.Scripts.Simulation
 {
@@ -30,11 +31,17 @@ namespace Assets.Scripts.Simulation
         [SerializeField] private Transform floorTransform;
 
         [Tooltip("World-space size of the factory floor (units along X and Z).")]
-        [SerializeField] private Vector2 floorSize = new Vector2(20f, 20f);
+        [SerializeField] private Vector2 floorSize = new Vector2(30f, 30f);
 
         [Header("Layout")]
         [Tooltip("Vertical offset so machine bases sit on top of the floor plane.")]
         [SerializeField] private float machineYOffset = 0.5f;
+
+        [Tooltip("Minimum distance between machine centres in the auto-grid. " +
+                 "Should be at least machine width + 2× conveyor belt length + AGV lane. " +
+                 "With default belt settings (capacity 3, spacing 0.5 = 1 unit per belt) " +
+                 "a value of 5–6 gives comfortable clearance.")]
+        [SerializeField] private float minCellSize = 5.5f;
 
         [Tooltip("If true, log the distance matrix to the console on build.")]
         [SerializeField] private bool logDistanceMatrix = true;
@@ -105,7 +112,6 @@ namespace Assets.Scripts.Simulation
 
             navMeshSurface.BuildNavMesh();
 
-
             SimLogger.Medium($"[FactoryLayout] Built floor: {count} machines, " +
                       $"floor {floorSize.x}×{floorSize.y}");
         }
@@ -158,7 +164,9 @@ namespace Assets.Scripts.Simulation
             if (customPositions != null)
             {
                 if (customPositions.Length != count)
-                    throw new InvalidOperationException($"Custom layout has {customPositions.Length} positions but simulator has {count} machines.");
+                    throw new InvalidOperationException(
+                        $"Custom layout has {customPositions.Length} positions " +
+                        $"but simulator has {count} machines.");
                 return customPositions;
             }
 
@@ -171,46 +179,89 @@ namespace Assets.Scripts.Simulation
             };
         }
 
+        // ─────────────────────────────────────────────────────────
+        //  Grid Generator
+        // ─────────────────────────────────────────────────────────
+
         /// @brief Generates a uniform grid layout for an arbitrary machine count.
+        ///        Enforces @c minCellSize so machines never crowd each other even
+        ///        on small floors or with large machine counts.
         /// @param count  Number of machines to position.
-        /// @return       Array of local offsets filling the floor area.
+        /// @return       Array of local offsets centred on the floor.
         private Vector3[] GenerateGridPositions(int count)
         {
             int cols = Mathf.CeilToInt(Mathf.Sqrt(count));
             int rows = Mathf.CeilToInt((float)count / cols);
 
             float margin = 2f;
-            float spacingX = (floorSize.x - margin * 2) / Mathf.Max(cols - 1, 1);
-            float spacingZ = (floorSize.y - margin * 2) / Mathf.Max(rows - 1, 1);
 
-            float originX = -(floorSize.x - margin * 2) / 2f;
-            float originZ = -(floorSize.y - margin * 2) / 2f;
+            // Compute spacing from available floor area, but never go below
+            // minCellSize so conveyors and AGV lanes have room.
+            float spacingX = Mathf.Max(
+                (floorSize.x - margin * 2) / Mathf.Max(cols - 1, 1),
+                minCellSize);
+            float spacingZ = Mathf.Max(
+                (floorSize.y - margin * 2) / Mathf.Max(rows - 1, 1),
+                minCellSize);
+
+            // Centre the grid on the floor
+            float originX = -((cols - 1) * spacingX) / 2f;
+            float originZ = -((rows - 1) * spacingZ) / 2f;
 
             Vector3[] positions = new Vector3[count];
             for (int i = 0; i < count; i++)
             {
                 int col = i % cols;
                 int row = i / cols;
-                positions[i] = new Vector3(originX + col * spacingX, 0f, originZ + row * spacingZ);
+                positions[i] = new Vector3(
+                    originX + col * spacingX,
+                    0f,
+                    originZ + row * spacingZ);
             }
+
+            // If the grid exceeds the floor, warn but don't clamp — the user
+            // can increase floorSize or lower minCellSize in the inspector.
+            float neededX = (cols - 1) * spacingX + margin * 2;
+            float neededZ = (rows - 1) * spacingZ + margin * 2;
+            if (neededX > floorSize.x || neededZ > floorSize.y)
+            {
+                SimLogger.Error(
+                    $"[FactoryLayout] Grid needs {neededX:F0}×{neededZ:F0} but floor is " +
+                    $"{floorSize.x}×{floorSize.y}. Increase Floor Size or reduce Min Cell Size.");
+            }
+
             return positions;
         }
 
-        /// @brief Hard-coded symmetric 2-row layout for 8 machines.
+        // ─────────────────────────────────────────────────────────
+        //  Hard-Coded Layouts  (widened for conveyor clearance)
+        // ─────────────────────────────────────────────────────────
+
+        /// @brief Symmetric 2-row layout for 8 machines.
+        ///        X spacing: 6 units  |  Z spacing: 6 units
         private static Vector3[] GetLayout8()
         {
-            return new[] {
-                new Vector3(-6f, 0f, -3f), new Vector3(-2f, 0f, -3f), new Vector3( 2f, 0f, -3f), new Vector3( 6f, 0f, -3f),
-                new Vector3(-6f, 0f,  3f), new Vector3(-2f, 0f,  3f), new Vector3( 2f, 0f,  3f), new Vector3( 6f, 0f,  3f),
+            return new[]
+            {
+                new Vector3(-9f,  0f, -3f),
+                new Vector3(-3f,  0f, -3f),
+                new Vector3( 3f,  0f, -3f),
+                new Vector3( 9f,  0f, -3f),
+
+                new Vector3(-9f,  0f,  3f),
+                new Vector3(-3f,  0f,  3f),
+                new Vector3( 3f,  0f,  3f),
+                new Vector3( 9f,  0f,  3f),
             };
         }
 
-        /// @brief Hard-coded 5×3 grid layout for 15 machines.
+        /// @brief 5×3 grid layout for 15 machines.
+        ///        X spacing: 5.5 units  |  Z spacing: 6 units
         private static Vector3[] GetLayout15()
         {
             Vector3[] positions = new Vector3[15];
-            float[] xSlots = { -7f, -3.5f, 0f, 3.5f, 7f };
-            float[] zRows = { -4f, 0f, 4f };
+            float[] xSlots = { -11f, -5.5f, 0f, 5.5f, 11f };
+            float[] zRows = { -6f, 0f, 6f };
             int index = 0;
             for (int row = 0; row < 3; row++)
                 for (int col = 0; col < 5; col++)
@@ -218,12 +269,13 @@ namespace Assets.Scripts.Simulation
             return positions;
         }
 
-        /// @brief Hard-coded 5×4 grid layout for 20 machines.
+        /// @brief 5×4 grid layout for 20 machines.
+        ///        X spacing: 5.5 units  |  Z spacing: 5 units
         private static Vector3[] GetLayout20()
         {
             Vector3[] positions = new Vector3[20];
-            float[] xSlots = { -7f, -3.5f, 0f, 3.5f, 7f };
-            float[] zRows = { -4.5f, -1.5f, 1.5f, 4.5f };
+            float[] xSlots = { -11f, -5.5f, 0f, 5.5f, 11f };
+            float[] zRows = { -7.5f, -2.5f, 2.5f, 7.5f };
             int index = 0;
             for (int row = 0; row < 4; row++)
                 for (int col = 0; col < 5; col++)

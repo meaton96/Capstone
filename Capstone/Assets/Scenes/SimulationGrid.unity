@@ -216,6 +216,7 @@ GameObject:
   - component: {fileID: 178498098}
   - component: {fileID: 178498101}
   - component: {fileID: 178498102}
+  - component: {fileID: 178498103}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -348,7 +349,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 178498097}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 11db2319544024343a31bfee839caa4e, type: 3}
   m_Name: 
@@ -357,6 +358,20 @@ MonoBehaviour:
   orbitSpeed: 5
   zoomDistance: 15
   heightOffset: 4
+--- !u!114 &178498103
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 178498097}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ea1d9ca043b576458dd476c094896b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraController
+  moveSpeed: 15
+  lookSensitivity: 0.2
 --- !u!1 &192365266
 GameObject:
   m_ObjectHideFlags: 0
@@ -2570,6 +2585,7 @@ MonoBehaviour:
   floorTransform: {fileID: 473100912}
   floorSize: {x: 20, y: 20}
   machineYOffset: 0.5
+  minCellSize: 4.5
   logDistanceMatrix: 1
 --- !u!4 &909580046
 Transform:
@@ -3305,7 +3321,7 @@ Transform:
   m_GameObject: {fileID: 1228920630}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 13, y: 0, z: 0}
+  m_LocalPosition: {x: 20, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3888,7 +3904,7 @@ Transform:
   m_GameObject: {fileID: 1676106527}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -13, y: 0, z: 0}
+  m_LocalPosition: {x: -20, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

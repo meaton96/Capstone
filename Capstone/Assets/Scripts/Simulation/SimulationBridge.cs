@@ -7,6 +7,8 @@ using Assets.Scripts.Scheduling.Data;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using Assets.Scripts.Logging;
+using Assets.Scripts.Simulation.Machines;
+using Assets.Scripts.Simulation.AGV;
 
 namespace Assets.Scripts.Simulation
 {

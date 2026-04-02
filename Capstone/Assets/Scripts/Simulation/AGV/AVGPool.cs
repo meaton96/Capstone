@@ -1,8 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Assets.Scripts.Simulation.Machines;
+using Assets.Scripts.Logging;
 
-namespace Assets.Scripts.Simulation
+namespace Assets.Scripts.Simulation.AGV
 {
     public class AGVPool : MonoBehaviour
     {
@@ -83,7 +85,7 @@ namespace Assets.Scripts.Simulation
             }
             else
             {
-                Debug.LogWarning($"[AGVPool] No AGV free for Job {jobId} — queuing request.");
+                SimLogger.Low($"[AGVPool] No AGV free for Job {jobId} — queuing request.");
                 pendingRequests.Enqueue(new DispatchRequest
                 {
                     JobId = jobId,
@@ -105,7 +107,7 @@ namespace Assets.Scripts.Simulation
             AGVController agv = GetAvailableAGV();
             if (agv == null) return;
             DispatchRequest req = pendingRequests.Dequeue();
-            Debug.Log($"[AGVPool] Draining queue — assigning Job {req.JobId} to AGV {agv.AgvId}.");
+            SimLogger.Low($"[AGVPool] Draining queue — assigning Job {req.JobId} to AGV {agv.AgvId}.");
             agv.Dispatch(req.JobId, req.PickupPosition, req.DropoffSlotPosition, req.Source, req.Dropoff);
         }
 
