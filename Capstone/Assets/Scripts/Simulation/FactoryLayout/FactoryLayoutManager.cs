@@ -18,11 +18,25 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         // ─────────────────────────────────────────────────────────
         //  Inspector — References
         // ─────────────────────────────────────────────────────────
-
+        public static FactoryLayoutManager Instance;
         [SerializeField] private NavMeshSurface navMeshSurface;
 
         [Header("Prefabs")]
         [SerializeField] private PhysicalMachine machinePrefab;
+        [SerializeField] private PhysicalMachine doubleSidedMachinePrefab;
+
+        [Header("I/O & AGV Infrastructure")]
+        [SerializeField] private GameObject conveyorPrefab;
+        [SerializeField] private Vector3 ioConveyorScale = new Vector3(.05f, .2f, .30f);
+        [SerializeField] private Material incomingBeltMaterial;
+
+        public Vector3 IncomingBeltPosition { get; private set; }
+        public Vector3 OutgoingBeltPosition { get; private set; }
+        public Vector3 AGVParkingPosition { get; private set; }
+
+        public ConveyorBelt IncomingBelt { get; private set; }
+        public ConveyorBelt OutgoingBelt { get; private set; }
+        // public Vector3 AGVParkingPosition { get; private set; }
 
         [Tooltip("Optional prefab for aisle wall segments. If null, a " +
                  "primitive cube is generated at runtime.")]
@@ -124,6 +138,11 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         /// <summary>Total floor bounds in world units.</summary>
         public Vector2 FloorSize => new Vector2(totalFloorWidth, totalFloorDepth);
 
+        void Awake()
+        {
+            Instance = this;
+        }
+
         // ─────────────────────────────────────────────────────────
         //  Public API
         // ─────────────────────────────────────────────────────────
@@ -180,12 +199,30 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 Vector3 worldPos = floorCentre + localPos;
                 worldPos.y = machineYOffset;
 
-                // Machine faces south (toward the aisle below it)
-                // so Z+ local = south in world.
-                Quaternion rotation = Quaternion.identity;
+                PhysicalMachine prefabToSpawn;
+                Quaternion rotation;
 
-                PhysicalMachine pm = Instantiate(
-                    machinePrefab, worldPos, rotation, transform);
+                if (row == 0)
+                {
+                    // Top Row: Single-sided prefab, flipped 180 to face South
+                    prefabToSpawn = machinePrefab;
+                    rotation = Quaternion.Euler(0f, 180f, 0f);
+                }
+                else if (row == layoutRows - 1)
+                {
+                    // Bottom Row: Single-sided prefab, default rotation to face North
+                    prefabToSpawn = machinePrefab;
+                    rotation = Quaternion.identity;
+                }
+                else
+                {
+                    // Center Rows: Double-sided prefab
+                    // (Includes a fallback just in case you forget to assign it in the inspector)
+                    prefabToSpawn = doubleSidedMachinePrefab != null ? doubleSidedMachinePrefab : machinePrefab;
+                    rotation = Quaternion.identity;
+                }
+
+                PhysicalMachine pm = Instantiate(prefabToSpawn, worldPos, rotation, transform);
                 pm.gameObject.name = $"Machine_{i}";
                 pm.Initialize(i, simulator.Machines[i]);
                 machines[i] = pm;
@@ -198,6 +235,9 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             ComputeDistanceMatrix();
             if (logDistanceMatrix) LogDistanceMatrix();
 
+
+            BuildInfrastructure(floorCentre);
+
             // Rebuild NavMesh with walls in place
             navMeshSurface.BuildNavMesh();
 
@@ -205,6 +245,47 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 $"{count} machines ({layoutRows}×{layoutCols}), " +
                 $"floor {totalFloorWidth:F1}×{totalFloorDepth:F1}, " +
                 $"row pitch {RowPitch:F1}");
+        }
+
+        private void BuildInfrastructure(Vector3 floorCentre)
+        {
+            float machineAreaHalfW = ((layoutCols - 1) * machineSpacingX) / 2f;
+
+            // A) INCOMING BELT (Top-Left, facing East onto the top spine)
+            float topZ = floorCentre.z + GetTopSpineZ();
+            IncomingBeltPosition = new Vector3(floorCentre.x - machineAreaHalfW - verticalAisleWidth, 0.01f, topZ);
+
+            if (conveyorPrefab != null)
+            {
+                GameObject inBelt = Instantiate(conveyorPrefab, IncomingBeltPosition, Quaternion.Euler(0, 90, 0), transform);
+                inBelt.name = "Incoming_Belt";
+                inBelt.transform.localScale = ioConveyorScale;
+                IncomingBelt = inBelt.GetComponent<ConveyorBelt>();
+                if (incomingBeltMaterial != null)
+                {
+                    foreach (var rend in inBelt.GetComponentsInChildren<Renderer>())
+                    {
+                        rend.material = incomingBeltMaterial;
+                    }
+                }
+                spawnedObjects.Add(inBelt);
+            }
+
+            // B) OUTGOING BELT (Bottom-Right, facing South/Out of the factory)
+            float botZ = floorCentre.z + GetBottomSpineZ();
+            OutgoingBeltPosition = new Vector3(floorCentre.x + machineAreaHalfW + verticalAisleWidth, 0.01f, botZ);
+
+            if (conveyorPrefab != null)
+            {
+                GameObject outBelt = Instantiate(conveyorPrefab, OutgoingBeltPosition, Quaternion.Euler(0, 180, 0), transform);
+                outBelt.name = "Outgoing_Belt";
+                outBelt.transform.localScale = ioConveyorScale;
+                spawnedObjects.Add(outBelt);
+                OutgoingBelt = outBelt.GetComponent<ConveyorBelt>();
+            }
+
+            // C) AGV PARKING (Bottom-Left)
+            AGVParkingPosition = new Vector3(floorCentre.x - machineAreaHalfW, 0.01f, botZ);
         }
 
         public void ClearFloor()

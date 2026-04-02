@@ -2583,6 +2583,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Simulation::Assets.Scripts.Simulation.FactoryLayoutManager
   navMeshSurface: {fileID: 473100913}
   machinePrefab: {fileID: -1989336749945410295, guid: 52beb639f07b3a94e81b96b233969ff7, type: 3}
+  doubleSidedMachinePrefab: {fileID: -1989336749945410295, guid: 296fb1ed2cfd5394eaf7827875857536, type: 3}
+  conveyorPrefab: {fileID: 2393961752667882661, guid: 0b5d1f82c872515499f45c6baf69da5c, type: 3}
+  ioConveyorScale: {x: 0.05, y: 0.2, z: 0.3}
+  incomingBeltMaterial: {fileID: 0}
   wallPrefab: {fileID: 8214164735923952847, guid: 80dbfde9c2c33664ca74062703b00a2b, type: 3}
   floorTransform: {fileID: 473100912}
   machineSpacingX: 6
@@ -4364,7 +4368,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Simulation::Assets.Scripts.Simulation.AGVPool
   agvPrefab: {fileID: 8322204830557532020, guid: 489bfb667fecd44beb9c13ac3c110478, type: 3}
   fleetSize: 1
-  parkingArea: {fileID: 624777364}
+  layoutManager: {fileID: 0}
 --- !u!4 &1750965657
 Transform:
   m_ObjectHideFlags: 0

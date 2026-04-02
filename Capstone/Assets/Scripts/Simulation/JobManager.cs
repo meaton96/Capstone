@@ -4,6 +4,7 @@ using UnityEngine;
 using Assets.Scripts.Scheduling.Core;
 using Assets.Scripts.Scheduling.Data;
 using Assets.Scripts.Simulation.FactoryLayout;
+using Assets.Scripts.Logging;
 
 namespace Assets.Scripts.Simulation
 {
@@ -71,7 +72,7 @@ namespace Assets.Scripts.Simulation
         [Header("Exit Area")]
         [SerializeField] private Transform exitAreaMarker;
         [SerializeField] private Vector3 exitAreaOrigin = new Vector3(-5f, 0f, 10f);
-
+        private Queue<int> pendingIncomingJobs = new Queue<int>();
         private JobTracker[] trackers;
         private bool initialized;
         private Transform jobTokenParent;
@@ -151,9 +152,58 @@ namespace Assets.Scripts.Simulation
                     tracker.Visual = visual;
                 }
                 trackers[j] = tracker;
+                pendingIncomingJobs.Enqueue(j);
             }
             initialized = true;
             Debug.Log($"[JobManager] Initialized {jobCount} job trackers directly from JSON data.");
+        }
+
+        private void Update()
+        {
+            if (!initialized || layoutManager == null) return;
+
+            // 1. INCOMING BELT: Instantly fill any available space
+            if (layoutManager.IncomingBelt != null)
+            {
+                // Using a while-loop means it will spawn 3 jobs instantly if capacity is 3
+                while (pendingIncomingJobs.Count > 0 && !layoutManager.IncomingBelt.IsFull)
+                {
+                    int nextJobId = pendingIncomingJobs.Peek();
+                    JobTracker tracker = trackers[nextJobId];
+
+                    if (tracker.Visual != null)
+                    {
+                        tracker.Visual.gameObject.SetActive(true);
+                    }
+
+                    if (layoutManager.IncomingBelt.TryEnqueue(nextJobId, tracker.Visual))
+                    {
+                        pendingIncomingJobs.Dequeue();
+                    }
+                }
+            }
+
+            // 2. OUTGOING BELT: Reap completed jobs as they reach the end
+            if (layoutManager.OutgoingBelt != null && layoutManager.OutgoingBelt.Count > 0)
+            {
+                JobVisual frontVisual = layoutManager.OutgoingBelt.PeekFrontVisual();
+                if (frontVisual != null)
+                {
+                    // Check how close the visual is to the final output position
+                    float dist = Vector3.Distance(frontVisual.transform.position, layoutManager.OutgoingBelt.OutputEndPosition);
+
+                    // If it's close enough, remove it from the belt
+                    if (dist < 0.05f)
+                    {
+                        var (jobId, vis) = layoutManager.OutgoingBelt.DequeueFront();
+
+                        // Hide it (or you could use Destroy(vis.gameObject) if preferred)
+                        vis.gameObject.SetActive(false);
+
+                        SimLogger.Low($"[JobManager] Job {jobId} reached the end of the outgoing belt and was removed.");
+                    }
+                }
+            }
         }
 
         /// @brief Destroys all visual tokens and resets the manager to an uninitialised state.
@@ -298,7 +348,8 @@ namespace Assets.Scripts.Simulation
         /// @return      World position including the configured token height offset.
         private Vector3 GetIncomingQueuePosition(int slot)
         {
-            Vector3 origin = incomingQueueMarker != null ? incomingQueueMarker.position : incomingQueueOrigin;
+            // Use the LayoutManager's Incoming Belt as the origin
+            Vector3 origin = layoutManager != null ? layoutManager.IncomingBeltPosition : incomingQueueOrigin;
             int row = slot / Mathf.Max(queueRowSize, 1);
             int col = slot % Mathf.Max(queueRowSize, 1);
             Vector3 rowDir = queueRowDirection.normalized;
@@ -306,12 +357,10 @@ namespace Assets.Scripts.Simulation
             return origin + rowDir * (col * queueGridSpacing) + colDir * (row * queueGridSpacing) + Vector3.up * jobTokenHeight;
         }
 
-        /// @brief Computes the world-space position where a completed job's visual should rest.
-        /// @param slot  Slot index matching the job's original incoming queue slot.
-        /// @return      World position in the exit area.
         private Vector3 GetExitAreaPosition(int slot)
         {
-            Vector3 origin = exitAreaMarker != null ? exitAreaMarker.position : exitAreaOrigin;
+            // Use the LayoutManager's Outgoing Belt as the origin
+            Vector3 origin = layoutManager != null ? layoutManager.OutgoingBeltPosition : exitAreaOrigin;
             int row = slot / Mathf.Max(queueRowSize, 1);
             int col = slot % Mathf.Max(queueRowSize, 1);
             Vector3 rowDir = queueRowDirection.normalized;

@@ -135,6 +135,10 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         [Tooltip("Draw zone labels in the Scene view.")]
         [SerializeField] private bool drawLabels = true;
 
+        public const int IncomingBeltId = -1;
+        public const int OutgoingBeltId = -2;
+        public const int ParkingAreaId = -3;
+
         // ─────────────────────────────────────────────────────────
         //  Runtime State
         // ─────────────────────────────────────────────────────────
@@ -536,6 +540,66 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             int[][] rowAisles, int[] topSpine, int[] botSpine,
             int rows, int cols)
         {
+            // ─────────────────────────────────────────────────────────
+            //  I/O & Parking Dock Points
+            // ─────────────────────────────────────────────────────────
+
+            // 1. Incoming Belt (Top-Left corner)
+            // Located at the start of the Top Spine (eastbound)
+            if (topSpine.Length > 0 && layoutManager.IncomingBelt != null)
+            {
+                int inZoneId = topSpine[0];
+                TrafficZone inZone = zoneById[inZoneId];
+
+                // The AGV needs to pick up from the output end of the incoming belt
+                Vector3 handshake = layoutManager.IncomingBelt.OutputEndPosition;
+                Vector3 approach = handshake - Vector3.right * 1.5f; // Stand slightly west to approach
+
+                inZone.DockPoints[IncomingBeltId] = new DockPoint
+                {
+                    ApproachPosition = approach,
+                    HandshakePosition = handshake,
+                    FacingDirection = Vector3.right, // Face East toward the belt
+                    IsPickup = true
+                };
+            }
+
+            // 2. Outgoing Belt (Bottom-Right corner)
+            // Located at the start of the Bottom Spine (westbound)
+            if (botSpine.Length > 0 && layoutManager.OutgoingBelt != null)
+            {
+                int outZoneId = botSpine[botSpine.Length - 1];
+                TrafficZone outZone = zoneById[outZoneId];
+
+                // The AGV needs to drop off at the input end of the outgoing belt
+                Vector3 handshake = layoutManager.OutgoingBelt.InputEndPosition;
+                Vector3 approach = handshake + Vector3.forward * 1.5f; // Stand slightly north to approach
+
+                outZone.DockPoints[OutgoingBeltId] = new DockPoint
+                {
+                    ApproachPosition = approach,
+                    HandshakePosition = handshake,
+                    FacingDirection = -Vector3.forward, // Face South toward the belt
+                    IsPickup = false
+                };
+            }
+
+            // 3. AGV Parking (Bottom-Left corner)
+            // Located at the end of the Bottom Spine (before going north)
+            if (botSpine.Length > 0)
+            {
+                int parkZoneId = botSpine[0];
+                TrafficZone parkZone = zoneById[parkZoneId];
+                Vector3 parkPos = layoutManager.AGVParkingPosition;
+
+                parkZone.DockPoints[ParkingAreaId] = new DockPoint
+                {
+                    ApproachPosition = parkPos,
+                    HandshakePosition = parkPos, // No handshake needed for parking
+                    FacingDirection = -Vector3.left, // Face East while parked
+                    IsPickup = false
+                };
+            }
             float standoff = 1.5f; // distance from conveyor end to approach point
             Vector3 floorCentre = layoutManager.transform.position;
 

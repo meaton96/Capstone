@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.AI;
 using Assets.Scripts.Simulation.Machines;
+using Assets.Scripts.Simulation.FactoryLayout;
 
 namespace Assets.Scripts.Simulation.AGV
 {
@@ -96,7 +97,16 @@ namespace Assets.Scripts.Simulation.AGV
             JobTracker tracker = SimulationBridge.Instance.JobManager.GetJobTracker(CurrentJobId);
             loadedJobVisual = tracker?.Visual;
 
-            sourceMachine?.ReleaseFromOutgoing(CurrentJobId);
+            if (sourceMachine != null)
+            {
+                sourceMachine.ReleaseFromOutgoing(CurrentJobId);
+            }
+            else
+            {
+                // Null source means we are picking up from the main Incoming Belt
+                var layoutManager = FindObjectOfType<FactoryLayoutManager>(); // Or pass this reference in Initialize
+                layoutManager.IncomingBelt?.RemoveJob(CurrentJobId);
+            }
 
             if (loadedJobVisual != null)
             {
@@ -105,19 +115,30 @@ namespace Assets.Scripts.Simulation.AGV
             }
 
             agent.SetDestination(lockedDropoffPos);
-            SimulationBridge.Instance.JobManager.BeginTransit(CurrentJobId, targetMachine.MachineId, Time.time);
+
+            // Safety check for targetMachine being null (going to exit)
+            int nextMachineId = targetMachine != null ? targetMachine.MachineId : -1;
+            SimulationBridge.Instance.JobManager.BeginTransit(CurrentJobId, nextMachineId, Time.time);
         }
 
-        /// <summary>
-        /// Handles job delivery logic upon reaching the target destination.
-        /// </summary>
         private void HandleDropoff()
         {
             if (loadedJobVisual != null)
                 loadedJobVisual.DetachFromCarrier(lockedDropoffPos);
 
-            targetMachine?.ReceiveJob(CurrentJobId, loadedJobVisual);
-            SimulationBridge.Instance.JobManager.CompleteTransit(CurrentJobId, targetMachine.MachineId, Time.time);
+            if (targetMachine != null)
+            {
+                targetMachine.ReceiveJob(CurrentJobId, loadedJobVisual);
+            }
+            else
+            {
+                // Null target means we are dropping off at the main Outgoing Belt
+
+                FactoryLayoutManager.Instance.OutgoingBelt?.TryEnqueue(CurrentJobId, loadedJobVisual);
+            }
+
+            int currentMachineId = targetMachine != null ? targetMachine.MachineId : -1;
+            SimulationBridge.Instance.JobManager.CompleteTransit(CurrentJobId, currentMachineId, Time.time);
 
             CurrentJobId = -1;
             loadedJobVisual = null;

@@ -285,7 +285,7 @@ namespace Assets.Scripts.Simulation.Machines
         //  Editor Gizmos
         // ─────────────────────────────────────────────────────────
 
-        private void OnDrawGizmosSelected()
+        private void OnDrawGizmos()
         {
             if (capacity <= 0) return;
 

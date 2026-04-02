@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Assets.Scripts.Simulation.Machines;
 using Assets.Scripts.Logging;
+using Assets.Scripts.Simulation.FactoryLayout;
+
 
 namespace Assets.Scripts.Simulation.AGV
 {
@@ -14,7 +16,7 @@ namespace Assets.Scripts.Simulation.AGV
         [Header("Fleet Settings")]
         [SerializeField] private AGVController agvPrefab;
         [SerializeField] private int fleetSize = 5;
-        [SerializeField] private Transform parkingArea;
+        [SerializeField] private FactoryLayoutManager layoutManager;
 
         private List<AGVController> fleet = new List<AGVController>();
 
@@ -41,10 +43,13 @@ namespace Assets.Scripts.Simulation.AGV
             fleet.Clear();
             pendingRequests.Clear();
 
+            // Use dynamic parking position if available
+            Vector3 baseParkingPos = layoutManager != null ? layoutManager.AGVParkingPosition : Vector3.zero;
+
             for (int i = 0; i < fleetSize; i++)
             {
-                Vector3 spawnPos = parkingArea != null ? parkingArea.position : Vector3.zero;
-                spawnPos += new Vector3(i * 2f, 0, 0);
+                // Line the AGVs up next to each other starting from the base position
+                Vector3 spawnPos = baseParkingPos + new Vector3(i * 2f, 0, 0);
 
                 AGVController newAgv = Instantiate(agvPrefab, spawnPos, Quaternion.identity, this.transform);
                 newAgv.gameObject.name = $"AGV_{i}";
