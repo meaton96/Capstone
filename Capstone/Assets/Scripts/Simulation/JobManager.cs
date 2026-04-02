@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Assets.Scripts.Scheduling.Core;
 using Assets.Scripts.Scheduling.Data;
+using Assets.Scripts.Simulation.FactoryLayout;
 
 namespace Assets.Scripts.Simulation
 {
