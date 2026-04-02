@@ -144,6 +144,7 @@ namespace Assets.Scripts.Simulation
                     Vector3 spawnPos = GetIncomingQueuePosition(j);
                     GameObject tokenGo = Instantiate(jobVisualPrefab, spawnPos, Quaternion.identity, jobTokenParent);
                     tokenGo.name = $"Job_{j}";
+                    tokenGo.SetActive(false);
 
                     JobVisual visual = tokenGo.GetComponent<JobVisual>();
                     if (visual == null) visual = tokenGo.AddComponent<JobVisual>();

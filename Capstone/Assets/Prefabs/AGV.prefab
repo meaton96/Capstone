@@ -31,7 +31,8 @@ Transform:
   m_LocalPosition: {x: 0, y: -0.41, z: 0.609}
   m_LocalScale: {x: 0.54, y: 0.1, z: 0.5}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 5609213214218915278}
   m_Father: {fileID: 7783008010062179903}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &7069979463035918394
@@ -289,3 +290,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70449d1137e0c32418f1d68387c7d061, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Simulation::Assets.Scripts.Simulation.AGVController
+  carryPos: {fileID: 5609213214218915278}
+--- !u!1 &8739962346231398460
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5609213214218915278}
+  m_Layer: 0
+  m_Name: CarryPos
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5609213214218915278
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8739962346231398460}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 2.78, z: 0.126}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5564267828113952228}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

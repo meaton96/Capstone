@@ -71,7 +71,7 @@ namespace Assets.Scripts.Simulation.Machines
         public int Count => entries.Count;
         public bool IsFull => entries.Count >= capacity;
         public bool IsEmpty => entries.Count == 0;
-        public int Capacity => capacity;
+        public int Capacity { get { return capacity; } set { capacity = value; } }
 
         /// <summary>Total world-space length of the belt.</summary>
         public float BeltLength => (capacity - 1) * slotSpacing;

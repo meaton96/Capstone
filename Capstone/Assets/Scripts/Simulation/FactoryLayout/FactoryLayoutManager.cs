@@ -30,6 +30,8 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         [SerializeField] private Vector3 ioConveyorScale = new Vector3(.05f, .2f, .30f);
         [SerializeField] private Material incomingBeltMaterial;
 
+        [SerializeField] private Vector3 incomingBeltOffset = new Vector3(-2f, 0.01f, 1.5f);
+
         public Vector3 IncomingBeltPosition { get; private set; }
         public Vector3 OutgoingBeltPosition { get; private set; }
         public Vector3 AGVParkingPosition { get; private set; }
@@ -253,14 +255,18 @@ namespace Assets.Scripts.Simulation.FactoryLayout
 
             // A) INCOMING BELT (Top-Left, facing East onto the top spine)
             float topZ = floorCentre.z + GetTopSpineZ();
-            IncomingBeltPosition = new Vector3(floorCentre.x - machineAreaHalfW - verticalAisleWidth, 0.01f, topZ);
+            IncomingBeltPosition = new Vector3(
+                floorCentre.x - machineAreaHalfW + incomingBeltOffset.x,
+                incomingBeltOffset.y,
+                topZ + incomingBeltOffset.z);
 
             if (conveyorPrefab != null)
             {
-                GameObject inBelt = Instantiate(conveyorPrefab, IncomingBeltPosition, Quaternion.Euler(0, 90, 0), transform);
+                GameObject inBelt = Instantiate(conveyorPrefab, IncomingBeltPosition, Quaternion.Euler(0, 0, 0), transform);
                 inBelt.name = "Incoming_Belt";
                 inBelt.transform.localScale = ioConveyorScale;
                 IncomingBelt = inBelt.GetComponent<ConveyorBelt>();
+                IncomingBelt.Capacity = 8;
                 if (incomingBeltMaterial != null)
                 {
                     foreach (var rend in inBelt.GetComponentsInChildren<Renderer>())
