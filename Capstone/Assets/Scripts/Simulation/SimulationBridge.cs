@@ -96,7 +96,7 @@ namespace Assets.Scripts.Simulation
 
         [Header("Scene References")]
         [SerializeField] private FactoryLayoutManager layoutManager;
-        [SerializeField] private AGVPool agvPool;           // ← Fix 1: field was missing
+        [SerializeField] private AGVPool agvPool;
         public JobManager JobManager;
         [SerializeField] private SchedulingAgent agent;
 
@@ -170,7 +170,6 @@ namespace Assets.Scripts.Simulation
 
         private void Start()
         {
-            // ← Fix 2: removed stray DispatchRealAGV(i, null, firstMachineId) that was here
             if (autoStartOnPlay && TaillardJson != null)
             {
                 SimLogger.Medium("[Sim Bridge] Auto Starting Episode...");
