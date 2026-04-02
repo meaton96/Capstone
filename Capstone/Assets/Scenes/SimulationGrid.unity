@@ -1070,6 +1070,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Simulation::Assets.Scripts.Simulation.SimulationBridge
   layoutManager: {fileID: 909580045}
+  trafficZoneManager: {fileID: 0}
   agvPool: {fileID: 0}
   JobManager: {fileID: 0}
   agent: {fileID: 0}
@@ -2586,7 +2587,7 @@ MonoBehaviour:
   doubleSidedMachinePrefab: {fileID: -1989336749945410295, guid: 296fb1ed2cfd5394eaf7827875857536, type: 3}
   conveyorPrefab: {fileID: 2393961752667882661, guid: 0b5d1f82c872515499f45c6baf69da5c, type: 3}
   ioConveyorScale: {x: 0.05, y: 0.2, z: 0.3}
-  incomingBeltMaterial: {fileID: 0}
+  incomingBeltMaterial: {fileID: 2100000, guid: 51d8a3821f9c63147ae8d05d1c9e4fe0, type: 2}
   wallPrefab: {fileID: 8214164735923952847, guid: 80dbfde9c2c33664ca74062703b00a2b, type: 3}
   floorTransform: {fileID: 473100912}
   machineSpacingX: 6
@@ -3689,6 +3690,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Simulation::Assets.Scripts.Simulation.SimulationBridge
   layoutManager: {fileID: 909580045}
+  trafficZoneManager: {fileID: 909580047}
   agvPool: {fileID: 1750965656}
   JobManager: {fileID: 263971909}
   agent: {fileID: 516692882}

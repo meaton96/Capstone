@@ -97,6 +97,7 @@ namespace Assets.Scripts.Simulation
 
         [Header("Scene References")]
         [SerializeField] private FactoryLayoutManager layoutManager;
+        [SerializeField] private TrafficZoneManager trafficZoneManager;
         [SerializeField] private AGVPool agvPool;
         public JobManager JobManager;
         [SerializeField] private SchedulingAgent agent;
@@ -203,6 +204,10 @@ namespace Assets.Scripts.Simulation
             if (layoutManager != null)
             {
                 layoutManager.BuildFloor(simulator);
+            }
+            if (trafficZoneManager != null)
+            {
+                trafficZoneManager.BuildZoneGraph();
             }
             if (JobManager != null)
             {
