@@ -292,8 +292,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Simulation::Assets.Scripts.Simulation.AGVController
   carryPos: {fileID: 5609213214218915278}
   moveSpeed: 3.5
-  turnSpeed: 180
-  pathTurnThreshold: 10
+  turnSpeed: 120
+  pathTurnThreshold: 5
   waypointArrivalDist: 0.4
   dockArrivalDist: 0.3
   alignmentThreshold: 3

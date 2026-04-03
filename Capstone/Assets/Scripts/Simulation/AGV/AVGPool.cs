@@ -19,6 +19,7 @@ namespace Assets.Scripts.Simulation.AGV
         [SerializeField] private FactoryLayoutManager layoutManager;
 
         private List<AGVController> fleet = new List<AGVController>();
+        public List<AGVController> Fleet => fleet;
 
         /// <summary>
         /// Represents a queued transport request when all AGVs are currently occupied.

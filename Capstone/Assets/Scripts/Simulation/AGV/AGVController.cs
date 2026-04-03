@@ -15,8 +15,10 @@ namespace Assets.Scripts.Simulation.AGV
         Idle,
         NavigatingToPickup,
         AligningForPickup,
+        ExecutingPickup,
         NavigatingToDropoff,
         AligningForDropoff,
+        ExecutingDropoff,
         WaitingForZone
     }
 
@@ -59,6 +61,14 @@ namespace Assets.Scripts.Simulation.AGV
 
         [Header("References")]
         [SerializeField] private Transform carryPos;
+
+        [Header("Handshake")]
+        [Tooltip("Time in seconds the AGV waits to simulate transferring a job.")]
+        [SerializeField] private float handshakeDuration = 1.5f;
+
+        private float handshakeTimer;
+        private Vector3 targetPickupPos;
+        private Vector3 targetDropoffPos;
 
         [Header("Movement")]
         [Tooltip("Forward driving speed in world units/sec.")]
@@ -197,6 +207,9 @@ namespace Assets.Scripts.Simulation.AGV
             sourceMachine = source;
             targetMachine = dropoff;
 
+            targetPickupPos = pickupPosition;
+            targetDropoffPos = dropoffPosition;
+
             // ── Ensure we know our starting zone ──
             if (currentZoneId < 0)
             {
@@ -205,21 +218,17 @@ namespace Assets.Scripts.Simulation.AGV
                     trafficMgr.TryReserve(currentZoneId, AgvId);
             }
 
-            // ── Resolve pickup zone & dock (shortest route from here) ──
+            // ── Resolve pickup zone & dock ──
             if (source != null)
-                (pickupZoneId, pickupDock) =
-                    FindDockForMachine(source.MachineId, currentZoneId);
+                (pickupZoneId, pickupDock) = FindDockForMachine(source.MachineId, currentZoneId, targetPickupPos);
             else
-                (pickupZoneId, pickupDock) =
-                    FindSpecialDock(TrafficZoneManager.IncomingBeltId);
+                (pickupZoneId, pickupDock) = FindSpecialDock(TrafficZoneManager.IncomingBeltId);
 
-            // ── Resolve dropoff zone & dock (shortest route from pickup) ──
+            // ── Resolve dropoff zone & dock ──
             if (dropoff != null)
-                (dropoffZoneId, dropoffDock) =
-                    FindDockForMachine(dropoff.MachineId, pickupZoneId);
+                (dropoffZoneId, dropoffDock) = FindDockForMachine(dropoff.MachineId, pickupZoneId, targetDropoffPos);
             else
-                (dropoffZoneId, dropoffDock) =
-                    FindSpecialDock(TrafficZoneManager.OutgoingBeltId);
+                (dropoffZoneId, dropoffDock) = FindSpecialDock(TrafficZoneManager.OutgoingBeltId);
 
             // ── Plan route to pickup ──
             if (!PlanRoute(currentZoneId, pickupZoneId))
@@ -253,12 +262,28 @@ namespace Assets.Scripts.Simulation.AGV
 
                 case AGVState.AligningForPickup:
                     if (AlignToDock(pickupDock))
-                        ExecutePickup();
+                    {
+                        State = AGVState.ExecutingPickup;
+                        handshakeTimer = handshakeDuration;
+                    }
+                    break;
+
+                case AGVState.ExecutingPickup:
+                    handshakeTimer -= Time.deltaTime;
+                    if (handshakeTimer <= 0f) ExecutePickup();
                     break;
 
                 case AGVState.AligningForDropoff:
                     if (AlignToDock(dropoffDock))
-                        ExecuteDropoff();
+                    {
+                        State = AGVState.ExecutingDropoff;
+                        handshakeTimer = handshakeDuration;
+                    }
+                    break;
+
+                case AGVState.ExecutingDropoff:
+                    handshakeTimer -= Time.deltaTime;
+                    if (handshakeTimer <= 0f) ExecuteDropoff();
                     break;
 
                 case AGVState.WaitingForZone:
@@ -505,11 +530,9 @@ namespace Assets.Scripts.Simulation.AGV
                 .BeginTransit(CurrentJobId, nextMachineId, Time.time);
 
             // ── Re-resolve dropoff dock from our actual position ──
-            // The AGV may have arrived from a different direction than
-            // anticipated at dispatch time, so pick the best side now.
             if (targetMachine != null)
                 (dropoffZoneId, dropoffDock) =
-                    FindDockForMachine(targetMachine.MachineId, currentZoneId);
+                    FindDockForMachine(targetMachine.MachineId, currentZoneId, targetDropoffPos);
             else
                 (dropoffZoneId, dropoffDock) =
                     FindSpecialDock(TrafficZoneManager.OutgoingBeltId);
@@ -582,34 +605,29 @@ namespace Assets.Scripts.Simulation.AGV
         }
 
         /// <summary>
-        /// Finds the zone and DockPoint for <paramref name="machineId"/>,
-        /// choosing the dock reachable via the fewest zone hops from
-        /// <paramref name="fromZoneId"/>. This ensures the AGV picks
-        /// whichever side (north or south) is closest by traffic flow,
-        /// not Euclidean distance.
+        /// Finds the zone and DockPoint for <paramref name="machineId"/> by matching it 
+        /// to the physical location of the assigned conveyor belt.
         /// </summary>
         private (int zoneId, DockPoint dock) FindDockForMachine(
-            int machineId, int fromZoneId)
+            int machineId, int fromZoneId, Vector3 targetConveyorPos)
         {
             List<int> candidates = trafficMgr.GetZonesForMachine(machineId);
             int bestZone = -1;
             DockPoint bestDock = default;
-            int bestHops = int.MaxValue;
+            float closestDist = float.MaxValue;
 
             foreach (int zId in candidates)
             {
                 if (!trafficMgr.TryGetDockPoint(zId, machineId, out DockPoint d))
                     continue;
 
-                // Cost = zone hops via one-way downstream links.
-                List<int> route = trafficMgr.GetRoute(fromZoneId, zId);
-                int hops = (route != null && route.Count > 0)
-                    ? route.Count
-                    : int.MaxValue;
+                // Ignore routing hops to find the destination. The AGV MUST go to the 
+                // dock that aligns physically with the conveyor belt target.
+                float dist = Vector3.Distance(d.HandshakePosition, targetConveyorPos);
 
-                if (hops < bestHops)
+                if (dist < closestDist)
                 {
-                    bestHops = hops;
+                    closestDist = dist;
                     bestZone = zId;
                     bestDock = d;
                 }
@@ -618,11 +636,10 @@ namespace Assets.Scripts.Simulation.AGV
             if (bestZone < 0)
                 SimLogger.Error(
                     $"[AGV {AgvId}] No reachable dock for machine {machineId} " +
-                    $"from zone {fromZoneId}");
+                    $"near conveyor position {targetConveyorPos}");
 
             return (bestZone, bestDock);
         }
-
         /// <summary>
         /// Finds the zone and DockPoint for a special infrastructure ID
         /// (incoming belt, outgoing belt, or parking area).
