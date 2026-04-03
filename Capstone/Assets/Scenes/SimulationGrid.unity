@@ -2604,7 +2604,7 @@ MonoBehaviour:
   conveyorPrefab: {fileID: 2393961752667882661, guid: 0b5d1f82c872515499f45c6baf69da5c, type: 3}
   ioConveyorScale: {x: 0.05, y: 0.2, z: 0.4}
   incomingBeltMaterial: {fileID: 2100000, guid: 51d8a3821f9c63147ae8d05d1c9e4fe0, type: 2}
-  incomingBeltOffset: {x: -2, y: 0.01, z: 1.5}
+  incomingBeltOffset: {x: -2.5, y: 0.01, z: 1.5}
   wallPrefab: {fileID: 8214164735923952847, guid: 80dbfde9c2c33664ca74062703b00a2b, type: 3}
   floorTransform: {fileID: 473100912}
   machineSpacingX: 6
@@ -4386,7 +4386,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Simulation::Assets.Scripts.Simulation.AGVPool
   agvPrefab: {fileID: 8322204830557532020, guid: 489bfb667fecd44beb9c13ac3c110478, type: 3}
-  fleetSize: 1
+  fleetSize: 3
   layoutManager: {fileID: 909580045}
 --- !u!4 &1750965657
 Transform:

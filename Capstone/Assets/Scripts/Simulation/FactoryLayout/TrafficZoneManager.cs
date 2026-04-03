@@ -592,6 +592,8 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 TrafficZone parkZone = zoneById[parkZoneId];
                 Vector3 parkPos = layoutManager.AGVParkingPosition;
 
+                parkZone.Capacity = 10;
+
                 parkZone.DockPoints[ParkingAreaId] = new DockPoint
                 {
                     ApproachPosition = parkPos,
