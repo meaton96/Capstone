@@ -553,13 +553,13 @@ namespace Assets.Scripts.Simulation.FactoryLayout
 
                 // The AGV needs to pick up from the output end of the incoming belt
                 Vector3 handshake = layoutManager.IncomingBelt.OutputEndPosition;
-                Vector3 approach = handshake - Vector3.right * 1.5f; // Stand slightly west to approach
+                Vector3 approach = handshake - Vector3.forward * 1.5f; // Stand slightly west to approach
 
                 inZone.DockPoints[IncomingBeltId] = new DockPoint
                 {
                     ApproachPosition = approach,
                     HandshakePosition = handshake,
-                    FacingDirection = Vector3.right, // Face East toward the belt
+                    FacingDirection = Vector3.forward, // Face East toward the belt
                     IsPickup = true
                 };
             }

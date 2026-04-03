@@ -197,22 +197,6 @@ namespace Assets.Scripts.Simulation.AGV
             sourceMachine = source;
             targetMachine = dropoff;
 
-            // ── Resolve pickup zone & dock ──
-            if (source != null)
-                (pickupZoneId, pickupDock) =
-                    FindDockForMachine(source.MachineId, pickupPosition);
-            else
-                (pickupZoneId, pickupDock) =
-                    FindSpecialDock(TrafficZoneManager.IncomingBeltId);
-
-            // ── Resolve dropoff zone & dock ──
-            if (dropoff != null)
-                (dropoffZoneId, dropoffDock) =
-                    FindDockForMachine(dropoff.MachineId, dropoffPosition);
-            else
-                (dropoffZoneId, dropoffDock) =
-                    FindSpecialDock(TrafficZoneManager.OutgoingBeltId);
-
             // ── Ensure we know our starting zone ──
             if (currentZoneId < 0)
             {
@@ -220,6 +204,22 @@ namespace Assets.Scripts.Simulation.AGV
                 if (currentZoneId >= 0)
                     trafficMgr.TryReserve(currentZoneId, AgvId);
             }
+
+            // ── Resolve pickup zone & dock (shortest route from here) ──
+            if (source != null)
+                (pickupZoneId, pickupDock) =
+                    FindDockForMachine(source.MachineId, currentZoneId);
+            else
+                (pickupZoneId, pickupDock) =
+                    FindSpecialDock(TrafficZoneManager.IncomingBeltId);
+
+            // ── Resolve dropoff zone & dock (shortest route from pickup) ──
+            if (dropoff != null)
+                (dropoffZoneId, dropoffDock) =
+                    FindDockForMachine(dropoff.MachineId, pickupZoneId);
+            else
+                (dropoffZoneId, dropoffDock) =
+                    FindSpecialDock(TrafficZoneManager.OutgoingBeltId);
 
             // ── Plan route to pickup ──
             if (!PlanRoute(currentZoneId, pickupZoneId))
@@ -504,6 +504,16 @@ namespace Assets.Scripts.Simulation.AGV
             SimulationBridge.Instance.JobManager
                 .BeginTransit(CurrentJobId, nextMachineId, Time.time);
 
+            // ── Re-resolve dropoff dock from our actual position ──
+            // The AGV may have arrived from a different direction than
+            // anticipated at dispatch time, so pick the best side now.
+            if (targetMachine != null)
+                (dropoffZoneId, dropoffDock) =
+                    FindDockForMachine(targetMachine.MachineId, currentZoneId);
+            else
+                (dropoffZoneId, dropoffDock) =
+                    FindSpecialDock(TrafficZoneManager.OutgoingBeltId);
+
             // ── Plan route to dropoff ──
             if (!PlanRoute(currentZoneId, dropoffZoneId))
             {
@@ -573,26 +583,33 @@ namespace Assets.Scripts.Simulation.AGV
 
         /// <summary>
         /// Finds the zone and DockPoint for <paramref name="machineId"/>,
-        /// choosing the dock whose handshake position is closest to
-        /// <paramref name="hintPosition"/>.
+        /// choosing the dock reachable via the fewest zone hops from
+        /// <paramref name="fromZoneId"/>. This ensures the AGV picks
+        /// whichever side (north or south) is closest by traffic flow,
+        /// not Euclidean distance.
         /// </summary>
         private (int zoneId, DockPoint dock) FindDockForMachine(
-            int machineId, Vector3 hintPosition)
+            int machineId, int fromZoneId)
         {
             List<int> candidates = trafficMgr.GetZonesForMachine(machineId);
             int bestZone = -1;
             DockPoint bestDock = default;
-            float bestDist = float.MaxValue;
+            int bestHops = int.MaxValue;
 
             foreach (int zId in candidates)
             {
                 if (!trafficMgr.TryGetDockPoint(zId, machineId, out DockPoint d))
                     continue;
 
-                float dist = Vector3.Distance(d.HandshakePosition, hintPosition);
-                if (dist < bestDist)
+                // Cost = zone hops via one-way downstream links.
+                List<int> route = trafficMgr.GetRoute(fromZoneId, zId);
+                int hops = (route != null && route.Count > 0)
+                    ? route.Count
+                    : int.MaxValue;
+
+                if (hops < bestHops)
                 {
-                    bestDist = dist;
+                    bestHops = hops;
                     bestZone = zId;
                     bestDock = d;
                 }
@@ -600,7 +617,8 @@ namespace Assets.Scripts.Simulation.AGV
 
             if (bestZone < 0)
                 SimLogger.Error(
-                    $"[AGV {AgvId}] No dock found for machine {machineId}");
+                    $"[AGV {AgvId}] No reachable dock for machine {machineId} " +
+                    $"from zone {fromZoneId}");
 
             return (bestZone, bestDock);
         }

@@ -408,7 +408,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Simulation::Assets.Scripts.Simulation.PhysicalMachine
   incomingConveyor: {fileID: 6417866726663160651}
-  outgoingConveyor: {fileID: 0}
+  outgoingConveyor: {fileID: 7820283277372851331}
+  secondaryIncomingConveyor: {fileID: 0}
+  secondaryOutgoingConveyor: {fileID: 0}
 --- !u!54 &2076717645124088267
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1465,3 +1467,14 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8993242045437528568, guid: 0b5d1f82c872515499f45c6baf69da5c, type: 3}
   m_PrefabInstance: {fileID: 7338448527182964718}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &7820283277372851331 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 671126757960983405, guid: 0b5d1f82c872515499f45c6baf69da5c, type: 3}
+  m_PrefabInstance: {fileID: 7338448527182964718}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 943b4b0da91c32c48a9c74876ee6c90e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Simulation::Assets.Scripts.Simulation.ConveyorBelt

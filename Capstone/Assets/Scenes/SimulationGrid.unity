@@ -4371,7 +4371,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Simulation::Assets.Scripts.Simulation.AGVPool
   agvPrefab: {fileID: 8322204830557532020, guid: 489bfb667fecd44beb9c13ac3c110478, type: 3}
   fleetSize: 1
-  layoutManager: {fileID: 0}
+  layoutManager: {fileID: 909580045}
 --- !u!4 &1750965657
 Transform:
   m_ObjectHideFlags: 0
