@@ -1,5 +1,10 @@
 \doxysection{Assets.\+Scripts.\+Simulation.\+Simulation\+Bridge Class Reference}
 \hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge}{}\label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge}\index{Assets.Scripts.Simulation.SimulationBridge@{Assets.Scripts.Simulation.SimulationBridge}}
+
+
+Central coordinator between the Unity physics simulation and the scheduling agent.  
+
+
 Inheritance diagram for Assets.\+Scripts.\+Simulation.\+Simulation\+Bridge:\+\begin{figure}[H]
 \begin{center}
 \leavevmode
@@ -9,16 +14,22 @@ Inheritance diagram for Assets.\+Scripts.\+Simulation.\+Simulation\+Bridge:\+\be
 \doxysubsubsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
-void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a5d8b43c53cd38a61470816de22f1fd0c}{Start\+Episode}} ()
-\begin{DoxyCompactList}\small\item\em Initialises a new episode using the Inspector-\/configured instance. \end{DoxyCompactList}\item 
-void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a4e6daadbb23b0bfd1927806e2cf8ba58}{Start\+Episode}} (Text\+Asset json)
-\begin{DoxyCompactList}\small\item\em Starts an episode with an explicit Taillard JSON asset. \end{DoxyCompactList}\item 
-\doxymbox{\hyperlink{struct_assets_1_1_scripts_1_1_simulation_1_1_step_result}{Step\+Result}} \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a54f762ba8e222fcc8cfde852c459562e}{Step}} (int action)
-\begin{DoxyCompactList}\small\item\em The core Gymnasium-\/style step function. \end{DoxyCompactList}\item 
-\doxymbox{\hyperlink{struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result}{Episode\+Result}} \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_ac7294ac378f1337ee5815db40489fd8d}{Run\+Episode\+With\+Fixed\+Rule}} (Text\+Asset json, int rule\+Index)
-\begin{DoxyCompactList}\small\item\em Runs an entire episode synchronously with a fixed rule. No visuals. Returns the result immediately. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a5d8b43c53cd38a61470816de22f1fd0c}\label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a5d8b43c53cd38a61470816de22f1fd0c} 
+void {\bfseries Start\+Episode} ()
+\begin{DoxyCompactList}\small\item\em Loads the configured Taillard instance, builds the factory floor, spawns job visuals, and dispatches every job toward its first machine. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_afcfbc4ada3e42cbb7e0a3cdcdb1523f6}{On\+Job\+Arrived\+In\+Queue}} (int machine\+Id, int job\+Id)
+\begin{DoxyCompactList}\small\item\em Called by {\ttfamily \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine}{Physical\+Machine}} when a job enters its trigger zone. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_aa9b6417eb34dd5001ddbe0377f161330}{On\+Machine\+Finished}} (int machine\+Id, int job\+Id)
+\begin{DoxyCompactList}\small\item\em Called by {\ttfamily \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine}{Physical\+Machine}} when it finishes processing a job. \end{DoxyCompactList}\item 
+\doxymbox{\hyperlink{struct_assets_1_1_scripts_1_1_simulation_1_1_step_result}{Step\+Result}} \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a8d81d85edf95a798dd0e6ee4da84a9c1}{Step}} (int action\+Index)
+\begin{DoxyCompactList}\small\item\em Applies the agent\textquotesingle{}s chosen dispatching rule to {\ttfamily Current\+Decision}. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a475fa477cd47decd17d78f587449b70e}{Stop\+Episode}} ()
+\begin{DoxyCompactList}\small\item\em Immediately halts the active episode and tears down all scene objects. \end{DoxyCompactList}\end{DoxyCompactItemize}
 \doxysubsubsection*{Public Attributes}
 \begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a56bcb917c3507fdbf02a6fbce422c7ca}\label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a56bcb917c3507fdbf02a6fbce422c7ca} 
+Job\+Manager {\bfseries Job\+Manager}
 \item 
 \Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a854e0579243796cdd6203ec77df9c936}\label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a854e0579243796cdd6203ec77df9c936} 
 Unity\+Event$<$ \doxymbox{\hyperlink{struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request}{Decision\+Request}} $>$ {\bfseries On\+Decision\+Required}
@@ -29,130 +40,121 @@ Unity\+Event$<$ \doxymbox{\hyperlink{struct_assets_1_1_scripts_1_1_simulation_1_
 \Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_aab6fdcaf7d8e8335dffe96b903f62438}\label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_aab6fdcaf7d8e8335dffe96b903f62438} 
 Unity\+Event$<$ \doxymbox{\hyperlink{struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result}{Episode\+Result}} $>$ {\bfseries On\+Episode\+Finished}
 \end{DoxyCompactItemize}
+\doxysubsubsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a2a7d0f7b394af5369749e8b9243e0d5d}\label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a2a7d0f7b394af5369749e8b9243e0d5d} 
+static \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge}{Simulation\+Bridge}} {\bfseries Instance}
+\begin{DoxyCompactList}\small\item\em Singleton instance accessible from {\ttfamily \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine}{Physical\+Machine}} and {\ttfamily \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager}{Job\+Manager}}. \end{DoxyCompactList}\end{DoxyCompactItemize}
 \doxysubsubsection*{Properties}
 \begin{DoxyCompactItemize}
 \item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a9e815aa3e00e542bee0641088d719ce3}\label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a9e815aa3e00e542bee0641088d719ce3} 
+string {\bfseries Last\+Applied\+Rule} = "{}Waiting..."{}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em The dispatching rule last applied during {\ttfamily \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a8d81d85edf95a798dd0e6ee4da84a9c1}{Step()}}. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_abee3155323c3454e2614ebb20ea68447}\label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_abee3155323c3454e2614ebb20ea68447} 
+float {\bfseries Start\+Time}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em Wall-\/clock time when the current episode started. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a1c62e42cbd8e907b5840574b571f5c41}\label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a1c62e42cbd8e907b5840574b571f5c41} 
+Text\+Asset {\bfseries Taillard\+Json}\hspace{0.3cm}{\ttfamily  \+[get, set]\+}
+\item 
 \Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a191796bd323709a5d2f02d2b121187f6}\label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a191796bd323709a5d2f02d2b121187f6} 
 static int {\bfseries Action\+Count}\hspace{0.3cm}{\ttfamily  \+[get]\+}
-\begin{DoxyCompactList}\small\item\em Total number of discrete actions in the action space. \end{DoxyCompactList}\item 
-\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a904630e03924813c79e016df46629df4}\label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a904630e03924813c79e016df46629df4} 
-bool {\bfseries Is\+Episode\+Active}\hspace{0.3cm}{\ttfamily  \+[get]\+}
-\begin{DoxyCompactList}\small\item\em True while an episode is in progress. \end{DoxyCompactList}\item 
-\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a436e69beba136fb322c737933d6e8d79}\label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a436e69beba136fb322c737933d6e8d79} 
-bool {\bfseries Is\+Done}\hspace{0.3cm}{\ttfamily  \+[get]\+}
-\begin{DoxyCompactList}\small\item\em True when the episode has ended (all jobs scheduled). \end{DoxyCompactList}\item 
-\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a47b78b3fb2e0b63dae2f6e11aa7e3b55}\label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a47b78b3fb2e0b63dae2f6e11aa7e3b55} 
-\doxymbox{\hyperlink{struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request}{Decision\+Request}} {\bfseries Current\+Decision}\hspace{0.3cm}{\ttfamily  \+[get]\+}
-\begin{DoxyCompactList}\small\item\em The current decision request. Only valid when the DES is waiting and the episode is active. \end{DoxyCompactList}\item 
-\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a02ba2996adfc6bd0d53afa83757af5a8}\label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a02ba2996adfc6bd0d53afa83757af5a8} 
-bool {\bfseries Is\+Waiting\+For\+Action}\hspace{0.3cm}{\ttfamily  \+[get]\+}
-\begin{DoxyCompactList}\small\item\em True if the DES is paused waiting for an action. \end{DoxyCompactList}\item 
-\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a168e40a044c13acbb3ba00642036fe13}\label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a168e40a044c13acbb3ba00642036fe13} 
-double {\bfseries Sim\+Time}\hspace{0.3cm}{\ttfamily  \+[get]\+}
-\begin{DoxyCompactList}\small\item\em Current simulation time. \end{DoxyCompactList}\item 
-\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_ad70f13ea069d844466f1ee17a485dc8e}\label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_ad70f13ea069d844466f1ee17a485dc8e} 
-double {\bfseries Current\+Makespan}\hspace{0.3cm}{\ttfamily  \+[get]\+}
-\begin{DoxyCompactList}\small\item\em Running makespan estimate (max operation end-\/time so far). \end{DoxyCompactList}\item 
-\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a7bf9fa029b239d6fbd5c6250d535a57f}\label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a7bf9fa029b239d6fbd5c6250d535a57f} 
-float {\bfseries Speed\+Multiplier}\hspace{0.3cm}{\ttfamily  \+[get, set]\+}
-\begin{DoxyCompactList}\small\item\em Visual playback speed. \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em Number of discrete actions available to the agent. \end{DoxyCompactList}\item 
 \Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_adf8da4488fdeb8bb688dd615f21c5ef2}\label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_adf8da4488fdeb8bb688dd615f21c5ef2} 
 int {\bfseries Decision\+Count}\hspace{0.3cm}{\ttfamily  \+[get]\+}
-\begin{DoxyCompactList}\small\item\em Decisions made so far this episode. \end{DoxyCompactList}\item 
-\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a5d61c103d95c8c657e545075ad4ee559}\label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a5d61c103d95c8c657e545075ad4ee559} 
-\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator}{DESSimulator}} {\bfseries Simulator}\hspace{0.3cm}{\ttfamily  \+[get]\+}
-\begin{DoxyCompactList}\small\item\em The underlying DES simulator for advanced queries. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a904630e03924813c79e016df46629df4}\label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a904630e03924813c79e016df46629df4} 
+bool {\bfseries Is\+Episode\+Active}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a436e69beba136fb322c737933d6e8d79}\label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a436e69beba136fb322c737933d6e8d79} 
+bool {\bfseries Is\+Done}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a47b78b3fb2e0b63dae2f6e11aa7e3b55}\label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a47b78b3fb2e0b63dae2f6e11aa7e3b55} 
+\doxymbox{\hyperlink{struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request}{Decision\+Request}} {\bfseries Current\+Decision}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em The decision context the agent is currently expected to respond to. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a02ba2996adfc6bd0d53afa83757af5a8}\label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a02ba2996adfc6bd0d53afa83757af5a8} 
+bool {\bfseries Is\+Waiting\+For\+Action}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em True from the moment {\ttfamily On\+Decision\+Required} fires until {\ttfamily \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a8d81d85edf95a798dd0e6ee4da84a9c1}{Step()}} is called. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a168e40a044c13acbb3ba00642036fe13}\label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a168e40a044c13acbb3ba00642036fe13} 
+double {\bfseries Sim\+Time}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em Seconds elapsed since the episode started, derived from Unity wall time. \end{DoxyCompactList}\end{DoxyCompactItemize}
 
+
+\doxysubsection{Detailed Description}
+Central coordinator between the Unity physics simulation and the scheduling agent. 
+
+The bridge owns the episode lifecycle:\+ loading a Taillard instance, spawning physical jobs and machines, reacting to physics events from {\ttfamily \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine}{Physical\+Machine}}, maintaining a queue of pending scheduling decisions, and surfacing one decision at a time to the {\ttfamily \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent}{Scheduling\+Agent}} via {\ttfamily On\+Decision\+Required}. It also computes per-\/step rewards and fires {\ttfamily On\+Episode\+Finished} when all jobs are complete. 
 
 \label{doc-func-members}
 \Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_doc-func-members}
 \doxysubsection{Member Function Documentation}
-\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_ac7294ac378f1337ee5815db40489fd8d}\index{Assets.Scripts.Simulation.SimulationBridge@{Assets.Scripts.Simulation.SimulationBridge}!RunEpisodeWithFixedRule@{RunEpisodeWithFixedRule}}
-\index{RunEpisodeWithFixedRule@{RunEpisodeWithFixedRule}!Assets.Scripts.Simulation.SimulationBridge@{Assets.Scripts.Simulation.SimulationBridge}}
-\doxysubsubsection{\texorpdfstring{RunEpisodeWithFixedRule()}{RunEpisodeWithFixedRule()}}
-{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_ac7294ac378f1337ee5815db40489fd8d} 
-\doxymbox{\hyperlink{struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result}{Episode\+Result}} Assets.\+Scripts.\+Simulation.\+Simulation\+Bridge.\+Run\+Episode\+With\+Fixed\+Rule (\begin{DoxyParamCaption}\item[{Text\+Asset}]{json}{, }\item[{int}]{rule\+Index}{}\end{DoxyParamCaption})}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_afcfbc4ada3e42cbb7e0a3cdcdb1523f6}\index{Assets.Scripts.Simulation.SimulationBridge@{Assets.Scripts.Simulation.SimulationBridge}!OnJobArrivedInQueue@{OnJobArrivedInQueue}}
+\index{OnJobArrivedInQueue@{OnJobArrivedInQueue}!Assets.Scripts.Simulation.SimulationBridge@{Assets.Scripts.Simulation.SimulationBridge}}
+\doxysubsubsection{\texorpdfstring{OnJobArrivedInQueue()}{OnJobArrivedInQueue()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_afcfbc4ada3e42cbb7e0a3cdcdb1523f6} 
+void Assets.\+Scripts.\+Simulation.\+Simulation\+Bridge.\+On\+Job\+Arrived\+In\+Queue (\begin{DoxyParamCaption}\item[{int}]{machine\+Id}{, }\item[{int}]{job\+Id}{}\end{DoxyParamCaption})}
 
 
 
-Runs an entire episode synchronously with a fixed rule. No visuals. Returns the result immediately. 
-
-Used for Phase 1 Step 10 batch validation:\+ 
-\begin{DoxyCode}{0}
-\DoxyCodeLine{\textcolor{keywordflow}{foreach}\ (TextAsset\ ta\ \textcolor{keywordflow}{in}\ taillardAssets)}
-\DoxyCodeLine{\ \ \ \ \textcolor{keywordflow}{foreach}\ (\textcolor{keywordtype}{int}\ rule\ =\ 0;\ rule\ <\ 8;\ rule++)}
-\DoxyCodeLine{\ \ \ \ \ \ \ \ EpisodeResult\ r\ =\ bridge.RunEpisodeWithFixedRule(ta,\ rule);}
-
-\end{DoxyCode}
-
+Called by {\ttfamily \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine}{Physical\+Machine}} when a job enters its trigger zone. 
 
 
 \begin{DoxyParams}{Parameters}
-{\em json} & The Taillard instance. \\
+{\em machine\+Id} & The machine the job arrived at. \\
 \hline
-{\em rule\+Index} & Action index (0-\/7). \\
+{\em job\+Id} & The job that physically arrived. \\
 \hline
 \end{DoxyParams}
-\begin{DoxyReturn}{Returns}
-Final \doxylink{struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result}{Episode\+Result}. 
-\end{DoxyReturn}
-\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a5d8b43c53cd38a61470816de22f1fd0c}\index{Assets.Scripts.Simulation.SimulationBridge@{Assets.Scripts.Simulation.SimulationBridge}!StartEpisode@{StartEpisode}}
-\index{StartEpisode@{StartEpisode}!Assets.Scripts.Simulation.SimulationBridge@{Assets.Scripts.Simulation.SimulationBridge}}
-\doxysubsubsection{\texorpdfstring{StartEpisode()}{StartEpisode()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
-{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a5d8b43c53cd38a61470816de22f1fd0c} 
-void Assets.\+Scripts.\+Simulation.\+Simulation\+Bridge.\+Start\+Episode (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_aa9b6417eb34dd5001ddbe0377f161330}\index{Assets.Scripts.Simulation.SimulationBridge@{Assets.Scripts.Simulation.SimulationBridge}!OnMachineFinished@{OnMachineFinished}}
+\index{OnMachineFinished@{OnMachineFinished}!Assets.Scripts.Simulation.SimulationBridge@{Assets.Scripts.Simulation.SimulationBridge}}
+\doxysubsubsection{\texorpdfstring{OnMachineFinished()}{OnMachineFinished()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_aa9b6417eb34dd5001ddbe0377f161330} 
+void Assets.\+Scripts.\+Simulation.\+Simulation\+Bridge.\+On\+Machine\+Finished (\begin{DoxyParamCaption}\item[{int}]{machine\+Id}{, }\item[{int}]{job\+Id}{}\end{DoxyParamCaption})}
 
 
 
-Initialises a new episode using the Inspector-\/configured instance. 
+Called by {\ttfamily \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine}{Physical\+Machine}} when it finishes processing a job. 
 
-Loads the Taillard JSON, resets the DES, optionally builds the visual floor, and advances to the first decision point. After this call, \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a47b78b3fb2e0b63dae2f6e11aa7e3b55}{Current\+Decision} is populated and \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a02ba2996adfc6bd0d53afa83757af5a8}{Is\+Waiting\+For\+Action} is true (assuming the instance produces at least one queuing conflict). \Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a4e6daadbb23b0bfd1927806e2cf8ba58}\index{Assets.Scripts.Simulation.SimulationBridge@{Assets.Scripts.Simulation.SimulationBridge}!StartEpisode@{StartEpisode}}
-\index{StartEpisode@{StartEpisode}!Assets.Scripts.Simulation.SimulationBridge@{Assets.Scripts.Simulation.SimulationBridge}}
-\doxysubsubsection{\texorpdfstring{StartEpisode()}{StartEpisode()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
-{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a4e6daadbb23b0bfd1927806e2cf8ba58} 
-void Assets.\+Scripts.\+Simulation.\+Simulation\+Bridge.\+Start\+Episode (\begin{DoxyParamCaption}\item[{Text\+Asset}]{json}{}\end{DoxyParamCaption})}
-
-
-
-Starts an episode with an explicit Taillard JSON asset. 
-
-
+Updates job tracking, checks for episode completion, dispatches an \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} to carry the job to its next machine, and checks whether the now-\/idle machine has further jobs waiting. 
 \begin{DoxyParams}{Parameters}
-{\em json} & Text\+Asset containing the Taillard instance JSON. \\
+{\em machine\+Id} & The machine that finished. \\
+\hline
+{\em job\+Id} & The job that was completed. \\
 \hline
 \end{DoxyParams}
-\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a54f762ba8e222fcc8cfde852c459562e}\index{Assets.Scripts.Simulation.SimulationBridge@{Assets.Scripts.Simulation.SimulationBridge}!Step@{Step}}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a8d81d85edf95a798dd0e6ee4da84a9c1}\index{Assets.Scripts.Simulation.SimulationBridge@{Assets.Scripts.Simulation.SimulationBridge}!Step@{Step}}
 \index{Step@{Step}!Assets.Scripts.Simulation.SimulationBridge@{Assets.Scripts.Simulation.SimulationBridge}}
 \doxysubsubsection{\texorpdfstring{Step()}{Step()}}
-{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a54f762ba8e222fcc8cfde852c459562e} 
-\doxymbox{\hyperlink{struct_assets_1_1_scripts_1_1_simulation_1_1_step_result}{Step\+Result}} Assets.\+Scripts.\+Simulation.\+Simulation\+Bridge.\+Step (\begin{DoxyParamCaption}\item[{int}]{action}{}\end{DoxyParamCaption})}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a8d81d85edf95a798dd0e6ee4da84a9c1} 
+\doxymbox{\hyperlink{struct_assets_1_1_scripts_1_1_simulation_1_1_step_result}{Step\+Result}} Assets.\+Scripts.\+Simulation.\+Simulation\+Bridge.\+Step (\begin{DoxyParamCaption}\item[{int}]{action\+Index}{}\end{DoxyParamCaption})}
 
 
 
-The core Gymnasium-\/style step function. 
+Applies the agent\textquotesingle{}s chosen dispatching rule to {\ttfamily Current\+Decision}. 
 
-
-\begin{DoxyEnumerate}
-\item Validates that the DES is actually waiting for a decision.
-\item Maps the action index (0-\/7) to a composite Dispatching\+Rule.
-\item Snapshots the queue state for logging/\+visuals.
-\item Calls DESSimulator.\+Apply\+Decision with the chosen rule.
-\item Advances the DES event-\/by-\/event to the next decision point (or end).
-\item Computes the step reward from delta-\/makespan.
-\item If visuals are enabled, plays back the intermediate events.
-\item Returns a \doxylink{struct_assets_1_1_scripts_1_1_simulation_1_1_step_result}{Step\+Result}.
-\end{DoxyEnumerate}
+Selects the best job from the machine\textquotesingle{}s physical queue according to the rule identified by {\ttfamily action\+Index}, starts physical processing on that machine, and returns a {\ttfamily \doxylink{struct_assets_1_1_scripts_1_1_simulation_1_1_step_result}{Step\+Result}} carrying the reward.
 
 
 \begin{DoxyParams}{Parameters}
-{\em action} & Index into the composite PDR action space (0-\/7). \\
+{\em action\+Index} & Index into {\ttfamily Action\+To\+Rule}; selects the dispatching rule. \\
 \hline
 \end{DoxyParams}
 \begin{DoxyReturn}{Returns}
-A \doxylink{struct_assets_1_1_scripts_1_1_simulation_1_1_step_result}{Step\+Result} with reward, done flag, and next decision. 
+A {\ttfamily \doxylink{struct_assets_1_1_scripts_1_1_simulation_1_1_step_result}{Step\+Result}} with reward and episode-\/done flag. 
 \end{DoxyReturn}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a475fa477cd47decd17d78f587449b70e}\index{Assets.Scripts.Simulation.SimulationBridge@{Assets.Scripts.Simulation.SimulationBridge}!StopEpisode@{StopEpisode}}
+\index{StopEpisode@{StopEpisode}!Assets.Scripts.Simulation.SimulationBridge@{Assets.Scripts.Simulation.SimulationBridge}}
+\doxysubsubsection{\texorpdfstring{StopEpisode()}{StopEpisode()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a475fa477cd47decd17d78f587449b70e} 
+void Assets.\+Scripts.\+Simulation.\+Simulation\+Bridge.\+Stop\+Episode (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
 
+
+
+Immediately halts the active episode and tears down all scene objects. 
+
+Safe to call mid-\/episode. Notifies the \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent}{Scheduling\+Agent} via End\+Episode() so ML-\/\+Agents doesn\textquotesingle{}t get stuck waiting for an action. 
 
 The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
 \item 
-C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Simulation/\+\doxymbox{\hyperlink{_simulation_bridge_8cs}{Simulation\+Bridge.\+cs}}\end{DoxyCompactItemize}
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Simulation/\+Simulation\+Bridge.\+cs\end{DoxyCompactItemize}

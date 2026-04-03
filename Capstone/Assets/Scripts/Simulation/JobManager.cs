@@ -1,8 +1,11 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Assets.Scripts.Scheduling.Core;
 using Assets.Scripts.Scheduling.Data;
+using Assets.Scripts.Simulation.FactoryLayout;
+using Assets.Scripts.Logging;
 
 namespace Assets.Scripts.Simulation
 {
@@ -43,12 +46,8 @@ namespace Assets.Scripts.Simulation
     }
 
     /// @brief Creates, tracks, and updates all jobs in a simulation episode.
-    ///
-    /// @details Initialises @c JobTracker instances from a @c TaillardInstance,
-    /// optionally spawning @c JobVisual tokens in the scene. State transitions are
-    /// driven by physics events forwarded from @c SimulationBridge rather than
-    /// polled every frame, so this class acts as the authoritative record of each
-    /// job's position in the schedule.
+    /// @details Authoritative record of job states. Transitions are driven by 
+    /// SimulationBridge events to maintain synchronization with the scheduler.
     public class JobManager : MonoBehaviour
     {
         [Header("References")]
@@ -71,26 +70,24 @@ namespace Assets.Scripts.Simulation
         [SerializeField] private Transform exitAreaMarker;
         [SerializeField] private Vector3 exitAreaOrigin = new Vector3(-5f, 0f, 10f);
 
+        private Queue<int> pendingIncomingJobs = new Queue<int>();
         private JobTracker[] trackers;
         private bool initialized;
         private Transform jobTokenParent;
 
-        /// @brief All job trackers for the current episode, indexed by job ID.
         public JobTracker[] JobTrackers => trackers;
-
-        /// @brief Number of jobs in the current episode.
         public int JobCount => trackers?.Length ?? 0;
-
-        /// @brief True after @c Initialize() completes successfully.
         public bool IsInitialized => initialized;
 
-        // ─────────────────────────────────────────────────────────
-        //  Initialization
-        // ─────────────────────────────────────────────────────────
-
         /// @brief Allocates trackers and optionally spawns visual tokens for every job.
-        /// @param instance      The loaded Taillard problem instance.
-        /// @param spawnVisuals  When true, a @c JobVisual prefab is instantiated per job.
+        ///
+        /// @details Maps the Taillard problem matrices into individual trackers. 
+        /// Visuals are instantiated and deactivated until they are called to the incoming belt.
+        ///
+        /// @param instance The loaded Taillard problem instance.
+        /// @param spawnVisuals When true, a JobVisual prefab is instantiated per job.
+        ///
+        /// @post trackers array is populated and initialized is set to true.
         public void Initialize(TaillardInstance instance, bool spawnVisuals = true)
         {
             int jobCount = instance.JobCount;
@@ -142,6 +139,7 @@ namespace Assets.Scripts.Simulation
                     Vector3 spawnPos = GetIncomingQueuePosition(j);
                     GameObject tokenGo = Instantiate(jobVisualPrefab, spawnPos, Quaternion.identity, jobTokenParent);
                     tokenGo.name = $"Job_{j}";
+                    tokenGo.SetActive(false);
 
                     JobVisual visual = tokenGo.GetComponent<JobVisual>();
                     if (visual == null) visual = tokenGo.AddComponent<JobVisual>();
@@ -150,12 +148,53 @@ namespace Assets.Scripts.Simulation
                     tracker.Visual = visual;
                 }
                 trackers[j] = tracker;
+                pendingIncomingJobs.Enqueue(j);
             }
             initialized = true;
-            Debug.Log($"[JobManager] Initialized {jobCount} job trackers directly from JSON data.");
+            Debug.Log($"[JobManager] Initialized {jobCount} job trackers.");
         }
 
-        /// @brief Destroys all visual tokens and resets the manager to an uninitialised state.
+        /// @brief Logic loop managing the physical flow of jobs onto and off the factory floor.
+        /// @details Drives the entrance of jobs into the factory via the IncomingBelt and 
+        /// deactivates jobs that reach the final OutgoingBelt destination.
+        private void Update()
+        {
+            if (!initialized || layoutManager == null) return;
+
+            if (layoutManager.IncomingBelt != null)
+            {
+                while (pendingIncomingJobs.Count > 0 && !layoutManager.IncomingBelt.IsFull)
+                {
+                    int nextJobId = pendingIncomingJobs.Peek();
+                    JobTracker tracker = trackers[nextJobId];
+
+                    if (tracker.Visual != null) tracker.Visual.gameObject.SetActive(true);
+
+                    if (layoutManager.IncomingBelt.TryEnqueue(nextJobId, tracker.Visual))
+                    {
+                        pendingIncomingJobs.Dequeue();
+                    }
+                }
+            }
+
+            if (layoutManager.OutgoingBelt != null && layoutManager.OutgoingBelt.Count > 0)
+            {
+                JobVisual frontVisual = layoutManager.OutgoingBelt.PeekFrontVisual();
+                if (frontVisual != null)
+                {
+                    float dist = Vector3.Distance(frontVisual.transform.position, layoutManager.OutgoingBelt.OutputEndPosition);
+                    if (dist < 0.05f)
+                    {
+                        var (jobId, vis) = layoutManager.OutgoingBelt.DequeueFront();
+                        vis.gameObject.SetActive(false);
+                        SimLogger.Low($"[JobManager] Job {jobId} removed at exit.");
+                    }
+                }
+            }
+        }
+
+        /// @brief Wipes tracking data and destroys physical job tokens.
+        /// @post initialized is false and trackers is null.
         public void Cleanup()
         {
             if (jobTokenParent != null) Destroy(jobTokenParent.gameObject);
@@ -163,14 +202,9 @@ namespace Assets.Scripts.Simulation
             initialized = false;
         }
 
-        // ─────────────────────────────────────────────────────────
-        //  State Transitions
-        // ─────────────────────────────────────────────────────────
-
-        /// @brief Transitions a job to the @c Queued state when it physically
-        ///        enters a machine's trigger zone.
-        /// @param jobId      The arriving job.
-        /// @param machineId  The machine the job has arrived at.
+        /// @brief Updates state to @c Queued when a job arrives at its destination machine.
+        /// @param jobId The arriving job.
+        /// @param machineId The machine the job has reached.
         public void MarkJobArrivedAtMachine(int jobId, int machineId)
         {
             JobTracker t = GetJobTracker(jobId);
@@ -179,13 +213,12 @@ namespace Assets.Scripts.Simulation
             t.State = JobLifecycleState.Queued;
             t.CurrentMachineId = machineId;
             t.PhysicallyAtMachine = true;
-
             if (t.Visual != null) t.Visual.SetState(t.State);
         }
 
-        /// @brief Transitions a job to @c Processing and accrues its wait time.
-        /// @param jobId    The job starting its operation.
-        /// @param simTime  Current simulation time used to compute wait duration.
+        /// @brief Sets job to @c Processing and calculates the preceding wait duration.
+        /// @param jobId The job starting its operation.
+        /// @param simTime Current simulation time.
         public void MarkOperationStarted(int jobId, double simTime)
         {
             JobTracker t = GetJobTracker(jobId);
@@ -195,14 +228,13 @@ namespace Assets.Scripts.Simulation
             t.TotalWaitTime += (simTime - t.StateEntryTime);
             t.StateEntryTime = simTime;
             t.OperationStatuses[t.CurrentOperationIndex] = 0.5f;
-
             if (t.Visual != null) t.Visual.SetState(t.State);
         }
 
-        /// @brief Transitions a job to @c InTransit toward its next destination.
-        /// @param jobId                 The job being transported.
-        /// @param destinationMachineId  Machine the AGV is heading to.
-        /// @param simTime               Current simulation time.
+        /// @brief Assigns a job to an AGV and transitions state to @c InTransit.
+        /// @param jobId The job being moved.
+        /// @param destinationMachineId Target machine for the transfer.
+        /// @param simTime Current simulation time.
         public void BeginTransit(int jobId, int destinationMachineId, double simTime)
         {
             JobTracker t = GetJobTracker(jobId);
@@ -212,34 +244,32 @@ namespace Assets.Scripts.Simulation
             t.NextMachineId = destinationMachineId;
             t.TotalWaitTime += (simTime - t.StateEntryTime);
             t.StateEntryTime = simTime;
-
             if (t.Visual != null) t.Visual.SetState(t.State);
         }
 
-        /// @brief Records transit completion time. The @c Queued transition is
-        ///        deferred to @c PhysicalMachine.OnTriggerEnter().
-        /// @param jobId      The job that has been delivered.
-        /// @param machineId  Machine the job was delivered to.
-        /// @param simTime    Current simulation time.
+        /// @brief Records the end of a transport leg and updates travel statistics.
+        /// @param jobId The delivered job.
+        /// @param machineId Target destination.
+        /// @param simTime Current simulation time.
         public void CompleteTransit(int jobId, int machineId, double simTime)
         {
             JobTracker t = GetJobTracker(jobId);
             if (t == null) return;
 
-            double transitDuration = simTime - t.StateEntryTime;
-            t.TotalTransitTime += transitDuration;
+            t.TotalTransitTime += (simTime - t.StateEntryTime);
             t.NextMachineId = machineId;
             t.StateEntryTime = simTime;
         }
 
-        /// @brief Marks the current operation as finished and advances the tracker.
+        /// @brief Finalizes an operation and determines if the job is finished or needs more routing.
         ///
-        /// @details If all operations are complete the job transitions to @c Complete
-        ///          and its visual moves to the exit area. Otherwise it transitions to
-        ///          @c WaitingForTransport and its next machine ID is updated.
+        /// @details If the job has completed all required machine operations, it is marked 
+        /// as @c Complete and moved to the exit area. Otherwise, it is set to @c WaitingForTransport.
         ///
-        /// @param jobId    The job whose operation just finished.
-        /// @param simTime  Current simulation time.
+        /// @param jobId The finished job.
+        /// @param simTime Current simulation time.
+        ///
+        /// @post CurrentOperationIndex is incremented if the job is not yet finished.
         public void MarkOperationComplete(int jobId, double simTime)
         {
             if (!initialized) return;
@@ -276,84 +306,67 @@ namespace Assets.Scripts.Simulation
             }
         }
 
-        /// @brief Returns true when every job has reached the @c Complete state.
+        /// @brief Checks if the entire job set for the episode has reached completion.
+        /// @return True if every job is in the Complete state.
         public bool AreAllJobsComplete()
         {
             if (!initialized) return false;
-
-            foreach (var t in trackers)
-            {
-                if (t.State != JobLifecycleState.Complete) return false;
-            }
+            foreach (var t in trackers) if (t.State != JobLifecycleState.Complete) return false;
             return true;
         }
 
-        // ─────────────────────────────────────────────────────────
-        //  Grid Layout Helpers
-        // ─────────────────────────────────────────────────────────
-
-        /// @brief Computes the world-space spawn position for a job in the incoming queue.
-        /// @param slot  Job index used to determine row and column in the grid.
-        /// @return      World position including the configured token height offset.
+        /// @brief Calculates the grid-based world position for the starting queue.
+        /// @param slot The unique slot index for the job.
         private Vector3 GetIncomingQueuePosition(int slot)
         {
-            Vector3 origin = incomingQueueMarker != null ? incomingQueueMarker.position : incomingQueueOrigin;
+            Vector3 origin = layoutManager != null ? layoutManager.IncomingBeltPosition : incomingQueueOrigin;
             int row = slot / Mathf.Max(queueRowSize, 1);
             int col = slot % Mathf.Max(queueRowSize, 1);
-            Vector3 rowDir = queueRowDirection.normalized;
-            Vector3 colDir = queueColumnDirection.normalized;
-            return origin + rowDir * (col * queueGridSpacing) + colDir * (row * queueGridSpacing) + Vector3.up * jobTokenHeight;
+            return origin + queueRowDirection.normalized * (col * queueGridSpacing) +
+                   queueColumnDirection.normalized * (row * queueGridSpacing) + Vector3.up * jobTokenHeight;
         }
 
-        /// @brief Computes the world-space position where a completed job's visual should rest.
-        /// @param slot  Slot index matching the job's original incoming queue slot.
-        /// @return      World position in the exit area.
+        /// @brief Calculates the world position for jobs that have finished all operations.
         private Vector3 GetExitAreaPosition(int slot)
         {
-            Vector3 origin = exitAreaMarker != null ? exitAreaMarker.position : exitAreaOrigin;
+            Vector3 origin = layoutManager != null ? layoutManager.OutgoingBeltPosition : exitAreaOrigin;
             int row = slot / Mathf.Max(queueRowSize, 1);
             int col = slot % Mathf.Max(queueRowSize, 1);
-            Vector3 rowDir = queueRowDirection.normalized;
-            Vector3 colDir = queueColumnDirection.normalized;
-            return origin + rowDir * (col * queueGridSpacing) + colDir * (row * queueGridSpacing) + Vector3.up * jobTokenHeight;
+            return origin + queueRowDirection.normalized * (col * queueGridSpacing) +
+                   queueColumnDirection.normalized * (row * queueGridSpacing) + Vector3.up * jobTokenHeight;
         }
 
-        // ─────────────────────────────────────────────────────────
-        //  Query API
-        // ─────────────────────────────────────────────────────────
-
-        /// @brief Returns the @c JobTracker for the given job ID, or @c null if invalid.
-        /// @param jobId  Zero-based job index.
+        /// @brief Safe accessor for individual job tracking data.
+        /// @param jobId Zero-based job index.
+        /// @return The JobTracker or null if out of range.
         public JobTracker GetJobTracker(int jobId)
         {
             if (trackers == null || jobId < 0 || jobId >= trackers.Length) return null;
             return trackers[jobId];
         }
 
-        /// @brief Returns a flat array of (x, z) world positions for every job visual.
-        /// @return Float array of length @c JobCount * 2, or @c null if uninitialised.
+        /// @brief Exports the world-space (X, Z) coordinates of all jobs for logging or AI observations.
+        /// @return Flat float array: [j0_x, j0_z, j1_x, j1_z, ...].
         public float[] GetJobPositionsFlat()
         {
             if (!initialized) return null;
             float[] positions = new float[trackers.Length * 2];
             for (int j = 0; j < trackers.Length; j++)
             {
-                Vector3 pos = trackers[j].WorldPosition;
-                if (trackers[j].Visual != null) pos = trackers[j].Visual.transform.position;
-
+                Vector3 pos = trackers[j].Visual != null ? trackers[j].Visual.transform.position : trackers[j].WorldPosition;
                 positions[j * 2 + 0] = pos.x;
                 positions[j * 2 + 1] = pos.z;
             }
             return positions;
         }
 
-        /// @brief Builds a flat (jobs × machines × 3) scheduling matrix.
+        /// @brief Flattens job operation data into a normalized matrix for agent input.
         ///
-        /// @details Each cell stores three normalised floats: operation-exists flag,
-        ///          normalised duration, and completion status.
+        /// @details Each operation is represented by 3 values: presence flag, 
+        /// normalized duration, and completion status (0 to 1).
         ///
-        /// @param numMachines  Column count; should match the instance's machine count.
-        /// @return             Float array of length @c JobCount * @p numMachines * 3.
+        /// @param numMachines The machine count to bound the matrix columns.
+        /// @return Flat array of size Jobs * Machines * 3.
         public float[] GetSchedulingMatrixFlat(int numMachines)
         {
             if (!initialized) return null;
@@ -361,8 +374,7 @@ namespace Assets.Scripts.Simulation
             float[] matrix = new float[numJobs * numMachines * 3];
             float maxDuration = 1f;
             foreach (JobTracker t in trackers)
-                foreach (float d in t.OperationDurations)
-                    if (d > maxDuration) maxDuration = d;
+                foreach (float d in t.OperationDurations) if (d > maxDuration) maxDuration = d;
 
             for (int j = 0; j < numJobs; j++)
             {
@@ -380,14 +392,9 @@ namespace Assets.Scripts.Simulation
             return matrix;
         }
 
-        /// @brief Builds a flat array of per-job scalar observations for the agent.
-        ///
-        /// @details Each job contributes four values: completion ratio, operation
-        ///          progress, normalised total wait time, and a float encoding of
-        ///          the current lifecycle state.
-        ///
-        /// @param currentSimTime  Used to normalise wait-time values.
-        /// @return                Float array of length @c JobCount * 4.
+        /// @brief Exports job-level scalar features normalized by current simulation time.
+        /// @param currentSimTime Used as a denominator for wait-time normalization.
+        /// @return Flat float array: [compRatio, opProgress, waitNorm, stateEncoding, ...].
         public float[] GetJobScalarsFlat(double currentSimTime)
         {
             if (!initialized) return null;
@@ -405,9 +412,6 @@ namespace Assets.Scripts.Simulation
             return scalars;
         }
 
-        /// @brief Maps a @c JobLifecycleState to a normalised float in [0, 1].
-        /// @param state  The lifecycle state to convert.
-        /// @return       Float value spaced evenly across the range.
         private static float StateToFloat(JobLifecycleState state)
         {
             return state switch

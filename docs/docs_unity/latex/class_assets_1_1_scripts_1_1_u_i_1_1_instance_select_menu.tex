@@ -1,0 +1,46 @@
+\doxysection{Assets.\+Scripts.\+UI.\+Instance\+Select\+Menu Class Reference}
+\hypertarget{class_assets_1_1_scripts_1_1_u_i_1_1_instance_select_menu}{}\label{class_assets_1_1_scripts_1_1_u_i_1_1_instance_select_menu}\index{Assets.Scripts.UI.InstanceSelectMenu@{Assets.Scripts.UI.InstanceSelectMenu}}
+
+
+Startup menu that lets the user pick a Taillard instance before the simulation begins.  
+
+
+Inheritance diagram for Assets.\+Scripts.\+UI.\+Instance\+Select\+Menu:\+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_assets_1_1_scripts_1_1_u_i_1_1_instance_select_menu}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_u_i_1_1_instance_select_menu_a6807c72fe9536aee0ed5c2c0f8f0a769}\label{class_assets_1_1_scripts_1_1_u_i_1_1_instance_select_menu_a6807c72fe9536aee0ed5c2c0f8f0a769} 
+void {\bfseries Show} ()
+\begin{DoxyCompactList}\small\item\em Re-\/shows the menu and refreshes the dropdown for a new selection. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_u_i_1_1_instance_select_menu_a968e6fe0cea81246ff8b413d71049820}{On\+Start\+Clicked}} ()
+\begin{DoxyCompactList}\small\item\em Pushes the selected {\ttfamily Text\+Asset} to the bridge and starts the episode. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Startup menu that lets the user pick a Taillard instance before the simulation begins. 
+
+On {\ttfamily Start}, all {\ttfamily Text\+Asset} files under {\ttfamily Resources/\+\+Instances} are loaded and their names populate a {\ttfamily TMP\+\_\+\+Dropdown}. When the user confirms their selection the chosen asset is pushed to {\ttfamily Simulation\+Bridge.\+Taillard\+Json} and {\ttfamily Start\+Episode()} is called. 
+
+\label{doc-func-members}
+\Hypertarget{class_assets_1_1_scripts_1_1_u_i_1_1_instance_select_menu_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_u_i_1_1_instance_select_menu_a968e6fe0cea81246ff8b413d71049820}\index{Assets.Scripts.UI.InstanceSelectMenu@{Assets.Scripts.UI.InstanceSelectMenu}!OnStartClicked@{OnStartClicked}}
+\index{OnStartClicked@{OnStartClicked}!Assets.Scripts.UI.InstanceSelectMenu@{Assets.Scripts.UI.InstanceSelectMenu}}
+\doxysubsubsection{\texorpdfstring{OnStartClicked()}{OnStartClicked()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_u_i_1_1_instance_select_menu_a968e6fe0cea81246ff8b413d71049820} 
+void Assets.\+Scripts.\+UI.\+Instance\+Select\+Menu.\+On\+Start\+Clicked (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Pushes the selected {\ttfamily Text\+Asset} to the bridge and starts the episode. 
+
+Hides the menu panel so the factory floor is fully visible during play. 
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+UI/\+Instance\+Select\+Menu.\+cs\end{DoxyCompactItemize}

@@ -1,0 +1,215 @@
+\doxysection{Assets.\+Scripts.\+Simulation.\+Machines.\+Conveyor\+Belt Class Reference}
+\hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt}{}\label{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt}\index{Assets.Scripts.Simulation.Machines.ConveyorBelt@{Assets.Scripts.Simulation.Machines.ConveyorBelt}}
+
+
+A linear conveyor belt that smoothly moves job visuals between an input end and an output end.  
+
+
+Inheritance diagram for Assets.\+Scripts.\+Simulation.\+Machines.\+Conveyor\+Belt:\+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+bool \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a592ee368625f3e6ec244dcafbc6764fe}{Try\+Enqueue}} (int \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a80b0033e2d8c7bc501c296542a690bcf}{job\+Id}}, \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_job_visual}{Job\+Visual}} visual)
+\begin{DoxyCompactList}\small\item\em Attempts to place a job at the input end of the belt. \end{DoxyCompactList}\item 
+int \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a4e015c2bf8b868417ee83efe41746429}{Peek\+Front}} ()
+\begin{DoxyCompactList}\small\item\em Retrieves the ID of the job at the output end without removing it. \end{DoxyCompactList}\item 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_job_visual}{Job\+Visual}} \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_ae0d02b3590e1d2973659feb7f0e07150}{Peek\+Front\+Visual}} ()
+\begin{DoxyCompactList}\small\item\em Retrieves the visual of the job at the output end without removing it. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a4af56f18331235a66735666df10f9fe9}\label{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a4af56f18331235a66735666df10f9fe9} 
+int \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_job_visual}{Job\+Visual}} visual {\bfseries Dequeue\+Front} ()
+\item 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_job_visual}{Job\+Visual}} \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_adcc0ea7826af5f294f5d5eef3251cb0d}{Remove\+Job}} (int \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a80b0033e2d8c7bc501c296542a690bcf}{job\+Id}})
+\begin{DoxyCompactList}\small\item\em Removes a specific job ID from any position on the belt. \end{DoxyCompactList}\item 
+bool \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a34f9c554c64340d2746be7ae206fe5f1}{Contains}} (int \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a80b0033e2d8c7bc501c296542a690bcf}{job\+Id}})
+\begin{DoxyCompactList}\small\item\em Checks if a specific job is currently managed by this belt. \end{DoxyCompactList}\item 
+List$<$ int $>$ \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_af8603b94ff2a2dcbc365db486317f29f}{Get\+Job\+Ids}} ()
+\begin{DoxyCompactList}\small\item\em Generates a list of all job IDs currently on the belt. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a6bb67afe3129e4eb2c17c22183cfd92d}{Clear}} ()
+\begin{DoxyCompactList}\small\item\em Forcefully clears all jobs from the belt. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+int \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a80b0033e2d8c7bc501c296542a690bcf}{job\+Id}}
+\begin{DoxyCompactList}\small\item\em Removes and returns the job at the output end of the belt. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a414641645c8b2e7bffd8a2888b7d8356}\label{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a414641645c8b2e7bffd8a2888b7d8356} 
+int {\bfseries Count}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_ae22906a6cdf05d2b0092f38d5bb498d2}\label{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_ae22906a6cdf05d2b0092f38d5bb498d2} 
+bool {\bfseries Is\+Full}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a5195240af35591ac1e73393cc276706f}\label{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a5195240af35591ac1e73393cc276706f} 
+bool {\bfseries Is\+Empty}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a34e93d732c212800d3005badf5a2571a}\label{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a34e93d732c212800d3005badf5a2571a} 
+int {\bfseries Capacity}\hspace{0.3cm}{\ttfamily  \+[get, set]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_aeb29bb8bc06853814bb2f4f3f978664f}\label{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_aeb29bb8bc06853814bb2f4f3f978664f} 
+float {\bfseries Belt\+Length}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a9529ad6fb7094887e99ff67dc640e306}\label{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a9529ad6fb7094887e99ff67dc640e306} 
+Vector3 {\bfseries Input\+End\+Position}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a6e4dbf2b2f652d8d7b99e3522dd5ae9c}\label{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a6e4dbf2b2f652d8d7b99e3522dd5ae9c} 
+Vector3 {\bfseries Output\+End\+Position}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+A linear conveyor belt that smoothly moves job visuals between an input end and an output end. 
+
+Jobs pack toward the output, advancing automatically when space opens up ahead. Orientation is determined by the transform\textquotesingle{}s forward vector, while the flow direction is toggled via the reverse\+Flow flag. 
+
+\label{doc-func-members}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a6bb67afe3129e4eb2c17c22183cfd92d}\index{Assets.Scripts.Simulation.Machines.ConveyorBelt@{Assets.Scripts.Simulation.Machines.ConveyorBelt}!Clear@{Clear}}
+\index{Clear@{Clear}!Assets.Scripts.Simulation.Machines.ConveyorBelt@{Assets.Scripts.Simulation.Machines.ConveyorBelt}}
+\doxysubsubsection{\texorpdfstring{Clear()}{Clear()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a6bb67afe3129e4eb2c17c22183cfd92d} 
+void Assets.\+Scripts.\+Simulation.\+Machines.\+Conveyor\+Belt.\+Clear (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Forcefully clears all jobs from the belt. 
+
+\begin{DoxyPostcond}{Postcondition}
+Visuals are released from conveyor control and the entries list is emptied. 
+\end{DoxyPostcond}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a34f9c554c64340d2746be7ae206fe5f1}\index{Assets.Scripts.Simulation.Machines.ConveyorBelt@{Assets.Scripts.Simulation.Machines.ConveyorBelt}!Contains@{Contains}}
+\index{Contains@{Contains}!Assets.Scripts.Simulation.Machines.ConveyorBelt@{Assets.Scripts.Simulation.Machines.ConveyorBelt}}
+\doxysubsubsection{\texorpdfstring{Contains()}{Contains()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a34f9c554c64340d2746be7ae206fe5f1} 
+bool Assets.\+Scripts.\+Simulation.\+Machines.\+Conveyor\+Belt.\+Contains (\begin{DoxyParamCaption}\item[{int}]{job\+Id}{}\end{DoxyParamCaption})}
+
+
+
+Checks if a specific job is currently managed by this belt. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a80b0033e2d8c7bc501c296542a690bcf}{job\+Id}} & The ID to search for. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if the ID exists in the current entries list. 
+\end{DoxyReturn}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_af8603b94ff2a2dcbc365db486317f29f}\index{Assets.Scripts.Simulation.Machines.ConveyorBelt@{Assets.Scripts.Simulation.Machines.ConveyorBelt}!GetJobIds@{GetJobIds}}
+\index{GetJobIds@{GetJobIds}!Assets.Scripts.Simulation.Machines.ConveyorBelt@{Assets.Scripts.Simulation.Machines.ConveyorBelt}}
+\doxysubsubsection{\texorpdfstring{GetJobIds()}{GetJobIds()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_af8603b94ff2a2dcbc365db486317f29f} 
+List$<$ int $>$ Assets.\+Scripts.\+Simulation.\+Machines.\+Conveyor\+Belt.\+Get\+Job\+Ids (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Generates a list of all job IDs currently on the belt. 
+
+\begin{DoxyReturn}{Returns}
+An ordered list of IDs from output to input end. 
+\end{DoxyReturn}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a4e015c2bf8b868417ee83efe41746429}\index{Assets.Scripts.Simulation.Machines.ConveyorBelt@{Assets.Scripts.Simulation.Machines.ConveyorBelt}!PeekFront@{PeekFront}}
+\index{PeekFront@{PeekFront}!Assets.Scripts.Simulation.Machines.ConveyorBelt@{Assets.Scripts.Simulation.Machines.ConveyorBelt}}
+\doxysubsubsection{\texorpdfstring{PeekFront()}{PeekFront()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a4e015c2bf8b868417ee83efe41746429} 
+int Assets.\+Scripts.\+Simulation.\+Machines.\+Conveyor\+Belt.\+Peek\+Front (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Retrieves the ID of the job at the output end without removing it. 
+
+\begin{DoxyReturn}{Returns}
+The job ID, or -\/1 if the belt is empty. 
+\end{DoxyReturn}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_ae0d02b3590e1d2973659feb7f0e07150}\index{Assets.Scripts.Simulation.Machines.ConveyorBelt@{Assets.Scripts.Simulation.Machines.ConveyorBelt}!PeekFrontVisual@{PeekFrontVisual}}
+\index{PeekFrontVisual@{PeekFrontVisual}!Assets.Scripts.Simulation.Machines.ConveyorBelt@{Assets.Scripts.Simulation.Machines.ConveyorBelt}}
+\doxysubsubsection{\texorpdfstring{PeekFrontVisual()}{PeekFrontVisual()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_ae0d02b3590e1d2973659feb7f0e07150} 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_job_visual}{Job\+Visual}} Assets.\+Scripts.\+Simulation.\+Machines.\+Conveyor\+Belt.\+Peek\+Front\+Visual (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Retrieves the visual of the job at the output end without removing it. 
+
+\begin{DoxyReturn}{Returns}
+The \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_job_visual}{Job\+Visual} component, or null if the belt is empty. 
+\end{DoxyReturn}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_adcc0ea7826af5f294f5d5eef3251cb0d}\index{Assets.Scripts.Simulation.Machines.ConveyorBelt@{Assets.Scripts.Simulation.Machines.ConveyorBelt}!RemoveJob@{RemoveJob}}
+\index{RemoveJob@{RemoveJob}!Assets.Scripts.Simulation.Machines.ConveyorBelt@{Assets.Scripts.Simulation.Machines.ConveyorBelt}}
+\doxysubsubsection{\texorpdfstring{RemoveJob()}{RemoveJob()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_adcc0ea7826af5f294f5d5eef3251cb0d} 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_job_visual}{Job\+Visual}} Assets.\+Scripts.\+Simulation.\+Machines.\+Conveyor\+Belt.\+Remove\+Job (\begin{DoxyParamCaption}\item[{int}]{job\+Id}{}\end{DoxyParamCaption})}
+
+
+
+Removes a specific job ID from any position on the belt. 
+
+Locates the entry matching {\ttfamily job\+Id}, removes it, and repacks the remaining items toward the output end.
+
+
+\begin{DoxyParams}{Parameters}
+{\em \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a80b0033e2d8c7bc501c296542a690bcf}{job\+Id}} & The ID of the job to remove. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The visual associated with the removed job, or null if not found. 
+\end{DoxyReturn}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a592ee368625f3e6ec244dcafbc6764fe}\index{Assets.Scripts.Simulation.Machines.ConveyorBelt@{Assets.Scripts.Simulation.Machines.ConveyorBelt}!TryEnqueue@{TryEnqueue}}
+\index{TryEnqueue@{TryEnqueue}!Assets.Scripts.Simulation.Machines.ConveyorBelt@{Assets.Scripts.Simulation.Machines.ConveyorBelt}}
+\doxysubsubsection{\texorpdfstring{TryEnqueue()}{TryEnqueue()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a592ee368625f3e6ec244dcafbc6764fe} 
+bool Assets.\+Scripts.\+Simulation.\+Machines.\+Conveyor\+Belt.\+Try\+Enqueue (\begin{DoxyParamCaption}\item[{int}]{job\+Id}{, }\item[{\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_job_visual}{Job\+Visual}}}]{visual}{}\end{DoxyParamCaption})}
+
+
+
+Attempts to place a job at the input end of the belt. 
+
+If the belt has capacity and the job is not a duplicate, a new entry is created. The {\ttfamily visual} is snapped to the input position and flagged as being handled by a conveyor.
+
+
+\begin{DoxyParams}{Parameters}
+{\em \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a80b0033e2d8c7bc501c296542a690bcf}{job\+Id}} & The unique ID of the job. \\
+\hline
+{\em visual} & The visual component associated with the job.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if the job was successfully enqueued; otherwise, false. 
+\end{DoxyReturn}
+\begin{DoxyPostcond}{Postcondition}
+Job count increases by one; entries is updated. 
+\end{DoxyPostcond}
+
+
+\label{doc-variable-members}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_doc-variable-members}
+\doxysubsection{Member Data Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a80b0033e2d8c7bc501c296542a690bcf}\index{Assets.Scripts.Simulation.Machines.ConveyorBelt@{Assets.Scripts.Simulation.Machines.ConveyorBelt}!jobId@{jobId}}
+\index{jobId@{jobId}!Assets.Scripts.Simulation.Machines.ConveyorBelt@{Assets.Scripts.Simulation.Machines.ConveyorBelt}}
+\doxysubsubsection{\texorpdfstring{jobId}{jobId}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt_a80b0033e2d8c7bc501c296542a690bcf} 
+int Assets.\+Scripts.\+Simulation.\+Machines.\+Conveyor\+Belt.\+job\+Id}
+
+
+
+Removes and returns the job at the output end of the belt. 
+
+Dequeues the front entry, releases the visual from conveyor control, and triggers a target recalculation so remaining jobs shift forward.
+
+\begin{DoxyPrecond}{Precondition}
+Belt must not be empty. 
+\end{DoxyPrecond}
+\begin{DoxyPostcond}{Postcondition}
+The entries list count decreases; remaining items update their Target\+World\+Pos. 
+\end{DoxyPostcond}
+
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Simulation/\+\+Machines/\+Conveyor\+Belt.\+cs\end{DoxyCompactItemize}

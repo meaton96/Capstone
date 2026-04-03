@@ -1,0 +1,209 @@
+\doxysection{Assets.\+Scripts.\+Simulation.\+Factory\+Layout.\+Factory\+Layout\+Manager Class Reference}
+\hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager}{}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager}\index{Assets.Scripts.Simulation.FactoryLayout.FactoryLayoutManager@{Assets.Scripts.Simulation.FactoryLayout.FactoryLayoutManager}}
+
+
+Builds an aisle-\/based factory floor with one-\/way traffic lanes, physical wall colliders, and zone markers.  
+
+
+Inheritance diagram for Assets.\+Scripts.\+Simulation.\+Factory\+Layout.\+Factory\+Layout\+Manager:\+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_ac42b12bf72a7895deee455eaeb293246}{Build\+Floor}} (\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator}{DESSimulator}} simulator)
+\begin{DoxyCompactList}\small\item\em Generates the factory floor, places machines, and builds navigation boundaries. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a3c72974403f8f75aad2ddb0fbe08dcb0}{Clear\+Floor}} ()
+\begin{DoxyCompactList}\small\item\em Destroys all spawned factory components and clears memory. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a860cdd2221c4bc95beb3f76549875b4e}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a860cdd2221c4bc95beb3f76549875b4e} 
+void {\bfseries Set\+Custom\+Layout} (Vector3\+[$\,$]\+ positions)
+\item 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine}{Physical\+Machine}} \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_ac26566b55faf68cb82f31915cac1db73}{Get\+Machine}} (int machine\+Id)
+\begin{DoxyCompactList}\small\item\em Retrieves a machine instance by its ID. \end{DoxyCompactList}\item 
+Vector3 \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_aeb1bf905a372e7dd8670f9a67096c1ee}{Get\+Machine\+Local\+Position}} (int row, int col)
+\begin{DoxyCompactList}\small\item\em Calculates the local XZ coordinates for a machine at a specific grid coordinate. \end{DoxyCompactList}\item 
+Vector3 \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a08e230f6341fe54bcb546f703fe8e8eb}{Get\+Row\+Aisle\+Centre}} (int aisle\+Index)
+\begin{DoxyCompactList}\small\item\em Returns the world position of the center of a row aisle. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a183bac8b2f010e8418f0eb42ed26f108}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a183bac8b2f010e8418f0eb42ed26f108} 
+Vector3 {\bfseries Get\+Row\+Aisle\+Direction} (int aisle\+Index)
+\begin{DoxyCompactList}\small\item\em Returns the restricted flow direction for a specific row aisle. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a3ed87648aa873a438931f63cf8fd46e4}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a3ed87648aa873a438931f63cf8fd46e4} 
+float {\bfseries Get\+Top\+SpineZ} ()
+\begin{DoxyCompactList}\small\item\em Returns the Z offset for the top peripheral spine. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a6d3bb9108da1b3cfa2d4462992026e8b}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a6d3bb9108da1b3cfa2d4462992026e8b} 
+float {\bfseries Get\+Bottom\+SpineZ} ()
+\begin{DoxyCompactList}\small\item\em Returns the Z offset for the bottom peripheral spine. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_ab9b27dac4a11ffa9a32bced741f62e94}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_ab9b27dac4a11ffa9a32bced741f62e94} 
+static \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager}{Factory\+Layout\+Manager}} {\bfseries Instance}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a97b4ab893064a909b837dcb40e4d79dd}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a97b4ab893064a909b837dcb40e4d79dd} 
+Vector3 {\bfseries Incoming\+Belt\+Position}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_aca60b7b7db7daf71906daa4d80d76ac3}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_aca60b7b7db7daf71906daa4d80d76ac3} 
+Vector3 {\bfseries Outgoing\+Belt\+Position}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_af9196373354343f3f14a736f08f1d3cc}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_af9196373354343f3f14a736f08f1d3cc} 
+Vector3 {\bfseries AGVParking\+Position}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a15492d41000bffc1789346f7a8f2fbc8}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a15492d41000bffc1789346f7a8f2fbc8} 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt}{Conveyor\+Belt}} {\bfseries Incoming\+Belt}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a56ff5c84c6bc978870a894c4325d18c0}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a56ff5c84c6bc978870a894c4325d18c0} 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt}{Conveyor\+Belt}} {\bfseries Outgoing\+Belt}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a83756be60a5b0685f38f0ad20012f8cd}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a83756be60a5b0685f38f0ad20012f8cd} 
+IRead\+Only\+List$<$ \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine}{Physical\+Machine}} $>$ {\bfseries Machines}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a71827a350160182ed751b7cd40ff5625}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a71827a350160182ed751b7cd40ff5625} 
+int {\bfseries Machine\+Count}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a8bd9e2852b1b05bc0321eae6e348272d}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a8bd9e2852b1b05bc0321eae6e348272d} 
+float\+[,]\+ {\bfseries Distance\+Matrix}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a0c38929e7972745a2cfa4677b81b4af3}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a0c38929e7972745a2cfa4677b81b4af3} 
+float\+[$\,$]\+ {\bfseries Distance\+Matrix\+Flat}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_ace97a6a41fd597f1f553a3b17f77efba}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_ace97a6a41fd597f1f553a3b17f77efba} 
+int {\bfseries Layout\+Rows}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_acc0b794c17e44222bd613dd54cbf0043}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_acc0b794c17e44222bd613dd54cbf0043} 
+int {\bfseries Layout\+Cols}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a87ac4489b722c170d5bad99a7be30596}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a87ac4489b722c170d5bad99a7be30596} 
+float {\bfseries Row\+Pitch}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a11ae220d28324f4145e07f54dca97af6}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a11ae220d28324f4145e07f54dca97af6} 
+float {\bfseries Machine\+SpacingX}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a2297d1ff06eb731045bbecd9d5bb7959}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a2297d1ff06eb731045bbecd9d5bb7959} 
+float {\bfseries Spine\+Aisle\+Width}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a1d90ab3348cc1fa05d3ab82c92f747eb}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a1d90ab3348cc1fa05d3ab82c92f747eb} 
+float {\bfseries Vertical\+Aisle\+Width}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a6494b2e22d37194afc26ce3cf6a1fcbb}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a6494b2e22d37194afc26ce3cf6a1fcbb} 
+float {\bfseries Row\+Aisle\+Width}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a882efc446a395c1a8ee85f036e2e1094}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a882efc446a395c1a8ee85f036e2e1094} 
+float {\bfseries Conveyor\+Reach}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_ad3ff54ef8164745d2da09d5622757107}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_ad3ff54ef8164745d2da09d5622757107} 
+float {\bfseries Machine\+Depth}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_ab1be232c45e61a431a40a595c3a205f7}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_ab1be232c45e61a431a40a595c3a205f7} 
+Vector3 {\bfseries Grid\+Origin}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_abf8a911c8ed87bdcfd7fef1d55aa264b}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_abf8a911c8ed87bdcfd7fef1d55aa264b} 
+Vector2 {\bfseries Floor\+Size}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Builds an aisle-\/based factory floor with one-\/way traffic lanes, physical wall colliders, and zone markers. 
+
+\label{doc-func-members}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_ac42b12bf72a7895deee455eaeb293246}\index{Assets.Scripts.Simulation.FactoryLayout.FactoryLayoutManager@{Assets.Scripts.Simulation.FactoryLayout.FactoryLayoutManager}!BuildFloor@{BuildFloor}}
+\index{BuildFloor@{BuildFloor}!Assets.Scripts.Simulation.FactoryLayout.FactoryLayoutManager@{Assets.Scripts.Simulation.FactoryLayout.FactoryLayoutManager}}
+\doxysubsubsection{\texorpdfstring{BuildFloor()}{BuildFloor()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_ac42b12bf72a7895deee455eaeb293246} 
+void Assets.\+Scripts.\+Simulation.\+Factory\+Layout.\+Factory\+Layout\+Manager.\+Build\+Floor (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator}{DESSimulator}}}]{simulator}{}\end{DoxyParamCaption})}
+
+
+
+Generates the factory floor, places machines, and builds navigation boundaries. 
+
+Calculates the grid dimensions based on machine count, instantiates the appropriate machine prefabs (single or double-\/sided), builds aisle walls for Nav\+Mesh carving, and computes the spatial distance matrix.
+
+
+\begin{DoxyParams}{Parameters}
+{\em simulator} & The active simulation instance containing machine data.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyPrecond}{Precondition}
+{\ttfamily simulator} must not be null. 
+\end{DoxyPrecond}
+\begin{DoxyPostcond}{Postcondition}
+The floor is populated with machines, walls, and arrows; the Nav\+Mesh is rebuilt. 
+\end{DoxyPostcond}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a3c72974403f8f75aad2ddb0fbe08dcb0}\index{Assets.Scripts.Simulation.FactoryLayout.FactoryLayoutManager@{Assets.Scripts.Simulation.FactoryLayout.FactoryLayoutManager}!ClearFloor@{ClearFloor}}
+\index{ClearFloor@{ClearFloor}!Assets.Scripts.Simulation.FactoryLayout.FactoryLayoutManager@{Assets.Scripts.Simulation.FactoryLayout.FactoryLayoutManager}}
+\doxysubsubsection{\texorpdfstring{ClearFloor()}{ClearFloor()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a3c72974403f8f75aad2ddb0fbe08dcb0} 
+void Assets.\+Scripts.\+Simulation.\+Factory\+Layout.\+Factory\+Layout\+Manager.\+Clear\+Floor (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Destroys all spawned factory components and clears memory. 
+
+\begin{DoxyPostcond}{Postcondition}
+The floor is empty, machine arrays are null, and Nav\+Mesh data is removed. 
+\end{DoxyPostcond}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_ac26566b55faf68cb82f31915cac1db73}\index{Assets.Scripts.Simulation.FactoryLayout.FactoryLayoutManager@{Assets.Scripts.Simulation.FactoryLayout.FactoryLayoutManager}!GetMachine@{GetMachine}}
+\index{GetMachine@{GetMachine}!Assets.Scripts.Simulation.FactoryLayout.FactoryLayoutManager@{Assets.Scripts.Simulation.FactoryLayout.FactoryLayoutManager}}
+\doxysubsubsection{\texorpdfstring{GetMachine()}{GetMachine()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_ac26566b55faf68cb82f31915cac1db73} 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine}{Physical\+Machine}} Assets.\+Scripts.\+Simulation.\+Factory\+Layout.\+Factory\+Layout\+Manager.\+Get\+Machine (\begin{DoxyParamCaption}\item[{int}]{machine\+Id}{}\end{DoxyParamCaption})}
+
+
+
+Retrieves a machine instance by its ID. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em machine\+Id} & The index of the machine. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine}{Physical\+Machine} component or null if out of bounds. 
+\end{DoxyReturn}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_aeb1bf905a372e7dd8670f9a67096c1ee}\index{Assets.Scripts.Simulation.FactoryLayout.FactoryLayoutManager@{Assets.Scripts.Simulation.FactoryLayout.FactoryLayoutManager}!GetMachineLocalPosition@{GetMachineLocalPosition}}
+\index{GetMachineLocalPosition@{GetMachineLocalPosition}!Assets.Scripts.Simulation.FactoryLayout.FactoryLayoutManager@{Assets.Scripts.Simulation.FactoryLayout.FactoryLayoutManager}}
+\doxysubsubsection{\texorpdfstring{GetMachineLocalPosition()}{GetMachineLocalPosition()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_aeb1bf905a372e7dd8670f9a67096c1ee} 
+Vector3 Assets.\+Scripts.\+Simulation.\+Factory\+Layout.\+Factory\+Layout\+Manager.\+Get\+Machine\+Local\+Position (\begin{DoxyParamCaption}\item[{int}]{row}{, }\item[{int}]{col}{}\end{DoxyParamCaption})}
+
+
+
+Calculates the local XZ coordinates for a machine at a specific grid coordinate. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em row} & The machine row. \\
+\hline
+{\em col} & The machine column. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A Vector3 local position relative to the floor center. 
+\end{DoxyReturn}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a08e230f6341fe54bcb546f703fe8e8eb}\index{Assets.Scripts.Simulation.FactoryLayout.FactoryLayoutManager@{Assets.Scripts.Simulation.FactoryLayout.FactoryLayoutManager}!GetRowAisleCentre@{GetRowAisleCentre}}
+\index{GetRowAisleCentre@{GetRowAisleCentre}!Assets.Scripts.Simulation.FactoryLayout.FactoryLayoutManager@{Assets.Scripts.Simulation.FactoryLayout.FactoryLayoutManager}}
+\doxysubsubsection{\texorpdfstring{GetRowAisleCentre()}{GetRowAisleCentre()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager_a08e230f6341fe54bcb546f703fe8e8eb} 
+Vector3 Assets.\+Scripts.\+Simulation.\+Factory\+Layout.\+Factory\+Layout\+Manager.\+Get\+Row\+Aisle\+Centre (\begin{DoxyParamCaption}\item[{int}]{aisle\+Index}{}\end{DoxyParamCaption})}
+
+
+
+Returns the world position of the center of a row aisle. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em aisle\+Index} & The index of the aisle (0 is between machine row 0 and 1). \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Simulation/\+\+Factory\+Layout/\+Factory\+Layout\+Manager.\+cs\end{DoxyCompactItemize}

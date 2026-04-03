@@ -1,16 +1,13 @@
 var class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge =
 [
-    [ "RunEpisodeWithFixedRule", "class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html#ac7294ac378f1337ee5815db40489fd8d", null ],
+    [ "OnJobArrivedInQueue", "class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html#afcfbc4ada3e42cbb7e0a3cdcdb1523f6", null ],
+    [ "OnMachineFinished", "class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html#aa9b6417eb34dd5001ddbe0377f161330", null ],
     [ "StartEpisode", "class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html#a5d8b43c53cd38a61470816de22f1fd0c", null ],
-    [ "StartEpisode", "class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html#a4e6daadbb23b0bfd1927806e2cf8ba58", null ],
-    [ "Step", "class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html#a54f762ba8e222fcc8cfde852c459562e", null ],
+    [ "Step", "class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html#a8d81d85edf95a798dd0e6ee4da84a9c1", null ],
+    [ "StopEpisode", "class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html#a475fa477cd47decd17d78f587449b70e", null ],
     [ "CurrentDecision", "class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html#a47b78b3fb2e0b63dae2f6e11aa7e3b55", null ],
-    [ "CurrentMakespan", "class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html#ad70f13ea069d844466f1ee17a485dc8e", null ],
-    [ "DecisionCount", "class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html#adf8da4488fdeb8bb688dd615f21c5ef2", null ],
-    [ "IsDone", "class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html#a436e69beba136fb322c737933d6e8d79", null ],
-    [ "IsEpisodeActive", "class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html#a904630e03924813c79e016df46629df4", null ],
     [ "IsWaitingForAction", "class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html#a02ba2996adfc6bd0d53afa83757af5a8", null ],
+    [ "LastAppliedRule", "class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html#a9e815aa3e00e542bee0641088d719ce3", null ],
     [ "SimTime", "class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html#a168e40a044c13acbb3ba00642036fe13", null ],
-    [ "Simulator", "class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html#a5d61c103d95c8c657e545075ad4ee559", null ],
-    [ "SpeedMultiplier", "class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html#a7bf9fa029b239d6fbd5c6250d535a57f", null ]
+    [ "StartTime", "class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html#abee3155323c3454e2614ebb20ea68447", null ]
 ];

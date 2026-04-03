@@ -1,0 +1,25 @@
+\doxysection{Assets.\+Scripts.\+Simulation.\+AGV Namespace Reference}
+\hypertarget{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{}\label{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}\index{Assets.Scripts.Simulation.AGV@{Assets.Scripts.Simulation.AGV}}
+\doxysubsubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller}{AGVController}}
+\begin{DoxyCompactList}\small\item\em Controls navigation, job assignment, and lifecycle of an \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV}. \end{DoxyCompactList}\item 
+class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_pool}{AGVPool}}
+\begin{DoxyCompactList}\small\item\em Manages a fleet of AGVs, handling initialization, job dispatching, and request queuing. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_a1d94b34561483c4dc3c4673fd25db755}\label{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_a1d94b34561483c4dc3c4673fd25db755} 
+enum {\bfseries AGVState} \{ \newline
+{\bfseries Idle}
+, {\bfseries Navigating\+To\+Pickup}
+, {\bfseries Aligning\+For\+Pickup}
+, {\bfseries Executing\+Pickup}
+, \newline
+{\bfseries Navigating\+To\+Dropoff}
+, {\bfseries Aligning\+For\+Dropoff}
+, {\bfseries Executing\+Dropoff}
+, {\bfseries Waiting\+For\+Zone}
+ \}
+\end{DoxyCompactItemize}

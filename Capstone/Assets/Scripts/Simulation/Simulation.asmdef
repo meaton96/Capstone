@@ -5,7 +5,8 @@
         "Scheduling",
         "Unity.TextMeshPro",
         "Unity.ML-Agents",
-        "Logging"
+        "Logging",
+        "Unity.AI.Navigation"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

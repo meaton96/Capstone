@@ -1,7 +1,7 @@
 ﻿<Solution>
   <Project Path="Simulation.csproj" />
   <Project Path="Scheduling.csproj" />
-  <Project Path="Assembly-CSharp-Editor.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="Assembly-CSharp-Editor.csproj" />
   <Project Path="Logging.csproj" />
 </Solution>

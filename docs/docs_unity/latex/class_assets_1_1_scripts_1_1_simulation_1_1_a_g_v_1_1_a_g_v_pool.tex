@@ -1,0 +1,126 @@
+\doxysection{Assets.\+Scripts.\+Simulation.\+AGV.\+AGVPool Class Reference}
+\hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_pool}{}\label{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_pool}\index{Assets.Scripts.Simulation.AGV.AGVPool@{Assets.Scripts.Simulation.AGV.AGVPool}}
+
+
+Manages a fleet of AGVs, handling initialization, job dispatching, and request queuing.  
+
+
+Inheritance diagram for Assets.\+Scripts.\+Simulation.\+AGV.\+AGVPool:\+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_pool}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_pool_a40e0ea3fcbe549cce0f45ef914e56f04}{Initialize\+Fleet}} ()
+\begin{DoxyCompactList}\small\item\em Spawns and prepares the \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} fleet at the designated parking area. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_pool_a519d9d273599467ffd204138361b246a}{Try\+Dispatch\+Staggered}} (int job\+Id, Vector3 pickup\+Pos, Vector3 dropoff\+Slot\+Pos, \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine}{Physical\+Machine}} source, \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine}{Physical\+Machine}} dropoff, int dispatch\+Index)
+\begin{DoxyCompactList}\small\item\em Initiates a job dispatch with a calculated delay. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_pool_a18eedbbe9467a0dd7ba219e912c890a9}{Try\+Dispatch}} (int job\+Id, Vector3 pickup\+Pos, Vector3 dropoff\+Slot\+Pos, \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine}{Physical\+Machine}} source, \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine}{Physical\+Machine}} dropoff)
+\begin{DoxyCompactList}\small\item\em Attempts to assign a transport task to an available \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} or queues it if the fleet is full. \end{DoxyCompactList}\item 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller}{AGVController}} \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_pool_ab8b052f59c954bb82b2f8426df235116}{Get\+Available\+AGV}} ()
+\begin{DoxyCompactList}\small\item\em Scans the fleet for an \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} in the Idle state. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_pool_a071d33de635de45e4e32ce679cf4a2f9}\label{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_pool_a071d33de635de45e4e32ce679cf4a2f9} 
+List$<$ \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller}{AGVController}} $>$ {\bfseries Fleet}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Manages a fleet of AGVs, handling initialization, job dispatching, and request queuing. 
+
+\label{doc-func-members}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_pool_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_pool_ab8b052f59c954bb82b2f8426df235116}\index{Assets.Scripts.Simulation.AGV.AGVPool@{Assets.Scripts.Simulation.AGV.AGVPool}!GetAvailableAGV@{GetAvailableAGV}}
+\index{GetAvailableAGV@{GetAvailableAGV}!Assets.Scripts.Simulation.AGV.AGVPool@{Assets.Scripts.Simulation.AGV.AGVPool}}
+\doxysubsubsection{\texorpdfstring{GetAvailableAGV()}{GetAvailableAGV()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_pool_ab8b052f59c954bb82b2f8426df235116} 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller}{AGVController}} Assets.\+Scripts.\+Simulation.\+AGV.\+AGVPool.\+Get\+Available\+AGV (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Scans the fleet for an \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} in the Idle state. 
+
+\begin{DoxyReturn}{Returns}
+The first available \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller}{AGVController} found, or null if all are busy. 
+\end{DoxyReturn}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_pool_a40e0ea3fcbe549cce0f45ef914e56f04}\index{Assets.Scripts.Simulation.AGV.AGVPool@{Assets.Scripts.Simulation.AGV.AGVPool}!InitializeFleet@{InitializeFleet}}
+\index{InitializeFleet@{InitializeFleet}!Assets.Scripts.Simulation.AGV.AGVPool@{Assets.Scripts.Simulation.AGV.AGVPool}}
+\doxysubsubsection{\texorpdfstring{InitializeFleet()}{InitializeFleet()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_pool_a40e0ea3fcbe549cce0f45ef914e56f04} 
+void Assets.\+Scripts.\+Simulation.\+AGV.\+AGVPool.\+Initialize\+Fleet (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Spawns and prepares the \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} fleet at the designated parking area. 
+
+Clears any existing fleet instances and the pending request queue. Instances are staggered along the X-\/axis starting from the layout manager\textquotesingle{}s parking position. Each \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} is initialized with a unique ID and a callback for idle state transitions.
+
+\begin{DoxyPostcond}{Postcondition}
+The fleet list is populated with initialized AGVControllers and pending\+Requests is empty. 
+\end{DoxyPostcond}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_pool_a18eedbbe9467a0dd7ba219e912c890a9}\index{Assets.Scripts.Simulation.AGV.AGVPool@{Assets.Scripts.Simulation.AGV.AGVPool}!TryDispatch@{TryDispatch}}
+\index{TryDispatch@{TryDispatch}!Assets.Scripts.Simulation.AGV.AGVPool@{Assets.Scripts.Simulation.AGV.AGVPool}}
+\doxysubsubsection{\texorpdfstring{TryDispatch()}{TryDispatch()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_pool_a18eedbbe9467a0dd7ba219e912c890a9} 
+void Assets.\+Scripts.\+Simulation.\+AGV.\+AGVPool.\+Try\+Dispatch (\begin{DoxyParamCaption}\item[{int}]{job\+Id}{, }\item[{Vector3}]{pickup\+Pos}{, }\item[{Vector3}]{dropoff\+Slot\+Pos}{, }\item[{\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine}{Physical\+Machine}}}]{source}{, }\item[{\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine}{Physical\+Machine}}}]{dropoff}{}\end{DoxyParamCaption})}
+
+
+
+Attempts to assign a transport task to an available \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} or queues it if the fleet is full. 
+
+Queries the fleet for an idle \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV}. If one is found, the job is dispatched immediately. If all AGVs are busy, the task is stored in pending\+Requests to be processed once an \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} becomes idle.
+
+
+\begin{DoxyParams}{Parameters}
+{\em job\+Id} & The unique ID of the job. \\
+\hline
+{\em pickup\+Pos} & The world position for pickup. \\
+\hline
+{\em dropoff\+Slot\+Pos} & The pre-\/reserved world position for dropoff. \\
+\hline
+{\em source} & The source machine. \\
+\hline
+{\em dropoff} & The destination machine.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyPostcond}{Postcondition}
+Job is either assigned to an \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} or added to the tail of the queue. 
+\end{DoxyPostcond}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_pool_a519d9d273599467ffd204138361b246a}\index{Assets.Scripts.Simulation.AGV.AGVPool@{Assets.Scripts.Simulation.AGV.AGVPool}!TryDispatchStaggered@{TryDispatchStaggered}}
+\index{TryDispatchStaggered@{TryDispatchStaggered}!Assets.Scripts.Simulation.AGV.AGVPool@{Assets.Scripts.Simulation.AGV.AGVPool}}
+\doxysubsubsection{\texorpdfstring{TryDispatchStaggered()}{TryDispatchStaggered()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_pool_a519d9d273599467ffd204138361b246a} 
+void Assets.\+Scripts.\+Simulation.\+AGV.\+AGVPool.\+Try\+Dispatch\+Staggered (\begin{DoxyParamCaption}\item[{int}]{job\+Id}{, }\item[{Vector3}]{pickup\+Pos}{, }\item[{Vector3}]{dropoff\+Slot\+Pos}{, }\item[{\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine}{Physical\+Machine}}}]{source}{, }\item[{\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine}{Physical\+Machine}}}]{dropoff}{, }\item[{int}]{dispatch\+Index}{}\end{DoxyParamCaption})}
+
+
+
+Initiates a job dispatch with a calculated delay. 
+
+Offloads the dispatch to a coroutine that waits for a duration based on the {\ttfamily dispatch\+Index}. This prevents CPU spikes caused by multiple AGVs calculating complex BFS paths on the same frame during simulation startup.
+
+
+\begin{DoxyParams}{Parameters}
+{\em job\+Id} & The unique ID of the job. \\
+\hline
+{\em pickup\+Pos} & The world position for pickup. \\
+\hline
+{\em dropoff\+Slot\+Pos} & The pre-\/reserved world position for dropoff. \\
+\hline
+{\em source} & The source machine. \\
+\hline
+{\em dropoff} & The destination machine. \\
+\hline
+{\em dispatch\+Index} & The index used to calculate the stagger delay (index \texorpdfstring{$\ast$}{*} 0.\+3s). \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Simulation/\+\+AGV/\+AVGPool.\+cs\end{DoxyCompactItemize}

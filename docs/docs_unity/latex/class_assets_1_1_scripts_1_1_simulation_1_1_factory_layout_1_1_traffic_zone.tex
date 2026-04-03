@@ -1,0 +1,60 @@
+\doxysection{Assets.\+Scripts.\+Simulation.\+Factory\+Layout.\+Traffic\+Zone Class Reference}
+\hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone}{}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone}\index{Assets.Scripts.Simulation.FactoryLayout.TrafficZone@{Assets.Scripts.Simulation.FactoryLayout.TrafficZone}}
+
+
+A single reservable zone within the traffic network.  
+
+
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_a574aa0990a521b088d70c3a0d40524dd}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_a574aa0990a521b088d70c3a0d40524dd} 
+int {\bfseries Zone\+Id}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_aa6260232d4f0a9d4237c10e5259fff00}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_aa6260232d4f0a9d4237c10e5259fff00} 
+string {\bfseries Name}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_acbe3ecdf55b6791c96e62d6cd21e4393}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_acbe3ecdf55b6791c96e62d6cd21e4393} 
+\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_ad04533065738779ae625468710eedc82}{Aisle\+Type}} {\bfseries Aisle\+Type}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_a07bfc0d16209622b35d831156225b131}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_a07bfc0d16209622b35d831156225b131} 
+\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_a2dc71cc63bc0bf75437c3288e80a0389}{Flow\+Direction}} {\bfseries Flow}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_a2dfbc82064414a914c98322e1ce5da84}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_a2dfbc82064414a914c98322e1ce5da84} 
+Vector3 {\bfseries Centre}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_a7dadfef90392a35100918eeb30c3b6df}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_a7dadfef90392a35100918eeb30c3b6df} 
+Vector3 {\bfseries Size}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_af63a702c4d39631899426477b2013de0}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_af63a702c4d39631899426477b2013de0} 
+int {\bfseries Capacity} = 1
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_a14956b5b94c72999586063fff7984ca1}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_a14956b5b94c72999586063fff7984ca1} 
+List$<$ int $>$ {\bfseries Downstream} = new List$<$int$>$()
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_a6f78284df63c345943fefd31d8329308}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_a6f78284df63c345943fefd31d8329308} 
+List$<$ int $>$ {\bfseries Upstream} = new List$<$int$>$()
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_a398116c68fff8509bb097a4518f56bd2}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_a398116c68fff8509bb097a4518f56bd2} 
+Dictionary$<$ int, \doxymbox{\hyperlink{struct_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_dock_point}{Dock\+Point}} $>$ {\bfseries Dock\+Points} = new Dictionary$<$int, \doxymbox{\hyperlink{struct_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_dock_point}{Dock\+Point}}$>$()
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_a63a71f6bafb28ae636daf31646fdaaca}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_a63a71f6bafb28ae636daf31646fdaaca} 
+Hash\+Set$<$ int $>$ {\bfseries Occupant\+Agv\+Ids} = new Hash\+Set$<$int$>$()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_ad4ddf351f201881a0332feb277c3e589}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_ad4ddf351f201881a0332feb277c3e589} 
+bool {\bfseries Is\+Full}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_ad68f7579674a1b2b2f4ba34f1b80ccd5}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_ad68f7579674a1b2b2f4ba34f1b80ccd5} 
+bool {\bfseries Is\+Empty}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+A single reservable zone within the traffic network. 
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Simulation/\+\+Factory\+Layout/\+Traffic\+Zone\+Manager.\+cs\end{DoxyCompactItemize}

@@ -1,0 +1,144 @@
+\doxysection{Assets.\+Scripts.\+Simulation.\+Factory\+Layout.\+Traffic\+Zone\+Manager Class Reference}
+\hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager}{}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager}\index{Assets.Scripts.Simulation.FactoryLayout.TrafficZoneManager@{Assets.Scripts.Simulation.FactoryLayout.TrafficZoneManager}}
+
+
+Manages the zone-\/based traffic control network for the factory floor.  
+
+
+Inheritance diagram for Assets.\+Scripts.\+Simulation.\+Factory\+Layout.\+Traffic\+Zone\+Manager:\+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager_a91f2060d9dc3fa8ed19189212059edb2}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager_a91f2060d9dc3fa8ed19189212059edb2} 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone}{Traffic\+Zone}} {\bfseries Get\+Zone} (int zone\+Id)
+\begin{DoxyCompactList}\small\item\em Retrieves a zone by its unique ID. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager_a4b10f00c3df0824a595fe33817e9898c}{Build\+Zone\+Graph}} ()
+\begin{DoxyCompactList}\small\item\em Constructs the topological traffic network from the current factory layout. \end{DoxyCompactList}\item 
+bool \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager_abffc63fd42ab7653576fe7840c9432b6}{Try\+Reserve}} (int zone\+Id, int agv\+Id)
+\begin{DoxyCompactList}\small\item\em Attempts to secure a spot in a zone for an \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV}. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager_a62aeb44c8744fe7f3c11c763a14706c3}{Release}} (int zone\+Id, int agv\+Id)
+\begin{DoxyCompactList}\small\item\em Releases an \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV}\textquotesingle{}s reservation on a specific zone. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager_a6ea2cdbd2d41e9ac840c3cb92457bb3f}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager_a6ea2cdbd2d41e9ac840c3cb92457bb3f} 
+void {\bfseries Release\+All} (int agv\+Id)
+\begin{DoxyCompactList}\small\item\em Forcefully removes an \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} from all zones it may be occupying. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager_ada0163fcd269ae8bee47c87b0e86a50e}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager_ada0163fcd269ae8bee47c87b0e86a50e} 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone}{Traffic\+Zone}} {\bfseries Get\+Zone\+At\+Position} (Vector3 world\+Pos)
+\begin{DoxyCompactList}\small\item\em Finds the zone containing the specified world position. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager_a5d3d2fcfca5472e9474699ef95f3d53a}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager_a5d3d2fcfca5472e9474699ef95f3d53a} 
+bool {\bfseries Try\+Get\+Dock\+Point} (int zone\+Id, int machine\+Id, out \doxymbox{\hyperlink{struct_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_dock_point}{Dock\+Point}} dock)
+\begin{DoxyCompactList}\small\item\em Returns the dock configuration for a machine within a specific zone. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager_a082284ff32ff57ce06e00c7484495931}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager_a082284ff32ff57ce06e00c7484495931} 
+List$<$ int $>$ {\bfseries Get\+Zones\+For\+Machine} (int machine\+Id)
+\begin{DoxyCompactList}\small\item\em Returns all zones that have interaction points for a specific machine. \end{DoxyCompactList}\item 
+List$<$ int $>$ \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager_aaee1fbe0e7fd9be15b7b50765d6eabdb}{Get\+Route}} (int from\+Zone\+Id, int to\+Zone\+Id)
+\begin{DoxyCompactList}\small\item\em Calculates a zone-\/level path using BFS following restricted flow. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager_a24bac3a03d75e6a108742addfd15cda6}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager_a24bac3a03d75e6a108742addfd15cda6} 
+const int {\bfseries Incoming\+Belt\+Id} = -\/1
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager_a055f37c9dd09eab83615f1852063f425}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager_a055f37c9dd09eab83615f1852063f425} 
+const int {\bfseries Outgoing\+Belt\+Id} = -\/2
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager_a283c9bf8ccbf7b64cfae3665b319c8aa}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager_a283c9bf8ccbf7b64cfae3665b319c8aa} 
+const int {\bfseries Parking\+Area\+Id} = -\/3
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager_af93f286028186d373dfd1ef423b8a358}\label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager_af93f286028186d373dfd1ef423b8a358} 
+IRead\+Only\+List$<$ \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone}{Traffic\+Zone}} $>$ {\bfseries Zones}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Manages the zone-\/based traffic control network for the factory floor. 
+
+Divides the floor into reservable segments to manage one-\/way flow and prevent deadlocks. 
+
+\label{doc-func-members}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager_a4b10f00c3df0824a595fe33817e9898c}\index{Assets.Scripts.Simulation.FactoryLayout.TrafficZoneManager@{Assets.Scripts.Simulation.FactoryLayout.TrafficZoneManager}!BuildZoneGraph@{BuildZoneGraph}}
+\index{BuildZoneGraph@{BuildZoneGraph}!Assets.Scripts.Simulation.FactoryLayout.TrafficZoneManager@{Assets.Scripts.Simulation.FactoryLayout.TrafficZoneManager}}
+\doxysubsubsection{\texorpdfstring{BuildZoneGraph()}{BuildZoneGraph()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager_a4b10f00c3df0824a595fe33817e9898c} 
+void Assets.\+Scripts.\+Simulation.\+Factory\+Layout.\+Traffic\+Zone\+Manager.\+Build\+Zone\+Graph (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Constructs the topological traffic network from the current factory layout. 
+
+Orchestrates the creation of row, spine, and vertical zones, establishes directed links, and registers dock points for all machines and I/\+O belts. \begin{DoxyPrecond}{Precondition}
+\doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager}{Factory\+Layout\+Manager} must have already built the physical floor. 
+\end{DoxyPrecond}
+\begin{DoxyPostcond}{Postcondition}
+The zones list and lookup dictionaries are fully populated. 
+\end{DoxyPostcond}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager_aaee1fbe0e7fd9be15b7b50765d6eabdb}\index{Assets.Scripts.Simulation.FactoryLayout.TrafficZoneManager@{Assets.Scripts.Simulation.FactoryLayout.TrafficZoneManager}!GetRoute@{GetRoute}}
+\index{GetRoute@{GetRoute}!Assets.Scripts.Simulation.FactoryLayout.TrafficZoneManager@{Assets.Scripts.Simulation.FactoryLayout.TrafficZoneManager}}
+\doxysubsubsection{\texorpdfstring{GetRoute()}{GetRoute()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager_aaee1fbe0e7fd9be15b7b50765d6eabdb} 
+List$<$ int $>$ Assets.\+Scripts.\+Simulation.\+Factory\+Layout.\+Traffic\+Zone\+Manager.\+Get\+Route (\begin{DoxyParamCaption}\item[{int}]{from\+Zone\+Id}{, }\item[{int}]{to\+Zone\+Id}{}\end{DoxyParamCaption})}
+
+
+
+Calculates a zone-\/level path using BFS following restricted flow. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em from\+Zone\+Id} & Starting zone ID. \\
+\hline
+{\em to\+Zone\+Id} & Destination zone ID. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A list of zone IDs representing the route; empty if no valid path exists. 
+\end{DoxyReturn}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager_a62aeb44c8744fe7f3c11c763a14706c3}\index{Assets.Scripts.Simulation.FactoryLayout.TrafficZoneManager@{Assets.Scripts.Simulation.FactoryLayout.TrafficZoneManager}!Release@{Release}}
+\index{Release@{Release}!Assets.Scripts.Simulation.FactoryLayout.TrafficZoneManager@{Assets.Scripts.Simulation.FactoryLayout.TrafficZoneManager}}
+\doxysubsubsection{\texorpdfstring{Release()}{Release()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager_a62aeb44c8744fe7f3c11c763a14706c3} 
+void Assets.\+Scripts.\+Simulation.\+Factory\+Layout.\+Traffic\+Zone\+Manager.\+Release (\begin{DoxyParamCaption}\item[{int}]{zone\+Id}{, }\item[{int}]{agv\+Id}{}\end{DoxyParamCaption})}
+
+
+
+Releases an \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV}\textquotesingle{}s reservation on a specific zone. 
+
+\begin{DoxyPostcond}{Postcondition}
+The occupant count for the zone is decremented. 
+\end{DoxyPostcond}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager_abffc63fd42ab7653576fe7840c9432b6}\index{Assets.Scripts.Simulation.FactoryLayout.TrafficZoneManager@{Assets.Scripts.Simulation.FactoryLayout.TrafficZoneManager}!TryReserve@{TryReserve}}
+\index{TryReserve@{TryReserve}!Assets.Scripts.Simulation.FactoryLayout.TrafficZoneManager@{Assets.Scripts.Simulation.FactoryLayout.TrafficZoneManager}}
+\doxysubsubsection{\texorpdfstring{TryReserve()}{TryReserve()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager_abffc63fd42ab7653576fe7840c9432b6} 
+bool Assets.\+Scripts.\+Simulation.\+Factory\+Layout.\+Traffic\+Zone\+Manager.\+Try\+Reserve (\begin{DoxyParamCaption}\item[{int}]{zone\+Id}{, }\item[{int}]{agv\+Id}{}\end{DoxyParamCaption})}
+
+
+
+Attempts to secure a spot in a zone for an \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em zone\+Id} & The ID of the zone to enter. \\
+\hline
+{\em agv\+Id} & The ID of the \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} requesting entry. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if capacity is available or \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} is already registered; false if full. 
+\end{DoxyReturn}
+\begin{DoxyPostcond}{Postcondition}
+If true, the \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} ID is added to the zone\textquotesingle{}s occupant set. 
+\end{DoxyPostcond}
+
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Simulation/\+\+Factory\+Layout/\+Traffic\+Zone\+Manager.\+cs\end{DoxyCompactItemize}

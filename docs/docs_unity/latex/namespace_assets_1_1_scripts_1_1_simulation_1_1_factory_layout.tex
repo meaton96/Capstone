@@ -1,0 +1,29 @@
+\doxysection{Assets.\+Scripts.\+Simulation.\+Factory\+Layout Namespace Reference}
+\hypertarget{namespace_assets_1_1_scripts_1_1_simulation_1_1_factory_layout}{}\label{namespace_assets_1_1_scripts_1_1_simulation_1_1_factory_layout}\index{Assets.Scripts.Simulation.FactoryLayout@{Assets.Scripts.Simulation.FactoryLayout}}
+\doxysubsubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager}{Factory\+Layout\+Manager}}
+\begin{DoxyCompactList}\small\item\em Builds an aisle-\/based factory floor with one-\/way traffic lanes, physical wall colliders, and zone markers. \end{DoxyCompactList}\item 
+class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone}{Traffic\+Zone}}
+\begin{DoxyCompactList}\small\item\em A single reservable zone within the traffic network. \end{DoxyCompactList}\item 
+struct \doxymbox{\hyperlink{struct_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_dock_point}{Dock\+Point}}
+\begin{DoxyCompactList}\small\item\em Describes positioning for AGV-\/conveyor interaction. \end{DoxyCompactList}\item 
+class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager}{Traffic\+Zone\+Manager}}
+\begin{DoxyCompactList}\small\item\em Manages the zone-\/based traffic control network for the factory floor. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{namespace_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_ad04533065738779ae625468710eedc82}\label{namespace_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_ad04533065738779ae625468710eedc82} 
+enum \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_ad04533065738779ae625468710eedc82}{Aisle\+Type}} \{ {\bfseries Row\+Aisle}
+, {\bfseries Spine\+Aisle}
+, {\bfseries Vertical\+Aisle}
+ \}
+\begin{DoxyCompactList}\small\item\em Categorises the aisle type a zone belongs to. \end{DoxyCompactList}\item 
+\Hypertarget{namespace_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_a2dc71cc63bc0bf75437c3288e80a0389}\label{namespace_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_a2dc71cc63bc0bf75437c3288e80a0389} 
+enum \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_a2dc71cc63bc0bf75437c3288e80a0389}{Flow\+Direction}} \{ {\bfseries East}
+, {\bfseries West}
+, {\bfseries North}
+, {\bfseries South}
+ \}
+\begin{DoxyCompactList}\small\item\em One-\/way flow direction of a zone\textquotesingle{}s parent aisle. \end{DoxyCompactList}\end{DoxyCompactItemize}

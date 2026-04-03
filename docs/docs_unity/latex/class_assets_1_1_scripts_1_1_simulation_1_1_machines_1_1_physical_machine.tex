@@ -1,0 +1,184 @@
+\doxysection{Assets.\+Scripts.\+Simulation.\+Machines.\+Physical\+Machine Class Reference}
+\hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine}{}\label{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine}\index{Assets.Scripts.Simulation.Machines.PhysicalMachine@{Assets.Scripts.Simulation.Machines.PhysicalMachine}}
+
+
+Physical anchor for a machine in the Unity scene.  
+
+
+Inheritance diagram for Assets.\+Scripts.\+Simulation.\+Machines.\+Physical\+Machine:\+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_a3f99564f264f9d0918a53676a7dcc33a}{Initialize}} (int id, \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine}{Machine}} core\+Machine\+Data)
+\begin{DoxyCompactList}\small\item\em Initializes the physical machine state and links visual components. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_af96dee367b938e03a6aaf83508031782}\label{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_af96dee367b938e03a6aaf83508031782} 
+void {\bfseries Reset\+Queues} ()
+\begin{DoxyCompactList}\small\item\em Clears all jobs from primary and secondary conveyors. \end{DoxyCompactList}\item 
+Vector3 \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_ab4ee422abdbd81ea44d395053555fbeb}{Reserve\+Incoming\+Slot}} (int job\+Id)
+\begin{DoxyCompactList}\small\item\em Determines the world position where an \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} should deliver a job. \end{DoxyCompactList}\item 
+Vector3 \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_ad4d630789dcab2e4e5e954abd1c52e08}{Get\+Pickup\+Position\+For\+Job}} (int job\+Id)
+\begin{DoxyCompactList}\small\item\em Locates the specific world position where an \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} should pick up a job. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_a92e518f2dd3aa90ddd9dde10b113edd8}{Receive\+Job}} (int job\+Id, \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_job_visual}{Job\+Visual}} visual)
+\begin{DoxyCompactList}\small\item\em Handshakes with an \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} to receive a job onto an incoming conveyor. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_a23a2d5cb2ac280b371459fdab8f37ac8}{Start\+Processing}} (int job\+Id, float real\+Time\+Duration)
+\begin{DoxyCompactList}\small\item\em Transitions a job from the queue into active processing. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_a22ac04709a1eea201ad014f4886a53ca}{Release\+From\+Outgoing}} (int job\+Id)
+\begin{DoxyCompactList}\small\item\em Finalizes the removal of a job from the machine\textquotesingle{}s outgoing system. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_ab9d8f4a1c74cda559b8101b89b6e998f}\label{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_ab9d8f4a1c74cda559b8101b89b6e998f} 
+int {\bfseries Machine\+Id}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_a552f2cb44b9047989b28af5cde664eb2}\label{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_a552f2cb44b9047989b28af5cde664eb2} 
+bool {\bfseries Is\+Idle} = true\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_a9db19127dd141433bbd1e2199bc9ceaa}\label{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_a9db19127dd141433bbd1e2199bc9ceaa} 
+bool {\bfseries Is\+Blocked} = false\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em True when processing is done but all outgoing belts are full. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_a46adc640a09c92b3679dd3d3a94865eb}\label{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_a46adc640a09c92b3679dd3d3a94865eb} 
+List$<$ int $>$ {\bfseries Incoming\+Queue}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_a331efd0b54d0a3159195fdd6442016c3}\label{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_a331efd0b54d0a3159195fdd6442016c3} 
+List$<$ int $>$ {\bfseries Outgoing\+Queue}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_ae338bacdda3f78f6a10fc66201d07f25}\label{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_ae338bacdda3f78f6a10fc66201d07f25} 
+List$<$ int $>$ {\bfseries Physical\+Queue}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Physical anchor for a machine in the Unity scene. 
+
+Manages real-\/time processing via coroutines and delegates visual updates to \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_machine_visual}{Machine\+Visual}. Supports multi-\/conveyor setups for double-\/sided machines, handling load balancing between belts and proximity-\/based job reception. 
+
+\label{doc-func-members}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_ad4d630789dcab2e4e5e954abd1c52e08}\index{Assets.Scripts.Simulation.Machines.PhysicalMachine@{Assets.Scripts.Simulation.Machines.PhysicalMachine}!GetPickupPositionForJob@{GetPickupPositionForJob}}
+\index{GetPickupPositionForJob@{GetPickupPositionForJob}!Assets.Scripts.Simulation.Machines.PhysicalMachine@{Assets.Scripts.Simulation.Machines.PhysicalMachine}}
+\doxysubsubsection{\texorpdfstring{GetPickupPositionForJob()}{GetPickupPositionForJob()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_ad4d630789dcab2e4e5e954abd1c52e08} 
+Vector3 Assets.\+Scripts.\+Simulation.\+Machines.\+Physical\+Machine.\+Get\+Pickup\+Position\+For\+Job (\begin{DoxyParamCaption}\item[{int}]{job\+Id}{}\end{DoxyParamCaption})}
+
+
+
+Locates the specific world position where an \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} should pick up a job. 
+
+Searches both outgoing conveyors to find which one currently holds the job. 
+\begin{DoxyParams}{Parameters}
+{\em job\+Id} & The job requested for pickup. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Vector3 world position of the conveyor\textquotesingle{}s output end. 
+\end{DoxyReturn}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_a3f99564f264f9d0918a53676a7dcc33a}\index{Assets.Scripts.Simulation.Machines.PhysicalMachine@{Assets.Scripts.Simulation.Machines.PhysicalMachine}!Initialize@{Initialize}}
+\index{Initialize@{Initialize}!Assets.Scripts.Simulation.Machines.PhysicalMachine@{Assets.Scripts.Simulation.Machines.PhysicalMachine}}
+\doxysubsubsection{\texorpdfstring{Initialize()}{Initialize()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_a3f99564f264f9d0918a53676a7dcc33a} 
+void Assets.\+Scripts.\+Simulation.\+Machines.\+Physical\+Machine.\+Initialize (\begin{DoxyParamCaption}\item[{int}]{id}{, }\item[{\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine}{Machine}}}]{core\+Machine\+Data}{}\end{DoxyParamCaption})}
+
+
+
+Initializes the physical machine state and links visual components. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em id} & The unique machine index. \\
+\hline
+{\em core\+Machine\+Data} & The logical machine data from the simulation core. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyPostcond}{Postcondition}
+\doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine}{Machine} is set to Idle, and all attached conveyors are cleared. 
+\end{DoxyPostcond}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_a92e518f2dd3aa90ddd9dde10b113edd8}\index{Assets.Scripts.Simulation.Machines.PhysicalMachine@{Assets.Scripts.Simulation.Machines.PhysicalMachine}!ReceiveJob@{ReceiveJob}}
+\index{ReceiveJob@{ReceiveJob}!Assets.Scripts.Simulation.Machines.PhysicalMachine@{Assets.Scripts.Simulation.Machines.PhysicalMachine}}
+\doxysubsubsection{\texorpdfstring{ReceiveJob()}{ReceiveJob()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_a92e518f2dd3aa90ddd9dde10b113edd8} 
+void Assets.\+Scripts.\+Simulation.\+Machines.\+Physical\+Machine.\+Receive\+Job (\begin{DoxyParamCaption}\item[{int}]{job\+Id}{, }\item[{\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_job_visual}{Job\+Visual}}}]{visual}{}\end{DoxyParamCaption})}
+
+
+
+Handshakes with an \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} to receive a job onto an incoming conveyor. 
+
+Selects the belt physically closest to the job visual\textquotesingle{}s position (the side where the \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} is docking). Falls back to the opposite belt if the preferred one is full. 
+\begin{DoxyParams}{Parameters}
+{\em job\+Id} & The job being delivered. \\
+\hline
+{\em visual} & The visual representation of the job. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyPostcond}{Postcondition}
+\doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job}{Job} is enqueued on a belt and the visual state is updated to Queued. 
+\end{DoxyPostcond}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_a22ac04709a1eea201ad014f4886a53ca}\index{Assets.Scripts.Simulation.Machines.PhysicalMachine@{Assets.Scripts.Simulation.Machines.PhysicalMachine}!ReleaseFromOutgoing@{ReleaseFromOutgoing}}
+\index{ReleaseFromOutgoing@{ReleaseFromOutgoing}!Assets.Scripts.Simulation.Machines.PhysicalMachine@{Assets.Scripts.Simulation.Machines.PhysicalMachine}}
+\doxysubsubsection{\texorpdfstring{ReleaseFromOutgoing()}{ReleaseFromOutgoing()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_a22ac04709a1eea201ad014f4886a53ca} 
+void Assets.\+Scripts.\+Simulation.\+Machines.\+Physical\+Machine.\+Release\+From\+Outgoing (\begin{DoxyParamCaption}\item[{int}]{job\+Id}{}\end{DoxyParamCaption})}
+
+
+
+Finalizes the removal of a job from the machine\textquotesingle{}s outgoing system. 
+
+Triggered by an \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} collection event. Clears the job from the physical belt. 
+\begin{DoxyParams}{Parameters}
+{\em job\+Id} & The job being removed. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyPostcond}{Postcondition}
+Outgoing queue count is updated in the visual layer. 
+\end{DoxyPostcond}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_ab4ee422abdbd81ea44d395053555fbeb}\index{Assets.Scripts.Simulation.Machines.PhysicalMachine@{Assets.Scripts.Simulation.Machines.PhysicalMachine}!ReserveIncomingSlot@{ReserveIncomingSlot}}
+\index{ReserveIncomingSlot@{ReserveIncomingSlot}!Assets.Scripts.Simulation.Machines.PhysicalMachine@{Assets.Scripts.Simulation.Machines.PhysicalMachine}}
+\doxysubsubsection{\texorpdfstring{ReserveIncomingSlot()}{ReserveIncomingSlot()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_ab4ee422abdbd81ea44d395053555fbeb} 
+Vector3 Assets.\+Scripts.\+Simulation.\+Machines.\+Physical\+Machine.\+Reserve\+Incoming\+Slot (\begin{DoxyParamCaption}\item[{int}]{job\+Id}{}\end{DoxyParamCaption})}
+
+
+
+Determines the world position where an \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} should deliver a job. 
+
+Alternates between available incoming belts to balance the load across both sides of double-\/sided machines. 
+\begin{DoxyParams}{Parameters}
+{\em job\+Id} & The ID of the job to be delivered. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Vector3 world position of the chosen conveyor\textquotesingle{}s input end. 
+\end{DoxyReturn}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_a23a2d5cb2ac280b371459fdab8f37ac8}\index{Assets.Scripts.Simulation.Machines.PhysicalMachine@{Assets.Scripts.Simulation.Machines.PhysicalMachine}!StartProcessing@{StartProcessing}}
+\index{StartProcessing@{StartProcessing}!Assets.Scripts.Simulation.Machines.PhysicalMachine@{Assets.Scripts.Simulation.Machines.PhysicalMachine}}
+\doxysubsubsection{\texorpdfstring{StartProcessing()}{StartProcessing()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine_a23a2d5cb2ac280b371459fdab8f37ac8} 
+void Assets.\+Scripts.\+Simulation.\+Machines.\+Physical\+Machine.\+Start\+Processing (\begin{DoxyParamCaption}\item[{int}]{job\+Id}{, }\item[{float}]{real\+Time\+Duration}{}\end{DoxyParamCaption})}
+
+
+
+Transitions a job from the queue into active processing. 
+
+Removes the job from its conveyor, moves the visual into the machine body, and initiates the timed process coroutine. 
+\begin{DoxyParams}{Parameters}
+{\em job\+Id} & The job selected for processing. \\
+\hline
+{\em real\+Time\+Duration} & Time in seconds the process will take. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyPrecond}{Precondition}
+\doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine}{Machine} must be Idle. 
+\end{DoxyPrecond}
+\begin{DoxyPostcond}{Postcondition}
+\doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine}{Machine} state becomes Busy; Is\+Idle set to false. 
+\end{DoxyPostcond}
+
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Simulation/\+\+Machines/\+Physical\+Machine.\+cs\end{DoxyCompactItemize}

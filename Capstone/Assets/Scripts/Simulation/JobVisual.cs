@@ -3,28 +3,11 @@ using UnityEngine;
 namespace Assets.Scripts.Simulation
 {
     /// @brief Visual token representing a single job on the factory floor.
-    ///
-    /// @details Attach this to a small prefab (e.g., a colored cube or sphere).
-    /// The @c JobManager sets its target position and state each time a physics
-    /// event fires. The token smoothly interpolates toward its destination using
-    /// a parabolic arc so it visually hops between machines.
-    ///
-    /// @par Prefab Setup
-    /// Create a small GameObject (0.3–0.5 scale) with a @c MeshRenderer.
-    /// Add this component. @c JobManager.Initialize() will call @c Initialize()
-    /// at episode start. Colors are set automatically from lifecycle state.
+    /// @details Smoothly interpolates toward targets set by the JobManager. Movement ownership
+    /// switches between self-driven (lerp), carried (parented to AGV), or conveyor-driven.
     public class JobVisual : MonoBehaviour
     {
-        // ─────────────────────────────────────────────────────────
-        //  Inspector
-        // ─────────────────────────────────────────────────────────
-
-        [Header("Movement")]
-        [Tooltip("How quickly the token moves toward its target position.")]
         [SerializeField] private float moveSpeed = 2f;
-
-        [Tooltip("How high the job hops when moving between machines.")]
-        [SerializeField] private float hopHeight = 3.0f;
 
         [Header("State Colors")]
         [SerializeField] private Color notStartedColor = new Color(0.5f, 0.5f, 0.5f, 0.6f);
@@ -33,10 +16,6 @@ namespace Assets.Scripts.Simulation
         [SerializeField] private Color waitingColor = new Color(1.0f, 0.5f, 0.1f, 1f);
         [SerializeField] private Color inTransitColor = new Color(0.3f, 0.6f, 1.0f, 1f);
         [SerializeField] private Color completeColor = new Color(0.3f, 0.3f, 0.3f, 0.4f);
-
-        // ─────────────────────────────────────────────────────────
-        //  Runtime State
-        // ─────────────────────────────────────────────────────────
 
         private int jobId;
         private int totalOperations;
@@ -47,23 +26,16 @@ namespace Assets.Scripts.Simulation
         private MaterialPropertyBlock propBlock;
         private JobLifecycleState currentState;
 
-        // ─────────────────────────────────────────────────────────
-        //  Public Accessors
-        // ─────────────────────────────────────────────────────────
+        private bool isCarried = false;
+        private bool isOnConveyor = false;
 
-        /// @brief The job ID this token represents.
         public int JobId => jobId;
-
-        /// @brief The token's current lifecycle state.
         public JobLifecycleState CurrentState => currentState;
 
-        // ─────────────────────────────────────────────────────────
-        //  Lifecycle
-        // ─────────────────────────────────────────────────────────
-
-        /// @brief Called by @c JobManager when the tracker is created.
-        /// @param id       Zero-based job index.
-        /// @param opCount  Total number of operations this job must complete.
+        /// @brief Initializes the visual token and caches rendering components.
+        /// @param id Zero-based job index.
+        /// @param opCount Total number of operations this job must complete.
+        /// @post State is set to NotStarted and targetPosition matches current transform.
         public void Initialize(int id, int opCount)
         {
             jobId = id;
@@ -76,68 +48,99 @@ namespace Assets.Scripts.Simulation
             SetState(JobLifecycleState.NotStarted);
         }
 
-        /// @brief Advances the token along the arc toward its target position each frame.
-        private void Update()
-        {
-            if (travelProgress < 1f)
-            {
-                travelProgress += Time.deltaTime * moveSpeed;
-                if (travelProgress > 1f) travelProgress = 1f;
-
-                Vector3 currentPos = Vector3.Lerp(startPosition, targetPosition, travelProgress);
-                float currentHeight = Mathf.Sin(travelProgress * Mathf.PI) * hopHeight;
-                currentPos.y += currentHeight;
-
-                transform.position = currentPos;
-            }
-        }
-
-        // ─────────────────────────────────────────────────────────
-        //  Public API
-        // ─────────────────────────────────────────────────────────
-
         /// @brief Updates the token's tint to reflect its current lifecycle state.
-        /// @param state  The new @c JobLifecycleState to display.
+        /// @details Uses a MaterialPropertyBlock to update the "_Color" property without creating material instances.
+        /// @param state The target @ref JobLifecycleState.
         public void SetState(JobLifecycleState state)
         {
             currentState = state;
-
             if (meshRenderer == null) return;
 
-            Color c;
-            switch (state)
+            Color c = state switch
             {
-                case JobLifecycleState.NotStarted: c = notStartedColor; break;
-                case JobLifecycleState.Queued: c = queuedColor; break;
-                case JobLifecycleState.Processing: c = processingColor; break;
-                case JobLifecycleState.WaitingForTransport: c = waitingColor; break;
-                case JobLifecycleState.InTransit: c = inTransitColor; break;
-                case JobLifecycleState.Complete: c = completeColor; break;
-                default: c = notStartedColor; break;
-            }
+                JobLifecycleState.NotStarted => notStartedColor,
+                JobLifecycleState.Queued => queuedColor,
+                JobLifecycleState.Processing => processingColor,
+                JobLifecycleState.WaitingForTransport => waitingColor,
+                JobLifecycleState.InTransit => inTransitColor,
+                JobLifecycleState.Complete => completeColor,
+                _ => notStartedColor,
+            };
 
             meshRenderer.GetPropertyBlock(propBlock);
             propBlock.SetColor("_Color", c);
             meshRenderer.SetPropertyBlock(propBlock);
         }
 
-        /// @brief Begins animating the token toward a new world position.
-        /// @param pos  The destination position in world space.
-        public void SetTargetPosition(Vector3 pos)
+        /// @brief Defines a destination for the smooth interpolation logic.
+        /// @details If the job is carried or on a conveyor, this request is ignored.
+        /// @param worldPos The target global coordinates.
+        /// @pre @ref isCarried and @ref isOnConveyor must be false.
+        /// @post @ref travelProgress is reset to 0 to initiate movement.
+        public void SetTargetPosition(Vector3 worldPos)
         {
+            if (isCarried || isOnConveyor) return;
             startPosition = transform.position;
-            targetPosition = pos;
+            targetPosition = worldPos;
             travelProgress = 0f;
         }
 
-        /// @brief Scales the token vertically to reflect progress through the current operation.
-        /// @details Y scale grows from 1.0 to 1.3 as @p progress advances from 0 to 1,
-        ///          providing a subtle visual cue of how far along an operation is.
-        /// @param progress  Normalised operation progress in [0, 1].
-        public void SetProgress(float progress)
+        /// @brief Instantly teleports the token to a position with no interpolation.
+        /// @param worldPos The destination global coordinates.
+        /// @post @ref travelProgress is set to 1 and interpolation is finalized.
+        public void SnapToPosition(Vector3 worldPos)
         {
-            float scaleY = 1f + progress * 0.3f;
-            transform.localScale = new Vector3(1f, scaleY, 1f) * 0.4f;
+            transform.position = worldPos;
+            startPosition = worldPos;
+            targetPosition = worldPos;
+            travelProgress = 1f;
         }
+
+        /// @brief Toggles external movement control by a conveyor belt.
+        /// @details While enabled, the token's internal Update loop will not process movement.
+        /// @param on True if a ConveyorBelt is now driving the transform.
+        public void SetOnConveyor(bool on)
+        {
+            isOnConveyor = on;
+        }
+
+        /// @brief Parents the token to an AGV carrier for physical transport.
+        /// @details Disables conveyor control and resets interpolation progress.
+        /// @param carrier The transform component of the AGV.
+        /// @post Visual is parented with a fixed local offset (0, 0.5, 0).
+        public void AttachToCarrier(Transform carrier)
+        {
+            isCarried = true;
+            isOnConveyor = false;
+            travelProgress = 1f;
+            transform.SetParent(carrier);
+            transform.localPosition = new Vector3(0f, 0.5f, 0f);
+            transform.localRotation = Quaternion.identity;
+        }
+
+        /// @brief Detaches the token from an AGV and returns it to world space.
+        /// @param worldSnapPos The world position to snap to upon release.
+        /// @post @ref isCarried is false and the visual has no parent transform.
+        public void DetachFromCarrier(Vector3 worldSnapPos)
+        {
+            transform.SetParent(null);
+            isCarried = false;
+            SnapToPosition(worldSnapPos);
+        }
+
+        /// @brief Internal Unity update loop driving self-driven lerps.
+        /// @details Interpolates position between startPosition and targetPosition using moveSpeed.
+        private void Update()
+        {
+            if (isCarried || isOnConveyor) return;
+            if (travelProgress >= 1f) return;
+
+            travelProgress += Time.deltaTime * moveSpeed;
+            if (travelProgress > 1f) travelProgress = 1f;
+
+            transform.position = Vector3.Lerp(startPosition, targetPosition, travelProgress);
+        }
+
+
     }
 }

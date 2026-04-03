@@ -9,6 +9,7 @@ namespace Assets.Scripts.Scheduling.Core
     {
         Idle,   ///< Machine is free and ready to accept a new operation.
         Busy,   ///< Machine is currently processing an operation.
+        Blocked,
         Failed, ///< Machine has experienced a fault and cannot accept work. Reserved for future use.
         Repair, ///< Machine is undergoing repair after a fault. Reserved for future use.
     }

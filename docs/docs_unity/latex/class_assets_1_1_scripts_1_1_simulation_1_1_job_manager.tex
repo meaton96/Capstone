@@ -1,0 +1,278 @@
+\doxysection{Assets.\+Scripts.\+Simulation.\+Job\+Manager Class Reference}
+\hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager}{}\label{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager}\index{Assets.Scripts.Simulation.JobManager@{Assets.Scripts.Simulation.JobManager}}
+
+
+Creates, tracks, and updates all jobs in a simulation episode.  
+
+
+Inheritance diagram for Assets.\+Scripts.\+Simulation.\+Job\+Manager:\+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_abe29496d8146d3f4fcc4bd289d6dfb22}{Initialize}} (\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance}{Taillard\+Instance}} instance, bool spawn\+Visuals=true)
+\begin{DoxyCompactList}\small\item\em Allocates trackers and optionally spawns visual tokens for every job. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_aebe6ad2121ca09ead96133d69d6fcb83}{Cleanup}} ()
+\begin{DoxyCompactList}\small\item\em Wipes tracking data and destroys physical job tokens. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_a93c4def1f16b12b56659c454aa398506}{Mark\+Job\+Arrived\+At\+Machine}} (int job\+Id, int machine\+Id)
+\begin{DoxyCompactList}\small\item\em Updates state to {\ttfamily Queued} when a job arrives at its destination machine. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_a375fd59b44da77a3ada753aad7e38b22}{Mark\+Operation\+Started}} (int job\+Id, double sim\+Time)
+\begin{DoxyCompactList}\small\item\em Sets job to {\ttfamily Processing} and calculates the preceding wait duration. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_a938f1ac0b8ff55b6bf21e5b58a52bac1}{Begin\+Transit}} (int job\+Id, int destination\+Machine\+Id, double sim\+Time)
+\begin{DoxyCompactList}\small\item\em Assigns a job to an \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} and transitions state to {\ttfamily In\+Transit}. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_af8e66d1afd34fe17fe7f8035def97126}{Complete\+Transit}} (int job\+Id, int machine\+Id, double sim\+Time)
+\begin{DoxyCompactList}\small\item\em Records the end of a transport leg and updates travel statistics. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_a114b958795f0c2b61f40b4eaa7d1c5b7}{Mark\+Operation\+Complete}} (int job\+Id, double sim\+Time)
+\begin{DoxyCompactList}\small\item\em Finalizes an operation and determines if the job is finished or needs more routing. \end{DoxyCompactList}\item 
+bool \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_ae7c9a7e5a6ab7cd945a4a3b283081f88}{Are\+All\+Jobs\+Complete}} ()
+\begin{DoxyCompactList}\small\item\em Checks if the entire job set for the episode has reached completion. \end{DoxyCompactList}\item 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker}{Job\+Tracker}} \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_a379f06b88a4af0e06f5285203d6eecd6}{Get\+Job\+Tracker}} (int job\+Id)
+\begin{DoxyCompactList}\small\item\em Safe accessor for individual job tracking data. \end{DoxyCompactList}\item 
+float\+[$\,$]\+ \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_a71d44307903ba2a5694668ce54d29566}{Get\+Job\+Positions\+Flat}} ()
+\begin{DoxyCompactList}\small\item\em Exports the world-\/space (X, Z) coordinates of all jobs for logging or AI observations. \end{DoxyCompactList}\item 
+float\+[$\,$]\+ \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_ad0866d59050bf6a244640da512ca0a6e}{Get\+Scheduling\+Matrix\+Flat}} (int num\+Machines)
+\begin{DoxyCompactList}\small\item\em Flattens job operation data into a normalized matrix for agent input. \end{DoxyCompactList}\item 
+float\+[$\,$]\+ \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_af0a3fadd4b0150ea3e7aa855dfec3ba1}{Get\+Job\+Scalars\+Flat}} (double current\+Sim\+Time)
+\begin{DoxyCompactList}\small\item\em Exports job-\/level scalar features normalized by current simulation time. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_a013566f3df30df4a3472e858a4a75227}\label{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_a013566f3df30df4a3472e858a4a75227} 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker}{Job\+Tracker}}\+[$\,$]\+ {\bfseries Job\+Trackers}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_a2c7e7f0186c0e71952090960a8b3b2f7}\label{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_a2c7e7f0186c0e71952090960a8b3b2f7} 
+int {\bfseries Job\+Count}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_ab812fc2d2baba42c2a7be6a89279b54e}\label{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_ab812fc2d2baba42c2a7be6a89279b54e} 
+bool {\bfseries Is\+Initialized}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Creates, tracks, and updates all jobs in a simulation episode. 
+
+Authoritative record of job states. Transitions are driven by \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge}{Simulation\+Bridge} events to maintain synchronization with the scheduler. 
+
+\label{doc-func-members}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_ae7c9a7e5a6ab7cd945a4a3b283081f88}\index{Assets.Scripts.Simulation.JobManager@{Assets.Scripts.Simulation.JobManager}!AreAllJobsComplete@{AreAllJobsComplete}}
+\index{AreAllJobsComplete@{AreAllJobsComplete}!Assets.Scripts.Simulation.JobManager@{Assets.Scripts.Simulation.JobManager}}
+\doxysubsubsection{\texorpdfstring{AreAllJobsComplete()}{AreAllJobsComplete()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_ae7c9a7e5a6ab7cd945a4a3b283081f88} 
+bool Assets.\+Scripts.\+Simulation.\+Job\+Manager.\+Are\+All\+Jobs\+Complete (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Checks if the entire job set for the episode has reached completion. 
+
+\begin{DoxyReturn}{Returns}
+True if every job is in the Complete state. 
+\end{DoxyReturn}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_a938f1ac0b8ff55b6bf21e5b58a52bac1}\index{Assets.Scripts.Simulation.JobManager@{Assets.Scripts.Simulation.JobManager}!BeginTransit@{BeginTransit}}
+\index{BeginTransit@{BeginTransit}!Assets.Scripts.Simulation.JobManager@{Assets.Scripts.Simulation.JobManager}}
+\doxysubsubsection{\texorpdfstring{BeginTransit()}{BeginTransit()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_a938f1ac0b8ff55b6bf21e5b58a52bac1} 
+void Assets.\+Scripts.\+Simulation.\+Job\+Manager.\+Begin\+Transit (\begin{DoxyParamCaption}\item[{int}]{job\+Id}{, }\item[{int}]{destination\+Machine\+Id}{, }\item[{double}]{sim\+Time}{}\end{DoxyParamCaption})}
+
+
+
+Assigns a job to an \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} and transitions state to {\ttfamily In\+Transit}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em job\+Id} & The job being moved. \\
+\hline
+{\em destination\+Machine\+Id} & Target machine for the transfer. \\
+\hline
+{\em sim\+Time} & Current simulation time. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_aebe6ad2121ca09ead96133d69d6fcb83}\index{Assets.Scripts.Simulation.JobManager@{Assets.Scripts.Simulation.JobManager}!Cleanup@{Cleanup}}
+\index{Cleanup@{Cleanup}!Assets.Scripts.Simulation.JobManager@{Assets.Scripts.Simulation.JobManager}}
+\doxysubsubsection{\texorpdfstring{Cleanup()}{Cleanup()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_aebe6ad2121ca09ead96133d69d6fcb83} 
+void Assets.\+Scripts.\+Simulation.\+Job\+Manager.\+Cleanup (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Wipes tracking data and destroys physical job tokens. 
+
+\begin{DoxyPostcond}{Postcondition}
+initialized is false and trackers is null. 
+\end{DoxyPostcond}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_af8e66d1afd34fe17fe7f8035def97126}\index{Assets.Scripts.Simulation.JobManager@{Assets.Scripts.Simulation.JobManager}!CompleteTransit@{CompleteTransit}}
+\index{CompleteTransit@{CompleteTransit}!Assets.Scripts.Simulation.JobManager@{Assets.Scripts.Simulation.JobManager}}
+\doxysubsubsection{\texorpdfstring{CompleteTransit()}{CompleteTransit()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_af8e66d1afd34fe17fe7f8035def97126} 
+void Assets.\+Scripts.\+Simulation.\+Job\+Manager.\+Complete\+Transit (\begin{DoxyParamCaption}\item[{int}]{job\+Id}{, }\item[{int}]{machine\+Id}{, }\item[{double}]{sim\+Time}{}\end{DoxyParamCaption})}
+
+
+
+Records the end of a transport leg and updates travel statistics. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em job\+Id} & The delivered job. \\
+\hline
+{\em machine\+Id} & Target destination. \\
+\hline
+{\em sim\+Time} & Current simulation time. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_a71d44307903ba2a5694668ce54d29566}\index{Assets.Scripts.Simulation.JobManager@{Assets.Scripts.Simulation.JobManager}!GetJobPositionsFlat@{GetJobPositionsFlat}}
+\index{GetJobPositionsFlat@{GetJobPositionsFlat}!Assets.Scripts.Simulation.JobManager@{Assets.Scripts.Simulation.JobManager}}
+\doxysubsubsection{\texorpdfstring{GetJobPositionsFlat()}{GetJobPositionsFlat()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_a71d44307903ba2a5694668ce54d29566} 
+float\+[$\,$]\+ Assets.\+Scripts.\+Simulation.\+Job\+Manager.\+Get\+Job\+Positions\+Flat (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Exports the world-\/space (X, Z) coordinates of all jobs for logging or AI observations. 
+
+\begin{DoxyReturn}{Returns}
+Flat float array:\+ \+[j0\+\_\+x, j0\+\_\+z, j1\+\_\+x, j1\+\_\+z, ...]\+. 
+\end{DoxyReturn}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_af0a3fadd4b0150ea3e7aa855dfec3ba1}\index{Assets.Scripts.Simulation.JobManager@{Assets.Scripts.Simulation.JobManager}!GetJobScalarsFlat@{GetJobScalarsFlat}}
+\index{GetJobScalarsFlat@{GetJobScalarsFlat}!Assets.Scripts.Simulation.JobManager@{Assets.Scripts.Simulation.JobManager}}
+\doxysubsubsection{\texorpdfstring{GetJobScalarsFlat()}{GetJobScalarsFlat()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_af0a3fadd4b0150ea3e7aa855dfec3ba1} 
+float\+[$\,$]\+ Assets.\+Scripts.\+Simulation.\+Job\+Manager.\+Get\+Job\+Scalars\+Flat (\begin{DoxyParamCaption}\item[{double}]{current\+Sim\+Time}{}\end{DoxyParamCaption})}
+
+
+
+Exports job-\/level scalar features normalized by current simulation time. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em current\+Sim\+Time} & Used as a denominator for wait-\/time normalization. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Flat float array:\+ \+[comp\+Ratio, op\+Progress, wait\+Norm, state\+Encoding, ...]\+. 
+\end{DoxyReturn}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_a379f06b88a4af0e06f5285203d6eecd6}\index{Assets.Scripts.Simulation.JobManager@{Assets.Scripts.Simulation.JobManager}!GetJobTracker@{GetJobTracker}}
+\index{GetJobTracker@{GetJobTracker}!Assets.Scripts.Simulation.JobManager@{Assets.Scripts.Simulation.JobManager}}
+\doxysubsubsection{\texorpdfstring{GetJobTracker()}{GetJobTracker()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_a379f06b88a4af0e06f5285203d6eecd6} 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker}{Job\+Tracker}} Assets.\+Scripts.\+Simulation.\+Job\+Manager.\+Get\+Job\+Tracker (\begin{DoxyParamCaption}\item[{int}]{job\+Id}{}\end{DoxyParamCaption})}
+
+
+
+Safe accessor for individual job tracking data. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em job\+Id} & Zero-\/based job index. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker}{Job\+Tracker} or null if out of range. 
+\end{DoxyReturn}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_ad0866d59050bf6a244640da512ca0a6e}\index{Assets.Scripts.Simulation.JobManager@{Assets.Scripts.Simulation.JobManager}!GetSchedulingMatrixFlat@{GetSchedulingMatrixFlat}}
+\index{GetSchedulingMatrixFlat@{GetSchedulingMatrixFlat}!Assets.Scripts.Simulation.JobManager@{Assets.Scripts.Simulation.JobManager}}
+\doxysubsubsection{\texorpdfstring{GetSchedulingMatrixFlat()}{GetSchedulingMatrixFlat()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_ad0866d59050bf6a244640da512ca0a6e} 
+float\+[$\,$]\+ Assets.\+Scripts.\+Simulation.\+Job\+Manager.\+Get\+Scheduling\+Matrix\+Flat (\begin{DoxyParamCaption}\item[{int}]{num\+Machines}{}\end{DoxyParamCaption})}
+
+
+
+Flattens job operation data into a normalized matrix for agent input. 
+
+Each operation is represented by 3 values:\+ presence flag, normalized duration, and completion status (0 to 1).
+
+
+\begin{DoxyParams}{Parameters}
+{\em num\+Machines} & The machine count to bound the matrix columns. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Flat array of size Jobs \texorpdfstring{$\ast$}{*} \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_machines}{Machines} \texorpdfstring{$\ast$}{*} 3. 
+\end{DoxyReturn}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_abe29496d8146d3f4fcc4bd289d6dfb22}\index{Assets.Scripts.Simulation.JobManager@{Assets.Scripts.Simulation.JobManager}!Initialize@{Initialize}}
+\index{Initialize@{Initialize}!Assets.Scripts.Simulation.JobManager@{Assets.Scripts.Simulation.JobManager}}
+\doxysubsubsection{\texorpdfstring{Initialize()}{Initialize()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_abe29496d8146d3f4fcc4bd289d6dfb22} 
+void Assets.\+Scripts.\+Simulation.\+Job\+Manager.\+Initialize (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance}{Taillard\+Instance}}}]{instance}{, }\item[{bool}]{spawn\+Visuals}{ = {\ttfamily true}}\end{DoxyParamCaption})}
+
+
+
+Allocates trackers and optionally spawns visual tokens for every job. 
+
+Maps the Taillard problem matrices into individual trackers. Visuals are instantiated and deactivated until they are called to the incoming belt.
+
+
+\begin{DoxyParams}{Parameters}
+{\em instance} & The loaded Taillard problem instance. \\
+\hline
+{\em spawn\+Visuals} & When true, a \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_job_visual}{Job\+Visual} prefab is instantiated per job.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyPostcond}{Postcondition}
+trackers array is populated and initialized is set to true. 
+\end{DoxyPostcond}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_a93c4def1f16b12b56659c454aa398506}\index{Assets.Scripts.Simulation.JobManager@{Assets.Scripts.Simulation.JobManager}!MarkJobArrivedAtMachine@{MarkJobArrivedAtMachine}}
+\index{MarkJobArrivedAtMachine@{MarkJobArrivedAtMachine}!Assets.Scripts.Simulation.JobManager@{Assets.Scripts.Simulation.JobManager}}
+\doxysubsubsection{\texorpdfstring{MarkJobArrivedAtMachine()}{MarkJobArrivedAtMachine()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_a93c4def1f16b12b56659c454aa398506} 
+void Assets.\+Scripts.\+Simulation.\+Job\+Manager.\+Mark\+Job\+Arrived\+At\+Machine (\begin{DoxyParamCaption}\item[{int}]{job\+Id}{, }\item[{int}]{machine\+Id}{}\end{DoxyParamCaption})}
+
+
+
+Updates state to {\ttfamily Queued} when a job arrives at its destination machine. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em job\+Id} & The arriving job. \\
+\hline
+{\em machine\+Id} & The machine the job has reached. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_a114b958795f0c2b61f40b4eaa7d1c5b7}\index{Assets.Scripts.Simulation.JobManager@{Assets.Scripts.Simulation.JobManager}!MarkOperationComplete@{MarkOperationComplete}}
+\index{MarkOperationComplete@{MarkOperationComplete}!Assets.Scripts.Simulation.JobManager@{Assets.Scripts.Simulation.JobManager}}
+\doxysubsubsection{\texorpdfstring{MarkOperationComplete()}{MarkOperationComplete()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_a114b958795f0c2b61f40b4eaa7d1c5b7} 
+void Assets.\+Scripts.\+Simulation.\+Job\+Manager.\+Mark\+Operation\+Complete (\begin{DoxyParamCaption}\item[{int}]{job\+Id}{, }\item[{double}]{sim\+Time}{}\end{DoxyParamCaption})}
+
+
+
+Finalizes an operation and determines if the job is finished or needs more routing. 
+
+If the job has completed all required machine operations, it is marked as {\ttfamily Complete} and moved to the exit area. Otherwise, it is set to {\ttfamily Waiting\+For\+Transport}.
+
+
+\begin{DoxyParams}{Parameters}
+{\em job\+Id} & The finished job. \\
+\hline
+{\em sim\+Time} & Current simulation time.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyPostcond}{Postcondition}
+Current\+Operation\+Index is incremented if the job is not yet finished. 
+\end{DoxyPostcond}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_a375fd59b44da77a3ada753aad7e38b22}\index{Assets.Scripts.Simulation.JobManager@{Assets.Scripts.Simulation.JobManager}!MarkOperationStarted@{MarkOperationStarted}}
+\index{MarkOperationStarted@{MarkOperationStarted}!Assets.Scripts.Simulation.JobManager@{Assets.Scripts.Simulation.JobManager}}
+\doxysubsubsection{\texorpdfstring{MarkOperationStarted()}{MarkOperationStarted()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager_a375fd59b44da77a3ada753aad7e38b22} 
+void Assets.\+Scripts.\+Simulation.\+Job\+Manager.\+Mark\+Operation\+Started (\begin{DoxyParamCaption}\item[{int}]{job\+Id}{, }\item[{double}]{sim\+Time}{}\end{DoxyParamCaption})}
+
+
+
+Sets job to {\ttfamily Processing} and calculates the preceding wait duration. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em job\+Id} & The job starting its operation. \\
+\hline
+{\em sim\+Time} & Current simulation time. \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Simulation/\+Job\+Manager.\+cs\end{DoxyCompactItemize}

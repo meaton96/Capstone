@@ -1,0 +1,75 @@
+\doxysection{Assets.\+Scripts.\+Simulation.\+Job\+Tracker Class Reference}
+\hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker}{}\label{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker}\index{Assets.Scripts.Simulation.JobTracker@{Assets.Scripts.Simulation.JobTracker}}
+
+
+Runtime tracking data for a single job across all of its operations.  
+
+
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_a8b51b2208c1237a55f0deccee73af8f8}\label{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_a8b51b2208c1237a55f0deccee73af8f8} 
+int {\bfseries Job\+Id}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_a2c9a1f0e1305cddaff7cb1335db33357}\label{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_a2c9a1f0e1305cddaff7cb1335db33357} 
+int {\bfseries Total\+Operations}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_ae0c6c92458191069e126a6d40f2c10a1}\label{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_ae0c6c92458191069e126a6d40f2c10a1} 
+\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_simulation_ab99ecd1dad64c1ad442ca809788c0d05}{Job\+Lifecycle\+State}} {\bfseries State}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_a4c3d98c32ec901feacb87733193ba820}\label{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_a4c3d98c32ec901feacb87733193ba820} 
+int {\bfseries Current\+Operation\+Index}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_a9d22dd27ccbb61e3feb3ddd1a8494c6a}\label{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_a9d22dd27ccbb61e3feb3ddd1a8494c6a} 
+int {\bfseries Completed\+Operations}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_ae9fbaabb0045ccbd6ff6f17e8b74f018}\label{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_ae9fbaabb0045ccbd6ff6f17e8b74f018} 
+Vector3 {\bfseries World\+Position}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_a5df07f026ae762172f77993dc4c2285b}\label{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_a5df07f026ae762172f77993dc4c2285b} 
+int {\bfseries Current\+Machine\+Id}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_a5cc994f4fcf788e47de0836d39515b71}\label{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_a5cc994f4fcf788e47de0836d39515b71} 
+int {\bfseries Next\+Machine\+Id}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_ae83943e8fb8a375c9b0ba7c8c7430001}\label{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_ae83943e8fb8a375c9b0ba7c8c7430001} 
+double {\bfseries State\+Entry\+Time}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_aa0ae84e1943ff439a238f7ad43120ebb}\label{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_aa0ae84e1943ff439a238f7ad43120ebb} 
+double {\bfseries Total\+Wait\+Time}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_a618977318a8a8fa38a70f3fcd1eb2066}\label{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_a618977318a8a8fa38a70f3fcd1eb2066} 
+double {\bfseries Total\+Transit\+Time}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_a5bc97388c5271c87e58311e4b5324f6c}\label{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_a5bc97388c5271c87e58311e4b5324f6c} 
+float {\bfseries Operation\+Progress}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_a0b70cded73052facc10d361cc434cfc3}\label{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_a0b70cded73052facc10d361cc434cfc3} 
+float\+[$\,$]\+ {\bfseries Operation\+Statuses}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_a99964a6723c80e49d92c62c5d5630781}\label{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_a99964a6723c80e49d92c62c5d5630781} 
+int\+[$\,$]\+ {\bfseries Operation\+Machine\+Ids}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_a55b309bdb07a31de3a46483874c8e7d0}\label{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_a55b309bdb07a31de3a46483874c8e7d0} 
+float\+[$\,$]\+ {\bfseries Operation\+Durations}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_a410b0f042763273e4cf77f895c9bcdf8}\label{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_a410b0f042763273e4cf77f895c9bcdf8} 
+bool {\bfseries Physically\+At\+Machine}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_aec0d8112d0957092cac2631b2774376f}\label{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_aec0d8112d0957092cac2631b2774376f} 
+int {\bfseries Incoming\+Queue\+Slot}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_a6e74827f202a452f0861ce4c90a0172c}\label{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_a6e74827f202a452f0861ce4c90a0172c} 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_job_visual}{Job\+Visual}} {\bfseries Visual}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_a090434a3b55cc30c2157abb5bb056902}\label{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker_a090434a3b55cc30c2157abb5bb056902} 
+int {\bfseries Time\+In\+Current\+State}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Runtime tracking data for a single job across all of its operations. 
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Simulation/\+Job\+Manager.\+cs\end{DoxyCompactItemize}
