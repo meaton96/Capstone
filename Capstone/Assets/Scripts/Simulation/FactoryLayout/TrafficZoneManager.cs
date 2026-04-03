@@ -5,39 +5,21 @@ using Assets.Scripts.Logging;
 
 namespace Assets.Scripts.Simulation.FactoryLayout
 {
-    // ─────────────────────────────────────────────────────────
-    //  Enums & Data Structures
-    // ─────────────────────────────────────────────────────────
-
-    /// <summary>
-    /// Categorises the aisle type a zone belongs to.
-    /// </summary>
+    /// @brief Categorises the aisle type a zone belongs to.
     public enum AisleType
     {
-        /// <summary>Narrow aisle between two machine rows.</summary>
         RowAisle,
-        /// <summary>Wide top or bottom peripheral spine aisle.</summary>
         SpineAisle,
-        /// <summary>Left or right vertical connector aisle.</summary>
         VerticalAisle
     }
 
-    /// <summary>
-    /// One-way flow direction of a zone's parent aisle.
-    /// </summary>
+    /// @brief One-way flow direction of a zone's parent aisle.
     public enum FlowDirection
     {
-        East,       // +X
-        West,       // -X
-        North,      // +Z
-        South       // -Z
+        East, West, North, South
     }
 
-    /// <summary>
-    /// A single reservable zone within the traffic network.
-    /// Zones are the atomic units of space that AGVs must reserve
-    /// before entering.
-    /// </summary>
+    /// @brief A single reservable zone within the traffic network.
     [Serializable]
     public class TrafficZone
     {
@@ -45,128 +27,64 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         public string Name;
         public AisleType AisleType;
         public FlowDirection Flow;
-
-        /// <summary>World-space centre of this zone.</summary>
         public Vector3 Centre;
-
-        /// <summary>World-space bounds of this zone (width along aisle × depth).</summary>
         public Vector3 Size;
-
-        /// <summary>Maximum AGVs allowed in this zone simultaneously.</summary>
         public int Capacity = 1;
-
-        /// <summary>IDs of zones reachable from this zone following flow direction.</summary>
         public List<int> Downstream = new List<int>();
-
-        /// <summary>IDs of zones that flow into this zone.</summary>
         public List<int> Upstream = new List<int>();
-
-        /// <summary>
-        /// Machine docking points accessible from this zone.
-        /// Key = machineId, Value = (approachPos, dockPos, facingDir).
-        /// </summary>
         public Dictionary<int, DockPoint> DockPoints = new Dictionary<int, DockPoint>();
 
-        // ── Runtime ──
-        /// <summary>Set of AGV IDs currently occupying or reserved into this zone.</summary>
         [NonSerialized] public HashSet<int> OccupantAgvIds = new HashSet<int>();
 
         public bool IsFull => OccupantAgvIds.Count >= Capacity;
         public bool IsEmpty => OccupantAgvIds.Count == 0;
     }
 
-    /// <summary>
-    /// Describes where an AGV must position itself to interact
-    /// with a machine's conveyor from within an aisle zone.
-    /// </summary>
+    /// @brief Describes positioning for AGV-conveyor interaction.
     [Serializable]
     public struct DockPoint
     {
-        /// <summary>Position where the AGV should navigate to before docking.</summary>
         public Vector3 ApproachPosition;
-
-        /// <summary>Position the AGV's carry point must reach for handshake.</summary>
         public Vector3 HandshakePosition;
-
-        /// <summary>Direction the AGV must face during docking (toward conveyor).</summary>
         public Vector3 FacingDirection;
-
-        /// <summary>Whether this dock point is for pickup (outgoing) or dropoff (incoming).</summary>
         public bool IsPickup;
     }
 
-    // ─────────────────────────────────────────────────────────
-    //  Traffic Zone Manager
-    // ─────────────────────────────────────────────────────────
-
-    /// <summary>
-    /// Manages the zone-based traffic control network for the factory floor.
-    ///
-    /// <para><b>Zone layout (matches FactoryLayoutManager):</b></para>
-    /// The floor is divided into reservable zones. Each narrow row aisle
-    /// is split into segments (one per machine column gap). Spine and
-    /// vertical aisles are split at intersection points.
-    ///
-    /// <para><b>Reservation protocol:</b></para>
-    /// 1. AGV requests its next zone via <see cref="TryReserve"/>.
-    /// 2. If the zone has capacity, the AGV is added and may enter.
-    /// 3. If full, the AGV must wait (the caller decides behaviour).
-    /// 4. When the AGV leaves a zone, it calls <see cref="Release"/>.
-    ///
-    /// <para><b>One-way enforcement:</b></para>
-    /// Zones expose <see cref="TrafficZone.Downstream"/> connections.
-    /// The AGV pathfinder should only request zones along the downstream
-    /// chain. The manager does NOT enforce direction — it trusts the
-    /// pathfinder — but provides <see cref="GetRoute"/> for convenience.
-    /// </summary>
+    /// @brief Manages the zone-based traffic control network for the factory floor.
+    /// @details Divides the floor into reservable segments to manage one-way flow and prevent deadlocks.
     [RequireComponent(typeof(FactoryLayoutManager))]
     public class TrafficZoneManager : MonoBehaviour
     {
-        // ─────────────────────────────────────────────────────────
-        //  Inspector
-        // ─────────────────────────────────────────────────────────
-
         private FactoryLayoutManager layoutManager;
 
         [Header("Debug")]
-        [Tooltip("Draw zone bounds and occupancy in the Scene view.")]
         [SerializeField] private bool drawGizmos = true;
-
-        [Tooltip("Draw zone labels in the Scene view.")]
         [SerializeField] private bool drawLabels = true;
 
         public const int IncomingBeltId = -1;
         public const int OutgoingBeltId = -2;
         public const int ParkingAreaId = -3;
 
-        // ─────────────────────────────────────────────────────────
-        //  Runtime State
-        // ─────────────────────────────────────────────────────────
-
         private readonly List<TrafficZone> zones = new List<TrafficZone>();
         private readonly Dictionary<int, TrafficZone> zoneById = new Dictionary<int, TrafficZone>();
         private int nextZoneId;
-
-        /// <summary>Maps machineId → list of zone IDs adjacent to that machine.</summary>
         private readonly Dictionary<int, List<int>> machineToZones = new Dictionary<int, List<int>>();
-
-        // ─────────────────────────────────────────────────────────
-        //  Public Accessors
-        // ─────────────────────────────────────────────────────────
 
         public IReadOnlyList<TrafficZone> Zones => zones;
 
-        public TrafficZone GetZone(int zoneId) =>
-            zoneById.TryGetValue(zoneId, out var z) ? z : null;
+        /// @brief Retrieves a zone by its unique ID.
+        public TrafficZone GetZone(int zoneId) => zoneById.TryGetValue(zoneId, out var z) ? z : null;
 
-        // ─────────────────────────────────────────────────────────
-        //  Initialisation
-        // ─────────────────────────────────────────────────────────
+        void Awake()
+        {
+            layoutManager = GetComponent<FactoryLayoutManager>();
+        }
 
-        /// <summary>
-        /// Builds the full zone graph from the current factory layout.
-        /// Call this after <see cref="FactoryLayoutManager.BuildFloor"/>.
-        /// </summary>
+        /// @brief Constructs the topological traffic network from the current factory layout.
+        /// @details Orchestrates the creation of row, spine, and vertical zones, establishes 
+        /// directed links, and registers dock points for all machines and I/O belts.
+        /// @pre FactoryLayoutManager must have already built the physical floor.
+        /// @post The @ref zones list and lookup dictionaries are fully populated.
         public void BuildZoneGraph()
         {
             zones.Clear();
@@ -174,54 +92,31 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             machineToZones.Clear();
             nextZoneId = 0;
 
-            if (layoutManager == null)
+            if (layoutManager == null || layoutManager.LayoutRows == 0)
             {
-                SimLogger.Error("[TrafficZones] No FactoryLayoutManager assigned.");
+                SimLogger.Error("[TrafficZones] Layout manager missing or layout not built.");
                 return;
             }
 
             int rows = layoutManager.LayoutRows;
             int cols = layoutManager.LayoutCols;
 
-            if (rows == 0 || cols == 0)
-            {
-                SimLogger.Error("[TrafficZones] Layout not built yet.");
-                return;
-            }
+            int[][] rowAisleZones = BuildRowAisleZones(rows, cols);
+            int[] topSpineZones = BuildSpineZones(true, cols);
+            int[] botSpineZones = BuildSpineZones(false, cols);
+            int[] leftVertZones = BuildVerticalZones(true, rows);
+            int[] rightVertZones = BuildVerticalZones(false, rows);
 
-            // Phase 1: Create row aisle zones
-            var rowAisleZones = BuildRowAisleZones(rows, cols);
+            ConnectZoneGraph(rowAisleZones, topSpineZones, botSpineZones, leftVertZones, rightVertZones, rows, cols);
+            RegisterDockPoints(rowAisleZones, topSpineZones, botSpineZones, rows, cols);
 
-            // Phase 2: Create spine aisle zones
-            var topSpineZones = BuildSpineZones(true, cols);
-            var botSpineZones = BuildSpineZones(false, cols);
-
-            // Phase 3: Create vertical aisle zones
-            var leftVertZones = BuildVerticalZones(true, rows);
-            var rightVertZones = BuildVerticalZones(false, rows);
-
-            // Phase 4: Connect zones into a directed graph
-            ConnectZoneGraph(rowAisleZones, topSpineZones, botSpineZones,
-                             leftVertZones, rightVertZones, rows, cols);
-
-            // Phase 5: Register dock points for each machine
-            RegisterDockPoints(rowAisleZones, topSpineZones, botSpineZones,
-                               rows, cols);
-
-            SimLogger.Medium($"[TrafficZones] Built zone graph: " +
-                $"{zones.Count} zones, {rows - 1} row aisles, " +
-                $"2 spines, 2 verticals.");
+            SimLogger.Medium($"[TrafficZones] Built zone graph: {zones.Count} zones.");
         }
 
-        // ─────────────────────────────────────────────────────────
-        //  Zone Construction
-        // ─────────────────────────────────────────────────────────
-
-        /// <summary>
-        /// Creates zones for each row aisle, split into segments at
-        /// each machine column boundary.
-        /// Returns [aisleIndex][segmentIndex] = zoneId.
-        /// </summary>
+        /// @brief Segments row aisles into discrete zones based on machine columns.
+        /// @param rows Number of machine rows.
+        /// @param cols Number of machine columns.
+        /// @return A 2D array mapping [aisleIndex][segmentIndex] to zone IDs.
         private int[][] BuildRowAisleZones(int rows, int cols)
         {
             int numAisles = rows - 1;
@@ -231,90 +126,52 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             {
                 Vector3 aisleCentre = layoutManager.GetRowAisleCentre(a);
                 Vector3 flowDir = layoutManager.GetRowAisleDirection(a);
-                FlowDirection flow = flowDir.x > 0
-                    ? FlowDirection.East : FlowDirection.West;
+                FlowDirection flow = flowDir.x > 0 ? FlowDirection.East : FlowDirection.West;
 
-                int numSegments = cols; // one segment per machine column
-                result[a] = new int[numSegments];
-
+                result[a] = new int[cols];
                 float segWidth = layoutManager.MachineSpacingX;
                 float halfTotalWidth = ((cols - 1) * segWidth) / 2f;
 
-                for (int s = 0; s < numSegments; s++)
+                for (int s = 0; s < cols; s++)
                 {
-                    float segCentreX = -halfTotalWidth + s * segWidth;
-
                     var zone = new TrafficZone
                     {
                         ZoneId = nextZoneId++,
                         Name = $"RowAisle{a}_Seg{s}",
                         AisleType = AisleType.RowAisle,
                         Flow = flow,
-                        Centre = new Vector3(
-                            aisleCentre.x + segCentreX,
-                            aisleCentre.y,
-                            aisleCentre.z),
-                        Size = new Vector3(
-                            segWidth,
-                            0.1f,
-                            layoutManager.RowAisleWidth),
+                        Centre = new Vector3(aisleCentre.x + (-halfTotalWidth + s * segWidth), aisleCentre.y, aisleCentre.z),
+                        Size = new Vector3(segWidth, 0.1f, layoutManager.RowAisleWidth),
                         Capacity = 1
                     };
-
                     RegisterZone(zone);
                     result[a][s] = zone.ZoneId;
                 }
             }
-
             return result;
         }
 
-        /// <summary>
-        /// Creates zones for a spine aisle (top or bottom), split into
-        /// segments aligned with machine columns.
-        /// </summary>
+        /// @brief Segments spine aisles (top/bottom peripheral) into zones.
+        /// @param isTop True if building the top spine, false for bottom.
+        /// @param cols Number of machine columns.
+        /// @return An array of zone IDs for the spine.
         private int[] BuildSpineZones(bool isTop, int cols)
         {
-            int numSegments = cols + 1; // extra segments at the ends for vertical connections
+            int numSegments = cols + 1;
             int[] result = new int[numSegments];
-
-            float z = isTop
-                ? layoutManager.GetTopSpineZ()
-                : layoutManager.GetBottomSpineZ();
-
+            float z = isTop ? layoutManager.GetTopSpineZ() : layoutManager.GetBottomSpineZ();
             Vector3 floorCentre = layoutManager.transform.position;
-
             FlowDirection flow = isTop ? FlowDirection.East : FlowDirection.West;
             float segWidth = layoutManager.MachineSpacingX;
             float halfTotalWidth = ((cols - 1) * segWidth) / 2f;
-
-            // Left end segment (in vertical aisle zone)
-            float leftEdge = -halfTotalWidth - layoutManager.MachineDepth / 2f
-                             - layoutManager.VerticalAisleWidth / 2f;
+            float leftEdge = -halfTotalWidth - layoutManager.MachineDepth / 2f - layoutManager.VerticalAisleWidth / 2f;
 
             for (int s = 0; s < numSegments; s++)
             {
-                float segCentreX;
-                float width;
-
-                if (s == 0)
-                {
-                    // Left end
-                    segCentreX = leftEdge;
-                    width = layoutManager.VerticalAisleWidth;
-                }
-                else if (s == numSegments - 1)
-                {
-                    // Right end
-                    segCentreX = halfTotalWidth + layoutManager.MachineDepth / 2f
-                                 + layoutManager.VerticalAisleWidth / 2f;
-                    width = layoutManager.VerticalAisleWidth;
-                }
-                else
-                {
-                    segCentreX = -halfTotalWidth + (s - 1) * segWidth;
-                    width = segWidth;
-                }
+                float segCentreX, width;
+                if (s == 0) { segCentreX = leftEdge; width = layoutManager.VerticalAisleWidth; }
+                else if (s == numSegments - 1) { segCentreX = -leftEdge; width = layoutManager.VerticalAisleWidth; }
+                else { segCentreX = -halfTotalWidth + (s - 1) * segWidth; width = segWidth; }
 
                 var zone = new TrafficZone
                 {
@@ -322,76 +179,36 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                     Name = $"{(isTop ? "TopSpine" : "BotSpine")}_Seg{s}",
                     AisleType = AisleType.SpineAisle,
                     Flow = flow,
-                    Centre = new Vector3(
-                        floorCentre.x + segCentreX,
-                        0.01f,
-                        floorCentre.z + z),
-                    Size = new Vector3(
-                        width,
-                        0.1f,
-                        layoutManager.SpineAisleWidth),
-                    Capacity = 2 // spine is wider, allow 2 AGVs
+                    Centre = new Vector3(floorCentre.x + segCentreX, 0.01f, floorCentre.z + z),
+                    Size = new Vector3(width, 0.1f, layoutManager.SpineAisleWidth),
+                    Capacity = 2
                 };
-
                 RegisterZone(zone);
                 result[s] = zone.ZoneId;
             }
-
             return result;
         }
 
-        void Awake()
-        {
-            layoutManager = GetComponent<FactoryLayoutManager>();
-        }
-
-        /// <summary>
-        /// Creates zones for a vertical aisle (left or right), one per
-        /// row aisle intersection.
-        /// </summary>
+        /// @brief Segments vertical connector aisles (left/right) into zones.
+        /// @param isLeft True for the left aisle, false for right.
+        /// @param rows Number of machine rows.
+        /// @return An array of zone IDs for the vertical aisle.
         private int[] BuildVerticalZones(bool isLeft, int rows)
         {
             int numRowAisles = rows - 1;
-            int numSegments = numRowAisles + 2; // +2 for spine connections
+            int numSegments = numRowAisles + 2;
             int[] result = new int[numSegments];
-
-            float halfMachineAreaW = ((layoutManager.LayoutCols - 1)
-                                     * layoutManager.MachineSpacingX) / 2f
-                                     + layoutManager.MachineDepth / 2f;
-
-            float x = isLeft
-                ? -(halfMachineAreaW + layoutManager.VerticalAisleWidth / 2f)
-                : (halfMachineAreaW + layoutManager.VerticalAisleWidth / 2f);
-
+            float halfMachineAreaW = ((layoutManager.LayoutCols - 1) * layoutManager.MachineSpacingX) / 2f + layoutManager.MachineDepth / 2f;
+            float x = isLeft ? -(halfMachineAreaW + layoutManager.VerticalAisleWidth / 2f) : (halfMachineAreaW + layoutManager.VerticalAisleWidth / 2f);
             FlowDirection flow = isLeft ? FlowDirection.North : FlowDirection.South;
-
             Vector3 floorCentre = layoutManager.transform.position;
 
             for (int s = 0; s < numSegments; s++)
             {
-                float z;
-                float height;
-                string name;
-
-                if (s == 0)
-                {
-                    z = layoutManager.GetTopSpineZ();
-                    height = layoutManager.SpineAisleWidth;
-                    name = "TopConn";
-                }
-                else if (s == numSegments - 1)
-                {
-                    z = layoutManager.GetBottomSpineZ();
-                    height = layoutManager.SpineAisleWidth;
-                    name = "BotConn";
-                }
-                else
-                {
-                    Vector3 aisleCentre = layoutManager.GetRowAisleCentre(s - 1);
-                    z = aisleCentre.z - floorCentre.z;
-                    height = layoutManager.RowAisleWidth;
-                    name = $"Row{s - 1}";
-                }
+                float z, height; string name;
+                if (s == 0) { z = layoutManager.GetTopSpineZ(); height = layoutManager.SpineAisleWidth; name = "TopConn"; }
+                else if (s == numSegments - 1) { z = layoutManager.GetBottomSpineZ(); height = layoutManager.SpineAisleWidth; name = "BotConn"; }
+                else { Vector3 aisleCentre = layoutManager.GetRowAisleCentre(s - 1); z = aisleCentre.z - floorCentre.z; height = layoutManager.RowAisleWidth; name = $"Row{s - 1}"; }
 
                 var zone = new TrafficZone
                 {
@@ -399,21 +216,13 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                     Name = $"{(isLeft ? "LeftVert" : "RightVert")}_{name}",
                     AisleType = AisleType.VerticalAisle,
                     Flow = flow,
-                    Centre = new Vector3(
-                        floorCentre.x + x,
-                        0.01f,
-                        floorCentre.z + z),
-                    Size = new Vector3(
-                        layoutManager.VerticalAisleWidth,
-                        0.1f,
-                        height),
+                    Centre = new Vector3(floorCentre.x + x, 0.01f, floorCentre.z + z),
+                    Size = new Vector3(layoutManager.VerticalAisleWidth, 0.1f, height),
                     Capacity = 1
                 };
-
                 RegisterZone(zone);
                 result[s] = zone.ZoneId;
             }
-
             return result;
         }
 
@@ -423,481 +232,203 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             zoneById[zone.ZoneId] = zone;
         }
 
-        // ─────────────────────────────────────────────────────────
-        //  Graph Connectivity
-        // ─────────────────────────────────────────────────────────
-
-        /// <summary>
-        /// Wires up the downstream/upstream links between all zones
-        /// to form the one-way circulation loop.
-        /// </summary>
-        private void ConnectZoneGraph(
-            int[][] rowAisles, int[] topSpine, int[] botSpine,
-            int[] leftVert, int[] rightVert,
-            int rows, int cols)
+        /// @brief Wires up downstream and upstream links between all zones to form a circulation loop.
+        /// @details Connects internal chains for rows, spines, and vertical aisles, then bridges 
+        /// intersections and corners based on restricted flow directions.
+        /// @post Every zone has populated Downstream/Upstream lists forming a directed graph.
+        private void ConnectZoneGraph(int[][] rowAisles, int[] topSpine, int[] botSpine, int[] leftVert, int[] rightVert, int rows, int cols)
         {
-            // Row aisle internal chains
             for (int a = 0; a < rowAisles.Length; a++)
             {
                 bool eastbound = (a % 2 == 0);
                 int[] segs = rowAisles[a];
-
-                if (eastbound)
-                {
-                    for (int s = 0; s < segs.Length - 1; s++)
-                        LinkZones(segs[s], segs[s + 1]);
-                }
-                else
-                {
-                    for (int s = segs.Length - 1; s > 0; s--)
-                        LinkZones(segs[s], segs[s - 1]);
-                }
+                if (eastbound) for (int s = 0; s < segs.Length - 1; s++) LinkZones(segs[s], segs[s + 1]);
+                else for (int s = segs.Length - 1; s > 0; s--) LinkZones(segs[s], segs[s - 1]);
             }
 
-            // Spine internal chains
-            // Top spine: east (0 -> Length)
-            for (int s = 0; s < topSpine.Length - 1; s++)
-                LinkZones(topSpine[s], topSpine[s + 1]);
+            for (int s = 0; s < topSpine.Length - 1; s++) LinkZones(topSpine[s], topSpine[s + 1]);
+            for (int s = botSpine.Length - 1; s > 0; s--) LinkZones(botSpine[s], botSpine[s - 1]);
+            for (int s = leftVert.Length - 1; s > 0; s--) LinkZones(leftVert[s], leftVert[s - 1]);
+            for (int s = 0; s < rightVert.Length - 1; s++) LinkZones(rightVert[s], rightVert[s + 1]);
 
-            // Bottom spine: west (Length -> 0)
-            for (int s = botSpine.Length - 1; s > 0; s--)
-                LinkZones(botSpine[s], botSpine[s - 1]);
-
-            // Vertical internal chains
-            // Left: north (bottom -> top) -> (Length -> 0)
-            for (int s = leftVert.Length - 1; s > 0; s--)
-                LinkZones(leftVert[s], leftVert[s - 1]);
-
-            // Right: south (top -> bottom) -> (0 -> Length)
-            for (int s = 0; s < rightVert.Length - 1; s++)
-                LinkZones(rightVert[s], rightVert[s + 1]);
-
-            // Cross-connections: vertical ↔ row aisles
             for (int a = 0; a < rowAisles.Length; a++)
             {
                 bool eastbound = (a % 2 == 0);
                 int[] segs = rowAisles[a];
-                int leftVertIdx = a + 1;   // +1 because index 0 is top spine conn
-                int rightVertIdx = a + 1;
-
-                if (eastbound)
-                {
-                    // Left vert -> row aisle first segment
-                    LinkZones(leftVert[leftVertIdx], segs[0]);
-                    // Row aisle last segment -> right vert
-                    LinkZones(segs[segs.Length - 1], rightVert[rightVertIdx]);
-                }
-                else
-                {
-                    // Right vert -> row aisle last segment (westbound entry)
-                    LinkZones(rightVert[rightVertIdx], segs[segs.Length - 1]);
-                    // Row aisle first segment -> left vert
-                    LinkZones(segs[0], leftVert[leftVertIdx]);
-                }
+                int vIdx = a + 1;
+                if (eastbound) { LinkZones(leftVert[vIdx], segs[0]); LinkZones(segs[segs.Length - 1], rightVert[vIdx]); }
+                else { LinkZones(rightVert[vIdx], segs[segs.Length - 1]); LinkZones(segs[0], leftVert[vIdx]); }
             }
 
-            // Cross-connections: spine ↔ vertical (The 4 corners)
-
-            // Top-Left: Left vert (top) flows into Top spine (left end)
             LinkZones(leftVert[0], topSpine[0]);
-
-            // Top-Right: Top spine (right end) flows into Right vert (top)
             LinkZones(topSpine[topSpine.Length - 1], rightVert[0]);
-
-            // Bottom-Right: Right vert (bottom) flows into Bottom spine (right end)
             LinkZones(rightVert[rightVert.Length - 1], botSpine[botSpine.Length - 1]);
-
-            // Bottom-Left: Bottom spine (left end) flows into Left vert (bottom)
             LinkZones(botSpine[0], leftVert[leftVert.Length - 1]);
         }
 
-
-
         private void LinkZones(int fromId, int toId)
         {
-            if (!zoneById.ContainsKey(fromId) || !zoneById.ContainsKey(toId))
-                return;
-
-            TrafficZone from = zoneById[fromId];
-            TrafficZone to = zoneById[toId];
-
-            if (!from.Downstream.Contains(toId))
-                from.Downstream.Add(toId);
-            if (!to.Upstream.Contains(fromId))
-                to.Upstream.Add(fromId);
+            if (!zoneById.TryGetValue(fromId, out var from) || !zoneById.TryGetValue(toId, out var to)) return;
+            if (!from.Downstream.Contains(toId)) from.Downstream.Add(toId);
+            if (!to.Upstream.Contains(fromId)) to.Upstream.Add(fromId);
         }
 
-        // ─────────────────────────────────────────────────────────
-        //  Dock Points
-        // ─────────────────────────────────────────────────────────
-
-        /// <summary>
-        /// For each machine, registers dock points (approach position,
-        /// handshake position, facing direction) in the adjacent aisle
-        /// zones.
-        /// </summary>
-        private void RegisterDockPoints(
-            int[][] rowAisles, int[] topSpine, int[] botSpine,
-            int rows, int cols)
+        /// @brief Calculates and registers AGV interaction points for machines and belts.
+        /// @details Resolves the handshake and approach positions for every physical machine 
+        /// and maps them to the nearest reservable traffic zone.
+        /// @post TrafficZone.DockPoints dictionaries are populated for relevant zones.
+        private void RegisterDockPoints(int[][] rowAisles, int[] topSpine, int[] botSpine, int rows, int cols)
         {
-            // ─────────────────────────────────────────────────────────
-            //  I/O & Parking Dock Points
-            // ─────────────────────────────────────────────────────────
-
-            // 1. Incoming Belt (Top-Left corner)
-            // Located at the start of the Top Spine (eastbound)
             if (topSpine.Length > 0 && layoutManager.IncomingBelt != null)
             {
-                int inZoneId = topSpine[0];
-                TrafficZone inZone = zoneById[inZoneId];
-
-                // The AGV needs to pick up from the output end of the incoming belt
+                TrafficZone inZone = zoneById[topSpine[0]];
                 Vector3 handshake = layoutManager.IncomingBelt.OutputEndPosition;
-                Vector3 approach = handshake - Vector3.forward * 1.5f; // Stand slightly west to approach
-
-                inZone.DockPoints[IncomingBeltId] = new DockPoint
-                {
-                    ApproachPosition = approach,
-                    HandshakePosition = handshake,
-                    FacingDirection = Vector3.forward, // Face East toward the belt
-                    IsPickup = true
-                };
+                inZone.DockPoints[IncomingBeltId] = new DockPoint { ApproachPosition = handshake - Vector3.forward * 1.5f, HandshakePosition = handshake, FacingDirection = Vector3.forward, IsPickup = true };
             }
 
-            // 2. Outgoing Belt (Bottom-Right corner)
-            // Located at the start of the Bottom Spine (westbound)
             if (botSpine.Length > 0 && layoutManager.OutgoingBelt != null)
             {
-                int outZoneId = botSpine[botSpine.Length - 1];
-                TrafficZone outZone = zoneById[outZoneId];
-
-                // The AGV needs to drop off at the input end of the outgoing belt
+                TrafficZone outZone = zoneById[botSpine[botSpine.Length - 1]];
                 Vector3 handshake = layoutManager.OutgoingBelt.InputEndPosition;
-                Vector3 approach = handshake + Vector3.forward * 1.5f; // Stand slightly north to approach
-
-                outZone.DockPoints[OutgoingBeltId] = new DockPoint
-                {
-                    ApproachPosition = approach,
-                    HandshakePosition = handshake,
-                    FacingDirection = -Vector3.forward, // Face South toward the belt
-                    IsPickup = false
-                };
+                outZone.DockPoints[OutgoingBeltId] = new DockPoint { ApproachPosition = handshake + Vector3.forward * 1.5f, HandshakePosition = handshake, FacingDirection = -Vector3.forward, IsPickup = false };
             }
 
-            // 3. AGV Parking (Bottom-Left corner)
-            // Located at the end of the Bottom Spine (before going north)
             if (botSpine.Length > 0)
             {
-                int parkZoneId = botSpine[0];
-                TrafficZone parkZone = zoneById[parkZoneId];
-                Vector3 parkPos = layoutManager.AGVParkingPosition;
-
+                TrafficZone parkZone = zoneById[botSpine[0]];
                 parkZone.Capacity = 10;
-
-                parkZone.DockPoints[ParkingAreaId] = new DockPoint
-                {
-                    ApproachPosition = parkPos,
-                    HandshakePosition = parkPos, // No handshake needed for parking
-                    FacingDirection = -Vector3.left, // Face East while parked
-                    IsPickup = false
-                };
+                parkZone.DockPoints[ParkingAreaId] = new DockPoint { ApproachPosition = layoutManager.AGVParkingPosition, HandshakePosition = layoutManager.AGVParkingPosition, FacingDirection = -Vector3.left, IsPickup = false };
             }
-            float standoff = 1.5f; // distance from conveyor end to approach point
-            Vector3 floorCentre = layoutManager.transform.position;
 
+            float standoff = 1.5f;
             for (int i = 0; i < layoutManager.MachineCount; i++)
             {
-                int row = i / cols;
-                int col = i % cols;
+                int row = i / cols; int col = i % cols;
                 Vector3 machinePos = layoutManager.Machines[i].transform.position;
 
-                // South-facing dock (into the aisle below this machine row)
-                int southAisleIdx = row; // aisle 0 is between row 0 and row 1
-                if (southAisleIdx < rowAisles.Length && col < rowAisles[southAisleIdx].Length)
+                if (row < rowAisles.Length)
                 {
-                    int zoneId = rowAisles[southAisleIdx][col];
-                    TrafficZone zone = zoneById[zoneId];
-
-                    Vector3 conveyorEnd = machinePos - Vector3.forward *
-                        (layoutManager.MachineDepth / 2f + layoutManager.ConveyorReach);
-                    Vector3 approach = conveyorEnd - Vector3.forward * standoff;
-
-                    zone.DockPoints[i] = new DockPoint
-                    {
-                        ApproachPosition = approach,
-                        HandshakePosition = conveyorEnd,
-                        FacingDirection = Vector3.forward, // face north toward machine
-                        IsPickup = false // outgoing conveyor → pickup for AGV
-                    };
-
-                    if (!machineToZones.ContainsKey(i))
-                        machineToZones[i] = new List<int>();
-                    machineToZones[i].Add(zoneId);
+                    int zId = rowAisles[row][col];
+                    Vector3 conveyorEnd = machinePos - Vector3.forward * (layoutManager.MachineDepth / 2f + layoutManager.ConveyorReach);
+                    zoneById[zId].DockPoints[i] = new DockPoint { ApproachPosition = conveyorEnd - Vector3.forward * standoff, HandshakePosition = conveyorEnd, FacingDirection = Vector3.forward, IsPickup = false };
+                    if (!machineToZones.ContainsKey(i)) machineToZones[i] = new List<int>();
+                    machineToZones[i].Add(zId);
                 }
 
-                // North-facing dock (into the aisle above this machine row)
-                int northAisleIdx = row - 1;
-                if (northAisleIdx >= 0 && col < rowAisles[northAisleIdx].Length)
+                if (row > 0 || row == 0) // Check north aisles
                 {
-                    int zoneId = rowAisles[northAisleIdx][col];
-                    TrafficZone zone = zoneById[zoneId];
+                    int zId = -1;
+                    if (row > 0) zId = rowAisles[row - 1][col];
+                    else if (row == 0) zId = topSpine[col + 1];
 
-                    Vector3 conveyorEnd = machinePos + Vector3.forward *
-                        (layoutManager.MachineDepth / 2f + layoutManager.ConveyorReach);
-                    Vector3 approach = conveyorEnd + Vector3.forward * standoff;
-
-                    zone.DockPoints[i] = new DockPoint
+                    if (zId != -1)
                     {
-                        ApproachPosition = approach,
-                        HandshakePosition = conveyorEnd,
-                        FacingDirection = -Vector3.forward, // face south toward machine
-                        IsPickup = true // incoming conveyor → dropoff for AGV
-                    };
-
-                    if (!machineToZones.ContainsKey(i))
-                        machineToZones[i] = new List<int>();
-                    machineToZones[i].Add(zoneId);
-                }
-
-                // Top row machines: dock into top spine for north-side conveyor
-                if (row == 0)
-                {
-                    int spineSegIdx = col + 1; // +1 for left-end segment
-                    if (spineSegIdx < topSpine.Length)
-                    {
-                        int zoneId = topSpine[spineSegIdx];
-                        TrafficZone zone = zoneById[zoneId];
-
-                        Vector3 conveyorEnd = machinePos + Vector3.forward *
-                            (layoutManager.MachineDepth / 2f + layoutManager.ConveyorReach);
-                        Vector3 approach = conveyorEnd + Vector3.forward * standoff;
-
-                        zone.DockPoints[i] = new DockPoint
-                        {
-                            ApproachPosition = approach,
-                            HandshakePosition = conveyorEnd,
-                            FacingDirection = -Vector3.forward,
-                            IsPickup = true
-                        };
-
-                        if (!machineToZones.ContainsKey(i))
-                            machineToZones[i] = new List<int>();
-                        machineToZones[i].Add(zoneId);
-                    }
-                }
-
-                // Bottom row machines: dock into bottom spine
-                if (row == layoutManager.LayoutRows - 1)
-                {
-                    int spineSegIdx = col + 1;
-                    if (spineSegIdx < botSpine.Length)
-                    {
-                        int zoneId = botSpine[spineSegIdx];
-                        TrafficZone zone = zoneById[zoneId];
-
-                        Vector3 conveyorEnd = machinePos - Vector3.forward *
-                            (layoutManager.MachineDepth / 2f + layoutManager.ConveyorReach);
-                        Vector3 approach = conveyorEnd - Vector3.forward * standoff;
-
-                        zone.DockPoints[i] = new DockPoint
-                        {
-                            ApproachPosition = approach,
-                            HandshakePosition = conveyorEnd,
-                            FacingDirection = Vector3.forward,
-                            IsPickup = false
-                        };
-
-                        if (!machineToZones.ContainsKey(i))
-                            machineToZones[i] = new List<int>();
-                        machineToZones[i].Add(zoneId);
+                        Vector3 conveyorEnd = machinePos + Vector3.forward * (layoutManager.MachineDepth / 2f + layoutManager.ConveyorReach);
+                        zoneById[zId].DockPoints[i] = new DockPoint { ApproachPosition = conveyorEnd + Vector3.forward * standoff, HandshakePosition = conveyorEnd, FacingDirection = -Vector3.forward, IsPickup = true };
+                        if (!machineToZones.ContainsKey(i)) machineToZones[i] = new List<int>();
+                        machineToZones[i].Add(zId);
                     }
                 }
             }
         }
 
-        // ─────────────────────────────────────────────────────────
-        //  Reservation API
-        // ─────────────────────────────────────────────────────────
-
-        /// <summary>
-        /// Attempts to reserve a zone for the given AGV.
-        /// </summary>
-        /// <returns>True if the reservation was granted.</returns>
+        /// @brief Attempts to secure a spot in a zone for an AGV.
+        /// @param zoneId The ID of the zone to enter.
+        /// @param agvId The ID of the AGV requesting entry.
+        /// @return True if capacity is available or AGV is already registered; false if full.
+        /// @post If true, the AGV ID is added to the zone's occupant set.
         public bool TryReserve(int zoneId, int agvId)
         {
-            if (!zoneById.TryGetValue(zoneId, out TrafficZone zone))
-            {
-                SimLogger.Error($"[TrafficZones] Unknown zone {zoneId}");
-                return false;
-            }
-
-            if (zone.OccupantAgvIds.Contains(agvId))
-                return true; // already in this zone
-
-            if (zone.IsFull)
-            {
-                SimLogger.Low($"[TrafficZones] Zone {zone.Name} full — " +
-                    $"AGV {agvId} denied. Occupants: " +
-                    $"{string.Join(",", zone.OccupantAgvIds)}");
-                return false;
-            }
+            if (!zoneById.TryGetValue(zoneId, out TrafficZone zone)) return false;
+            if (zone.OccupantAgvIds.Contains(agvId)) return true;
+            if (zone.IsFull) return false;
 
             zone.OccupantAgvIds.Add(agvId);
-            SimLogger.Low($"[TrafficZones] AGV {agvId} reserved zone " +
-                $"{zone.Name} ({zone.OccupantAgvIds.Count}/{zone.Capacity})");
             return true;
         }
 
-        /// <summary>
-        /// Releases the AGV's reservation on a zone.
-        /// </summary>
+        /// @brief Releases an AGV's reservation on a specific zone.
+        /// @post The occupant count for the zone is decremented.
         public void Release(int zoneId, int agvId)
         {
-            if (!zoneById.TryGetValue(zoneId, out TrafficZone zone))
-                return;
-
-            if (zone.OccupantAgvIds.Remove(agvId))
-            {
-                SimLogger.Low($"[TrafficZones] AGV {agvId} released zone " +
-                    $"{zone.Name} ({zone.OccupantAgvIds.Count}/{zone.Capacity})");
-            }
-        }
-
-        /// <summary>
-        /// Releases the AGV from ALL zones. Useful when an AGV
-        /// finishes a task or encounters an error.
-        /// </summary>
-        public void ReleaseAll(int agvId)
-        {
-            foreach (var zone in zones)
+            if (zoneById.TryGetValue(zoneId, out TrafficZone zone))
                 zone.OccupantAgvIds.Remove(agvId);
         }
 
-        // ─────────────────────────────────────────────────────────
-        //  Query API
-        // ─────────────────────────────────────────────────────────
+        /// @brief Forcefully removes an AGV from all zones it may be occupying.
+        public void ReleaseAll(int agvId)
+        {
+            foreach (var zone in zones) zone.OccupantAgvIds.Remove(agvId);
+        }
 
-        /// <summary>
-        /// Returns the zone whose bounds contain the given world position,
-        /// or null if the position is outside all zones.
-        /// </summary>
+        /// @brief Finds the zone containing the specified world position.
         public TrafficZone GetZoneAtPosition(Vector3 worldPos)
         {
             foreach (var zone in zones)
             {
-                Vector3 half = zone.Size / 2f;
-                Vector3 d = worldPos - zone.Centre;
-                if (Mathf.Abs(d.x) <= half.x && Mathf.Abs(d.z) <= half.z)
-                    return zone;
+                Vector3 half = zone.Size / 2f; Vector3 d = worldPos - zone.Centre;
+                if (Mathf.Abs(d.x) <= half.x && Mathf.Abs(d.z) <= half.z) return zone;
             }
             return null;
         }
 
-        /// <summary>
-        /// Returns the dock point for a specific machine from a specific zone.
-        /// </summary>
+        /// @brief Returns the dock configuration for a machine within a specific zone.
         public bool TryGetDockPoint(int zoneId, int machineId, out DockPoint dock)
         {
             dock = default;
-            if (!zoneById.TryGetValue(zoneId, out TrafficZone zone))
-                return false;
-            return zone.DockPoints.TryGetValue(machineId, out dock);
+            return zoneById.TryGetValue(zoneId, out TrafficZone zone) && zone.DockPoints.TryGetValue(machineId, out dock);
         }
 
-        /// <summary>
-        /// Returns all zone IDs adjacent to the given machine.
-        /// </summary>
+        /// @brief Returns all zones that have interaction points for a specific machine.
         public List<int> GetZonesForMachine(int machineId)
         {
-            return machineToZones.TryGetValue(machineId, out var list)
-                ? list : new List<int>();
+            return machineToZones.TryGetValue(machineId, out var list) ? list : new List<int>();
         }
 
-        /// <summary>
-        /// Simple BFS to find a zone-level route from one zone to another,
-        /// following only downstream links.
-        /// Returns the list of zone IDs (inclusive of start and end), or
-        /// empty if no path exists.
-        /// </summary>
+        /// @brief Calculates a zone-level path using BFS following restricted flow.
+        /// @param fromZoneId Starting zone ID.
+        /// @param toZoneId Destination zone ID.
+        /// @return A list of zone IDs representing the route; empty if no valid path exists.
         public List<int> GetRoute(int fromZoneId, int toZoneId)
         {
-            if (fromZoneId == toZoneId)
-                return new List<int> { fromZoneId };
-
-            var visited = new HashSet<int>();
-            var parent = new Dictionary<int, int>();
-            var queue = new Queue<int>();
-
-            queue.Enqueue(fromZoneId);
-            visited.Add(fromZoneId);
+            if (fromZoneId == toZoneId) return new List<int> { fromZoneId };
+            var visited = new HashSet<int>(); var parent = new Dictionary<int, int>(); var queue = new Queue<int>();
+            queue.Enqueue(fromZoneId); visited.Add(fromZoneId);
 
             while (queue.Count > 0)
             {
                 int current = queue.Dequeue();
-                TrafficZone zone = zoneById[current];
-
-                foreach (int next in zone.Downstream)
+                foreach (int next in zoneById[current].Downstream)
                 {
                     if (visited.Contains(next)) continue;
-                    visited.Add(next);
-                    parent[next] = current;
-
+                    visited.Add(next); parent[next] = current;
                     if (next == toZoneId)
                     {
-                        // Reconstruct path
-                        var path = new List<int>();
-                        int node = toZoneId;
-                        while (node != fromZoneId)
-                        {
-                            path.Add(node);
-                            node = parent[node];
-                        }
-                        path.Add(fromZoneId);
-                        path.Reverse();
-                        return path;
+                        var path = new List<int>(); int node = toZoneId;
+                        while (node != fromZoneId) { path.Add(node); node = parent[node]; }
+                        path.Add(fromZoneId); path.Reverse(); return path;
                     }
-
                     queue.Enqueue(next);
                 }
             }
-
-            return new List<int>(); // no path found
+            return new List<int>();
         }
-
-        // ─────────────────────────────────────────────────────────
-        //  Editor Gizmos
-        // ─────────────────────────────────────────────────────────
 
         private void OnDrawGizmos()
         {
             if (!drawGizmos || zones.Count == 0) return;
-
             foreach (var zone in zones)
             {
-                // Color by type and occupancy
                 var col = zone.AisleType switch
                 {
                     AisleType.SpineAisle => new Color(0.1f, 0.7f, 0.5f, 0.15f),
                     AisleType.VerticalAisle => new Color(0.2f, 0.4f, 0.9f, 0.15f),
                     _ => new Color(0.9f, 0.7f, 0.2f, 0.12f),
                 };
+                if (!zone.IsEmpty) { col = Color.Lerp(col, Color.red, 0.4f); col.a = 0.3f; }
+                Gizmos.color = col; Gizmos.DrawCube(zone.Centre, zone.Size);
+                col.a = 0.5f; Gizmos.color = col; Gizmos.DrawWireCube(zone.Centre, zone.Size);
 
-                // Red tint when occupied
-                if (!zone.IsEmpty)
-                {
-                    col = Color.Lerp(col, Color.red, 0.4f);
-                    col.a = 0.3f;
-                }
-
-                Gizmos.color = col;
-                Gizmos.DrawCube(zone.Centre, zone.Size);
-
-                // Outline
-                col.a = 0.5f;
-                Gizmos.color = col;
-                Gizmos.DrawWireCube(zone.Centre, zone.Size);
-
-                // Flow arrow
                 Vector3 flowVec = zone.Flow switch
                 {
                     FlowDirection.East => Vector3.right,
@@ -906,19 +437,12 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                     FlowDirection.South => Vector3.back,
                     _ => Vector3.zero
                 };
-
                 Gizmos.color = new Color(1f, 1f, 0f, 0.4f);
-                Vector3 arrowStart = zone.Centre - 0.3f * zone.Size.x * flowVec;
-                Vector3 arrowEnd = zone.Centre + 0.3f * zone.Size.x * flowVec;
-                Gizmos.DrawLine(arrowStart, arrowEnd);
+                Gizmos.DrawLine(zone.Centre - 0.3f * zone.Size.x * flowVec, zone.Centre + 0.3f * zone.Size.x * flowVec);
 
-                // Dock points
-                foreach (var kvp in zone.DockPoints)
+                foreach (var dp in zone.DockPoints.Values)
                 {
-                    DockPoint dp = kvp.Value;
-                    Gizmos.color = dp.IsPickup
-                        ? new Color(1f, 0.3f, 0.3f, 0.6f)
-                        : new Color(0.3f, 1f, 0.3f, 0.6f);
+                    Gizmos.color = dp.IsPickup ? new Color(1f, 0.3f, 0.3f, 0.6f) : new Color(0.3f, 1f, 0.3f, 0.6f);
                     Gizmos.DrawWireSphere(dp.ApproachPosition, 0.2f);
                     Gizmos.DrawLine(dp.ApproachPosition, dp.HandshakePosition);
                     Gizmos.DrawWireSphere(dp.HandshakePosition, 0.15f);
@@ -927,11 +451,8 @@ namespace Assets.Scripts.Simulation.FactoryLayout
 #if UNITY_EDITOR
                 if (drawLabels)
                 {
-                    string label = zone.IsEmpty
-                        ? zone.Name
-                        : $"{zone.Name} [{string.Join(",", zone.OccupantAgvIds)}]";
-                    UnityEditor.Handles.Label(
-                        zone.Centre + Vector3.up * 0.5f, label);
+                    string label = zone.IsEmpty ? zone.Name : $"{zone.Name} [{string.Join(",", zone.OccupantAgvIds)}]";
+                    UnityEditor.Handles.Label(zone.Centre + Vector3.up * 0.5f, label);
                 }
 #endif
             }

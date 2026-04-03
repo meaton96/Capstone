@@ -9,15 +9,8 @@ using TMPro;
 namespace Assets.Scripts.Simulation.Machines
 {
     /// @brief Handles all visual feedback for a single machine on the factory floor.
-    ///
-    /// @details Manages the machine's mesh colour, overhead UI labels, progress bar,
-    /// queue-length display, and decision-point flash effect. All state changes are
-    /// driven externally by @c PhysicalMachine; this class contains no scheduling logic.
-    ///
-    /// <para><b>Blocked state:</b> When the outgoing conveyor is full after processing,
-    /// <see cref="SetBlockedAfterProcessing"/> hides the progress bar and sets the
-    /// machine to an orange <c>MachineState.Blocked</c> colour so operators can
-    /// immediately see output bottlenecks on the floor.</para>
+    /// @details Manages mesh colour, overhead UI, progress bars, and decision flashes. 
+    /// State changes are driven externally by PhysicalMachine.
     public class MachineVisual : MonoBehaviour
     {
         [Header("Identity")]
@@ -25,7 +18,6 @@ namespace Assets.Scripts.Simulation.Machines
 
         [Header("Rendering")]
         [SerializeField] private MeshRenderer meshRenderer;
-
         [SerializeField] private Vector3 incomingOffset = new Vector3(-2.5f, -.5f, 0f);
         [SerializeField] private Vector3 outgoingOffset = new Vector3(2.5f, -.5f, 0f);
 
@@ -54,24 +46,11 @@ namespace Assets.Scripts.Simulation.Machines
         private int decisionPointCount;
         private readonly List<string> historyLog = new List<string>();
 
-        /// @brief The logical @c Machine data this visual is bound to.
         public Machine CoreMachine => coreMachine;
-
-        /// @brief Unique machine index matching the simulation's machine array.
         public int MachineId => machineId;
-
-        /// @brief The machine's current @c MachineState.
         public MachineState CurrentState => currentState;
-
-        /// @brief Total number of decision points recorded for this machine this episode.
         public int DecisionPointCount => decisionPointCount;
-
-        /// @brief Timestamped log of state transitions and decision events.
         public IReadOnlyList<string> HistoryLog => historyLog;
-
-        // ─────────────────────────────────────────────────────────
-        //  Unity Lifecycle
-        // ─────────────────────────────────────────────────────────
 
         private void Awake()
         {
@@ -90,10 +69,10 @@ namespace Assets.Scripts.Simulation.Machines
             if (instanceMaterial != null) Destroy(instanceMaterial);
         }
 
-        // ─────────────────────────────────────────────────────────
-        //  Initialization
-        // ─────────────────────────────────────────────────────────
-
+        /// @brief Initializes the machine visual identity and binds it to the simulation core.
+        /// @param id The unique machine index.
+        /// @param coreMachineRef Reference to the logical machine data.
+        /// @post State is set to Idle and UI labels are updated.
         public void Initialise(int id, Machine coreMachineRef = null)
         {
             machineId = id;
@@ -105,10 +84,10 @@ namespace Assets.Scripts.Simulation.Machines
             Log($"Initialised at {transform.position}");
         }
 
-        // ─────────────────────────────────────────────────────────
-        //  State Management
-        // ─────────────────────────────────────────────────────────
-
+        /// @brief Transitions the machine to a new operational state and updates visuals.
+        /// @details Updates the mesh color, status text label, and disables progress bars if no longer busy.
+        /// @param newState The target @ref MachineState to apply.
+        /// @post currentState is updated and the history log is appended.
         public void SetState(MachineState newState)
         {
             MachineState previous = currentState;
@@ -126,6 +105,11 @@ namespace Assets.Scripts.Simulation.Machines
             Log($"State: {previous} → {newState}");
         }
 
+        /// @brief Initiates the visual processing phase for a job.
+        /// @param jobId ID of the job being processed.
+        /// @param simStartTime The simulation time at the start of the operation.
+        /// @param duration The calculated processing time.
+        /// @post state becomes Busy and the overhead progress bar is enabled.
         public void BeginOperation(int jobId, float simStartTime, float duration)
         {
             SetState(MachineState.Busy);
@@ -134,6 +118,9 @@ namespace Assets.Scripts.Simulation.Machines
             Log($"Op started: Job {jobId}, dur={duration:F1}");
         }
 
+        /// @brief Resets the machine visual state after a job is successfully released.
+        /// @param jobId ID of the job that finished.
+        /// @post Progress bar is hidden and state returns to Idle.
         public void CompleteOperation(int jobId)
         {
             SetProgressBarVisible(false);
@@ -141,14 +128,10 @@ namespace Assets.Scripts.Simulation.Machines
             Log($"Op completed: Job {jobId}");
         }
 
-        /// <summary>
-        /// Called by <see cref="PhysicalMachine"/> when processing finishes but
-        /// the outgoing conveyor is full. Hides the progress bar and transitions
-        /// to <c>MachineState.Blocked</c> (orange) so the bottleneck is visible.
-        /// The machine will stay in this state until an AGV frees a slot on the
-        /// outgoing belt, at which point <see cref="CompleteOperation"/> is called.
-        /// </summary>
-        /// <param name="jobId">The job being held inside the machine.</param>
+        /// @brief Sets the visual state to Blocked when the output end is obstructed.
+        /// @details Triggered when processing is 100% complete but the outgoing conveyor is at capacity.
+        /// @param jobId The job currently being held inside the machine.
+        /// @post State becomes Blocked (orange) and progress bar is hidden.
         public void SetBlockedAfterProcessing(int jobId)
         {
             SetProgressBarVisible(false);
@@ -156,10 +139,8 @@ namespace Assets.Scripts.Simulation.Machines
             Log($"Blocked: outgoing conveyor full, holding Job {jobId}");
         }
 
-        // ─────────────────────────────────────────────────────────
-        //  Progress Bar
-        // ─────────────────────────────────────────────────────────
-
+        /// @brief Updates the overhead slider value.
+        /// @param normalizedProgress Value between 0.0 and 1.0.
         public void UpdateProgress(float normalizedProgress)
         {
             if (progressBar != null)
@@ -171,42 +152,28 @@ namespace Assets.Scripts.Simulation.Machines
             if (progressBar != null) progressBar.gameObject.SetActive(visible);
         }
 
-        // ─────────────────────────────────────────────────────────
-        //  Queue UI
-        // ─────────────────────────────────────────────────────────
-
+        /// @brief Updates the text label for the incoming machine buffer.
+        /// @param count Number of jobs waiting to be processed.
         public void UpdateIncomingQueueLabel(int count)
         {
             if (incomingQueueLabel != null) incomingQueueLabel.text = $"IN: {count}";
         }
 
+        /// @brief Updates the text label for the outgoing machine buffer.
+        /// @param count Number of jobs waiting for AGV pickup.
         public void UpdateOutgoingQueueLabel(int count)
         {
             if (outgoingQueueLabel != null) outgoingQueueLabel.text = $"OUT: {count}";
         }
 
-        // private void OnDrawGizmosSelected()
-        // {
-        //     Gizmos.color = Color.cyan;
-        //     for (int i = 0; i < 4; i++)
-        //     {
-        //         Vector3 inSlot = transform.position + transform.TransformDirection(incomingOffset)
-        //                        + transform.right * (i * 0.75f);
-        //         Gizmos.DrawWireCube(inSlot, Vector3.one * 0.3f);
-        //     }
-        //     Gizmos.color = Color.yellow;
-        //     for (int i = 0; i < 4; i++)
-        //     {
-        //         Vector3 outSlot = transform.position + transform.TransformDirection(outgoingOffset)
-        //                         + transform.right * (i * 0.75f);
-        //         Gizmos.DrawWireCube(outSlot, Vector3.one * 0.3f);
-        //     }
-        // }
-
-        // ─────────────────────────────────────────────────────────
-        //  Decision-Point Flash
-        // ─────────────────────────────────────────────────────────
-
+        /// @brief Logs a scheduling decision point and triggers visual feedback.
+        /// @details Records state of the queue and the rule choice into the @ref historyLog.
+        /// @param simTime Current simulation clock.
+        /// @param queuedJobIds Array of all jobs currently in the buffer.
+        /// @param chosenJobId The job selected for processing.
+        /// @param ruleName Name of the dispatching rule applied.
+        /// @param flash If true, triggers the mesh color flash effect.
+        /// @post decisionPointCount is incremented.
         public void RecordDecisionPoint(float simTime, int[] queuedJobIds, int chosenJobId, string ruleName, bool flash = true)
         {
             decisionPointCount++;
@@ -217,6 +184,8 @@ namespace Assets.Scripts.Simulation.Machines
             if (flash) Flash();
         }
 
+        /// @brief Initiates a temporary color flash on the machine mesh.
+        /// @post Starts the FlashRoutine coroutine, stopping any existing flash.
         public void Flash()
         {
             if (instanceMaterial == null) return;
@@ -232,10 +201,6 @@ namespace Assets.Scripts.Simulation.Machines
             instanceMaterial.color = baseColour;
             activeFlash = null;
         }
-
-        // ─────────────────────────────────────────────────────────
-        //  Helpers
-        // ─────────────────────────────────────────────────────────
 
         private Color GetColourForState(MachineState state)
         {

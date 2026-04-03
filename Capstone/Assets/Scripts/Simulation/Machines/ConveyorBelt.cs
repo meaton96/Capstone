@@ -3,55 +3,19 @@ using UnityEngine;
 
 namespace Assets.Scripts.Simulation.Machines
 {
-    /// <summary>
-    /// A linear conveyor belt that smoothly moves job visuals between an input
-    /// end and an output end. Jobs pack toward the output, advancing automatically
-    /// when space opens up ahead.
-    ///
-    /// <para><b>Scene Setup:</b></para>
-    /// Place the GameObject near the machine body and point its local Z+
-    /// (forward / blue arrow) <b>away</b> from the machine.
-    ///
-    /// <para><b>For an incoming belt</b> set <see cref="reverseFlow"/> = true.
-    /// Items enter at the far end (where AGVs arrive) and slide back toward
-    /// the machine (the origin).</para>
-    ///
-    /// <para><b>For an outgoing belt</b> leave <see cref="reverseFlow"/> = false.
-    /// Items enter at the origin (where the machine drops them) and slide out
-    /// toward the far end (where AGVs pick up).</para>
-    ///
-    /// Both conveyors can share the same orientation — origin at machine,
-    /// forward pointing away — just flip the checkbox.
-    /// </summary>
+    /// @brief A linear conveyor belt that smoothly moves job visuals between an input end and an output end.
+    /// @details Jobs pack toward the output, advancing automatically when space opens up ahead. 
+    /// Orientation is determined by the transform's forward vector, while the flow direction is 
+    /// toggled via the @ref reverseFlow flag.
     public class ConveyorBelt : MonoBehaviour
     {
-        // ─────────────────────────────────────────────────────────
-        //  Inspector
-        // ─────────────────────────────────────────────────────────
-
-        [Header("Belt Configuration")]
-        [Tooltip("Maximum jobs the belt can hold at once.")]
         [SerializeField] private int capacity = 3;
-
-        [Tooltip("World-space distance between adjacent slot centers.")]
         [SerializeField] private float slotSpacing = 0.5f;
-
-        [Tooltip("Speed at which visuals slide along the belt (units/sec).")]
         [SerializeField] private float beltSpeed = 3f;
-
-        [Tooltip("Height offset above the belt surface for job tokens.")]
         [SerializeField] private float heightOffset = 0.5f;
 
-        [Header("Flow Direction")]
-        [Tooltip("When FALSE (outgoing): items enter at the origin and flow " +
-                 "outward along forward toward the far end.\n\n" +
-                 "When TRUE (incoming): items enter at the far end and flow " +
-                 "back toward the origin (the machine).")]
+        [Tooltip("FALSE (outgoing): items enter at origin and flow out.\nTRUE (incoming): items enter at far end and flow back.")]
         [SerializeField] private bool reverseFlow = false;
-
-        // ─────────────────────────────────────────────────────────
-        //  Internal Data
-        // ─────────────────────────────────────────────────────────
 
         private class BeltEntry
         {
@@ -61,90 +25,64 @@ namespace Assets.Scripts.Simulation.Machines
             public Vector3 TargetWorldPos;
         }
 
-        // Ordered front-to-back: entries[0] is nearest the OUTPUT end.
         private readonly List<BeltEntry> entries = new List<BeltEntry>();
-
-        // ─────────────────────────────────────────────────────────
-        //  Properties
-        // ─────────────────────────────────────────────────────────
 
         public int Count => entries.Count;
         public bool IsFull => entries.Count >= capacity;
         public bool IsEmpty => entries.Count == 0;
         public int Capacity { get { return capacity; } set { capacity = value; } }
 
-        /// <summary>Total world-space length of the belt.</summary>
         public float BeltLength => (capacity - 1) * slotSpacing;
 
-        /// <summary>World position at the origin end (transform.position + height).</summary>
-        private Vector3 OriginEnd =>
-            transform.position + Vector3.up * heightOffset;
+        private Vector3 OriginEnd => transform.position + Vector3.up * heightOffset;
 
-        /// <summary>World position at the far end (along forward + height).</summary>
-        private Vector3 FarEnd =>
-            transform.position
-            + transform.forward * BeltLength
-            + Vector3.up * heightOffset;
+        private Vector3 FarEnd => transform.position + transform.forward * BeltLength + Vector3.up * heightOffset;
 
-        /// <summary>
-        /// World position where new items enter the belt.
-        /// reverseFlow OFF → origin.  reverseFlow ON → far end.
-        /// </summary>
         public Vector3 InputEndPosition => reverseFlow ? FarEnd : OriginEnd;
 
-        /// <summary>
-        /// World position where items leave the belt.
-        /// reverseFlow OFF → far end.  reverseFlow ON → origin.
-        /// </summary>
         public Vector3 OutputEndPosition => reverseFlow ? OriginEnd : FarEnd;
 
-        // ─────────────────────────────────────────────────────────
-        //  Slot Geometry
-        // ─────────────────────────────────────────────────────────
-
-        /// <summary>
-        /// Returns the world position of the given slot index.
-        /// Slot 0 is always at the OUTPUT end; slot (capacity-1) at the INPUT end.
-        /// The <see cref="reverseFlow"/> flag controls which physical end those map to.
-        /// </summary>
+        /// @brief Calculates the world-space coordinate for a specific belt slot.
+        ///
+        /// @details Slot 0 is always the output end, and slot (capacity-1) is the input end. 
+        /// The physical mapping of these indices to @ref OriginEnd or @ref FarEnd is 
+        /// determined by the @ref reverseFlow state.
+        ///
+        /// @param slotIndex The index of the slot to query.
+        /// @return The world-space Vector3 position of the slot.
         private Vector3 GetSlotWorldPosition(int slotIndex)
         {
             if (reverseFlow)
             {
-                // OUTPUT = origin (near machine), INPUT = far end.
-                // Slot 0 (output) at origin; higher slots toward far end.
                 float dist = slotIndex * slotSpacing;
-                return transform.position
-                       + transform.forward * dist
-                       + Vector3.up * heightOffset;
+                return transform.position + transform.forward * dist + Vector3.up * heightOffset;
             }
             else
             {
-                // OUTPUT = far end, INPUT = origin.
-                // Slot 0 (output) at far end; higher slots toward origin.
                 float dist = (capacity - 1 - slotIndex) * slotSpacing;
-                return transform.position
-                       + transform.forward * dist
-                       + Vector3.up * heightOffset;
+                return transform.position + transform.forward * dist + Vector3.up * heightOffset;
             }
         }
 
-        /// <summary>Entry at list index i targets slot i (packed toward output).</summary>
+        /// @brief Maps a list entry index to a target world slot.
+        /// @param entryIndex The index of the entry in the packed list.
+        /// @return The world position the entry should move toward.
         private Vector3 GetTargetForEntry(int entryIndex)
         {
             return GetSlotWorldPosition(entryIndex);
         }
 
-        // ─────────────────────────────────────────────────────────
-        //  Public API — Enqueue / Dequeue
-        // ─────────────────────────────────────────────────────────
-
-        /// <summary>
-        /// Places a job at the input end of the belt.
-        /// The visual is snapped to the input position and will smoothly
-        /// slide toward the output end as space allows.
-        /// </summary>
-        /// <returns>True if the job was accepted; false if full or duplicate.</returns>
+        /// @brief Attempts to place a job at the input end of the belt.
+        ///
+        /// @details If the belt has capacity and the job is not a duplicate, a new entry 
+        /// is created. The @p visual is snapped to the input position and flagged 
+        /// as being handled by a conveyor.
+        ///
+        /// @param jobId The unique ID of the job.
+        /// @param visual The visual component associated with the job.
+        ///
+        /// @return True if the job was successfully enqueued; otherwise, false.
+        /// @post Job count increases by one; @ref entries is updated.
         public bool TryEnqueue(int jobId, JobVisual visual)
         {
             if (IsFull) return false;
@@ -171,22 +109,21 @@ namespace Assets.Scripts.Simulation.Machines
             return true;
         }
 
-        /// <summary>Peek at the front (output-end) job without removing.</summary>
-        public int PeekFront()
-        {
-            return entries.Count > 0 ? entries[0].JobId : -1;
-        }
+        /// @brief Retrieves the ID of the job at the output end without removing it.
+        /// @return The job ID, or -1 if the belt is empty.
+        public int PeekFront() => entries.Count > 0 ? entries[0].JobId : -1;
 
-        /// <summary>Peek at the front visual without removing.</summary>
-        public JobVisual PeekFrontVisual()
-        {
-            return entries.Count > 0 ? entries[0].Visual : null;
-        }
+        /// @brief Retrieves the visual of the job at the output end without removing it.
+        /// @return The JobVisual component, or null if the belt is empty.
+        public JobVisual PeekFrontVisual() => entries.Count > 0 ? entries[0].Visual : null;
 
-        /// <summary>
-        /// Removes and returns the front (output-end) job.
-        /// All remaining jobs shift one slot toward the output.
-        /// </summary>
+        /// @brief Removes and returns the job at the output end of the belt.
+        ///
+        /// @details Dequeues the front entry, releases the visual from conveyor control, 
+        /// and triggers a target recalculation so remaining jobs shift forward.
+        ///
+        /// @pre Belt must not be empty.
+        /// @post The @ref entries list count decreases; remaining items update their @ref TargetWorldPos.
         public (int jobId, JobVisual visual) DequeueFront()
         {
             if (entries.Count == 0) return (-1, null);
@@ -201,10 +138,13 @@ namespace Assets.Scripts.Simulation.Machines
             return (front.JobId, front.Visual);
         }
 
-        /// <summary>
-        /// Removes a specific job by ID from anywhere on the belt.
-        /// Remaining jobs repack toward the output end.
-        /// </summary>
+        /// @brief Removes a specific job ID from any position on the belt.
+        ///
+        /// @details Locates the entry matching @p jobId, removes it, and repacks the 
+        /// remaining items toward the output end.
+        ///
+        /// @param jobId The ID of the job to remove.
+        /// @return The visual associated with the removed job, or null if not found.
         public JobVisual RemoveJob(int jobId)
         {
             for (int i = 0; i < entries.Count; i++)
@@ -221,7 +161,9 @@ namespace Assets.Scripts.Simulation.Machines
             return null;
         }
 
-        /// <summary>True if the given job is currently on this belt.</summary>
+        /// @brief Checks if a specific job is currently managed by this belt.
+        /// @param jobId The ID to search for.
+        /// @return True if the ID exists in the current @ref entries list.
         public bool Contains(int jobId)
         {
             for (int i = 0; i < entries.Count; i++)
@@ -229,7 +171,8 @@ namespace Assets.Scripts.Simulation.Machines
             return false;
         }
 
-        /// <summary>All job IDs on the belt, ordered output to input.</summary>
+        /// @brief Generates a list of all job IDs currently on the belt.
+        /// @return An ordered list of IDs from output to input end.
         public List<int> GetJobIds()
         {
             var ids = new List<int>(entries.Count);
@@ -237,7 +180,8 @@ namespace Assets.Scripts.Simulation.Machines
             return ids;
         }
 
-        /// <summary>Removes all jobs and releases visuals from conveyor control.</summary>
+        /// @brief Forcefully clears all jobs from the belt.
+        /// @post Visuals are released from conveyor control and the @ref entries list is emptied.
         public void Clear()
         {
             foreach (var e in entries)
@@ -245,16 +189,16 @@ namespace Assets.Scripts.Simulation.Machines
             entries.Clear();
         }
 
-        // ─────────────────────────────────────────────────────────
-        //  Movement
-        // ─────────────────────────────────────────────────────────
-
+        /// @brief Updates target positions for all entries based on their current list index.
         private void RecalculateTargets()
         {
             for (int i = 0; i < entries.Count; i++)
                 entries[i].TargetWorldPos = GetTargetForEntry(i);
         }
 
+        /// @brief Unity update loop driving the smooth sliding of items along the belt.
+        /// @details Iterates through entries and moves their world positions toward 
+        /// their calculated slot targets at a constant speed.
         private void Update()
         {
             if (entries.Count == 0) return;
@@ -273,60 +217,47 @@ namespace Assets.Scripts.Simulation.Machines
                     continue;
                 }
 
-                e.CurrentWorldPos = Vector3.MoveTowards(
-                    e.CurrentWorldPos, e.TargetWorldPos, step);
+                e.CurrentWorldPos = Vector3.MoveTowards(e.CurrentWorldPos, e.TargetWorldPos, step);
 
                 if (e.Visual != null)
                     e.Visual.transform.position = e.CurrentWorldPos;
             }
         }
 
-        // ─────────────────────────────────────────────────────────
-        //  Editor Gizmos
-        // ─────────────────────────────────────────────────────────
-
+        /// @brief Renders the belt spine, slots, and flow direction in the Unity Editor.
         private void OnDrawGizmos()
         {
             if (capacity <= 0) return;
 
             Vector3 origin = transform.position + Vector3.up * heightOffset;
-            Vector3 far = transform.position
-                + transform.forward * BeltLength
-                + Vector3.up * heightOffset;
+            Vector3 far = transform.position + transform.forward * BeltLength + Vector3.up * heightOffset;
 
-            // Belt spine
             Gizmos.color = new Color(0.3f, 0.8f, 1f, 0.6f);
             Gizmos.DrawLine(origin, far);
 
-            // Slots — color-coded by role
             for (int i = 0; i < capacity; i++)
             {
                 Vector3 pos = GetSlotWorldPosition(i);
                 bool isOutput = (i == 0);
                 bool isInput = (i == capacity - 1);
 
-                if (isOutput)
-                    Gizmos.color = new Color(1f, 0.3f, 0.3f, 0.8f);   // red = output
-                else if (isInput)
-                    Gizmos.color = new Color(0.3f, 1f, 0.3f, 0.8f);   // green = input
-                else
-                    Gizmos.color = new Color(0.3f, 0.8f, 1f, 0.4f);   // cyan = middle
+                if (isOutput) Gizmos.color = new Color(1f, 0.3f, 0.3f, 0.8f);
+                else if (isInput) Gizmos.color = new Color(0.3f, 1f, 0.3f, 0.8f);
+                else Gizmos.color = new Color(0.3f, 0.8f, 1f, 0.4f);
 
                 Gizmos.DrawWireCube(pos, Vector3.one * 0.25f);
             }
 
-            // Flow arrow in item movement direction
             Vector3 mid = (origin + far) * 0.5f;
             Vector3 flowDir = reverseFlow ? -transform.forward : transform.forward;
             Gizmos.color = Color.yellow;
             Gizmos.DrawRay(mid, flowDir * slotSpacing * 0.6f);
 
-            // Spheres marking input/output ends
             Gizmos.color = new Color(0.3f, 1f, 0.3f, 0.9f);
-            Gizmos.DrawWireSphere(InputEndPosition, 0.15f);  // green = input
+            Gizmos.DrawWireSphere(InputEndPosition, 0.15f);
 
             Gizmos.color = new Color(1f, 0.3f, 0.3f, 0.9f);
-            Gizmos.DrawWireSphere(OutputEndPosition, 0.15f); // red = output
+            Gizmos.DrawWireSphere(OutputEndPosition, 0.15f);
         }
     }
 }
