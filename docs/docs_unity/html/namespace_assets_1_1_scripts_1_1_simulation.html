@@ -95,16 +95,36 @@ $(function(){initNavTree('namespace_assets_1_1_scripts_1_1_simulation.html','','
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:FactoryLayoutManager" id="r_FactoryLayoutManager"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager.html">FactoryLayoutManager</a></td></tr>
-<tr class="memitem:MachineVisual" id="r_MachineVisual"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual.html">MachineVisual</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine.html" title="Represents a single machine on the shop floor.">Machine</a> operating states — mirrors the core DES <a class="el" href="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine.html" title="Represents a single machine on the shop floor.">Machine</a> states.  <a href="class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual.html#details">More...</a><br /></td></tr>
+<tr class="memitem:JobTracker" id="r_JobTracker"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker.html">JobTracker</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Runtime tracking data for a single job across all of its operations.  <a href="class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker.html#details">More...</a><br /></td></tr>
+<tr class="memitem:JobManager" id="r_JobManager"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_job_manager.html">JobManager</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates, tracks, and updates all jobs in a simulation episode.  <a href="class_assets_1_1_scripts_1_1_simulation_1_1_job_manager.html#details">More...</a><br /></td></tr>
+<tr class="memitem:JobVisual" id="r_JobVisual"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_job_visual.html">JobVisual</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Visual token representing a single job on the factory floor.  <a href="class_assets_1_1_scripts_1_1_simulation_1_1_job_visual.html#details">More...</a><br /></td></tr>
+<tr class="memitem:SchedulingAgent" id="r_SchedulingAgent"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent.html">SchedulingAgent</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">ML-Agents <code>Agent</code> subclass that drives job-shop scheduling decisions.  <a href="class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent.html#details">More...</a><br /></td></tr>
 <tr class="memitem:DecisionRequest" id="r_DecisionRequest"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request.html">DecisionRequest</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Snapshot of the DES state at a decision point, presented to the agent (or fixed rule) so it can choose an action.  <a href="struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Snapshot of the state presented to the agent when a scheduling decision is needed.  <a href="struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request.html#details">More...</a><br /></td></tr>
 <tr class="memitem:StepResult" id="r_StepResult"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_assets_1_1_scripts_1_1_simulation_1_1_step_result.html">StepResult</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returned by <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html#a54f762ba8e222fcc8cfde852c459562e" title="SimulationBridge.Step">SimulationBridge.Step</a> after the agent's action is applied.  <a href="struct_assets_1_1_scripts_1_1_simulation_1_1_step_result.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result returned by <code><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html#a8d81d85edf95a798dd0e6ee4da84a9c1" title="Applies the agent&#39;s chosen dispatching rule to CurrentDecision.">SimulationBridge.Step()</a></code> after applying a dispatching rule.  <a href="struct_assets_1_1_scripts_1_1_simulation_1_1_step_result.html#details">More...</a><br /></td></tr>
 <tr class="memitem:EpisodeResult" id="r_EpisodeResult"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result.html">EpisodeResult</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Final episode statistics, emitted via SimulationBridge.OnEpisodeFinished.  <a href="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Summary statistics produced when an episode ends.  <a href="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result.html#details">More...</a><br /></td></tr>
 <tr class="memitem:SimulationBridge" id="r_SimulationBridge"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html">SimulationBridge</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Central coordinator between the Unity physics simulation and the scheduling agent.  <a href="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html#details">More...</a><br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:ab99ecd1dad64c1ad442ca809788c0d05" id="r_ab99ecd1dad64c1ad442ca809788c0d05"><td class="memItemLeft"><a id="ab99ecd1dad64c1ad442ca809788c0d05" name="ab99ecd1dad64c1ad442ca809788c0d05"></a>enum &#160;</td><td class="memItemRight"><a class="el" href="#ab99ecd1dad64c1ad442ca809788c0d05">JobLifecycleState</a> { <br />
+&#160;&#160;<b>NotStarted</b>
+, <b>Queued</b>
+, <b>Processing</b>
+, <b>WaitingForTransport</b>
+, <br />
+&#160;&#160;<b>InTransit</b>
+, <b>Complete</b>
+<br />
+ }</td></tr>
+<tr class="memdesc:ab99ecd1dad64c1ad442ca809788c0d05"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lifecycle states a job passes through from creation to completion. <br /></td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->

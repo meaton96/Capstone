@@ -1,0 +1,116 @@
+\doxysection{Assets.\+Scripts.\+Simulation.\+Scheduling\+Agent Class Reference}
+\hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent}{}\label{class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent}\index{Assets.Scripts.Simulation.SchedulingAgent@{Assets.Scripts.Simulation.SchedulingAgent}}
+
+
+ML-\/\+Agents {\ttfamily Agent} subclass that drives job-\/shop scheduling decisions.  
+
+
+Inheritance diagram for Assets.\+Scripts.\+Simulation.\+Scheduling\+Agent:\+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent_ab69d116b9d52d39549588717ecf155fc}\label{class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent_ab69d116b9d52d39549588717ecf155fc} 
+override void {\bfseries Initialize} ()
+\begin{DoxyCompactList}\small\item\em One-\/time agent setup called by ML-\/\+Agents on first activation. \end{DoxyCompactList}\item 
+override void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent_aaf471be28804484ab94a515831ab314a}{On\+Episode\+Begin}} ()
+\begin{DoxyCompactList}\small\item\em Resets the simulation and begins a new physics episode. \end{DoxyCompactList}\item 
+override void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent_a7143c16091b5258ee2945185ce6e1f23}{Collect\+Observations}} (Vector\+Sensor sensor)
+\begin{DoxyCompactList}\small\item\em Builds the observation vector sent to the neural network. \end{DoxyCompactList}\item 
+override void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent_ac346483ded6edef052cc8880edb75680}{On\+Action\+Received}} (Action\+Buffers actions)
+\begin{DoxyCompactList}\small\item\em Receives the network\textquotesingle{}s chosen action and applies it to the simulation. \end{DoxyCompactList}\item 
+override void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent_ac24f7362465d841b589a35ef9a84b65a}{Heuristic}} (in Action\+Buffers actions\+Out)
+\begin{DoxyCompactList}\small\item\em Heuristic fallback:\+ always selects action 0 (first dispatching rule). \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent_aebb519fa43c21666ac9358d500a2b9e0}\label{class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent_aebb519fa43c21666ac9358d500a2b9e0} 
+override void {\bfseries On\+Enable} ()
+\begin{DoxyCompactList}\small\item\em Subscribes to the bridge\textquotesingle{}s decision-\/required event. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent_aa1fce6c7862e3dbd42ad9daee95ee3da}\label{class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent_aa1fce6c7862e3dbd42ad9daee95ee3da} 
+override void {\bfseries On\+Disable} ()
+\begin{DoxyCompactList}\small\item\em Unsubscribes from the bridge\textquotesingle{}s decision-\/required event. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent_acff3c95eb198077691f8d56e286f5eb3}\label{class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent_acff3c95eb198077691f8d56e286f5eb3} 
+int {\bfseries Observation\+Size}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em Total number of floats in one observation vector. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+ML-\/\+Agents {\ttfamily Agent} subclass that drives job-\/shop scheduling decisions. 
+
+Listens for {\ttfamily \doxylink{struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request}{Decision\+Request}} events from the {\ttfamily \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge}{Simulation\+Bridge}}, collects a fixed-\/width observation vector describing the current machine queue, and maps a discrete action index to a dispatching rule applied via {\ttfamily \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a8d81d85edf95a798dd0e6ee4da84a9c1}{Simulation\+Bridge.\+Step()}}. 
+
+\label{doc-func-members}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent_a7143c16091b5258ee2945185ce6e1f23}\index{Assets.Scripts.Simulation.SchedulingAgent@{Assets.Scripts.Simulation.SchedulingAgent}!CollectObservations@{CollectObservations}}
+\index{CollectObservations@{CollectObservations}!Assets.Scripts.Simulation.SchedulingAgent@{Assets.Scripts.Simulation.SchedulingAgent}}
+\doxysubsubsection{\texorpdfstring{CollectObservations()}{CollectObservations()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent_a7143c16091b5258ee2945185ce6e1f23} 
+override void Assets.\+Scripts.\+Simulation.\+Scheduling\+Agent.\+Collect\+Observations (\begin{DoxyParamCaption}\item[{Vector\+Sensor}]{sensor}{}\end{DoxyParamCaption})}
+
+
+
+Builds the observation vector sent to the neural network. 
+
+Writes six scalar context values followed by a fixed-\/width padded block of {\ttfamily max\+Queue\+Slots} (job-\/id, duration) pairs. All slots beyond the actual queue length are zero-\/padded so the vector size remains constant across episodes.
+
+
+\begin{DoxyParams}{Parameters}
+{\em sensor} & The {\ttfamily Vector\+Sensor} provided by ML-\/\+Agents. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent_ac24f7362465d841b589a35ef9a84b65a}\index{Assets.Scripts.Simulation.SchedulingAgent@{Assets.Scripts.Simulation.SchedulingAgent}!Heuristic@{Heuristic}}
+\index{Heuristic@{Heuristic}!Assets.Scripts.Simulation.SchedulingAgent@{Assets.Scripts.Simulation.SchedulingAgent}}
+\doxysubsubsection{\texorpdfstring{Heuristic()}{Heuristic()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent_ac24f7362465d841b589a35ef9a84b65a} 
+override void Assets.\+Scripts.\+Simulation.\+Scheduling\+Agent.\+Heuristic (\begin{DoxyParamCaption}\item[{in Action\+Buffers}]{actions\+Out}{}\end{DoxyParamCaption})}
+
+
+
+Heuristic fallback:\+ always selects action 0 (first dispatching rule). 
+
+
+\begin{DoxyParams}{Parameters}
+{\em actions\+Out} & Action buffer to write the heuristic choice into. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent_ac346483ded6edef052cc8880edb75680}\index{Assets.Scripts.Simulation.SchedulingAgent@{Assets.Scripts.Simulation.SchedulingAgent}!OnActionReceived@{OnActionReceived}}
+\index{OnActionReceived@{OnActionReceived}!Assets.Scripts.Simulation.SchedulingAgent@{Assets.Scripts.Simulation.SchedulingAgent}}
+\doxysubsubsection{\texorpdfstring{OnActionReceived()}{OnActionReceived()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent_ac346483ded6edef052cc8880edb75680} 
+override void Assets.\+Scripts.\+Simulation.\+Scheduling\+Agent.\+On\+Action\+Received (\begin{DoxyParamCaption}\item[{Action\+Buffers}]{actions}{}\end{DoxyParamCaption})}
+
+
+
+Receives the network\textquotesingle{}s chosen action and applies it to the simulation. 
+
+Maps the discrete action index to a dispatching rule via {\ttfamily \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a8d81d85edf95a798dd0e6ee4da84a9c1}{Simulation\+Bridge.\+Step()}}, accumulates the returned reward, and ends the episode if the bridge signals completion. The next {\ttfamily Request\+Decision()} call is driven by the {\ttfamily Handle\+Decision\+Required} event, not called here directly.
+
+
+\begin{DoxyParams}{Parameters}
+{\em actions} & Action buffers provided by ML-\/\+Agents. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent_aaf471be28804484ab94a515831ab314a}\index{Assets.Scripts.Simulation.SchedulingAgent@{Assets.Scripts.Simulation.SchedulingAgent}!OnEpisodeBegin@{OnEpisodeBegin}}
+\index{OnEpisodeBegin@{OnEpisodeBegin}!Assets.Scripts.Simulation.SchedulingAgent@{Assets.Scripts.Simulation.SchedulingAgent}}
+\doxysubsubsection{\texorpdfstring{OnEpisodeBegin()}{OnEpisodeBegin()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent_aaf471be28804484ab94a515831ab314a} 
+override void Assets.\+Scripts.\+Simulation.\+Scheduling\+Agent.\+On\+Episode\+Begin (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Resets the simulation and begins a new physics episode. 
+
+Delegates full episode setup to {\ttfamily \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a5d8b43c53cd38a61470816de22f1fd0c}{Simulation\+Bridge.\+Start\+Episode()}}. The bridge spawns jobs which physically enter machine trigger colliders, causing {\ttfamily Handle\+Decision\+Required} to fire and wake this agent when the first scheduling decision is needed. 
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Simulation/\+Scheduling\+Agent.\+cs\end{DoxyCompactItemize}

@@ -1,0 +1,57 @@
+\doxysection{Assets.\+Scripts.\+Logging Namespace Reference}
+\hypertarget{namespace_assets_1_1_scripts_1_1_logging}{}\label{namespace_assets_1_1_scripts_1_1_logging}\index{Assets.Scripts.Logging@{Assets.Scripts.Logging}}
+\doxysubsubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class {\bfseries Sim\+Logger}
+\begin{DoxyCompactList}\small\item\em Static levelled logger that gates {\ttfamily Unity\+Engine.\+Debug} output behind a configurable verbosity threshold. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_logging_a0d54784f0b518837381332917d2002ee}{Log\+Level}} \{ \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_logging_a0d54784f0b518837381332917d2002eea902b0d55fddef6f8d651fe1035b7d4bd}{Error}} = 0
+, \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_logging_a0d54784f0b518837381332917d2002eea28d0edd045e05cf5af64e35ae0c4c6ef}{Low}} = 1
+, \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_logging_a0d54784f0b518837381332917d2002eea87f8a6ab85c9ced3702b4ea641ad4bb5}{Medium}} = 2
+, \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_logging_a0d54784f0b518837381332917d2002eea655d20c1ca69519ca647684edbb2db35}{High}} = 3
+ \}
+\begin{DoxyCompactList}\small\item\em Verbosity levels for {\ttfamily Sim\+Logger}, ordered from least to most detailed. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\label{doc-enum-members}
+\Hypertarget{namespace_assets_1_1_scripts_1_1_logging_doc-enum-members}
+\doxysubsection{Enumeration Type Documentation}
+\Hypertarget{namespace_assets_1_1_scripts_1_1_logging_a0d54784f0b518837381332917d2002ee}\index{Assets.Scripts.Logging@{Assets.Scripts.Logging}!LogLevel@{LogLevel}}
+\index{LogLevel@{LogLevel}!Assets.Scripts.Logging@{Assets.Scripts.Logging}}
+\doxysubsubsection{\texorpdfstring{LogLevel}{LogLevel}}
+{\footnotesize\ttfamily \label{namespace_assets_1_1_scripts_1_1_logging_a0d54784f0b518837381332917d2002ee} 
+enum \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_logging_a0d54784f0b518837381332917d2002ee}{Assets.\+Scripts.\+Logging.\+Log\+Level}}}
+
+
+
+Verbosity levels for {\ttfamily Sim\+Logger}, ordered from least to most detailed. 
+
+\begin{DoxyEnumFields}[2]{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{Error@{Error}!Assets.Scripts.Logging@{Assets.Scripts.Logging}}
+\index{Assets.Scripts.Logging@{Assets.Scripts.Logging}!Error@{Error}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_logging_a0d54784f0b518837381332917d2002eea902b0d55fddef6f8d651fe1035b7d4bd}\label{namespace_assets_1_1_scripts_1_1_logging_a0d54784f0b518837381332917d2002eea902b0d55fddef6f8d651fe1035b7d4bd} 
+Error&Critical errors only. Always printed regardless of the active level. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{Low@{Low}!Assets.Scripts.Logging@{Assets.Scripts.Logging}}
+\index{Assets.Scripts.Logging@{Assets.Scripts.Logging}!Low@{Low}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_logging_a0d54784f0b518837381332917d2002eea28d0edd045e05cf5af64e35ae0c4c6ef}\label{namespace_assets_1_1_scripts_1_1_logging_a0d54784f0b518837381332917d2002eea28d0edd045e05cf5af64e35ae0c4c6ef} 
+Low&High-\/level milestones:\+ episode start/\+end, makespan, decision count. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{Medium@{Medium}!Assets.Scripts.Logging@{Assets.Scripts.Logging}}
+\index{Assets.Scripts.Logging@{Assets.Scripts.Logging}!Medium@{Medium}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_logging_a0d54784f0b518837381332917d2002eea87f8a6ab85c9ced3702b4ea641ad4bb5}\label{namespace_assets_1_1_scripts_1_1_logging_a0d54784f0b518837381332917d2002eea87f8a6ab85c9ced3702b4ea641ad4bb5} 
+Medium&Per-\/decision and per-\/job state transitions. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{High@{High}!Assets.Scripts.Logging@{Assets.Scripts.Logging}}
+\index{Assets.Scripts.Logging@{Assets.Scripts.Logging}!High@{High}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_logging_a0d54784f0b518837381332917d2002eea655d20c1ca69519ca647684edbb2db35}\label{namespace_assets_1_1_scripts_1_1_logging_a0d54784f0b518837381332917d2002eea655d20c1ca69519ca647684edbb2db35} 
+High&Frame-\/level detail:\+ AGV dispatches, queue arrivals, progress ticks. \\
+\hline
+
+\end{DoxyEnumFields}

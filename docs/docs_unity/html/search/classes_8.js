@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['taillardinstance_0',['TaillardInstance',['../class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance.html',1,'Assets::Scripts::Scheduling::Data']]],
-  ['taillardmetadata_1',['TaillardMetadata',['../class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_metadata.html',1,'Assets::Scripts::Scheduling::Data']]],
-  ['taillardvalidator_2',['TaillardValidator',['../class_assets_1_1_scripts_1_1_scheduling_1_1_unity_1_1_taillard_validator.html',1,'Assets::Scripts::Scheduling::Unity']]]
+  ['machine_0',['Machine',['../class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine.html',1,'Assets.Scripts.Scheduling.Core.Machine'],['../classmirror__des_1_1_machine.html',1,'mirror_des.Machine']]],
+  ['machinestate_1',['MachineState',['../classmirror__des_1_1_machine_state.html',1,'mirror_des']]],
+  ['machinevisual_2',['MachineVisual',['../class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_machine_visual.html',1,'Assets::Scripts::Simulation::Machines']]]
 ];

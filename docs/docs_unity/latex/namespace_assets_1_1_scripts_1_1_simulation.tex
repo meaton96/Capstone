@@ -3,15 +3,33 @@
 \doxysubsubsection*{Classes}
 \begin{DoxyCompactItemize}
 \item 
-class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_manager}{Factory\+Layout\+Manager}}
-\item 
-class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machine_visual}{Machine\+Visual}}
-\begin{DoxyCompactList}\small\item\em \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine}{Machine} operating states — mirrors the core DES \doxylink{class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine}{Machine} states. \end{DoxyCompactList}\item 
+class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker}{Job\+Tracker}}
+\begin{DoxyCompactList}\small\item\em Runtime tracking data for a single job across all of its operations. \end{DoxyCompactList}\item 
+class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_job_manager}{Job\+Manager}}
+\begin{DoxyCompactList}\small\item\em Creates, tracks, and updates all jobs in a simulation episode. \end{DoxyCompactList}\item 
+class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_job_visual}{Job\+Visual}}
+\begin{DoxyCompactList}\small\item\em Visual token representing a single job on the factory floor. \end{DoxyCompactList}\item 
+class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent}{Scheduling\+Agent}}
+\begin{DoxyCompactList}\small\item\em ML-\/\+Agents {\ttfamily Agent} subclass that drives job-\/shop scheduling decisions. \end{DoxyCompactList}\item 
 struct \doxymbox{\hyperlink{struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request}{Decision\+Request}}
-\begin{DoxyCompactList}\small\item\em Snapshot of the DES state at a decision point, presented to the agent (or fixed rule) so it can choose an action. \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em Snapshot of the state presented to the agent when a scheduling decision is needed. \end{DoxyCompactList}\item 
 struct \doxymbox{\hyperlink{struct_assets_1_1_scripts_1_1_simulation_1_1_step_result}{Step\+Result}}
-\begin{DoxyCompactList}\small\item\em Returned by \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a54f762ba8e222fcc8cfde852c459562e}{Simulation\+Bridge.\+Step} after the agent\textquotesingle{}s action is applied. \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em Result returned by {\ttfamily \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a8d81d85edf95a798dd0e6ee4da84a9c1}{Simulation\+Bridge.\+Step()}} after applying a dispatching rule. \end{DoxyCompactList}\item 
 struct \doxymbox{\hyperlink{struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result}{Episode\+Result}}
-\begin{DoxyCompactList}\small\item\em Final episode statistics, emitted via Simulation\+Bridge.\+On\+Episode\+Finished. \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em Summary statistics produced when an episode ends. \end{DoxyCompactList}\item 
 class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge}{Simulation\+Bridge}}
-\end{DoxyCompactItemize}
+\begin{DoxyCompactList}\small\item\em Central coordinator between the Unity physics simulation and the scheduling agent. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{namespace_assets_1_1_scripts_1_1_simulation_ab99ecd1dad64c1ad442ca809788c0d05}\label{namespace_assets_1_1_scripts_1_1_simulation_ab99ecd1dad64c1ad442ca809788c0d05} 
+enum \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_simulation_ab99ecd1dad64c1ad442ca809788c0d05}{Job\+Lifecycle\+State}} \{ \newline
+{\bfseries Not\+Started}
+, {\bfseries Queued}
+, {\bfseries Processing}
+, {\bfseries Waiting\+For\+Transport}
+, \newline
+{\bfseries In\+Transit}
+, {\bfseries Complete}
+ \}
+\begin{DoxyCompactList}\small\item\em Lifecycle states a job passes through from creation to completion. \end{DoxyCompactList}\end{DoxyCompactItemize}

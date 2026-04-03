@@ -1,0 +1,38 @@
+\doxysection{Orbit\+Camera Class Reference}
+\hypertarget{class_orbit_camera}{}\label{class_orbit_camera}\index{OrbitCamera@{OrbitCamera}}
+
+
+Continuously orbits the camera around a target Transform.  
+
+
+Inheritance diagram for Orbit\+Camera:\+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_orbit_camera}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_orbit_camera_af65ae929a8138327191e074922911bd9}\label{class_orbit_camera_af65ae929a8138327191e074922911bd9} 
+Transform {\bfseries target}
+\item 
+\Hypertarget{class_orbit_camera_a25b2916eb96a8302ac1971cf46c70754}\label{class_orbit_camera_a25b2916eb96a8302ac1971cf46c70754} 
+float {\bfseries orbit\+Speed} = 20f
+\item 
+\Hypertarget{class_orbit_camera_a97f2d386e574cd691c85f4aea5683006}\label{class_orbit_camera_a97f2d386e574cd691c85f4aea5683006} 
+float {\bfseries zoom\+Distance} = 10f
+\item 
+\Hypertarget{class_orbit_camera_a140572d60385e732d7e1a3730150defd}\label{class_orbit_camera_a140572d60385e732d7e1a3730150defd} 
+float {\bfseries height\+Offset} = 2f
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Continuously orbits the camera around a target Transform. 
+
+Each {\ttfamily Late\+Update} the camera advances its yaw angle by {\ttfamily orbit\+Speed} degrees per real-\/world second (unaffected by {\ttfamily Time.\+time\+Scale}), then positions itself behind and above the target before looking at it. Assign a {\ttfamily target} in the Inspector; the camera will log a warning and skip movement if none is set. 
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Camera/\+Orbit\+Camera.\+cs\end{DoxyCompactItemize}

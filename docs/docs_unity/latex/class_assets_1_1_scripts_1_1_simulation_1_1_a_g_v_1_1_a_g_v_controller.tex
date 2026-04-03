@@ -1,0 +1,114 @@
+\doxysection{Assets.\+Scripts.\+Simulation.\+AGV.\+AGVController Class Reference}
+\hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller}{}\label{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller}\index{Assets.Scripts.Simulation.AGV.AGVController@{Assets.Scripts.Simulation.AGV.AGVController}}
+
+
+Controls navigation, job assignment, and lifecycle of an \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV}.  
+
+
+Inheritance diagram for Assets.\+Scripts.\+Simulation.\+AGV.\+AGVController:\+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller_a6e77a5cf6be68fb6a348d9bc2c85b3d3}{Set\+Idle\+Callback}} (System.\+Action callback)
+\begin{DoxyCompactList}\small\item\em Assigns a callback to be fired when the \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} returns to an Idle state. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller_a3b6caf80368477fe05b4ed532d0bb7dc}{Initialize}} (int id)
+\begin{DoxyCompactList}\small\item\em Initializes the \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} controller and anchors it to the traffic grid. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller_a36cba0e894e790aefc7a8659c86b6191}{Dispatch}} (int job\+Id, Vector3 pickup\+Position, Vector3 dropoff\+Position, \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine}{Physical\+Machine}} source, \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine}{Physical\+Machine}} dropoff)
+\begin{DoxyCompactList}\small\item\em Assigns a pickup and delivery task to the \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV}. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller_a02482884ad8e96ea4958c208b8ee138d}\label{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller_a02482884ad8e96ea4958c208b8ee138d} 
+int {\bfseries Agv\+Id}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller_a44b9355229acbf7d184bed6fa2a882c5}\label{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller_a44b9355229acbf7d184bed6fa2a882c5} 
+AGVState {\bfseries State} = AGVState.\+Idle\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller_ad58df716b3b530684936c47af99da416}\label{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller_ad58df716b3b530684936c47af99da416} 
+int {\bfseries Current\+Job\+Id} = -\/1\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller_ade70c75fb54ee2b3527614347359fd8c}\label{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller_ade70c75fb54ee2b3527614347359fd8c} 
+int {\bfseries Current\+Zone\+Id}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Controls navigation, job assignment, and lifecycle of an \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV}. 
+
+Implements a Turn-\/\+Then-\/\+Move model. Routes are planned via the \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager}{Traffic\+Zone\+Manager} using BFS. Deadlocks are prevented through a reserve-\/ahead zone system. 
+
+\label{doc-func-members}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller_a36cba0e894e790aefc7a8659c86b6191}\index{Assets.Scripts.Simulation.AGV.AGVController@{Assets.Scripts.Simulation.AGV.AGVController}!Dispatch@{Dispatch}}
+\index{Dispatch@{Dispatch}!Assets.Scripts.Simulation.AGV.AGVController@{Assets.Scripts.Simulation.AGV.AGVController}}
+\doxysubsubsection{\texorpdfstring{Dispatch()}{Dispatch()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller_a36cba0e894e790aefc7a8659c86b6191} 
+void Assets.\+Scripts.\+Simulation.\+AGV.\+AGVController.\+Dispatch (\begin{DoxyParamCaption}\item[{int}]{job\+Id}{, }\item[{Vector3}]{pickup\+Position}{, }\item[{Vector3}]{dropoff\+Position}{, }\item[{\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine}{Physical\+Machine}}}]{source}{, }\item[{\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine}{Physical\+Machine}}}]{dropoff}{}\end{DoxyParamCaption})}
+
+
+
+Assigns a pickup and delivery task to the \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV}. 
+
+Resolves the nearest valid docks for the source and target machines, plans a BFS route to the pickup location, and initiates navigation. 
+\begin{DoxyParams}{Parameters}
+{\em job\+Id} & ID of the job to transport. \\
+\hline
+{\em pickup\+Position} & Target world position for pickup. \\
+\hline
+{\em dropoff\+Position} & Target world position for dropoff. \\
+\hline
+{\em source} & The machine providing the job (null for incoming belt). \\
+\hline
+{\em dropoff} & The machine receiving the job (null for outgoing belt). \\
+\hline
+\end{DoxyParams}
+\begin{DoxyPrecond}{Precondition}
+\doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} should be in an Idle state. 
+\end{DoxyPrecond}
+\begin{DoxyPostcond}{Postcondition}
+State changes to Navigating\+To\+Pickup if a route is found; otherwise, returns to Idle. 
+\end{DoxyPostcond}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller_a3b6caf80368477fe05b4ed532d0bb7dc}\index{Assets.Scripts.Simulation.AGV.AGVController@{Assets.Scripts.Simulation.AGV.AGVController}!Initialize@{Initialize}}
+\index{Initialize@{Initialize}!Assets.Scripts.Simulation.AGV.AGVController@{Assets.Scripts.Simulation.AGV.AGVController}}
+\doxysubsubsection{\texorpdfstring{Initialize()}{Initialize()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller_a3b6caf80368477fe05b4ed532d0bb7dc} 
+void Assets.\+Scripts.\+Simulation.\+AGV.\+AGVController.\+Initialize (\begin{DoxyParamCaption}\item[{int}]{id}{}\end{DoxyParamCaption})}
+
+
+
+Initializes the \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} controller and anchors it to the traffic grid. 
+
+Parks the Nav\+Mesh\+Agent to use transform-\/based movement and reserves the starting zone. 
+\begin{DoxyParams}{Parameters}
+{\em id} & The unique identifier for this \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV}. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyPostcond}{Postcondition}
+Agent is stopped, ground offset is applied, and the initial zone is reserved. 
+\end{DoxyPostcond}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller_a6e77a5cf6be68fb6a348d9bc2c85b3d3}\index{Assets.Scripts.Simulation.AGV.AGVController@{Assets.Scripts.Simulation.AGV.AGVController}!SetIdleCallback@{SetIdleCallback}}
+\index{SetIdleCallback@{SetIdleCallback}!Assets.Scripts.Simulation.AGV.AGVController@{Assets.Scripts.Simulation.AGV.AGVController}}
+\doxysubsubsection{\texorpdfstring{SetIdleCallback()}{SetIdleCallback()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller_a6e77a5cf6be68fb6a348d9bc2c85b3d3} 
+void Assets.\+Scripts.\+Simulation.\+AGV.\+AGVController.\+Set\+Idle\+Callback (\begin{DoxyParamCaption}\item[{System.\+Action}]{callback}{}\end{DoxyParamCaption})}
+
+
+
+Assigns a callback to be fired when the \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} returns to an Idle state. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em callback} & The action to execute. \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Simulation/\+\+AGV/\+AGVController.\+cs\end{DoxyCompactItemize}
