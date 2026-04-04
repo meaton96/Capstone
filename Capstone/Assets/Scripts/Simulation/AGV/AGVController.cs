@@ -5,6 +5,7 @@ using Assets.Scripts.Simulation.Machines;
 using Assets.Scripts.Simulation.FactoryLayout;
 using Assets.Scripts.Logging;
 using Assets.Scripts.Simulation.Jobs;
+using TMPro;
 
 namespace Assets.Scripts.Simulation.AGV
 {
@@ -19,6 +20,7 @@ namespace Assets.Scripts.Simulation.AGV
         ExecutingDropoff,
         WaitingForZone
     }
+
 
     /// @brief Controls navigation, job assignment, and lifecycle of an AGV.
     /// @details Implements a Turn-Then-Move model. Routes are planned via the TrafficZoneManager 
@@ -64,6 +66,9 @@ namespace Assets.Scripts.Simulation.AGV
         private AGVState stateBeforeWait;
         private int pendingZoneId = -1;
         private float nextRetryTime;
+
+        [Header("Debug Label")]
+        [SerializeField] private TextMeshProUGUI statusLabel;
 
         /// @brief Assigns a callback to be fired when the AGV returns to an Idle state.
         /// @param callback The action to execute.
@@ -180,6 +185,40 @@ namespace Assets.Scripts.Simulation.AGV
                     break;
             }
             agent.nextPosition = transform.position;
+            UpdateStatusLabel();
+        }
+        private void UpdateStatusLabel()
+        {
+            if (statusLabel == null) return;
+
+            string jobStr = CurrentJobId >= 0 ? $"J{CurrentJobId}" : "–";
+            string target = targetMachine != null ? $"M{targetMachine.MachineId}" : "belt";
+
+            string line1 = $"AGV{AgvId} [{State}]";
+            string line2 = State switch
+            {
+                AGVState.Idle => "waiting",
+                AGVState.NavigatingToPickup => $"→ pickup {jobStr}",
+                AGVState.AligningForPickup => $"aligning pickup {jobStr}",
+                AGVState.ExecutingPickup => $"loading {jobStr}",
+                AGVState.NavigatingToDropoff => $"→ {target} carrying {jobStr}",
+                AGVState.AligningForDropoff => $"aligning dropoff {jobStr}",
+                AGVState.ExecutingDropoff => $"unloading {jobStr} @ {target}",
+                AGVState.WaitingForZone => $"BLOCKED zone {pendingZoneId}",
+                _ => ""
+            };
+
+            statusLabel.text = $"{line1}\n{line2}";
+
+            // Color-code by state for at-a-glance reading
+            statusLabel.color = State switch
+            {
+                AGVState.Idle => Color.white,
+                AGVState.WaitingForZone => Color.red,
+                AGVState.ExecutingPickup or
+                AGVState.ExecutingDropoff => Color.green,
+                _ => Color.yellow
+            };
         }
 
         private float handshakeTimer;
@@ -369,7 +408,7 @@ namespace Assets.Scripts.Simulation.AGV
                 ResetToIdle();
                 return;
             }
-
+            SimLogger.High($"[AGV {AgvId}] Executed pickup of job {CurrentJobId}");
             State = AGVState.NavigatingToDropoff;
             BeginNextWaypoint();
         }
@@ -390,7 +429,7 @@ namespace Assets.Scripts.Simulation.AGV
 
             int machineId = targetMachine != null ? targetMachine.MachineId : -1;
             SimulationBridge.Instance.JobManager.CompleteTransit(CurrentJobId, machineId, Time.time);
-
+            SimLogger.High($"[AGV {AgvId}] Executed dropoff of job {CurrentJobId}");
             ResetToIdle();
         }
 

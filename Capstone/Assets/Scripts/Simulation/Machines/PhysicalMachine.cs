@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Assets.Scripts.Simulation.Jobs;
+using Assets.Scripts.Logging;
 
 namespace Assets.Scripts.Simulation.Machines
 {
@@ -192,7 +193,7 @@ namespace Assets.Scripts.Simulation.Machines
                 outgoingConveyor.RemoveJob(jobId);
             else if (secondaryOutgoingConveyor != null && secondaryOutgoingConveyor.Contains(jobId))
                 secondaryOutgoingConveyor.RemoveJob(jobId);
-
+            SimLogger.Error($"{jobId} not found on outgoing belt");
             visualLayer?.UpdateOutgoingQueueLabel(TotalOutgoingCount);
         }
 

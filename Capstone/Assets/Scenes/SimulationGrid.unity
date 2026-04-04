@@ -3723,7 +3723,7 @@ MonoBehaviour:
   OnEpisodeFinished:
     m_PersistentCalls:
       m_Calls: []
-  logLevel: 1
+  logLevel: 3
 --- !u!4 &1562084951
 Transform:
   m_ObjectHideFlags: 0

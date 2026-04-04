@@ -146,11 +146,13 @@ namespace Assets.Scripts.Simulation.Jobs
                     if (dist < 0.05f)
                     {
                         var (jobId, vis) = layoutManager.OutgoingBelt.DequeueFront();
-                        vis.gameObject.SetActive(false);
-                        SimLogger.Low($"[JobManager] Job {jobId} removed at exit.");
+                        vis?.gameObject.SetActive(false);
+                        SimLogger.Low($"[JobManager] Job {jobId} exited factory.");
+                        SimulationBridge.Instance?.OnJobExited(jobId);
                     }
                 }
             }
+
         }
 
         /// @brief Wipes tracking data and destroys physical job tokens.
@@ -205,6 +207,7 @@ namespace Assets.Scripts.Simulation.Jobs
             t.TotalWaitTime += (simTime - t.StateEntryTime);
             t.StateEntryTime = simTime;
             if (t.Visual != null) t.Visual.SetState(t.State);
+            SimLogger.High($"[Job Manager] begin transit of job {jobId} to machine {destinationMachineId}");
         }
 
         /// @brief Records the end of a transport leg and updates travel statistics.

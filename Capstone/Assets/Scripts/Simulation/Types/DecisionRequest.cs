@@ -12,6 +12,7 @@ namespace Assets.Scripts.Simulation.Types
         public int DecisionIndex;
         public int TotalJobs;
         public int CompletedJobs;
+        public int SourceMachineId;
 
         // --- Dispatch decision (idle machine, pick a job) ---
         public int MachineId;
