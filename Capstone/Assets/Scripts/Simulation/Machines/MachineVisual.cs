@@ -3,23 +3,25 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using Assets.Scripts.Scheduling.Core;
 using TMPro;
+using Assets.Scripts.Simulation.Types;
 
 namespace Assets.Scripts.Simulation.Machines
 {
-    /// @brief Handles all visual feedback for a single machine on the factory floor.
-    /// @details Manages mesh colour, overhead UI, progress bars, and decision flashes. 
-    /// State changes are driven externally by PhysicalMachine.
     public class MachineVisual : MonoBehaviour
     {
         [Header("Identity")]
         [SerializeField] private int machineId;
 
         [Header("Rendering")]
-        [SerializeField] private MeshRenderer meshRenderer;
+        [SerializeField] private MeshRenderer machineBodyRenderer;
+        [SerializeField] private MeshRenderer indicatorRenderer;
         [SerializeField] private Vector3 incomingOffset = new Vector3(-2.5f, -.5f, 0f);
         [SerializeField] private Vector3 outgoingOffset = new Vector3(2.5f, -.5f, 0f);
+
+        /// @brief One material per MachineState, assigned in Inspector.
+        /// Order must match MachineState enum: Idle, Busy, Blocked, Failed, Repair
+        [SerializeField] private Material[] indicatorMaterials;
 
         [Header("Overhead UI")]
         [SerializeField] private TextMeshProUGUI labelText;
@@ -28,37 +30,48 @@ namespace Assets.Scripts.Simulation.Machines
         [SerializeField] private TextMeshProUGUI incomingQueueLabel;
         [SerializeField] private TextMeshProUGUI outgoingQueueLabel;
 
-        [Header("State Colours")]
-        [SerializeField] private Color idleColour = new Color(0.30f, 0.85f, 0.40f);
-        [SerializeField] private Color busyColour = new Color(0.95f, 0.80f, 0.20f);
-        [SerializeField] private Color blockedColour = new Color(1.00f, 0.55f, 0.10f);
-        [SerializeField] private Color failedColour = new Color(0.90f, 0.25f, 0.25f);
-        [SerializeField] private Color repairingColour = new Color(0.30f, 0.55f, 0.95f);
-
         [Header("Decision-Point Flash")]
         [SerializeField] private Color flashColour = Color.white;
         [SerializeField] private float flashDuration = 0.25f;
 
+        // ── Type identity colours ───────────────────────────────────────────
+        private static readonly Dictionary<MachineType, Color> TypeColors = new()
+        {
+            { MachineType.Mill,     new Color(0.20f, 0.40f, 0.80f) },   // steel blue
+            { MachineType.Lathe,    new Color(0.80f, 0.50f, 0.10f) },   // amber
+            { MachineType.Weld,     new Color(0.70f, 0.20f, 0.20f) },   // deep red
+            { MachineType.Inspect,  new Color(0.20f, 0.70f, 0.40f) },   // green
+            { MachineType.Assemble, new Color(0.55f, 0.25f, 0.70f) },   // purple
+        };
+
         private MachineState currentState = MachineState.Idle;
-        private Material instanceMaterial;
+        private Material bodyInstanceMaterial;
+        private Material indicatorInstanceMaterial;
         private Coroutine activeFlash;
-        // private Machine coreMachine;
         private int decisionPointCount;
         private readonly List<string> historyLog = new List<string>();
 
-        // public Machine CoreMachine => coreMachine;
         public int MachineId => machineId;
         public MachineState CurrentState => currentState;
         public int DecisionPointCount => decisionPointCount;
         public IReadOnlyList<string> HistoryLog => historyLog;
 
+        // ── Unity Lifecycle ─────────────────────────────────────────────────
+
         private void Awake()
         {
-            if (meshRenderer != null)
+            // Body gets its own material instance so type color doesn't bleed
+            // across all machines sharing the same prefab material
+            if (machineBodyRenderer != null)
             {
-                instanceMaterial = new Material(meshRenderer.sharedMaterial);
-                meshRenderer.material = instanceMaterial;
+                bodyInstanceMaterial = new Material(machineBodyRenderer.sharedMaterial);
+                machineBodyRenderer.material = bodyInstanceMaterial;
             }
+
+            // Indicator starts on the Idle material from the inspector list
+            if (indicatorRenderer != null)
+                ApplyIndicatorMaterial(MachineState.Idle);
+
             SetProgressBarVisible(false);
             UpdateIncomingQueueLabel(0);
             UpdateOutgoingQueueLabel(0);
@@ -66,37 +79,36 @@ namespace Assets.Scripts.Simulation.Machines
 
         private void OnDestroy()
         {
-            if (instanceMaterial != null) Destroy(instanceMaterial);
+            if (bodyInstanceMaterial != null) Destroy(bodyInstanceMaterial);
+            if (indicatorInstanceMaterial != null) Destroy(indicatorInstanceMaterial);
         }
 
-        /// @brief Initializes the machine visual identity and binds it to the simulation core.
-        /// @param id The unique machine index.
-        /// @param coreMachineRef Reference to the logical machine data.
-        /// @post State is set to Idle and UI labels are updated.
+        // ── Initialisation ──────────────────────────────────────────────────
+
+        /// @brief Sets permanent type identity color on the machine body and resets state.
         public void Initialise(int id, MachineType type)
         {
             machineId = id;
-            SetState(MachineState.Idle);
             SetLabel($"M{id}\n{type}");
-            Log($"Initialised {type} at {transform.position}");
+
+            if (bodyInstanceMaterial != null && TypeColors.TryGetValue(type, out Color bodyColor))
+                bodyInstanceMaterial.color = bodyColor * 0.6f;  // darken so indicator pops
+
+            SetState(MachineState.Idle);
+            Log($"Initialised as {type} at {transform.position}");
         }
 
-        private void SetLabel(string label)
-        {
-            if (labelText != null) labelText.text = $"{label}";
-        }
+        // ── State ───────────────────────────────────────────────────────────
 
-        /// @brief Transitions the machine to a new operational state and updates visuals.
-        /// @details Updates the mesh color, status text label, and disables progress bars if no longer busy.
-        /// @param newState The target @ref MachineState to apply.
-        /// @post currentState is updated and the history log is appended.
+        /// @brief Transitions to a new operational state.
+        /// @details Updates the indicator light material and status text.
+        ///          The machine body color never changes after Initialise.
         public void SetState(MachineState newState)
         {
             MachineState previous = currentState;
             currentState = newState;
 
-            if (instanceMaterial != null)
-                instanceMaterial.color = GetColourForState(newState);
+            ApplyIndicatorMaterial(newState);
 
             if (statusText != null)
                 statusText.text = newState.ToString().ToUpper();
@@ -107,11 +119,8 @@ namespace Assets.Scripts.Simulation.Machines
             Log($"State: {previous} → {newState}");
         }
 
-        /// @brief Initiates the visual processing phase for a job.
-        /// @param jobId ID of the job being processed.
-        /// @param simStartTime The simulation time at the start of the operation.
-        /// @param duration The calculated processing time.
-        /// @post state becomes Busy and the overhead progress bar is enabled.
+        // ── Operation Callbacks ─────────────────────────────────────────────
+
         public void BeginOperation(int jobId, float simStartTime, float duration)
         {
             SetState(MachineState.Busy);
@@ -120,9 +129,6 @@ namespace Assets.Scripts.Simulation.Machines
             Log($"Op started: Job {jobId}, dur={duration:F1}");
         }
 
-        /// @brief Resets the machine visual state after a job is successfully released.
-        /// @param jobId ID of the job that finished.
-        /// @post Progress bar is hidden and state returns to Idle.
         public void CompleteOperation(int jobId)
         {
             SetProgressBarVisible(false);
@@ -130,91 +136,102 @@ namespace Assets.Scripts.Simulation.Machines
             Log($"Op completed: Job {jobId}");
         }
 
-        /// @brief Sets the visual state to Blocked when the output end is obstructed.
-        /// @details Triggered when processing is 100% complete but the outgoing conveyor is at capacity.
-        /// @param jobId The job currently being held inside the machine.
-        /// @post State becomes Blocked (orange) and progress bar is hidden.
         public void SetBlockedAfterProcessing(int jobId)
         {
             SetProgressBarVisible(false);
             SetState(MachineState.Blocked);
-            Log($"Blocked: outgoing conveyor full, holding Job {jobId}");
+            Log($"Blocked: outgoing full, holding Job {jobId}");
         }
 
-        /// @brief Updates the overhead slider value.
-        /// @param normalizedProgress Value between 0.0 and 1.0.
         public void UpdateProgress(float normalizedProgress)
         {
             if (progressBar != null)
                 progressBar.value = Mathf.Clamp01(normalizedProgress);
         }
 
-        private void SetProgressBarVisible(bool visible)
-        {
-            if (progressBar != null) progressBar.gameObject.SetActive(visible);
-        }
+        // ── Queue Labels ────────────────────────────────────────────────────
 
-        /// @brief Updates the text label for the incoming machine buffer.
-        /// @param count Number of jobs waiting to be processed.
         public void UpdateIncomingQueueLabel(int count)
         {
             if (incomingQueueLabel != null) incomingQueueLabel.text = $"IN: {count}";
         }
 
-        /// @brief Updates the text label for the outgoing machine buffer.
-        /// @param count Number of jobs waiting for AGV pickup.
         public void UpdateOutgoingQueueLabel(int count)
         {
             if (outgoingQueueLabel != null) outgoingQueueLabel.text = $"OUT: {count}";
         }
 
-        /// @brief Logs a scheduling decision point and triggers visual feedback.
-        /// @details Records state of the queue and the rule choice into the @ref historyLog.
-        /// @param simTime Current simulation clock.
-        /// @param queuedJobIds Array of all jobs currently in the buffer.
-        /// @param chosenJobId The job selected for processing.
-        /// @param ruleName Name of the dispatching rule applied.
-        /// @param flash If true, triggers the mesh color flash effect.
-        /// @post decisionPointCount is incremented.
+        // ── Decision Flash ──────────────────────────────────────────────────
+
+        /// @brief Records a scheduling decision and flashes the indicator briefly white.
         public void RecordDecisionPoint(float simTime, int[] queuedJobIds, int chosenJobId, string ruleName, bool flash = true)
         {
             decisionPointCount++;
             string queueStr = string.Join(", ", Array.ConvertAll(queuedJobIds, id => $"Job {id}"));
-            string entry = $"[t={simTime:F1}] M{machineId} free, queue=[{queueStr}], rule chose Job {chosenJobId} ({ruleName})";
-            Log(entry);
-
+            Log($"[t={simTime:F1}] queue=[{queueStr}], chose Job {chosenJobId} ({ruleName})");
             if (flash) Flash();
         }
 
-        /// @brief Initiates a temporary color flash on the machine mesh.
-        /// @post Starts the FlashRoutine coroutine, stopping any existing flash.
         public void Flash()
         {
-            if (instanceMaterial == null) return;
+            if (indicatorRenderer == null) return;
             if (activeFlash != null) StopCoroutine(activeFlash);
             activeFlash = StartCoroutine(FlashRoutine());
         }
 
+        // ── Private Helpers ─────────────────────────────────────────────────
+
+        /// @brief Swaps the indicator renderer to the material matching <paramref name="state"/>.
+        /// @details Creates an instance copy so emission tweaks don't affect the shared asset.
+        private void ApplyIndicatorMaterial(MachineState state)
+        {
+            if (indicatorRenderer == null) return;
+
+            int index = (int)state;
+            if (indicatorMaterials == null || index >= indicatorMaterials.Length || indicatorMaterials[index] == null)
+            {
+                Debug.LogWarning($"[MachineVisual] No indicator material for state {state} on M{machineId}");
+                return;
+            }
+
+            // Re-use the instance if we already created one for this state,
+            // otherwise make a fresh owned copy so we can safely tweak emission
+            if (indicatorInstanceMaterial == null ||
+                indicatorInstanceMaterial.name != indicatorMaterials[index].name + " (Instance)")
+            {
+                if (indicatorInstanceMaterial != null) Destroy(indicatorInstanceMaterial);
+                indicatorInstanceMaterial = new Material(indicatorMaterials[index]);
+            }
+
+            // Drive emission from the material's base color so the inspector
+            // controls both tint and glow in one place
+            Color baseColor = indicatorInstanceMaterial.color;
+            indicatorInstanceMaterial.SetColor("_EmissionColor", baseColor * 1.8f);
+            indicatorInstanceMaterial.EnableKeyword("_EMISSION");
+
+            indicatorRenderer.material = indicatorInstanceMaterial;
+        }
+        private void SetProgressBarVisible(bool visible)
+        {
+            if (progressBar != null) progressBar.gameObject.SetActive(visible);
+        }
+
         private IEnumerator FlashRoutine()
         {
-            Color baseColour = GetColourForState(currentState);
-            instanceMaterial.color = flashColour;
+            // Flash white on the indicator, then restore the current state material
+            if (indicatorInstanceMaterial != null)
+                indicatorInstanceMaterial.color = flashColour;
+
             yield return new WaitForSeconds(flashDuration);
-            instanceMaterial.color = baseColour;
+
+            // Re-apply the correct state material cleanly
+            ApplyIndicatorMaterial(currentState);
             activeFlash = null;
         }
 
-        private Color GetColourForState(MachineState state)
+        private void SetLabel(string label)
         {
-            return state switch
-            {
-                MachineState.Idle => idleColour,
-                MachineState.Busy => busyColour,
-                MachineState.Blocked => blockedColour,
-                MachineState.Failed => failedColour,
-                MachineState.Repair => repairingColour,
-                _ => Color.magenta
-            };
+            if (labelText != null) labelText.text = label;
         }
 
         private void Log(string message)
