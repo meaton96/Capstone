@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using Assets.Scripts.Simulation;
 using UnityEngine.UI;
+using Assets.Scripts.Simulation.Jobs;
 
 namespace Assets.Scripts.UI
 {

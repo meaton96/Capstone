@@ -3,6 +3,7 @@ using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
+using Assets.Scripts.Simulation.Types;
 
 namespace Assets.Scripts.Simulation
 {
@@ -16,7 +17,7 @@ namespace Assets.Scripts.Simulation
     {
         [Header("References")]
         [SerializeField] private SimulationBridge bridge;
-        private TextAsset instanceJson;
+        //  private TextAsset instanceJson;
 
         [Header("Observation Config")]
         [SerializeField] private int maxQueueSlots = 10;

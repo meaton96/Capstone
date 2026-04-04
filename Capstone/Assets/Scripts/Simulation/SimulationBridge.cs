@@ -11,75 +11,10 @@ using Assets.Scripts.Simulation.Machines;
 using Assets.Scripts.Simulation.AGV;
 using Assets.Scripts.Simulation.FactoryLayout;
 using Assets.Scripts.Simulation.Jobs;
+using Assets.Scripts.Simulation.Types;
 
 namespace Assets.Scripts.Simulation
 {
-    /// @brief Snapshot of the state presented to the agent when a scheduling decision is needed.
-    [Serializable]
-    public struct DecisionRequest
-    {
-        /// @brief ID of the machine waiting for a job to be dispatched.
-        public int MachineId;
-
-        /// @brief Current simulation time in seconds when the decision was raised.
-        public double SimTime;
-
-        /// @brief Job IDs currently queued at the machine.
-        public int[] QueuedJobIds;
-
-        /// @brief Processing durations (in sim-seconds) corresponding to each queued job.
-        public double[] QueuedDurations;
-
-        /// @brief Sequential index of this decision point across the episode.
-        public int DecisionIndex;
-
-        /// @brief Total number of jobs in the current instance.
-        public int TotalJobs;
-
-        /// @brief Number of jobs that have completed all operations so far.
-        public int CompletedJobs;
-    }
-
-    /// @brief Result returned by @c SimulationBridge.Step() after applying a dispatching rule.
-    [Serializable]
-    public struct StepResult
-    {
-        /// @brief Reward signal for the agent based on elapsed makespan delta.
-        public float Reward;
-
-        /// @brief True when the episode has ended (all jobs complete).
-        public bool Done;
-
-        /// @brief The next decision context, if one is immediately available.
-        public DecisionRequest NextDecision;
-
-        /// @brief Makespan at the time this step was resolved.
-        public double CurrentMakespan;
-
-        /// @brief Total operations completed across all jobs at this step.
-        public int OperationsCompleted;
-    }
-
-    /// @brief Summary statistics produced when an episode ends.
-    [Serializable]
-    public struct EpisodeResult
-    {
-        public string InstanceName;
-        public string RuleName;
-        public double Makespan;
-        public double OptimalMakespan;
-        public int TotalJobs;
-        public int TotalOperations;
-        public int CompletedJobs;
-        public int DecisionPoints;
-        public double TotalReward;
-        public int[] PerMachineDecisions;
-
-        /// @brief Percentage deviation of achieved makespan from the known optimum.
-        public double OptimalityGap => OptimalMakespan > 0
-            ? (Makespan - OptimalMakespan) / OptimalMakespan * 100.0
-            : 0;
-    }
 
     /// @brief Central coordinator between the Unity physics simulation and the scheduling agent.
     ///
