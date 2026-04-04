@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Assets.Scripts.Scheduling.Core;
+using Assets.Scripts.Simulation.Jobs;
 
 namespace Assets.Scripts.Simulation.Machines
 {

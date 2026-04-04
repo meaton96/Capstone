@@ -7,43 +7,8 @@ using Assets.Scripts.Scheduling.Data;
 using Assets.Scripts.Simulation.FactoryLayout;
 using Assets.Scripts.Logging;
 
-namespace Assets.Scripts.Simulation
+namespace Assets.Scripts.Simulation.Jobs
 {
-    /// @brief Lifecycle states a job passes through from creation to completion.
-    public enum JobLifecycleState
-    {
-        NotStarted,
-        Queued,
-        Processing,
-        WaitingForTransport,
-        InTransit,
-        Complete,
-    }
-
-    /// @brief Runtime tracking data for a single job across all of its operations.
-    [Serializable]
-    public class JobTracker
-    {
-        public int JobId;
-        public int TotalOperations;
-        public JobLifecycleState State;
-        public int CurrentOperationIndex;
-        public int CompletedOperations;
-        public Vector3 WorldPosition;
-        public int CurrentMachineId;
-        public int NextMachineId;
-        public double StateEntryTime;
-        public double TotalWaitTime;
-        public double TotalTransitTime;
-        public float OperationProgress;
-        public float[] OperationStatuses;
-        public int[] OperationMachineIds;
-        public float[] OperationDurations;
-        public bool PhysicallyAtMachine;
-        public int IncomingQueueSlot;
-        public JobVisual Visual;
-        public int TimeInCurrentState;
-    }
 
     /// @brief Creates, tracks, and updates all jobs in a simulation episode.
     /// @details Authoritative record of job states. Transitions are driven by 

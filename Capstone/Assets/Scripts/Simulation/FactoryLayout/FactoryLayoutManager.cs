@@ -5,6 +5,7 @@ using Assets.Scripts.Scheduling.Core;
 using Assets.Scripts.Logging;
 using Unity.AI.Navigation;
 using Assets.Scripts.Simulation.Machines;
+using Assets.Scripts.Simulation.Jobs;
 
 namespace Assets.Scripts.Simulation.FactoryLayout
 {

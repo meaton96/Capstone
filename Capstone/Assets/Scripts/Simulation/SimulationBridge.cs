@@ -10,6 +10,7 @@ using Assets.Scripts.Logging;
 using Assets.Scripts.Simulation.Machines;
 using Assets.Scripts.Simulation.AGV;
 using Assets.Scripts.Simulation.FactoryLayout;
+using Assets.Scripts.Simulation.Jobs;
 
 namespace Assets.Scripts.Simulation
 {

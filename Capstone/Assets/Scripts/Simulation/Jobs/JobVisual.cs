@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Assets.Scripts.Simulation
+namespace Assets.Scripts.Simulation.Jobs
 {
     /// @brief Visual token representing a single job on the factory floor.
     /// @details Smoothly interpolates toward targets set by the JobManager. Movement ownership
