@@ -42,11 +42,11 @@ namespace Assets.Scripts.Simulation.Machines
         private MachineState currentState = MachineState.Idle;
         private Material instanceMaterial;
         private Coroutine activeFlash;
-        private Machine coreMachine;
+        // private Machine coreMachine;
         private int decisionPointCount;
         private readonly List<string> historyLog = new List<string>();
 
-        public Machine CoreMachine => coreMachine;
+        // public Machine CoreMachine => coreMachine;
         public int MachineId => machineId;
         public MachineState CurrentState => currentState;
         public int DecisionPointCount => decisionPointCount;
@@ -73,10 +73,10 @@ namespace Assets.Scripts.Simulation.Machines
         /// @param id The unique machine index.
         /// @param coreMachineRef Reference to the logical machine data.
         /// @post State is set to Idle and UI labels are updated.
-        public void Initialise(int id, Machine coreMachineRef = null)
+        public void Initialise(int id)
         {
             machineId = id;
-            coreMachine = coreMachineRef;
+            // coreMachine = coreMachineRef;
 
             if (labelText != null) labelText.text = $"M{id}";
 

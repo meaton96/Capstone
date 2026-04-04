@@ -63,7 +63,7 @@ namespace Assets.Scripts.Simulation.Machines
         /// @param id The unique machine index.
         /// @param coreMachineData The logical machine data from the simulation core.
         /// @post Machine is set to Idle, and all attached conveyors are cleared.
-        public void Initialize(int id, Machine coreMachineData)
+        public void Initialize(int id)
         {
             MachineId = id;
             IsIdle = true;
@@ -73,7 +73,7 @@ namespace Assets.Scripts.Simulation.Machines
 
             visualLayer = GetComponent<MachineVisual>();
             if (visualLayer != null)
-                visualLayer.Initialise(id, coreMachineData);
+                visualLayer.Initialise(id);
 
             ResetQueues();
         }

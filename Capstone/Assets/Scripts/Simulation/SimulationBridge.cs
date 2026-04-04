@@ -133,7 +133,7 @@ namespace Assets.Scripts.Simulation
         /// @brief Number of discrete actions available to the agent.
         public static int ActionCount => ActionToRule.Length;
 
-        private DESSimulator simulator;
+        // private DESSimulator simulator;
         private TaillardInstance currentInstance;
         private bool episodeActive;
         private int decisionCount;
@@ -166,7 +166,7 @@ namespace Assets.Scripts.Simulation
                 return;
             }
             Instance = this;
-            simulator = new DESSimulator();
+            // simulator = new DESSimulator();
             SimLogger.ActiveLevel = logLevel;
         }
 
@@ -199,11 +199,11 @@ namespace Assets.Scripts.Simulation
             SimLogger.Medium($"[Sim Bridge] Loaded : {currentInstance.MachineCount} machines");
             SimLogger.Medium($"[Sim Bridge] Loaded : {currentInstance.JobCount} jobs");
 
-            simulator.LoadInstance(currentInstance);
+            //simulator.LoadInstance(currentInstance);
 
             if (layoutManager != null)
             {
-                layoutManager.BuildFloor(simulator);
+                layoutManager.BuildFloor(currentInstance.MachineCount);
             }
             if (trafficZoneManager != null)
             {
@@ -222,7 +222,7 @@ namespace Assets.Scripts.Simulation
             decisionCount = 0;
             totalReward = 0;
             previousMakespan = 0;
-            perMachineDecisions = new int[simulator.Machines.Length];
+            perMachineDecisions = new int[currentInstance.MachineCount];
             IsWaitingForAction = false;
             pendingDecisions.Clear();
 

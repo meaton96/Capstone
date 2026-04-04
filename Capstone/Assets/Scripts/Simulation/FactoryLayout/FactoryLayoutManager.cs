@@ -99,17 +99,17 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         /// 
         /// @pre @p simulator must not be null.
         /// @post The floor is populated with machines, walls, and arrows; the NavMesh is rebuilt.
-        public void BuildFloor(DESSimulator simulator)
+        public void BuildFloor(int machineCount)
         {
-            if (simulator == null)
-                throw new ArgumentNullException(nameof(simulator));
+            // if (simulator == null)
+            //     throw new ArgumentNullException(nameof(simulator));
 
             ClearFloor();
 
-            int count = simulator.Machines.Length;
+            // int count = simulator.Machines.Length;
 
-            layoutCols = Mathf.CeilToInt(Mathf.Sqrt(count));
-            layoutRows = Mathf.CeilToInt((float)count / layoutCols);
+            layoutCols = Mathf.CeilToInt(Mathf.Sqrt(machineCount));
+            layoutRows = Mathf.CeilToInt((float)machineCount / layoutCols);
 
             float machineAreaWidth = (layoutCols - 1) * machineSpacingX + machineDepth;
             float machineAreaDepth = (layoutRows - 1) * RowPitch + machineDepth;
@@ -130,8 +130,8 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 0f,
                 machineAreaDepth / 2f);
 
-            machines = new PhysicalMachine[count];
-            for (int i = 0; i < count; i++)
+            machines = new PhysicalMachine[machineCount];
+            for (int i = 0; i < machineCount; i++)
             {
                 int col = i % layoutCols;
                 int row = i / layoutCols;
@@ -161,7 +161,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
 
                 PhysicalMachine pm = Instantiate(prefabToSpawn, worldPos, rotation, transform);
                 pm.gameObject.name = $"Machine_{i}";
-                pm.Initialize(i, simulator.Machines[i]);
+                pm.Initialize(i);
                 machines[i] = pm;
             }
 
@@ -174,7 +174,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
 
             navMeshSurface.BuildNavMesh();
 
-            SimLogger.Medium($"[FactoryLayout] Built aisle-based floor: {count} machines.");
+            SimLogger.Medium($"[FactoryLayout] Built aisle-based floor: {machineCount} machines.");
         }
 
         /// @brief Instantiates I/O conveyors and the AGV parking zone.
