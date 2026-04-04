@@ -15,6 +15,7 @@ namespace Assets.Scripts.Simulation.Machines
     public class PhysicalMachine : MonoBehaviour
     {
         public int MachineId { get; private set; }
+        public MachineType MachineType { get; private set; }
         public bool IsIdle { get; private set; } = true;
 
         /// @brief True when processing is done but all outgoing belts are full.
@@ -63,9 +64,10 @@ namespace Assets.Scripts.Simulation.Machines
         /// @param id The unique machine index.
         /// @param coreMachineData The logical machine data from the simulation core.
         /// @post Machine is set to Idle, and all attached conveyors are cleared.
-        public void Initialize(int id)
+        public void Initialize(int id, MachineType type = MachineType.Mill)
         {
             MachineId = id;
+            MachineType = type;
             IsIdle = true;
             IsBlocked = false;
             preferSecondaryInput = false;
@@ -73,7 +75,7 @@ namespace Assets.Scripts.Simulation.Machines
 
             visualLayer = GetComponent<MachineVisual>();
             if (visualLayer != null)
-                visualLayer.Initialise(id);
+                visualLayer.Initialise(id, type);
 
             ResetQueues();
         }

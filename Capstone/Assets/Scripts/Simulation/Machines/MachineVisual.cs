@@ -73,15 +73,17 @@ namespace Assets.Scripts.Simulation.Machines
         /// @param id The unique machine index.
         /// @param coreMachineRef Reference to the logical machine data.
         /// @post State is set to Idle and UI labels are updated.
-        public void Initialise(int id)
+        public void Initialise(int id, MachineType type)
         {
             machineId = id;
-            // coreMachine = coreMachineRef;
-
-            if (labelText != null) labelText.text = $"M{id}";
-
             SetState(MachineState.Idle);
-            Log($"Initialised at {transform.position}");
+            SetLabel($"M{id}\n{type}");
+            Log($"Initialised {type} at {transform.position}");
+        }
+
+        private void SetLabel(string label)
+        {
+            if (labelText != null) labelText.text = $"{label}";
         }
 
         /// @brief Transitions the machine to a new operational state and updates visuals.

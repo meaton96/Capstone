@@ -114,6 +114,26 @@ namespace Assets.Scripts.Simulation
                 StartEpisode();
             }
         }
+        private FJSSPConfig BuildDefaultConfig()
+        {
+            // 15 machines, 3 of each type, laid out in type order
+            var layout = new MachineType[15];
+            MachineType[] types = (MachineType[])System.Enum.GetValues(typeof(MachineType));
+            for (int i = 0; i < 15; i++)
+                layout[i] = types[i / 3];
+
+            return new FJSSPConfig
+            {
+                JobCount = 20,
+                MachinesPerType = 3,
+                MachineTypeLayout = layout,
+                MinProcTime = 8f,
+                MaxProcTime = 35f,
+                MinOpsPerJob = 5,
+                MaxOpsPerJob = 8,
+                MaxArrivalTime = 0f  // all jobs available at start for now
+            };
+        }
 
         // ─────────────────────────────────────────────────────────
         //  Episode Management
@@ -129,17 +149,20 @@ namespace Assets.Scripts.Simulation
             }
 
             currentInstance = LoadInstance(TaillardJson);
-            if (currentInstance == null) return;
+            //  if (currentInstance == null) return;
 
-            SimLogger.Medium($"[Sim Bridge] Loaded : {currentInstance.name}");
-            SimLogger.Medium($"[Sim Bridge] Loaded : {currentInstance.MachineCount} machines");
-            SimLogger.Medium($"[Sim Bridge] Loaded : {currentInstance.JobCount} jobs");
+            // SimLogger.Medium($"[Sim Bridge] Loaded : {currentInstance.name}");
+            // SimLogger.Medium($"[Sim Bridge] Loaded : {currentInstance.MachineCount} machines");
+            // SimLogger.Medium($"[Sim Bridge] Loaded : {currentInstance.JobCount} jobs");
+
+            FJSSPConfig config = BuildDefaultConfig();  // temporary hardcoded config
+            var machinesByType = layoutManager.BuildFloor(config);
 
             //simulator.LoadInstance(currentInstance);
 
             if (layoutManager != null)
             {
-                layoutManager.BuildFloor(currentInstance.MachineCount);
+                layoutManager.BuildFloor(BuildDefaultConfig());
             }
             if (trafficZoneManager != null)
             {
