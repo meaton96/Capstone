@@ -1,27 +1,28 @@
+using Assets.Scripts.Simulation.Machines;
 namespace Assets.Scripts.Simulation.Types
 {
+    public enum DecisionType { Dispatch, Routing }
     /// @brief Snapshot of the state presented to the agent when a scheduling decision is needed.
     public struct DecisionRequest
     {
-        /// @brief ID of the machine waiting for a job to be dispatched.
-        public int MachineId;
+        public DecisionType Type;
 
-        /// @brief Current simulation time in seconds when the decision was raised.
+        // --- Shared ---
         public double SimTime;
+        public int DecisionIndex;
+        public int TotalJobs;
+        public int CompletedJobs;
 
-        /// @brief Job IDs currently queued at the machine.
+        // --- Dispatch decision (idle machine, pick a job) ---
+        public int MachineId;
         public int[] QueuedJobIds;
-
-        /// @brief Processing durations (in sim-seconds) corresponding to each queued job.
         public double[] QueuedDurations;
 
-        /// @brief Sequential index of this decision point across the episode.
-        public int DecisionIndex;
-
-        /// @brief Total number of jobs in the current instance.
-        public int TotalJobs;
-
-        /// @brief Number of jobs that have completed all operations so far.
-        public int CompletedJobs;
+        // --- Routing decision (finished job, pick a machine) ---
+        public int JobId;
+        public MachineType RequiredType;
+        public int[] CandidateMachineIds;   // eligible machines of required type
+        public float[] CandidateQueueLengths;
+        public float[] CandidateJobTimes;   // this job's proc time at each candidate
     }
 }

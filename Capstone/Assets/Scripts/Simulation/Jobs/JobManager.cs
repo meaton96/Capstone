@@ -53,9 +53,8 @@ namespace Assets.Scripts.Simulation.Jobs
         /// @param spawnVisuals When true, a JobVisual prefab is instantiated per job.
         ///
         /// @post trackers array is populated and initialized is set to true.
-        public void Initialize(TaillardInstance instance, bool spawnVisuals = true)
+        public void Initialize(FJSSPJobDefinition[] jobDefs, bool spawnVisuals = true)
         {
-            int jobCount = instance.JobCount;
             Cleanup();
 
             if (spawnVisuals)
@@ -64,40 +63,35 @@ namespace Assets.Scripts.Simulation.Jobs
                 jobTokenParent = parentGo.transform;
             }
 
-            trackers = new JobTracker[jobCount];
+            trackers = new JobTracker[jobDefs.Length];
 
-            for (int j = 0; j < jobCount; j++)
+            for (int j = 0; j < jobDefs.Length; j++)
             {
-                int opCount = instance.MachineCount;
+                FJSSPJobDefinition def = jobDefs[j];
+                int opCount = def.OperationSequence.Length;
 
                 var tracker = new JobTracker
                 {
-                    JobId = j,
+                    JobId = def.JobId,
                     TotalOperations = opCount,
                     State = JobLifecycleState.NotStarted,
                     CurrentOperationIndex = 0,
                     CompletedOperations = 0,
                     WorldPosition = GetIncomingQueuePosition(j),
                     CurrentMachineId = -1,
-                    NextMachineId = instance.machines_matrix[j][0],
+                    NextMachineId = -1,           // unresolved — agent decides
+                    NextMachineType = def.OperationSequence[0],
+                    ArrivalTime = def.ArrivalTime,
                     StateEntryTime = 0,
-                    TimeInCurrentState = 0,
                     TotalWaitTime = 0,
                     TotalTransitTime = 0,
                     OperationProgress = 0f,
+                    OperationTypes = def.OperationSequence,
+                    EligibleMachinesPerOp = def.EligibleMachinesPerOp,
                     OperationStatuses = new float[opCount],
-                    OperationMachineIds = new int[opCount],
-                    OperationDurations = new float[opCount],
                     PhysicallyAtMachine = false,
                     IncomingQueueSlot = j,
                 };
-
-                for (int o = 0; o < opCount; o++)
-                {
-                    tracker.OperationMachineIds[o] = instance.machines_matrix[j][o];
-                    tracker.OperationDurations[o] = (float)instance.duration_matrix[j][o];
-                    tracker.OperationStatuses[o] = 0f;
-                }
 
                 if (spawnVisuals && jobVisualPrefab != null)
                 {
@@ -108,15 +102,16 @@ namespace Assets.Scripts.Simulation.Jobs
 
                     JobVisual visual = tokenGo.GetComponent<JobVisual>();
                     if (visual == null) visual = tokenGo.AddComponent<JobVisual>();
-
                     visual.Initialize(j, opCount);
                     tracker.Visual = visual;
                 }
+
                 trackers[j] = tracker;
                 pendingIncomingJobs.Enqueue(j);
             }
+
             initialized = true;
-            Debug.Log($"[JobManager] Initialized {jobCount} job trackers.");
+            Debug.Log($"[JobManager] Initialized {jobDefs.Length} FJSSP job trackers.");
         }
 
         /// @brief Logic loop managing the physical flow of jobs onto and off the factory floor.
@@ -238,7 +233,6 @@ namespace Assets.Scripts.Simulation.Jobs
         public void MarkOperationComplete(int jobId, double simTime)
         {
             if (!initialized) return;
-
             JobTracker t = trackers[jobId];
             if (t.CurrentOperationIndex >= t.TotalOperations) return;
 
@@ -252,7 +246,6 @@ namespace Assets.Scripts.Simulation.Jobs
                 t.CurrentMachineId = -1;
                 t.NextMachineId = -1;
                 t.OperationProgress = 0f;
-
                 if (t.Visual != null)
                 {
                     t.Visual.SetState(t.State);
@@ -261,14 +254,23 @@ namespace Assets.Scripts.Simulation.Jobs
             }
             else
             {
-                t.State = JobLifecycleState.WaitingForTransport;
                 t.CurrentOperationIndex++;
-                t.NextMachineId = t.OperationMachineIds[t.CurrentOperationIndex];
+                t.NextMachineId = -1;                   // unresolved
+                t.NextMachineType = t.OperationTypes[t.CurrentOperationIndex];
                 t.CurrentMachineId = -1;
                 t.OperationProgress = 0f;
-
+                t.State = JobLifecycleState.WaitingForTransport;
                 if (t.Visual != null) t.Visual.SetState(t.State);
             }
+        }
+        public float GetProcessingTime(int jobId, int machineId)
+        {
+            JobTracker t = GetJobTracker(jobId);
+            if (t == null) return 0f;
+            int opIdx = t.CurrentOperationIndex;
+            if (t.EligibleMachinesPerOp[opIdx].TryGetValue(machineId, out float time))
+                return time;
+            return 0f;
         }
 
         /// @brief Checks if the entire job set for the episode has reached completion.
@@ -334,27 +336,28 @@ namespace Assets.Scripts.Simulation.Jobs
         /// @return Flat array of size Jobs * Machines * 3.
         public float[] GetSchedulingMatrixFlat(int numMachines)
         {
-            if (!initialized) return null;
-            int numJobs = trackers.Length;
-            float[] matrix = new float[numJobs * numMachines * 3];
-            float maxDuration = 1f;
-            foreach (JobTracker t in trackers)
-                foreach (float d in t.OperationDurations) if (d > maxDuration) maxDuration = d;
+            throw new NotImplementedException();
+            // if (!initialized) return null;
+            // int numJobs = trackers.Length;
+            // float[] matrix = new float[numJobs * numMachines * 3];
+            // float maxDuration = 1f;
+            // foreach (JobTracker t in trackers)
+            //     foreach (float d in t.OperationDurations) if (d > maxDuration) maxDuration = d;
 
-            for (int j = 0; j < numJobs; j++)
-            {
-                JobTracker t = trackers[j];
-                for (int o = 0; o < t.TotalOperations; o++)
-                {
-                    int m = t.OperationMachineIds[o];
-                    if (m < 0 || m >= numMachines) continue;
-                    int baseIdx = (j * numMachines + m) * 3;
-                    matrix[baseIdx + 0] = 1.0f;
-                    matrix[baseIdx + 1] = t.OperationDurations[o] / maxDuration;
-                    matrix[baseIdx + 2] = t.OperationStatuses[o];
-                }
-            }
-            return matrix;
+            // for (int j = 0; j < numJobs; j++)
+            // {
+            //     JobTracker t = trackers[j];
+            //     for (int o = 0; o < t.TotalOperations; o++)
+            //     {
+            //         int m = t.OperationMachineIds[o];
+            //         if (m < 0 || m >= numMachines) continue;
+            //         int baseIdx = (j * numMachines + m) * 3;
+            //         matrix[baseIdx + 0] = 1.0f;
+            //         matrix[baseIdx + 1] = t.OperationDurations[o] / maxDuration;
+            //         matrix[baseIdx + 2] = t.OperationStatuses[o];
+            //     }
+            // }
+            // return matrix;
         }
 
         /// @brief Exports job-level scalar features normalized by current simulation time.

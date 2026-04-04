@@ -17,10 +17,29 @@ namespace Assets.Scripts.Simulation
     {
         [Header("References")]
         [SerializeField] private SimulationBridge bridge;
+        [SerializeField] private int maxCandidateSlots = 3;
         //  private TextAsset instanceJson;
 
         [Header("Observation Config")]
         [SerializeField] private int maxQueueSlots = 10;
+        public int ObservationSize => 5 + 2 + (maxQueueSlots * 2) + 2 + (maxCandidateSlots * 3);
+
+        [Header("Heuristic / Baseline Config")]
+        [SerializeField] private DispatchingRule heuristicRule = DispatchingRule.SPT_SMPT;
+
+        [SerializeField] private bool logDecisions = true;
+
+        public override void Heuristic(in ActionBuffers actionsOut)
+        {
+            actionsOut.DiscreteActions.Array[0] = SimulationBridge.Instance.GetRuleIndex(heuristicRule);
+
+            if (logDecisions)
+            {
+                string ruleName = heuristicRule.ToString();
+                string decType = bridge.CurrentDecision.Type.ToString();
+                //  Debug.Log($"[Heuristic] {decType} → rule {ruleName}");
+            }
+        }
 
         // ─────────────────────────────────────────────────────────
         //  Unity Lifecycle
@@ -68,8 +87,8 @@ namespace Assets.Scripts.Simulation
                 return;
             }
 
-            if (bridge.TaillardJson == null)
-                return;
+            // if (bridge.TaillardJson == null)
+            //     return;
 
             bridge.StartEpisode();
         }
@@ -100,38 +119,48 @@ namespace Assets.Scripts.Simulation
         public override void CollectObservations(VectorSensor sensor)
         {
             DecisionRequest req = bridge.CurrentDecision;
+            if (!bridge.IsEpisodeActive) { PadZeros(sensor); return; }
 
-            bool valid = bridge.IsEpisodeActive
-                         && req.QueuedJobIds != null
-                         && req.QueuedDurations != null;
-
-            if (!valid)
-            {
-                for (int i = 0; i < ObservationSize; i++)
-                    sensor.AddObservation(0f);
-                return;
-            }
-
-            sensor.AddObservation(req.MachineId);
+            sensor.AddObservation((float)req.Type);   // 0=Dispatch, 1=Routing
             sensor.AddObservation((float)req.SimTime);
             sensor.AddObservation(req.DecisionIndex);
             sensor.AddObservation(req.TotalJobs);
             sensor.AddObservation(req.CompletedJobs);
-            sensor.AddObservation(req.QueuedJobIds.Length);
 
-            for (int i = 0; i < maxQueueSlots; i++)
+            if (req.Type == DecisionType.Dispatch)
             {
-                if (i < req.QueuedJobIds.Length)
+                sensor.AddObservation(req.MachineId);
+                sensor.AddObservation(req.QueuedJobIds?.Length ?? 0);
+                for (int i = 0; i < maxQueueSlots; i++)
                 {
-                    sensor.AddObservation(req.QueuedJobIds[i]);
-                    sensor.AddObservation((float)req.QueuedDurations[i]);
+                    bool valid = req.QueuedJobIds != null && i < req.QueuedJobIds.Length;
+                    sensor.AddObservation(valid ? req.QueuedJobIds[i] : 0);
+                    sensor.AddObservation(valid ? (float)req.QueuedDurations[i] : 0f);
                 }
-                else
+                // pad routing slots
+                for (int i = 0; i < maxCandidateSlots * 3; i++) sensor.AddObservation(0f);
+            }
+            else
+            {
+                sensor.AddObservation(req.JobId);
+                sensor.AddObservation((float)req.RequiredType);
+                // pad dispatch slots
+                sensor.AddObservation(0); sensor.AddObservation(0);
+                for (int i = 0; i < maxQueueSlots * 2; i++) sensor.AddObservation(0f);
+
+                for (int i = 0; i < maxCandidateSlots; i++)
                 {
-                    sensor.AddObservation(0);
-                    sensor.AddObservation(0f);
+                    bool valid = req.CandidateMachineIds != null && i < req.CandidateMachineIds.Length;
+                    sensor.AddObservation(valid ? req.CandidateMachineIds[i] : 0);
+                    sensor.AddObservation(valid ? req.CandidateJobTimes[i] : 0f);
+                    sensor.AddObservation(valid ? req.CandidateQueueLengths[i] : 0f);
                 }
             }
+        }
+
+        private void PadZeros(VectorSensor sensor)
+        {
+            for (int i = 0; i < ObservationSize; i++) sensor.AddObservation(0f);
         }
 
         /// @brief Receives the network's chosen action and applies it to the simulation.
@@ -161,12 +190,12 @@ namespace Assets.Scripts.Simulation
 
         /// @brief Heuristic fallback: always selects action 0 (first dispatching rule).
         /// @param actionsOut  Action buffer to write the heuristic choice into.
-        public override void Heuristic(in ActionBuffers actionsOut)
-        {
-            actionsOut.DiscreteActions.Array[0] = 0;
-        }
+        // public override void Heuristic(in ActionBuffers actionsOut)
+        // {
+        //     actionsOut.DiscreteActions.Array[0] = 0;
+        // }
 
         /// @brief Total number of floats in one observation vector.
-        public int ObservationSize => 6 + (maxQueueSlots * 2);
+        //public int ObservationSize => 6 + (maxQueueSlots * 2);
     }
 }
