@@ -64,7 +64,7 @@ namespace Assets.Scripts.Simulation.Machines
         /// @param id The unique machine index.
         /// @param coreMachineData The logical machine data from the simulation core.
         /// @post Machine is set to Idle, and all attached conveyors are cleared.
-        public void Initialize(int id, MachineType type = MachineType.Mill)
+        public void Initialize(int id, MachineType type)
         {
             MachineId = id;
             MachineType = type;

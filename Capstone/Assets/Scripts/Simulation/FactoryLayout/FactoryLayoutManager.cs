@@ -165,7 +165,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
 
                 PhysicalMachine pm = Instantiate(prefabToSpawn, worldPos, rotation, transform);
                 pm.gameObject.name = $"Machine_{i}_{type}";
-                pm.Initialize(i);
+                pm.Initialize(i, type);
                 machines[i] = pm;
                 if (!machinesByType.ContainsKey(type))
                     machinesByType[type] = new List<int>();
