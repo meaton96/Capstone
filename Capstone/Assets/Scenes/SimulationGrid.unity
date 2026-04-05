@@ -1085,6 +1085,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 596d6ff3314006a42824daaf42c219b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Simulation::Assets.Scripts.Simulation.SimulationBridge
+  OnFactorySpawned:
+    m_PersistentCalls:
+      m_Calls: []
   layoutManager: {fileID: 909580045}
   trafficZoneManager: {fileID: 0}
   agvPool: {fileID: 0}
@@ -3689,6 +3692,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1562084951}
   - component: {fileID: 1562084950}
+  - component: {fileID: 1562084952}
   m_Layer: 0
   m_Name: Bridge
   m_TagString: Untagged
@@ -3708,6 +3712,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 596d6ff3314006a42824daaf42c219b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Simulation::Assets.Scripts.Simulation.SimulationBridge
+  OnFactorySpawned:
+    m_PersistentCalls:
+      m_Calls: []
   layoutManager: {fileID: 909580045}
   trafficZoneManager: {fileID: 909580047}
   agvPool: {fileID: 1750965656}
@@ -3739,6 +3746,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1562084952
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1562084949}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76c5dace699a14605b6a45f8bfa08cde, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Simulation::Assets.Scripts.Simulation.HeadlessBatchRunner
+  bridge: {fileID: 1562084950}
+  agent: {fileID: 516692882}
+  fallbackBatchJson: {fileID: 4900000, guid: ac6254305ac4c4fb7a6176bc1e3522ef, type: 3}
+  fallbackRepeats: 1
 --- !u!1 &1599695576
 GameObject:
   m_ObjectHideFlags: 0

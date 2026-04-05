@@ -13,20 +13,52 @@ namespace Assets.Scripts.Simulation
     /// collects a fixed-width observation vector describing the current machine queue,
     /// and maps a discrete action index to a dispatching rule applied via
     /// @c SimulationBridge.Step().
+    ///
+    /// The agent is gated by @c IsArmed — ML-Agents' Academy will call
+    /// @c OnEpisodeBegin() immediately on FixedUpdate, but we only proceed
+    /// if something (UI button, batch runner, or autoStartOnPlay) has armed us.
     public class SchedulingAgent : Agent
     {
         [Header("References")]
         [SerializeField] private SimulationBridge bridge;
         [SerializeField] private int maxCandidateSlots = 3;
-        //  private TextAsset instanceJson;
 
         [Header("Observation Config")]
         [SerializeField] private int maxQueueSlots = 10;
         public int ObservationSize => 5 + 2 + (maxQueueSlots * 2) + 2 + (maxCandidateSlots * 3);
+
         [Header("Heuristic / Baseline Config")]
         [SerializeField] private DispatchingRule heuristicRule = DispatchingRule.SPT_SMPT;
 
         [SerializeField] private bool logDecisions = true;
+
+        // ─────────────────────────────────────────────────────────
+        //  Episode Gating
+        // ─────────────────────────────────────────────────────────
+
+        /// @brief When false, OnEpisodeBegin() is a no-op.
+        ///        Set to true by the UI "Start" button, batch runner,
+        ///        or SimulationBridge.autoStartOnPlay before the first
+        ///        Academy step fires.
+        public bool IsArmed { get; set; }
+
+        /// @brief Arms the agent and immediately requests an episode reset.
+        ///        Call this from UI buttons or the batch runner.
+        public void ArmAndStart()
+        {
+            IsArmed = true;
+
+            // If Academy already ran its first step and the agent is idle,
+            // we need to manually trigger a new episode.
+            // EndEpisode() → Academy calls OnEpisodeBegin() next step.
+            EndEpisode();
+        }
+
+        /// @brief Public setter so the batch runner can swap rules without reflection.
+        public void SetHeuristicRule(DispatchingRule rule)
+        {
+            heuristicRule = rule;
+        }
 
         public override void Heuristic(in ActionBuffers actionsOut)
         {
@@ -36,7 +68,6 @@ namespace Assets.Scripts.Simulation
             {
                 string ruleName = heuristicRule.ToString();
                 string decType = bridge.CurrentDecision.Type.ToString();
-                //  Debug.Log($"[Heuristic] {decType} → rule {ruleName}");
             }
         }
 
@@ -44,50 +75,45 @@ namespace Assets.Scripts.Simulation
         //  Unity Lifecycle
         // ─────────────────────────────────────────────────────────
 
-        /// @brief Subscribes to the bridge's decision-required event.
         protected override void OnEnable()
         {
             base.OnEnable();
             if (bridge != null)
-            {
                 bridge.OnDecisionRequired.AddListener(HandleDecisionRequired);
-            }
         }
 
-        /// @brief Unsubscribes from the bridge's decision-required event.
         protected override void OnDisable()
         {
             base.OnDisable();
             if (bridge != null)
-            {
                 bridge.OnDecisionRequired.RemoveListener(HandleDecisionRequired);
-            }
         }
 
         // ─────────────────────────────────────────────────────────
         //  ML-Agents Lifecycle
         // ─────────────────────────────────────────────────────────
 
-        /// @brief One-time agent setup called by ML-Agents on first activation.
-        public override void Initialize()
-        {
-        }
+        public override void Initialize() { }
 
-        /// @brief Resets the simulation and begins a new physics episode.
-        /// @details Delegates full episode setup to @c SimulationBridge.StartEpisode().
-        ///          The bridge spawns jobs which physically enter machine trigger
-        ///          colliders, causing @c HandleDecisionRequired to fire and wake
-        ///          this agent when the first scheduling decision is needed.
+        /// @brief Called by Academy every time it wants a new episode.
+        ///
+        /// @details ML-Agents fires this on the very first FixedUpdate AND
+        ///          after every EndEpisode() call. We gate it with IsArmed
+        ///          so the factory only spawns when something has explicitly
+        ///          asked for it (UI click, batch runner, or autoStartOnPlay).
         public override void OnEpisodeBegin()
         {
+            if (!IsArmed)
+            {
+                SimLogger.Low("[Agent] OnEpisodeBegin skipped — not armed.");
+                return;
+            }
+
             if (bridge == null)
             {
                 SimLogger.Error("[Agent] Bridge not assigned.");
                 return;
             }
-
-            // if (bridge.TaillardJson == null)
-            //     return;
 
             bridge.StartEpisode();
         }
@@ -96,31 +122,21 @@ namespace Assets.Scripts.Simulation
         //  Event Handlers
         // ─────────────────────────────────────────────────────────
 
-        /// @brief Invoked by the bridge when a machine needs a scheduling decision.
-        /// @param req  Contextual data describing the waiting machine and its queue.
         private void HandleDecisionRequired(DecisionRequest req)
         {
             RequestDecision();
         }
 
         // ─────────────────────────────────────────────────────────
-        //  Agent Logic
+        //  Observations
         // ─────────────────────────────────────────────────────────
 
-        /// @brief Builds the observation vector sent to the neural network.
-        ///
-        /// @details Writes six scalar context values followed by a fixed-width
-        ///          padded block of @c maxQueueSlots (job-id, duration) pairs.
-        ///          All slots beyond the actual queue length are zero-padded so
-        ///          the vector size remains constant across episodes.
-        ///
-        /// @param sensor  The @c VectorSensor provided by ML-Agents.
         public override void CollectObservations(VectorSensor sensor)
         {
             DecisionRequest req = bridge.CurrentDecision;
             if (!bridge.IsEpisodeActive) { PadZeros(sensor); return; }
 
-            sensor.AddObservation((float)req.Type);   // 0=Dispatch, 1=Routing
+            sensor.AddObservation((float)req.Type);
             sensor.AddObservation((float)req.SimTime);
             sensor.AddObservation(req.DecisionIndex);
             sensor.AddObservation(req.TotalJobs);
@@ -136,27 +152,27 @@ namespace Assets.Scripts.Simulation
                     sensor.AddObservation(valid ? req.QueuedJobIds[i] : 0);
                     sensor.AddObservation(valid ? (float)req.QueuedDurations[i] : 0f);
                 }
-                // pad routing slots — must match routing branch exactly
-                sensor.AddObservation(0); // jobId placeholder
-                sensor.AddObservation(0); // requiredType placeholder
+                // pad routing slots
+                sensor.AddObservation(0);
+                sensor.AddObservation(0);
                 for (int i = 0; i < maxCandidateSlots; i++)
                 {
-                    sensor.AddObservation(0); // machineId
-                    sensor.AddObservation(0f); // jobTime
-                    sensor.AddObservation(0f); // queueLength
+                    sensor.AddObservation(0);
+                    sensor.AddObservation(0f);
+                    sensor.AddObservation(0f);
                 }
             }
             else // Routing
             {
                 sensor.AddObservation(req.JobId);
                 sensor.AddObservation((float)req.RequiredType);
-                // pad dispatch slots — must match dispatch branch exactly
-                sensor.AddObservation(0); // machineId placeholder
-                sensor.AddObservation(0); // queueLength placeholder
+                // pad dispatch slots
+                sensor.AddObservation(0);
+                sensor.AddObservation(0);
                 for (int i = 0; i < maxQueueSlots; i++)
                 {
-                    sensor.AddObservation(0); // jobId
-                    sensor.AddObservation(0f); // duration
+                    sensor.AddObservation(0);
+                    sensor.AddObservation(0f);
                 }
                 for (int i = 0; i < maxCandidateSlots; i++)
                 {
@@ -173,23 +189,16 @@ namespace Assets.Scripts.Simulation
             for (int i = 0; i < ObservationSize; i++) sensor.AddObservation(0f);
         }
 
-        /// @brief Receives the network's chosen action and applies it to the simulation.
-        ///
-        /// @details Maps the discrete action index to a dispatching rule via
-        ///          @c SimulationBridge.Step(), accumulates the returned reward,
-        ///          and ends the episode if the bridge signals completion.
-        ///          The next @c RequestDecision() call is driven by the
-        ///          @c HandleDecisionRequired event, not called here directly.
-        ///
-        /// @param actions  Action buffers provided by ML-Agents.
+        // ─────────────────────────────────────────────────────────
+        //  Actions
+        // ─────────────────────────────────────────────────────────
+
         public override void OnActionReceived(ActionBuffers actions)
         {
             if (!bridge.IsWaitingForAction) return;
 
             int pdrIndex = actions.DiscreteActions[0];
-
             StepResult result = bridge.Step(pdrIndex);
-
             AddReward(result.Reward);
 
             if (result.Done)
@@ -197,15 +206,5 @@ namespace Assets.Scripts.Simulation
                 EndEpisode();
             }
         }
-
-        /// @brief Heuristic fallback: always selects action 0 (first dispatching rule).
-        /// @param actionsOut  Action buffer to write the heuristic choice into.
-        // public override void Heuristic(in ActionBuffers actionsOut)
-        // {
-        //     actionsOut.DiscreteActions.Array[0] = 0;
-        // }
-
-        /// @brief Total number of floats in one observation vector.
-        //public int ObservationSize => 6 + (maxQueueSlots * 2);
     }
 }

@@ -25,6 +25,19 @@ namespace Assets.Scripts.Simulation
     /// @c OnEpisodeFinished when all jobs are complete.
     public class SimulationBridge : MonoBehaviour
     {
+        /// @brief True after SpawnFactory() has built the floor.
+        public bool IsFactoryReady { get; private set; }
+
+        /// @brief The loaded config (readable by UI, batch runner, etc).
+        public FJSSPConfig CurrentConfig => currentConfig;
+
+        /// @brief Event fired after the factory floor is built but before the simulation starts.
+        ///        UI can bind to this to show a "Start Simulation" button.
+        [Header("Lifecycle Events")]
+        public UnityEvent OnFactorySpawned;
+
+        /// @brief Cached machine lookup built during SpawnFactory for use by StartSimulation.
+        private Dictionary<MachineType, List<int>> cachedMachinesByType;
         /// @brief The dispatching rule last applied during @c Step().
         public string LastAppliedRule { get; private set; } = "Waiting...";
 
@@ -138,11 +151,38 @@ namespace Assets.Scripts.Simulation
 
         private void Start()
         {
+            // Check for CLI config path (headless or editor)
+            string configPath = GetCommandLineArg("-config");
+            if (!string.IsNullOrEmpty(configPath))
+            {
+                LoadConfigFromFile(configPath);
+            }
+
             if (autoStartOnPlay)
             {
-                SimLogger.Medium("[Sim Bridge] Auto Starting Episode...");
-                StartEpisode();
+                // Arm the agent so Academy's first OnEpisodeBegin will proceed
+                SimLogger.Medium("[SimBridge] autoStartOnPlay=true — arming agent.");
+                if (agent != null)
+                    agent.IsArmed = true;
+
+                // Don't call StartEpisode() here — Academy will trigger
+                // OnEpisodeBegin on the next FixedUpdate, which calls it for us.
+                // This avoids the double-start race condition.
             }
+            // else: interactive mode — agent stays unarmed, user drives the flow
+        }
+        // @brief Reads a command-line argument value by key.
+        /// @param key  The argument flag (e.g. "-config").
+        /// @returns    The value following the key, or null if not found.
+        private static string GetCommandLineArg(string key)
+        {
+            string[] args = Environment.GetCommandLineArgs();
+            for (int i = 0; i < args.Length - 1; i++)
+            {
+                if (args[i] == key)
+                    return args[i + 1];
+            }
+            return null;
         }
         private FJSSPConfig BuildTestConfig()
         {
@@ -192,29 +232,78 @@ namespace Assets.Scripts.Simulation
         //  Episode Management
         // ─────────────────────────────────────────────────────────
 
-        /// @brief Loads the configured Taillard instance, builds the factory floor,
-        ///        spawns job visuals, and dispatches every job toward its first machine.
-        public void StartEpisode()
+        /// @brief Loads a config from a JSON file path.
+        public bool LoadConfigFromFile(string path)
         {
-            //currentConfig = BuildDefaultConfig();  // temporary hardcoded config
-            currentConfig = BuildTestConfig();
+            var config = ConfigLoader.LoadSingle(path);
+            if (config == null)
+            {
+                SimLogger.Error($"[SimBridge] Failed to load config from: {path}");
+                return false;
+            }
+            LoadConfig(config);
+            return true;
+        }
+
+        /// @brief Stores a config without changing the scene.
+        public void LoadConfig(FJSSPConfig config)
+        {
+            currentConfig = config;
+            IsFactoryReady = false;
+            SimLogger.Medium($"[SimBridge] Config loaded: {config.Name} " +
+                             $"({config.JobCount}J, {config.TotalMachines}M, seed={config.Seed})");
+        }
+
+        /// @brief Builds the physical factory floor from the loaded config.
+        ///        Does NOT start job dispatching — call StartSimulation() for that.
+        public void SpawnFactory()
+        {
+            if (currentConfig == null)
+            {
+                SimLogger.Error("[SimBridge] No config loaded. Call LoadConfig() first.");
+                return;
+            }
+
+            // Tear down any existing floor
+            if (IsFactoryReady || episodeActive)
+            {
+                StopEpisode();
+                if (layoutManager != null) layoutManager.ClearFloor();
+                if (JobManager != null) JobManager.Cleanup();
+            }
+
             UnityEngine.Random.InitState(currentConfig.Seed);
-            var machinesByType = layoutManager.BuildFloor(currentConfig);
-            exitedJobCount = 0;
-            FJSSPJobDefinition[] jobDefs = FJSSPJobGenerator.Generate(currentConfig, machinesByType);
+            cachedMachinesByType = layoutManager.BuildFloor(currentConfig);
 
             if (trafficZoneManager != null)
-            {
                 trafficZoneManager.BuildZoneGraph();
-            }
-            if (JobManager != null)
-            {
-                JobManager.Initialize(jobDefs, spawnVisuals: true);
-            }
+
             if (agvPool != null)
-            {
                 agvPool.InitializeFleet();
+
+            IsFactoryReady = true;
+            SimLogger.High($"[SimBridge] Factory spawned: {currentConfig.TotalMachines} machines");
+            OnFactorySpawned?.Invoke();
+        }
+
+        /// @brief Begins job dispatching on the already-built factory floor.
+        public void StartSimulation()
+        {
+            if (!IsFactoryReady)
+            {
+                SimLogger.Error("[SimBridge] Factory not ready. Call SpawnFactory() first.");
+                return;
             }
+            if (episodeActive)
+            {
+                SimLogger.Error("[SimBridge] Episode already active.");
+                return;
+            }
+
+            FJSSPJobDefinition[] jobDefs = FJSSPJobGenerator.Generate(currentConfig, cachedMachinesByType);
+
+            if (JobManager != null)
+                JobManager.Initialize(jobDefs, spawnVisuals: true);
 
             episodeActive = true;
             decisionCount = 0;
@@ -223,17 +312,55 @@ namespace Assets.Scripts.Simulation
             perMachineDecisions = new int[layoutManager.MachineCount];
             IsWaitingForAction = false;
             pendingDecisions.Clear();
+            pendingRoutingJobs.Clear();
+            routingJobSources.Clear();
+            exitedJobCount = 0;
+            frameCount = 0;
+            timeScaleSum = 0;
 
             StartTime = Time.time;
-
-            SimLogger.High($"[SimBridge] Episode started");
+            SimLogger.High($"[SimBridge] Simulation started ({currentConfig.Name})");
 
             foreach (var tracker in JobManager.JobTrackers)
             {
                 if (tracker.ArrivalTime <= 0f)
                     EnqueueRoutingDecision(tracker.JobId, -1, tracker.NextMachineType);
             }
+        }
 
+        /// @brief Convenience: loads config → spawns → starts in one call.
+        ///        Preserves backward compat with SchedulingAgent.OnEpisodeBegin().
+        public void StartEpisode()
+        {
+            if (currentConfig == null)
+                currentConfig = BuildTestConfig();
+
+            SpawnFactory();
+            StartSimulation();
+        }
+        /// @brief Call from a "Load & Spawn" UI button.
+        ///        Loads the config and builds the factory so the user can see it.
+        public void LoadAndSpawnFromFile(string path)
+        {
+            if (LoadConfigFromFile(path))
+                SpawnFactory();
+        }
+
+        /// @brief Call from a "Start Simulation" UI button after inspecting the factory.
+        ///        Arms the agent and begins dispatching.
+        public void StartSimulationInteractive()
+        {
+            if (!IsFactoryReady)
+            {
+                SimLogger.Error("[SimBridge] Spawn the factory first.");
+                return;
+            }
+
+            // Arm agent so its OnEpisodeBegin will work for subsequent resets
+            if (agent != null)
+                agent.IsArmed = true;
+
+            StartSimulation();
         }
 
         // ─────────────────────────────────────────────────────────
