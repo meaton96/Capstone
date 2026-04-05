@@ -10,6 +10,7 @@ using Assets.Scripts.Simulation.FactoryLayout;
 using Assets.Scripts.Simulation.Jobs;
 using Assets.Scripts.Simulation.Types;
 using System.IO;
+using Unity.MLAgents;
 
 namespace Assets.Scripts.Simulation
 {
@@ -114,9 +115,24 @@ namespace Assets.Scripts.Simulation
                 return;
             }
             Instance = this;
+            string[] args = Environment.GetCommandLineArgs();
+            for (int i = 0; i < args.Length - 1; i++)
+            {
+                if (args[i] == "-timescale" && float.TryParse(args[i + 1], out float ts))
+                {
+                    Time.timeScale = ts;
+                    SimLogger.Low($"[SimBridge] Timescale set to {ts} from command line.");
+                    break;
+                }
+            }
             // simulator = new DESSimulator();
-            ResultsLogger.OutputDirectory = Path.Combine(Application.dataPath, "..\\..", "Results");
-            Directory.CreateDirectory(ResultsLogger.OutputDirectory);
+
+            string resultsDir = Application.isEditor
+                ? Path.Combine(Application.dataPath, "..\\..", "Results")
+                : Path.Combine(Application.persistentDataPath, "Results");
+
+            Directory.CreateDirectory(resultsDir);
+            ResultsLogger.OutputDirectory = resultsDir;
             SimLogger.ActiveLevel = logLevel;
         }
 
@@ -452,8 +468,8 @@ namespace Assets.Scripts.Simulation
         {
             frameCount++;
             timeScaleSum += Time.timeScale;
-            if (pendingRoutingJobs.Count > 0 || pendingDecisions.Count > 0)
-                SimLogger.Medium($"[Bridge] Update: routing={pendingRoutingJobs.Count} dispatch={pendingDecisions.Count} waiting={IsWaitingForAction}");
+            // if (pendingRoutingJobs.Count > 0 || pendingDecisions.Count > 0)
+            //     SimLogger.Medium($"[Bridge] Update: routing={pendingRoutingJobs.Count} dispatch={pendingDecisions.Count} waiting={IsWaitingForAction}");
             if (!episodeActive) return;
             if (IsWaitingForAction) return;
 
@@ -581,8 +597,8 @@ namespace Assets.Scripts.Simulation
             if (JobManager?.JobTrackers != null)
                 foreach (var t in JobManager.JobTrackers)
                     totalOps += t.TotalOperations;
-
-            return -delta / Mathf.Max(totalOps, 1);
+            // Normalize by timescale so reward magnitude is consistent across instances
+            return -delta / (Mathf.Max(totalOps, 1) * Time.timeScale);
         }
 
         /// @brief Selects the best job from a machine's queue using the job-selection
@@ -726,8 +742,29 @@ namespace Assets.Scripts.Simulation
                 PerMachineDecisions = perMachineDecisions
             };
 
+
             SimLogger.High($"[SimBridge] Episode complete: makespan={result.Makespan:F1}, decisions={result.DecisionPoints}");
+            float expectedMinMakespan = 0f;
+            foreach (var t in JobManager.JobTrackers)
+            {
+                float minJobTime = 0f;
+                foreach (var op in t.EligibleMachinesPerOp)
+                    minJobTime += op.Values.Min();
+                expectedMinMakespan = Mathf.Max(expectedMinMakespan, minJobTime);
+            }
+
+            SimLogger.High($"[Validate] Makespan={SimTime:F1} | " +
+                           $"TheoreticalMin={expectedMinMakespan:F1} | " +
+                           $"Ratio={SimTime / expectedMinMakespan:F2}x | " +
+                           $"TimeScale={Time.timeScale}");
             OnEpisodeFinished?.Invoke(result);
+
+            var stats = Academy.Instance.StatsRecorder;
+            // stats.Add("Environment/Makespan", (float)SimTime);
+            // stats.Add("Environment/MakespanVsBestPDR", (float)SimTime / bestPDRMakespan);
+            // stats.Add("Environment/JobsCompleted", CountCompletedJobs());
+            // stats.Add("Environment/DecisionCount", decisionCount);
+            // stats.Add("Environment/AvgQueueLength", GetAverageQueueLength());
         }
 
         /// @brief Dispatches a real AGV to carry @p jobId from its current location

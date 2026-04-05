@@ -23,7 +23,6 @@ namespace Assets.Scripts.Simulation
         [Header("Observation Config")]
         [SerializeField] private int maxQueueSlots = 10;
         public int ObservationSize => 5 + 2 + (maxQueueSlots * 2) + 2 + (maxCandidateSlots * 3);
-
         [Header("Heuristic / Baseline Config")]
         [SerializeField] private DispatchingRule heuristicRule = DispatchingRule.SPT_SMPT;
 
@@ -137,17 +136,28 @@ namespace Assets.Scripts.Simulation
                     sensor.AddObservation(valid ? req.QueuedJobIds[i] : 0);
                     sensor.AddObservation(valid ? (float)req.QueuedDurations[i] : 0f);
                 }
-                // pad routing slots
-                for (int i = 0; i < maxCandidateSlots * 3; i++) sensor.AddObservation(0f);
+                // pad routing slots — must match routing branch exactly
+                sensor.AddObservation(0); // jobId placeholder
+                sensor.AddObservation(0); // requiredType placeholder
+                for (int i = 0; i < maxCandidateSlots; i++)
+                {
+                    sensor.AddObservation(0); // machineId
+                    sensor.AddObservation(0f); // jobTime
+                    sensor.AddObservation(0f); // queueLength
+                }
             }
-            else
+            else // Routing
             {
                 sensor.AddObservation(req.JobId);
                 sensor.AddObservation((float)req.RequiredType);
-                // pad dispatch slots
-                sensor.AddObservation(0); sensor.AddObservation(0);
-                for (int i = 0; i < maxQueueSlots * 2; i++) sensor.AddObservation(0f);
-
+                // pad dispatch slots — must match dispatch branch exactly
+                sensor.AddObservation(0); // machineId placeholder
+                sensor.AddObservation(0); // queueLength placeholder
+                for (int i = 0; i < maxQueueSlots; i++)
+                {
+                    sensor.AddObservation(0); // jobId
+                    sensor.AddObservation(0f); // duration
+                }
                 for (int i = 0; i < maxCandidateSlots; i++)
                 {
                     bool valid = req.CandidateMachineIds != null && i < req.CandidateMachineIds.Length;

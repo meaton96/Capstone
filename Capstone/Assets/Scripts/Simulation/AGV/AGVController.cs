@@ -36,8 +36,11 @@ namespace Assets.Scripts.Simulation.AGV
         [SerializeField] private float waypointArrivalDist = 0.4f;
         [SerializeField] private float dockArrivalDist = 0.3f;
         [SerializeField] private float alignmentThreshold = 3f;
-        [SerializeField] private float reservationRetryInterval = 0.25f;
+        [SerializeField] private float reservationRetryInterval;
         [SerializeField] private float groundOffset = 0.5f;
+
+        private const float MaxPhysicsStep = 0.02f; // 50Hz equivalent
+
 
         public int AgvId { get; private set; }
         public AGVState State { get; private set; } = AGVState.Idle;
@@ -73,6 +76,12 @@ namespace Assets.Scripts.Simulation.AGV
         /// @brief Assigns a callback to be fired when the AGV returns to an Idle state.
         /// @param callback The action to execute.
         public void SetIdleCallback(System.Action callback) => onBecameIdle = callback;
+
+
+        void Awake()
+        {
+            reservationRetryInterval = Time.fixedDeltaTime;
+        }
 
         /// @brief Initializes the AGV controller and anchors it to the traffic grid.
         /// @details Parks the NavMeshAgent to use transform-based movement and reserves the starting zone.
@@ -149,7 +158,7 @@ namespace Assets.Scripts.Simulation.AGV
         private Vector3 targetDropoffPos;
 
         /// @brief Standard Unity update loop driving the state machine.
-        private void Update()
+        private void FixedUpdate()  // was Update()
         {
             switch (State)
             {
@@ -166,7 +175,7 @@ namespace Assets.Scripts.Simulation.AGV
                     }
                     break;
                 case AGVState.ExecutingPickup:
-                    handshakeTimer -= Time.deltaTime;
+                    handshakeTimer -= Time.fixedDeltaTime;
                     if (handshakeTimer <= 0f) ExecutePickup();
                     break;
                 case AGVState.AligningForDropoff:
@@ -177,7 +186,7 @@ namespace Assets.Scripts.Simulation.AGV
                     }
                     break;
                 case AGVState.ExecutingDropoff:
-                    handshakeTimer -= Time.deltaTime;
+                    handshakeTimer -= Time.fixedDeltaTime;
                     if (handshakeTimer <= 0f) ExecuteDropoff();
                     break;
                 case AGVState.WaitingForZone:
@@ -185,7 +194,6 @@ namespace Assets.Scripts.Simulation.AGV
                     break;
             }
             agent.nextPosition = transform.position;
-            UpdateStatusLabel();
         }
         private void UpdateStatusLabel()
         {
@@ -305,7 +313,7 @@ namespace Assets.Scripts.Simulation.AGV
         {
             stateBeforeWait = State;
             pendingZoneId = blockedZoneId;
-            nextRetryTime = Time.time + reservationRetryInterval;
+            nextRetryTime = Time.fixedTime + reservationRetryInterval;
             State = AGVState.WaitingForZone;
         }
 
@@ -313,7 +321,7 @@ namespace Assets.Scripts.Simulation.AGV
         /// @post Resumes previous navigation state if reservation is granted.
         private void UpdateWaiting()
         {
-            if (Time.time < nextRetryTime) return;
+            if (Time.fixedTime < nextRetryTime) return;
 
             if (trafficMgr.TryReserve(pendingZoneId, AgvId))
             {
@@ -346,7 +354,7 @@ namespace Assets.Scripts.Simulation.AGV
             else
             {
                 transform.rotation = Quaternion.LookRotation(dir.normalized, Vector3.up);
-                transform.position = Vector3.MoveTowards(transform.position, target, moveSpeed * Time.deltaTime);
+                transform.position = Vector3.MoveTowards(transform.position, target, moveSpeed * Time.fixedDeltaTime);
             }
         }
 
@@ -355,7 +363,7 @@ namespace Assets.Scripts.Simulation.AGV
         private void RotateToward(Vector3 flatDir)
         {
             Quaternion goal = Quaternion.LookRotation(flatDir, Vector3.up);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, goal, turnSpeed * Time.deltaTime);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, goal, turnSpeed * Time.fixedDeltaTime);
         }
 
         /// @brief Aligns the AGV heading with the dock's required handshake direction.
