@@ -179,7 +179,7 @@ namespace Assets.Scripts.Simulation.UI
             if (totalMachinesText == null || machinesPerTypeSlider == null) return;
             int typeCount = allMachineTypes.Length;
             int total = typeCount * (int)machinesPerTypeSlider.value;
-            totalMachinesText.text = $"{total} machines ({typeCount} types × {(int)machinesPerTypeSlider.value})";
+            totalMachinesText.text = $"{total} machines ({typeCount} types x {(int)machinesPerTypeSlider.value})";
         }
 
         // ─────────────────────────────────────────────────────────

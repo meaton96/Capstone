@@ -271,6 +271,7 @@ namespace Assets.Scripts.Simulation.Jobs
             JobTracker t = GetJobTracker(jobId);
             if (t == null) return 0f;
             int opIdx = t.CurrentOperationIndex;
+            if (opIdx < 0 || opIdx >= t.EligibleMachinesPerOp.Length) return 0f;
             if (t.EligibleMachinesPerOp[opIdx].TryGetValue(machineId, out float time))
                 return time;
             return 0f;

@@ -142,7 +142,7 @@ namespace Assets.Scripts.Simulation
 
             string resultsDir = Application.isEditor
                 ? Path.Combine(Application.dataPath, "..\\..", "Results")
-                : Path.Combine(Application.persistentDataPath, "Results");
+                : Path.Combine(Application.dataPath, "Results");
 
             Directory.CreateDirectory(resultsDir);
             ResultsLogger.OutputDirectory = resultsDir;
@@ -385,22 +385,20 @@ namespace Assets.Scripts.Simulation
         public void OnMachineFinished(int machineId, int jobId)
         {
             JobManager.MarkOperationComplete(jobId, SimTime);
-
             JobTracker tracker = JobManager.GetJobTracker(jobId);
+            if (tracker == null) return;
 
-            if (tracker != null && tracker.State == JobLifecycleState.Complete)
+            if (tracker.State == JobLifecycleState.Complete ||
+                tracker.CurrentOperationIndex >= tracker.TotalOperations)
             {
-                // Final delivery — send to outgoing belt, no routing decision needed
                 PhysicalMachine sourceMachine = layoutManager.GetMachine(machineId);
                 DispatchToExit(jobId, sourceMachine);
             }
-            else if (tracker != null && tracker.State == JobLifecycleState.WaitingForTransport)
+            else if (tracker.State == JobLifecycleState.WaitingForTransport)
             {
                 EnqueueRoutingDecision(jobId, machineId, tracker.NextMachineType);
             }
 
-            // Check episode completion only after final AGV is dispatched
-            // AreAllJobsComplete is checked in OnJobExited instead
             CheckIfDecisionNeeded(machineId);
         }
         public void OnJobExited(int jobId)

@@ -161,6 +161,7 @@ namespace Assets.Scripts.Simulation.Types
 
             return new FJSSPConfig
             {
+                Name = string.IsNullOrEmpty(raw.name) ? "unnamed" : raw.name,
                 Seed = raw.seed,
                 JobCount = raw.jobCount,
                 MachinesPerType = raw.machinesPerType,
