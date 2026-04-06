@@ -189,11 +189,21 @@ namespace Assets.Scripts.Simulation.Machines
         /// @post Outgoing queue count is updated in the visual layer.
         public void ReleaseFromOutgoing(int jobId)
         {
+
             if (outgoingConveyor != null && outgoingConveyor.Contains(jobId))
                 outgoingConveyor.RemoveJob(jobId);
             else if (secondaryOutgoingConveyor != null && secondaryOutgoingConveyor.Contains(jobId))
                 secondaryOutgoingConveyor.RemoveJob(jobId);
-            SimLogger.Error($"{jobId} not found on outgoing belt");
+            else
+            {
+                Debug.LogWarning($"{jobId} not found on outgoing belt");
+                Debug.LogWarning(outgoingConveyor.DumpBeltJobs());
+                if (secondaryOutgoingConveyor != null)
+                {
+                    Debug.LogWarning(secondaryOutgoingConveyor.DumpBeltJobs());
+                }
+            }
+
             visualLayer?.UpdateOutgoingQueueLabel(TotalOutgoingCount);
         }
 

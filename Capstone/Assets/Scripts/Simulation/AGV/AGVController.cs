@@ -158,7 +158,7 @@ namespace Assets.Scripts.Simulation.AGV
         private Vector3 targetDropoffPos;
 
         /// @brief Standard Unity update loop driving the state machine.
-        private void FixedUpdate()  // was Update()
+        private void FixedUpdate()
         {
             switch (State)
             {
@@ -194,6 +194,7 @@ namespace Assets.Scripts.Simulation.AGV
                     break;
             }
             agent.nextPosition = transform.position;
+            UpdateStatusLabel();
         }
         private void UpdateStatusLabel()
         {
