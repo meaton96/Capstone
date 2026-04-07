@@ -549,7 +549,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             int n = machines.Length;
             string header = "     ";
             for (int j = 0; j < n; j++) header += $"  M{j,-4}";
-            SimLogger.Medium($"[FactoryLayout] Distance matrix ({n}×{n}):\n{header}");
+            SimLogger.Medium($"[FactoryLayout] Distance matrix ({n}x{n}):\n{header}");
 
             for (int i = 0; i < n; i++)
             {

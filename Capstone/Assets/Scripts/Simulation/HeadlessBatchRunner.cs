@@ -93,7 +93,7 @@ namespace Assets.Scripts.Simulation
         {
             if (isBatchRunning)
             {
-                Debug.LogWarning("[BatchRunner] Batch already in progress.");
+                SimLogger.LogWarning("[BatchRunner] Batch already in progress.");
                 return;
             }
             StartCoroutine(RunBatchCoroutine(configs, repeats));
@@ -105,7 +105,7 @@ namespace Assets.Scripts.Simulation
             var configs = ConfigLoader.LoadBatch(path);
             if (configs.Length == 0)
             {
-                Debug.LogError($"[BatchRunner] No configs in {path}");
+                SimLogger.LogError($"[BatchRunner] No configs in {path}");
                 return;
             }
             RunBatch(configs, repeats);
@@ -121,7 +121,7 @@ namespace Assets.Scripts.Simulation
             totalRuns = configs.Length * AllRules.Length * repeats;
             completedRuns = 0;
 
-            Debug.Log($"[BatchRunner] Starting batch: {configs.Length} configs × " +
+            SimLogger.Low($"[BatchRunner] Starting batch: {configs.Length} configs × " +
                       $"{AllRules.Length} rules × {repeats} repeats = {totalRuns} total runs");
 
             float startWall = Time.realtimeSinceStartup;
@@ -135,7 +135,7 @@ namespace Assets.Scripts.Simulation
                         // Clone config with offset seed for this repeat
                         FJSSPConfig runConfig = CloneWithSeed(baseConfig, baseConfig.Seed + rep);
 
-                        Debug.Log($"[BatchRunner] Run {completedRuns + 1}/{totalRuns}: " +
+                        SimLogger.Low($"[BatchRunner] Run {completedRuns + 1}/{totalRuns}: " +
                                   $"config={runConfig.Name} rule={rule} seed={runConfig.Seed}");
 
                         yield return RunSingleEpisode(runConfig, rule);
@@ -145,19 +145,19 @@ namespace Assets.Scripts.Simulation
                         float elapsed = Time.realtimeSinceStartup - startWall;
                         float avgPerRun = elapsed / completedRuns;
                         float eta = avgPerRun * (totalRuns - completedRuns);
-                        Debug.Log($"[BatchRunner] Progress: {completedRuns}/{totalRuns} " +
+                        SimLogger.Low($"[BatchRunner] Progress: {completedRuns}/{totalRuns} " +
                                   $"({elapsed:F1}s elapsed, ETA {eta:F1}s)");
                     }
                 }
             }
 
             float totalTime = Time.realtimeSinceStartup - startWall;
-            Debug.Log($"[BatchRunner] Batch complete: {totalRuns} runs in {totalTime:F1}s");
+            SimLogger.Low($"[BatchRunner] Batch complete: {totalRuns} runs in {totalTime:F1}s");
             isBatchRunning = false;
 
             if (Application.isBatchMode)
             {
-                Debug.Log("[BatchRunner] Headless mode — quitting application.");
+                SimLogger.Low("[BatchRunner] Headless mode — quitting application.");
                 Application.Quit();
             }
         }
@@ -225,7 +225,7 @@ namespace Assets.Scripts.Simulation
             if (fallbackBatchJson != null)
                 return ConfigLoader.ParseBatch(fallbackBatchJson.text);
 
-            Debug.LogError("[BatchRunner] No batch config source available.");
+            SimLogger.LogError("[BatchRunner] No batch config source available.");
             return Array.Empty<FJSSPConfig>();
         }
 
@@ -240,7 +240,7 @@ namespace Assets.Scripts.Simulation
 
         private void QuitWithError(string message)
         {
-            Debug.LogError($"[BatchRunner] {message}");
+            SimLogger.LogError($"[BatchRunner] {message}");
             if (Application.isBatchMode)
                 Application.Quit(1);
         }

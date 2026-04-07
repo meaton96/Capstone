@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using Assets.Scripts.Simulation.Machines;
+using Assets.Scripts.Logging;
 
 namespace Assets.Scripts.Simulation.Types
 {
@@ -45,7 +46,7 @@ namespace Assets.Scripts.Simulation.Types
         {
             if (!File.Exists(path))
             {
-                Debug.LogError($"[ConfigLoader] File not found: {path}");
+                SimLogger.LogError($"[ConfigLoader] File not found: {path}");
                 return null;
             }
 
@@ -60,7 +61,7 @@ namespace Assets.Scripts.Simulation.Types
         {
             if (!File.Exists(path))
             {
-                Debug.LogError($"[ConfigLoader] File not found: {path}");
+                SimLogger.LogError($"[ConfigLoader] File not found: {path}");
                 return Array.Empty<FJSSPConfig>();
             }
 
@@ -78,7 +79,7 @@ namespace Assets.Scripts.Simulation.Types
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[ConfigLoader] Parse error: {ex.Message}");
+                SimLogger.LogError($"[ConfigLoader] Parse error: {ex.Message}");
                 return null;
             }
         }
@@ -99,7 +100,7 @@ namespace Assets.Scripts.Simulation.Types
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[ConfigLoader] Batch parse error: {ex.Message}");
+                SimLogger.LogError($"[ConfigLoader] Batch parse error: {ex.Message}");
                 return Array.Empty<FJSSPConfig>();
             }
         }
@@ -179,7 +180,7 @@ namespace Assets.Scripts.Simulation.Types
             if (Enum.TryParse<MachineType>(name, ignoreCase: true, out var result))
                 return result;
 
-            Debug.LogWarning($"[ConfigLoader] Unknown machine type '{name}', skipping.");
+            SimLogger.LogWarning($"[ConfigLoader] Unknown machine type '{name}', skipping.");
             return null;
         }
     }

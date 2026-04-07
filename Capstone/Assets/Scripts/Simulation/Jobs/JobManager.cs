@@ -111,7 +111,7 @@ namespace Assets.Scripts.Simulation.Jobs
             }
 
             initialized = true;
-            Debug.Log($"[JobManager] Initialized {jobDefs.Length} FJSSP job trackers.");
+            SimLogger.Low($"[JobManager] Initialized {jobDefs.Length} FJSSP job trackers.");
         }
 
         /// @brief Logic loop managing the physical flow of jobs onto and off the factory floor.

@@ -134,7 +134,7 @@ namespace Assets.Scripts.Simulation.Machines
 
             if (belt == null)
             {
-                Debug.LogError($"[PhysicalMachine M{MachineId}] No incoming conveyor wired!");
+                SimLogger.LogError($"[PhysicalMachine M{MachineId}] No incoming conveyor wired!");
                 return;
             }
 
@@ -143,7 +143,7 @@ namespace Assets.Scripts.Simulation.Machines
                 ConveyorBelt fallback = GetOtherIncoming(belt);
                 if (fallback == null || !fallback.TryEnqueue(jobId, visual))
                 {
-                    Debug.LogWarning($"[PhysicalMachine M{MachineId}] All incoming conveyors full — cannot accept Job {jobId}.");
+                    SimLogger.LogWarning($"[PhysicalMachine M{MachineId}] All incoming conveyors full - cannot accept Job {jobId}.");
                     return;
                 }
             }
@@ -197,11 +197,11 @@ namespace Assets.Scripts.Simulation.Machines
                 secondaryOutgoingConveyor.RemoveJob(jobId);
             else
             {
-                Debug.LogWarning($"{jobId} not found on outgoing belt");
-                Debug.LogWarning(outgoingConveyor.DumpBeltJobs());
+                SimLogger.LogWarning($"{jobId} not found on outgoing belt");
+                SimLogger.LogWarning(outgoingConveyor.DumpBeltJobs());
                 if (secondaryOutgoingConveyor != null)
                 {
-                    Debug.LogWarning(secondaryOutgoingConveyor.DumpBeltJobs());
+                    SimLogger.LogWarning(secondaryOutgoingConveyor.DumpBeltJobs());
                 }
             }
 

@@ -64,7 +64,7 @@ namespace Assets.Scripts.Simulation.AGV
                 fleet.Add(newAgv);
             }
 
-            Debug.Log($"[AGVPool] Spawned fleet of {fleetSize} AGVs.");
+            SimLogger.Medium($"[AGVPool] Spawned fleet of {fleetSize} AGVs.");
         }
         public Vector3 GetParkingPosition(int agvId)
         {
@@ -115,7 +115,7 @@ namespace Assets.Scripts.Simulation.AGV
                                 PhysicalMachine source, PhysicalMachine dropoff)
         {
             AGVController agv = GetAvailableAGV();
-            SimLogger.High($"[AGVPool] TryDispatch job={jobId} — " +
+            SimLogger.High($"[AGVPool] TryDispatch job={jobId} - " +
                (agv != null ? $"assigned to AGV {agv.AgvId}" : "no AGV free, queuing"));
             if (agv != null)
             {
@@ -123,7 +123,7 @@ namespace Assets.Scripts.Simulation.AGV
             }
             else
             {
-                SimLogger.Low($"[AGVPool] No AGV free for Job {jobId} — queuing request.");
+                SimLogger.High($"[AGVPool] No AGV free for Job {jobId} - queuing request.");
                 pendingRequests.Enqueue(new DispatchRequest
                 {
                     JobId = jobId,
@@ -149,7 +149,7 @@ namespace Assets.Scripts.Simulation.AGV
             if (agv == null) return;
 
             DispatchRequest req = pendingRequests.Dequeue();
-            SimLogger.Low($"[AGVPool] Draining queue — assigning Job {req.JobId} to AGV {agv.AgvId}.");
+            SimLogger.High($"[AGVPool] Draining queue - assigning Job {req.JobId} to AGV {agv.AgvId}.");
             agv.Dispatch(req.JobId, req.PickupPosition, req.DropoffSlotPosition, req.Source, req.Dropoff);
         }
 

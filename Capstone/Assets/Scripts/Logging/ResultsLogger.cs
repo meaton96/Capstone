@@ -42,7 +42,7 @@ namespace Assets.Scripts.Logging
                 $"{averageTimeScale:F4}"
             );
 
-            Debug.Log($"[Results] Logged: {ruleName} seed={seed} makespan={makespan:F1} → {FilePath}");
+            Debug.Log($"[Results] Logged: {ruleName} seed={seed} makespan={makespan:F1} - {FilePath}");
         }
     }
 }

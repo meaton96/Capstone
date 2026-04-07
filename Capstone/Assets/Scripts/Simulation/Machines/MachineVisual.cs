@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using Assets.Scripts.Simulation.Types;
+using Assets.Scripts.Logging;
 
 namespace Assets.Scripts.Simulation.Machines
 {
@@ -190,7 +191,7 @@ namespace Assets.Scripts.Simulation.Machines
             int index = (int)state;
             if (indicatorMaterials == null || index >= indicatorMaterials.Length || indicatorMaterials[index] == null)
             {
-                Debug.LogWarning($"[MachineVisual] No indicator material for state {state} on M{machineId}");
+                SimLogger.LogWarning($"[MachineVisual] No indicator material for state {state} on M{machineId}");
                 return;
             }
 
