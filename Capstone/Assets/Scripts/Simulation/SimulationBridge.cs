@@ -142,7 +142,7 @@ namespace Assets.Scripts.Simulation
 
             string resultsDir = Application.isEditor
                 ? Path.Combine(Application.dataPath, "..\\..", "Results")
-                : Path.Combine(Application.dataPath, "Results");
+                : Path.Combine(Application.dataPath, "..\\Results");
 
             Directory.CreateDirectory(resultsDir);
             ResultsLogger.OutputDirectory = resultsDir;

@@ -711,16 +711,16 @@ namespace Assets.Scripts.Simulation.AGV
         {
             if (statusLabel == null) return;
 
-            string jobStr = CurrentJobId >= 0 ? $"J{CurrentJobId}" : "–";
+            string jobStr = CurrentJobId >= 0 ? $"J{CurrentJobId}" : "-";
             string target = targetMachine != null ? $"M{targetMachine.MachineId}" : "belt";
             string waitStr = waitingForZone ? $" [BLOCKED z{pendingZoneId}]" : "";
 
             statusLabel.text = State switch
             {
                 AGVState.Idle => $"AGV{AgvId} [Idle]\nwaiting",
-                AGVState.MovingToPickup => $"AGV{AgvId} [Pickup]{waitStr}\n→ {jobStr}",
-                AGVState.MovingToDropoff => $"AGV{AgvId} [Dropoff]{waitStr}\n{jobStr} → {target}",
-                AGVState.ReturningToParking => $"AGV{AgvId} [Parking]{waitStr}\n↩",
+                AGVState.MovingToPickup => $"AGV{AgvId} [Pickup]{waitStr}\n {jobStr}",
+                AGVState.MovingToDropoff => $"AGV{AgvId} [Dropoff]{waitStr}\n{jobStr}  {target}",
+                AGVState.ReturningToParking => $"AGV{AgvId} [Parking]{waitStr}\n",
                 _ => $"AGV{AgvId}"
             };
 
