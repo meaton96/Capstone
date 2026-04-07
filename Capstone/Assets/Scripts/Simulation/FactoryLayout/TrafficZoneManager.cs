@@ -42,7 +42,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
 
     /// @brief Describes positioning for AGV-conveyor interaction.
     [Serializable]
-    public struct DockPoint
+    public class DockPoint
     {
         public Vector3 ApproachPosition;
         public Vector3 HandshakePosition;

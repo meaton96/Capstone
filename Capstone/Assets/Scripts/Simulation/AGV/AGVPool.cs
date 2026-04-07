@@ -10,6 +10,8 @@ namespace Assets.Scripts.Simulation.AGV
     /// @brief Manages a fleet of AGVs, handling initialization, job dispatching, and request queuing.
     public class AGVPool : MonoBehaviour
     {
+        public static AGVPool Instance;
+        private Vector3[] parkingPositions;
         [SerializeField] private AGVController agvPrefab;
         [SerializeField] private int fleetSize = 5;
         [SerializeField] private FactoryLayoutManager layoutManager;
@@ -28,6 +30,12 @@ namespace Assets.Scripts.Simulation.AGV
 
         private Queue<DispatchRequest> pendingRequests = new Queue<DispatchRequest>();
 
+
+        void Awake()
+        {
+            Instance = this;
+        }
+
         /// @brief Spawns and prepares the AGV fleet at the designated parking area.
         ///
         /// @details Clears any existing fleet instances and the pending request queue. 
@@ -44,11 +52,11 @@ namespace Assets.Scripts.Simulation.AGV
             pendingRequests.Clear();
 
             Vector3 baseParkingPos = layoutManager != null ? layoutManager.AGVParkingPosition : Vector3.zero;
-
+            parkingPositions = new Vector3[fleetSize];
             for (int i = 0; i < fleetSize; i++)
             {
                 Vector3 spawnPos = baseParkingPos + new Vector3(i * 2f, 0, 0);
-
+                parkingPositions[i] = spawnPos;
                 AGVController newAgv = Instantiate(agvPrefab, spawnPos, Quaternion.identity, this.transform);
                 newAgv.gameObject.name = $"AGV_{i}";
                 newAgv.Initialize(i);
@@ -57,6 +65,12 @@ namespace Assets.Scripts.Simulation.AGV
             }
 
             Debug.Log($"[AGVPool] Spawned fleet of {fleetSize} AGVs.");
+        }
+        public Vector3 GetParkingPosition(int agvId)
+        {
+            if (parkingPositions != null && agvId < parkingPositions.Length)
+                return parkingPositions[agvId];
+            return Vector3.zero;
         }
 
         /// @brief Initiates a job dispatch with a calculated delay.
@@ -101,6 +115,8 @@ namespace Assets.Scripts.Simulation.AGV
                                 PhysicalMachine source, PhysicalMachine dropoff)
         {
             AGVController agv = GetAvailableAGV();
+            SimLogger.High($"[AGVPool] TryDispatch job={jobId} — " +
+               (agv != null ? $"assigned to AGV {agv.AgvId}" : "no AGV free, queuing"));
             if (agv != null)
             {
                 agv.Dispatch(jobId, pickupPos, dropoffSlotPos, source, dropoff);

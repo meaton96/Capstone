@@ -1,4 +1,6 @@
 using UnityEngine;
+using System.IO;
+using System;
 
 namespace Assets.Scripts.Logging
 {
@@ -39,6 +41,41 @@ namespace Assets.Scripts.Logging
         /// @brief The minimum level a message must meet to be written to the console.
         ///        Defaults to @c Low so only important milestones appear out of the box.
         public static LogLevel ActiveLevel = LogLevel.Low;
+        private static string _filePath;
+        private static bool _isFileLoggingEnabled = false;
+
+        public static void InitializeFileLogging(string fileName = "simulation_log.txt")
+        {
+            try
+            {
+                _filePath = Path.Combine(Application.dataPath, fileName);
+
+                File.WriteAllText(_filePath, $"--- Log Started: {DateTime.Now} ---\n");
+
+                _isFileLoggingEnabled = true;
+                Debug.Log($"[SimLogger] File logging initialized at: {_filePath}");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[SimLogger] Failed to initialize file logging: {ex.Message}");
+            }
+        }
+        private static void WriteToFile(string message)
+        {
+            if (!_isFileLoggingEnabled) return;
+
+            try
+            {
+                // We use AppendAllText for simplicity. 
+                // For extremely high-frequency logs, consider a persistent StreamWriter buffer.
+                string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+                File.AppendAllText(_filePath, $"{timestamp} {message}\n");
+            }
+            catch
+            {
+                // Fail silently to avoid infinite recursion if the error log fails
+            }
+        }
 
         // ─────────────────────────────────────────────────────────
         //  Core API
@@ -50,7 +87,10 @@ namespace Assets.Scripts.Logging
         public static void Log(LogLevel level, string message)
         {
             if (level <= ActiveLevel)
+            {
                 Debug.Log(message);
+                WriteToFile($"{message}");
+            }
         }
 
         /// @brief Writes @p message as a @c Debug.LogWarning, always visible.
@@ -58,6 +98,7 @@ namespace Assets.Scripts.Logging
         public static void LogWarning(string message)
         {
             Debug.LogWarning(message);
+            WriteToFile($"[Warning] {message}");
         }
 
         /// @brief Writes @p message as a @c Debug.LogError, always visible.
@@ -65,6 +106,7 @@ namespace Assets.Scripts.Logging
         public static void LogError(string message)
         {
             Debug.LogError(message);
+            WriteToFile($"[Error] {message}");
         }
 
         // ─────────────────────────────────────────────────────────

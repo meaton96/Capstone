@@ -180,6 +180,7 @@ namespace Assets.Scripts.Simulation.Machines
 
             visualLayer?.BeginOperation(jobId, Time.time, realTimeDuration);
             visualLayer?.UpdateIncomingQueueLabel(TotalIncomingCount);
+            SimLogger.High($"[Machine] {MachineId} began processing job {jobId} for {realTimeDuration} seconds.");
             StartCoroutine(ProcessJobRoutine(jobId, realTimeDuration));
         }
 
@@ -214,6 +215,8 @@ namespace Assets.Scripts.Simulation.Machines
         /// @param duration Processing time.
         private IEnumerator ProcessJobRoutine(int jobId, float duration)
         {
+            yield return null;
+
             float elapsed = 0f;
             while (elapsed < duration)
             {

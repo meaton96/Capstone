@@ -149,6 +149,8 @@ namespace Assets.Scripts.Simulation.Jobs
                         vis?.gameObject.SetActive(false);
                         SimLogger.Low($"[JobManager] Job {jobId} exited factory.");
                         SimulationBridge.Instance?.OnJobExited(jobId);
+                        JobTracker t = GetJobTracker(jobId);
+                        t.State = JobLifecycleState.Complete;
                     }
                 }
             }
@@ -171,7 +173,7 @@ namespace Assets.Scripts.Simulation.Jobs
         {
             JobTracker t = GetJobTracker(jobId);
             if (t == null) return;
-
+            if (t.State == JobLifecycleState.Complete) return;
             t.State = JobLifecycleState.Queued;
             t.CurrentMachineId = machineId;
             t.PhysicallyAtMachine = true;
@@ -252,7 +254,7 @@ namespace Assets.Scripts.Simulation.Jobs
                 if (t.Visual != null)
                 {
                     t.Visual.SetState(t.State);
-                    t.Visual.SetTargetPosition(GetExitAreaPosition(t.IncomingQueueSlot));
+                    //t.Visual.SetTargetPosition(GetExitAreaPosition(t.IncomingQueueSlot));
                 }
             }
             else

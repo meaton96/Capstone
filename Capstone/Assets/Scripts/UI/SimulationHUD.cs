@@ -3,6 +3,7 @@ using TMPro;
 using Assets.Scripts.Simulation;
 using UnityEngine.UI;
 using Assets.Scripts.Simulation.Jobs;
+using Assets.Scripts.Logging;
 
 namespace Assets.Scripts.UI
 {
@@ -65,8 +66,10 @@ namespace Assets.Scripts.UI
             if (SimulationBridge.Instance != null)
                 SimulationBridge.Instance.StopEpisode();
 
-            if (instanceSelectMenu != null)
-                instanceSelectMenu.Show();
+            // if (instanceSelectMenu != null)
+            //     instanceSelectMenu.Show();
+                
+            
         }
 
         /// @brief Polls the bridge and refreshes all HUD labels once per frame.

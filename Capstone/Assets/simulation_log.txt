@@ -1,0 +1,424 @@
+--- Log Started: 4/7/2026 4:39:38 PM ---
+2026-04-07 16:39:38.851 [Agent] OnEpisodeBegin skipped — not armed.
+2026-04-07 16:39:55.720 [SimBridge] Config loaded: 5j_10m (5J, 10M, seed=42)
+2026-04-07 16:39:55.739 [FactoryLayout] Distance matrix (10×10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-04-07 16:39:55.741 M0      0.0    6.0   12.0   18.0    7.5    9.6   14.2   19.5   15.0   16.2 
+2026-04-07 16:39:55.741 M1      6.0    0.0    6.0   12.0    9.6    7.5    9.6   14.2   16.2   15.0 
+2026-04-07 16:39:55.741 M2     12.0    6.0    0.0    6.0   14.2    9.6    7.5    9.6   19.2   16.2 
+2026-04-07 16:39:55.741 M3     18.0   12.0    6.0    0.0   19.5   14.2    9.6    7.5   23.4   19.2 
+2026-04-07 16:39:55.742 M4      7.5    9.6   14.2   19.5    0.0    6.0   12.0   18.0    7.5    9.6 
+2026-04-07 16:39:55.742 M5      9.6    7.5    9.6   14.2    6.0    0.0    6.0   12.0    9.6    7.5 
+2026-04-07 16:39:55.743 M6     14.2    9.6    7.5    9.6   12.0    6.0    0.0    6.0   14.2    9.6 
+2026-04-07 16:39:55.743 M7     19.5   14.2    9.6    7.5   18.0   12.0    6.0    0.0   19.5   14.2 
+2026-04-07 16:39:55.743 M8     15.0   16.2   19.2   23.4    7.5    9.6   14.2   19.5    0.0    6.0 
+2026-04-07 16:39:55.744 M9     16.2   15.0   16.2   19.2    9.6    7.5    9.6   14.2    6.0    0.0 
+2026-04-07 16:39:55.755 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-04-07 16:39:55.760 [TrafficZones] Built zone graph: 26 zones.
+2026-04-07 16:39:55.764 [SimBridge] Factory spawned: 10 machines
+2026-04-07 16:39:56.640 [SimBridge] Simulation started (5j_10m)
+2026-04-07 16:39:56.652 [DispatchRealAGV] job=0 pickup=(-11.50, 1.51, 11.75) (source=null) dropoff=(9.25, 0.33, 5.81) target=3
+2026-04-07 16:39:56.653 [AGVPool] TryDispatch job=0 — assigned to AGV 0
+2026-04-07 16:39:56.669 [DispatchRealAGV] job=1 pickup=(-11.50, 1.51, 12.25) (source=null) dropoff=(-9.25, 0.33, 1.69) target=4
+2026-04-07 16:39:56.669 [AGVPool] TryDispatch job=1 — assigned to AGV 1
+2026-04-07 16:39:56.687 [DispatchRealAGV] job=2 pickup=(-11.50, 1.51, 12.75) (source=null) dropoff=(3.25, 0.33, 5.81) target=2
+2026-04-07 16:39:56.687 [AGVPool] TryDispatch job=2 — assigned to AGV 2
+2026-04-07 16:39:56.707 [DispatchRealAGV] job=3 pickup=(-11.50, 1.51, 13.25) (source=null) dropoff=(2.75, 0.33, 1.69) target=6
+2026-04-07 16:39:56.707 [AGVPool] TryDispatch job=3 — no AGV free, queuing
+2026-04-07 16:39:56.707 [AGVPool] No AGV free for Job 3 — queuing request.
+2026-04-07 16:39:56.724 [DispatchRealAGV] job=4 pickup=(-11.50, 1.51, 13.75) (source=null) dropoff=(3.25, 0.33, 5.81) target=2
+2026-04-07 16:39:56.724 [AGVPool] TryDispatch job=4 — no AGV free, queuing
+2026-04-07 16:39:56.724 [AGVPool] No AGV free for Job 4 — queuing request.
+2026-04-07 16:39:59.255 [Job Manager] begin transit of job 0 to machine 3
+2026-04-07 16:39:59.256 [AGV 0] Executed pickup of job 0
+2026-04-07 16:39:59.723 [Job Manager] begin transit of job 1 to machine 4
+2026-04-07 16:39:59.723 [AGV 1] Executed pickup of job 1
+2026-04-07 16:40:00.139 [Job Manager] begin transit of job 2 to machine 2
+2026-04-07 16:40:00.139 [AGV 2] Executed pickup of job 2
+2026-04-07 16:40:01.209 [AGV 0] Executed dropoff of job 0
+2026-04-07 16:40:01.210 [AGV 0] Returning to parking at (-9.00, 0.01, -10.25).
+2026-04-07 16:40:01.224 [Machine] 3 began processing job 0 for 39.18116 seconds.
+2026-04-07 16:40:01.291 [AGV 1] Executed dropoff of job 1
+2026-04-07 16:40:01.291 [AGV 1] Returning to parking at (-7.00, 0.01, -10.25).
+2026-04-07 16:40:01.301 [Machine] 4 began processing job 1 for 47.80549 seconds.
+2026-04-07 16:40:01.979 [AGV 0] Parked — zones released.
+2026-04-07 16:40:01.980 [AGVPool] Draining queue — assigning Job 3 to AGV 0.
+2026-04-07 16:40:02.054 [AGV 2] Executed dropoff of job 2
+2026-04-07 16:40:02.054 [AGV 2] Returning to parking at (-5.00, 0.01, -10.25).
+2026-04-07 16:40:02.066 [Machine] 2 began processing job 2 for 55.74482 seconds.
+2026-04-07 16:40:02.346 [AGV 1] Parked — zones released.
+2026-04-07 16:40:02.346 [AGVPool] Draining queue — assigning Job 4 to AGV 1.
+2026-04-07 16:40:02.520 [Job Manager] begin transit of job 3 to machine 6
+2026-04-07 16:40:02.521 [AGV 0] Executed pickup of job 3
+2026-04-07 16:40:02.859 [AGV 2] Parked — zones released.
+2026-04-07 16:40:02.924 [Job Manager] begin transit of job 4 to machine 2
+2026-04-07 16:40:02.925 [AGV 1] Executed pickup of job 4
+2026-04-07 16:40:03.639 [OnMachineFinished] job=0 machine=3
+2026-04-07 16:40:03.640 [OnMachineFinished] job=0 state=WaitingForTransport opIndex=1/7 completedOps=1
+2026-04-07 16:40:03.640 [OnMachineFinished] job=0 → EnqueueRouting nextType=Assemble
+2026-04-07 16:40:03.657 [DispatchRealAGV] job=0 pickup=(8.75, 0.33, 5.81) (source=3) dropoff=(-9.25, 0.33, -5.81) target=8
+2026-04-07 16:40:03.658 [AGVPool] TryDispatch job=0 — assigned to AGV 2
+2026-04-07 16:40:04.245 [OnMachineFinished] job=1 machine=4
+2026-04-07 16:40:04.245 [OnMachineFinished] job=1 state=WaitingForTransport opIndex=1/6 completedOps=1
+2026-04-07 16:40:04.246 [OnMachineFinished] job=1 → EnqueueRouting nextType=Assemble
+2026-04-07 16:40:04.261 [DispatchRealAGV] job=1 pickup=(-8.75, 0.33, 1.69) (source=4) dropoff=(-9.25, 0.33, -5.81) target=8
+2026-04-07 16:40:04.262 [AGVPool] TryDispatch job=1 — no AGV free, queuing
+2026-04-07 16:40:04.262 [AGVPool] No AGV free for Job 1 — queuing request.
+2026-04-07 16:40:04.295 [AGV 0] Executed dropoff of job 3
+2026-04-07 16:40:04.296 [AGV 0] Returning to parking at (-9.00, 0.01, -10.25).
+2026-04-07 16:40:04.311 [Machine] 6 began processing job 3 for 69.9256 seconds.
+2026-04-07 16:40:04.911 [Job Manager] begin transit of job 0 to machine 8
+2026-04-07 16:40:04.911 [AGV 2] Executed pickup of job 0
+2026-04-07 16:40:05.172 [AGV 0] Parked — zones released.
+2026-04-07 16:40:05.173 [AGVPool] Draining queue — assigning Job 1 to AGV 0.
+2026-04-07 16:40:05.244 [AGV 1] Executed dropoff of job 4
+2026-04-07 16:40:05.245 [AGV 1] Returning to parking at (-7.00, 0.01, -10.25).
+2026-04-07 16:40:05.494 [OnMachineFinished] job=2 machine=2
+2026-04-07 16:40:05.495 [OnMachineFinished] job=2 state=WaitingForTransport opIndex=1/6 completedOps=1
+2026-04-07 16:40:05.495 [OnMachineFinished] job=2 → EnqueueRouting nextType=Mill
+2026-04-07 16:40:05.510 [DispatchRealAGV] job=2 pickup=(2.75, 0.33, 5.81) (source=2) dropoff=(-2.75, 0.33, 5.81) target=1
+2026-04-07 16:40:05.510 [AGVPool] TryDispatch job=2 — no AGV free, queuing
+2026-04-07 16:40:05.510 [AGVPool] No AGV free for Job 2 — queuing request.
+2026-04-07 16:40:05.519 [Machine] 2 began processing job 4 for 21.92682 seconds.
+2026-04-07 16:40:05.703 [AGV 2] Executed dropoff of job 0
+2026-04-07 16:40:05.703 [AGV 2] Returning to parking at (-5.00, 0.01, -10.25).
+2026-04-07 16:40:05.711 [Machine] 8 began processing job 0 for 39.12345 seconds.
+2026-04-07 16:40:05.728 [Job Manager] begin transit of job 1 to machine 8
+2026-04-07 16:40:05.729 [AGV 0] Executed pickup of job 1
+2026-04-07 16:40:06.089 [AGV 1] Parked — zones released.
+2026-04-07 16:40:06.089 [AGVPool] Draining queue — assigning Job 2 to AGV 1.
+2026-04-07 16:40:06.841 [AGV 0] Executed dropoff of job 1
+2026-04-07 16:40:06.842 [AGV 0] Returning to parking at (-9.00, 0.01, -10.25).
+2026-04-07 16:40:06.874 [OnMachineFinished] job=4 machine=2
+2026-04-07 16:40:06.874 [OnMachineFinished] job=4 state=WaitingForTransport opIndex=1/5 completedOps=1
+2026-04-07 16:40:06.875 [OnMachineFinished] job=4 → EnqueueRouting nextType=Assemble
+2026-04-07 16:40:06.882 [Job Manager] begin transit of job 2 to machine 1
+2026-04-07 16:40:06.882 [AGV 1] Executed pickup of job 2
+2026-04-07 16:40:06.891 [DispatchRealAGV] job=4 pickup=(2.75, 0.33, 5.81) (source=2) dropoff=(-3.25, 0.33, -5.81) target=9
+2026-04-07 16:40:06.891 [AGVPool] TryDispatch job=4 — no AGV free, queuing
+2026-04-07 16:40:06.892 [AGVPool] No AGV free for Job 4 — queuing request.
+2026-04-07 16:40:07.119 [AGV 2] Parked — zones released.
+2026-04-07 16:40:07.120 [AGVPool] Draining queue — assigning Job 4 to AGV 2.
+2026-04-07 16:40:07.952 [Job Manager] begin transit of job 4 to machine 9
+2026-04-07 16:40:07.953 [AGV 2] Executed pickup of job 4
+2026-04-07 16:40:08.127 [OnMachineFinished] job=0 machine=8
+2026-04-07 16:40:08.127 [OnMachineFinished] job=0 state=WaitingForTransport opIndex=2/7 completedOps=2
+2026-04-07 16:40:08.128 [OnMachineFinished] job=0 → EnqueueRouting nextType=Lathe
+2026-04-07 16:40:08.145 [DispatchRealAGV] job=0 pickup=(-8.75, 0.33, -5.81) (source=8) dropoff=(9.25, 0.33, 5.81) target=3
+2026-04-07 16:40:08.146 [AGVPool] TryDispatch job=0 — no AGV free, queuing
+2026-04-07 16:40:08.146 [AGVPool] No AGV free for Job 0 — queuing request.
+2026-04-07 16:40:08.155 [Machine] 8 began processing job 1 for 25.52834 seconds.
+2026-04-07 16:40:08.227 [AGV 0] Parked — zones released.
+2026-04-07 16:40:08.228 [AGVPool] Draining queue — assigning Job 0 to AGV 0.
+2026-04-07 16:40:08.347 [AGV 1] Executed dropoff of job 2
+2026-04-07 16:40:08.347 [AGV 1] Returning to parking at (-7.00, 0.01, -10.25).
+2026-04-07 16:40:08.356 [Machine] 1 began processing job 2 for 23.28467 seconds.
+2026-04-07 16:40:08.610 [OnMachineFinished] job=3 machine=6
+2026-04-07 16:40:08.610 [OnMachineFinished] job=3 state=WaitingForTransport opIndex=1/5 completedOps=1
+2026-04-07 16:40:08.610 [OnMachineFinished] job=3 → EnqueueRouting nextType=Weld
+2026-04-07 16:40:08.625 [DispatchRealAGV] job=3 pickup=(3.25, 0.33, 1.69) (source=6) dropoff=(-3.25, 0.33, 1.69) target=5
+2026-04-07 16:40:08.625 [AGVPool] TryDispatch job=3 — no AGV free, queuing
+2026-04-07 16:40:08.626 [AGVPool] No AGV free for Job 3 — queuing request.
+2026-04-07 16:40:08.749 [AGV 2] Executed dropoff of job 4
+2026-04-07 16:40:08.749 [AGV 2] Returning to parking at (-5.00, 0.01, -10.25).
+2026-04-07 16:40:08.760 [Machine] 9 began processing job 4 for 15.74358 seconds.
+2026-04-07 16:40:09.298 [AGV 1] Parked — zones released.
+2026-04-07 16:40:09.299 [AGVPool] Draining queue — assigning Job 3 to AGV 1.
+2026-04-07 16:40:09.716 [Job Manager] begin transit of job 0 to machine 3
+2026-04-07 16:40:09.716 [AGV 0] Executed pickup of job 0
+2026-04-07 16:40:09.733 [OnMachineFinished] job=1 machine=8
+2026-04-07 16:40:09.734 [OnMachineFinished] job=1 state=WaitingForTransport opIndex=2/6 completedOps=2
+2026-04-07 16:40:09.734 [OnMachineFinished] job=1 → EnqueueRouting nextType=Inspect
+2026-04-07 16:40:09.743 [OnMachineFinished] job=4 machine=9
+2026-04-07 16:40:09.743 [OnMachineFinished] job=4 state=WaitingForTransport opIndex=2/5 completedOps=2
+2026-04-07 16:40:09.744 [OnMachineFinished] job=4 → EnqueueRouting nextType=Inspect
+2026-04-07 16:40:09.750 [DispatchRealAGV] job=1 pickup=(-8.75, 0.33, -5.81) (source=8) dropoff=(8.75, 0.33, 1.69) target=7
+2026-04-07 16:40:09.751 [AGVPool] TryDispatch job=1 — no AGV free, queuing
+2026-04-07 16:40:09.751 [AGVPool] No AGV free for Job 1 — queuing request.
+2026-04-07 16:40:09.759 [DispatchRealAGV] job=4 pickup=(-2.75, 0.33, -5.81) (source=9) dropoff=(2.75, 0.33, -1.69) target=6
+2026-04-07 16:40:09.760 [AGVPool] TryDispatch job=4 — no AGV free, queuing
+2026-04-07 16:40:09.760 [AGVPool] No AGV free for Job 4 — queuing request.
+2026-04-07 16:40:09.796 [OnMachineFinished] job=2 machine=1
+2026-04-07 16:40:09.796 [OnMachineFinished] job=2 state=WaitingForTransport opIndex=2/6 completedOps=2
+2026-04-07 16:40:09.797 [OnMachineFinished] job=2 → EnqueueRouting nextType=Assemble
+2026-04-07 16:40:09.812 [DispatchRealAGV] job=2 pickup=(-3.25, 0.33, 5.81) (source=1) dropoff=(-3.25, 0.33, -5.81) target=9
+2026-04-07 16:40:09.812 [AGVPool] TryDispatch job=2 — no AGV free, queuing
+2026-04-07 16:40:09.813 [AGVPool] No AGV free for Job 2 — queuing request.
+2026-04-07 16:40:10.101 [Job Manager] begin transit of job 3 to machine 5
+2026-04-07 16:40:10.102 [AGV 1] Executed pickup of job 3
+2026-04-07 16:40:10.168 [AGV 2] Parked — zones released.
+2026-04-07 16:40:10.168 [AGVPool] Draining queue — assigning Job 1 to AGV 2.
+2026-04-07 16:40:10.719 [AGV 0] Executed dropoff of job 0
+2026-04-07 16:40:10.719 [AGV 0] Returning to parking at (-9.00, 0.01, -10.25).
+2026-04-07 16:40:10.727 [Machine] 3 began processing job 0 for 18.06304 seconds.
+2026-04-07 16:40:11.402 [AGV 1] Executed dropoff of job 3
+2026-04-07 16:40:11.402 [AGV 1] Returning to parking at (-7.00, 0.01, -10.25).
+2026-04-07 16:40:11.410 [Machine] 5 began processing job 3 for 78.95451 seconds.
+2026-04-07 16:40:11.487 [AGV 0] Parked — zones released.
+2026-04-07 16:40:11.488 [AGVPool] Draining queue — assigning Job 4 to AGV 0.
+2026-04-07 16:40:11.849 [OnMachineFinished] job=0 machine=3
+2026-04-07 16:40:11.850 [OnMachineFinished] job=0 state=WaitingForTransport opIndex=3/7 completedOps=3
+2026-04-07 16:40:11.850 [OnMachineFinished] job=0 → EnqueueRouting nextType=Weld
+2026-04-07 16:40:11.858 [Job Manager] begin transit of job 1 to machine 7
+2026-04-07 16:40:11.858 [AGV 2] Executed pickup of job 1
+2026-04-07 16:40:11.867 [DispatchRealAGV] job=0 pickup=(8.75, 0.33, 5.81) (source=3) dropoff=(-9.25, 0.33, -1.69) target=4
+2026-04-07 16:40:11.868 [AGVPool] TryDispatch job=0 — no AGV free, queuing
+2026-04-07 16:40:11.868 [AGVPool] No AGV free for Job 0 — queuing request.
+2026-04-07 16:40:12.351 [AGV 1] Parked — zones released.
+2026-04-07 16:40:12.352 [AGVPool] Draining queue — assigning Job 2 to AGV 1.
+2026-04-07 16:40:12.724 [AGV 2] Executed dropoff of job 1
+2026-04-07 16:40:12.726 [AGV 2] Returning to parking at (-5.00, 0.01, -10.25).
+2026-04-07 16:40:12.733 [Machine] 7 began processing job 1 for 20.96243 seconds.
+2026-04-07 16:40:12.868 [Job Manager] begin transit of job 4 to machine 6
+2026-04-07 16:40:12.868 [AGV 0] Executed pickup of job 4
+2026-04-07 16:40:13.041 [Job Manager] begin transit of job 2 to machine 9
+2026-04-07 16:40:13.042 [AGV 1] Executed pickup of job 2
+2026-04-07 16:40:13.430 [AGV 2] Parked — zones released.
+2026-04-07 16:40:13.431 [AGVPool] Draining queue — assigning Job 0 to AGV 2.
+2026-04-07 16:40:13.946 [AGV 1] Executed dropoff of job 2
+2026-04-07 16:40:13.947 [AGV 1] Returning to parking at (-7.00, 0.01, -10.25).
+2026-04-07 16:40:13.954 [Machine] 9 began processing job 2 for 58.90813 seconds.
+2026-04-07 16:40:14.028 [OnMachineFinished] job=1 machine=7
+2026-04-07 16:40:14.028 [OnMachineFinished] job=1 state=WaitingForTransport opIndex=3/6 completedOps=3
+2026-04-07 16:40:14.029 [OnMachineFinished] job=1 → EnqueueRouting nextType=Lathe
+2026-04-07 16:40:14.043 [DispatchRealAGV] job=1 pickup=(9.25, 0.33, 1.69) (source=7) dropoff=(3.25, 0.33, 5.81) target=2
+2026-04-07 16:40:14.044 [AGVPool] TryDispatch job=1 — no AGV free, queuing
+2026-04-07 16:40:14.044 [AGVPool] No AGV free for Job 1 — queuing request.
+2026-04-07 16:40:14.347 [AGV 0] Executed dropoff of job 4
+2026-04-07 16:40:14.348 [AGV 0] Returning to parking at (-9.00, 0.01, -10.25).
+2026-04-07 16:40:14.357 [Machine] 6 began processing job 4 for 33.43359 seconds.
+2026-04-07 16:40:14.368 [Job Manager] begin transit of job 0 to machine 4
+2026-04-07 16:40:14.368 [AGV 2] Executed pickup of job 0
+2026-04-07 16:40:15.161 [AGV 2] Executed dropoff of job 0
+2026-04-07 16:40:15.162 [AGV 2] Returning to parking at (-5.00, 0.01, -10.25).
+2026-04-07 16:40:15.169 [Machine] 4 began processing job 0 for 16.14824 seconds.
+2026-04-07 16:40:15.467 [AGV 1] Parked — zones released.
+2026-04-07 16:40:15.467 [AGVPool] Draining queue — assigning Job 1 to AGV 1.
+2026-04-07 16:40:15.944 [AGV 0] Parked — zones released.
+2026-04-07 16:40:16.167 [OnMachineFinished] job=0 machine=4
+2026-04-07 16:40:16.168 [OnMachineFinished] job=0 state=WaitingForTransport opIndex=4/7 completedOps=4
+2026-04-07 16:40:16.168 [OnMachineFinished] job=0 → EnqueueRouting nextType=Mill
+2026-04-07 16:40:16.182 [DispatchRealAGV] job=0 pickup=(-8.75, 0.33, -1.69) (source=4) dropoff=(-2.75, 0.33, 5.81) target=1
+2026-04-07 16:40:16.182 [AGVPool] TryDispatch job=0 — assigned to AGV 0
+2026-04-07 16:40:16.261 [OnMachineFinished] job=3 machine=5
+2026-04-07 16:40:16.262 [OnMachineFinished] job=3 state=WaitingForTransport opIndex=2/5 completedOps=2
+2026-04-07 16:40:16.262 [OnMachineFinished] job=3 → EnqueueRouting nextType=Assemble
+2026-04-07 16:40:16.279 [DispatchRealAGV] job=3 pickup=(-2.75, 0.33, 1.69) (source=5) dropoff=(-9.25, 0.33, -5.81) target=8
+2026-04-07 16:40:16.279 [AGVPool] TryDispatch job=3 — no AGV free, queuing
+2026-04-07 16:40:16.280 [AGVPool] No AGV free for Job 3 — queuing request.
+2026-04-07 16:40:16.373 [Job Manager] begin transit of job 1 to machine 2
+2026-04-07 16:40:16.373 [AGV 1] Executed pickup of job 1
+2026-04-07 16:40:16.424 [OnMachineFinished] job=4 machine=6
+2026-04-07 16:40:16.424 [OnMachineFinished] job=4 state=WaitingForTransport opIndex=3/5 completedOps=3
+2026-04-07 16:40:16.425 [OnMachineFinished] job=4 → EnqueueRouting nextType=Mill
+2026-04-07 16:40:16.442 [DispatchRealAGV] job=4 pickup=(3.25, 0.33, -1.69) (source=6) dropoff=(-8.75, 0.33, 5.81) target=0
+2026-04-07 16:40:16.442 [AGVPool] TryDispatch job=4 — no AGV free, queuing
+2026-04-07 16:40:16.443 [AGVPool] No AGV free for Job 4 — queuing request.
+2026-04-07 16:40:16.478 [AGV 2] Parked — zones released.
+2026-04-07 16:40:16.479 [AGVPool] Draining queue — assigning Job 3 to AGV 2.
+2026-04-07 16:40:17.208 [Job Manager] begin transit of job 3 to machine 8
+2026-04-07 16:40:17.208 [AGV 2] Executed pickup of job 3
+2026-04-07 16:40:17.587 [OnMachineFinished] job=2 machine=9
+2026-04-07 16:40:17.587 [OnMachineFinished] job=2 state=WaitingForTransport opIndex=3/6 completedOps=3
+2026-04-07 16:40:17.588 [OnMachineFinished] job=2 → EnqueueRouting nextType=Lathe
+2026-04-07 16:40:17.604 [DispatchRealAGV] job=2 pickup=(-2.75, 0.33, -5.81) (source=9) dropoff=(3.25, 0.33, 5.81) target=2
+2026-04-07 16:40:17.605 [AGVPool] TryDispatch job=2 — no AGV free, queuing
+2026-04-07 16:40:17.605 [AGVPool] No AGV free for Job 2 — queuing request.
+2026-04-07 16:40:17.666 [Job Manager] begin transit of job 0 to machine 1
+2026-04-07 16:40:17.666 [AGV 0] Executed pickup of job 0
+2026-04-07 16:40:17.819 [AGV 1] Executed dropoff of job 1
+2026-04-07 16:40:17.819 [AGV 1] Returning to parking at (-7.00, 0.01, -10.25).
+2026-04-07 16:40:17.827 [Machine] 2 began processing job 1 for 59.74762 seconds.
+2026-04-07 16:40:18.216 [AGV 2] Executed dropoff of job 3
+2026-04-07 16:40:18.217 [AGV 2] Returning to parking at (-5.00, 0.01, -10.25).
+2026-04-07 16:40:18.224 [Machine] 8 began processing job 3 for 62.11535 seconds.
+2026-04-07 16:40:18.247 [AGV 0] Executed dropoff of job 0
+2026-04-07 16:40:18.248 [AGV 0] Returning to parking at (-9.00, 0.01, -10.25).
+2026-04-07 16:40:18.255 [Machine] 1 began processing job 0 for 69.71387 seconds.
+2026-04-07 16:40:18.663 [AGV 1] Parked — zones released.
+2026-04-07 16:40:18.663 [AGVPool] Draining queue — assigning Job 4 to AGV 1.
+2026-04-07 16:40:19.231 [AGV 0] Parked — zones released.
+2026-04-07 16:40:19.232 [AGVPool] Draining queue — assigning Job 2 to AGV 0.
+2026-04-07 16:40:19.530 [AGV 2] Parked — zones released.
+2026-04-07 16:40:19.970 [Job Manager] begin transit of job 4 to machine 0
+2026-04-07 16:40:19.970 [AGV 1] Executed pickup of job 4
+2026-04-07 16:40:20.609 [Job Manager] begin transit of job 2 to machine 2
+2026-04-07 16:40:20.610 [AGV 0] Executed pickup of job 2
+2026-04-07 16:40:20.652 [AGV 1] Executed dropoff of job 4
+2026-04-07 16:40:20.652 [AGV 1] Returning to parking at (-7.00, 0.01, -10.25).
+2026-04-07 16:40:20.660 [Machine] 0 began processing job 4 for 39.93016 seconds.
+2026-04-07 16:40:21.406 [AGV 0] Executed dropoff of job 2
+2026-04-07 16:40:21.407 [AGV 0] Returning to parking at (-9.00, 0.01, -10.25).
+2026-04-07 16:40:21.505 [OnMachineFinished] job=1 machine=2
+2026-04-07 16:40:21.505 [OnMachineFinished] job=1 state=WaitingForTransport opIndex=4/6 completedOps=4
+2026-04-07 16:40:21.506 [OnMachineFinished] job=1 → EnqueueRouting nextType=Inspect
+2026-04-07 16:40:21.520 [DispatchRealAGV] job=1 pickup=(2.75, 0.33, 5.81) (source=2) dropoff=(2.75, 0.33, 1.69) target=6
+2026-04-07 16:40:21.521 [AGVPool] TryDispatch job=1 — assigned to AGV 2
+2026-04-07 16:40:21.529 [Machine] 2 began processing job 2 for 17.87481 seconds.
+2026-04-07 16:40:21.703 [AGV 1] Parked — zones released.
+2026-04-07 16:40:22.044 [OnMachineFinished] job=3 machine=8
+2026-04-07 16:40:22.044 [OnMachineFinished] job=3 state=WaitingForTransport opIndex=3/5 completedOps=3
+2026-04-07 16:40:22.045 [OnMachineFinished] job=3 → EnqueueRouting nextType=Lathe
+2026-04-07 16:40:22.058 [DispatchRealAGV] job=3 pickup=(-8.75, 0.33, -5.81) (source=8) dropoff=(3.25, 0.33, 5.81) target=2
+2026-04-07 16:40:22.059 [AGVPool] TryDispatch job=3 — assigned to AGV 1
+2026-04-07 16:40:22.283 [AGV 0] Parked — zones released.
+2026-04-07 16:40:22.362 [Job Manager] begin transit of job 1 to machine 6
+2026-04-07 16:40:22.363 [AGV 2] Executed pickup of job 1
+2026-04-07 16:40:22.533 [AGV 2] Executed dropoff of job 1
+2026-04-07 16:40:22.534 [AGV 2] Returning to parking at (-5.00, 0.01, -10.25).
+2026-04-07 16:40:22.542 [Machine] 6 began processing job 1 for 45.87774 seconds.
+2026-04-07 16:40:22.544 [OnMachineFinished] job=0 machine=1
+2026-04-07 16:40:22.544 [OnMachineFinished] job=0 state=WaitingForTransport opIndex=5/7 completedOps=5
+2026-04-07 16:40:22.545 [OnMachineFinished] job=0 → EnqueueRouting nextType=Inspect
+2026-04-07 16:40:22.561 [DispatchRealAGV] job=0 pickup=(-3.25, 0.33, 5.81) (source=1) dropoff=(8.75, 0.33, -1.69) target=7
+2026-04-07 16:40:22.562 [AGVPool] TryDispatch job=0 — assigned to AGV 0
+2026-04-07 16:40:22.638 [OnMachineFinished] job=2 machine=2
+2026-04-07 16:40:22.639 [OnMachineFinished] job=2 state=WaitingForTransport opIndex=4/6 completedOps=4
+2026-04-07 16:40:22.639 [OnMachineFinished] job=2 → EnqueueRouting nextType=Inspect
+2026-04-07 16:40:22.654 [DispatchRealAGV] job=2 pickup=(2.75, 0.33, 5.81) (source=2) dropoff=(2.75, 0.33, -1.69) target=6
+2026-04-07 16:40:22.655 [AGVPool] TryDispatch job=2 — no AGV free, queuing
+2026-04-07 16:40:22.655 [AGVPool] No AGV free for Job 2 — queuing request.
+2026-04-07 16:40:23.120 [OnMachineFinished] job=4 machine=0
+2026-04-07 16:40:23.120 [OnMachineFinished] job=4 state=WaitingForTransport opIndex=4/5 completedOps=4
+2026-04-07 16:40:23.121 [OnMachineFinished] job=4 → EnqueueRouting nextType=Weld
+2026-04-07 16:40:23.137 [DispatchRealAGV] job=4 pickup=(-9.25, 0.33, 5.81) (source=0) dropoff=(-9.25, 0.33, 1.69) target=4
+2026-04-07 16:40:23.137 [AGVPool] TryDispatch job=4 — no AGV free, queuing
+2026-04-07 16:40:23.138 [AGVPool] No AGV free for Job 4 — queuing request.
+2026-04-07 16:40:23.259 [Job Manager] begin transit of job 0 to machine 7
+2026-04-07 16:40:23.260 [AGV 0] Executed pickup of job 0
+2026-04-07 16:40:23.341 [AGV 2] Parked — zones released.
+2026-04-07 16:40:23.342 [AGVPool] Draining queue — assigning Job 2 to AGV 2.
+2026-04-07 16:40:23.768 [Job Manager] begin transit of job 3 to machine 2
+2026-04-07 16:40:23.769 [AGV 1] Executed pickup of job 3
+2026-04-07 16:40:23.953 [AGV 0] Executed dropoff of job 0
+2026-04-07 16:40:23.953 [AGV 0] Returning to parking at (-9.00, 0.01, -10.25).
+2026-04-07 16:40:23.960 [Machine] 7 began processing job 0 for 39.8377 seconds.
+2026-04-07 16:40:24.172 [Job Manager] begin transit of job 2 to machine 6
+2026-04-07 16:40:24.172 [AGV 2] Executed pickup of job 2
+2026-04-07 16:40:24.679 [AGV 1] Executed dropoff of job 3
+2026-04-07 16:40:24.680 [AGV 1] Returning to parking at (-7.00, 0.01, -10.25).
+2026-04-07 16:40:24.689 [Machine] 2 began processing job 3 for 57.64144 seconds.
+2026-04-07 16:40:24.865 [AGV 2] Executed dropoff of job 2
+2026-04-07 16:40:24.866 [AGV 2] Returning to parking at (-5.00, 0.01, -10.25).
+2026-04-07 16:40:25.366 [OnMachineFinished] job=1 machine=6
+2026-04-07 16:40:25.367 [OnMachineFinished] job=1 state=WaitingForTransport opIndex=5/6 completedOps=5
+2026-04-07 16:40:25.367 [OnMachineFinished] job=1 → EnqueueRouting nextType=Mill
+2026-04-07 16:40:25.381 [DispatchRealAGV] job=1 pickup=(3.25, 0.33, 1.69) (source=6) dropoff=(-8.75, 0.33, 5.81) target=0
+2026-04-07 16:40:25.382 [AGVPool] TryDispatch job=1 — no AGV free, queuing
+2026-04-07 16:40:25.382 [AGVPool] No AGV free for Job 1 — queuing request.
+2026-04-07 16:40:25.390 [Machine] 6 began processing job 2 for 20.73143 seconds.
+2026-04-07 16:40:25.518 [AGV 1] Parked — zones released.
+2026-04-07 16:40:25.518 [AGVPool] Draining queue — assigning Job 4 to AGV 1.
+2026-04-07 16:40:25.898 [AGV 0] Parked — zones released.
+2026-04-07 16:40:25.898 [AGVPool] Draining queue — assigning Job 1 to AGV 0.
+2026-04-07 16:40:26.099 [Job Manager] begin transit of job 4 to machine 4
+2026-04-07 16:40:26.099 [AGV 1] Executed pickup of job 4
+2026-04-07 16:40:26.282 [AGV 1] Executed dropoff of job 4
+2026-04-07 16:40:26.282 [AGV 1] Returning to parking at (-7.00, 0.01, -10.25).
+2026-04-07 16:40:26.291 [Machine] 4 began processing job 4 for 59.3142 seconds.
+2026-04-07 16:40:26.390 [AGV 2] Parked — zones released.
+2026-04-07 16:40:26.414 [OnMachineFinished] job=0 machine=7
+2026-04-07 16:40:26.415 [OnMachineFinished] job=0 state=WaitingForTransport opIndex=6/7 completedOps=6
+2026-04-07 16:40:26.415 [OnMachineFinished] job=0 → EnqueueRouting nextType=Assemble
+2026-04-07 16:40:26.435 [DispatchRealAGV] job=0 pickup=(9.25, 0.33, -1.69) (source=7) dropoff=(-9.25, 0.33, -5.81) target=8
+2026-04-07 16:40:26.435 [AGVPool] TryDispatch job=0 — assigned to AGV 2
+2026-04-07 16:40:26.671 [OnMachineFinished] job=2 machine=6
+2026-04-07 16:40:26.671 [OnMachineFinished] job=2 state=WaitingForTransport opIndex=5/6 completedOps=5
+2026-04-07 16:40:26.672 [OnMachineFinished] job=2 → EnqueueRouting nextType=Weld
+2026-04-07 16:40:26.687 [DispatchRealAGV] job=2 pickup=(3.25, 0.33, -1.69) (source=6) dropoff=(-9.25, 0.33, -1.69) target=4
+2026-04-07 16:40:26.688 [AGVPool] TryDispatch job=2 — no AGV free, queuing
+2026-04-07 16:40:26.688 [AGVPool] No AGV free for Job 2 — queuing request.
+2026-04-07 16:40:26.993 [Job Manager] begin transit of job 1 to machine 0
+2026-04-07 16:40:26.994 [AGV 0] Executed pickup of job 1
+2026-04-07 16:40:27.337 [AGV 1] Parked — zones released.
+2026-04-07 16:40:27.338 [AGVPool] Draining queue — assigning Job 2 to AGV 1.
+2026-04-07 16:40:27.938 [Job Manager] begin transit of job 0 to machine 8
+2026-04-07 16:40:27.938 [AGV 2] Executed pickup of job 0
+2026-04-07 16:40:28.236 [OnMachineFinished] job=3 machine=2
+2026-04-07 16:40:28.237 [OnMachineFinished] job=3 state=WaitingForTransport opIndex=4/5 completedOps=4
+2026-04-07 16:40:28.237 [OnMachineFinished] job=3 → EnqueueRouting nextType=Mill
+2026-04-07 16:40:28.252 [DispatchRealAGV] job=3 pickup=(2.75, 0.33, 5.81) (source=2) dropoff=(-8.75, 0.33, 5.81) target=0
+2026-04-07 16:40:28.252 [AGVPool] TryDispatch job=3 — no AGV free, queuing
+2026-04-07 16:40:28.253 [AGVPool] No AGV free for Job 3 — queuing request.
+2026-04-07 16:40:28.282 [AGV 0] Executed dropoff of job 1
+2026-04-07 16:40:28.283 [AGV 0] Returning to parking at (-9.00, 0.01, -10.25).
+2026-04-07 16:40:28.289 [Machine] 0 began processing job 1 for 46.59415 seconds.
+2026-04-07 16:40:28.433 [AGV 2] Executed dropoff of job 0
+2026-04-07 16:40:28.434 [AGV 2] Returning to parking at (-5.00, 0.01, -10.25).
+2026-04-07 16:40:28.441 [Machine] 8 began processing job 0 for 19.27036 seconds.
+2026-04-07 16:40:28.648 [Job Manager] begin transit of job 2 to machine 4
+2026-04-07 16:40:28.648 [AGV 1] Executed pickup of job 2
+2026-04-07 16:40:29.037 [AGV 1] Executed dropoff of job 2
+2026-04-07 16:40:29.038 [AGV 1] Returning to parking at (-7.00, 0.01, -10.25).
+2026-04-07 16:40:29.369 [AGV 0] Parked — zones released.
+2026-04-07 16:40:29.369 [AGVPool] Draining queue — assigning Job 3 to AGV 0.
+2026-04-07 16:40:29.636 [OnMachineFinished] job=0 machine=8
+2026-04-07 16:40:29.637 [OnMachineFinished] job=0 state=Complete opIndex=6/7 completedOps=7
+2026-04-07 16:40:29.637 [OnMachineFinished] job=0 → DispatchToExit
+2026-04-07 16:40:29.638 [AGVPool] TryDispatch job=0 — no AGV free, queuing
+2026-04-07 16:40:29.638 [AGVPool] No AGV free for Job 0 — queuing request.
+2026-04-07 16:40:29.755 [AGV 2] Parked — zones released.
+2026-04-07 16:40:29.756 [AGVPool] Draining queue — assigning Job 0 to AGV 2.
+2026-04-07 16:40:29.940 [OnMachineFinished] job=4 machine=4
+2026-04-07 16:40:29.940 [OnMachineFinished] job=4 state=Complete opIndex=4/5 completedOps=5
+2026-04-07 16:40:29.940 [OnMachineFinished] job=4 → DispatchToExit
+2026-04-07 16:40:29.940 [AGVPool] TryDispatch job=4 — no AGV free, queuing
+2026-04-07 16:40:29.941 [AGVPool] No AGV free for Job 4 — queuing request.
+2026-04-07 16:40:29.955 [Machine] 4 began processing job 2 for 48.99602 seconds.
+2026-04-07 16:40:30.134 [Job Manager] begin transit of job 3 to machine 0
+2026-04-07 16:40:30.134 [AGV 0] Executed pickup of job 3
+2026-04-07 16:40:30.390 [AGV 1] Parked — zones released.
+2026-04-07 16:40:30.390 [AGVPool] Draining queue — assigning Job 4 to AGV 1.
+2026-04-07 16:40:30.983 [Job Manager] begin transit of job 4 to machine -1
+2026-04-07 16:40:30.984 [AGV 1] Executed pickup of job 4
+2026-04-07 16:40:31.157 [OnMachineFinished] job=1 machine=0
+2026-04-07 16:40:31.158 [OnMachineFinished] job=1 state=Complete opIndex=5/6 completedOps=6
+2026-04-07 16:40:31.158 [OnMachineFinished] job=1 → DispatchToExit
+2026-04-07 16:40:31.158 [AGVPool] TryDispatch job=1 — no AGV free, queuing
+2026-04-07 16:40:31.159 [AGVPool] No AGV free for Job 1 — queuing request.
+2026-04-07 16:40:31.521 [AGV 0] Executed dropoff of job 3
+2026-04-07 16:40:31.521 [AGV 0] Returning to parking at (-9.00, 0.01, -10.25).
+2026-04-07 16:40:31.530 [Machine] 0 began processing job 3 for 0 seconds.
+2026-04-07 16:40:31.540 [OnMachineFinished] job=3 machine=0
+2026-04-07 16:40:31.540 [OnMachineFinished] job=3 state=Complete opIndex=4/5 completedOps=5
+2026-04-07 16:40:31.540 [OnMachineFinished] job=3 → DispatchToExit
+2026-04-07 16:40:31.540 [AGVPool] TryDispatch job=3 — no AGV free, queuing
+2026-04-07 16:40:31.541 [AGVPool] No AGV free for Job 3 — queuing request.
+2026-04-07 16:40:31.565 [Job Manager] begin transit of job 0 to machine -1
+2026-04-07 16:40:31.565 [AGV 2] Executed pickup of job 0
+2026-04-07 16:40:31.865 [AGV 1] Executed dropoff of job 4
+2026-04-07 16:40:31.866 [AGV 1] Returning to parking at (-7.00, 0.01, -10.25).
+2026-04-07 16:40:31.890 [JobManager] Job 4 exited factory.
+2026-04-07 16:40:32.247 [AGV 1] Parked — zones released.
+2026-04-07 16:40:32.247 [AGVPool] Draining queue — assigning Job 1 to AGV 1.
+2026-04-07 16:40:32.606 [AGV 0] Parked — zones released.
+2026-04-07 16:40:32.607 [AGVPool] Draining queue — assigning Job 3 to AGV 0.
+2026-04-07 16:40:32.766 [AGV 2] Executed dropoff of job 0
+2026-04-07 16:40:32.767 [AGV 2] Returning to parking at (-5.00, 0.01, -10.25).
+2026-04-07 16:40:32.789 [JobManager] Job 0 exited factory.
+2026-04-07 16:40:32.826 [Job Manager] begin transit of job 1 to machine -1
+2026-04-07 16:40:32.826 [AGV 1] Executed pickup of job 1
+2026-04-07 16:40:32.977 [OnMachineFinished] job=2 machine=4
+2026-04-07 16:40:32.977 [OnMachineFinished] job=2 state=Complete opIndex=5/6 completedOps=6
+2026-04-07 16:40:32.978 [OnMachineFinished] job=2 → DispatchToExit
+2026-04-07 16:40:32.978 [AGVPool] TryDispatch job=2 — no AGV free, queuing
+2026-04-07 16:40:32.978 [AGVPool] No AGV free for Job 2 — queuing request.
+2026-04-07 16:40:33.114 [AGV 2] Parked — zones released.
+2026-04-07 16:40:33.115 [AGVPool] Draining queue — assigning Job 2 to AGV 2.
+2026-04-07 16:40:33.328 [Job Manager] begin transit of job 3 to machine -1
+2026-04-07 16:40:33.329 [AGV 0] Executed pickup of job 3
+2026-04-07 16:40:33.721 [AGV 1] Executed dropoff of job 1
+2026-04-07 16:40:33.722 [AGV 1] Returning to parking at (-7.00, 0.01, -10.25).
+2026-04-07 16:40:33.752 [JobManager] Job 1 exited factory.
+2026-04-07 16:40:34.095 [AGV 1] Parked — zones released.
+2026-04-07 16:40:34.253 [AGV 0] Executed dropoff of job 3
+2026-04-07 16:40:34.254 [AGV 0] Returning to parking at (-9.00, 0.01, -10.25).
+2026-04-07 16:40:34.279 [JobManager] Job 3 exited factory.
+2026-04-07 16:40:34.662 [AGV 0] Parked — zones released.
+2026-04-07 16:40:34.815 [Job Manager] begin transit of job 2 to machine -1
+2026-04-07 16:40:34.816 [AGV 2] Executed pickup of job 2
+2026-04-07 16:40:36.001 [AGV 2] Executed dropoff of job 2
+2026-04-07 16:40:36.001 [AGV 2] Returning to parking at (-5.00, 0.01, -10.25).
+2026-04-07 16:40:36.029 [JobManager] Job 2 exited factory.
+2026-04-07 16:40:36.031 [SimBridge] Episode complete: makespan=608.0, decisions=58
+2026-04-07 16:40:36.031 [Validate] Makespan=608.0 | TheoreticalMin=268.6 | Ratio=2.26x | TimeScale=16.30604

@@ -46,7 +46,7 @@ namespace Assets.Scripts.Simulation
         [Header("Scene References")]
         [SerializeField] private FactoryLayoutManager layoutManager;
         [SerializeField] private TrafficZoneManager trafficZoneManager;
-        [SerializeField] private AGVPool agvPool;
+        [SerializeField] private AGV.AGVPool agvPool;
         public JobManager JobManager;
         [SerializeField] private SchedulingAgent agent;
         private FJSSPConfig currentConfig;
@@ -147,6 +147,7 @@ namespace Assets.Scripts.Simulation
             Directory.CreateDirectory(resultsDir);
             ResultsLogger.OutputDirectory = resultsDir;
             SimLogger.ActiveLevel = logLevel;
+            SimLogger.InitializeFileLogging();
         }
 
         private void Start()
@@ -384,19 +385,39 @@ namespace Assets.Scripts.Simulation
         /// @param jobId      The job that was completed.
         public void OnMachineFinished(int machineId, int jobId)
         {
+            SimLogger.High($"[OnMachineFinished] job={jobId} machine={machineId}");
+
             JobManager.MarkOperationComplete(jobId, SimTime);
             JobTracker tracker = JobManager.GetJobTracker(jobId);
-            if (tracker == null) return;
+
+            if (tracker == null)
+            {
+                SimLogger.Error($"[OnMachineFinished] tracker is NULL for job {jobId}!");
+                return;
+            }
+
+            SimLogger.High($"[OnMachineFinished] job={jobId} state={tracker.State} " +
+                           $"opIndex={tracker.CurrentOperationIndex}/{tracker.TotalOperations} " +
+                           $"completedOps={tracker.CompletedOperations}");
 
             if (tracker.State == JobLifecycleState.Complete ||
                 tracker.CurrentOperationIndex >= tracker.TotalOperations)
             {
+                SimLogger.High($"[OnMachineFinished] job={jobId} → DispatchToExit");
                 PhysicalMachine sourceMachine = layoutManager.GetMachine(machineId);
                 DispatchToExit(jobId, sourceMachine);
             }
             else if (tracker.State == JobLifecycleState.WaitingForTransport)
             {
+                SimLogger.High($"[OnMachineFinished] job={jobId} → EnqueueRouting " +
+                               $"nextType={tracker.NextMachineType}");
                 EnqueueRoutingDecision(jobId, machineId, tracker.NextMachineType);
+            }
+            else
+            {
+                // This is the silent kill — neither branch fires
+                SimLogger.Error($"[OnMachineFinished] job={jobId} UNHANDLED state={tracker.State} " +
+                                $"— no routing or exit dispatched! opIndex={tracker.CurrentOperationIndex}");
             }
 
             CheckIfDecisionNeeded(machineId);
@@ -442,7 +463,7 @@ namespace Assets.Scripts.Simulation
             {
                 Type = DecisionType.Routing,
                 SimTime = SimTime,
-                DecisionIndex = decisionCount++,
+                DecisionIndex = 0,
                 TotalJobs = JobManager.JobCount,
                 CompletedJobs = JobManager.JobTrackers.Count(t => t.State == JobLifecycleState.Complete),
                 JobId = jobId,
@@ -503,8 +524,9 @@ namespace Assets.Scripts.Simulation
                 float duration = JobManager.GetProcessingTime(chosenJobId, CurrentDecision.MachineId);
 
                 PhysicalMachine machine = layoutManager.GetMachine(CurrentDecision.MachineId);
-                machine.StartProcessing(chosenJobId, duration);
                 JobManager.MarkOperationStarted(chosenJobId, SimTime);
+                machine.StartProcessing(chosenJobId, duration);
+
             }
             else if (CurrentDecision.Type == DecisionType.Routing)
             {
@@ -608,7 +630,12 @@ namespace Assets.Scripts.Simulation
 
                 bool validForRouting = tracker.State == JobLifecycleState.NotStarted ||
                                        tracker.State == JobLifecycleState.WaitingForTransport;
-                if (!validForRouting) continue;
+                if (!validForRouting)
+                {
+                    SimLogger.Error($"[Update] job={jobId} SKIPPED routing — state={tracker.State} " +
+                        $"(was it reset by MarkJobArrivedAtMachine?)");
+                    continue;
+                }
 
                 int sourceMachineId = routingJobSources.TryGetValue(jobId, out int src) ? src : -1;
                 routingJobSources.Remove(jobId);
@@ -633,6 +660,7 @@ namespace Assets.Scripts.Simulation
                     return;
                 }
             }
+
         }
         private DecisionRequest BuildRoutingDecisionRequest(int jobId, MachineType requiredType, int sourceMachineId)
         {
@@ -899,22 +927,25 @@ namespace Assets.Scripts.Simulation
         /// @param targetMachineId  Destination machine index.
         private void DispatchRealAGV(int jobId, PhysicalMachine source, int targetMachineId)
         {
-            if (agvPool == null) { SimLogger.Error("[SimBridge] AGVPool not assigned!"); return; }
-
             PhysicalMachine targetMachine = layoutManager.GetMachine(targetMachineId);
-            if (targetMachine == null) return;
+            if (targetMachine == null)
+            {
+                SimLogger.Error($"[DispatchRealAGV] job={jobId} targetMachine {targetMachineId} is NULL!");
+                return;
+            }
 
-            // Reserve the slot NOW — one authoritative position flows through the whole chain
             Vector3 dropoffSlotPos = targetMachine.ReserveIncomingSlot(jobId);
-
             Vector3 pickupPos = source != null
                 ? source.GetPickupPositionForJob(jobId)
                 : JobManager.GetJobTracker(jobId)?.WorldPosition ?? Vector3.zero;
 
-            if (pickupPos == Vector3.zero)
-                SimLogger.Error($"[SimBridge] Job {jobId} has zero pickup position — check WorldPosition init");
+            SimLogger.High($"[DispatchRealAGV] job={jobId} " +
+                           $"pickup={pickupPos} (source={(source != null ? source.MachineId.ToString() : "null")}) " +
+                           $"dropoff={dropoffSlotPos} target={targetMachineId}");
 
-            JobManager.GetJobTracker(jobId)?.Visual?.SetState(JobLifecycleState.WaitingForTransport);
+            if (pickupPos == Vector3.zero)
+                SimLogger.Error($"[DispatchRealAGV] job={jobId} pickup is Vector3.zero — AGV will go to world origin!");
+
             agvPool.TryDispatch(jobId, pickupPos, dropoffSlotPos, source, targetMachine);
         }
 
