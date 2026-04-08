@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -10,26 +9,11 @@ using Assets.Scripts.Simulation;
 
 namespace Assets.Scripts.UI
 {
-    /// @brief Wires a pre-built UI panel to the SimulationBridge lifecycle.
-    ///
-    /// @details Drop your Canvas sliders, labels, and buttons into the inspector.
-    ///          This script configures slider ranges, hooks up button clicks,
-    ///          and manages panel visibility. No programmatic UI creation.
-    ///
-    /// Workflow:
-    ///   App starts → panel visible → user tweaks sliders →
-    ///   Spawn Factory → inspect layout → Start Simulation → panel hides →
-    ///   episode ends → panel reappears.
     public class SimulationMenuUI : MonoBehaviour
     {
-        // ─────────────────────────────────────────────────────────
-        //  Inspector References
-        // ─────────────────────────────────────────────────────────
-
-        [Header("Bridge")]
+        [Header("References")]
         [SerializeField] private SimulationBridge bridge;
-
-        [Header("Panel Root")]
+        [SerializeField] private SchedulingAgent agent; // <-- NEW REFERENCE
         [SerializeField] private GameObject panel;
 
         [Header("Sliders")]
@@ -61,16 +45,8 @@ namespace Assets.Scripts.UI
         [SerializeField] private TextMeshProUGUI seedText;
         [SerializeField] private TMP_InputField configNameField;
 
-        // ─────────────────────────────────────────────────────────
-        //  Internal State
-        // ─────────────────────────────────────────────────────────
-
         private MachineType[] allMachineTypes;
         private bool panelVisible = true;
-
-        // ─────────────────────────────────────────────────────────
-        //  Unity Lifecycle
-        // ─────────────────────────────────────────────────────────
 
         private void Awake()
         {
@@ -79,9 +55,9 @@ namespace Assets.Scripts.UI
 
         private void Start()
         {
-            if (Application.isBatchMode)
+            if (Application.isBatchMode || (bridge != null && bridge.AutoStartOnPlay))
             {
-                if (panel != null) panel.SetActive(false);
+                HidePanel();
                 return;
             }
 
@@ -95,8 +71,8 @@ namespace Assets.Scripts.UI
         {
             if (bridge != null)
             {
-                bridge.OnFactorySpawned?.AddListener(OnFactorySpawned);
-                bridge.OnEpisodeFinished?.AddListener(OnEpisodeFinished);
+                bridge.OnFactorySpawned.AddListener(OnFactorySpawned);
+                bridge.OnEpisodeFinished.AddListener(OnEpisodeFinished);
             }
         }
 
@@ -104,8 +80,8 @@ namespace Assets.Scripts.UI
         {
             if (bridge != null)
             {
-                bridge.OnFactorySpawned?.RemoveListener(OnFactorySpawned);
-                bridge.OnEpisodeFinished?.RemoveListener(OnEpisodeFinished);
+                bridge.OnFactorySpawned.RemoveListener(OnFactorySpawned);
+                bridge.OnEpisodeFinished.RemoveListener(OnEpisodeFinished);
             }
         }
 
@@ -121,7 +97,7 @@ namespace Assets.Scripts.UI
         }
 
         // ─────────────────────────────────────────────────────────
-        //  Slider Configuration
+        //  UI Configuration (Same as before)
         // ─────────────────────────────────────────────────────────
 
         private void ConfigureSliders()
@@ -140,37 +116,27 @@ namespace Assets.Scripts.UI
             UpdateTotalMachines();
         }
 
-        private void SetupSlider(Slider slider, float min, float max, float defaultVal,
-                                  bool wholeNumbers, TMP_Text label,
-                                  UnityEngine.Events.UnityAction<float> extraCallback = null)
+        private void SetupSlider(Slider slider, float min, float max, float defaultVal, bool wholeNumbers, TMP_Text label, UnityEngine.Events.UnityAction<float> extraCallback = null)
         {
             if (slider == null) return;
-
             slider.minValue = min;
             slider.maxValue = max;
             slider.wholeNumbers = wholeNumbers;
             slider.value = defaultVal;
-
             slider.onValueChanged.AddListener(v => UpdateLabel(label, v, wholeNumbers));
-            if (extraCallback != null)
-                slider.onValueChanged.AddListener(extraCallback);
-
+            if (extraCallback != null) slider.onValueChanged.AddListener(extraCallback);
             UpdateLabel(label, defaultVal, wholeNumbers);
         }
 
         private void UpdateLabel(TMP_Text label, float value, bool wholeNumbers)
         {
-            if (label == null) return;
-            label.text = wholeNumbers ? $"{(int)value}" : $"{value:F1}";
+            if (label != null) label.text = wholeNumbers ? $"{(int)value}" : $"{value:F1}";
         }
 
         private void ClampMinMax(Slider minSlider, Slider maxSlider, TMP_Text minLabel, TMP_Text maxLabel)
         {
             if (minSlider == null || maxSlider == null) return;
-
-            if (minSlider.value > maxSlider.value)
-                maxSlider.value = minSlider.value;
-
+            if (minSlider.value > maxSlider.value) maxSlider.value = minSlider.value;
             UpdateLabel(minLabel, minSlider.value, minSlider.wholeNumbers);
             UpdateLabel(maxLabel, maxSlider.value, maxSlider.wholeNumbers);
         }
@@ -184,16 +150,13 @@ namespace Assets.Scripts.UI
         }
 
         // ─────────────────────────────────────────────────────────
-        //  Button Wiring
+        //  Button Handlers
         // ─────────────────────────────────────────────────────────
 
         private void WireCallbacks()
         {
-            if (spawnButton != null)
-                spawnButton.onClick.AddListener(OnSpawnClicked);
-
-            if (startButton != null)
-                startButton.onClick.AddListener(OnStartClicked);
+            if (spawnButton != null) spawnButton.onClick.AddListener(OnSpawnClicked);
+            if (startButton != null) startButton.onClick.AddListener(OnStartClicked);
         }
 
         private void RefreshButtonStates()
@@ -210,14 +173,9 @@ namespace Assets.Scripts.UI
             }
         }
 
-        // ─────────────────────────────────────────────────────────
-        //  Button Handlers
-        // ─────────────────────────────────────────────────────────
-
         private void OnSpawnClicked()
         {
             if (bridge == null) return;
-
             FJSSPConfig config = BuildConfig();
             bridge.LoadConfig(config);
             bridge.SpawnFactory();
@@ -225,9 +183,10 @@ namespace Assets.Scripts.UI
 
         private void OnStartClicked()
         {
-            if (bridge == null) return;
+            if (agent == null) return;
 
-            // bridge.StartSimulationInteractive();
+            // Give the ML-Agent its ticket to run exactly one episode
+            agent.ArmAndStart();
             SetStatus("Simulation running...");
             HidePanel();
         }
@@ -243,12 +202,13 @@ namespace Assets.Scripts.UI
 
         private void OnEpisodeFinished(EpisodeResult result)
         {
-            SetStatus($"Done — makespan: {result.Makespan:F1}s, decisions: {result.DecisionPoints}");
+            // The simulation finished! Display the final metrics and bring the menu back up.
+            SetStatus($"<color=#00FF00>SUCCESS!</color>\nFinal Makespan: <b>{result.Makespan:F1}s</b>\nDecisions Made: <b>{result.DecisionPoints}</b>");
             ShowPanel();
         }
 
         // ─────────────────────────────────────────────────────────
-        //  Panel Visibility
+        //  UI Helpers
         // ─────────────────────────────────────────────────────────
 
         private void ShowPanel()
@@ -268,22 +228,16 @@ namespace Assets.Scripts.UI
             if (statusText != null) statusText.text = msg;
         }
 
-        // ─────────────────────────────────────────────────────────
-        //  Config Builder
-        // ─────────────────────────────────────────────────────────
-
         private FJSSPConfig BuildConfig()
         {
             int mpt = (int)machinesPerTypeSlider.value;
-
             var layout = new MachineType[allMachineTypes.Length * mpt];
             for (int t = 0; t < allMachineTypes.Length; t++)
                 for (int m = 0; m < mpt; m++)
                     layout[t * mpt + m] = allMachineTypes[t];
 
             string name = configNameField != null && !string.IsNullOrEmpty(configNameField.text)
-                ? configNameField.text
-                : $"{(int)jobCountSlider.value}j_{layout.Length}m";
+                ? configNameField.text : $"{(int)jobCountSlider.value}j_{layout.Length}m";
 
             return new FJSSPConfig
             {

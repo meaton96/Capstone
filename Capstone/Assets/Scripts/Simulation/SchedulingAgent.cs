@@ -89,16 +89,24 @@ namespace Assets.Scripts.Simulation
 
         public override void OnEpisodeBegin()
         {
+            // If training mode is on, bypass the UI and stay armed infinitely
+            if (bridge != null && bridge.AutoStartOnPlay)
+            {
+                IsArmed = true;
+            }
+
             if (!IsArmed)
             {
-                SimLogger.Low("[Agent] OnEpisodeBegin skipped — not armed.");
+                SimLogger.Low("[Agent] OnEpisodeBegin skipped — waiting for UI to arm.");
                 return;
             }
 
-            if (bridge == null)
+            if (bridge == null) return;
+
+            // Consume the ticket! Next time an episode ends, it will wait here.
+            if (!bridge.AutoStartOnPlay)
             {
-                SimLogger.Error("[Agent] Bridge not assigned.");
-                return;
+                IsArmed = false;
             }
 
             bridge.StartEpisode();

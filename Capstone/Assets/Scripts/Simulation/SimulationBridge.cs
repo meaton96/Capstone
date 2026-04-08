@@ -49,6 +49,7 @@ namespace Assets.Scripts.Simulation
 
         [Header("Episode Configuration")]
         [SerializeField] private bool autoStartOnPlay = false;
+        public bool AutoStartOnPlay => autoStartOnPlay;
         [SerializeField] private LogLevel logLevel = LogLevel.Low;
 
         private FJSSPConfig currentConfig;
@@ -149,7 +150,10 @@ namespace Assets.Scripts.Simulation
             }
 
 
-            SpawnFactory();
+            if (!IsFactoryReady)
+            {
+                SpawnFactory();
+            }
 
             var jobDefs = FJSSPJobGenerator.Generate(currentConfig, cachedMachinesByType);
             Jobs.Initialize(jobDefs, spawnVisuals: true);
