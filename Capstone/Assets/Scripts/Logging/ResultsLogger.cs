@@ -6,11 +6,14 @@ namespace Assets.Scripts.Logging
 {
     public static class ResultsLogger
     {
+        // The wrapper will set this on Awake
         public static string OutputDirectory = "";
+
         private static string FilePath
         {
             get
             {
+                // Fallback to persistent data path just in case the wrapper isn't used
                 string dir = string.IsNullOrEmpty(OutputDirectory)
                     ? Application.persistentDataPath
                     : OutputDirectory;

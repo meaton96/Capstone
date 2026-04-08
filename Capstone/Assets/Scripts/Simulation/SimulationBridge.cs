@@ -50,7 +50,7 @@ namespace Assets.Scripts.Simulation
         [Header("Episode Configuration")]
         [SerializeField] private bool autoStartOnPlay = false;
         public bool AutoStartOnPlay => autoStartOnPlay;
-        [SerializeField] private LogLevel logLevel = LogLevel.Low;
+        //[SerializeField] private LogLevel logLevel = LogLevel.Low;
 
         private FJSSPConfig currentConfig;
         private Dictionary<MachineType, List<int>> cachedMachinesByType;
@@ -108,7 +108,7 @@ namespace Assets.Scripts.Simulation
         {
             if (Instance != null) { Destroy(this); return; }
             Instance = this;
-            SimLogger.ActiveLevel = logLevel;
+            //SimLogger.ActiveLevel = logLevel;
         }
 
         private void Start()
@@ -166,7 +166,7 @@ namespace Assets.Scripts.Simulation
             startTime = Time.time;
 
             // All jobs start in NeedsRouting — the tick loop will pick them up.
-            SimLogger.High($"[Orchestrator] Episode started: {currentConfig.JobCount} jobs, " +
+            SimLogger.Low($"[Orchestrator] Episode started: {currentConfig.JobCount} jobs, " +
                            $"{layoutManager.MachineCount} machines");
         }
 
@@ -272,7 +272,7 @@ namespace Assets.Scripts.Simulation
                     {
                         job.State = JobState.InTransit;
                         job.StateEntryTime = SimTime;
-                        SimLogger.Medium($"[Orchestrator] Job {jobId} picked up by AGV {agv.AgvId} → InTransit");
+                        SimLogger.High($"[Orchestrator] Job {jobId} picked up by AGV {agv.AgvId} → InTransit");
                     }
                     // Don't clear yet — clear after checking delivered too
                 }
@@ -657,7 +657,7 @@ namespace Assets.Scripts.Simulation
         private void FinaliseEpisode()
         {
             episodeActive = false;
-            SimLogger.High($"[Orchestrator] All jobs exited. Makespan={SimTime:F1}, decisions={decisionCount}");
+            SimLogger.Low($"[Orchestrator] All jobs exited. Makespan={SimTime:F1}, decisions={decisionCount}");
             // Fire events, log results, etc.
             OnEpisodeFinished?.Invoke(new EpisodeResult
             {

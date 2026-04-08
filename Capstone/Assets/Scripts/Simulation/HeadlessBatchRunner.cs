@@ -69,6 +69,21 @@ namespace Assets.Scripts.Simulation
             // Only auto-start in batchmode, or if a batchconfig was explicitly passed
             if (Application.isBatchMode || !string.IsNullOrEmpty(batchPath))
             {
+                // --- NEW: Parse and apply timescale ---
+                string timeScaleStr = GetCLIArg("-timescale");
+                if (!string.IsNullOrEmpty(timeScaleStr) && float.TryParse(timeScaleStr, out float parsedScale))
+                {
+                    Time.timeScale = parsedScale;
+                    SimLogger.Low($"[BatchRunner] TimeScale set to {parsedScale}x via CLI.");
+                }
+                else
+                {
+                    // Default to super fast if in headless mode and no timescale was provided
+                    Time.timeScale = 100f;
+                    SimLogger.Low("[BatchRunner] No timescale provided. Defaulting to 100x.");
+                }
+                // --------------------------------------
+
                 int repeats = 1;
                 string repeatsStr = GetCLIArg("-repeats");
                 if (!string.IsNullOrEmpty(repeatsStr))
@@ -147,6 +162,8 @@ namespace Assets.Scripts.Simulation
                         float eta = avgPerRun * (totalRuns - completedRuns);
                         SimLogger.Low($"[BatchRunner] Progress: {completedRuns}/{totalRuns} " +
                                   $"({elapsed:F1}s elapsed, ETA {eta:F1}s)");
+
+
                     }
                 }
             }
@@ -163,32 +180,60 @@ namespace Assets.Scripts.Simulation
         }
 
         /// @brief Runs one (config, rule) episode to completion, yielding each frame.
+        /// @brief Runs one (config, rule) episode to completion, yielding each frame.
         private IEnumerator RunSingleEpisode(FJSSPConfig config, DispatchingRule rule)
         {
-            // Set the agent's heuristic to the target rule
+
+            EpisodeResult runResult = null;
+            UnityEngine.Events.UnityAction<EpisodeResult> onFinish = res => runResult = res;
+            bridge.OnEpisodeFinished.AddListener(onFinish);
+            // Phase 1: Set the agent's heuristic to the target rule
             if (agent != null)
                 agent.SetHeuristicRule(rule);
 
-            // Phase 1: Load config
+            // Phase 2: Load config (this sets IsFactoryReady = false internally)
             bridge.LoadConfig(config);
-            yield return null;
 
-            // Phase 2: Spawn factory
-            bridge.SpawnFactory();
-            yield return null; // let physics settle one frame
-
-            // Phase 3: Arm the agent and start simulation
+            // Phase 3: Give the agent its single-use ticket to start the episode
             if (agent != null)
-                agent.IsArmed = true;
-            //TODO:  bridge.StartSimulation();
+                agent.ArmAndStart();
 
-            // Phase 4: Wait for episode to finish
+            // Phase 4: Wait for ML-Agents to trigger OnEpisodeBegin() on the next FixedUpdate
+            // This will call bridge.StartEpisode(), which spawns the factory and sets episodeActive = true
+            while (!bridge.IsEpisodeActive)
+            {
+                yield return null;
+            }
+
+            // Phase 5: The simulation is now running. Wait for the orchestrator to finish it.
             while (bridge.IsEpisodeActive)
             {
                 yield return null;
             }
 
-            // Small cooldown between episodes
+            int totalOps = 0;
+            if (bridge.Jobs != null)
+            {
+                foreach (var job in bridge.Jobs.AllJobs)
+                    totalOps += job.TotalOperations;
+            }
+
+            if (runResult != null)
+            {
+                ResultsLogger.LogEpisode(
+                    ruleName: rule.ToString(),
+                    seed: config.Seed,
+                    makespan: runResult.Makespan,
+                    jobCount: config.JobCount,
+                    machineCount: config.MachineTypeLayout.Length,
+                    totalOps: totalOps,
+                    decisionCount: runResult.DecisionPoints,
+                    totalReward: runResult.TotalReward,
+                    averageTimeScale: Time.timeScale
+                );
+            }
+
+            // Small cooldown to let physics and ML-Agents buffers settle between episodes
             yield return new WaitForSecondsRealtime(0.1f);
         }
 

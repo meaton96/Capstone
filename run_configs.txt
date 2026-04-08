@@ -1,0 +1,4 @@
+./capstone.app/Contents/MacOS/capstone \
+    -batchmode -nographics -timescale 50 \
+    -batchconfig ./BatchConfigs/BatchConfigs.json \
+    -repeats 1

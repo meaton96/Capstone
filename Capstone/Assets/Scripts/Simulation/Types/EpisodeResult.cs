@@ -1,7 +1,7 @@
 namespace Assets.Scripts.Simulation.Types
 {
     /// @brief Summary statistics produced when an episode ends.
-    public struct EpisodeResult
+    public class EpisodeResult
     {
         public string InstanceName;
         public string RuleName;
