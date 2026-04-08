@@ -9,9 +9,10 @@ namespace Assets.Scripts.Simulation.Jobs
 {
 
     /// @brief Creates, tracks, and updates all jobs in a simulation episode.
-    /// @details Authoritative record of job states AND locations. Every change to
-    ///          where a job is must go through TransitionJob(). External code queries
-    ///          GetJobsInMachineQueue() etc. instead of reading ConveyorBelt contents.
+    /// @details THE single source of truth for job state and location.
+    ///          Every location change goes through TransitionJob().
+    ///          AGVPool pulls from GetNextTransportJob() — no push queue.
+    ///          Exit happens on state transition, not belt polling.
     public class JobManager : MonoBehaviour
     {
         [Header("References")]
@@ -105,6 +106,13 @@ namespace Assets.Scripts.Simulation.Jobs
 
                 trackers[j] = tracker;
                 pendingIncomingJobs.Enqueue(j);
+
+                // Validate array lengths match
+                if (def.EligibleMachinesPerOp.Length != opCount)
+                {
+                    SimLogger.Error($"[JobManager] Job {j}: EligibleMachinesPerOp.Length ({def.EligibleMachinesPerOp.Length}) " +
+                                    $"!= OperationSequence.Length ({opCount}). Generator bug!");
+                }
             }
 
             initialized = true;
@@ -115,18 +123,19 @@ namespace Assets.Scripts.Simulation.Jobs
         //  TransitionJob — THE single authority for location changes
         // ─────────────────────────────────────────────────────────
 
-        /// @brief Moves a job to a new location. This is the ONLY method that should
-        ///        change Location/LocationMachineId/AssignedAGVId.
-        /// @param jobId       The job to move.
-        /// @param newLocation The destination location.
-        /// @param machineId   Machine context (-1 if not applicable).
-        /// @param agvId       AGV carrying the job (-1 if not applicable).
         public void TransitionJob(int jobId, JobLocation newLocation, int machineId = -1, int agvId = -1)
         {
             JobTracker t = GetJobTracker(jobId);
             if (t == null)
             {
                 SimLogger.Error($"[TransitionJob] job={jobId} tracker is NULL!");
+                return;
+            }
+
+            // Guard: don't transition a job that's already Exited
+            if (t.Location == JobLocation.Exited && newLocation != JobLocation.Exited)
+            {
+                SimLogger.Error($"[TransitionJob] job={jobId} is already Exited — ignoring transition to {newLocation}");
                 return;
             }
 
@@ -137,7 +146,7 @@ namespace Assets.Scripts.Simulation.Jobs
             t.LocationMachineId = machineId;
             t.AssignedAGVId = agvId;
 
-            // Update the legacy State field to keep compatibility
+            // Update legacy State field for compatibility
             switch (newLocation)
             {
                 case JobLocation.PendingEntry:
@@ -145,8 +154,7 @@ namespace Assets.Scripts.Simulation.Jobs
                     t.State = JobLifecycleState.NotStarted;
                     break;
                 case JobLocation.AwaitingPickup:
-                    // Keep current state — could be NotStarted or WaitingForTransport
-                    break;
+                    break; // keep current state
                 case JobLocation.InTransit:
                 case JobLocation.InTransitToExit:
                     t.State = JobLifecycleState.InTransit;
@@ -163,7 +171,6 @@ namespace Assets.Scripts.Simulation.Jobs
                 case JobLocation.AwaitingTransport:
                     t.State = JobLifecycleState.WaitingForTransport;
                     break;
-                case JobLocation.OnExitBelt:
                 case JobLocation.Exited:
                     t.State = JobLifecycleState.Complete;
                     break;
@@ -173,16 +180,37 @@ namespace Assets.Scripts.Simulation.Jobs
                 t.Visual.SetState(t.State);
 
             SimLogger.Medium($"[TransitionJob] job={jobId} {oldLocation}(M{oldMachine}) → {newLocation}(M{machineId}) agv={agvId}");
-            // Verify assignment
-            SimLogger.Medium($"[TransitionJob] VERIFY job={jobId}: Location={t.Location}, LocationMachineId={t.LocationMachineId}");
+        }
+
+        // ─────────────────────────────────────────────────────────
+        //  Pull-model query for AGVPool
+        // ─────────────────────────────────────────────────────────
+
+        /// @brief Returns the next unclaimed job awaiting transport, or null if none.
+        ///        AGVPool calls this instead of maintaining its own queue.
+        ///        Skips jobs already claimed by an AGV (AssignedAGVId != -1).
+        public JobTracker GetNextTransportJob()
+        {
+            if (!initialized) return null;
+            JobTracker best = null;
+            double bestTime = double.MaxValue;
+            foreach (var t in trackers)
+            {
+                if (t.Location != JobLocation.AwaitingPickup) continue;
+                if (t.AssignedAGVId >= 0) continue; // already claimed by an AGV
+                if (t.StateEntryTime < bestTime)
+                {
+                    bestTime = t.StateEntryTime;
+                    best = t;
+                }
+            }
+            return best;
         }
 
         // ─────────────────────────────────────────────────────────
         //  Query methods — replace ConveyorBelt queries
         // ─────────────────────────────────────────────────────────
 
-        /// @brief Returns job IDs queued at a machine's incoming area.
-        ///        Replaces PhysicalMachine.IncomingQueue / PhysicalQueue.
         public List<int> GetJobsInMachineQueue(int machineId)
         {
             var result = new List<int>();
@@ -193,7 +221,6 @@ namespace Assets.Scripts.Simulation.Jobs
             return result;
         }
 
-        /// @brief Returns job IDs on a machine's outgoing belt (awaiting transport).
         public List<int> GetJobsOnMachineOutgoing(int machineId)
         {
             var result = new List<int>();
@@ -204,32 +231,19 @@ namespace Assets.Scripts.Simulation.Jobs
             return result;
         }
 
-        /// @brief True if at least one dispatchable job is queued at this machine.
         public bool HasDispatchableJob(int machineId)
         {
-            if (!initialized) { SimLogger.LogWarning("[HasDispatchableJob] NOT INITIALIZED"); return false; }
+            if (!initialized) return false;
             foreach (var t in trackers)
             {
                 if (t.Location != JobLocation.InMachineQueue) continue;
                 if (t.LocationMachineId != machineId) continue;
-                if (t.CurrentOperationIndex < 0 || t.CurrentOperationIndex >= t.EligibleMachinesPerOp.Length)
-                {
-                    SimLogger.LogWarning($"[HasDispatchableJob] job={t.JobId} at M{machineId} SKIPPED: opIndex={t.CurrentOperationIndex}, opsLength={t.EligibleMachinesPerOp.Length}");
-                    continue;
-                }
+                if (t.CurrentOperationIndex < 0 || t.CurrentOperationIndex >= t.TotalOperations) continue;
                 return true;
             }
-
-            // Dump all tracker states when returning false — this helps find the desync
-            string dump = $"[HasDispatchableJob] M{machineId} → FALSE. All trackers: ";
-            foreach (var t in trackers)
-                dump += $"\n  job={t.JobId} loc={t.Location} locM={t.LocationMachineId} opIdx={t.CurrentOperationIndex}/{t.TotalOperations}";
-            SimLogger.LogWarning(dump);
-
             return false;
         }
 
-        /// @brief Returns dispatchable jobs at a machine (valid op index, correct location).
         public List<int> GetDispatchableJobs(int machineId)
         {
             var result = new List<int>();
@@ -238,13 +252,12 @@ namespace Assets.Scripts.Simulation.Jobs
             {
                 if (t.Location != JobLocation.InMachineQueue) continue;
                 if (t.LocationMachineId != machineId) continue;
-                if (t.CurrentOperationIndex < 0 || t.CurrentOperationIndex >= t.EligibleMachinesPerOp.Length) continue;
+                if (t.CurrentOperationIndex < 0 || t.CurrentOperationIndex >= t.TotalOperations) continue;
                 result.Add(t.JobId);
             }
             return result;
         }
 
-        /// @brief Count of jobs at a machine (incoming queue + processing + outgoing).
         public int GetTotalJobsAtMachine(int machineId)
         {
             int count = 0;
@@ -261,19 +274,14 @@ namespace Assets.Scripts.Simulation.Jobs
         }
 
         // ─────────────────────────────────────────────────────────
-        //  Operation lifecycle (called by SimulationBridge)
+        //  Operation lifecycle
         // ─────────────────────────────────────────────────────────
 
-        /// @brief Called when an AGV drops a job at a machine.
-        ///        Transitions to InMachineQueue.
         public void MarkJobArrivedAtMachine(int jobId, int machineId)
         {
-            JobTracker t = GetJobTracker(jobId);
-            if (t == null) return;
             TransitionJob(jobId, JobLocation.InMachineQueue, machineId);
         }
 
-        /// @brief Called when a machine begins processing a job.
         public void MarkOperationStarted(int jobId, double simTime)
         {
             JobTracker t = GetJobTracker(jobId);
@@ -285,7 +293,6 @@ namespace Assets.Scripts.Simulation.Jobs
             t.OperationStatuses[t.CurrentOperationIndex] = 0.5f;
         }
 
-        /// @brief Called when a machine finishes processing. Advances operation index.
         public void MarkOperationComplete(int jobId, double simTime)
         {
             if (!initialized) return;
@@ -296,14 +303,16 @@ namespace Assets.Scripts.Simulation.Jobs
             t.OperationStatuses[t.CurrentOperationIndex] = 1.0f;
             t.StateEntryTime = simTime;
 
+            int currentMachine = t.LocationMachineId;
+
             if (t.CompletedOperations >= t.TotalOperations)
             {
-                // All operations done — job goes to outgoing belt awaiting exit transport
+                t.CurrentOperationIndex = t.TotalOperations; // prevent re-entry
                 t.CurrentMachineId = -1;
                 t.NextMachineId = -1;
                 t.OperationProgress = 0f;
-                TransitionJob(jobId, JobLocation.AwaitingTransport, t.LocationMachineId);
-                t.State = JobLifecycleState.Complete; // override: logically complete
+                TransitionJob(jobId, JobLocation.AwaitingTransport, currentMachine);
+                t.State = JobLifecycleState.Complete;
                 if (t.Visual != null) t.Visual.SetState(t.State);
             }
             else
@@ -313,11 +322,11 @@ namespace Assets.Scripts.Simulation.Jobs
                 t.NextMachineType = t.OperationTypes[t.CurrentOperationIndex];
                 t.CurrentMachineId = -1;
                 t.OperationProgress = 0f;
-                TransitionJob(jobId, JobLocation.AwaitingTransport, t.LocationMachineId);
+                TransitionJob(jobId, JobLocation.AwaitingTransport, currentMachine);
             }
         }
 
-        /// @brief Called when an AGV picks up a job and begins carrying it.
+        /// @brief AGV picked up a job — transition to InTransit.
         public void BeginTransit(int jobId, int destinationMachineId, double simTime)
         {
             JobTracker t = GetJobTracker(jobId);
@@ -335,28 +344,38 @@ namespace Assets.Scripts.Simulation.Jobs
             SimLogger.High($"[JobManager] begin transit of job {jobId} to machine {destinationMachineId}");
         }
 
-        /// @brief Called when an AGV completes delivery of a job.
+        /// @brief AGV completed delivery.
+        ///        For machine delivery: transitions to InMachineQueue.
+        ///        For exit delivery: transitions DIRECTLY to Exited and fires OnJobExited.
+        ///        The exit belt is visual-only — it does NOT drive state.
         public void CompleteTransit(int jobId, int machineId, double simTime)
         {
             JobTracker t = GetJobTracker(jobId);
             if (t == null) return;
 
             t.TotalTransitTime += (simTime - t.StateEntryTime);
-            t.NextMachineId = machineId;
             t.StateEntryTime = simTime;
 
             if (machineId < 0)
-                TransitionJob(jobId, JobLocation.OnExitBelt, -1);
+            {
+                // EXIT: go straight to Exited — belt is just visual
+                TransitionJob(jobId, JobLocation.Exited, -1);
+                SimLogger.Low($"[JobManager] Job {jobId} exited factory.");
+                SimulationBridge.Instance?.OnJobExited(jobId);
+            }
             else
+            {
+                t.NextMachineId = machineId;
                 TransitionJob(jobId, JobLocation.InMachineQueue, machineId);
+            }
         }
 
         // ─────────────────────────────────────────────────────────
-        //  Factory belt management
+        //  Update — ONLY handles factory incoming belt visuals
         // ─────────────────────────────────────────────────────────
 
-        /// @brief Drives jobs from PendingEntry onto the factory IncomingBelt,
-        ///        and handles exit belt departures.
+        /// @brief Feeds pending jobs onto the factory incoming belt (visual only).
+        ///        Exit belt cleanup just deactivates visuals — no state changes.
         private void Update()
         {
             if (!initialized || layoutManager == null) return;
@@ -379,7 +398,8 @@ namespace Assets.Scripts.Simulation.Jobs
                 }
             }
 
-            // Handle exit belt departures
+            // Exit belt: just deactivate visuals that reach the end.
+            // State already transitioned to Exited in CompleteTransit — this is visual cleanup only.
             if (layoutManager.OutgoingBelt != null && layoutManager.OutgoingBelt.Count > 0)
             {
                 JobVisual frontVisual = layoutManager.OutgoingBelt.PeekFrontVisual();
@@ -390,9 +410,7 @@ namespace Assets.Scripts.Simulation.Jobs
                     {
                         var (jobId, vis) = layoutManager.OutgoingBelt.DequeueFront();
                         vis?.gameObject.SetActive(false);
-                        TransitionJob(jobId, JobLocation.Exited, -1);
-                        SimLogger.Low($"[JobManager] Job {jobId} exited factory.");
-                        SimulationBridge.Instance?.OnJobExited(jobId);
+                        // NO state transition here — CompleteTransit already handled it
                     }
                 }
             }
@@ -407,7 +425,12 @@ namespace Assets.Scripts.Simulation.Jobs
             JobTracker t = GetJobTracker(jobId);
             if (t == null) return 0f;
             int opIdx = t.CurrentOperationIndex;
-            if (opIdx < 0 || opIdx >= t.EligibleMachinesPerOp.Length) return 0f;
+            if (opIdx < 0 || opIdx >= t.TotalOperations) return 0f;
+            if (opIdx >= t.EligibleMachinesPerOp.Length)
+            {
+                SimLogger.Error($"[GetProcessingTime] job={jobId} opIdx={opIdx} out of EligibleMachinesPerOp (len={t.EligibleMachinesPerOp.Length})");
+                return 0f;
+            }
             if (t.EligibleMachinesPerOp[opIdx].TryGetValue(machineId, out float time))
                 return time;
             return 0f;
@@ -441,15 +464,6 @@ namespace Assets.Scripts.Simulation.Jobs
         private Vector3 GetIncomingQueuePosition(int slot)
         {
             Vector3 origin = layoutManager != null ? layoutManager.IncomingBeltPosition : incomingQueueOrigin;
-            int row = slot / Mathf.Max(queueRowSize, 1);
-            int col = slot % Mathf.Max(queueRowSize, 1);
-            return origin + queueRowDirection.normalized * (col * queueGridSpacing) +
-                   queueColumnDirection.normalized * (row * queueGridSpacing) + Vector3.up * jobTokenHeight;
-        }
-
-        private Vector3 GetExitAreaPosition(int slot)
-        {
-            Vector3 origin = layoutManager != null ? layoutManager.OutgoingBeltPosition : exitAreaOrigin;
             int row = slot / Mathf.Max(queueRowSize, 1);
             int col = slot % Mathf.Max(queueRowSize, 1);
             return origin + queueRowDirection.normalized * (col * queueGridSpacing) +

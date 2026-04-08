@@ -210,6 +210,15 @@ namespace Assets.Scripts.Simulation.Machines
             JobTracker tracker = SimulationBridge.Instance.JobManager.GetJobTracker(jobId);
             JobVisual visual = tracker?.Visual;
 
+            // Guard: if job was already completed or moved away, abort this coroutine
+            if (tracker == null || tracker.CurrentOperationIndex >= tracker.TotalOperations)
+            {
+                SimLogger.LogWarning($"[ProcessJobRoutine] M{MachineId} job={jobId} — aborting stale coroutine " +
+                                     $"(opIdx={tracker?.CurrentOperationIndex}/{tracker?.TotalOperations})");
+                IsIdle = true;
+                yield break;
+            }
+
             // Wait if all outgoing belts are visually full
             if (AllOutgoingFull())
             {

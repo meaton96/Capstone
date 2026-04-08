@@ -448,6 +448,12 @@ namespace Assets.Scripts.Simulation.AGV
                 previousZoneId = -1;
             }
 
+            if (currentZoneId >= 0)
+            {
+                trafficMgr.Release(currentZoneId, AgvId);
+                currentZoneId = -1;
+            }
+
             currentRoute.Clear();
             routeIndex = 0;
             waitingForZone = false;
@@ -654,6 +660,13 @@ namespace Assets.Scripts.Simulation.AGV
         private void FullReset()
         {
             SimLogger.Error($"[AGV {AgvId}] FullReset triggered — clearing job {CurrentJobId}.");
+
+            // Unclaim the job so another AGV can grab it
+            if (CurrentJobId >= 0)
+            {
+                var tracker = SimulationBridge.Instance?.JobManager?.GetJobTracker(CurrentJobId);
+                if (tracker != null) tracker.AssignedAGVId = -1;
+            }
 
             CurrentJobId = -1;
             loadedJobVisual = null;

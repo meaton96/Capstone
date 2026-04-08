@@ -331,14 +331,21 @@ namespace Assets.Scripts.Simulation
         {
             SimLogger.High($"[OnMachineFinished] job={jobId} machine={machineId}");
 
-            JobManager.MarkOperationComplete(jobId, SimTime);
             JobTracker tracker = JobManager.GetJobTracker(jobId);
-
             if (tracker == null)
             {
                 SimLogger.Error($"[OnMachineFinished] tracker is NULL for job {jobId}!");
                 return;
             }
+
+            // Guard: if already complete and past all operations, don't re-process
+            if (tracker.CurrentOperationIndex >= tracker.TotalOperations)
+            {
+                SimLogger.LogWarning($"[OnMachineFinished] job={jobId} already past all operations (opIdx={tracker.CurrentOperationIndex}/{tracker.TotalOperations}). Ignoring.");
+                return;
+            }
+
+            JobManager.MarkOperationComplete(jobId, SimTime);
 
             SimLogger.High($"[OnMachineFinished] job={jobId} state={tracker.State} location={tracker.Location} " +
                            $"opIndex={tracker.CurrentOperationIndex}/{tracker.TotalOperations} " +
@@ -383,9 +390,11 @@ namespace Assets.Scripts.Simulation
             if (tracker != null)
                 tracker.NextMachineId = -1; // -1 = exit
 
-            // Transition to AwaitingPickup — AGV will resolve positions
+            // Transition to AwaitingPickup — AGV will pull this job when idle
             JobManager.TransitionJob(jobId, JobLocation.AwaitingPickup, sourceMachineId);
-            agvPool.TryDispatch(jobId);
+
+            // Nudge pool to check for idle AGVs (pull model)
+            agvPool.TryAssignWork();
         }
 
         private void EnqueueRoutingDecision(int jobId, int sourceMachineId, MachineType requiredType)
@@ -413,13 +422,13 @@ namespace Assets.Scripts.Simulation
             if (tracker != null)
                 tracker.NextMachineId = targetMachineId;
 
-            // Transition to AwaitingPickup at source location
+            // Transition to AwaitingPickup at source location — AGV will pull
             JobManager.TransitionJob(jobId, JobLocation.AwaitingPickup, sourceMachineId);
 
             SimLogger.High($"[DispatchRealAGV] job={jobId} source=M{sourceMachineId} target=M{targetMachineId}");
 
-            // AGV resolves positions itself
-            agvPool.TryDispatch(jobId);
+            // Nudge pool to check for idle AGVs (pull model)
+            agvPool.TryAssignWork();
         }
 
         /// @brief Checks if an idle machine has dispatchable jobs. Queries JobManager.
@@ -730,7 +739,9 @@ namespace Assets.Scripts.Simulation
         {
             JobTracker t = JobManager.GetJobTracker(jobId);
             if (t == null) return float.MaxValue;
-            if (t.CurrentOperationIndex < 0 || t.CurrentOperationIndex >= t.EligibleMachinesPerOp.Length)
+            if (t.CurrentOperationIndex < 0 || t.CurrentOperationIndex >= t.TotalOperations)
+                return float.MaxValue;
+            if (t.CurrentOperationIndex >= t.EligibleMachinesPerOp.Length)
                 return float.MaxValue;
 
             var eligible = t.EligibleMachinesPerOp[t.CurrentOperationIndex];

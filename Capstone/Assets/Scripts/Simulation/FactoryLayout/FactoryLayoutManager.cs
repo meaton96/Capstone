@@ -47,6 +47,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         [SerializeField] private float rowAisleWidth = 3f;
         [SerializeField] private float spineAisleWidth = 4f;
         [SerializeField] private float verticalAisleWidth = 3.5f;
+        [SerializeField] private float parkingAlcoveDepth = 5f;
 
         [Header("Walls")]
         [SerializeField] private float wallHeight = 0.6f;
@@ -118,8 +119,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             float machineAreaDepth = (layoutRows - 1) * RowPitch + machineDepth;
 
             totalFloorWidth = verticalAisleWidth + machineAreaWidth + verticalAisleWidth;
-            totalFloorDepth = spineAisleWidth + machineAreaDepth + spineAisleWidth;
-
+            totalFloorDepth = spineAisleWidth + machineAreaDepth + spineAisleWidth + parkingAlcoveDepth;
             if (floorTransform != null)
             {
                 floorTransform.localScale = new Vector3(
@@ -228,7 +228,14 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 OutgoingBelt = outBelt.GetComponent<ConveyorBelt>();
             }
 
-            AGVParkingPosition = new Vector3(floorCentre.x - machineAreaHalfW, 0.01f, botZ);
+            float alcoveZ = botZ - (spineAisleWidth / 2f) - (parkingAlcoveDepth / 2f);
+
+            // Push the parking position south of the bottom spine into the new alcove
+            AGVParkingPosition = new Vector3(
+                floorCentre.x - machineAreaHalfW,
+                0.01f,
+                alcoveZ
+            );
         }
 
         /// @brief Destroys all spawned factory components and clears memory.
