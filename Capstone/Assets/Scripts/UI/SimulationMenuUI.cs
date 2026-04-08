@@ -6,8 +6,9 @@ using UnityEngine.UI;
 using TMPro;
 using Assets.Scripts.Simulation.Machines;
 using Assets.Scripts.Simulation.Types;
+using Assets.Scripts.Simulation;
 
-namespace Assets.Scripts.Simulation.UI
+namespace Assets.Scripts.UI
 {
     /// @brief Wires a pre-built UI panel to the SimulationBridge lifecycle.
     ///
@@ -226,7 +227,7 @@ namespace Assets.Scripts.Simulation.UI
         {
             if (bridge == null) return;
 
-            bridge.StartSimulationInteractive();
+            // bridge.StartSimulationInteractive();
             SetStatus("Simulation running...");
             HidePanel();
         }

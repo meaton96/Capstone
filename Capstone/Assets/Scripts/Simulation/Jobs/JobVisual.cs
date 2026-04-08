@@ -24,22 +24,20 @@ namespace Assets.Scripts.Simulation.Jobs
         private float travelProgress = 1f;
         private Renderer meshRenderer;
         private MaterialPropertyBlock propBlock;
-        [SerializeField] private JobLifecycleState currentState;
+        [SerializeField] private JobState currentState;
 
         private bool isCarried = false;
         private bool isOnConveyor = false;
 
         public int JobId => jobId;
-        public JobLifecycleState CurrentState => currentState;
+        public JobState CurrentState => currentState;
 
         public JobLocation jobLocation;
-
-
 
         /// @brief Initializes the visual token and caches rendering components.
         /// @param id Zero-based job index.
         /// @param opCount Total number of operations this job must complete.
-        /// @post State is set to NotStarted and targetPosition matches current transform.
+        /// @post State is set to NeedsRouting and targetPosition matches current transform.
         public void Initialize(int id, int opCount)
         {
             jobId = id;
@@ -49,25 +47,25 @@ namespace Assets.Scripts.Simulation.Jobs
             meshRenderer = GetComponentInChildren<Renderer>();
             propBlock = new MaterialPropertyBlock();
 
-            SetState(JobLifecycleState.NotStarted);
+            SetState(JobState.NeedsRouting);
         }
 
         /// @brief Updates the token's tint to reflect its current lifecycle state.
         /// @details Uses a MaterialPropertyBlock to update the "_Color" property without creating material instances.
-        /// @param state The target @ref JobLifecycleState.
-        public void SetState(JobLifecycleState state)
+        /// @param state The target @ref JobState.
+        public void SetState(JobState state)
         {
             currentState = state;
             if (meshRenderer == null) return;
 
             Color c = state switch
             {
-                JobLifecycleState.NotStarted => notStartedColor,
-                JobLifecycleState.Queued => queuedColor,
-                JobLifecycleState.Processing => processingColor,
-                JobLifecycleState.WaitingForTransport => waitingColor,
-                JobLifecycleState.InTransit => inTransitColor,
-                JobLifecycleState.Complete => completeColor,
+                JobState.NeedsRouting => notStartedColor,
+                JobState.WaitingForPickup => waitingColor,
+                JobState.InTransit => inTransitColor,
+                JobState.Queued => queuedColor,
+                JobState.Processing => processingColor,
+                JobState.Exited => completeColor,
                 _ => notStartedColor,
             };
 
@@ -144,7 +142,5 @@ namespace Assets.Scripts.Simulation.Jobs
 
             transform.position = Vector3.Lerp(startPosition, targetPosition, travelProgress);
         }
-
-
     }
 }

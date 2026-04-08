@@ -180,7 +180,7 @@ namespace Assets.Scripts.Simulation
             // Phase 3: Arm the agent and start simulation
             if (agent != null)
                 agent.IsArmed = true;
-            bridge.StartSimulation();
+            //TODO:  bridge.StartSimulation();
 
             // Phase 4: Wait for episode to finish
             while (bridge.IsEpisodeActive)

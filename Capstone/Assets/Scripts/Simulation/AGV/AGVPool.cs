@@ -1,17 +1,15 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Assets.Scripts.Simulation.Machines;
-using Assets.Scripts.Logging;
 using Assets.Scripts.Simulation.FactoryLayout;
-using Assets.Scripts.Simulation.Jobs;
+using Assets.Scripts.Logging;
 
 namespace Assets.Scripts.Simulation.AGV
 {
-    /// @brief Manages a fleet of AGVs using a PULL model.
-    /// @details There is NO dispatch queue. When an AGV becomes idle, it asks
-    ///          JobManager for the next job that needs transport (Location == AwaitingPickup).
-    ///          This eliminates stale-request bugs entirely — there's nothing to go stale.
+    /// <summary>
+    /// Manages a fleet of AGVs.
+    /// In the orchestrator architecture, this is purely a container and factory.
+    /// The SimulationBridge (Orchestrator) pulls idle AGVs from here and dispatches them.
+    /// </summary>
     public class AGVPool : MonoBehaviour
     {
         public static AGVPool Instance;
@@ -21,7 +19,9 @@ namespace Assets.Scripts.Simulation.AGV
         [SerializeField] private FactoryLayoutManager layoutManager;
 
         private List<AGVController> fleet = new List<AGVController>();
-        public List<AGVController> Fleet => fleet;
+
+        // Expose fleet for the orchestrator to harvest flags
+        public IReadOnlyList<AGVController> AllAGVs => fleet;
 
         void Awake()
         {
@@ -35,14 +35,18 @@ namespace Assets.Scripts.Simulation.AGV
 
             Vector3 baseParkingPos = layoutManager != null ? layoutManager.AGVParkingPosition : Vector3.zero;
             parkingPositions = new Vector3[fleetSize];
+
             for (int i = 0; i < fleetSize; i++)
             {
                 Vector3 spawnPos = baseParkingPos + new Vector3(i * 2f, 0, 0);
                 parkingPositions[i] = spawnPos;
+
                 AGVController newAgv = Instantiate(agvPrefab, spawnPos, Quaternion.identity, this.transform);
                 newAgv.gameObject.name = $"AGV_{i}";
                 newAgv.Initialize(i);
-                newAgv.SetIdleCallback(OnAnyAGVBecameIdle);
+
+                // Note: Idle callbacks are no longer assigned here. 
+                // The orchestrator actively polls GetIdleAGV() during Phase 3.
                 fleet.Add(newAgv);
             }
 
@@ -56,37 +60,15 @@ namespace Assets.Scripts.Simulation.AGV
             return Vector3.zero;
         }
 
-        /// @brief Called when any AGV becomes idle. Pulls the next job from JobManager.
-        private void OnAnyAGVBecameIdle()
-        {
-            TryAssignWork();
-        }
-
-        /// @brief Pairs an idle AGV with the next job needing transport.
-        ///        Reads directly from JobManager — no queue, nothing to go stale.
-        ///        Call this when a new job becomes AwaitingPickup, or when an AGV parks.
-        public void TryAssignWork()
-        {
-            AGVController agv = GetAvailableAGV();
-            if (agv == null) return;
-
-            JobManager jm = SimulationBridge.Instance?.JobManager;
-            if (jm == null) return;
-
-            JobTracker job = jm.GetNextTransportJob();
-            if (job == null) return;
-
-            // Claim the job so no other AGV grabs it
-            job.AssignedAGVId = agv.AgvId;
-
-            SimLogger.High($"[AGVPool] Assigning Job {job.JobId} to AGV {agv.AgvId} (pull model).");
-            agv.Dispatch(job.JobId);
-        }
-
-        public AGVController GetAvailableAGV()
+        /// <summary>
+        /// Queried by the Orchestrator to find an available AGV for dispatch.
+        /// </summary>
+        public AGVController GetIdleAGV()
         {
             foreach (var agv in fleet)
-                if (agv.State == AGVState.Idle) return agv;
+            {
+                if (agv.IsIdle) return agv;
+            }
             return null;
         }
     }

@@ -55,7 +55,7 @@ public class AGVFollowCamera : MonoBehaviour
     {
         if (!isFollowing || agvPool == null) return;
 
-        List<AGVController> fleet = agvPool.Fleet;
+        IReadOnlyList<AGVController> fleet = agvPool.AllAGVs;
         if (fleet == null || fleet.Count == 0) return;
 
         // Ensure index stays valid if fleet size changes dynamically
@@ -95,7 +95,7 @@ public class AGVFollowCamera : MonoBehaviour
 
     private void ChangeAGV(int direction)
     {
-        List<AGVController> fleet = agvPool.Fleet;
+        IReadOnlyList<AGVController> fleet = agvPool.AllAGVs;
         if (fleet == null || fleet.Count <= 1) return;
 
         // Loop the index around the fleet list

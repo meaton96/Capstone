@@ -31,7 +31,7 @@ namespace Assets.Scripts.Simulation.Jobs
     {
         public int JobId;
         public int TotalOperations;
-        public JobLifecycleState State;
+        // public JobLifecycleState State;
         public int CurrentOperationIndex;
         public int CompletedOperations;
         public Vector3 WorldPosition;

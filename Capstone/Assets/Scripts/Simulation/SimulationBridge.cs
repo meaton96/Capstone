@@ -14,50 +14,75 @@ using Unity.MLAgents;
 
 namespace Assets.Scripts.Simulation
 {
-
-    /// @brief Central coordinator between the Unity physics simulation and the scheduling agent.
-    ///
-    /// @details Job location is tracked exclusively by JobManager. This bridge reacts to
-    /// physics events, queues scheduling decisions, and delegates state changes through
-    /// JobManager.TransitionJob — never through ConveyorBelt or PhysicalMachine directly.
+    /// <summary>
+    /// THE single orchestrator. One Update() tick drives the entire simulation.
+    /// 
+    /// Nothing else mutates job state. PhysicalMachine sets flags. AGVController
+    /// sets flags. This class reads those flags and makes ALL state transitions.
+    /// 
+    /// Decision flow:
+    ///   1. Harvest flags from machines and AGVs
+    ///   2. Assign AGVs to jobs waiting for pickup
+    ///   3. If not waiting for agent: find next decision (routing or dispatch)
+    ///   4. Agent responds via Step() → execute the decision
+    /// </summary>
     public class SimulationBridge : MonoBehaviour
     {
-        public bool IsFactoryReady { get; private set; }
-        public FJSSPConfig CurrentConfig => currentConfig;
+        public static SimulationBridge Instance;
 
-        [Header("Lifecycle Events")]
-        public UnityEvent OnFactorySpawned;
-
-        private Dictionary<MachineType, List<int>> cachedMachinesByType;
-        public string LastAppliedRule { get; private set; } = "Waiting...";
-
-        private Queue<int> pendingDecisions = new Queue<int>();
+        // ─────────────────────────────────────────────────────────
+        //  Scene References
+        // ─────────────────────────────────────────────────────────
 
         [Header("Scene References")]
         [SerializeField] private FactoryLayoutManager layoutManager;
         [SerializeField] private TrafficZoneManager trafficZoneManager;
-        [SerializeField] private AGV.AGVPool agvPool;
-        public JobManager JobManager;
+        [SerializeField] private AGVPool agvPool;
         [SerializeField] private SchedulingAgent agent;
-        private FJSSPConfig currentConfig;
+        public JobStore Jobs;
 
-        private long frameCount;
-        private float timeScaleSum;
-        public static SimulationBridge Instance;
 
-        public float StartTime { get; private set; }
+
+        // ─────────────────────────────────────────────────────────
+        //  Config & Episode State
+        // ─────────────────────────────────────────────────────────
 
         [Header("Episode Configuration")]
         [SerializeField] private bool autoStartOnPlay = false;
-        private Dictionary<int, int> routingJobSources = new Dictionary<int, int>();
+        [SerializeField] private LogLevel logLevel = LogLevel.Low;
+
+        private FJSSPConfig currentConfig;
+        private Dictionary<MachineType, List<int>> cachedMachinesByType;
+
+        private bool episodeActive;
+        private int decisionCount;
+        public int DecisionCount => decisionCount;
+        private double totalReward;
+        private double previousMakespan;
+        private float startTime;
+
+        public bool IsEpisodeActive => episodeActive;
+        public bool IsFactoryReady { get; private set; }
+        public double SimTime => Time.time - startTime;
+        public FJSSPConfig CurrentConfig => currentConfig;
+
+        // ─────────────────────────────────────────────────────────
+        //  Agent Interface
+        // ─────────────────────────────────────────────────────────
+
+        public DecisionRequest CurrentDecision { get; private set; }
+        public bool IsWaitingForAction { get; private set; }
+        public string LastAppliedRule { get; private set; } = "Waiting...";
 
         [Header("Events")]
         public UnityEvent<DecisionRequest> OnDecisionRequired;
         public UnityEvent<StepResult> OnStepCompleted;
         public UnityEvent<EpisodeResult> OnEpisodeFinished;
+        public UnityEvent OnFactorySpawned;
 
-        [Header("Logging")]
-        [SerializeField] private LogLevel logLevel = LogLevel.Low;
+        // ─────────────────────────────────────────────────────────
+        //  Dispatching Rules
+        // ─────────────────────────────────────────────────────────
 
         private static readonly DispatchingRule[] ActionToRule = new DispatchingRule[]
         {
@@ -72,431 +97,500 @@ namespace Assets.Scripts.Simulation
         };
 
         public static int ActionCount => ActionToRule.Length;
+        public int GetRuleIndex(DispatchingRule rule) => Array.IndexOf(ActionToRule, rule);
 
-        private bool episodeActive;
-        private int decisionCount;
-        private double totalReward;
-        private double previousMakespan;
-        private int[] perMachineDecisions;
-
-        public int DecisionCount => decisionCount;
-        public bool IsEpisodeActive => episodeActive;
-        public bool IsDone => !episodeActive;
-
-        public DecisionRequest CurrentDecision { get; private set; }
-        public bool IsWaitingForAction { get; private set; }
-
-        private int exitedJobCount = 0;
-        public double SimTime => Time.time - StartTime;
-
-        private Queue<int> pendingRoutingJobs = new Queue<int>();
-
-        // ─────────────────────────────────────────────────────────
-        //  Unity Lifecycle
-        // ─────────────────────────────────────────────────────────
+        // ═════════════════════════════════════════════════════════
+        //  UNITY LIFECYCLE
+        // ═════════════════════════════════════════════════════════
 
         private void Awake()
         {
-            if (Instance != null)
-            {
-                Destroy(this);
-                return;
-            }
+            if (Instance != null) { Destroy(this); return; }
             Instance = this;
-            string[] args = Environment.GetCommandLineArgs();
-            for (int i = 0; i < args.Length - 1; i++)
-            {
-                if (args[i] == "-timescale" && float.TryParse(args[i + 1], out float ts))
-                {
-                    Time.timeScale = ts;
-                    SimLogger.Low($"[SimBridge] Timescale set to {ts} from command line.");
-                    break;
-                }
-            }
-
-            string resultsDir = Application.isEditor
-                ? Path.Combine(Application.dataPath, "..\\..", "Results")
-                : Path.Combine(Application.dataPath, "..\\Results");
-
-            Directory.CreateDirectory(resultsDir);
-            ResultsLogger.OutputDirectory = resultsDir;
             SimLogger.ActiveLevel = logLevel;
-            SimLogger.InitializeFileLogging();
         }
 
         private void Start()
         {
-            string configPath = GetCommandLineArg("-config");
-            if (!string.IsNullOrEmpty(configPath))
-                LoadConfigFromFile(configPath);
-
-            if (autoStartOnPlay)
-            {
-                SimLogger.Medium("[SimBridge] autoStartOnPlay=true — arming agent.");
-                if (agent != null)
-                    agent.IsArmed = true;
-            }
+            if (autoStartOnPlay && agent != null)
+                agent.IsArmed = true;
         }
 
-        private static string GetCommandLineArg(string key)
-        {
-            string[] args = Environment.GetCommandLineArgs();
-            for (int i = 0; i < args.Length - 1; i++)
-            {
-                if (args[i] == key)
-                    return args[i + 1];
-            }
-            return null;
-        }
-
-        private FJSSPConfig BuildTestConfig()
-        {
-            var layout = new MachineType[] {
-                MachineType.Mill, MachineType.Lathe, MachineType.Weld,
-                MachineType.Inspect, MachineType.Assemble
-            };
-
-            return new FJSSPConfig
-            {
-                JobCount = 2,
-                MachinesPerType = 1,
-                MachineTypeLayout = layout,
-                MinProcTime = 5f,
-                MaxProcTime = 10f,
-                MinOpsPerJob = 5,
-                MaxOpsPerJob = 5,
-                MaxArrivalTime = 0f,
-                Seed = 42
-            };
-        }
-
-        private FJSSPConfig BuildDefaultConfig()
-        {
-            var layout = new MachineType[15];
-            MachineType[] types = (MachineType[])Enum.GetValues(typeof(MachineType));
-            for (int i = 0; i < 15; i++)
-                layout[i] = types[i / 3];
-
-            return new FJSSPConfig
-            {
-                Seed = 42,
-                JobCount = 20,
-                MachinesPerType = 3,
-                MachineTypeLayout = layout,
-                MinProcTime = 15f,
-                MaxProcTime = 90f,
-                MinOpsPerJob = 5,
-                MaxOpsPerJob = 8,
-                MaxArrivalTime = 0f
-            };
-        }
-
-        // ─────────────────────────────────────────────────────────
-        //  Episode Management
-        // ─────────────────────────────────────────────────────────
-
-        public bool LoadConfigFromFile(string path)
-        {
-            var config = ConfigLoader.LoadSingle(path);
-            if (config == null)
-            {
-                SimLogger.Error($"[SimBridge] Failed to load config from: {path}");
-                return false;
-            }
-            LoadConfig(config);
-            return true;
-        }
+        // ═════════════════════════════════════════════════════════
+        //  EPISODE MANAGEMENT
+        // ═════════════════════════════════════════════════════════
 
         public void LoadConfig(FJSSPConfig config)
         {
             currentConfig = config;
             IsFactoryReady = false;
-            SimLogger.Medium($"[SimBridge] Config loaded: {config.Name} " +
-                             $"({config.JobCount}J, {config.TotalMachines}M, seed={config.Seed})");
         }
 
         public void SpawnFactory()
         {
-            if (currentConfig == null)
-            {
-                SimLogger.Error("[SimBridge] No config loaded. Call LoadConfig() first.");
-                return;
-            }
-
-            if (IsFactoryReady || episodeActive)
-            {
-                StopEpisode();
-                if (layoutManager != null) layoutManager.ClearFloor();
-                if (JobManager != null) JobManager.Cleanup();
-            }
+            if (currentConfig == null) return;
+            if (IsFactoryReady || episodeActive) StopEpisode();
 
             UnityEngine.Random.InitState(currentConfig.Seed);
             cachedMachinesByType = layoutManager.BuildFloor(currentConfig);
-
-            if (trafficZoneManager != null)
-                trafficZoneManager.BuildZoneGraph();
-
-            if (agvPool != null)
-                agvPool.InitializeFleet();
+            trafficZoneManager.BuildZoneGraph();
+            agvPool.InitializeFleet();
 
             IsFactoryReady = true;
-            SimLogger.High($"[SimBridge] Factory spawned: {currentConfig.TotalMachines} machines");
             OnFactorySpawned?.Invoke();
-        }
-
-        public void StartSimulation()
-        {
-            if (!IsFactoryReady)
-            {
-                SimLogger.Error("[SimBridge] Factory not ready. Call SpawnFactory() first.");
-                return;
-            }
-            if (episodeActive)
-            {
-                SimLogger.Error("[SimBridge] Episode already active.");
-                return;
-            }
-
-            FJSSPJobDefinition[] jobDefs = FJSSPJobGenerator.Generate(currentConfig, cachedMachinesByType);
-
-            if (JobManager != null)
-                JobManager.Initialize(jobDefs, spawnVisuals: true);
-
-            episodeActive = true;
-            decisionCount = 0;
-            totalReward = 0;
-            previousMakespan = 0;
-            perMachineDecisions = new int[layoutManager.MachineCount];
-            IsWaitingForAction = false;
-            pendingDecisions.Clear();
-            pendingRoutingJobs.Clear();
-            routingJobSources.Clear();
-            exitedJobCount = 0;
-            frameCount = 0;
-            timeScaleSum = 0;
-
-            StartTime = Time.time;
-            SimLogger.High($"[SimBridge] Simulation started ({currentConfig.Name})");
-
-            foreach (var tracker in JobManager.JobTrackers)
-            {
-                if (tracker.ArrivalTime <= 0f)
-                    EnqueueRoutingDecision(tracker.JobId, -1, tracker.NextMachineType);
-            }
         }
 
         public void StartEpisode()
         {
             if (currentConfig == null)
-                currentConfig = BuildTestConfig();
+            {
+                currentConfig = BuildDefaultConfig();
+                // currentConfig = BuildTestConfig();
+            }
+
 
             SpawnFactory();
-            StartSimulation();
+
+            var jobDefs = FJSSPJobGenerator.Generate(currentConfig, cachedMachinesByType);
+            Jobs.Initialize(jobDefs, spawnVisuals: true);
+
+            episodeActive = true;
+            decisionCount = 0;
+            totalReward = 0;
+            previousMakespan = 0;
+            IsWaitingForAction = false;
+            startTime = Time.time;
+
+            // All jobs start in NeedsRouting — the tick loop will pick them up.
+            SimLogger.High($"[Orchestrator] Episode started: {currentConfig.JobCount} jobs, " +
+                           $"{layoutManager.MachineCount} machines");
         }
 
-        public void LoadAndSpawnFromFile(string path)
+        public void StopEpisode()
         {
-            if (LoadConfigFromFile(path))
-                SpawnFactory();
+            episodeActive = false;
+            IsWaitingForAction = false;
+            layoutManager.ClearFloor();
+            Jobs.Cleanup();
+            // agent?.EndEpisode();
         }
 
-        public void StartSimulationInteractive()
+        // ═════════════════════════════════════════════════════════
+        //  THE TICK — one pass per frame, deterministic order
+        // ═════════════════════════════════════════════════════════
+
+        private void Update()
         {
-            if (!IsFactoryReady)
-            {
-                SimLogger.Error("[SimBridge] Spawn the factory first.");
-                return;
-            }
+            if (!episodeActive) return;
 
-            if (agent != null)
-                agent.IsArmed = true;
+            // ── Phase 1: Harvest machine completion flags ─────────
+            HarvestMachineFlags();
 
-            StartSimulation();
-        }
+            // ── Phase 2: Harvest AGV delivery flags ──────────────
+            HarvestAGVFlags();
 
-        // ─────────────────────────────────────────────────────────
-        //  Physics Event Listeners
-        // ─────────────────────────────────────────────────────────
+            // ── Phase 3: Assign idle AGVs to WaitingForPickup jobs
+            AssignAGVs();
 
-        /// @brief Called by AGVController.DoDropoff when a job arrives at a machine.
-        ///        State transition already happened in JobManager.CompleteTransit.
-        public void OnJobArrivedInQueue(int machineId, int jobId)
-        {
-            SimLogger.High($"[OnJobArrivedInQueue] job={jobId} at M{machineId} — checking dispatch needed");
-            CheckIfDecisionNeeded(machineId);
-        }
+            // ── Phase 4: Feed next decision to agent ─────────────
+            if (!IsWaitingForAction)
+                FindNextDecision();
 
-        /// @brief Called by PhysicalMachine when it finishes processing a job.
-        public void OnMachineFinished(int machineId, int jobId)
-        {
-            SimLogger.High($"[OnMachineFinished] job={jobId} machine={machineId}");
-
-            JobTracker tracker = JobManager.GetJobTracker(jobId);
-            if (tracker == null)
-            {
-                SimLogger.Error($"[OnMachineFinished] tracker is NULL for job {jobId}!");
-                return;
-            }
-
-            // Guard: if already complete and past all operations, don't re-process
-            if (tracker.CurrentOperationIndex >= tracker.TotalOperations)
-            {
-                SimLogger.LogWarning($"[OnMachineFinished] job={jobId} already past all operations (opIdx={tracker.CurrentOperationIndex}/{tracker.TotalOperations}). Ignoring.");
-                return;
-            }
-
-            JobManager.MarkOperationComplete(jobId, SimTime);
-
-            SimLogger.High($"[OnMachineFinished] job={jobId} state={tracker.State} location={tracker.Location} " +
-                           $"opIndex={tracker.CurrentOperationIndex}/{tracker.TotalOperations} " +
-                           $"completedOps={tracker.CompletedOperations}");
-
-            if (tracker.CompletedOperations >= tracker.TotalOperations)
-            {
-                SimLogger.High($"[OnMachineFinished] job={jobId} → DispatchToExit");
-                DispatchToExit(jobId, machineId);
-            }
-            else if (tracker.Location == JobLocation.AwaitingTransport)
-            {
-                SimLogger.High($"[OnMachineFinished] job={jobId} → EnqueueRouting " +
-                               $"nextType={tracker.NextMachineType}");
-                EnqueueRoutingDecision(jobId, machineId, tracker.NextMachineType);
-            }
-            else
-            {
-                SimLogger.Error($"[OnMachineFinished] job={jobId} UNHANDLED location={tracker.Location} " +
-                                $"— no routing or exit dispatched!");
-            }
-
-            CheckIfDecisionNeeded(machineId);
-        }
-
-        public void OnJobExited(int jobId)
-        {
-            exitedJobCount++;
-            if (exitedJobCount >= JobManager.JobCount)
+            // ── Phase 5: Check episode completion ────────────────
+            if (Jobs.AreAllExited())
                 FinaliseEpisode();
         }
 
         // ─────────────────────────────────────────────────────────
-        //  Dispatch helpers
+        //  Phase 1: Machine Flags
         // ─────────────────────────────────────────────────────────
 
-        private void DispatchToExit(int jobId, int sourceMachineId)
+        private void HarvestMachineFlags()
         {
-            if (agvPool == null) return;
-
-            JobTracker tracker = JobManager.GetJobTracker(jobId);
-            if (tracker != null)
-                tracker.NextMachineId = -1; // -1 = exit
-
-            // Transition to AwaitingPickup — AGV will pull this job when idle
-            JobManager.TransitionJob(jobId, JobLocation.AwaitingPickup, sourceMachineId);
-
-            // Nudge pool to check for idle AGVs (pull model)
-            agvPool.TryAssignWork();
-        }
-
-        private void EnqueueRoutingDecision(int jobId, int sourceMachineId, MachineType requiredType)
-        {
-            if (!pendingRoutingJobs.Contains(jobId))
+            foreach (var machine in layoutManager.Machines)
             {
-                pendingRoutingJobs.Enqueue(jobId);
-                routingJobSources[jobId] = sourceMachineId;
+                if (!machine.FinishedFlag) continue;
+
+                int jobId = machine.ActiveJobId;
+                machine.ClearFinished();
+
+                JobData job = Jobs.Get(jobId);
+                if (job == null)
+                {
+                    SimLogger.Error($"[Orchestrator] Machine M{machine.MachineId} finished unknown job {jobId}");
+                    continue;
+                }
+
+                // Advance operation
+                job.CompletedOps++;
+
+                if (job.CurrentOpIndex < job.TotalOperations)
+                    job.CurrentOpIndex++;
+
+                // Place visual on outgoing belt
+                machine.PlaceOnOutgoing(jobId, job.Visual);
+
+                if (job.IsLastOperation)
+                {
+                    // All ops done → needs transport to exit
+                    job.State = JobState.WaitingForPickup;
+                    job.TargetMachineId = -1;  // -1 = exit
+                    job.LocationMachineId = machine.MachineId;
+                    job.StateEntryTime = SimTime;
+                    SimLogger.High($"[Orchestrator] Job {jobId} complete → WaitingForPickup(exit)");
+                }
+                else
+                {
+                    // More ops → needs routing decision
+                    job.State = JobState.NeedsRouting;
+                    job.LocationMachineId = machine.MachineId;
+                    job.StateEntryTime = SimTime;
+                    SimLogger.High($"[Orchestrator] Job {jobId} op {job.CompletedOps}/{job.TotalOperations} done " +
+                                   $"→ NeedsRouting (next={job.NextRequiredType})");
+                }
             }
         }
 
-        /// @brief Dispatches an AGV for a job. Sets AwaitingPickup and calls pool.
-        ///        The AGV resolves pickup/dropoff positions itself from JobManager.
-        private void DispatchRealAGV(int jobId, int sourceMachineId, int targetMachineId)
+        // ─────────────────────────────────────────────────────────
+        //  Phase 2: AGV Delivery Flags
+        // ─────────────────────────────────────────────────────────
+
+        private void HarvestAGVFlags()
         {
-            PhysicalMachine targetMachine = layoutManager.GetMachine(targetMachineId);
-            if (targetMachine == null)
+            foreach (var agv in agvPool.AllAGVs)
             {
-                SimLogger.Error($"[DispatchRealAGV] job={jobId} targetMachine {targetMachineId} is NULL!");
+                if (agv.PickedUpFlag)
+                {
+                    // Job is now physically on the AGV
+                    int jobId = agv.CurrentJobId;
+                    JobData job = Jobs.Get(jobId);
+                    if (job != null && job.State == JobState.WaitingForPickup)
+                    {
+                        job.State = JobState.InTransit;
+                        job.StateEntryTime = SimTime;
+                        SimLogger.Medium($"[Orchestrator] Job {jobId} picked up by AGV {agv.AgvId} → InTransit");
+                    }
+                    // Don't clear yet — clear after checking delivered too
+                }
+
+                if (agv.DeliveredFlag)
+                {
+                    int jobId = agv.DeliveredJobId;
+                    int machineId = agv.DeliveredMachineId;
+
+                    JobData job = Jobs.Get(jobId);
+                    if (job != null)
+                    {
+                        if (machineId < 0)
+                        {
+                            // Delivered to exit
+                            job.State = JobState.Exited;
+                            job.LocationMachineId = -1;
+                            job.StateEntryTime = SimTime;
+                            if (job.Visual != null) job.Visual.gameObject.SetActive(false);
+                            SimLogger.High($"[Orchestrator] Job {jobId} → Exited");
+                        }
+                        else
+                        {
+                            // Delivered to machine queue
+                            job.State = JobState.Queued;
+                            job.LocationMachineId = machineId;
+                            job.StateEntryTime = SimTime;
+                            SimLogger.High($"[Orchestrator] Job {jobId} → Queued at M{machineId}");
+                        }
+
+                        job.TotalTransitTime += (SimTime - job.StateEntryTime);
+                        job.AssignedAgvId = -1;
+                    }
+                }
+
+                // Clear both flags together
+                if (agv.PickedUpFlag || agv.DeliveredFlag)
+                    agv.ClearFlags();
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────
+        //  Phase 3: AGV Assignment
+        // ─────────────────────────────────────────────────────────
+
+        private void AssignAGVs()
+        {
+            // Try to assign idle AGVs to unassigned WaitingForPickup jobs.
+            // One assignment per idle AGV per frame is fine.
+            while (true)
+            {
+                JobData job = Jobs.GetNextUnassignedPickup();
+                if (job == null) break;
+
+                AGVController agv = agvPool.GetIdleAGV();
+                if (agv == null) break;
+
+                // Resolve positions
+                PhysicalMachine sourceMachine = null;
+                Vector3 pickupPos;
+                if (job.LocationMachineId >= 0)
+                {
+                    sourceMachine = layoutManager.GetMachine(job.LocationMachineId);
+                    pickupPos = sourceMachine.GetPickupPosition();
+                }
+                else
+                {
+                    pickupPos = layoutManager.IncomingBeltPosition;
+                }
+
+                PhysicalMachine targetMachine = null;
+                Vector3 dropoffPos;
+                if (job.TargetMachineId >= 0)
+                {
+                    targetMachine = layoutManager.GetMachine(job.TargetMachineId);
+                    dropoffPos = targetMachine.GetDropoffPosition();
+                }
+                else
+                {
+                    dropoffPos = layoutManager.OutgoingBeltPosition;
+                }
+
+                // Dispatch AGV
+                job.AssignedAgvId = agv.AgvId;
+                agv.Dispatch(job.JobId, pickupPos, dropoffPos, sourceMachine, targetMachine, job.Visual);
+                agv.SetCarryVisual(job.Visual);
+
+                SimLogger.High($"[Orchestrator] Assigned AGV {agv.AgvId} to job {job.JobId} " +
+                               $"(M{job.LocationMachineId} → M{job.TargetMachineId})");
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────
+        //  Phase 4: Find Next Decision
+        // ─────────────────────────────────────────────────────────
+
+        private void FindNextDecision()
+        {
+            // Priority 1: Routing decisions (jobs need a target machine)
+            JobData routingJob = Jobs.GetNextNeedsRouting();
+            if (routingJob != null)
+            {
+                CurrentDecision = BuildRoutingDecision(routingJob);
+                IsWaitingForAction = true;
+                OnDecisionRequired?.Invoke(CurrentDecision);
                 return;
             }
 
-            // Set where the job is going
-            JobTracker tracker = JobManager.GetJobTracker(jobId);
-            if (tracker != null)
-                tracker.NextMachineId = targetMachineId;
+            // Priority 2: Dispatch decisions (idle machine with queued jobs)
+            foreach (var machine in layoutManager.Machines)
+            {
+                if (!machine.IsIdle) continue;
+                if (!Jobs.HasDispatchableJob(machine.MachineId)) continue;
 
-            // Transition to AwaitingPickup at source location — AGV will pull
-            JobManager.TransitionJob(jobId, JobLocation.AwaitingPickup, sourceMachineId);
+                CurrentDecision = BuildDispatchDecision(machine.MachineId);
+                IsWaitingForAction = true;
+                OnDecisionRequired?.Invoke(CurrentDecision);
+                return;
+            }
 
-            SimLogger.High($"[DispatchRealAGV] job={jobId} source=M{sourceMachineId} target=M{targetMachineId}");
-
-            // Nudge pool to check for idle AGVs (pull model)
-            agvPool.TryAssignWork();
         }
 
-        /// @brief Checks if an idle machine has dispatchable jobs. Queries JobManager.
-        private void CheckIfDecisionNeeded(int machineId)
-        {
-            PhysicalMachine machine = layoutManager.GetMachine(machineId);
-            bool isIdle = machine != null && machine.IsIdle;
-            bool hasJobs = JobManager.HasDispatchableJob(machineId);
-
-            if (isIdle && hasJobs)
-            {
-                if (!pendingDecisions.Contains(machineId))
-                {
-                    SimLogger.Medium($"[CheckDecision] M{machineId} → enqueuing dispatch (idle={isIdle}, hasJobs={hasJobs})");
-                    pendingDecisions.Enqueue(machineId);
-                }
-            }
-            else
-            {
-                SimLogger.Medium($"[CheckDecision] M{machineId} → skipped (idle={isIdle}, hasJobs={hasJobs})");
-            }
-        }
-
-        // ─────────────────────────────────────────────────────────
-        //  Core Step
-        // ─────────────────────────────────────────────────────────
+        // ═════════════════════════════════════════════════════════
+        //  STEP — called by SchedulingAgent.OnActionReceived
+        // ═════════════════════════════════════════════════════════
 
         public StepResult Step(int actionIndex)
         {
             IsWaitingForAction = false;
 
-            if (CurrentDecision.Type == DecisionType.Dispatch)
+            if (CurrentDecision.Type == DecisionType.Routing)
             {
-                LastAppliedRule = ActionToRule[actionIndex].ToString();
-                int chosenJobId = ApplyDispatchingRule(actionIndex, CurrentDecision.MachineId);
-
-                if (chosenJobId < 0)
-                {
-                    SimLogger.LogWarning($"[Step] No dispatchable job at M{CurrentDecision.MachineId}.");
-                }
-                else
-                {
-                    float duration = JobManager.GetProcessingTime(chosenJobId, CurrentDecision.MachineId);
-                    PhysicalMachine machine = layoutManager.GetMachine(CurrentDecision.MachineId);
-                    JobManager.MarkOperationStarted(chosenJobId, SimTime);
-                    machine.StartProcessing(chosenJobId, duration);
-                }
+                ExecuteRoutingDecision(actionIndex);
             }
-            else if (CurrentDecision.Type == DecisionType.Routing)
+            else if (CurrentDecision.Type == DecisionType.Dispatch)
             {
-                int chosenMachineId = ApplyMachineSelectionRule(actionIndex, CurrentDecision);
-
-                int sourceMachineId = CurrentDecision.SourceMachineId;
-                DispatchRealAGV(CurrentDecision.JobId, sourceMachineId, chosenMachineId);
+                ExecuteDispatchDecision(actionIndex);
             }
 
-            float stepReward = CalculateReward();
-            totalReward += stepReward;
+            float reward = CalculateReward();
+            totalReward += reward;
 
-            StepResult result = new StepResult
+            return new StepResult
             {
-                Reward = stepReward,
+                Reward = reward,
                 Done = false,
                 CurrentMakespan = SimTime
             };
+        }
 
-            OnStepCompleted?.Invoke(result);
-            return result;
+        // ─────────────────────────────────────────────────────────
+        //  Execute Routing: agent picked a target machine
+        // ─────────────────────────────────────────────────────────
+
+        private void ExecuteRoutingDecision(int actionIndex)
+        {
+            int chosenMachineId = ApplyMachineSelectionRule(actionIndex, CurrentDecision);
+
+            JobData job = Jobs.Get(CurrentDecision.JobId);
+            if (job == null) return;
+
+            job.TargetMachineId = chosenMachineId;
+            job.State = JobState.WaitingForPickup;
+            job.StateEntryTime = SimTime;
+
+            SimLogger.High($"[Orchestrator] Routed job {job.JobId} → M{chosenMachineId} " +
+                           $"(type={job.NextRequiredType})");
+
+            // AGV assignment happens in Phase 3 next frame.
+            // No immediate dispatch — keeps the tick clean.
+        }
+
+        // ─────────────────────────────────────────────────────────
+        //  Execute Dispatch: agent picked a job for the machine
+        // ─────────────────────────────────────────────────────────
+
+        private void ExecuteDispatchDecision(int actionIndex)
+        {
+            int machineId = CurrentDecision.MachineId;
+            int chosenJobId = ApplyDispatchingRule(actionIndex, machineId);
+
+            if (chosenJobId < 0)
+            {
+                SimLogger.LogWarning($"[Orchestrator] No dispatchable job at M{machineId}.");
+                return;
+            }
+
+            JobData job = Jobs.Get(chosenJobId);
+            if (job == null) return;
+
+            // Guard: verify job is actually Queued at this machine
+            if (job.State != JobState.Queued || job.LocationMachineId != machineId)
+            {
+                SimLogger.Error($"[Orchestrator] Job {chosenJobId} not Queued at M{machineId} " +
+                                $"(state={job.State}, loc=M{job.LocationMachineId}). Skipping.");
+                return;
+            }
+
+            // Guard: verify operation index is valid
+            if (job.CurrentOpIndex >= job.TotalOperations)
+            {
+                SimLogger.Error($"[Orchestrator] Job {chosenJobId} has no more operations. Skipping.");
+                return;
+            }
+
+            float duration = job.GetProcessingTime(machineId);
+            if (duration <= 0f)
+            {
+                SimLogger.LogWarning($"[Orchestrator] Job {chosenJobId} has 0 processing time at M{machineId}. " +
+                                     "Machine not eligible for this operation?");
+                // Still process it — could be a valid 0-time op, but log it.
+            }
+
+            // Transition job
+            job.State = JobState.Processing;
+            job.TotalWaitTime += (SimTime - job.StateEntryTime);
+            job.StateEntryTime = SimTime;
+
+            // Tell machine to run the timer
+            PhysicalMachine machine = layoutManager.GetMachine(machineId);
+            machine.StartJob(chosenJobId, duration);
+
+            LastAppliedRule = ActionToRule[actionIndex].ToString();
+
+            SimLogger.High($"[Orchestrator] M{machineId} processing job {chosenJobId} " +
+                           $"(op {job.CurrentOpIndex}/{job.TotalOperations}, {duration:F1}s)");
+        }
+
+        // ═════════════════════════════════════════════════════════
+        //  DECISION BUILDERS
+        // ═════════════════════════════════════════════════════════
+
+        private DecisionRequest BuildRoutingDecision(JobData job)
+        {
+            MachineType required = job.NextRequiredType;
+
+            var candidates = new List<int>();
+            foreach (var m in layoutManager.Machines)
+                if (m.MachineType == required)
+                    candidates.Add(m.MachineId);
+
+            float[] queueLengths = new float[candidates.Count];
+            float[] jobTimes = new float[candidates.Count];
+
+            for (int i = 0; i < candidates.Count; i++)
+            {
+                queueLengths[i] = Jobs.GetMachineLoad(candidates[i]);
+                jobTimes[i] = job.GetProcessingTime(candidates[i]);
+            }
+
+            return new DecisionRequest
+            {
+                Type = DecisionType.Routing,
+                SimTime = SimTime,
+                DecisionIndex = decisionCount++,
+                TotalJobs = Jobs.JobCount,
+                CompletedJobs = Jobs.CountInState(JobState.Exited),
+                JobId = job.JobId,
+                SourceMachineId = job.LocationMachineId,
+                RequiredType = required,
+                CandidateMachineIds = candidates.ToArray(),
+                CandidateQueueLengths = queueLengths,
+                CandidateJobTimes = jobTimes,
+            };
+        }
+
+        private DecisionRequest BuildDispatchDecision(int machineId)
+        {
+            List<int> queue = Jobs.GetDispatchableJobs(machineId);
+            int[] jobIds = queue.ToArray();
+            double[] durations = new double[jobIds.Length];
+
+            for (int i = 0; i < jobIds.Length; i++)
+                durations[i] = Jobs.GetProcessingTime(jobIds[i], machineId);
+
+            return new DecisionRequest
+            {
+                Type = DecisionType.Dispatch,
+                MachineId = machineId,
+                SimTime = SimTime,
+                DecisionIndex = decisionCount++,
+                TotalJobs = Jobs.JobCount,
+                CompletedJobs = Jobs.CountInState(JobState.Exited),
+                QueuedJobIds = jobIds,
+                QueuedDurations = durations,
+            };
+        }
+
+        // ═════════════════════════════════════════════════════════
+        //  DISPATCHING RULES (same logic, just reads from JobStore)
+        // ═════════════════════════════════════════════════════════
+
+        private int ApplyDispatchingRule(int actionIndex, int machineId)
+        {
+            DispatchingRule rule = ActionToRule[actionIndex];
+            List<int> queue = Jobs.GetDispatchableJobs(machineId);
+
+            if (queue.Count == 0) return -1;
+            if (queue.Count == 1) return queue[0];
+
+            return rule switch
+            {
+                DispatchingRule.SPT_SMPT or
+                DispatchingRule.SPT_SRWT =>
+                    ArgMin(queue, id => Jobs.Get(id).GetProcessingTime(machineId)),
+
+                DispatchingRule.LPT_MMUR or
+                DispatchingRule.LPT_SMPT =>
+                    ArgMax(queue, id => Jobs.Get(id).GetProcessingTime(machineId)),
+
+                DispatchingRule.SRT_SRWT or
+                DispatchingRule.SRT_SMPT =>
+                    ArgMin(queue, id => GetRemainingWork(id)),
+
+                DispatchingRule.LRT_MMUR =>
+                    ArgMax(queue, id => GetRemainingWork(id)),
+
+                DispatchingRule.SDT_SRWT =>
+                    ArgMin(queue, id => (float)(SimTime - Jobs.Get(id).ArrivalTime)),
+
+                _ => queue[0]
+            };
         }
 
         private int ApplyMachineSelectionRule(int actionIndex, DecisionRequest req)
@@ -511,362 +605,125 @@ namespace Assets.Scripts.Simulation
                 DispatchingRule.SPT_SMPT or
                 DispatchingRule.LPT_SMPT or
                 DispatchingRule.SRT_SMPT =>
-                    candidates[ArgMinIndex(req.CandidateJobTimes)],
+                    candidates[ArgMinIdx(req.CandidateJobTimes)],
 
                 DispatchingRule.SPT_SRWT or
                 DispatchingRule.SRT_SRWT or
                 DispatchingRule.SDT_SRWT =>
-                    candidates[ArgMinIndex(req.CandidateQueueLengths)],
+                    candidates[ArgMinIdx(req.CandidateQueueLengths)],
 
                 DispatchingRule.LPT_MMUR or
                 DispatchingRule.LRT_MMUR =>
-                    candidates[ArgMaxIndex(req.CandidateQueueLengths)],
+                    candidates[ArgMaxIdx(req.CandidateQueueLengths)],
 
                 _ => candidates[0]
             };
         }
 
-        private int ArgMinIndex(float[] values)
-        {
-            int best = 0;
-            for (int i = 1; i < values.Length; i++)
-                if (values[i] < values[best]) best = i;
-            return best;
-        }
-
-        private int ArgMaxIndex(float[] values)
-        {
-            int best = 0;
-            for (int i = 1; i < values.Length; i++)
-                if (values[i] > values[best]) best = i;
-            return best;
-        }
-
         // ─────────────────────────────────────────────────────────
-        //  Update Loop
+        //  Helpers
         // ─────────────────────────────────────────────────────────
-
-        private void Update()
-        {
-            frameCount++;
-            timeScaleSum += Time.timeScale;
-            if (!episodeActive) return;
-            if (IsWaitingForAction) return;
-
-            // Routing first — job is done, needs to move
-            while (pendingRoutingJobs.Count > 0)
-            {
-                int jobId = pendingRoutingJobs.Dequeue();
-                JobTracker tracker = JobManager.GetJobTracker(jobId);
-
-                if (tracker == null) continue;
-
-                bool validForRouting = tracker.Location == JobLocation.OnFactoryBelt ||
-                                       tracker.Location == JobLocation.AwaitingTransport ||
-                                       tracker.Location == JobLocation.PendingEntry;
-                if (!validForRouting)
-                {
-                    SimLogger.Error($"[Update] job={jobId} SKIPPED routing — location={tracker.Location}");
-                    continue;
-                }
-
-                int sourceMachineId = routingJobSources.TryGetValue(jobId, out int src) ? src : -1;
-                routingJobSources.Remove(jobId);
-
-                CurrentDecision = BuildRoutingDecisionRequest(jobId, tracker.NextMachineType, sourceMachineId);
-                IsWaitingForAction = true;
-                OnDecisionRequired?.Invoke(CurrentDecision);
-                return;
-            }
-
-            // Then dispatch — idle machine with jobs waiting
-            while (pendingDecisions.Count > 0)
-            {
-                int nextMachineId = pendingDecisions.Dequeue();
-                PhysicalMachine machine = layoutManager.GetMachine(nextMachineId);
-
-                bool isIdle = machine != null && machine.IsIdle;
-                bool hasJobs = JobManager.HasDispatchableJob(nextMachineId);
-
-                SimLogger.Medium($"[Update] Processing dispatch for M{nextMachineId}: idle={isIdle}, hasJobs={hasJobs}");
-
-                if (isIdle && hasJobs)
-                {
-                    CurrentDecision = BuildDecisionRequest(nextMachineId);
-                    IsWaitingForAction = true;
-                    OnDecisionRequired?.Invoke(CurrentDecision);
-                    return;
-                }
-            }
-
-            // Safety scan: periodically check ALL machines for stuck dispatches.
-            // This catches any case where a CheckIfDecisionNeeded was missed.
-            if (frameCount % 60 == 0)
-            {
-                foreach (var machine in layoutManager.Machines)
-                {
-                    if (machine.IsIdle && JobManager.HasDispatchableJob(machine.MachineId))
-                    {
-                        if (!pendingDecisions.Contains(machine.MachineId))
-                        {
-                            SimLogger.LogWarning($"[SafetyScan] M{machine.MachineId} is idle with dispatchable jobs — re-enqueuing!");
-                            pendingDecisions.Enqueue(machine.MachineId);
-                        }
-                    }
-                }
-            }
-        }
-
-        private DecisionRequest BuildRoutingDecisionRequest(int jobId, MachineType requiredType, int sourceMachineId)
-        {
-            List<int> candidates = new List<int>();
-            foreach (var m in layoutManager.Machines)
-                if (m.MachineType == requiredType)
-                    candidates.Add(m.MachineId);
-
-            float[] queueLengths = new float[candidates.Count];
-            float[] jobTimes = new float[candidates.Count];
-
-            for (int i = 0; i < candidates.Count; i++)
-            {
-                // Use JobManager for queue lengths (single source of truth)
-                queueLengths[i] = JobManager.GetJobsInMachineQueue(candidates[i]).Count;
-                jobTimes[i] = JobManager.GetProcessingTime(jobId, candidates[i]);
-            }
-
-            return new DecisionRequest
-            {
-                Type = DecisionType.Routing,
-                SimTime = SimTime,
-                SourceMachineId = sourceMachineId,
-                DecisionIndex = decisionCount++,
-                TotalJobs = JobManager.JobCount,
-                CompletedJobs = CountCompletedJobs(),
-                JobId = jobId,
-                RequiredType = requiredType,
-                CandidateMachineIds = candidates.ToArray(),
-                CandidateQueueLengths = queueLengths,
-                CandidateJobTimes = jobTimes,
-            };
-        }
-
-        private int CountCompletedJobs()
-        {
-            int count = 0;
-            foreach (var t in JobManager.JobTrackers)
-                if (t.Location == JobLocation.Exited) count++;
-            return count;
-        }
-
-        /// @brief Builds a dispatch decision using JobManager queries (not belt contents).
-        private DecisionRequest BuildDecisionRequest(int machineId)
-        {
-            List<int> queue = JobManager.GetDispatchableJobs(machineId);
-            int[] jobIds = queue.ToArray();
-            double[] durations = new double[jobIds.Length];
-
-            for (int i = 0; i < jobIds.Length; i++)
-                durations[i] = JobManager.GetProcessingTime(jobIds[i], machineId);
-
-            return new DecisionRequest
-            {
-                MachineId = machineId,
-                SimTime = SimTime,
-                QueuedJobIds = jobIds,
-                QueuedDurations = durations,
-                DecisionIndex = decisionCount++,
-                TotalJobs = JobManager.JobCount,
-                Type = DecisionType.Dispatch,
-                CompletedJobs = CountCompletedJobs()
-            };
-        }
-
-        // ─────────────────────────────────────────────────────────
-        //  Reward
-        // ─────────────────────────────────────────────────────────
-
-        private float CalculateReward()
-        {
-            float currentSimTime = (float)SimTime;
-            float delta = currentSimTime - (float)previousMakespan;
-            previousMakespan = currentSimTime;
-
-            int totalOps = 0;
-            if (JobManager?.JobTrackers != null)
-                foreach (var t in JobManager.JobTrackers)
-                    totalOps += t.TotalOperations;
-            return -delta / (Mathf.Max(totalOps, 1) * Time.timeScale);
-        }
-
-        // ─────────────────────────────────────────────────────────
-        //  Dispatching rules — uses JobManager queries
-        // ─────────────────────────────────────────────────────────
-
-        /// @brief Selects the best job from JobManager's dispatchable list.
-        private int ApplyDispatchingRule(int actionIndex, int machineId)
-        {
-            DispatchingRule rule = ActionToRule[actionIndex];
-            List<int> queue = JobManager.GetDispatchableJobs(machineId);
-
-            if (queue.Count == 0) return -1;
-            if (queue.Count == 1) return queue[0];
-
-            return rule switch
-            {
-                DispatchingRule.SPT_SMPT or
-                DispatchingRule.SPT_SRWT =>
-                    ArgMin(queue, jobId => GetCurrentOpTime(jobId, machineId)),
-
-                DispatchingRule.LPT_MMUR or
-                DispatchingRule.LPT_SMPT =>
-                    ArgMax(queue, jobId => GetCurrentOpTime(jobId, machineId)),
-
-                DispatchingRule.SRT_SRWT or
-                DispatchingRule.SRT_SMPT =>
-                    ArgMin(queue, jobId => GetRemainingWork(jobId)),
-
-                DispatchingRule.LRT_MMUR =>
-                    ArgMax(queue, jobId => GetRemainingWork(jobId)),
-
-                DispatchingRule.SDT_SRWT =>
-                    ArgMin(queue, jobId => GetTimeInSystem(jobId)),
-
-                _ => queue[0]
-            };
-        }
-
-        private float GetCurrentOpTime(int jobId, int machineId)
-        {
-            JobTracker t = JobManager.GetJobTracker(jobId);
-            if (t == null) return float.MaxValue;
-            if (t.CurrentOperationIndex < 0 || t.CurrentOperationIndex >= t.TotalOperations)
-                return float.MaxValue;
-            if (t.CurrentOperationIndex >= t.EligibleMachinesPerOp.Length)
-                return float.MaxValue;
-
-            var eligible = t.EligibleMachinesPerOp[t.CurrentOperationIndex];
-            return eligible.TryGetValue(machineId, out float time) ? time : float.MaxValue;
-        }
 
         private float GetRemainingWork(int jobId)
         {
-            JobTracker t = JobManager.GetJobTracker(jobId);
-            if (t == null) return 0f;
-
+            JobData j = Jobs.Get(jobId);
+            if (j == null) return 0f;
             float total = 0f;
-            for (int o = t.CurrentOperationIndex; o < t.TotalOperations; o++)
+            for (int o = j.CurrentOpIndex; o < j.TotalOperations; o++)
             {
-                float minTime = float.MaxValue;
-                foreach (float procTime in t.EligibleMachinesPerOp[o].Values)
-                    if (procTime < minTime) minTime = procTime;
-                if (minTime < float.MaxValue) total += minTime;
+                float min = float.MaxValue;
+                foreach (float t in j.EligibleMachinesPerOp[o].Values)
+                    if (t < min) min = t;
+                if (min < float.MaxValue) total += min;
             }
             return total;
         }
 
-        private float GetTimeInSystem(int jobId)
+        private float CalculateReward()
         {
-            JobTracker t = JobManager.GetJobTracker(jobId);
-            if (t == null) return 0f;
-            return (float)SimTime - t.ArrivalTime;
-        }
+            float current = (float)SimTime;
+            float delta = current - (float)previousMakespan;
+            previousMakespan = current;
 
-        private int ArgMin(List<int> jobIds, Func<int, float> scorer)
-        {
-            int best = jobIds[0];
-            float bestScore = float.MaxValue;
-            foreach (int id in jobIds)
-            {
-                float score = scorer(id);
-                if (score < bestScore) { bestScore = score; best = id; }
-            }
-            return best;
+            int totalOps = 0;
+            foreach (var j in Jobs.AllJobs) totalOps += j.TotalOperations;
+            return -delta / (Mathf.Max(totalOps, 1) * Time.timeScale);
         }
-
-        private int ArgMax(List<int> jobIds, Func<int, float> scorer)
-        {
-            int best = jobIds[0];
-            float bestScore = float.MinValue;
-            foreach (int id in jobIds)
-            {
-                float score = scorer(id);
-                if (score > bestScore) { bestScore = score; best = id; }
-            }
-            return best;
-        }
-
-        // ─────────────────────────────────────────────────────────
-        //  Episode finalization
-        // ─────────────────────────────────────────────────────────
 
         private void FinaliseEpisode()
         {
             episodeActive = false;
-            int totalOps = 0;
-            foreach (var t in JobManager.JobTrackers) totalOps += t.TotalOperations;
-
-            ResultsLogger.LogEpisode(
-                ruleName: LastAppliedRule,
-                seed: currentConfig.Seed,
-                makespan: SimTime,
-                jobCount: JobManager.JobCount,
-                machineCount: layoutManager.MachineCount,
-                totalOps: totalOps,
-                decisionCount: decisionCount,
-                totalReward: totalReward,
-                timeScaleSum / frameCount
-            );
-
-            EpisodeResult result = new EpisodeResult
+            SimLogger.High($"[Orchestrator] All jobs exited. Makespan={SimTime:F1}, decisions={decisionCount}");
+            // Fire events, log results, etc.
+            OnEpisodeFinished?.Invoke(new EpisodeResult
             {
-                InstanceName = "unknown",
-                RuleName = "agent",
                 Makespan = SimTime,
-                OptimalMakespan = 0,
                 DecisionPoints = decisionCount,
-                TotalReward = totalReward,
-                PerMachineDecisions = perMachineDecisions
-            };
-
-            SimLogger.High($"[SimBridge] Episode complete: makespan={result.Makespan:F1}, decisions={result.DecisionPoints}");
-
-            float expectedMinMakespan = 0f;
-            foreach (var t in JobManager.JobTrackers)
-            {
-                float minJobTime = 0f;
-                foreach (var op in t.EligibleMachinesPerOp)
-                    minJobTime += op.Values.Min();
-                expectedMinMakespan = Mathf.Max(expectedMinMakespan, minJobTime);
-            }
-
-            SimLogger.High($"[Validate] Makespan={SimTime:F1} | " +
-                           $"TheoreticalMin={expectedMinMakespan:F1} | " +
-                           $"Ratio={SimTime / expectedMinMakespan:F2}x | " +
-                           $"TimeScale={Time.timeScale}");
-            OnEpisodeFinished?.Invoke(result);
-
-            var stats = Academy.Instance.StatsRecorder;
+                TotalReward = totalReward
+            });
         }
 
-        public void StopEpisode()
+        // ── Generic helpers ──────────────────────────────────────
+
+        private int ArgMin(List<int> ids, Func<int, float> score)
         {
-            if (!episodeActive) return;
-
-            episodeActive = false;
-            IsWaitingForAction = false;
-            pendingDecisions.Clear();
-            pendingRoutingJobs.Clear();
-            routingJobSources.Clear();
-            exitedJobCount = 0;
-
-            if (layoutManager != null) layoutManager.ClearFloor();
-            if (JobManager != null) JobManager.Cleanup();
-
-            if (agent != null) agent.EndEpisode();
-
-            SimLogger.Low("[SimBridge] Episode stopped by user.");
+            int best = ids[0]; float bestS = float.MaxValue;
+            foreach (int id in ids) { float s = score(id); if (s < bestS) { bestS = s; best = id; } }
+            return best;
+        }
+        private int ArgMax(List<int> ids, Func<int, float> score)
+        {
+            int best = ids[0]; float bestS = float.MinValue;
+            foreach (int id in ids) { float s = score(id); if (s > bestS) { bestS = s; best = id; } }
+            return best;
+        }
+        private int ArgMinIdx(float[] v)
+        {
+            int b = 0; for (int i = 1; i < v.Length; i++) if (v[i] < v[b]) b = i; return b;
+        }
+        private int ArgMaxIdx(float[] v)
+        {
+            int b = 0; for (int i = 1; i < v.Length; i++) if (v[i] > v[b]) b = i; return b;
         }
 
-        public int GetRuleIndex(DispatchingRule rule) => Array.IndexOf(ActionToRule, rule);
+        private FJSSPConfig BuildTestConfig()
+        {
+            var layout = new MachineType[5];
+            MachineType[] types = (MachineType[])Enum.GetValues(typeof(MachineType));
+            for (int i = 0; i < 5; i++) layout[i] = types[i];
+
+            return new FJSSPConfig
+            {
+                Seed = 42,
+                JobCount = 3,
+                MachinesPerType = 1,
+                MachineTypeLayout = layout,
+                MinProcTime = 15f,
+                MaxProcTime = 30f,
+                MinOpsPerJob = 2,
+                MaxOpsPerJob = 5,
+                MaxArrivalTime = 0f
+            };
+        }
+
+        private FJSSPConfig BuildDefaultConfig()
+        {
+            var layout = new MachineType[15];
+            MachineType[] types = (MachineType[])Enum.GetValues(typeof(MachineType));
+            for (int i = 0; i < 15; i++) layout[i] = types[i / 3];
+
+            return new FJSSPConfig
+            {
+                Seed = 42,
+                JobCount = 20,
+                MachinesPerType = 3,
+                MachineTypeLayout = layout,
+                MinProcTime = 15f,
+                MaxProcTime = 90f,
+                MinOpsPerJob = 5,
+                MaxOpsPerJob = 8,
+                MaxArrivalTime = 0f
+            };
+        }
     }
 }

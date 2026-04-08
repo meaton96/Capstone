@@ -7,16 +7,13 @@ using Assets.Scripts.Simulation.Types;
 
 namespace Assets.Scripts.Simulation
 {
-    /// @brief ML-Agents @c Agent subclass that drives job-shop scheduling decisions.
-    ///
-    /// @details Listens for @c DecisionRequest events from the @c SimulationBridge,
-    /// collects a fixed-width observation vector describing the current machine queue,
-    /// and maps a discrete action index to a dispatching rule applied via
-    /// @c SimulationBridge.Step().
-    ///
-    /// The agent is gated by @c IsArmed — ML-Agents' Academy will call
-    /// @c OnEpisodeBegin() immediately on FixedUpdate, but we only proceed
-    /// if something (UI button, batch runner, or autoStartOnPlay) has armed us.
+    /// <summary>
+    /// ML-Agents Agent subclass that drives job-shop scheduling decisions.
+    /// 
+    /// Listens for DecisionRequest events from the SimulationBridge,
+    /// collects a fixed-width observation vector, and maps a discrete action 
+    /// index to a dispatching rule applied via SimulationBridge.Step().
+    /// </summary>
     public class SchedulingAgent : Agent
     {
         [Header("References")]
@@ -36,25 +33,14 @@ namespace Assets.Scripts.Simulation
         //  Episode Gating
         // ─────────────────────────────────────────────────────────
 
-        /// @brief When false, OnEpisodeBegin() is a no-op.
-        ///        Set to true by the UI "Start" button, batch runner,
-        ///        or SimulationBridge.autoStartOnPlay before the first
-        ///        Academy step fires.
         public bool IsArmed { get; set; }
 
-        /// @brief Arms the agent and immediately requests an episode reset.
-        ///        Call this from UI buttons or the batch runner.
         public void ArmAndStart()
         {
             IsArmed = true;
-
-            // If Academy already ran its first step and the agent is idle,
-            // we need to manually trigger a new episode.
-            // EndEpisode() → Academy calls OnEpisodeBegin() next step.
             EndEpisode();
         }
 
-        /// @brief Public setter so the batch runner can swap rules without reflection.
         public void SetHeuristicRule(DispatchingRule rule)
         {
             heuristicRule = rule;
@@ -64,7 +50,7 @@ namespace Assets.Scripts.Simulation
         {
             actionsOut.DiscreteActions.Array[0] = SimulationBridge.Instance.GetRuleIndex(heuristicRule);
 
-            if (logDecisions)
+            if (logDecisions && bridge.CurrentDecision != null)
             {
                 string ruleName = heuristicRule.ToString();
                 string decType = bridge.CurrentDecision.Type.ToString();
@@ -79,14 +65,20 @@ namespace Assets.Scripts.Simulation
         {
             base.OnEnable();
             if (bridge != null)
+            {
                 bridge.OnDecisionRequired.AddListener(HandleDecisionRequired);
+                bridge.OnEpisodeFinished.AddListener(HandleEpisodeFinished); // NEW: Listen for natural completion
+            }
         }
 
         protected override void OnDisable()
         {
             base.OnDisable();
             if (bridge != null)
+            {
                 bridge.OnDecisionRequired.RemoveListener(HandleDecisionRequired);
+                bridge.OnEpisodeFinished.RemoveListener(HandleEpisodeFinished);
+            }
         }
 
         // ─────────────────────────────────────────────────────────
@@ -95,12 +87,6 @@ namespace Assets.Scripts.Simulation
 
         public override void Initialize() { }
 
-        /// @brief Called by Academy every time it wants a new episode.
-        ///
-        /// @details ML-Agents fires this on the very first FixedUpdate AND
-        ///          after every EndEpisode() call. We gate it with IsArmed
-        ///          so the factory only spawns when something has explicitly
-        ///          asked for it (UI click, batch runner, or autoStartOnPlay).
         public override void OnEpisodeBegin()
         {
             if (!IsArmed)
@@ -127,6 +113,13 @@ namespace Assets.Scripts.Simulation
             RequestDecision();
         }
 
+        private void HandleEpisodeFinished(EpisodeResult result)
+        {
+            // The simulation has naturally reached the end (all jobs exited).
+            // Tell ML-Agents to finalize the episode and loop back to OnEpisodeBegin.
+            EndEpisode();
+        }
+
         // ─────────────────────────────────────────────────────────
         //  Observations
         // ─────────────────────────────────────────────────────────
@@ -134,7 +127,7 @@ namespace Assets.Scripts.Simulation
         public override void CollectObservations(VectorSensor sensor)
         {
             DecisionRequest req = bridge.CurrentDecision;
-            if (!bridge.IsEpisodeActive) { PadZeros(sensor); return; }
+            if (!bridge.IsEpisodeActive || req == null) { PadZeros(sensor); return; }
 
             sensor.AddObservation((float)req.Type);
             sensor.AddObservation((float)req.SimTime);
@@ -152,7 +145,7 @@ namespace Assets.Scripts.Simulation
                     sensor.AddObservation(valid ? req.QueuedJobIds[i] : 0);
                     sensor.AddObservation(valid ? (float)req.QueuedDurations[i] : 0f);
                 }
-                // pad routing slots
+
                 sensor.AddObservation(0);
                 sensor.AddObservation(0);
                 for (int i = 0; i < maxCandidateSlots; i++)
@@ -166,7 +159,7 @@ namespace Assets.Scripts.Simulation
             {
                 sensor.AddObservation(req.JobId);
                 sensor.AddObservation((float)req.RequiredType);
-                // pad dispatch slots
+
                 sensor.AddObservation(0);
                 sensor.AddObservation(0);
                 for (int i = 0; i < maxQueueSlots; i++)
@@ -201,10 +194,6 @@ namespace Assets.Scripts.Simulation
             StepResult result = bridge.Step(pdrIndex);
             AddReward(result.Reward);
 
-            if (result.Done)
-            {
-                EndEpisode();
-            }
         }
     }
 }

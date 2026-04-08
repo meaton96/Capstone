@@ -3,7 +3,7 @@ namespace Assets.Scripts.Simulation.Types
 {
     public enum DecisionType { Dispatch, Routing }
     /// @brief Snapshot of the state presented to the agent when a scheduling decision is needed.
-    public struct DecisionRequest
+    public class DecisionRequest
     {
         public DecisionType Type;
 
