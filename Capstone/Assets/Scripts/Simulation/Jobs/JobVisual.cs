@@ -24,13 +24,17 @@ namespace Assets.Scripts.Simulation.Jobs
         private float travelProgress = 1f;
         private Renderer meshRenderer;
         private MaterialPropertyBlock propBlock;
-        private JobLifecycleState currentState;
+        [SerializeField] private JobLifecycleState currentState;
 
         private bool isCarried = false;
         private bool isOnConveyor = false;
 
         public int JobId => jobId;
         public JobLifecycleState CurrentState => currentState;
+
+        public JobLocation jobLocation;
+
+
 
         /// @brief Initializes the visual token and caches rendering components.
         /// @param id Zero-based job index.

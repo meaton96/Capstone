@@ -18,14 +18,8 @@ namespace Assets.Scripts.Simulation.AGV
     }
 
     /// @brief Controls navigation, job assignment, and lifecycle of a single AGV.
-    ///
-    /// @details Implements a 4-state machine: Idle → MovingToPickup → MovingToDropoff
-    /// → ReturningToParking → Idle. All state transitions happen exclusively inside
-    /// FixedUpdate(). Worker methods (DoPickup, DoDropoff) never touch State directly.
-    ///
-    /// Zone reservation is handled as a blocking-flag on the current movement state,
-    /// not as a separate state, eliminating the re-entrancy bugs that arise from
-    /// WaitingForZone interrupting pickup/dropoff execution.
+    /// @details Positions are resolved at execution time from JobManager — never cached.
+    ///          DoPickup/DoDropoff use JobManager.TransitionJob for state changes.
     [RequireComponent(typeof(NavMeshAgent))]
     public class AGVController : MonoBehaviour
     {
@@ -64,7 +58,7 @@ namespace Assets.Scripts.Simulation.AGV
         private TrafficZoneManager trafficMgr;
         private System.Action onBecameIdle;
 
-        // Job context — set once per Dispatch(), cleared in FullReset()
+        // Job context — resolved fresh in Dispatch(), cleared in FullReset()
         private PhysicalMachine sourceMachine;
         private PhysicalMachine targetMachine;
         private Vector3 targetPickupPos;
@@ -93,7 +87,7 @@ namespace Assets.Scripts.Simulation.AGV
         private int pendingZoneId = -1;
         private float nextRetryTime;
 
-        // Handshake timers — counted down inside FixedUpdate once at dock
+        // Handshake timers
         private float pickupTimer;
         private float dropoffTimer;
         private bool atPickupDock;
@@ -103,11 +97,8 @@ namespace Assets.Scripts.Simulation.AGV
         //  Initialisation
         // ─────────────────────────────────────────────────────────
 
-        /// @brief Registers the idle callback used by AGVPool to drain the request queue.
         public void SetIdleCallback(System.Action callback) => onBecameIdle = callback;
 
-        /// @brief Initialises the AGV, anchors it to the NavMesh, and reserves its
-        ///        starting zone.
         public void Initialize(int id)
         {
             AgvId = id;
@@ -130,15 +121,12 @@ namespace Assets.Scripts.Simulation.AGV
         }
 
         // ─────────────────────────────────────────────────────────
-        //  Dispatch (called by AGVPool)
+        //  Dispatch — resolves everything from JobManager at call time
         // ─────────────────────────────────────────────────────────
 
-        /// @brief Assigns a pickup-and-deliver task to this AGV.
-        ///
-        /// @pre  AGV must be in Idle state.
-        /// @post State becomes MovingToPickup if a route exists; otherwise stays Idle.
-        public void Dispatch(int jobId, Vector3 pickupPosition, Vector3 dropoffPosition,
-                             PhysicalMachine source, PhysicalMachine dropoff)
+        /// @brief Assigns a job to this AGV. Resolves pickup/dropoff positions
+        ///        fresh from JobManager — nothing is captured in advance.
+        public void Dispatch(int jobId)
         {
             if (State != AGVState.Idle)
             {
@@ -146,12 +134,14 @@ namespace Assets.Scripts.Simulation.AGV
                 return;
             }
 
-            CurrentJobId = jobId;
-            sourceMachine = source;
-            targetMachine = dropoff;
-            targetPickupPos = pickupPosition;
-            targetDropoffPos = dropoffPosition;
+            JobTracker tracker = SimulationBridge.Instance.JobManager.GetJobTracker(jobId);
+            if (tracker == null)
+            {
+                SimLogger.Error($"[AGV {AgvId}] Dispatch: no tracker for job {jobId}.");
+                return;
+            }
 
+            CurrentJobId = jobId;
             loadedJobVisual = null;
             atPickupDock = false;
             atDropoffDock = false;
@@ -160,7 +150,36 @@ namespace Assets.Scripts.Simulation.AGV
             waitingForZone = false;
             pendingZoneId = -1;
 
-            // Ensure we have a valid zone
+            // ── Resolve source machine and pickup position ──────────
+            int sourceMachineId = tracker.LocationMachineId;
+            if (sourceMachineId >= 0)
+            {
+                sourceMachine = FactoryLayoutManager.Instance.GetMachine(sourceMachineId);
+                targetPickupPos = sourceMachine.GetPickupPositionForJob(jobId);
+            }
+            else
+            {
+                sourceMachine = null;
+                targetPickupPos = tracker.WorldPosition;
+            }
+
+            // ── Resolve target machine and dropoff position ─────────
+            int targetMachineId = tracker.NextMachineId;
+            if (targetMachineId >= 0)
+            {
+                targetMachine = FactoryLayoutManager.Instance.GetMachine(targetMachineId);
+                targetDropoffPos = targetMachine.GetDropoffPosition(jobId);
+            }
+            else
+            {
+                targetMachine = null;
+                targetDropoffPos = FactoryLayoutManager.Instance.OutgoingBeltPosition;
+            }
+
+            SimLogger.High($"[AGV {AgvId}] Dispatch job={jobId} pickup=M{sourceMachineId}({targetPickupPos}) " +
+                           $"dropoff=M{targetMachineId}({targetDropoffPos})");
+
+            // Ensure valid starting zone
             if (currentZoneId < 0)
             {
                 currentZoneId = FindZoneAtSelf();
@@ -169,8 +188,8 @@ namespace Assets.Scripts.Simulation.AGV
             }
 
             // Resolve pickup dock
-            if (source != null)
-                (pickupZoneId, pickupDock) = FindDockForMachine(source.MachineId, currentZoneId, targetPickupPos);
+            if (sourceMachine != null)
+                (pickupZoneId, pickupDock) = FindDockForMachine(sourceMachine.MachineId, currentZoneId, targetPickupPos);
             else
                 (pickupZoneId, pickupDock) = FindSpecialDock(TrafficZoneManager.IncomingBeltId);
 
@@ -211,7 +230,7 @@ namespace Assets.Scripts.Simulation.AGV
                         if (!atPickupDock)
                         {
                             atPickupDock = true;
-                            AlignToDock(pickupDock); // begin alignment on arrival frame
+                            AlignToDock(pickupDock);
                         }
 
                         if (IsFacingDock(pickupDock))
@@ -279,7 +298,7 @@ namespace Assets.Scripts.Simulation.AGV
 
                     if (!waitingForZone && ReachedParking())
                     {
-                        ArriveAtParking();  // sets State = Idle, fires idle callback
+                        ArriveAtParking();
                     }
                     break;
             }
@@ -292,7 +311,7 @@ namespace Assets.Scripts.Simulation.AGV
         //  Worker methods — never write State
         // ─────────────────────────────────────────────────────────
 
-        /// @brief Picks up the job from its source. Returns true on success.
+        /// @brief Picks up the job. Uses JobManager.BeginTransit for state change.
         private bool DoPickup()
         {
             if (CurrentJobId < 0)
@@ -304,8 +323,9 @@ namespace Assets.Scripts.Simulation.AGV
             JobTracker tracker = SimulationBridge.Instance.JobManager.GetJobTracker(CurrentJobId);
             loadedJobVisual = tracker?.Visual;
 
+            // Remove visual from source belt
             if (sourceMachine != null)
-                sourceMachine.ReleaseFromOutgoing(CurrentJobId);
+                sourceMachine.ReleaseVisualFromOutgoing(CurrentJobId);
             else
                 FactoryLayoutManager.Instance.IncomingBelt?.RemoveJob(CurrentJobId);
 
@@ -333,6 +353,7 @@ namespace Assets.Scripts.Simulation.AGV
                 return false;
             }
 
+            // State transition through JobManager (single source of truth)
             int nextMachineId = targetMachine != null ? targetMachine.MachineId : -1;
             SimulationBridge.Instance.JobManager.BeginTransit(CurrentJobId, nextMachineId, Time.time);
             SimLogger.High($"[AGV {AgvId}] Executed pickup of job {CurrentJobId}");
@@ -342,7 +363,8 @@ namespace Assets.Scripts.Simulation.AGV
             return true;
         }
 
-        /// @brief Drops off the job at its destination. Returns true on success.
+        /// @brief Drops off the job. Uses JobManager.CompleteTransit for state change.
+        ///        Visual placement on belt is handled by PhysicalMachine.ReceiveJobVisual.
         private bool DoDropoff()
         {
             if (CurrentJobId < 0)
@@ -354,17 +376,23 @@ namespace Assets.Scripts.Simulation.AGV
             if (loadedJobVisual != null)
                 loadedJobVisual.DetachFromCarrier(dropoffDock.HandshakePosition);
 
+            // State transition through JobManager (single source of truth)
+            int machineId = targetMachine != null ? targetMachine.MachineId : -1;
+            SimulationBridge.Instance.JobManager.CompleteTransit(CurrentJobId, machineId, Time.time);
+
+            // Visual placement on belt (CANNOT lose the job — state is already updated)
             if (targetMachine != null)
-                targetMachine.ReceiveJob(CurrentJobId, loadedJobVisual);
+                targetMachine.ReceiveJobVisual(CurrentJobId, loadedJobVisual);
             else
                 FactoryLayoutManager.Instance.OutgoingBelt?.TryEnqueue(CurrentJobId, loadedJobVisual);
 
-            int machineId = targetMachine != null ? targetMachine.MachineId : -1;
-            SimulationBridge.Instance.JobManager.CompleteTransit(CurrentJobId, machineId, Time.time);
             SimLogger.High($"[AGV {AgvId}] Executed dropoff of job {CurrentJobId}");
 
-            // Clear job state immediately so nothing can reuse it
-            int completedJob = CurrentJobId;
+            // Notify bridge that delivery is done
+            if (targetMachine != null)
+                SimulationBridge.Instance?.OnJobArrivedInQueue(targetMachine.MachineId, CurrentJobId);
+
+            // Clear job state
             CurrentJobId = -1;
             loadedJobVisual = null;
             sourceMachine = null;
@@ -387,7 +415,6 @@ namespace Assets.Scripts.Simulation.AGV
 
             if (parkZone != null)
             {
-                // Build a synthetic dock at the parking position
                 parkingDock = new DockPoint
                 {
                     HandshakePosition = parkPos,
@@ -413,8 +440,6 @@ namespace Assets.Scripts.Simulation.AGV
             return FlatDistance(transform.position, parkPos) <= waypointArrivalDist;
         }
 
-        /// @brief Called when the AGV physically reaches its parking spot.
-        ///        Releases all zones, sets Idle, and fires the pool callback.
         private void ArriveAtParking()
         {
             if (previousZoneId >= 0)
@@ -422,7 +447,6 @@ namespace Assets.Scripts.Simulation.AGV
                 trafficMgr.Release(previousZoneId, AgvId);
                 previousZoneId = -1;
             }
-            // Keep currentZoneId reserved so we have a valid starting zone for next Dispatch
 
             currentRoute.Clear();
             routeIndex = 0;
@@ -453,7 +477,7 @@ namespace Assets.Scripts.Simulation.AGV
 
             if (dist <= threshold)
             {
-                if (pastRoute) return; // at final dock, let FixedUpdate handle it
+                if (pastRoute) return;
 
                 OnEnteredZone(currentRoute[routeIndex]);
                 routeIndex++;
@@ -491,7 +515,6 @@ namespace Assets.Scripts.Simulation.AGV
             }
             else
             {
-                // Choose final dock based on current state
                 DockPoint finalDock = State switch
                 {
                     AGVState.MovingToPickup => pickupDock,
@@ -628,8 +651,6 @@ namespace Assets.Scripts.Simulation.AGV
         //  Full reset (error path only)
         // ─────────────────────────────────────────────────────────
 
-        /// @brief Emergency reset used only when route planning fails.
-        ///        The AGV returns to parking so it doesn't block the floor.
         private void FullReset()
         {
             SimLogger.Error($"[AGV {AgvId}] FullReset triggered — clearing job {CurrentJobId}.");
@@ -653,7 +674,6 @@ namespace Assets.Scripts.Simulation.AGV
                 previousZoneId = -1;
             }
 
-            // Try to get home; if that fails too, just go idle in place
             Vector3 parkPos = AGVPool.Instance.GetParkingPosition(AgvId);
             TrafficZone parkZone = trafficMgr.GetZoneAtPosition(parkPos);
             parkingZoneId = parkZone?.ZoneId ?? -1;

@@ -7,9 +7,9 @@ using Assets.Scripts.Logging;
 namespace Assets.Scripts.Simulation.Machines
 {
     /// @brief Physical anchor for a machine in the Unity scene.
-    /// @details Manages real-time processing via coroutines and delegates visual updates 
-    /// to MachineVisual. Supports multi-conveyor setups for double-sided machines, 
-    /// handling load balancing between belts and proximity-based job reception.
+    /// @details Manages real-time processing via coroutines and delegates visual updates
+    /// to MachineVisual. Conveyor belts are VISUAL ONLY — job ownership is tracked
+    /// exclusively by JobManager. Queue queries go through JobManager, not belt contents.
     [RequireComponent(typeof(Collider))]
     [RequireComponent(typeof(Rigidbody))]
     [RequireComponent(typeof(MachineVisual))]
@@ -18,8 +18,6 @@ namespace Assets.Scripts.Simulation.Machines
         public int MachineId { get; private set; }
         public MachineType MachineType { get; private set; }
         public bool IsIdle { get; private set; } = true;
-
-        /// @brief True when processing is done but all outgoing belts are full.
         public bool IsBlocked { get; private set; } = false;
 
         [Header("Primary Conveyor Belts")]
@@ -34,37 +32,30 @@ namespace Assets.Scripts.Simulation.Machines
         private bool preferSecondaryOutput;
         private MachineVisual visualLayer;
 
-        public List<int> IncomingQueue
-        {
-            get
-            {
-                var ids = new List<int>();
-                if (incomingConveyor != null) ids.AddRange(incomingConveyor.GetJobIds());
-                if (secondaryIncomingConveyor != null) ids.AddRange(secondaryIncomingConveyor.GetJobIds());
-                return ids;
-            }
-        }
+        // ─────────────────────────────────────────────────────────
+        //  Queue queries — delegate to JobManager (single source of truth)
+        // ─────────────────────────────────────────────────────────
 
-        public List<int> OutgoingQueue
-        {
-            get
-            {
-                var ids = new List<int>();
-                if (outgoingConveyor != null) ids.AddRange(outgoingConveyor.GetJobIds());
-                if (secondaryOutgoingConveyor != null) ids.AddRange(secondaryOutgoingConveyor.GetJobIds());
-                return ids;
-            }
-        }
+        /// @brief Jobs logically queued at this machine's incoming area.
+        ///        Reads from JobManager, NOT from conveyor belt contents.
+        public List<int> IncomingQueue =>
+            SimulationBridge.Instance?.JobManager?.GetJobsInMachineQueue(MachineId) ?? new List<int>();
 
+        /// @brief Jobs logically on this machine's outgoing area.
+        public List<int> OutgoingQueue =>
+            SimulationBridge.Instance?.JobManager?.GetJobsOnMachineOutgoing(MachineId) ?? new List<int>();
+
+        /// @brief Alias for IncomingQueue — what the scheduler sees.
         public List<int> PhysicalQueue => IncomingQueue;
 
-        private int TotalIncomingCount => (incomingConveyor?.Count ?? 0) + (secondaryIncomingConveyor?.Count ?? 0);
-        private int TotalOutgoingCount => (outgoingConveyor?.Count ?? 0) + (secondaryOutgoingConveyor?.Count ?? 0);
+        /// @brief Visual-only counts for the HUD labels.
+        private int VisualIncomingCount => (incomingConveyor?.Count ?? 0) + (secondaryIncomingConveyor?.Count ?? 0);
+        private int VisualOutgoingCount => (outgoingConveyor?.Count ?? 0) + (secondaryOutgoingConveyor?.Count ?? 0);
 
-        /// @brief Initializes the physical machine state and links visual components.
-        /// @param id The unique machine index.
-        /// @param coreMachineData The logical machine data from the simulation core.
-        /// @post Machine is set to Idle, and all attached conveyors are cleared.
+        // ─────────────────────────────────────────────────────────
+        //  Initialization
+        // ─────────────────────────────────────────────────────────
+
         public void Initialize(int id, MachineType type)
         {
             MachineId = id;
@@ -81,7 +72,6 @@ namespace Assets.Scripts.Simulation.Machines
             ResetQueues();
         }
 
-        /// @brief Clears all jobs from primary and secondary conveyors.
         public void ResetQueues()
         {
             incomingConveyor?.Clear();
@@ -90,84 +80,90 @@ namespace Assets.Scripts.Simulation.Machines
             secondaryOutgoingConveyor?.Clear();
         }
 
-        /// @brief Determines the world position where an AGV should deliver a job.
-        /// @details Alternates between available incoming belts to balance the load across 
-        /// both sides of double-sided machines.
-        /// @param jobId The ID of the job to be delivered.
-        /// @return Vector3 world position of the chosen conveyor's input end.
-        public Vector3 ReserveIncomingSlot(int jobId)
+        // ─────────────────────────────────────────────────────────
+        //  AGV docking positions
+        // ─────────────────────────────────────────────────────────
+
+        /// @brief World position where an AGV should deliver a job.
+        ///        Resolved fresh each time — never cached/stale.
+        public Vector3 GetDropoffPosition(int jobId)
         {
             ConveyorBelt belt = PickNextIncomingBelt();
             if (belt != null)
                 return belt.InputEndPosition;
-
             return transform.position + transform.TransformDirection(new Vector3(-2.5f, 0.5f, 0f));
         }
 
-        /// @brief Locates the specific world position where an AGV should pick up a job.
-        /// @details Searches both outgoing conveyors to find which one currently holds the job.
-        /// @param jobId The job requested for pickup.
-        /// @return Vector3 world position of the conveyor's output end.
+        /// @brief World position where an AGV should pick up a job.
         public Vector3 GetPickupPositionForJob(int jobId)
         {
             if (outgoingConveyor != null && outgoingConveyor.Contains(jobId))
                 return outgoingConveyor.OutputEndPosition;
-
             if (secondaryOutgoingConveyor != null && secondaryOutgoingConveyor.Contains(jobId))
                 return secondaryOutgoingConveyor.OutputEndPosition;
 
+            // Fallback: job might not be on visual belt yet
             if (outgoingConveyor != null) return outgoingConveyor.OutputEndPosition;
             if (secondaryOutgoingConveyor != null) return secondaryOutgoingConveyor.OutputEndPosition;
-
             return transform.position + transform.TransformDirection(new Vector3(2.5f, 0.5f, 0f));
         }
 
-        /// @brief Handshakes with an AGV to receive a job onto an incoming conveyor.
-        /// @details Selects the belt physically closest to the job visual's position (the side 
-        /// where the AGV is docking). Falls back to the opposite belt if the preferred one is full.
-        /// @param jobId The job being delivered.
-        /// @param visual The visual representation of the job.
-        /// @post Job is enqueued on a belt and the visual state is updated to Queued.
-        public void ReceiveJob(int jobId, JobVisual visual)
+        // ─────────────────────────────────────────────────────────
+        //  Job reception (AGV delivers a job here)
+        // ─────────────────────────────────────────────────────────
+
+        /// @brief Places a job's visual on an incoming belt.
+        /// @details The job is ALREADY logically at this machine (TransitionJob was
+        ///          called by AGVController.DoDropoff). This method only handles the
+        ///          visual placement on the conveyor belt. It CANNOT fail in a way
+        ///          that loses the job — worst case the visual snaps to machine center.
+        public void ReceiveJobVisual(int jobId, JobVisual visual)
         {
             ConveyorBelt belt = PickClosestIncoming(visual);
 
-            if (belt == null)
+            if (belt != null && !belt.TryEnqueue(jobId, visual))
             {
-                SimLogger.LogError($"[PhysicalMachine M{MachineId}] No incoming conveyor wired!");
-                return;
-            }
-
-            if (!belt.TryEnqueue(jobId, visual))
-            {
+                // Primary belt full, try secondary
                 ConveyorBelt fallback = GetOtherIncoming(belt);
                 if (fallback == null || !fallback.TryEnqueue(jobId, visual))
                 {
-                    SimLogger.LogWarning($"[PhysicalMachine M{MachineId}] All incoming conveyors full - cannot accept Job {jobId}.");
-                    return;
+                    // All belts full — snap visual to machine center as fallback
+                    if (visual != null)
+                    {
+                        visual.SetOnConveyor(false);
+                        visual.SnapToPosition(transform.position + Vector3.up * 0.5f);
+                    }
+                    SimLogger.LogWarning($"[PhysicalMachine M{MachineId}] Belt full for visual of Job {jobId} — snapped to center.");
+                }
+            }
+            else if (belt == null)
+            {
+                // No conveyor at all — snap to machine
+                if (visual != null)
+                {
+                    visual.SetOnConveyor(false);
+                    visual.SnapToPosition(transform.position + Vector3.up * 0.5f);
                 }
             }
 
             if (visual != null)
                 visual.SetState(JobLifecycleState.Queued);
 
-            visualLayer?.UpdateIncomingQueueLabel(TotalIncomingCount);
-            SimulationBridge.Instance?.OnJobArrivedInQueue(MachineId, jobId);
+            visualLayer?.UpdateIncomingQueueLabel(VisualIncomingCount);
         }
 
-        /// @brief Transitions a job from the queue into active processing.
-        /// @details Removes the job from its conveyor, moves the visual into the machine body, 
-        /// and initiates the timed process coroutine.
-        /// @param jobId The job selected for processing.
-        /// @param realTimeDuration Time in seconds the process will take.
-        /// @pre Machine must be Idle.
-        /// @post Machine state becomes Busy; IsIdle set to false.
+        // ─────────────────────────────────────────────────────────
+        //  Processing
+        // ─────────────────────────────────────────────────────────
+
+        /// @brief Starts processing a job. Removes it from the visual incoming belt.
         public void StartProcessing(int jobId, float realTimeDuration)
         {
             IsIdle = false;
             IsBlocked = false;
 
-            RemoveFromAnyIncoming(jobId);
+            // Remove from visual belt
+            RemoveVisualFromAnyIncoming(jobId);
 
             JobTracker tracker = SimulationBridge.Instance.JobManager.GetJobTracker(jobId);
             JobVisual visual = tracker?.Visual;
@@ -179,40 +175,26 @@ namespace Assets.Scripts.Simulation.Machines
             }
 
             visualLayer?.BeginOperation(jobId, Time.time, realTimeDuration);
-            visualLayer?.UpdateIncomingQueueLabel(TotalIncomingCount);
+            visualLayer?.UpdateIncomingQueueLabel(VisualIncomingCount);
             SimLogger.High($"[Machine] {MachineId} began processing job {jobId} for {realTimeDuration} seconds.");
             StartCoroutine(ProcessJobRoutine(jobId, realTimeDuration));
         }
 
-        /// @brief Finalizes the removal of a job from the machine's outgoing system.
-        /// @details Triggered by an AGV collection event. Clears the job from the physical belt.
-        /// @param jobId The job being removed.
-        /// @post Outgoing queue count is updated in the visual layer.
-        public void ReleaseFromOutgoing(int jobId)
+        /// @brief AGV has picked up a job from our outgoing belt — remove its visual.
+        public void ReleaseVisualFromOutgoing(int jobId)
         {
-
             if (outgoingConveyor != null && outgoingConveyor.Contains(jobId))
                 outgoingConveyor.RemoveJob(jobId);
             else if (secondaryOutgoingConveyor != null && secondaryOutgoingConveyor.Contains(jobId))
                 secondaryOutgoingConveyor.RemoveJob(jobId);
-            else
-            {
-                SimLogger.LogWarning($"{jobId} not found on outgoing belt");
-                SimLogger.LogWarning(outgoingConveyor.DumpBeltJobs());
-                if (secondaryOutgoingConveyor != null)
-                {
-                    SimLogger.LogWarning(secondaryOutgoingConveyor.DumpBeltJobs());
-                }
-            }
 
-            visualLayer?.UpdateOutgoingQueueLabel(TotalOutgoingCount);
+            visualLayer?.UpdateOutgoingQueueLabel(VisualOutgoingCount);
         }
 
-        /// @brief Internal routine managing the processing timer and output logic.
-        /// @details Handles the transition through processing, checks for output blockages, 
-        /// and notifies the simulation bridge upon completion.
-        /// @param jobId Job currently being processed.
-        /// @param duration Processing time.
+        // ─────────────────────────────────────────────────────────
+        //  Processing coroutine
+        // ─────────────────────────────────────────────────────────
+
         private IEnumerator ProcessJobRoutine(int jobId, float duration)
         {
             yield return null;
@@ -228,6 +210,7 @@ namespace Assets.Scripts.Simulation.Machines
             JobTracker tracker = SimulationBridge.Instance.JobManager.GetJobTracker(jobId);
             JobVisual visual = tracker?.Visual;
 
+            // Wait if all outgoing belts are visually full
             if (AllOutgoingFull())
             {
                 IsBlocked = true;
@@ -236,14 +219,14 @@ namespace Assets.Scripts.Simulation.Machines
                 IsBlocked = false;
             }
 
+            // Place on visual outgoing belt
             ConveyorBelt outBelt = PickNextOutgoingBelt();
             if (outBelt != null)
             {
                 if (visual != null)
                     visual.SetState(JobLifecycleState.WaitingForTransport);
-
                 outBelt.TryEnqueue(jobId, visual);
-                visualLayer?.UpdateOutgoingQueueLabel(TotalOutgoingCount);
+                visualLayer?.UpdateOutgoingQueueLabel(VisualOutgoingCount);
             }
 
             IsIdle = true;
@@ -251,25 +234,24 @@ namespace Assets.Scripts.Simulation.Machines
             SimulationBridge.Instance?.OnMachineFinished(MachineId, jobId);
         }
 
-        /// @brief Selects the incoming belt closest to the job's current world position.
+        // ─────────────────────────────────────────────────────────
+        //  Belt visual helpers (internal)
+        // ─────────────────────────────────────────────────────────
+
         private ConveyorBelt PickClosestIncoming(JobVisual visual)
         {
             bool hasA = incomingConveyor != null;
             bool hasB = secondaryIncomingConveyor != null;
-
             if (hasA && !hasB) return incomingConveyor;
             if (hasB && !hasA) return secondaryIncomingConveyor;
             if (!hasA && !hasB) return null;
-
             if (visual == null) return incomingConveyor;
 
             float distA = Vector3.Distance(visual.transform.position, incomingConveyor.InputEndPosition);
             float distB = Vector3.Distance(visual.transform.position, secondaryIncomingConveyor.InputEndPosition);
-
             return distA <= distB ? incomingConveyor : secondaryIncomingConveyor;
         }
 
-        /// @brief Returns the opposite incoming conveyor for a given belt.
         private ConveyorBelt GetOtherIncoming(ConveyorBelt belt)
         {
             if (belt == incomingConveyor) return secondaryIncomingConveyor;
@@ -277,32 +259,27 @@ namespace Assets.Scripts.Simulation.Machines
             return null;
         }
 
-        /// @brief Cycles through incoming belts to find one with available capacity.
         private ConveyorBelt PickNextIncomingBelt()
         {
             ConveyorBelt a = preferSecondaryInput ? secondaryIncomingConveyor : incomingConveyor;
             ConveyorBelt b = preferSecondaryInput ? incomingConveyor : secondaryIncomingConveyor;
             preferSecondaryInput = !preferSecondaryInput;
-
             if (a != null && !a.IsFull) return a;
             if (b != null && !b.IsFull) return b;
             return a ?? b;
         }
 
-        /// @brief Cycles through outgoing belts to find one with available capacity.
         private ConveyorBelt PickNextOutgoingBelt()
         {
             ConveyorBelt a = preferSecondaryOutput ? secondaryOutgoingConveyor : outgoingConveyor;
             ConveyorBelt b = preferSecondaryOutput ? outgoingConveyor : secondaryOutgoingConveyor;
             preferSecondaryOutput = !preferSecondaryOutput;
-
             if (a != null && !a.IsFull) return a;
             if (b != null && !b.IsFull) return b;
             return a ?? b;
         }
 
-        /// @brief Checks both conveyors for a job and removes it if found.
-        private void RemoveFromAnyIncoming(int jobId)
+        private void RemoveVisualFromAnyIncoming(int jobId)
         {
             if (incomingConveyor != null && incomingConveyor.Contains(jobId))
                 incomingConveyor.RemoveJob(jobId);
@@ -310,7 +287,6 @@ namespace Assets.Scripts.Simulation.Machines
                 secondaryIncomingConveyor.RemoveJob(jobId);
         }
 
-        /// @brief Verifies if all assigned outgoing belts are currently at capacity.
         private bool AllOutgoingFull()
         {
             if (outgoingConveyor != null && !outgoingConveyor.IsFull) return false;

@@ -2483,7 +2483,7 @@ MonoBehaviour:
   bridge: {fileID: 1562084950}
   maxCandidateSlots: 3
   maxQueueSlots: 10
-  heuristicRule: 0
+  heuristicRule: 1
   logDecisions: 1
 --- !u!4 &516692883
 Transform:
@@ -7706,7 +7706,7 @@ MonoBehaviour:
   OnEpisodeFinished:
     m_PersistentCalls:
       m_Calls: []
-  logLevel: 2
+  logLevel: 3
 --- !u!4 &1562084951
 Transform:
   m_ObjectHideFlags: 0

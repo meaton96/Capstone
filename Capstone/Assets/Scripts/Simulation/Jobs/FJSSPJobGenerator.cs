@@ -20,6 +20,7 @@ namespace Assets.Scripts.Simulation.Jobs
             {
                 int opCount = UnityEngine.Random.Range(config.MinOpsPerJob, config.MaxOpsPerJob + 1);
                 var opSequence = GenerateOpSequence(opCount);
+                opCount = opSequence.Length; // GenerateOpSequence may clamp up to typeCount
 
                 var eligible = new Dictionary<int, float>[opCount];
                 for (int o = 0; o < opCount; o++)

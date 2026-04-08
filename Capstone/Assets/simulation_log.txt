@@ -1,207 +1,2422 @@
---- Log Started: 4/7/2026 6:01:42 PM ---
-2026-04-07 18:01:42.745 [Agent] OnEpisodeBegin skipped — not armed.
-2026-04-07 18:01:45.334 [SimBridge] Config loaded: 20j_15m (20J, 15M, seed=42)
-2026-04-07 18:01:45.359 [FactoryLayout] Distance matrix (15×15):
-       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
-2026-04-07 18:01:45.359 M0      0.0    6.0   12.0   18.0    7.5    9.6   14.2   19.5   15.0   16.2   19.2   23.4   22.5   23.3   25.5 
-2026-04-07 18:01:45.359 M1      6.0    0.0    6.0   12.0    9.6    7.5    9.6   14.2   16.2   15.0   16.2   19.2   23.3   22.5   23.3 
-2026-04-07 18:01:45.360 M2     12.0    6.0    0.0    6.0   14.2    9.6    7.5    9.6   19.2   16.2   15.0   16.2   25.5   23.3   22.5 
-2026-04-07 18:01:45.360 M3     18.0   12.0    6.0    0.0   19.5   14.2    9.6    7.5   23.4   19.2   16.2   15.0   28.8   25.5   23.3 
-2026-04-07 18:01:45.360 M4      7.5    9.6   14.2   19.5    0.0    6.0   12.0   18.0    7.5    9.6   14.2   19.5   15.0   16.2   19.2 
-2026-04-07 18:01:45.360 M5      9.6    7.5    9.6   14.2    6.0    0.0    6.0   12.0    9.6    7.5    9.6   14.2   16.2   15.0   16.2 
-2026-04-07 18:01:45.360 M6     14.2    9.6    7.5    9.6   12.0    6.0    0.0    6.0   14.2    9.6    7.5    9.6   19.2   16.2   15.0 
-2026-04-07 18:01:45.360 M7     19.5   14.2    9.6    7.5   18.0   12.0    6.0    0.0   19.5   14.2    9.6    7.5   23.4   19.2   16.2 
-2026-04-07 18:01:45.361 M8     15.0   16.2   19.2   23.4    7.5    9.6   14.2   19.5    0.0    6.0   12.0   18.0    7.5    9.6   14.2 
-2026-04-07 18:01:45.361 M9     16.2   15.0   16.2   19.2    9.6    7.5    9.6   14.2    6.0    0.0    6.0   12.0    9.6    7.5    9.6 
-2026-04-07 18:01:45.361 M10    19.2   16.2   15.0   16.2   14.2    9.6    7.5    9.6   12.0    6.0    0.0    6.0   14.2    9.6    7.5 
-2026-04-07 18:01:45.361 M11    23.4   19.2   16.2   15.0   19.5   14.2    9.6    7.5   18.0   12.0    6.0    0.0   19.5   14.2    9.6 
-2026-04-07 18:01:45.361 M12    22.5   23.3   25.5   28.8   15.0   16.2   19.2   23.4    7.5    9.6   14.2   19.5    0.0    6.0   12.0 
-2026-04-07 18:01:45.361 M13    23.3   22.5   23.3   25.5   16.2   15.0   16.2   19.2    9.6    7.5    9.6   14.2    6.0    0.0    6.0 
-2026-04-07 18:01:45.362 M14    25.5   23.3   22.5   23.3   19.2   16.2   15.0   16.2   14.2    9.6    7.5    9.6   12.0    6.0    0.0 
-2026-04-07 18:01:45.373 [FactoryLayout] Built aisle-based floor: 15 machines.
-2026-04-07 18:01:45.377 [TrafficZones] Built zone graph: 32 zones.
-2026-04-07 18:01:45.379 [SimBridge] Factory spawned: 15 machines
-2026-04-07 18:01:46.668 [SimBridge] Simulation started (20j_15m)
-2026-04-07 18:01:46.676 [DispatchRealAGV] job=0 pickup=(-11.50, 1.51, 15.50) (source=null) dropoff=(2.75, 0.33, -2.06) target=10
-2026-04-07 18:01:46.676 [AGVPool] TryDispatch job=0 — assigned to AGV 0
-2026-04-07 18:01:46.695 [DispatchRealAGV] job=17 pickup=(-11.00, 1.51, 19.00) (source=null) dropoff=(-9.25, 0.33, 5.44) target=4
-2026-04-07 18:01:46.695 [AGVPool] TryDispatch job=17 — assigned to AGV 1
-2026-04-07 18:01:46.713 [DispatchRealAGV] job=16 pickup=(-11.00, 1.51, 18.50) (source=null) dropoff=(-3.25, 0.33, 5.44) target=5
-2026-04-07 18:01:46.714 [AGVPool] TryDispatch job=16 — assigned to AGV 2
-2026-04-07 18:01:46.734 [DispatchRealAGV] job=15 pickup=(-11.00, 1.51, 18.00) (source=null) dropoff=(8.75, 0.33, -2.06) target=11
-2026-04-07 18:01:46.734 [AGVPool] TryDispatch job=15 — no AGV free, queuing
-2026-04-07 18:01:46.734 [AGVPool] No AGV free for Job 15 — queuing request.
-2026-04-07 18:01:46.753 [DispatchRealAGV] job=14 pickup=(-11.00, 1.51, 17.50) (source=null) dropoff=(8.75, 0.33, 5.44) target=7
-2026-04-07 18:01:46.753 [AGVPool] TryDispatch job=14 — no AGV free, queuing
-2026-04-07 18:01:46.754 [AGVPool] No AGV free for Job 14 — queuing request.
-2026-04-07 18:01:46.774 [DispatchRealAGV] job=13 pickup=(-11.00, 1.51, 17.00) (source=null) dropoff=(-3.25, 0.33, -9.56) target=13
-2026-04-07 18:01:46.774 [AGVPool] TryDispatch job=13 — no AGV free, queuing
-2026-04-07 18:01:46.774 [AGVPool] No AGV free for Job 13 — queuing request.
-2026-04-07 18:01:46.793 [DispatchRealAGV] job=12 pickup=(-11.00, 1.51, 16.50) (source=null) dropoff=(9.25, 0.33, 9.56) target=3
-2026-04-07 18:01:46.794 [AGVPool] TryDispatch job=12 — no AGV free, queuing
-2026-04-07 18:01:46.794 [AGVPool] No AGV free for Job 12 — queuing request.
-2026-04-07 18:01:46.814 [DispatchRealAGV] job=11 pickup=(-11.00, 1.51, 16.00) (source=null) dropoff=(-9.25, 0.33, -9.56) target=12
-2026-04-07 18:01:46.814 [AGVPool] TryDispatch job=11 — no AGV free, queuing
-2026-04-07 18:01:46.814 [AGVPool] No AGV free for Job 11 — queuing request.
-2026-04-07 18:01:46.833 [DispatchRealAGV] job=10 pickup=(-11.00, 1.51, 15.50) (source=null) dropoff=(-9.25, 0.33, -2.06) target=8
-2026-04-07 18:01:46.834 [AGVPool] TryDispatch job=10 — no AGV free, queuing
-2026-04-07 18:01:46.834 [AGVPool] No AGV free for Job 10 — queuing request.
-2026-04-07 18:01:46.854 [DispatchRealAGV] job=9 pickup=(-11.50, 1.51, 20.00) (source=null) dropoff=(-8.75, 0.33, 9.56) target=0
-2026-04-07 18:01:46.854 [AGVPool] TryDispatch job=9 — no AGV free, queuing
-2026-04-07 18:01:46.854 [AGVPool] No AGV free for Job 9 — queuing request.
-2026-04-07 18:01:46.874 [DispatchRealAGV] job=8 pickup=(-11.50, 1.51, 19.50) (source=null) dropoff=(-3.25, 0.33, -9.56) target=13
-2026-04-07 18:01:46.875 [AGVPool] TryDispatch job=8 — no AGV free, queuing
-2026-04-07 18:01:46.875 [AGVPool] No AGV free for Job 8 — queuing request.
-2026-04-07 18:01:46.894 [DispatchRealAGV] job=7 pickup=(-11.50, 1.51, 19.00) (source=null) dropoff=(2.75, 0.33, -9.56) target=14
-2026-04-07 18:01:46.894 [AGVPool] TryDispatch job=7 — no AGV free, queuing
-2026-04-07 18:01:46.894 [AGVPool] No AGV free for Job 7 — queuing request.
-2026-04-07 18:01:46.914 [DispatchRealAGV] job=6 pickup=(-11.50, 1.51, 18.50) (source=null) dropoff=(3.25, 0.33, 9.56) target=2
-2026-04-07 18:01:46.914 [AGVPool] TryDispatch job=6 — no AGV free, queuing
-2026-04-07 18:01:46.914 [AGVPool] No AGV free for Job 6 — queuing request.
-2026-04-07 18:01:46.933 [DispatchRealAGV] job=5 pickup=(-11.50, 1.51, 18.00) (source=null) dropoff=(-2.75, 0.33, 9.56) target=1
-2026-04-07 18:01:46.933 [AGVPool] TryDispatch job=5 — no AGV free, queuing
-2026-04-07 18:01:46.934 [AGVPool] No AGV free for Job 5 — queuing request.
-2026-04-07 18:01:46.954 [DispatchRealAGV] job=4 pickup=(-11.50, 1.51, 17.50) (source=null) dropoff=(8.75, 0.33, -5.44) target=11
-2026-04-07 18:01:46.954 [AGVPool] TryDispatch job=4 — no AGV free, queuing
-2026-04-07 18:01:46.954 [AGVPool] No AGV free for Job 4 — queuing request.
-2026-04-07 18:01:46.974 [DispatchRealAGV] job=3 pickup=(-11.50, 1.51, 17.00) (source=null) dropoff=(3.25, 0.33, 9.56) target=2
-2026-04-07 18:01:46.974 [AGVPool] TryDispatch job=3 — no AGV free, queuing
-2026-04-07 18:01:46.974 [AGVPool] No AGV free for Job 3 — queuing request.
-2026-04-07 18:01:46.994 [DispatchRealAGV] job=2 pickup=(-11.50, 1.51, 16.50) (source=null) dropoff=(8.75, 0.33, 2.06) target=7
-2026-04-07 18:01:46.994 [AGVPool] TryDispatch job=2 — no AGV free, queuing
-2026-04-07 18:01:46.994 [AGVPool] No AGV free for Job 2 — queuing request.
-2026-04-07 18:01:47.014 [DispatchRealAGV] job=1 pickup=(-11.50, 1.51, 16.00) (source=null) dropoff=(-8.75, 0.33, 9.56) target=0
-2026-04-07 18:01:47.014 [AGVPool] TryDispatch job=1 — no AGV free, queuing
-2026-04-07 18:01:47.014 [AGVPool] No AGV free for Job 1 — queuing request.
-2026-04-07 18:01:47.034 [DispatchRealAGV] job=18 pickup=(-11.00, 1.51, 19.50) (source=null) dropoff=(9.25, 0.33, 9.56) target=3
-2026-04-07 18:01:47.034 [AGVPool] TryDispatch job=18 — no AGV free, queuing
-2026-04-07 18:01:47.035 [AGVPool] No AGV free for Job 18 — queuing request.
-2026-04-07 18:01:47.054 [DispatchRealAGV] job=19 pickup=(-11.00, 1.51, 20.00) (source=null) dropoff=(-3.25, 0.33, 2.06) target=5
-2026-04-07 18:01:47.054 [AGVPool] TryDispatch job=19 — no AGV free, queuing
-2026-04-07 18:01:47.054 [AGVPool] No AGV free for Job 19 — queuing request.
-2026-04-07 18:01:53.226 [Job Manager] begin transit of job 0 to machine 10
-2026-04-07 18:01:53.227 [AGV 0] Executed pickup of job 0
-2026-04-07 18:01:53.560 [Job Manager] begin transit of job 17 to machine 4
-2026-04-07 18:01:53.560 [AGV 1] Executed pickup of job 17
-2026-04-07 18:01:53.898 [Job Manager] begin transit of job 16 to machine 5
-2026-04-07 18:01:53.898 [AGV 2] Executed pickup of job 16
-2026-04-07 18:01:54.072 [AGV 0] Executed dropoff of job 0
-2026-04-07 18:01:54.072 [AGV 0] Returning to parking at (-9.00, 0.01, -14.00).
-2026-04-07 18:01:54.078 [Machine] 10 began processing job 0 for 38.99795 seconds.
-2026-04-07 18:01:54.919 [AGV 1] Executed dropoff of job 17
-2026-04-07 18:01:54.920 [AGV 1] Returning to parking at (-7.00, 0.01, -14.00).
-2026-04-07 18:01:54.923 [Machine] 4 began processing job 17 for 36.78717 seconds.
-2026-04-07 18:01:55.442 [AGV 2] Executed dropoff of job 16
-2026-04-07 18:01:55.442 [AGV 2] Returning to parking at (-5.00, 0.01, -14.00).
-2026-04-07 18:01:55.445 [Machine] 5 began processing job 16 for 18.20292 seconds.
-2026-04-07 18:01:55.459 [AGV 0] Parked — zones released.
-2026-04-07 18:01:55.459 [AGVPool] Draining queue — assigning Job 15 to AGV 0.
-2026-04-07 18:01:55.868 [AGV 1] Parked — zones released.
-2026-04-07 18:01:55.869 [AGVPool] Draining queue — assigning Job 14 to AGV 1.
-2026-04-07 18:01:55.998 [OnMachineFinished] job=0 machine=10
-2026-04-07 18:01:55.998 [OnMachineFinished] job=0 state=WaitingForTransport opIndex=1/7 completedOps=1
-2026-04-07 18:01:55.998 [OnMachineFinished] job=0 → EnqueueRouting nextType=Weld
-2026-04-07 18:01:56.000 [Job Manager] begin transit of job 15 to machine 11
-2026-04-07 18:01:56.001 [AGV 0] Executed pickup of job 15
-2026-04-07 18:01:56.003 [DispatchRealAGV] job=0 pickup=(3.25, 0.33, -2.06) (source=10) dropoff=(2.75, 0.33, 5.44) target=6
-2026-04-07 18:01:56.003 [AGVPool] TryDispatch job=0 — no AGV free, queuing
-2026-04-07 18:01:56.004 [AGVPool] No AGV free for Job 0 — queuing request.
-2026-04-07 18:01:56.280 [AGV 2] Parked — zones released.
-2026-04-07 18:01:56.280 [AGVPool] Draining queue — assigning Job 13 to AGV 2.
-2026-04-07 18:01:56.344 [OnMachineFinished] job=16 machine=5
-2026-04-07 18:01:56.344 [OnMachineFinished] job=16 state=WaitingForTransport opIndex=1/5 completedOps=1
-2026-04-07 18:01:56.344 [OnMachineFinished] job=16 → EnqueueRouting nextType=Inspect
-2026-04-07 18:01:56.348 [DispatchRealAGV] job=16 pickup=(-2.75, 0.33, 5.44) (source=5) dropoff=(8.75, 0.33, -2.06) target=11
-2026-04-07 18:01:56.348 [AGVPool] TryDispatch job=16 — no AGV free, queuing
-2026-04-07 18:01:56.348 [AGVPool] No AGV free for Job 16 — queuing request.
-2026-04-07 18:01:56.436 [Job Manager] begin transit of job 14 to machine 7
-2026-04-07 18:01:56.436 [AGV 1] Executed pickup of job 14
-2026-04-07 18:01:56.737 [OnMachineFinished] job=17 machine=4
-2026-04-07 18:01:56.737 [OnMachineFinished] job=17 state=WaitingForTransport opIndex=1/5 completedOps=1
-2026-04-07 18:01:56.737 [OnMachineFinished] job=17 → EnqueueRouting nextType=Inspect
-2026-04-07 18:01:56.746 [DispatchRealAGV] job=17 pickup=(-8.75, 0.33, 5.44) (source=4) dropoff=(2.75, 0.33, -5.44) target=10
-2026-04-07 18:01:56.746 [AGVPool] TryDispatch job=17 — no AGV free, queuing
-2026-04-07 18:01:56.746 [AGVPool] No AGV free for Job 17 — queuing request.
-2026-04-07 18:01:56.753 [AGV 0] Executed dropoff of job 15
-2026-04-07 18:01:56.753 [AGV 0] Returning to parking at (-9.00, 0.01, -14.00).
-2026-04-07 18:01:56.760 [Machine] 11 began processing job 15 for 16.9266 seconds.
-2026-04-07 18:01:56.877 [Job Manager] begin transit of job 13 to machine 13
-2026-04-07 18:01:56.877 [AGV 2] Executed pickup of job 13
-2026-04-07 18:01:57.597 [OnMachineFinished] job=15 machine=11
-2026-04-07 18:01:57.598 [OnMachineFinished] job=15 state=WaitingForTransport opIndex=1/5 completedOps=1
-2026-04-07 18:01:57.598 [OnMachineFinished] job=15 → EnqueueRouting nextType=Assemble
-2026-04-07 18:01:57.604 [DispatchRealAGV] job=15 pickup=(9.25, 0.33, -2.06) (source=11) dropoff=(-9.25, 0.33, -9.56) target=12
-2026-04-07 18:01:57.605 [AGVPool] TryDispatch job=15 — no AGV free, queuing
-2026-04-07 18:01:57.605 [AGVPool] No AGV free for Job 15 — queuing request.
-2026-04-07 18:01:57.996 [AGV 1] Executed dropoff of job 14
-2026-04-07 18:01:57.996 [AGV 1] Returning to parking at (-7.00, 0.01, -14.00).
-2026-04-07 18:01:58.002 [Machine] 7 began processing job 14 for 36.23322 seconds.
-2026-04-07 18:02:01.737 [AGV 0] Parked — zones released.
-2026-04-07 18:02:01.737 [AGVPool] Draining queue — assigning Job 12 to AGV 0.
-2026-04-07 18:02:01.821 [AGV 2] Executed dropoff of job 13
-2026-04-07 18:02:01.821 [AGV 2] Returning to parking at (-5.00, 0.01, -14.00).
-2026-04-07 18:02:01.827 [Machine] 13 began processing job 13 for 47.05413 seconds.
-2026-04-07 18:02:02.113 [AGV 1] Parked — zones released.
-2026-04-07 18:02:02.113 [AGVPool] Draining queue — assigning Job 11 to AGV 1.
-2026-04-07 18:02:02.275 [Job Manager] begin transit of job 12 to machine 3
-2026-04-07 18:02:02.275 [AGV 0] Executed pickup of job 12
-2026-04-07 18:02:02.445 [AGV 2] Parked — zones released.
-2026-04-07 18:02:02.445 [AGVPool] Draining queue — assigning Job 10 to AGV 2.
-2026-04-07 18:02:02.680 [Job Manager] begin transit of job 11 to machine 12
-2026-04-07 18:02:02.680 [AGV 1] Executed pickup of job 11
-2026-04-07 18:02:03.041 [Job Manager] begin transit of job 10 to machine 8
-2026-04-07 18:02:03.041 [AGV 2] Executed pickup of job 10
-2026-04-07 18:02:03.207 [OnMachineFinished] job=14 machine=7
-2026-04-07 18:02:03.207 [OnMachineFinished] job=14 state=WaitingForTransport opIndex=1/6 completedOps=1
-2026-04-07 18:02:03.207 [OnMachineFinished] job=14 → EnqueueRouting nextType=Mill
-2026-04-07 18:02:03.211 [DispatchRealAGV] job=14 pickup=(9.25, 0.33, 5.44) (source=7) dropoff=(3.25, 0.33, 9.56) target=2
-2026-04-07 18:02:03.212 [AGVPool] TryDispatch job=14 — no AGV free, queuing
-2026-04-07 18:02:03.212 [AGVPool] No AGV free for Job 14 — queuing request.
-2026-04-07 18:02:03.786 [AGV 0] Executed dropoff of job 12
-2026-04-07 18:02:03.786 [AGV 0] Returning to parking at (-9.00, 0.01, -14.00).
-2026-04-07 18:02:03.789 [Machine] 3 began processing job 12 for 48.78674 seconds.
-2026-04-07 18:02:04.057 [AGV 2] Executed dropoff of job 10
-2026-04-07 18:02:04.057 [AGV 2] Returning to parking at (-5.00, 0.01, -14.00).
-2026-04-07 18:02:04.060 [Machine] 8 began processing job 10 for 15.23738 seconds.
-2026-04-07 18:02:04.120 [AGV 1] Executed dropoff of job 11
-2026-04-07 18:02:04.120 [AGV 1] Returning to parking at (-7.00, 0.01, -14.00).
-2026-04-07 18:02:04.123 [Machine] 12 began processing job 11 for 33.36783 seconds.
-2026-04-07 18:02:04.141 [OnMachineFinished] job=13 machine=13
-2026-04-07 18:02:04.141 [OnMachineFinished] job=13 state=WaitingForTransport opIndex=1/7 completedOps=1
-2026-04-07 18:02:04.142 [OnMachineFinished] job=13 → EnqueueRouting nextType=Mill
-2026-04-07 18:02:04.146 [DispatchRealAGV] job=13 pickup=(-2.75, 0.33, -9.56) (source=13) dropoff=(-8.75, 0.33, 9.56) target=0
-2026-04-07 18:02:04.146 [AGVPool] TryDispatch job=13 — no AGV free, queuing
-2026-04-07 18:02:04.146 [AGVPool] No AGV free for Job 13 — queuing request.
-2026-04-07 18:02:04.508 [AGV 0] Parked — zones released.
-2026-04-07 18:02:04.508 [AGVPool] Draining queue — assigning Job 9 to AGV 0.
-2026-04-07 18:02:04.812 [OnMachineFinished] job=10 machine=8
-2026-04-07 18:02:04.812 [OnMachineFinished] job=10 state=WaitingForTransport opIndex=1/7 completedOps=1
-2026-04-07 18:02:04.812 [OnMachineFinished] job=10 → EnqueueRouting nextType=Inspect
-2026-04-07 18:02:04.816 [DispatchRealAGV] job=10 pickup=(-8.75, 0.33, -2.06) (source=8) dropoff=(-3.25, 0.33, -2.06) target=9
-2026-04-07 18:02:04.817 [AGVPool] TryDispatch job=10 — no AGV free, queuing
-2026-04-07 18:02:04.817 [AGVPool] No AGV free for Job 10 — queuing request.
-2026-04-07 18:02:04.859 [AGV 1] Parked — zones released.
-2026-04-07 18:02:04.859 [AGVPool] Draining queue — assigning Job 8 to AGV 1.
-2026-04-07 18:02:05.049 [Job Manager] begin transit of job 9 to machine 0
-2026-04-07 18:02:05.049 [AGV 0] Executed pickup of job 9
-2026-04-07 18:02:05.219 [AGV 2] Parked — zones released.
-2026-04-07 18:02:05.219 [AGVPool] Draining queue — assigning Job 7 to AGV 2.
-2026-04-07 18:02:05.427 [Job Manager] begin transit of job 8 to machine 13
-2026-04-07 18:02:05.428 [AGV 1] Executed pickup of job 8
-2026-04-07 18:02:05.766 [OnMachineFinished] job=11 machine=12
-2026-04-07 18:02:05.766 [OnMachineFinished] job=11 state=WaitingForTransport opIndex=1/7 completedOps=1
-2026-04-07 18:02:05.766 [OnMachineFinished] job=11 → EnqueueRouting nextType=Inspect
-2026-04-07 18:02:05.771 [DispatchRealAGV] job=11 pickup=(-8.75, 0.33, -9.56) (source=12) dropoff=(-3.25, 0.33, -5.44) target=9
-2026-04-07 18:02:05.772 [AGVPool] TryDispatch job=11 — no AGV free, queuing
-2026-04-07 18:02:05.772 [AGVPool] No AGV free for Job 11 — queuing request.
-2026-04-07 18:02:05.814 [Job Manager] begin transit of job 7 to machine 14
-2026-04-07 18:02:05.815 [AGV 2] Executed pickup of job 7
-2026-04-07 18:02:06.189 [OnMachineFinished] job=12 machine=3
-2026-04-07 18:02:06.189 [OnMachineFinished] job=12 state=WaitingForTransport opIndex=1/6 completedOps=1
-2026-04-07 18:02:06.189 [OnMachineFinished] job=12 → EnqueueRouting nextType=Assemble
-2026-04-07 18:02:06.193 [DispatchRealAGV] job=12 pickup=(8.75, 0.33, 9.56) (source=3) dropoff=(-3.25, 0.33, -9.56) target=13
-2026-04-07 18:02:06.193 [AGVPool] TryDispatch job=12 — no AGV free, queuing
-2026-04-07 18:02:06.194 [AGVPool] No AGV free for Job 12 — queuing request.
-2026-04-07 18:02:06.297 [AGV 0] Executed dropoff of job 9
-2026-04-07 18:02:06.297 [AGV 0] Returning to parking at (-9.00, 0.01, -14.00).
-2026-04-07 18:02:06.300 [Machine] 0 began processing job 9 for 67.40498 seconds.
+--- Log Started: 4/7/2026 9:43:54 PM ---
+2026-04-07 21:43:54.471 [Agent] OnEpisodeBegin skipped — not armed.
+2026-04-07 21:44:08.225 [SimBridge] Config loaded: 2j_5m (2J, 5M, seed=42)
+2026-04-07 21:44:08.239 [FactoryLayout] Distance matrix (5x5):
+       M0     M1     M2     M3     M4   
+2026-04-07 21:44:08.241 M0      0.0    6.0   12.0    7.5    9.6 
+2026-04-07 21:44:08.241 M1      6.0    0.0    6.0    9.6    7.5 
+2026-04-07 21:44:08.242 M2     12.0    6.0    0.0   14.2    9.6 
+2026-04-07 21:44:08.242 M3      7.5    9.6   14.2    0.0    6.0 
+2026-04-07 21:44:08.243 M4      9.6    7.5    9.6    6.0    0.0 
+2026-04-07 21:44:08.252 [FactoryLayout] Built aisle-based floor: 5 machines.
+2026-04-07 21:44:08.258 [TrafficZones] Built zone graph: 17 zones.
+2026-04-07 21:44:08.260 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-07 21:44:08.261 [SimBridge] Factory spawned: 5 machines
+2026-04-07 21:44:12.803 [JobManager] Initialized 2 FJSSP job trackers.
+2026-04-07 21:44:12.804 [SimBridge] Simulation started (2j_5m)
+2026-04-07 21:44:12.805 [TransitionJob] job=0 PendingEntry(M-1) → OnFactoryBelt(M-1) agv=-1
+2026-04-07 21:44:12.805 [TransitionJob] VERIFY job=0: Location=OnFactoryBelt, LocationMachineId=-1
+2026-04-07 21:44:12.806 [TransitionJob] job=1 PendingEntry(M-1) → OnFactoryBelt(M-1) agv=-1
+2026-04-07 21:44:12.806 [TransitionJob] VERIFY job=1: Location=OnFactoryBelt, LocationMachineId=-1
+2026-04-07 21:44:12.816 [TransitionJob] job=0 OnFactoryBelt(M-1) → AwaitingPickup(M-1) agv=-1
+2026-04-07 21:44:12.817 [TransitionJob] VERIFY job=0: Location=AwaitingPickup, LocationMachineId=-1
+2026-04-07 21:44:12.817 [DispatchRealAGV] job=0 source=M-1 target=M3
+2026-04-07 21:44:12.818 [AGVPool] TryDispatch job=0 - assigned to AGV 0
+2026-04-07 21:44:12.819 [AGV 0] Dispatch job=0 pickup=M-1((-8.50, 1.51, 8.00)) dropoff=M3((-6.25, 0.33, -2.06))
+2026-04-07 21:44:12.830 [TransitionJob] job=1 OnFactoryBelt(M-1) → AwaitingPickup(M-1) agv=-1
+2026-04-07 21:44:12.831 [TransitionJob] VERIFY job=1: Location=AwaitingPickup, LocationMachineId=-1
+2026-04-07 21:44:12.832 [DispatchRealAGV] job=1 source=M-1 target=M0
+2026-04-07 21:44:12.832 [AGVPool] TryDispatch job=1 - assigned to AGV 1
+2026-04-07 21:44:12.832 [AGV 1] Dispatch job=1 pickup=M-1((-8.50, 1.51, 8.50)) dropoff=M0((-5.75, 0.33, 2.06))
+2026-04-07 21:44:13.196 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:13.197 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:13.197 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:13.198 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:13.198 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:13.618 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:13.619 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:13.619 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:13.619 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:13.620 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:14.057 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:14.058 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:14.058 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:14.059 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:14.059 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:14.418 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:14.419 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:14.419 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:14.419 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:14.419 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:14.742 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:14.743 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:14.743 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:14.743 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:14.744 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:15.073 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:15.073 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:15.074 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:15.074 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:15.075 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:15.396 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:15.397 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:15.397 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:15.397 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:15.397 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:15.728 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:15.728 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:15.729 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:15.729 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:15.729 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:16.043 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:16.043 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:16.044 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:16.044 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:16.044 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:16.399 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:16.400 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:16.400 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:16.400 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:16.401 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:16.822 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:16.822 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:16.823 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:16.823 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:16.823 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:17.271 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:17.272 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:17.272 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:17.272 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:17.273 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:17.623 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:17.623 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:17.624 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:17.624 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:17.624 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:17.946 [TransitionJob] job=0 AwaitingPickup(M-1) → InTransit(M-1) agv=-1
+2026-04-07 21:44:17.947 [TransitionJob] VERIFY job=0: Location=InTransit, LocationMachineId=-1
+2026-04-07 21:44:17.947 [JobManager] begin transit of job 0 to machine 3
+2026-04-07 21:44:17.947 [AGV 0] Executed pickup of job 0
+2026-04-07 21:44:18.003 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:18.003 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:18.004 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:18.004 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:18.005 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:18.422 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:18.423 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:18.423 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:18.424 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:18.424 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=-1 opIdx=0/5
+2026-04-07 21:44:18.615 [TransitionJob] job=1 AwaitingPickup(M-1) → InTransit(M-1) agv=-1
+2026-04-07 21:44:18.615 [TransitionJob] VERIFY job=1: Location=InTransit, LocationMachineId=-1
+2026-04-07 21:44:18.615 [JobManager] begin transit of job 1 to machine 0
+2026-04-07 21:44:18.616 [AGV 1] Executed pickup of job 1
+2026-04-07 21:44:18.802 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:18.803 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:18.803 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:18.803 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:18.804 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:19.158 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:19.158 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:19.159 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:19.159 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:19.159 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:19.532 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:19.532 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:19.533 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:19.533 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:19.533 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:19.913 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:19.914 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:19.914 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:19.915 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:19.915 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:20.282 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:20.283 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:20.283 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:20.283 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:20.284 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:20.631 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:20.632 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:20.632 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:20.633 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:20.633 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:20.966 [TransitionJob] job=0 InTransit(M-1) → InMachineQueue(M3) agv=-1
+2026-04-07 21:44:20.967 [TransitionJob] VERIFY job=0: Location=InMachineQueue, LocationMachineId=3
+2026-04-07 21:44:20.968 [AGV 0] Executed dropoff of job 0
+2026-04-07 21:44:20.968 [OnJobArrivedInQueue] job=0 at M3 — checking dispatch needed
+2026-04-07 21:44:20.969 [CheckDecision] M3 → enqueuing dispatch (idle=True, hasJobs=True)
+2026-04-07 21:44:20.969 [AGV 0] Returning to parking at (-6.00, 0.01, -6.50).
+2026-04-07 21:44:20.969 [Update] Processing dispatch for M3: idle=True, hasJobs=True
+2026-04-07 21:44:20.978 [TransitionJob] job=0 InMachineQueue(M3) → Processing(M3) agv=-1
+2026-04-07 21:44:20.978 [TransitionJob] VERIFY job=0: Location=Processing, LocationMachineId=3
+2026-04-07 21:44:20.979 [Machine] 3 began processing job 0 for 55.73768 seconds.
+2026-04-07 21:44:20.995 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:20.996 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:20.996 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:20.997 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:21.413 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:21.413 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:21.414 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:21.414 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:21.836 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:21.837 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:21.837 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:21.838 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=0/5
+2026-04-07 21:44:22.160 [TransitionJob] job=1 InTransit(M-1) → InMachineQueue(M0) agv=-1
+2026-04-07 21:44:22.161 [TransitionJob] VERIFY job=1: Location=InMachineQueue, LocationMachineId=0
+2026-04-07 21:44:22.162 [AGV 1] Executed dropoff of job 1
+2026-04-07 21:44:22.162 [OnJobArrivedInQueue] job=1 at M0 — checking dispatch needed
+2026-04-07 21:44:22.162 [CheckDecision] M0 → enqueuing dispatch (idle=True, hasJobs=True)
+2026-04-07 21:44:22.162 [AGV 1] Returning to parking at (-4.00, 0.01, -6.50).
+2026-04-07 21:44:22.163 [Update] Processing dispatch for M0: idle=True, hasJobs=True
+2026-04-07 21:44:22.170 [TransitionJob] job=1 InMachineQueue(M0) → Processing(M0) agv=-1
+2026-04-07 21:44:22.170 [TransitionJob] VERIFY job=1: Location=Processing, LocationMachineId=0
+2026-04-07 21:44:22.170 [Machine] 0 began processing job 1 for 16.12571 seconds.
+2026-04-07 21:44:22.211 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=0 opIdx=0/5
+2026-04-07 21:44:22.212 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=0 opIdx=0/5
+2026-04-07 21:44:22.212 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=0 opIdx=0/5
+2026-04-07 21:44:22.590 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=0 opIdx=0/5
+2026-04-07 21:44:22.591 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=0 opIdx=0/5
+2026-04-07 21:44:22.591 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=0 opIdx=0/5
+2026-04-07 21:44:22.675 [AGV 0] Parked — zones released.
+2026-04-07 21:44:22.979 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=0 opIdx=0/5
+2026-04-07 21:44:22.980 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=0 opIdx=0/5
+2026-04-07 21:44:22.980 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=0 opIdx=0/5
+2026-04-07 21:44:23.357 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=0 opIdx=0/5
+2026-04-07 21:44:23.358 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=0 opIdx=0/5
+2026-04-07 21:44:23.358 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=0 opIdx=0/5
+2026-04-07 21:44:23.721 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=0 opIdx=0/5
+2026-04-07 21:44:23.722 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=0 opIdx=0/5
+2026-04-07 21:44:23.722 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=0 opIdx=0/5
+2026-04-07 21:44:24.104 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=0 opIdx=0/5
+2026-04-07 21:44:24.105 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=0 opIdx=0/5
+2026-04-07 21:44:24.105 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=0 opIdx=0/5
+2026-04-07 21:44:24.444 [OnMachineFinished] job=1 machine=0
+2026-04-07 21:44:24.445 [TransitionJob] job=1 Processing(M0) → AwaitingTransport(M0) agv=-1
+2026-04-07 21:44:24.445 [TransitionJob] VERIFY job=1: Location=AwaitingTransport, LocationMachineId=0
+2026-04-07 21:44:24.446 [OnMachineFinished] job=1 state=WaitingForTransport location=AwaitingTransport opIndex=1/5 completedOps=1
+2026-04-07 21:44:24.446 [OnMachineFinished] job=1 → EnqueueRouting nextType=Lathe
+2026-04-07 21:44:24.446 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=AwaitingTransport locM=0 opIdx=1/5
+2026-04-07 21:44:24.447 [CheckDecision] M0 → skipped (idle=True, hasJobs=False)
+2026-04-07 21:44:24.460 [TransitionJob] job=1 AwaitingTransport(M0) → AwaitingPickup(M0) agv=-1
+2026-04-07 21:44:24.460 [TransitionJob] VERIFY job=1: Location=AwaitingPickup, LocationMachineId=0
+2026-04-07 21:44:24.461 [DispatchRealAGV] job=1 source=M0 target=M1
+2026-04-07 21:44:24.461 [AGVPool] TryDispatch job=1 - assigned to AGV 0
+2026-04-07 21:44:24.462 [AGV 0] Dispatch job=1 pickup=M0((-6.25, 0.33, 2.06)) dropoff=M1((0.25, 0.33, 2.06))
+2026-04-07 21:44:24.496 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=0 opIdx=1/5
+2026-04-07 21:44:24.496 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=0 opIdx=1/5
+2026-04-07 21:44:24.496 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=0 opIdx=1/5
+2026-04-07 21:44:24.497 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=0 opIdx=1/5
+2026-04-07 21:44:24.886 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=0 opIdx=1/5
+2026-04-07 21:44:24.887 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=0 opIdx=1/5
+2026-04-07 21:44:24.887 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=0 opIdx=1/5
+2026-04-07 21:44:24.888 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=0 opIdx=1/5
+2026-04-07 21:44:25.172 [AGV 1] Parked — zones released.
+2026-04-07 21:44:25.300 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=0 opIdx=1/5
+2026-04-07 21:44:25.301 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=0 opIdx=1/5
+2026-04-07 21:44:25.301 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=0 opIdx=1/5
+2026-04-07 21:44:25.302 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=0 opIdx=1/5
+2026-04-07 21:44:25.396 [TransitionJob] job=1 AwaitingPickup(M0) → InTransit(M-1) agv=-1
+2026-04-07 21:44:25.396 [TransitionJob] VERIFY job=1: Location=InTransit, LocationMachineId=-1
+2026-04-07 21:44:25.397 [JobManager] begin transit of job 1 to machine 1
+2026-04-07 21:44:25.398 [AGV 0] Executed pickup of job 1
+2026-04-07 21:44:25.680 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=1/5
+2026-04-07 21:44:25.680 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=1/5
+2026-04-07 21:44:25.680 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=1/5
+2026-04-07 21:44:25.681 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=InTransit locM=-1 opIdx=1/5
+2026-04-07 21:44:26.053 [TransitionJob] job=1 InTransit(M-1) → InMachineQueue(M1) agv=-1
+2026-04-07 21:44:26.054 [TransitionJob] VERIFY job=1: Location=InMachineQueue, LocationMachineId=1
+2026-04-07 21:44:26.054 [AGV 0] Executed dropoff of job 1
+2026-04-07 21:44:26.055 [OnJobArrivedInQueue] job=1 at M1 — checking dispatch needed
+2026-04-07 21:44:26.055 [CheckDecision] M1 → enqueuing dispatch (idle=True, hasJobs=True)
+2026-04-07 21:44:26.056 [AGV 0] Returning to parking at (-6.00, 0.01, -6.50).
+2026-04-07 21:44:26.057 [Update] Processing dispatch for M1: idle=True, hasJobs=True
+2026-04-07 21:44:26.065 [TransitionJob] job=1 InMachineQueue(M1) → Processing(M1) agv=-1
+2026-04-07 21:44:26.065 [TransitionJob] VERIFY job=1: Location=Processing, LocationMachineId=1
+2026-04-07 21:44:26.066 [Machine] 1 began processing job 1 for 15.95743 seconds.
+2026-04-07 21:44:26.085 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=1 opIdx=1/5
+2026-04-07 21:44:26.086 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=1 opIdx=1/5
+2026-04-07 21:44:26.086 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=1 opIdx=1/5
+2026-04-07 21:44:26.475 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=1 opIdx=1/5
+2026-04-07 21:44:26.475 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=1 opIdx=1/5
+2026-04-07 21:44:26.476 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=1 opIdx=1/5
+2026-04-07 21:44:26.832 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=1 opIdx=1/5
+2026-04-07 21:44:26.833 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=1 opIdx=1/5
+2026-04-07 21:44:26.833 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=1 opIdx=1/5
+2026-04-07 21:44:27.193 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=1 opIdx=1/5
+2026-04-07 21:44:27.193 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=1 opIdx=1/5
+2026-04-07 21:44:27.194 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=1 opIdx=1/5
+2026-04-07 21:44:27.547 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=1 opIdx=1/5
+2026-04-07 21:44:27.548 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=1 opIdx=1/5
+2026-04-07 21:44:27.548 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=1 opIdx=1/5
+2026-04-07 21:44:27.906 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=1 opIdx=1/5
+2026-04-07 21:44:27.906 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=1 opIdx=1/5
+2026-04-07 21:44:27.907 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=1 opIdx=1/5
+2026-04-07 21:44:28.259 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=1 opIdx=1/5
+2026-04-07 21:44:28.259 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=1 opIdx=1/5
+2026-04-07 21:44:28.260 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=Processing locM=1 opIdx=1/5
+2026-04-07 21:44:28.313 [OnMachineFinished] job=1 machine=1
+2026-04-07 21:44:28.313 [TransitionJob] job=1 Processing(M1) → AwaitingTransport(M1) agv=-1
+2026-04-07 21:44:28.313 [TransitionJob] VERIFY job=1: Location=AwaitingTransport, LocationMachineId=1
+2026-04-07 21:44:28.313 [OnMachineFinished] job=1 state=WaitingForTransport location=AwaitingTransport opIndex=2/5 completedOps=2
+2026-04-07 21:44:28.314 [OnMachineFinished] job=1 → EnqueueRouting nextType=Assemble
+2026-04-07 21:44:28.314 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=AwaitingTransport locM=1 opIdx=2/5
+2026-04-07 21:44:28.315 [CheckDecision] M1 → skipped (idle=True, hasJobs=False)
+2026-04-07 21:44:28.327 [TransitionJob] job=1 AwaitingTransport(M1) → AwaitingPickup(M1) agv=-1
+2026-04-07 21:44:28.328 [TransitionJob] VERIFY job=1: Location=AwaitingPickup, LocationMachineId=1
+2026-04-07 21:44:28.328 [DispatchRealAGV] job=1 source=M1 target=M4
+2026-04-07 21:44:28.329 [AGVPool] TryDispatch job=1 - assigned to AGV 1
+2026-04-07 21:44:28.329 [AGV 1] Dispatch job=1 pickup=M1((-0.25, 0.33, 2.06)) dropoff=M4((-0.25, 0.33, -2.06))
+2026-04-07 21:44:28.636 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=1 opIdx=2/5
+2026-04-07 21:44:28.636 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=1 opIdx=2/5
+2026-04-07 21:44:28.637 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=1 opIdx=2/5
+2026-04-07 21:44:28.637 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=3 opIdx=0/5
+  job=1 loc=AwaitingPickup locM=1 opIdx=2/5
+2026-04-07 21:44:28.801 [OnMachineFinished] job=0 machine=3
+2026-04-07 21:44:28.802 [TransitionJob] job=0 Processing(M3) → AwaitingTransport(M3) agv=-1
+2026-04-07 21:44:28.802 [TransitionJob] VERIFY job=0: Location=AwaitingTransport, LocationMachineId=3
+2026-04-07 21:44:28.802 [OnMachineFinished] job=0 state=WaitingForTransport location=AwaitingTransport opIndex=1/5 completedOps=1
+2026-04-07 21:44:28.802 [OnMachineFinished] job=0 → EnqueueRouting nextType=Assemble
+2026-04-07 21:44:28.803 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=AwaitingTransport locM=3 opIdx=1/5
+  job=1 loc=AwaitingPickup locM=1 opIdx=2/5
+2026-04-07 21:44:28.803 [CheckDecision] M3 → skipped (idle=True, hasJobs=False)
+2026-04-07 21:44:28.816 [TransitionJob] job=0 AwaitingTransport(M3) → AwaitingPickup(M3) agv=-1
+2026-04-07 21:44:28.817 [TransitionJob] VERIFY job=0: Location=AwaitingPickup, LocationMachineId=3
+2026-04-07 21:44:28.817 [DispatchRealAGV] job=0 source=M3 target=M4
+2026-04-07 21:44:28.818 [AGVPool] TryDispatch job=0 - assigned to AGV 2
+2026-04-07 21:44:28.818 [AGV 2] Dispatch job=0 pickup=M3((-5.75, 0.33, -2.06)) dropoff=M4((-0.25, 0.33, -2.06))
+2026-04-07 21:44:29.031 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=3 opIdx=1/5
+  job=1 loc=AwaitingPickup locM=1 opIdx=2/5
+2026-04-07 21:44:29.032 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=3 opIdx=1/5
+  job=1 loc=AwaitingPickup locM=1 opIdx=2/5
+2026-04-07 21:44:29.032 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=3 opIdx=1/5
+  job=1 loc=AwaitingPickup locM=1 opIdx=2/5
+2026-04-07 21:44:29.032 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=3 opIdx=1/5
+  job=1 loc=AwaitingPickup locM=1 opIdx=2/5
+2026-04-07 21:44:29.033 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=3 opIdx=1/5
+  job=1 loc=AwaitingPickup locM=1 opIdx=2/5
+2026-04-07 21:44:29.192 [AGV 0] Parked — zones released.
+2026-04-07 21:44:29.386 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=3 opIdx=1/5
+  job=1 loc=AwaitingPickup locM=1 opIdx=2/5
+2026-04-07 21:44:29.387 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=3 opIdx=1/5
+  job=1 loc=AwaitingPickup locM=1 opIdx=2/5
+2026-04-07 21:44:29.387 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=3 opIdx=1/5
+  job=1 loc=AwaitingPickup locM=1 opIdx=2/5
+2026-04-07 21:44:29.388 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=3 opIdx=1/5
+  job=1 loc=AwaitingPickup locM=1 opIdx=2/5
+2026-04-07 21:44:29.388 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=3 opIdx=1/5
+  job=1 loc=AwaitingPickup locM=1 opIdx=2/5
+2026-04-07 21:44:29.608 [TransitionJob] job=1 AwaitingPickup(M1) → InTransit(M-1) agv=-1
+2026-04-07 21:44:29.608 [TransitionJob] VERIFY job=1: Location=InTransit, LocationMachineId=-1
+2026-04-07 21:44:29.609 [JobManager] begin transit of job 1 to machine 4
+2026-04-07 21:44:29.609 [AGV 1] Executed pickup of job 1
+2026-04-07 21:44:29.736 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=3 opIdx=1/5
+  job=1 loc=InTransit locM=-1 opIdx=2/5
+2026-04-07 21:44:29.737 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=3 opIdx=1/5
+  job=1 loc=InTransit locM=-1 opIdx=2/5
+2026-04-07 21:44:29.738 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=3 opIdx=1/5
+  job=1 loc=InTransit locM=-1 opIdx=2/5
+2026-04-07 21:44:29.738 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=3 opIdx=1/5
+  job=1 loc=InTransit locM=-1 opIdx=2/5
+2026-04-07 21:44:29.738 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=3 opIdx=1/5
+  job=1 loc=InTransit locM=-1 opIdx=2/5
+2026-04-07 21:44:30.024 [TransitionJob] job=1 InTransit(M-1) → InMachineQueue(M4) agv=-1
+2026-04-07 21:44:30.024 [TransitionJob] VERIFY job=1: Location=InMachineQueue, LocationMachineId=4
+2026-04-07 21:44:30.025 [AGV 1] Executed dropoff of job 1
+2026-04-07 21:44:30.026 [OnJobArrivedInQueue] job=1 at M4 — checking dispatch needed
+2026-04-07 21:44:30.026 [CheckDecision] M4 → enqueuing dispatch (idle=True, hasJobs=True)
+2026-04-07 21:44:30.027 [AGV 1] Returning to parking at (-4.00, 0.01, -6.50).
+2026-04-07 21:44:30.027 [Update] Processing dispatch for M4: idle=True, hasJobs=True
+2026-04-07 21:44:30.036 [TransitionJob] job=1 InMachineQueue(M4) → Processing(M4) agv=-1
+2026-04-07 21:44:30.037 [TransitionJob] VERIFY job=1: Location=Processing, LocationMachineId=4
+2026-04-07 21:44:30.038 [Machine] 4 began processing job 1 for 57.25303 seconds.
+2026-04-07 21:44:30.138 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=3 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:30.138 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=3 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:30.139 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=3 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:30.139 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=3 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:30.536 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=3 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:30.537 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=3 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:30.537 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=3 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:30.538 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=3 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:30.901 [TransitionJob] job=0 AwaitingPickup(M3) → InTransit(M-1) agv=-1
+2026-04-07 21:44:30.902 [TransitionJob] VERIFY job=0: Location=InTransit, LocationMachineId=-1
+2026-04-07 21:44:30.902 [JobManager] begin transit of job 0 to machine 4
+2026-04-07 21:44:30.902 [AGV 2] Executed pickup of job 0
+2026-04-07 21:44:30.911 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:30.911 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:30.912 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:30.912 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:31.288 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:31.289 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:31.289 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:31.289 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:31.407 [AGV 1] Parked — zones released.
+2026-04-07 21:44:31.550 [TransitionJob] job=0 InTransit(M-1) → InMachineQueue(M4) agv=-1
+2026-04-07 21:44:31.551 [TransitionJob] VERIFY job=0: Location=InMachineQueue, LocationMachineId=4
+2026-04-07 21:44:31.552 [AGV 2] Executed dropoff of job 0
+2026-04-07 21:44:31.552 [OnJobArrivedInQueue] job=0 at M4 — checking dispatch needed
+2026-04-07 21:44:31.552 [CheckDecision] M4 → skipped (idle=False, hasJobs=True)
+2026-04-07 21:44:31.553 [AGV 2] Returning to parking at (-2.00, 0.01, -6.50).
+2026-04-07 21:44:31.652 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:31.653 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:31.653 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:31.653 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:32.018 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:32.019 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:32.020 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:32.020 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:32.372 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:32.373 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:32.373 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:32.373 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:32.719 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:32.719 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:32.720 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:32.720 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:33.095 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:33.096 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:33.096 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:33.096 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:33.446 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:33.447 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:33.447 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:33.448 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:33.793 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:33.794 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:33.794 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:33.794 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:34.184 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:34.185 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:34.185 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:34.186 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:34.570 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:34.571 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:34.571 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:34.571 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:34.932 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:34.932 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:34.933 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:34.933 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:35.302 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:35.302 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:35.303 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:35.303 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:35.646 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:35.647 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:35.647 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:35.647 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:36.003 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:36.003 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:36.003 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:36.004 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:36.360 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:36.360 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:36.360 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:36.360 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:36.800 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:36.800 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:36.800 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:36.800 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:37.160 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:37.160 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:37.161 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:37.161 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:37.547 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:37.548 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:37.549 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:37.549 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:37.926 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:37.927 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:37.927 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:37.927 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InMachineQueue locM=4 opIdx=1/5
+  job=1 loc=Processing locM=4 opIdx=2/5
+2026-04-07 21:44:38.079 [OnMachineFinished] job=1 machine=4
+2026-04-07 21:44:38.080 [TransitionJob] job=1 Processing(M4) → AwaitingTransport(M4) agv=-1
+2026-04-07 21:44:38.080 [TransitionJob] VERIFY job=1: Location=AwaitingTransport, LocationMachineId=4
+2026-04-07 21:44:38.080 [OnMachineFinished] job=1 state=WaitingForTransport location=AwaitingTransport opIndex=3/5 completedOps=3
+2026-04-07 21:44:38.081 [OnMachineFinished] job=1 → EnqueueRouting nextType=Inspect
+2026-04-07 21:44:38.081 [CheckDecision] M4 → enqueuing dispatch (idle=True, hasJobs=True)
+2026-04-07 21:44:38.096 [TransitionJob] job=1 AwaitingTransport(M4) → AwaitingPickup(M4) agv=-1
+2026-04-07 21:44:38.097 [TransitionJob] VERIFY job=1: Location=AwaitingPickup, LocationMachineId=4
+2026-04-07 21:44:38.097 [DispatchRealAGV] job=1 source=M4 target=M3
+2026-04-07 21:44:38.098 [AGVPool] TryDispatch job=1 - assigned to AGV 0
+2026-04-07 21:44:38.098 [AGV 0] Dispatch job=1 pickup=M4((0.25, 0.33, -2.06)) dropoff=M3((-6.25, 0.33, -2.06))
+2026-04-07 21:44:38.100 [Update] Processing dispatch for M4: idle=True, hasJobs=True
+2026-04-07 21:44:38.108 [TransitionJob] job=0 InMachineQueue(M4) → Processing(M4) agv=-1
+2026-04-07 21:44:38.109 [TransitionJob] VERIFY job=0: Location=Processing, LocationMachineId=4
+2026-04-07 21:44:38.110 [Machine] 4 began processing job 0 for 23.91784 seconds.
+2026-04-07 21:44:38.309 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=AwaitingPickup locM=4 opIdx=3/5
+2026-04-07 21:44:38.310 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=AwaitingPickup locM=4 opIdx=3/5
+2026-04-07 21:44:38.310 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=AwaitingPickup locM=4 opIdx=3/5
+2026-04-07 21:44:38.311 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=AwaitingPickup locM=4 opIdx=3/5
+2026-04-07 21:44:38.662 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=AwaitingPickup locM=4 opIdx=3/5
+2026-04-07 21:44:38.662 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=AwaitingPickup locM=4 opIdx=3/5
+2026-04-07 21:44:38.663 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=AwaitingPickup locM=4 opIdx=3/5
+2026-04-07 21:44:38.663 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=AwaitingPickup locM=4 opIdx=3/5
+2026-04-07 21:44:38.725 [AGV 2] Parked — zones released.
+2026-04-07 21:44:39.076 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=AwaitingPickup locM=4 opIdx=3/5
+2026-04-07 21:44:39.076 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=AwaitingPickup locM=4 opIdx=3/5
+2026-04-07 21:44:39.077 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=AwaitingPickup locM=4 opIdx=3/5
+2026-04-07 21:44:39.077 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=AwaitingPickup locM=4 opIdx=3/5
+2026-04-07 21:44:39.290 [TransitionJob] job=1 AwaitingPickup(M4) → InTransit(M-1) agv=-1
+2026-04-07 21:44:39.292 [TransitionJob] VERIFY job=1: Location=InTransit, LocationMachineId=-1
+2026-04-07 21:44:39.292 [JobManager] begin transit of job 1 to machine 3
+2026-04-07 21:44:39.293 [AGV 0] Executed pickup of job 1
+2026-04-07 21:44:39.443 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:39.444 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:39.444 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:39.444 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:39.811 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:39.812 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:39.812 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:39.812 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:40.208 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:40.209 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:40.209 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:40.210 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:40.603 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:40.603 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:40.604 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:40.604 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:40.979 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:40.979 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:40.980 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:40.980 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:41.357 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:41.357 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:41.358 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:41.358 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=4 opIdx=1/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:41.474 [OnMachineFinished] job=0 machine=4
+2026-04-07 21:44:41.474 [TransitionJob] job=0 Processing(M4) → AwaitingTransport(M4) agv=-1
+2026-04-07 21:44:41.475 [TransitionJob] VERIFY job=0: Location=AwaitingTransport, LocationMachineId=4
+2026-04-07 21:44:41.475 [OnMachineFinished] job=0 state=WaitingForTransport location=AwaitingTransport opIndex=2/5 completedOps=2
+2026-04-07 21:44:41.475 [OnMachineFinished] job=0 → EnqueueRouting nextType=Lathe
+2026-04-07 21:44:41.476 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=AwaitingTransport locM=4 opIdx=2/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:41.476 [CheckDecision] M4 → skipped (idle=True, hasJobs=False)
+2026-04-07 21:44:41.490 [TransitionJob] job=0 AwaitingTransport(M4) → AwaitingPickup(M4) agv=-1
+2026-04-07 21:44:41.490 [TransitionJob] VERIFY job=0: Location=AwaitingPickup, LocationMachineId=4
+2026-04-07 21:44:41.491 [DispatchRealAGV] job=0 source=M4 target=M1
+2026-04-07 21:44:41.491 [AGVPool] TryDispatch job=0 - assigned to AGV 1
+2026-04-07 21:44:41.492 [AGV 1] Dispatch job=0 pickup=M4((0.25, 0.33, -2.06)) dropoff=M1((0.25, 0.33, 2.06))
+2026-04-07 21:44:41.748 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=4 opIdx=2/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:41.749 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=4 opIdx=2/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:41.749 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=4 opIdx=2/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:41.750 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=4 opIdx=2/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:41.750 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=4 opIdx=2/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:42.137 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=4 opIdx=2/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:42.137 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=4 opIdx=2/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:42.137 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=4 opIdx=2/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:42.137 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=4 opIdx=2/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:42.138 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=4 opIdx=2/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:42.507 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=4 opIdx=2/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:42.507 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=4 opIdx=2/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:42.508 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=4 opIdx=2/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:42.508 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=4 opIdx=2/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:42.509 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=4 opIdx=2/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:42.772 [TransitionJob] job=0 AwaitingPickup(M4) → InTransit(M-1) agv=-1
+2026-04-07 21:44:42.773 [TransitionJob] VERIFY job=0: Location=InTransit, LocationMachineId=-1
+2026-04-07 21:44:42.774 [JobManager] begin transit of job 0 to machine 1
+2026-04-07 21:44:42.774 [AGV 1] Executed pickup of job 0
+2026-04-07 21:44:42.912 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=2/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:42.913 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=2/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:42.913 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=2/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:42.914 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=2/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:42.914 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=2/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:43.185 [TransitionJob] job=0 InTransit(M-1) → InMachineQueue(M1) agv=-1
+2026-04-07 21:44:43.185 [TransitionJob] VERIFY job=0: Location=InMachineQueue, LocationMachineId=1
+2026-04-07 21:44:43.186 [AGV 1] Executed dropoff of job 0
+2026-04-07 21:44:43.186 [OnJobArrivedInQueue] job=0 at M1 — checking dispatch needed
+2026-04-07 21:44:43.187 [CheckDecision] M1 → enqueuing dispatch (idle=True, hasJobs=True)
+2026-04-07 21:44:43.187 [AGV 1] Returning to parking at (-4.00, 0.01, -6.50).
+2026-04-07 21:44:43.188 [Update] Processing dispatch for M1: idle=True, hasJobs=True
+2026-04-07 21:44:43.197 [TransitionJob] job=0 InMachineQueue(M1) → Processing(M1) agv=-1
+2026-04-07 21:44:43.198 [TransitionJob] VERIFY job=0: Location=Processing, LocationMachineId=1
+2026-04-07 21:44:43.199 [Machine] 1 began processing job 0 for 43.34888 seconds.
+2026-04-07 21:44:43.339 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:43.339 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:43.340 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:43.340 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:43.722 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:43.722 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:43.723 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:43.723 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=InTransit locM=-1 opIdx=3/5
+2026-04-07 21:44:44.049 [TransitionJob] job=1 InTransit(M-1) → InMachineQueue(M3) agv=-1
+2026-04-07 21:44:44.050 [TransitionJob] VERIFY job=1: Location=InMachineQueue, LocationMachineId=3
+2026-04-07 21:44:44.050 [AGV 0] Executed dropoff of job 1
+2026-04-07 21:44:44.051 [OnJobArrivedInQueue] job=1 at M3 — checking dispatch needed
+2026-04-07 21:44:44.051 [CheckDecision] M3 → enqueuing dispatch (idle=True, hasJobs=True)
+2026-04-07 21:44:44.051 [AGV 0] Returning to parking at (-6.00, 0.01, -6.50).
+2026-04-07 21:44:44.052 [Update] Processing dispatch for M3: idle=True, hasJobs=True
+2026-04-07 21:44:44.060 [TransitionJob] job=1 InMachineQueue(M3) → Processing(M3) agv=-1
+2026-04-07 21:44:44.061 [TransitionJob] VERIFY job=1: Location=Processing, LocationMachineId=3
+2026-04-07 21:44:44.062 [Machine] 3 began processing job 1 for 59.7766 seconds.
+2026-04-07 21:44:44.127 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:44.127 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:44.128 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:44.513 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:44.513 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:44.513 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:44.573 [AGV 1] Parked — zones released.
+2026-04-07 21:44:44.893 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:44.893 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:44.893 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:45.249 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:45.250 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:45.250 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:45.602 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:45.602 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:45.603 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:45.966 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:45.967 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:45.967 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:46.333 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:46.334 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:46.334 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:46.684 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:46.685 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:46.685 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:47.033 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:47.034 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:47.034 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:47.387 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:47.387 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:47.388 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:47.743 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:47.744 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:47.744 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:48.095 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:48.096 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:48.096 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:48.469 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:48.470 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:48.470 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:48.867 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:48.868 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:48.868 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:49.227 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:49.227 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:49.228 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=1 opIdx=2/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:49.287 [OnMachineFinished] job=0 machine=1
+2026-04-07 21:44:49.287 [TransitionJob] job=0 Processing(M1) → AwaitingTransport(M1) agv=-1
+2026-04-07 21:44:49.287 [TransitionJob] VERIFY job=0: Location=AwaitingTransport, LocationMachineId=1
+2026-04-07 21:44:49.288 [OnMachineFinished] job=0 state=WaitingForTransport location=AwaitingTransport opIndex=3/5 completedOps=3
+2026-04-07 21:44:49.289 [OnMachineFinished] job=0 → EnqueueRouting nextType=Mill
+2026-04-07 21:44:49.289 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingTransport locM=1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:49.290 [CheckDecision] M1 → skipped (idle=True, hasJobs=False)
+2026-04-07 21:44:49.302 [TransitionJob] job=0 AwaitingTransport(M1) → AwaitingPickup(M1) agv=-1
+2026-04-07 21:44:49.302 [TransitionJob] VERIFY job=0: Location=AwaitingPickup, LocationMachineId=1
+2026-04-07 21:44:49.303 [DispatchRealAGV] job=0 source=M1 target=M0
+2026-04-07 21:44:49.303 [AGVPool] TryDispatch job=0 - assigned to AGV 1
+2026-04-07 21:44:49.304 [AGV 1] Dispatch job=0 pickup=M1((-0.25, 0.33, 2.06)) dropoff=M0((-5.75, 0.33, 2.06))
+2026-04-07 21:44:49.602 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:49.603 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:49.603 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:49.604 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:49.972 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:49.972 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:49.973 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:49.973 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:50.168 [AGV 0] Parked — zones released.
+2026-04-07 21:44:50.335 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:50.335 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:50.335 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:50.335 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:50.581 [TransitionJob] job=0 AwaitingPickup(M1) → InTransit(M-1) agv=-1
+2026-04-07 21:44:50.582 [TransitionJob] VERIFY job=0: Location=InTransit, LocationMachineId=-1
+2026-04-07 21:44:50.582 [JobManager] begin transit of job 0 to machine 0
+2026-04-07 21:44:50.583 [AGV 1] Executed pickup of job 0
+2026-04-07 21:44:50.703 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:50.705 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:50.705 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:50.705 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:51.083 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:51.083 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:51.083 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:51.083 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:51.443 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:51.443 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:51.443 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:51.444 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:51.785 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:51.786 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:51.786 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:51.787 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:52.139 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:52.140 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:52.140 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:52.141 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=Processing locM=3 opIdx=3/5
+2026-04-07 21:44:52.454 [OnMachineFinished] job=1 machine=3
+2026-04-07 21:44:52.454 [TransitionJob] job=1 Processing(M3) → AwaitingTransport(M3) agv=-1
+2026-04-07 21:44:52.455 [TransitionJob] VERIFY job=1: Location=AwaitingTransport, LocationMachineId=3
+2026-04-07 21:44:52.455 [OnMachineFinished] job=1 state=WaitingForTransport location=AwaitingTransport opIndex=4/5 completedOps=4
+2026-04-07 21:44:52.455 [OnMachineFinished] job=1 → EnqueueRouting nextType=Weld
+2026-04-07 21:44:52.456 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=AwaitingTransport locM=3 opIdx=4/5
+2026-04-07 21:44:52.456 [CheckDecision] M3 → skipped (idle=True, hasJobs=False)
+2026-04-07 21:44:52.468 [TransitionJob] job=1 AwaitingTransport(M3) → AwaitingPickup(M3) agv=-1
+2026-04-07 21:44:52.469 [TransitionJob] VERIFY job=1: Location=AwaitingPickup, LocationMachineId=3
+2026-04-07 21:44:52.469 [DispatchRealAGV] job=1 source=M3 target=M2
+2026-04-07 21:44:52.469 [AGVPool] TryDispatch job=1 - assigned to AGV 0
+2026-04-07 21:44:52.469 [AGV 0] Dispatch job=1 pickup=M3((-5.75, 0.33, -2.06)) dropoff=M2((6.25, 0.33, 2.06))
+2026-04-07 21:44:52.483 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=3 opIdx=4/5
+2026-04-07 21:44:52.484 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=3 opIdx=4/5
+2026-04-07 21:44:52.484 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=3 opIdx=4/5
+2026-04-07 21:44:52.484 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=3 opIdx=4/5
+2026-04-07 21:44:52.485 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=3 opIdx=4/5
+2026-04-07 21:44:52.874 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=3 opIdx=4/5
+2026-04-07 21:44:52.875 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=3 opIdx=4/5
+2026-04-07 21:44:52.875 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=3 opIdx=4/5
+2026-04-07 21:44:52.876 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=3 opIdx=4/5
+2026-04-07 21:44:52.876 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=3 opIdx=4/5
+2026-04-07 21:44:53.271 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=3 opIdx=4/5
+2026-04-07 21:44:53.272 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=3 opIdx=4/5
+2026-04-07 21:44:53.272 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=3 opIdx=4/5
+2026-04-07 21:44:53.272 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=3 opIdx=4/5
+2026-04-07 21:44:53.273 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=3 opIdx=4/5
+2026-04-07 21:44:53.424 [TransitionJob] job=1 AwaitingPickup(M3) → InTransit(M-1) agv=-1
+2026-04-07 21:44:53.425 [TransitionJob] VERIFY job=1: Location=InTransit, LocationMachineId=-1
+2026-04-07 21:44:53.425 [JobManager] begin transit of job 1 to machine 2
+2026-04-07 21:44:53.426 [AGV 0] Executed pickup of job 1
+2026-04-07 21:44:53.636 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=InTransit locM=-1 opIdx=4/5
+2026-04-07 21:44:53.636 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=InTransit locM=-1 opIdx=4/5
+2026-04-07 21:44:53.636 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=InTransit locM=-1 opIdx=4/5
+2026-04-07 21:44:53.637 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=InTransit locM=-1 opIdx=4/5
+2026-04-07 21:44:53.637 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=InTransit locM=-1 opIdx=4/5
+2026-04-07 21:44:53.996 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=InTransit locM=-1 opIdx=4/5
+2026-04-07 21:44:53.997 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=InTransit locM=-1 opIdx=4/5
+2026-04-07 21:44:53.998 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=InTransit locM=-1 opIdx=4/5
+2026-04-07 21:44:53.998 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=InTransit locM=-1 opIdx=4/5
+2026-04-07 21:44:53.998 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=InTransit locM=-1 opIdx=4/5
+2026-04-07 21:44:54.321 [TransitionJob] job=1 InTransit(M-1) → InMachineQueue(M2) agv=-1
+2026-04-07 21:44:54.322 [TransitionJob] VERIFY job=1: Location=InMachineQueue, LocationMachineId=2
+2026-04-07 21:44:54.322 [AGV 0] Executed dropoff of job 1
+2026-04-07 21:44:54.322 [OnJobArrivedInQueue] job=1 at M2 — checking dispatch needed
+2026-04-07 21:44:54.323 [CheckDecision] M2 → enqueuing dispatch (idle=True, hasJobs=True)
+2026-04-07 21:44:54.323 [AGV 0] Returning to parking at (-6.00, 0.01, -6.50).
+2026-04-07 21:44:54.323 [Update] Processing dispatch for M2: idle=True, hasJobs=True
+2026-04-07 21:44:54.330 [TransitionJob] job=1 InMachineQueue(M2) → Processing(M2) agv=-1
+2026-04-07 21:44:54.331 [TransitionJob] VERIFY job=1: Location=Processing, LocationMachineId=2
+2026-04-07 21:44:54.331 [Machine] 2 began processing job 1 for 43.36722 seconds.
+2026-04-07 21:44:54.358 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:54.359 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:54.359 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:54.359 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:54.632 [TransitionJob] job=0 InTransit(M-1) → InMachineQueue(M0) agv=-1
+2026-04-07 21:44:54.632 [TransitionJob] VERIFY job=0: Location=InMachineQueue, LocationMachineId=0
+2026-04-07 21:44:54.633 [AGV 1] Executed dropoff of job 0
+2026-04-07 21:44:54.633 [OnJobArrivedInQueue] job=0 at M0 — checking dispatch needed
+2026-04-07 21:44:54.633 [CheckDecision] M0 → enqueuing dispatch (idle=True, hasJobs=True)
+2026-04-07 21:44:54.634 [AGV 1] Returning to parking at (-4.00, 0.01, -6.50).
+2026-04-07 21:44:54.634 [Update] Processing dispatch for M0: idle=True, hasJobs=True
+2026-04-07 21:44:54.641 [TransitionJob] job=0 InMachineQueue(M0) → Processing(M0) agv=-1
+2026-04-07 21:44:54.641 [TransitionJob] VERIFY job=0: Location=Processing, LocationMachineId=0
+2026-04-07 21:44:54.643 [Machine] 0 began processing job 0 for 62.93754 seconds.
+2026-04-07 21:44:54.741 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:54.741 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:54.742 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:55.176 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:55.177 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:55.177 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:55.536 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:55.537 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:55.537 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:55.543 [AGV 0] Parked — zones released.
+2026-04-07 21:44:55.895 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:55.895 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:55.895 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:56.259 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:56.260 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:56.261 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:56.608 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:56.608 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:56.609 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:56.959 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:56.960 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:56.960 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:57.356 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:57.357 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:57.357 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:57.707 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:57.708 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:57.708 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:58.086 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:58.086 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:58.087 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:58.494 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:58.494 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:58.495 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:58.880 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:58.880 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:58.881 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:59.260 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:59.261 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:59.261 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:59.650 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:59.650 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:44:59.651 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:45:00.021 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:45:00.022 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:45:00.023 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Processing locM=2 opIdx=4/5
+2026-04-07 21:45:00.422 [OnMachineFinished] job=1 machine=2
+2026-04-07 21:45:00.423 [TransitionJob] job=1 Processing(M2) → AwaitingTransport(M2) agv=-1
+2026-04-07 21:45:00.423 [TransitionJob] VERIFY job=1: Location=AwaitingTransport, LocationMachineId=2
+2026-04-07 21:45:00.423 [OnMachineFinished] job=1 state=Complete location=AwaitingTransport opIndex=4/5 completedOps=5
+2026-04-07 21:45:00.424 [OnMachineFinished] job=1 → DispatchToExit
+2026-04-07 21:45:00.424 [TransitionJob] job=1 AwaitingTransport(M2) → AwaitingPickup(M2) agv=-1
+2026-04-07 21:45:00.425 [TransitionJob] VERIFY job=1: Location=AwaitingPickup, LocationMachineId=2
+2026-04-07 21:45:00.425 [AGVPool] TryDispatch job=1 - assigned to AGV 0
+2026-04-07 21:45:00.426 [AGV 0] Dispatch job=1 pickup=M2((5.75, 0.33, 2.06)) dropoff=M-1((9.50, 0.01, -6.50))
+2026-04-07 21:45:00.426 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=2 opIdx=4/5
+2026-04-07 21:45:00.427 [CheckDecision] M2 → skipped (idle=True, hasJobs=False)
+2026-04-07 21:45:00.527 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=2 opIdx=4/5
+2026-04-07 21:45:00.528 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=2 opIdx=4/5
+2026-04-07 21:45:00.528 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=2 opIdx=4/5
+2026-04-07 21:45:00.528 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=2 opIdx=4/5
+2026-04-07 21:45:00.933 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=2 opIdx=4/5
+2026-04-07 21:45:00.933 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=2 opIdx=4/5
+2026-04-07 21:45:00.934 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=2 opIdx=4/5
+2026-04-07 21:45:00.934 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=2 opIdx=4/5
+2026-04-07 21:45:01.142 [AGV 1] Parked — zones released.
+2026-04-07 21:45:01.353 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=2 opIdx=4/5
+2026-04-07 21:45:01.354 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=2 opIdx=4/5
+2026-04-07 21:45:01.354 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=2 opIdx=4/5
+2026-04-07 21:45:01.355 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=2 opIdx=4/5
+2026-04-07 21:45:01.756 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=2 opIdx=4/5
+2026-04-07 21:45:01.756 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=2 opIdx=4/5
+2026-04-07 21:45:01.756 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=2 opIdx=4/5
+2026-04-07 21:45:01.757 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=AwaitingPickup locM=2 opIdx=4/5
+2026-04-07 21:45:01.867 [TransitionJob] job=1 AwaitingPickup(M2) → InTransitToExit(M-1) agv=-1
+2026-04-07 21:45:01.867 [TransitionJob] VERIFY job=1: Location=InTransitToExit, LocationMachineId=-1
+2026-04-07 21:45:01.867 [JobManager] begin transit of job 1 to machine -1
+2026-04-07 21:45:01.867 [AGV 0] Executed pickup of job 1
+2026-04-07 21:45:02.155 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=InTransitToExit locM=-1 opIdx=4/5
+2026-04-07 21:45:02.155 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=InTransitToExit locM=-1 opIdx=4/5
+2026-04-07 21:45:02.156 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=InTransitToExit locM=-1 opIdx=4/5
+2026-04-07 21:45:02.156 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=InTransitToExit locM=-1 opIdx=4/5
+2026-04-07 21:45:02.544 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=InTransitToExit locM=-1 opIdx=4/5
+2026-04-07 21:45:02.545 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=InTransitToExit locM=-1 opIdx=4/5
+2026-04-07 21:45:02.545 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=InTransitToExit locM=-1 opIdx=4/5
+2026-04-07 21:45:02.545 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=InTransitToExit locM=-1 opIdx=4/5
+2026-04-07 21:45:02.874 [TransitionJob] job=1 InTransitToExit(M-1) → OnExitBelt(M-1) agv=-1
+2026-04-07 21:45:02.875 [TransitionJob] VERIFY job=1: Location=OnExitBelt, LocationMachineId=-1
+2026-04-07 21:45:02.875 [AGV 0] Executed dropoff of job 1
+2026-04-07 21:45:02.876 [AGV 0] Returning to parking at (-6.00, 0.01, -6.50).
+2026-04-07 21:45:02.897 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=OnExitBelt locM=-1 opIdx=4/5
+2026-04-07 21:45:02.897 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=OnExitBelt locM=-1 opIdx=4/5
+2026-04-07 21:45:02.898 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=OnExitBelt locM=-1 opIdx=4/5
+2026-04-07 21:45:02.898 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=OnExitBelt locM=-1 opIdx=4/5
+2026-04-07 21:45:02.923 [TransitionJob] job=1 OnExitBelt(M-1) → Exited(M-1) agv=-1
+2026-04-07 21:45:02.923 [TransitionJob] VERIFY job=1: Location=Exited, LocationMachineId=-1
+2026-04-07 21:45:02.923 [JobManager] Job 1 exited factory.
+2026-04-07 21:45:03.252 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:03.253 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:03.253 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:03.253 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=0 opIdx=3/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:03.480 [OnMachineFinished] job=0 machine=0
+2026-04-07 21:45:03.481 [TransitionJob] job=0 Processing(M0) → AwaitingTransport(M0) agv=-1
+2026-04-07 21:45:03.481 [TransitionJob] VERIFY job=0: Location=AwaitingTransport, LocationMachineId=0
+2026-04-07 21:45:03.481 [OnMachineFinished] job=0 state=WaitingForTransport location=AwaitingTransport opIndex=4/5 completedOps=4
+2026-04-07 21:45:03.482 [OnMachineFinished] job=0 → EnqueueRouting nextType=Weld
+2026-04-07 21:45:03.482 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingTransport locM=0 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:03.482 [CheckDecision] M0 → skipped (idle=True, hasJobs=False)
+2026-04-07 21:45:03.494 [TransitionJob] job=0 AwaitingTransport(M0) → AwaitingPickup(M0) agv=-1
+2026-04-07 21:45:03.494 [TransitionJob] VERIFY job=0: Location=AwaitingPickup, LocationMachineId=0
+2026-04-07 21:45:03.495 [DispatchRealAGV] job=0 source=M0 target=M2
+2026-04-07 21:45:03.496 [AGVPool] TryDispatch job=0 - assigned to AGV 1
+2026-04-07 21:45:03.496 [AGV 1] Dispatch job=0 pickup=M0((-6.25, 0.33, 2.06)) dropoff=M2((6.25, 0.33, 2.06))
+2026-04-07 21:45:03.616 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=0 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:03.616 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=0 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:03.616 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=0 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:03.617 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=0 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:03.618 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=0 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:03.975 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=0 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:03.976 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=0 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:03.977 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=0 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:03.977 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=0 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:03.977 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=0 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:04.341 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=0 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:04.342 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=0 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:04.343 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=0 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:04.343 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=0 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:04.343 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=0 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:04.413 [AGV 0] Parked — zones released.
+2026-04-07 21:45:04.516 [TransitionJob] job=0 AwaitingPickup(M0) → InTransit(M-1) agv=-1
+2026-04-07 21:45:04.517 [TransitionJob] VERIFY job=0: Location=InTransit, LocationMachineId=-1
+2026-04-07 21:45:04.517 [JobManager] begin transit of job 0 to machine 2
+2026-04-07 21:45:04.517 [AGV 1] Executed pickup of job 0
+2026-04-07 21:45:04.768 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:04.769 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:04.770 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:04.770 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:04.770 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:05.124 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:05.124 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:05.125 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:05.125 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:05.125 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=InTransit locM=-1 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:05.410 [TransitionJob] job=0 InTransit(M-1) → InMachineQueue(M2) agv=-1
+2026-04-07 21:45:05.410 [TransitionJob] VERIFY job=0: Location=InMachineQueue, LocationMachineId=2
+2026-04-07 21:45:05.411 [AGV 1] Executed dropoff of job 0
+2026-04-07 21:45:05.411 [OnJobArrivedInQueue] job=0 at M2 — checking dispatch needed
+2026-04-07 21:45:05.411 [CheckDecision] M2 → enqueuing dispatch (idle=True, hasJobs=True)
+2026-04-07 21:45:05.412 [AGV 1] Returning to parking at (-4.00, 0.01, -6.50).
+2026-04-07 21:45:05.413 [Update] Processing dispatch for M2: idle=True, hasJobs=True
+2026-04-07 21:45:05.419 [TransitionJob] job=0 InMachineQueue(M2) → Processing(M2) agv=-1
+2026-04-07 21:45:05.420 [TransitionJob] VERIFY job=0: Location=Processing, LocationMachineId=2
+2026-04-07 21:45:05.420 [Machine] 2 began processing job 0 for 70.48483 seconds.
+2026-04-07 21:45:05.475 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:05.476 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:05.476 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:05.476 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:05.844 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:05.845 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:05.846 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:05.846 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:06.216 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:06.217 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:06.217 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:06.218 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:06.568 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:06.569 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:06.569 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:06.569 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:06.915 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:06.916 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:06.916 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:06.916 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:07.274 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:07.274 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:07.275 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:07.276 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:07.629 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:07.629 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:07.630 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:07.631 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:07.978 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:07.978 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:07.979 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:07.980 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:08.353 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:08.354 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:08.354 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:08.354 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:08.747 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:08.748 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:08.748 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:08.749 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:09.108 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:09.108 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:09.109 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:09.110 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:09.458 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:09.459 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:09.459 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:09.459 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:09.815 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:09.816 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:09.817 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:09.817 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:10.170 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:10.170 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:10.171 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:10.171 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:10.530 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:10.530 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:10.531 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:10.532 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:10.898 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:10.898 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:10.899 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:10.900 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:11.273 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:11.273 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:11.274 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:11.274 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:11.683 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:11.683 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:11.683 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:11.684 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:12.106 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:12.107 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:12.107 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:12.107 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:12.465 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:12.466 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:12.466 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:12.466 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:12.831 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:12.832 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:12.832 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:12.833 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:13.188 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:13.188 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:13.189 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:13.189 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:13.526 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:13.526 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:13.527 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:13.527 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:13.882 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:13.883 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:13.883 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:13.883 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:14.232 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:14.232 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:14.233 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:14.233 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:14.573 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:14.573 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:14.573 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:14.574 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:14.968 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:14.969 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:14.969 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:14.969 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=Processing locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:15.319 [OnMachineFinished] job=0 machine=2
+2026-04-07 21:45:15.320 [TransitionJob] job=0 Processing(M2) → AwaitingTransport(M2) agv=-1
+2026-04-07 21:45:15.320 [TransitionJob] VERIFY job=0: Location=AwaitingTransport, LocationMachineId=2
+2026-04-07 21:45:15.321 [OnMachineFinished] job=0 state=Complete location=AwaitingTransport opIndex=4/5 completedOps=5
+2026-04-07 21:45:15.321 [OnMachineFinished] job=0 → DispatchToExit
+2026-04-07 21:45:15.322 [TransitionJob] job=0 AwaitingTransport(M2) → AwaitingPickup(M2) agv=-1
+2026-04-07 21:45:15.322 [TransitionJob] VERIFY job=0: Location=AwaitingPickup, LocationMachineId=2
+2026-04-07 21:45:15.323 [AGVPool] TryDispatch job=0 - assigned to AGV 0
+2026-04-07 21:45:15.323 [AGV 0] Dispatch job=0 pickup=M2((5.75, 0.33, 2.06)) dropoff=M-1((9.50, 0.01, -6.50))
+2026-04-07 21:45:15.324 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:15.324 [CheckDecision] M2 → skipped (idle=True, hasJobs=False)
+2026-04-07 21:45:15.333 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:15.334 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:15.335 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:15.335 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:15.336 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:15.752 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:15.753 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:15.753 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:15.754 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:15.754 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:16.029 [AGV 1] Parked — zones released.
+2026-04-07 21:45:16.123 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:16.123 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:16.123 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:16.124 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:16.124 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:16.496 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:16.497 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:16.497 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:16.497 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:16.498 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=AwaitingPickup locM=2 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:16.763 [TransitionJob] job=0 AwaitingPickup(M2) → InTransitToExit(M-1) agv=-1
+2026-04-07 21:45:16.764 [TransitionJob] VERIFY job=0: Location=InTransitToExit, LocationMachineId=-1
+2026-04-07 21:45:16.764 [JobManager] begin transit of job 0 to machine -1
+2026-04-07 21:45:16.765 [AGV 0] Executed pickup of job 0
+2026-04-07 21:45:16.878 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InTransitToExit locM=-1 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:16.879 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InTransitToExit locM=-1 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:16.879 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InTransitToExit locM=-1 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:16.880 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InTransitToExit locM=-1 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:16.880 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=InTransitToExit locM=-1 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:17.271 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InTransitToExit locM=-1 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:17.272 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InTransitToExit locM=-1 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:17.272 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InTransitToExit locM=-1 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:17.273 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InTransitToExit locM=-1 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:17.273 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=InTransitToExit locM=-1 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:17.636 [Warning] [HasDispatchableJob] M0 → FALSE. All trackers: 
+  job=0 loc=InTransitToExit locM=-1 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:17.637 [Warning] [HasDispatchableJob] M1 → FALSE. All trackers: 
+  job=0 loc=InTransitToExit locM=-1 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:17.637 [Warning] [HasDispatchableJob] M2 → FALSE. All trackers: 
+  job=0 loc=InTransitToExit locM=-1 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:17.637 [Warning] [HasDispatchableJob] M3 → FALSE. All trackers: 
+  job=0 loc=InTransitToExit locM=-1 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:17.638 [Warning] [HasDispatchableJob] M4 → FALSE. All trackers: 
+  job=0 loc=InTransitToExit locM=-1 opIdx=4/5
+  job=1 loc=Exited locM=-1 opIdx=4/5
+2026-04-07 21:45:17.773 [TransitionJob] job=0 InTransitToExit(M-1) → OnExitBelt(M-1) agv=-1
+2026-04-07 21:45:17.773 [TransitionJob] VERIFY job=0: Location=OnExitBelt, LocationMachineId=-1
+2026-04-07 21:45:17.774 [AGV 0] Executed dropoff of job 0
+2026-04-07 21:45:17.774 [AGV 0] Returning to parking at (-6.00, 0.01, -6.50).
+2026-04-07 21:45:17.822 [TransitionJob] job=0 OnExitBelt(M-1) → Exited(M-1) agv=-1
+2026-04-07 21:45:17.823 [TransitionJob] VERIFY job=0: Location=Exited, LocationMachineId=-1
+2026-04-07 21:45:17.823 [JobManager] Job 0 exited factory.
+2026-04-07 21:45:17.825 [SimBridge] Episode complete: makespan=434.2, decisions=20
+2026-04-07 21:45:17.826 [Validate] Makespan=434.2 | TheoreticalMin=256.4 | Ratio=1.69x | TimeScale=7.129822

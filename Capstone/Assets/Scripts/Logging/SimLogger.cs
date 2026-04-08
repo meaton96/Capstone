@@ -49,7 +49,13 @@ namespace Assets.Scripts.Logging
             try
             {
                 _filePath = Path.Combine(Application.dataPath, fileName);
-                Directory.CreateDirectory(_filePath);
+
+                string directoryPath = Path.GetDirectoryName(_filePath);
+
+                if (!string.IsNullOrEmpty(directoryPath))
+                {
+                    Directory.CreateDirectory(directoryPath);
+                }
 
                 File.WriteAllText(_filePath, $"--- Log Started: {DateTime.Now} ---\n");
 
