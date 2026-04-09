@@ -233,7 +233,7 @@ namespace Assets.Scripts.Simulation
 
                 // Place visual on outgoing belt
                 machine.PlaceOnOutgoing(jobId, job.Visual);
-
+                RefreshMachineLabels(machine.MachineId);
                 if (job.IsLastOperation)
                 {
                     // All ops done → needs transport to exit
@@ -301,6 +301,10 @@ namespace Assets.Scripts.Simulation
                             job.LocationMachineId = machineId;
                             job.StateEntryTime = SimTime;
                             SimLogger.High($"[Orchestrator] Job {jobId} → Queued at M{machineId}");
+
+                            PhysicalMachine targetMachine = layoutManager.GetMachine(machineId);
+                            targetMachine.PlaceOnIncoming(jobId, job.Visual);
+                            RefreshMachineLabels(machineId);
                         }
 
                         job.TotalTransitTime += (SimTime - job.StateEntryTime);
@@ -493,7 +497,8 @@ namespace Assets.Scripts.Simulation
 
             // Tell machine to run the timer
             PhysicalMachine machine = layoutManager.GetMachine(machineId);
-            machine.StartJob(chosenJobId, duration);
+            machine.StartJob(chosenJobId, duration, job.Visual);
+            RefreshMachineLabels(machineId);
 
             LastAppliedRule = ActionToRule[actionIndex].ToString();
 
@@ -628,6 +633,20 @@ namespace Assets.Scripts.Simulation
         //  Helpers
         // ─────────────────────────────────────────────────────────
 
+        private void RefreshMachineLabels(int machineId)
+        {
+            PhysicalMachine machine = layoutManager.GetMachine(machineId);
+            if (machine == null) return;
+
+            int inCount = Jobs.GetDispatchableJobs(machineId).Count;
+
+            int outCount = 0;
+            foreach (var j in Jobs.AllJobs)
+                if (j.LocationMachineId == machineId && j.State == JobState.WaitingForPickup)
+                    outCount++;
+
+            machine.RefreshQueueLabels(inCount, outCount);
+        }
         private float GetRemainingWork(int jobId)
         {
             JobData j = Jobs.Get(jobId);
