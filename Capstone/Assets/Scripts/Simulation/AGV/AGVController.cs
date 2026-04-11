@@ -154,10 +154,22 @@ namespace Assets.Scripts.Simulation.AGV
                              PhysicalMachine source, PhysicalMachine target,
                              JobVisual visual)
         {
-            if (State != AGVState.Idle)
+            if (State != AGVState.Idle && State != AGVState.ReturningToParking)
             {
-                SimLogger.Error($"[AGV {AgvId}] Dispatch while not idle (state={State}).");
+                SimLogger.Error($"[AGV {AgvId}] Dispatch while not idle or returning (state={State}).");
                 return;
+            }
+
+            // If we were heading home, cancel that route cleanly.
+            // currentZoneId stays valid — we're still physically in that zone.
+            if (State == AGVState.ReturningToParking)
+            {
+                currentRoute.Clear();
+                routeIndex = 0;
+                waitingForZone = false;
+                pendingZoneId = -1;
+                parkingZoneId = -1;
+                SimLogger.High($"[AGV {AgvId}] Redirected from parking to job {jobId}.");
             }
 
             CurrentJobId = jobId;
@@ -322,16 +334,31 @@ namespace Assets.Scripts.Simulation.AGV
             targetMachine = null;
             pickupZoneId = -1;
             dropoffZoneId = -1;
-
-            // Head to parking
-            State = AGVState.ReturningToParking;
             atDropoffDock = false;
+
+            // Head to parking.  The orchestrator may intercept and redispatch
+            // this AGV while it is ReturningToParking if a new job becomes ready
+            // before it arrives home — see Dispatch() and AssignAGVs().
+            State = AGVState.ReturningToParking;
             BeginParkingRoute();
         }
 
         // ─────────────────────────────────────────────────────────
         //  Parking
         // ─────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Releases all zone reservations and transitions to Idle at the current
+        /// world position.  Called after a normal delivery so the orchestrator can
+        /// immediately redispatch this AGV without requiring it to travel back to
+        /// the parking alcove first.
+        ///
+        /// The next Dispatch() call will re-acquire the zone at the new position
+        /// via FindZoneAtSelf(), so there is no permanent traffic-reservation leak.
+        ///
+        /// NOTE: BeginParkingRoute() is intentionally NOT called here.
+        ///       It is only used by FullReset() for error recovery.
+        /// </summary>
 
         private void BeginParkingRoute()
         {

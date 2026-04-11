@@ -71,5 +71,24 @@ namespace Assets.Scripts.Simulation.AGV
             }
             return null;
         }
+
+        /// <summary>
+        /// Returns the best available AGV for a new dispatch.
+        /// Prefers truly idle AGVs (already parked, no travel cost).
+        /// Falls back to AGVs currently returning to parking — they can be
+        /// intercepted mid-route and redirected, saving the full home trip.
+        /// </summary>
+        public AGVController GetAvailableAGV()
+        {
+            // Pass 1: truly idle (at or near parking)
+            foreach (var agv in fleet)
+                if (agv.IsIdle) return agv;
+
+            // Pass 2: returning home — preemptable
+            foreach (var agv in fleet)
+                if (agv.State == AGVState.ReturningToParking) return agv;
+
+            return null;
+        }
     }
 }

@@ -324,14 +324,16 @@ namespace Assets.Scripts.Simulation
 
         private void AssignAGVs()
         {
-            // Try to assign idle AGVs to unassigned WaitingForPickup jobs.
-            // One assignment per idle AGV per frame is fine.
+            // Assign available AGVs to unassigned WaitingForPickup jobs.
+            // GetAvailableAGV() prefers idle AGVs but will also return an AGV
+            // currently ReturningToParking — Dispatch() cancels the parking
+            // route mid-trip so the AGV pivots directly to the new pickup.
             while (true)
             {
                 JobData job = Jobs.GetNextUnassignedPickup();
                 if (job == null) break;
 
-                AGVController agv = agvPool.GetIdleAGV();
+                AGVController agv = agvPool.GetAvailableAGV();
                 if (agv == null) break;
 
                 // Resolve positions
@@ -367,6 +369,7 @@ namespace Assets.Scripts.Simulation
                 SimLogger.High($"[Orchestrator] Assigned AGV {agv.AgvId} to job {job.JobId} " +
                                $"(M{job.LocationMachineId} → M{job.TargetMachineId})");
             }
+
         }
 
         // ─────────────────────────────────────────────────────────
