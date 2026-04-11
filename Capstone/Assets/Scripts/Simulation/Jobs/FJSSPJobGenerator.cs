@@ -11,6 +11,62 @@ namespace Assets.Scripts.Simulation.Jobs
     {
         private static readonly MachineType[] AllTypes = (MachineType[])Enum.GetValues(typeof(MachineType));
 
+        // ── Per-type processing-time distributions ────────────────────────────────
+        //
+        //  Group 1 – Automated / Subtractive (G-code, fast, tight σ)
+        //    Mill    N(μ=15, σ=2)
+        //    Lathe   N(μ=12, σ=2)
+        //
+        //  Group 2 – Semi-Automated / Thermal (fixturing + heat cycle, wider σ)
+        //    Weld    N(μ=30, σ=6)
+        //
+        //  Group 3 – Quality Assurance (fast gateway, but can become a bottleneck)
+        //    Inspect N(μ=8,  σ=3)
+        //
+        //  Group 4 – Manual / Additive (longest, most unpredictable)
+        //    Assemble N(μ=45, σ=12)
+        //
+        //  Times are clamped to [1, ∞) so no op ever takes zero or negative time.
+        // ─────────────────────────────────────────────────────────────────────────
+        private static readonly Dictionary<MachineType, (float mu, float sigma)> ProcTimeParams =
+            new Dictionary<MachineType, (float mu, float sigma)>
+            {
+                { MachineType.Mill,     (mu: 180f, sigma:  20f) },
+                { MachineType.Lathe,    (mu: 150f, sigma:  20f) },
+                { MachineType.Weld,     (mu: 300f, sigma:  50f) },
+                { MachineType.Inspect,  (mu: 120f, sigma:  20f) },
+                { MachineType.Assemble, (mu: 480f, sigma:  80f) },
+            };
+
+        /// <summary>
+        /// Returns a sample from N(μ, σ) clamped to [minValue, ∞).
+        /// Uses the Box-Muller transform; both UnityEngine.Random calls consume
+        /// values in (0, 1] so the log is never called on zero.
+        /// </summary>
+        private static float SampleNormal(float mu, float sigma, float minValue = 1f)
+        {
+            // Box-Muller: two uniform samples → one standard-normal variate
+            float u1 = 1f - UnityEngine.Random.value; // (0, 1]
+            float u2 = 1f - UnityEngine.Random.value;
+            float z = Mathf.Sqrt(-2f * Mathf.Log(u1)) * Mathf.Cos(2f * Mathf.PI * u2);
+            return Mathf.Max(minValue, mu + sigma * z);
+        }
+
+        /// <summary>
+        /// Returns a processing-time sample for the given machine type drawn from
+        /// that type's calibrated N(μ, σ) distribution.
+        /// Falls back to the config's flat range if the type is not in the table
+        /// (future-proofs against new enum values added before the table is updated).
+        /// </summary>
+        private static float SampleProcTime(MachineType type, FJSSPConfig config)
+        {
+            if (ProcTimeParams.TryGetValue(type, out var p))
+                return SampleNormal(p.mu, p.sigma);
+
+            // Fallback: uniform draw from config bounds (preserves old behaviour)
+            return UnityEngine.Random.Range(config.MinProcTime, config.MaxProcTime);
+        }
+
         public static FJSSPJobDefinition[] Generate(FJSSPConfig config,
                                                      Dictionary<MachineType, List<int>> machinesByType)
         {
@@ -28,7 +84,10 @@ namespace Assets.Scripts.Simulation.Jobs
                     eligible[o] = new Dictionary<int, float>();
                     foreach (int machineId in machinesByType[opSequence[o]])
                     {
-                        float procTime = UnityEngine.Random.Range(config.MinProcTime, config.MaxProcTime);
+                        // Each machine of the required type gets its own independent
+                        // draw so that same-type machines have different queue pressures,
+                        // giving the _SRWT router a real signal to exploit.
+                        float procTime = SampleProcTime(opSequence[o], config);
                         eligible[o][machineId] = procTime;
                     }
                 }
