@@ -4576,6 +4576,7 @@ MonoBehaviour:
   ioConveyorScale: {x: 0.05, y: 0.2, z: 0.4}
   incomingBeltMaterial: {fileID: 2100000, guid: 51d8a3821f9c63147ae8d05d1c9e4fe0, type: 2}
   incomingBeltOffset: {x: -2.5, y: 0.01, z: 1.5}
+  outgoingBeltOffset: {x: -1, y: 0.01, z: -2}
   wallPrefab: {fileID: 8214164735923952847, guid: 80dbfde9c2c33664ca74062703b00a2b, type: 3}
   floorTransform: {fileID: 473100912}
   machineSpacingX: 6
@@ -7622,7 +7623,6 @@ MonoBehaviour:
   agent: {fileID: 516692882}
   Jobs: {fileID: 263971911}
   autoStartOnPlay: 0
-  logLevel: 3
   OnDecisionRequired:
     m_PersistentCalls:
       m_Calls: []

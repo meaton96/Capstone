@@ -25,6 +25,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         [SerializeField] private Vector3 ioConveyorScale = new Vector3(.05f, .2f, .30f);
         [SerializeField] private Material incomingBeltMaterial;
         [SerializeField] private Vector3 incomingBeltOffset = new Vector3(-2f, 0.01f, 1.5f);
+        [SerializeField] private Vector3 outgoingBeltOffset = new Vector3(-2f, 0.01f, 1.5f);
 
         public Vector3 IncomingBeltPosition { get; private set; }
         public Vector3 OutgoingBeltPosition { get; private set; }
@@ -133,6 +134,15 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 0f,
                 machineAreaDepth / 2f);
 
+            // Distribute machine types so no two machines of the same type share the same
+            // physical row aisle.  Same-type clustering would force all AGVs heading to that
+            // type to compete for the same aisle; spreading them across rows lets the
+            // _SRWT composite PDR route jobs to a less-congested aisle instead.
+            MachineType[] distributedLayout = BuildDistributedTypeLayout(
+                config.MachineTypeLayout, layoutRows, layoutCols);
+
+            LogDistributedLayout(distributedLayout, layoutRows, layoutCols);
+
             machines = new PhysicalMachine[machineCount];
             for (int i = 0; i < machineCount; i++)
             {
@@ -161,7 +171,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                     prefabToSpawn = doubleSidedMachinePrefab != null ? doubleSidedMachinePrefab : machinePrefab;
                     rotation = Quaternion.identity;
                 }
-                MachineType type = config.MachineTypeLayout[i];
+                MachineType type = distributedLayout[i];
 
                 PhysicalMachine pm = Instantiate(prefabToSpawn, worldPos, rotation, transform);
                 pm.gameObject.name = $"Machine_{i}_{type}";
@@ -217,7 +227,10 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             }
 
             float botZ = floorCentre.z + GetBottomSpineZ();
-            OutgoingBeltPosition = new Vector3(floorCentre.x + machineAreaHalfW + verticalAisleWidth, 0.01f, botZ);
+            OutgoingBeltPosition = new Vector3(
+                floorCentre.x + machineAreaHalfW + verticalAisleWidth + outgoingBeltOffset.x,
+                outgoingBeltOffset.y,
+                botZ + outgoingBeltOffset.z);
 
             if (conveyorPrefab != null)
             {
@@ -564,6 +577,117 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 for (int j = 0; j < n; j++) row += $"{distanceMatrix[i, j],6:F1} ";
                 SimLogger.High(row);
             }
+        }
+
+        /// @brief Reorders a flat MachineType array so that, within each grid row,
+        ///        every machine type appears at most once — spreading same-type machines
+        ///        across different physical row aisles.
+        ///
+        /// @details Uses a greedy "largest-remaining-count first" heuristic per row.
+        ///          Within a single row it picks the type with the highest outstanding
+        ///          quota that has not already been placed in that row.  If all distinct
+        ///          types are exhausted before the row is full (i.e. one type has more
+        ///          machines than there are rows), the constraint is relaxed and the
+        ///          type with the highest remaining count fills the overflow slots.
+        ///
+        /// @param original The flat type array from FJSSPConfig — not mutated.
+        /// @param rows     Number of grid rows already calculated by BuildFloor.
+        /// @param cols     Number of grid columns already calculated by BuildFloor.
+        /// @return A new array of the same length with redistributed type assignments.
+        private static MachineType[] BuildDistributedTypeLayout(MachineType[] original, int rows, int cols)
+        {
+            // Tally how many of each type we need to place in total.
+            var remaining = new Dictionary<MachineType, int>();
+            foreach (MachineType t in original)
+            {
+                if (!remaining.ContainsKey(t)) remaining[t] = 0;
+                remaining[t]++;
+            }
+
+            var result = new MachineType[original.Length];
+            int total = original.Length;
+
+            for (int row = 0; row < rows; row++)
+            {
+                var usedThisRow = new HashSet<MachineType>();
+
+                for (int col = 0; col < cols; col++)
+                {
+                    int idx = row * cols + col;
+                    if (idx >= total) break;
+
+                    // Pass 1 – pick the type with the highest quota not yet used in this row.
+                    MachineType best = default;
+                    int bestCount = -1;
+
+                    foreach (var kvp in remaining)
+                    {
+                        if (kvp.Value <= 0 || usedThisRow.Contains(kvp.Key)) continue;
+                        if (kvp.Value > bestCount) { best = kvp.Key; bestCount = kvp.Value; }
+                    }
+
+                    // Pass 2 (fallback) – every distinct type already appears in this row;
+                    // relax the uniqueness constraint and just fill with the highest-quota type.
+                    if (bestCount < 0)
+                    {
+                        foreach (var kvp in remaining)
+                        {
+                            if (kvp.Value <= 0) continue;
+                            if (kvp.Value > bestCount) { best = kvp.Key; bestCount = kvp.Value; }
+                        }
+                    }
+
+                    result[idx] = best;
+                    remaining[best]--;
+                    usedThisRow.Add(best);
+                }
+            }
+
+            return result;
+        }
+
+        /// @brief Logs the distributed machine-type grid so you can visually verify
+        ///        that no row contains duplicate types (unless overflow forces it).
+        private void LogDistributedLayout(MachineType[] layout, int rows, int cols)
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("[FactoryLayout] Distributed type layout (row × col):");
+
+            for (int row = 0; row < rows; row++)
+            {
+                sb.Append($"  Row{row}: ");
+                var typesInRow = new List<string>();
+                for (int col = 0; col < cols; col++)
+                {
+                    int idx = row * cols + col;
+                    if (idx < layout.Length)
+                        typesInRow.Add(layout[idx].ToString());
+                }
+                sb.AppendLine(string.Join(", ", typesInRow));
+            }
+
+            // Verify the invariant: warn if any row has two same-type machines.
+            bool violation = false;
+            for (int row = 0; row < rows; row++)
+            {
+                var seen = new HashSet<MachineType>();
+                for (int col = 0; col < cols; col++)
+                {
+                    int idx = row * cols + col;
+                    if (idx >= layout.Length) break;
+                    if (!seen.Add(layout[idx]))
+                    {
+                        sb.AppendLine($"  [WARN] Row {row} contains duplicate type '{layout[idx]}'" +
+                                      " — this type has more instances than there are rows.");
+                        violation = true;
+                    }
+                }
+            }
+
+            if (!violation)
+                sb.AppendLine("  [OK] No two same-type machines share a row aisle.");
+
+            SimLogger.Medium(sb.ToString());
         }
 
         private void OnDrawGizmosSelected()

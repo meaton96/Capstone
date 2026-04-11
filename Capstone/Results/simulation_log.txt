@@ -1,8 +1,98 @@
---- Log Started: 4/9/2026 2:42:23 PM ---
-2026-04-09 14:42:24.139 [Agent] OnEpisodeBegin skipped — waiting for UI to arm.
-2026-04-09 14:42:35.783 [FactoryLayout] Distance matrix (5x5):
-       M0     M1     M2     M3     M4   
-2026-04-09 14:42:35.792 [FactoryLayout] Built aisle-based floor: 5 machines.
-2026-04-09 14:42:35.798 [TrafficZones] Built zone graph: 18 zones.
-2026-04-09 14:42:35.800 [AGVPool] Spawned fleet of 3 AGVs.
-2026-04-09 14:42:36.196 [Orchestrator] Episode started: 3 jobs, 5 machines
+--- Log Started: 4/11/2026 10:23:29 AM ---
+2026-04-11 10:23:29.941 [Agent] OnEpisodeBegin skipped — waiting for UI to arm.
+2026-04-11 10:23:31.986 [FactoryLayout] Distributed type layout (row × col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble, Mill, Lathe
+  Row3: Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-11 10:23:32.012 [FactoryLayout] Distance matrix (15x15):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
+2026-04-11 10:23:32.023 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-04-11 10:23:32.029 [TrafficZones] Built zone graph: 33 zones.
+2026-04-11 10:23:32.032 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-11 10:23:58.371 [FactoryLayout] Distributed type layout (row × col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble, Mill, Lathe
+  Row3: Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-11 10:23:58.388 [FactoryLayout] Distance matrix (15x15):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
+2026-04-11 10:23:58.395 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-04-11 10:23:58.395 [TrafficZones] Built zone graph: 33 zones.
+2026-04-11 10:23:58.396 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-11 10:24:03.294 [FactoryLayout] Distributed type layout (row × col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble, Mill, Lathe
+  Row3: Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-11 10:24:03.305 [FactoryLayout] Distance matrix (15x15):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
+2026-04-11 10:24:03.310 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-04-11 10:24:03.310 [TrafficZones] Built zone graph: 33 zones.
+2026-04-11 10:24:03.311 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-11 10:24:05.800 [FactoryLayout] Distributed type layout (row × col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble, Mill, Lathe
+  Row3: Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-11 10:24:05.812 [FactoryLayout] Distance matrix (15x15):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
+2026-04-11 10:24:05.817 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-04-11 10:24:05.817 [TrafficZones] Built zone graph: 33 zones.
+2026-04-11 10:24:05.818 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-11 10:24:09.375 [FactoryLayout] Distributed type layout (row × col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble, Mill, Lathe
+  Row3: Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-11 10:24:09.388 [FactoryLayout] Distance matrix (15x15):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
+2026-04-11 10:24:09.393 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-04-11 10:24:09.393 [TrafficZones] Built zone graph: 33 zones.
+2026-04-11 10:24:09.394 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-11 10:24:17.113 [FactoryLayout] Distributed type layout (row × col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble, Mill, Lathe
+  Row3: Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-11 10:24:17.125 [FactoryLayout] Distance matrix (15x15):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
+2026-04-11 10:24:17.129 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-04-11 10:24:17.129 [TrafficZones] Built zone graph: 33 zones.
+2026-04-11 10:24:17.131 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-11 10:24:20.813 [FactoryLayout] Distributed type layout (row × col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble, Mill, Lathe
+  Row3: Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-11 10:24:20.825 [FactoryLayout] Distance matrix (15x15):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
+2026-04-11 10:24:20.829 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-04-11 10:24:20.830 [TrafficZones] Built zone graph: 33 zones.
+2026-04-11 10:24:20.831 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-11 10:24:31.981 [FactoryLayout] Distributed type layout (row × col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble, Mill, Lathe
+  Row3: Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-11 10:24:31.994 [FactoryLayout] Distance matrix (15x15):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
+2026-04-11 10:24:31.999 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-04-11 10:24:32.000 [TrafficZones] Built zone graph: 33 zones.
+2026-04-11 10:24:32.002 [AGVPool] Spawned fleet of 3 AGVs.
