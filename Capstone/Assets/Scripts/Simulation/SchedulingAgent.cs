@@ -89,7 +89,9 @@ namespace Assets.Scripts.Simulation
 
         public override void OnEpisodeBegin()
         {
-            // If training mode is on, bypass the UI and stay armed infinitely
+            // In continuous training mode, stay armed forever.
+            // In batch/UI mode the runner arms us explicitly via ArmAndStart()
+            // and the consume-ticket block below re-gates us after each episode.
             if (bridge != null && bridge.AutoStartOnPlay)
             {
                 IsArmed = true;

@@ -651,7 +651,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         private void LogDistributedLayout(MachineType[] layout, int rows, int cols)
         {
             var sb = new System.Text.StringBuilder();
-            sb.AppendLine("[FactoryLayout] Distributed type layout (row × col):");
+            sb.AppendLine("[FactoryLayout] Distributed type layout (row x col):");
 
             for (int row = 0; row < rows; row++)
             {

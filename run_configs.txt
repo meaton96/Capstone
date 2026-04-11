@@ -1,4 +1,13 @@
-./capstone.app/Contents/MacOS/capstone \
-    -batchmode -nographics -timescale 50 \
-    -batchconfig ./BatchConfigs/BatchConfigs.json \
-    -repeats 1
+.\RunBatch.ps1 `
+        -ExePath     ".\capstone.exe" `
+        -BatchConfig ".\BatchConfigs\BatchConfigs.json" `
+        -ResultsDir  ".\Results" `
+        -Repeats     3 `
+        -Timescale   100 `
+        -LogLevel    Medium
+
+
+
+./capstone.exe -batchmode -nographics -timescale 100 `
+          -batchconfig ./BatchConfigs/BatchConfigs.json `
+          -repeats 1

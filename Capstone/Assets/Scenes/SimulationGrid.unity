@@ -4458,7 +4458,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb468411eae5f45c1a1d6eba77b23cf1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Simulation::Assets.Scripts.Simulation.LoggingInitializer
-  simLoggerLevel: 2
+  simLoggerLevel: 3
   enableFileLogging: 1
 --- !u!4 &895129767
 Transform:
@@ -7622,7 +7622,7 @@ MonoBehaviour:
   agvPool: {fileID: 1750965656}
   agent: {fileID: 516692882}
   Jobs: {fileID: 263971911}
-  autoStartOnPlay: 0
+  AutoStartOnPlay: 0
   OnDecisionRequired:
     m_PersistentCalls:
       m_Calls: []

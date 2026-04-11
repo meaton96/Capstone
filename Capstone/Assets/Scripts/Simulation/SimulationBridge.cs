@@ -48,8 +48,8 @@ namespace Assets.Scripts.Simulation
         // ─────────────────────────────────────────────────────────
 
         [Header("Episode Configuration")]
-        [SerializeField] private bool autoStartOnPlay = false;
-        public bool AutoStartOnPlay => autoStartOnPlay;
+        public bool AutoStartOnPlay = false;
+        // public bool AutoStartOnPlay => autoStartOnPlay;
         //[SerializeField] private LogLevel logLevel = LogLevel.Low;
 
         private FJSSPConfig currentConfig;
@@ -116,7 +116,7 @@ namespace Assets.Scripts.Simulation
 
         private void Start()
         {
-            if (autoStartOnPlay && agent != null)
+            if (AutoStartOnPlay && agent != null)
                 agent.IsArmed = true;
         }
 

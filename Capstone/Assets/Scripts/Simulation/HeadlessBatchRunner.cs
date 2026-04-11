@@ -17,9 +17,9 @@ namespace Assets.Scripts.Simulation
     ///
     /// Usage (headless build):
     /// @code
-    ///   ./MyBuild.exe -batchmode -nographics -timescale 100 \
-    ///       -batchconfig path/to/batch_configs.json \
-    ///       -repeats 3
+    ///   ./capstone.exe -batchmode -nographics -timescale 100 `
+    ///      -batchconfig ./BatchConfigs/BatchConfigs.json `
+    ///      -repeats 1
     /// @endcode
     ///
     /// The runner will:
@@ -58,6 +58,10 @@ namespace Assets.Scripts.Simulation
         private int totalRuns;
         private int completedRuns;
 
+        // ── Active rule set (filtered by -rules CLI arg) ──────────
+        // Populated in Start(). Defaults to AllRules if no filter given.
+        private DispatchingRule[] activeRules;
+
         // ─────────────────────────────────────────────────────────
         //  Unity Lifecycle
         // ─────────────────────────────────────────────────────────
@@ -69,7 +73,7 @@ namespace Assets.Scripts.Simulation
             // Only auto-start in batchmode, or if a batchconfig was explicitly passed
             if (Application.isBatchMode || !string.IsNullOrEmpty(batchPath))
             {
-                // --- NEW: Parse and apply timescale ---
+                // ── Timescale ─────────────────────────────────────────
                 string timeScaleStr = GetCLIArg("-timescale");
                 if (!string.IsNullOrEmpty(timeScaleStr) && float.TryParse(timeScaleStr, out float parsedScale))
                 {
@@ -78,12 +82,32 @@ namespace Assets.Scripts.Simulation
                 }
                 else
                 {
-                    // Default to super fast if in headless mode and no timescale was provided
                     Time.timeScale = 100f;
                     SimLogger.Low("[BatchRunner] No timescale provided. Defaulting to 100x.");
                 }
-                // --------------------------------------
 
+                // ── Rules filter ───────────────────────────────────────
+                // -rules SPT_SMPT,LPT_MMUR   (comma-separated, no spaces)
+                // Lets the parallel launcher assign each process a subset.
+                activeRules = ParseRulesArg(GetCLIArg("-rules"));
+                SimLogger.Low($"[BatchRunner] Active rules ({activeRules.Length}): " +
+                              string.Join(", ", activeRules));
+
+                // ── Output suffix ──────────────────────────────────────
+                // -outputsuffix _SPT_SMPT  →  results_SPT_SMPT.csv
+                // Prevents CSV collisions when N processes write simultaneously.
+                //
+                // ResultsLogger.SetFilenameSuffix() must append the suffix to
+                // whatever base filename ResultsLogger uses internally, e.g.:
+                //   public static void SetFilenameSuffix(string suffix) {
+                //       _filename = "results" + suffix + ".csv";
+                //   }
+                // Add this one-liner to ResultsLogger.cs if not already present.
+                string suffix = GetCLIArg("-outputsuffix") ?? string.Empty;
+                if (!string.IsNullOrEmpty(suffix))
+                    ResultsLogger.SetFilenameSuffix(suffix);
+
+                // ── Repeats ────────────────────────────────────────────
                 int repeats = 1;
                 string repeatsStr = GetCLIArg("-repeats");
                 if (!string.IsNullOrEmpty(repeatsStr))
@@ -133,11 +157,15 @@ namespace Assets.Scripts.Simulation
         private IEnumerator RunBatchCoroutine(FJSSPConfig[] configs, int repeats)
         {
             isBatchRunning = true;
-            totalRuns = configs.Length * AllRules.Length * repeats;
+            // Use filtered rule list (set from CLI -rules arg, defaults to all rules)
+            if (activeRules == null || activeRules.Length == 0)
+                activeRules = AllRules;
+
+            totalRuns = configs.Length * activeRules.Length * repeats;
             completedRuns = 0;
 
-            SimLogger.Low($"[BatchRunner] Starting batch: {configs.Length} configs × " +
-                      $"{AllRules.Length} rules × {repeats} repeats = {totalRuns} total runs");
+            SimLogger.Low($"[BatchRunner] Starting batch: {configs.Length} configs x " +
+                      $"{activeRules.Length} rules x {repeats} repeats = {totalRuns} total runs");
 
             float startWall = Time.realtimeSinceStartup;
 
@@ -145,7 +173,7 @@ namespace Assets.Scripts.Simulation
             {
                 for (int rep = 0; rep < repeats; rep++)
                 {
-                    foreach (var rule in AllRules)
+                    foreach (var rule in activeRules)
                     {
                         // Clone config with offset seed for this repeat
                         FJSSPConfig runConfig = CloneWithSeed(baseConfig, baseConfig.Seed + rep);
@@ -183,7 +211,7 @@ namespace Assets.Scripts.Simulation
         /// @brief Runs one (config, rule) episode to completion, yielding each frame.
         private IEnumerator RunSingleEpisode(FJSSPConfig config, DispatchingRule rule)
         {
-
+            bridge.AutoStartOnPlay = true;
             EpisodeResult runResult = null;
             UnityEngine.Events.UnityAction<EpisodeResult> onFinish = res => runResult = res;
             bridge.OnEpisodeFinished.AddListener(onFinish);
@@ -194,9 +222,9 @@ namespace Assets.Scripts.Simulation
             // Phase 2: Load config (this sets IsFactoryReady = false internally)
             bridge.LoadConfig(config);
 
-            // Phase 3: Give the agent its single-use ticket to start the episode
-            if (agent != null)
-                agent.ArmAndStart();
+            // // Phase 3: Give the agent its single-use ticket to start the episode
+            // if (agent != null)
+            //     agent.ArmAndStart();
 
             // Phase 4: Wait for ML-Agents to trigger OnEpisodeBegin() on the next FixedUpdate
             // This will call bridge.StartEpisode(), which spawns the factory and sets episodeActive = true
@@ -272,6 +300,26 @@ namespace Assets.Scripts.Simulation
 
             SimLogger.LogError("[BatchRunner] No batch config source available.");
             return Array.Empty<FJSSPConfig>();
+        }
+
+        /// <summary>
+        /// Parses a comma-separated rule list from the -rules CLI argument.
+        /// Returns AllRules if the argument is absent or unparseable.
+        /// Example: -rules SPT_SMPT,LPT_MMUR,SRT_SRWT
+        /// </summary>
+        private static DispatchingRule[] ParseRulesArg(string arg)
+        {
+            if (string.IsNullOrEmpty(arg)) return AllRules;
+
+            var result = new List<DispatchingRule>();
+            foreach (string token in arg.Split(','))
+            {
+                if (Enum.TryParse(token.Trim(), ignoreCase: true, out DispatchingRule rule))
+                    result.Add(rule);
+                else
+                    SimLogger.LogWarning($"[BatchRunner] Unknown rule in -rules arg: '{token}'");
+            }
+            return result.Count > 0 ? result.ToArray() : AllRules;
         }
 
         private static string GetCLIArg(string key)
