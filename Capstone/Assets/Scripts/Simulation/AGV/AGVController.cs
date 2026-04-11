@@ -15,6 +15,9 @@ namespace Assets.Scripts.Simulation.AGV
         MovingToPickup,
         MovingToDropoff,
         ReturningToParking,
+        /// Heading to a machine's pickup zone ahead of job completion.
+        /// Waits at the dock until FinalizePreDispatch() is called.
+        MovingToPrePickup,
     }
 
     /// <summary>
@@ -52,6 +55,11 @@ namespace Assets.Scripts.Simulation.AGV
         public int CurrentJobId { get; private set; } = -1;
         public int CurrentZoneId => currentZoneId;
         public bool IsIdle => State == AGVState.Idle;
+
+        /// Set while this AGV is heading to a pre-pickup position.
+        /// -1 means not pre-dispatched.
+        public int PreDispatchedJobId { get; private set; } = -1;
+        public bool IsPreDispatched => State == AGVState.MovingToPrePickup;
 
         // ══════════════════════════════════════════════════════════
         //  FLAGS — orchestrator reads these, then calls ClearFlags()
@@ -149,6 +157,107 @@ namespace Assets.Scripts.Simulation.AGV
         // ─────────────────────────────────────────────────────────
         //  Dispatch — called by orchestrator
         // ─────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Sends this AGV to the source machine's pickup zone ahead of job completion.
+        /// The AGV will wait at the dock until FinalizePreDispatch() is called with
+        /// the routing target once the job actually finishes.
+        /// </summary>
+        public void PreDispatch(int jobId, Vector3 pickupPos, PhysicalMachine source)
+        {
+            if (State != AGVState.Idle && State != AGVState.ReturningToParking)
+            {
+                SimLogger.Error($"[AGV {AgvId}] PreDispatch while unavailable (state={State}).");
+                return;
+            }
+
+            if (State == AGVState.ReturningToParking)
+            {
+                currentRoute.Clear();
+                routeIndex = 0;
+                waitingForZone = false;
+                pendingZoneId = -1;
+                parkingZoneId = -1;
+            }
+
+            PreDispatchedJobId = jobId;
+            sourceMachine = source;
+            targetPickupPos = pickupPos;
+            targetMachine = null;     // not known yet
+            loadedJobVisual = null;
+
+            atPickupDock = false;
+            atDropoffDock = false;
+            pickupTimer = handshakeDuration;
+            dropoffTimer = handshakeDuration;
+            waitingForZone = false;
+            pendingZoneId = -1;
+            ClearFlags();
+
+            if (currentZoneId < 0)
+            {
+                currentZoneId = FindZoneAtSelf();
+                if (currentZoneId >= 0) trafficMgr.TryReserve(currentZoneId, AgvId);
+            }
+
+            if (source != null)
+                (pickupZoneId, pickupDock) = FindDockForMachine(source.MachineId, currentZoneId, pickupPos);
+            else
+                (pickupZoneId, pickupDock) = FindSpecialDock(TrafficZoneManager.IncomingBeltId);
+
+            if (pickupZoneId < 0 || !PlanRoute(currentZoneId, pickupZoneId))
+            {
+                SimLogger.Error($"[AGV {AgvId}] Cannot pre-dispatch to machine for job {jobId}.");
+                PreDispatchedJobId = -1;
+                return;
+            }
+
+            State = AGVState.MovingToPrePickup;
+            BeginNextWaypoint();
+            SimLogger.High($"[AGV {AgvId}] Pre-dispatched for job {jobId} — heading to pickup zone.");
+        }
+
+        /// <summary>
+        /// Called by the orchestrator after the pre-dispatched job has finished and been
+        /// routed to a target machine.  Upgrades this AGV from waiting-at-dock to a full
+        /// pickup-and-deliver run.  If the AGV is still en-route to the dock it stores the
+        /// target info and transitions to a normal pickup on arrival.
+        /// </summary>
+        public void FinalizePreDispatch(int jobId, Vector3 dropoffPos,
+                                        PhysicalMachine target, JobVisual visual)
+        {
+            if (PreDispatchedJobId != jobId)
+            {
+                SimLogger.Error($"[AGV {AgvId}] FinalizePreDispatch job mismatch " +
+                                $"(expected {PreDispatchedJobId}, got {jobId}).");
+                return;
+            }
+
+            CurrentJobId = jobId;
+            targetMachine = target;
+            targetDropoffPos = dropoffPos;
+            loadedJobVisual = visual;
+            PreDispatchedJobId = -1;
+
+            if (atPickupDock)
+            {
+                // Already waiting at the dock — start the handshake immediately.
+                // Transition back to MovingToPickup so the existing timer logic
+                // in FixedUpdate handles the rest without any duplication.
+                State = AGVState.MovingToPickup;
+                pickupTimer = handshakeDuration;
+                SimLogger.High($"[AGV {AgvId}] Finalized pre-dispatch for job {jobId} " +
+                               "— already at dock, starting handshake.");
+            }
+            else
+            {
+                // Still travelling — update state so FixedUpdate's MovingToPickup
+                // case takes over on next tick.  Route to pickup is already planned.
+                State = AGVState.MovingToPickup;
+                SimLogger.High($"[AGV {AgvId}] Finalized pre-dispatch for job {jobId} " +
+                               "— still en-route to pickup.");
+            }
+        }
 
         public void Dispatch(int jobId, Vector3 pickupPos, Vector3 dropoffPos,
                              PhysicalMachine source, PhysicalMachine target,
@@ -260,6 +369,22 @@ namespace Assets.Scripts.Simulation.AGV
                     UpdateMovement();
                     if (!waitingForZone && ReachedParking())
                         ArriveAtParking();
+                    break;
+
+                case AGVState.MovingToPrePickup:
+                    UpdateMovement();
+                    // Arrived at the pickup dock — wait here until FinalizePreDispatch
+                    // gives us the dropoff target.  The zone stays reserved so no other
+                    // AGV claims the slot while we sit here.
+                    if (!waitingForZone && ReachedDock(pickupDock))
+                    {
+                        if (!atPickupDock)
+                        {
+                            atPickupDock = true;
+                            AlignToDock(pickupDock);
+                            SimLogger.High($"[AGV {AgvId}] At pre-pickup dock for job {PreDispatchedJobId} — waiting for routing.");
+                        }
+                    }
                     break;
             }
 
@@ -670,6 +795,9 @@ namespace Assets.Scripts.Simulation.AGV
                 AGVState.MovingToPickup => $"AGV{AgvId} [Pickup]{waitStr}\n {jobStr}",
                 AGVState.MovingToDropoff => $"AGV{AgvId} [Dropoff]{waitStr}\n{jobStr}  {target}",
                 AGVState.ReturningToParking => $"AGV{AgvId} [Parking]{waitStr}\n",
+                AGVState.MovingToPrePickup => atPickupDock
+                                               ? $"AGV{AgvId} [PreWait]{waitStr}\nJ{PreDispatchedJobId}"
+                                               : $"AGV{AgvId} [PreRoute]{waitStr}\nJ{PreDispatchedJobId}",
                 _ => $"AGV{AgvId}"
             };
 
@@ -677,6 +805,7 @@ namespace Assets.Scripts.Simulation.AGV
             {
                 AGVState.Idle => Color.white,
                 AGVState.ReturningToParking => Color.cyan,
+                AGVState.MovingToPrePickup => Color.green,
                 _ when waitingForZone => Color.red,
                 _ => Color.yellow
             };

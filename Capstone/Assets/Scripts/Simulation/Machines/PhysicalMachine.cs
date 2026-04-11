@@ -31,9 +31,18 @@ namespace Assets.Scripts.Simulation.Machines
         /// Which job is currently processing (or just finished).
         public int ActiveJobId { get; private set; } = -1;
 
+        /// Set once when remainingTime drops to preDispatchLeadTime.
+        /// Orchestrator reads this to pre-route an AGV to this machine before
+        /// the job finishes. Cleared via ClearAlmostDone().
+        public bool AlmostDoneFlag { get; private set; }
+        public int AlmostDoneJobId { get; private set; } = -1;
+
         // ── Internals ────────────────────────────────────────────
         private float remainingTime;
         private float totalDuration;
+        private bool almostDoneFired;
+
+
 
         [Header("Conveyor Belts (visual only)")]
         [SerializeField] private ConveyorBelt incomingConveyor;
@@ -76,6 +85,9 @@ namespace Assets.Scripts.Simulation.Machines
             totalDuration = duration;
             IsIdle = false;
             FinishedFlag = false;
+            AlmostDoneFlag = false;
+            AlmostDoneJobId = -1;
+            almostDoneFired = false;
 
             // Visual: remove from incoming belt, show at machine center
             RemoveFromAnyIncoming(jobId);
@@ -97,6 +109,13 @@ namespace Assets.Scripts.Simulation.Machines
             IsIdle = true;
             ActiveJobId = -1;
             visualLayer?.CompleteOperation(-1);
+        }
+
+        /// <summary>Orchestrator calls this after reading AlmostDoneFlag.</summary>
+        public void ClearAlmostDone()
+        {
+            AlmostDoneFlag = false;
+            AlmostDoneJobId = -1;
         }
 
         // ─────────────────────────────────────────────────────────
@@ -164,6 +183,14 @@ namespace Assets.Scripts.Simulation.Machines
             // (we don't know total duration here, so visualLayer tracks it from BeginOperation)
             if (visualLayer != null && remainingTime > 0f)
                 visualLayer.UpdateProgress(1f - (remainingTime / Mathf.Max(totalDuration, 0.001f)));
+            // Fire AlmostDoneFlag once when time drops inside the lead window.
+            if (!almostDoneFired && remainingTime <= SimulationBridge.Instance.PreDispatchLeadTime)
+            {
+                almostDoneFired = true;
+                AlmostDoneFlag = true;
+                AlmostDoneJobId = ActiveJobId;
+            }
+
             if (remainingTime <= 0f)
             {
                 FinishedFlag = true;

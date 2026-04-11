@@ -81,6 +81,9 @@ namespace Assets.Scripts.Simulation
         public UnityEvent<EpisodeResult> OnEpisodeFinished;
         public UnityEvent OnFactorySpawned;
 
+        [SerializeField] private int preDispatchLeadTime = 30;
+        public int PreDispatchLeadTime => preDispatchLeadTime;
+
         // ─────────────────────────────────────────────────────────
         //  Dispatching Rules
         // ─────────────────────────────────────────────────────────
@@ -190,6 +193,9 @@ namespace Assets.Scripts.Simulation
             // ── Phase 1: Harvest machine completion flags ─────────
             HarvestMachineFlags();
 
+            // ── Phase 1.5: Pre-dispatch AGVs for jobs almost done ─
+            HarvestAlmostDoneFlags();
+
             // ── Phase 2: Harvest AGV delivery flags ──────────────
             HarvestAGVFlags();
 
@@ -258,6 +264,49 @@ namespace Assets.Scripts.Simulation
         // ─────────────────────────────────────────────────────────
         //  Phase 2: AGV Delivery Flags
         // ─────────────────────────────────────────────────────────
+
+        // ─────────────────────────────────────────────────────────
+        //  Phase 1.5: Pre-Dispatch
+        // ─────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Scans for machines whose active job is almost done and pre-dispatches
+        /// an available AGV to the machine's pickup zone.  The AGV will be waiting
+        /// at the dock by the time the job actually finishes and gets routed, so
+        /// the only remaining latency is the handshake duration rather than a full
+        /// cross-factory transit.
+        /// </summary>
+        private void HarvestAlmostDoneFlags()
+        {
+            foreach (var machine in layoutManager.Machines)
+            {
+                if (!machine.AlmostDoneFlag) continue;
+
+                int jobId = machine.AlmostDoneJobId;
+                machine.ClearAlmostDone();
+
+                JobData job = Jobs.Get(jobId);
+                if (job == null || job.State != JobState.Processing) continue;
+
+                // Skip if already has a pre-dispatched AGV
+                if (job.PreDispatchedAgvId >= 0) continue;
+
+                AGVController agv = agvPool.GetAvailableAGV();
+                if (agv == null)
+                {
+                    SimLogger.High($"[Orchestrator] AlmostDone for job {jobId} at M{machine.MachineId} " +
+                                   "— no AGV available for pre-dispatch.");
+                    continue;
+                }
+
+                Vector3 pickupPos = machine.GetPickupPosition();
+                agv.PreDispatch(jobId, pickupPos, machine);
+                job.PreDispatchedAgvId = agv.AgvId;
+
+                SimLogger.High($"[Orchestrator] Pre-dispatched AGV {agv.AgvId} for job {jobId} " +
+                               $"finishing at M{machine.MachineId}.");
+            }
+        }
 
         private void HarvestAGVFlags()
         {
@@ -332,6 +381,10 @@ namespace Assets.Scripts.Simulation
             {
                 JobData job = Jobs.GetNextUnassignedPickup();
                 if (job == null) break;
+
+                // Job already has a pre-dispatched AGV en-route to its pickup —
+                // it was finalized in ExecuteRoutingDecision; skip here.
+                if (job.PreDispatchedAgvId >= 0) continue;
 
                 AGVController agv = agvPool.GetAvailableAGV();
                 if (agv == null) break;
@@ -448,8 +501,33 @@ namespace Assets.Scripts.Simulation
             SimLogger.High($"[Orchestrator] Routed job {job.JobId} → M{chosenMachineId} " +
                            $"(type={job.NextRequiredType})");
 
-            // AGV assignment happens in Phase 3 next frame.
-            // No immediate dispatch — keeps the tick clean.
+            // If a pre-dispatched AGV is already waiting at (or heading to) the
+            // pickup zone, finalize it immediately rather than waiting for Phase 3.
+            if (job.PreDispatchedAgvId >= 0)
+            {
+                AGVController preAgv = agvPool.GetPreDispatchedAGV(job.JobId);
+                if (preAgv != null)
+                {
+                    PhysicalMachine targetMachine = layoutManager.GetMachine(chosenMachineId);
+                    Vector3 dropoffPos = targetMachine != null
+                        ? targetMachine.GetDropoffPosition()
+                        : layoutManager.OutgoingBeltPosition;
+
+                    preAgv.FinalizePreDispatch(job.JobId, dropoffPos, targetMachine, job.Visual);
+                    job.AssignedAgvId = preAgv.AgvId;
+                    job.PreDispatchedAgvId = -1;
+
+                    SimLogger.High($"[Orchestrator] Finalized pre-dispatch: AGV {preAgv.AgvId} " +
+                                   $"→ job {job.JobId} → M{chosenMachineId}.");
+                    return; // AGV already handling it — skip Phase 3 for this job
+                }
+
+                // Pre-dispatch AGV was lost (edge case) — clear and let Phase 3 handle it
+                SimLogger.High($"[Orchestrator] Pre-dispatched AGV {job.PreDispatchedAgvId} " +
+                               $"for job {job.JobId} not found — falling back to normal dispatch.");
+                job.PreDispatchedAgvId = -1;
+            }
+            // Normal path: AGV assignment happens in Phase 3 next frame.
         }
 
         // ─────────────────────────────────────────────────────────

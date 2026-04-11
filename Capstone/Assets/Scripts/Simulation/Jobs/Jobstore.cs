@@ -54,7 +54,9 @@ namespace Assets.Scripts.Simulation.Jobs
                 if (spawnVisuals && jobVisualPrefab != null)
                 {
                     // Instantiate visual and link it to the data
-                    JobVisual vis = Instantiate(jobVisualPrefab, Vector3.zero, Quaternion.identity, jobVisualContainer);
+                    JobVisual vis = Instantiate(
+                        jobVisualPrefab,
+                        jobVisualContainer);
                     vis.gameObject.name = $"JobVisual_{def.JobId}";
                     vis.Initialize(def.JobId, def.OperationSequence.Length);
                     jobData.Visual = vis;

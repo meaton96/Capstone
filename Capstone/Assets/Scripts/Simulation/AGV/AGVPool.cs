@@ -77,10 +77,12 @@ namespace Assets.Scripts.Simulation.AGV
         /// Prefers truly idle AGVs (already parked, no travel cost).
         /// Falls back to AGVs currently returning to parking — they can be
         /// intercepted mid-route and redirected, saving the full home trip.
+        /// Pre-dispatched AGVs (MovingToPrePickup) are excluded — they are
+        /// already committed to a specific job.
         /// </summary>
         public AGVController GetAvailableAGV()
         {
-            // Pass 1: truly idle (at or near parking)
+            // Pass 1: truly idle
             foreach (var agv in fleet)
                 if (agv.IsIdle) return agv;
 
@@ -88,6 +90,17 @@ namespace Assets.Scripts.Simulation.AGV
             foreach (var agv in fleet)
                 if (agv.State == AGVState.ReturningToParking) return agv;
 
+            return null;
+        }
+
+        /// <summary>
+        /// Returns the pre-dispatched AGV for a specific job, or null if none.
+        /// </summary>
+        public AGVController GetPreDispatchedAGV(int jobId)
+        {
+            foreach (var agv in fleet)
+                if (agv.IsPreDispatched && agv.PreDispatchedJobId == jobId)
+                    return agv;
             return null;
         }
     }

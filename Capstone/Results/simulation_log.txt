@@ -1,15 +1,15 @@
---- Log Started: 4/11/2026 11:33:47 AM ---
-2026-04-11 11:33:47.727 [Agent] OnEpisodeBegin skipped — waiting for UI to arm.
-2026-04-11 11:33:49.021 [FactoryLayout] Distributed type layout (row × col):
+--- Log Started: 4/11/2026 3:40:00 PM ---
+2026-04-11 15:40:01.296 [Agent] OnEpisodeBegin skipped — waiting for UI to arm.
+2026-04-11 15:40:03.729 [FactoryLayout] Distributed type layout (row × col):
   Row0: Mill, Lathe, Weld, Inspect
   Row1: Assemble, Mill, Lathe, Weld
   Row2: Inspect, Assemble, Mill, Lathe
   Row3: Weld, Inspect, Assemble
   [OK] No two same-type machines share a row aisle.
 
-2026-04-11 11:33:49.042 [FactoryLayout] Distance matrix (15x15):
+2026-04-11 15:40:03.753 [FactoryLayout] Distance matrix (15x15):
        M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
-2026-04-11 11:33:49.053 [FactoryLayout] Built aisle-based floor: 15 machines.
-2026-04-11 11:33:49.058 [TrafficZones] Built zone graph: 33 zones.
-2026-04-11 11:33:49.060 [AGVPool] Spawned fleet of 3 AGVs.
-2026-04-11 11:33:49.678 [Orchestrator] Episode started: 20 jobs, 15 machines
+2026-04-11 15:40:03.768 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-04-11 15:40:03.774 [TrafficZones] Built zone graph: 33 zones.
+2026-04-11 15:40:03.777 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-11 15:40:05.106 [Orchestrator] Episode started: 20 jobs, 15 machines

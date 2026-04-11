@@ -61,6 +61,11 @@ namespace Assets.Scripts.Simulation.Jobs
         /// Which AGV is assigned to this job. -1 = none.
         public int AssignedAgvId;
 
+        /// AGV pre-dispatched to this job's pickup while it is still Processing.
+        /// -1 = none. Set by orchestrator when AlmostDoneFlag fires.
+        /// Cleared once the AGV is upgraded to a full dispatch.
+        public int PreDispatchedAgvId = -1;
+
         // ── Operation tracking ───────────────────────────────────
         public MachineType[] OperationTypes;
         public Dictionary<int, float>[] EligibleMachinesPerOp;
