@@ -32,7 +32,7 @@ namespace Assets.Scripts.Simulation.Jobs
         public int JobId => jobId;
         public JobState CurrentState => currentState;
 
-        public JobLocation jobLocation;
+        //public JobLocation jobLocation;
 
         /// @brief Initializes the visual token and caches rendering components.
         /// @param id Zero-based job index.
