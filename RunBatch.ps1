@@ -122,7 +122,7 @@ $headerWritten = $false
 $rowsTotal = 0
 
 foreach ($rule in $Rules) {
-    $csv = Join-Path $ResultsDir "results_${rule}.csv"
+    $csv = Join-Path $ResultsDir "baseline_results_${rule}.csv"
     if (-not (Test-Path $csv)) {
         Write-Host "  [WARN] Missing: $csv" -ForegroundColor Yellow
         continue

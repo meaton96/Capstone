@@ -1,0 +1,408 @@
+--- Log Started: 4/12/2026 4:21:04 PM ---
+2026-04-12 16:21:04.313 [Agent] OnEpisodeBegin skipped — waiting for UI to arm.
+2026-04-12 16:21:04.313 [BatchRunner] Starting batch: 5 configs x 1 rules x 1 repeats = 5 total runs
+2026-04-12 16:21:04.314 [BatchRunner] Run 1/5: config=small_5j_5m rule=LRT_MMUR seed=42
+2026-04-12 16:21:04.320 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld
+  Row1: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-12 16:21:04.323 [BatchRunner] TimeScale set to 100x via CLI.
+2026-04-12 16:21:04.329 [BatchRunner] Active rules (1): SRT_SMPT
+2026-04-12 16:21:04.331 [FactoryLayout] Distance matrix (5x5):
+       M0     M1     M2     M3     M4   
+2026-04-12 16:21:04.330 [BatchRunner] TimeScale set to 100x via CLI.
+2026-04-12 16:21:04.335 [BatchRunner] Active rules (1): SDT_SRWT
+2026-04-12 16:21:04.338 [BatchRunner] Starting batch: 5 configs x 1 rules x 1 repeats = 5 total runs
+2026-04-12 16:21:04.340 [BatchRunner] Run 1/5: config=small_5j_5m rule=SRT_SMPT seed=42
+2026-04-12 16:21:04.340 [FactoryLayout] Built aisle-based floor: 5 machines.
+2026-04-12 16:21:04.345 [BatchRunner] Starting batch: 5 configs x 1 rules x 1 repeats = 5 total runs
+2026-04-12 16:21:04.346 [BatchRunner] Run 1/5: config=small_5j_5m rule=SDT_SRWT seed=42
+2026-04-12 16:21:04.346 [TrafficZones] Built zone graph: 18 zones.
+2026-04-12 16:21:04.347 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld
+  Row1: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-12 16:21:04.348 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-12 16:21:04.352 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld
+  Row1: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-12 16:21:04.355 [Orchestrator] Episode started: 5 jobs, 5 machines
+2026-04-12 16:21:04.357 [Agent] OnEpisodeBegin skipped — waiting for UI to arm.
+2026-04-12 16:21:04.361 [FactoryLayout] Distance matrix (5x5):
+       M0     M1     M2     M3     M4   
+2026-04-12 16:21:04.367 [FactoryLayout] Distance matrix (5x5):
+       M0     M1     M2     M3     M4   
+2026-04-12 16:21:04.370 [FactoryLayout] Built aisle-based floor: 5 machines.
+2026-04-12 16:21:04.377 [TrafficZones] Built zone graph: 18 zones.
+2026-04-12 16:21:04.377 [FactoryLayout] Built aisle-based floor: 5 machines.
+2026-04-12 16:21:04.379 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-12 16:21:04.383 [TrafficZones] Built zone graph: 18 zones.
+2026-04-12 16:21:04.385 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-12 16:21:04.385 [Orchestrator] Episode started: 5 jobs, 5 machines
+2026-04-12 16:21:04.387 [Agent] OnEpisodeBegin skipped — waiting for UI to arm.
+2026-04-12 16:21:04.391 [Orchestrator] Episode started: 5 jobs, 5 machines
+2026-04-12 16:21:04.393 [Agent] OnEpisodeBegin skipped — waiting for UI to arm.
+2026-04-12 16:21:16.155 [BatchRunner] Progress: 1/5 (11.8s elapsed, ETA 47.4s)
+2026-04-12 16:21:16.156 [BatchRunner] Run 2/5: config=medium_20j_15m rule=LRT_MMUR seed=42
+2026-04-12 16:21:16.158 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble, Mill, Lathe
+  Row3: Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-12 16:21:16.165 [FactoryLayout] Distance matrix (15x15):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
+2026-04-12 16:21:16.168 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-04-12 16:21:16.168 [TrafficZones] Built zone graph: 33 zones.
+2026-04-12 16:21:16.169 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-12 16:21:16.170 [Orchestrator] Episode started: 20 jobs, 15 machines
+2026-04-12 16:21:18.121 [BatchRunner] Progress: 1/5 (13.9s elapsed, ETA 55.6s)
+2026-04-12 16:21:18.121 [BatchRunner] Run 2/5: config=medium_20j_15m rule=SPT_SMPT seed=42
+2026-04-12 16:21:18.124 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble, Mill, Lathe
+  Row3: Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-12 16:21:18.131 [FactoryLayout] Distance matrix (15x15):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
+2026-04-12 16:21:18.135 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-04-12 16:21:18.135 [TrafficZones] Built zone graph: 33 zones.
+2026-04-12 16:21:18.136 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-12 16:21:18.137 [Orchestrator] Episode started: 20 jobs, 15 machines
+2026-04-12 16:21:18.154 [BatchRunner] Progress: 1/5 (13.9s elapsed, ETA 55.6s)
+2026-04-12 16:21:18.154 [BatchRunner] Run 2/5: config=medium_20j_15m rule=SPT_SRWT seed=42
+2026-04-12 16:21:18.156 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble, Mill, Lathe
+  Row3: Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-12 16:21:18.163 [FactoryLayout] Distance matrix (15x15):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
+2026-04-12 16:21:18.167 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-04-12 16:21:18.168 [TrafficZones] Built zone graph: 33 zones.
+2026-04-12 16:21:18.169 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-12 16:21:18.170 [Orchestrator] Episode started: 20 jobs, 15 machines
+2026-04-12 16:21:19.347 [BatchRunner] Progress: 1/5 (15.1s elapsed, ETA 60.3s)
+2026-04-12 16:21:19.347 [BatchRunner] Run 2/5: config=medium_20j_15m rule=LPT_SMPT seed=42
+2026-04-12 16:21:19.349 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble, Mill, Lathe
+  Row3: Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-12 16:21:19.357 [FactoryLayout] Distance matrix (15x15):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
+2026-04-12 16:21:19.360 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-04-12 16:21:19.361 [TrafficZones] Built zone graph: 33 zones.
+2026-04-12 16:21:19.362 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-12 16:21:19.362 [Orchestrator] Episode started: 20 jobs, 15 machines
+2026-04-12 16:21:19.426 [BatchRunner] Progress: 1/5 (15.1s elapsed, ETA 60.3s)
+2026-04-12 16:21:19.426 [BatchRunner] Run 2/5: config=medium_20j_15m rule=SRT_SMPT seed=42
+2026-04-12 16:21:19.428 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble, Mill, Lathe
+  Row3: Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-12 16:21:19.431 [BatchRunner] Progress: 1/5 (15.1s elapsed, ETA 60.3s)
+2026-04-12 16:21:19.432 [BatchRunner] Run 2/5: config=medium_20j_15m rule=SDT_SRWT seed=42
+2026-04-12 16:21:19.434 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble, Mill, Lathe
+  Row3: Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-12 16:21:19.434 [FactoryLayout] Distance matrix (15x15):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
+2026-04-12 16:21:19.438 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-04-12 16:21:19.439 [TrafficZones] Built zone graph: 33 zones.
+2026-04-12 16:21:19.440 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-12 16:21:19.441 [FactoryLayout] Distance matrix (15x15):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
+2026-04-12 16:21:19.441 [Orchestrator] Episode started: 20 jobs, 15 machines
+2026-04-12 16:21:19.444 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-04-12 16:21:19.445 [TrafficZones] Built zone graph: 33 zones.
+2026-04-12 16:21:19.446 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-12 16:21:19.447 [Orchestrator] Episode started: 20 jobs, 15 machines
+2026-04-12 16:21:44.112 [BatchRunner] Progress: 2/5 (39.9s elapsed, ETA 59.8s)
+2026-04-12 16:21:44.113 [BatchRunner] Run 3/5: config=large_50j_15m rule=SPT_SRWT seed=42
+2026-04-12 16:21:44.114 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble, Mill, Lathe
+  Row3: Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-12 16:21:44.121 [FactoryLayout] Distance matrix (15x15):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
+2026-04-12 16:21:44.125 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-04-12 16:21:44.126 [TrafficZones] Built zone graph: 33 zones.
+2026-04-12 16:21:44.127 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-12 16:21:44.128 [Orchestrator] Episode started: 50 jobs, 15 machines
+2026-04-12 16:21:44.241 [BatchRunner] Progress: 2/5 (40.0s elapsed, ETA 60.0s)
+2026-04-12 16:21:44.241 [BatchRunner] Run 3/5: config=large_50j_15m rule=SPT_SMPT seed=42
+2026-04-12 16:21:44.242 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble, Mill, Lathe
+  Row3: Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-12 16:21:44.249 [FactoryLayout] Distance matrix (15x15):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
+2026-04-12 16:21:44.253 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-04-12 16:21:44.254 [TrafficZones] Built zone graph: 33 zones.
+2026-04-12 16:21:44.255 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-12 16:21:44.257 [Orchestrator] Episode started: 50 jobs, 15 machines
+2026-04-12 16:21:48.529 [BatchRunner] Progress: 2/5 (44.3s elapsed, ETA 66.4s)
+2026-04-12 16:21:48.530 [BatchRunner] Run 3/5: config=large_50j_15m rule=LPT_SMPT seed=42
+2026-04-12 16:21:48.531 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble, Mill, Lathe
+  Row3: Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-12 16:21:48.538 [FactoryLayout] Distance matrix (15x15):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
+2026-04-12 16:21:48.542 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-04-12 16:21:48.543 [TrafficZones] Built zone graph: 33 zones.
+2026-04-12 16:21:48.543 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-12 16:21:48.544 [Orchestrator] Episode started: 50 jobs, 15 machines
+2026-04-12 16:21:49.754 [BatchRunner] Progress: 2/5 (45.4s elapsed, ETA 68.1s)
+2026-04-12 16:21:49.754 [BatchRunner] Run 3/5: config=large_50j_15m rule=SRT_SMPT seed=42
+2026-04-12 16:21:49.755 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble, Mill, Lathe
+  Row3: Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-12 16:21:49.761 [FactoryLayout] Distance matrix (15x15):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
+2026-04-12 16:21:49.765 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-04-12 16:21:49.765 [TrafficZones] Built zone graph: 33 zones.
+2026-04-12 16:21:49.766 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-12 16:21:49.768 [Orchestrator] Episode started: 50 jobs, 15 machines
+2026-04-12 16:21:53.318 [BatchRunner] Progress: 2/5 (49.0s elapsed, ETA 73.5s)
+2026-04-12 16:21:53.318 [BatchRunner] Run 3/5: config=large_50j_15m rule=SDT_SRWT seed=42
+2026-04-12 16:21:53.319 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble, Mill, Lathe
+  Row3: Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-12 16:21:53.326 [FactoryLayout] Distance matrix (15x15):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
+2026-04-12 16:21:53.330 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-04-12 16:21:53.330 [TrafficZones] Built zone graph: 33 zones.
+2026-04-12 16:21:53.331 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-12 16:21:53.332 [Orchestrator] Episode started: 50 jobs, 15 machines
+2026-04-12 16:22:20.945 [BatchRunner] Progress: 2/5 (76.6s elapsed, ETA 114.9s)
+2026-04-12 16:22:20.945 [BatchRunner] Run 3/5: config=large_50j_15m rule=LRT_MMUR seed=42
+2026-04-12 16:22:20.946 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble, Mill, Lathe
+  Row3: Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-12 16:22:20.958 [FactoryLayout] Distance matrix (15x15):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
+2026-04-12 16:22:20.964 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-04-12 16:22:20.964 [TrafficZones] Built zone graph: 33 zones.
+2026-04-12 16:22:20.965 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-12 16:22:20.966 [Orchestrator] Episode started: 50 jobs, 15 machines
+2026-04-12 16:22:37.905 [BatchRunner] Progress: 3/5 (93.6s elapsed, ETA 62.4s)
+2026-04-12 16:22:37.906 [BatchRunner] Run 4/5: config=xlarge_100j_20m rule=SPT_SRWT seed=42
+2026-04-12 16:22:37.907 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect, Assemble
+  Row1: Mill, Lathe, Weld, Inspect, Assemble
+  Row2: Mill, Lathe, Weld, Inspect, Assemble
+  Row3: Mill, Lathe, Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-12 16:22:37.916 [FactoryLayout] Distance matrix (20x20):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14    M15    M16    M17    M18    M19  
+2026-04-12 16:22:37.922 [FactoryLayout] Built aisle-based floor: 20 machines.
+2026-04-12 16:22:37.922 [TrafficZones] Built zone graph: 38 zones.
+2026-04-12 16:22:37.923 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-12 16:22:37.926 [Orchestrator] Episode started: 100 jobs, 20 machines
+2026-04-12 16:22:43.090 [BatchRunner] Progress: 3/5 (98.9s elapsed, ETA 65.9s)
+2026-04-12 16:22:43.090 [BatchRunner] Run 4/5: config=xlarge_100j_20m rule=SPT_SMPT seed=42
+2026-04-12 16:22:43.091 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect, Assemble
+  Row1: Mill, Lathe, Weld, Inspect, Assemble
+  Row2: Mill, Lathe, Weld, Inspect, Assemble
+  Row3: Mill, Lathe, Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-12 16:22:43.101 [FactoryLayout] Distance matrix (20x20):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14    M15    M16    M17    M18    M19  
+2026-04-12 16:22:43.107 [FactoryLayout] Built aisle-based floor: 20 machines.
+2026-04-12 16:22:43.107 [TrafficZones] Built zone graph: 38 zones.
+2026-04-12 16:22:43.108 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-12 16:22:43.112 [Orchestrator] Episode started: 100 jobs, 20 machines
+2026-04-12 16:22:51.538 [BatchRunner] Progress: 3/5 (107.2s elapsed, ETA 71.5s)
+2026-04-12 16:22:51.538 [BatchRunner] Run 4/5: config=xlarge_100j_20m rule=SRT_SMPT seed=42
+2026-04-12 16:22:51.539 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect, Assemble
+  Row1: Mill, Lathe, Weld, Inspect, Assemble
+  Row2: Mill, Lathe, Weld, Inspect, Assemble
+  Row3: Mill, Lathe, Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-12 16:22:51.548 [FactoryLayout] Distance matrix (20x20):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14    M15    M16    M17    M18    M19  
+2026-04-12 16:22:51.554 [FactoryLayout] Built aisle-based floor: 20 machines.
+2026-04-12 16:22:51.554 [TrafficZones] Built zone graph: 38 zones.
+2026-04-12 16:22:51.556 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-12 16:22:51.561 [Orchestrator] Episode started: 100 jobs, 20 machines
+2026-04-12 16:22:51.730 [BatchRunner] Progress: 3/5 (107.4s elapsed, ETA 71.6s)
+2026-04-12 16:22:51.731 [BatchRunner] Run 4/5: config=xlarge_100j_20m rule=SDT_SRWT seed=42
+2026-04-12 16:22:51.732 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect, Assemble
+  Row1: Mill, Lathe, Weld, Inspect, Assemble
+  Row2: Mill, Lathe, Weld, Inspect, Assemble
+  Row3: Mill, Lathe, Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-12 16:22:51.741 [FactoryLayout] Distance matrix (20x20):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14    M15    M16    M17    M18    M19  
+2026-04-12 16:22:51.747 [FactoryLayout] Built aisle-based floor: 20 machines.
+2026-04-12 16:22:51.747 [TrafficZones] Built zone graph: 38 zones.
+2026-04-12 16:22:51.748 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-12 16:22:51.751 [Orchestrator] Episode started: 100 jobs, 20 machines
+2026-04-12 16:22:52.372 [BatchRunner] Progress: 3/5 (108.1s elapsed, ETA 72.1s)
+2026-04-12 16:22:52.373 [BatchRunner] Run 4/5: config=xlarge_100j_20m rule=LPT_SMPT seed=42
+2026-04-12 16:22:52.373 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect, Assemble
+  Row1: Mill, Lathe, Weld, Inspect, Assemble
+  Row2: Mill, Lathe, Weld, Inspect, Assemble
+  Row3: Mill, Lathe, Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-12 16:22:52.384 [FactoryLayout] Distance matrix (20x20):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14    M15    M16    M17    M18    M19  
+2026-04-12 16:22:52.389 [FactoryLayout] Built aisle-based floor: 20 machines.
+2026-04-12 16:22:52.390 [TrafficZones] Built zone graph: 38 zones.
+2026-04-12 16:22:52.391 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-12 16:22:52.396 [Orchestrator] Episode started: 100 jobs, 20 machines
+2026-04-12 16:24:20.989 [BatchRunner] Progress: 4/5 (196.7s elapsed, ETA 49.2s)
+2026-04-12 16:24:20.990 [BatchRunner] Run 5/5: config=dynamic_30j_15m rule=SPT_SRWT seed=42
+2026-04-12 16:24:20.990 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble, Mill, Lathe
+  Row3: Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-12 16:24:20.997 [FactoryLayout] Distance matrix (15x15):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
+2026-04-12 16:24:21.003 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-04-12 16:24:21.004 [TrafficZones] Built zone graph: 33 zones.
+2026-04-12 16:24:21.005 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-12 16:24:21.006 [Orchestrator] Episode started: 30 jobs, 15 machines
+2026-04-12 16:24:38.965 [BatchRunner] Progress: 4/5 (214.6s elapsed, ETA 53.7s)
+2026-04-12 16:24:38.966 [BatchRunner] Run 5/5: config=dynamic_30j_15m rule=SDT_SRWT seed=42
+2026-04-12 16:24:38.967 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble, Mill, Lathe
+  Row3: Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-12 16:24:38.974 [FactoryLayout] Distance matrix (15x15):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
+2026-04-12 16:24:38.978 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-04-12 16:24:38.979 [TrafficZones] Built zone graph: 33 zones.
+2026-04-12 16:24:38.981 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-12 16:24:38.984 [Orchestrator] Episode started: 30 jobs, 15 machines
+2026-04-12 16:24:42.893 [BatchRunner] Progress: 3/5 (218.6s elapsed, ETA 145.7s)
+2026-04-12 16:24:42.893 [BatchRunner] Run 4/5: config=xlarge_100j_20m rule=LRT_MMUR seed=42
+2026-04-12 16:24:42.894 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect, Assemble
+  Row1: Mill, Lathe, Weld, Inspect, Assemble
+  Row2: Mill, Lathe, Weld, Inspect, Assemble
+  Row3: Mill, Lathe, Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-12 16:24:42.907 [FactoryLayout] Distance matrix (20x20):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14    M15    M16    M17    M18    M19  
+2026-04-12 16:24:42.912 [FactoryLayout] Built aisle-based floor: 20 machines.
+2026-04-12 16:24:42.913 [TrafficZones] Built zone graph: 38 zones.
+2026-04-12 16:24:42.914 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-12 16:24:42.917 [Orchestrator] Episode started: 100 jobs, 20 machines
+2026-04-12 16:24:46.170 [BatchRunner] Progress: 4/5 (221.9s elapsed, ETA 55.5s)
+2026-04-12 16:24:46.171 [BatchRunner] Run 5/5: config=dynamic_30j_15m rule=SPT_SMPT seed=42
+2026-04-12 16:24:46.173 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble, Mill, Lathe
+  Row3: Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-12 16:24:46.180 [FactoryLayout] Distance matrix (15x15):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
+2026-04-12 16:24:46.184 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-04-12 16:24:46.184 [TrafficZones] Built zone graph: 33 zones.
+2026-04-12 16:24:46.186 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-12 16:24:46.187 [Orchestrator] Episode started: 30 jobs, 15 machines
+2026-04-12 16:24:52.531 [BatchRunner] Progress: 4/5 (228.2s elapsed, ETA 57.0s)
+2026-04-12 16:24:52.531 [BatchRunner] Run 5/5: config=dynamic_30j_15m rule=SRT_SMPT seed=42
+2026-04-12 16:24:52.532 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble, Mill, Lathe
+  Row3: Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-12 16:24:52.538 [FactoryLayout] Distance matrix (15x15):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
+2026-04-12 16:24:52.543 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-04-12 16:24:52.544 [TrafficZones] Built zone graph: 33 zones.
+2026-04-12 16:24:52.545 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-12 16:24:52.546 [Orchestrator] Episode started: 30 jobs, 15 machines
+2026-04-12 16:24:53.130 [BatchRunner] Progress: 5/5 (228.9s elapsed, ETA 0.0s)
+2026-04-12 16:24:53.130 [BatchRunner] Batch complete: 5 runs in 228.9s
+2026-04-12 16:24:53.132 [BatchRunner] Headless mode — quitting application.
+2026-04-12 16:24:55.046 [BatchRunner] Progress: 4/5 (230.8s elapsed, ETA 57.7s)
+2026-04-12 16:24:55.047 [BatchRunner] Run 5/5: config=dynamic_30j_15m rule=LPT_SMPT seed=42
+2026-04-12 16:24:55.048 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble, Mill, Lathe
+  Row3: Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-12 16:24:55.054 [FactoryLayout] Distance matrix (15x15):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
+2026-04-12 16:24:55.059 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-04-12 16:24:55.060 [TrafficZones] Built zone graph: 33 zones.
+2026-04-12 16:24:55.061 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-12 16:24:55.063 [Orchestrator] Episode started: 30 jobs, 15 machines
+2026-04-12 16:25:08.021 [BatchRunner] Progress: 5/5 (243.7s elapsed, ETA 0.0s)
+2026-04-12 16:25:08.021 [BatchRunner] Batch complete: 5 runs in 243.7s
+2026-04-12 16:25:08.022 [BatchRunner] Headless mode — quitting application.
+2026-04-12 16:25:23.734 [BatchRunner] Progress: 5/5 (259.5s elapsed, ETA 0.0s)
+2026-04-12 16:25:23.734 [BatchRunner] Batch complete: 5 runs in 259.5s
+2026-04-12 16:25:23.735 [BatchRunner] Headless mode — quitting application.
+2026-04-12 16:25:31.027 [BatchRunner] Progress: 5/5 (266.7s elapsed, ETA 0.0s)
+2026-04-12 16:25:31.027 [BatchRunner] Batch complete: 5 runs in 266.7s
+2026-04-12 16:25:31.027 [BatchRunner] Headless mode — quitting application.
+2026-04-12 16:25:32.724 [BatchRunner] Progress: 5/5 (268.4s elapsed, ETA 0.0s)
+2026-04-12 16:25:32.724 [BatchRunner] Batch complete: 5 runs in 268.4s
+2026-04-12 16:25:32.725 [BatchRunner] Headless mode — quitting application.
