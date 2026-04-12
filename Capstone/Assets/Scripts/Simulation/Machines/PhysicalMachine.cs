@@ -4,45 +4,31 @@ using Assets.Scripts.Simulation.Jobs;
 
 namespace Assets.Scripts.Simulation.Machines
 {
-    /// <summary>
-    /// Physical machine in the scene. Counts down a processing timer and sets a flag.
-    /// Does NOT call SimulationBridge. Does NOT touch JobManager/JobStore.
-    /// The orchestrator reads FinishedFlag and drives all state transitions.
+    /// @brief Represents a physical processing unit within the factory simulation.
     ///
-    /// Conveyor belts remain attached for visuals, but the orchestrator tells us
-    /// when to add/remove visuals — we never decide on our own.
-    /// </summary>
+    /// @details Manages processing timers and state flags (@c FinishedFlag, @c AlmostDoneFlag). 
+    /// This component is strictly passive; it does not initiate state transitions or 
+    /// communicate with the orchestrator. Instead, the @c SimulationBridge polls 
+    /// these flags to drive the factory lifecycle.
     [RequireComponent(typeof(Collider))]
     [RequireComponent(typeof(Rigidbody))]
     public class PhysicalMachine : MonoBehaviour
     {
-        // ── Identity (set once by layout manager) ────────────────
         public int MachineId { get; private set; }
         public MachineType MachineType { get; private set; }
 
-        // ── State (read by orchestrator) ─────────────────────────
-
-        /// Machine has no active job.
         public bool IsIdle { get; private set; } = true;
 
-        /// The job we just finished. Orchestrator reads this, then calls ClearFinished().
         public bool FinishedFlag { get; private set; }
 
-        /// Which job is currently processing (or just finished).
         public int ActiveJobId { get; private set; } = -1;
 
-        /// Set once when remainingTime drops to preDispatchLeadTime.
-        /// Orchestrator reads this to pre-route an AGV to this machine before
-        /// the job finishes. Cleared via ClearAlmostDone().
         public bool AlmostDoneFlag { get; private set; }
         public int AlmostDoneJobId { get; private set; } = -1;
 
-        // ── Internals ────────────────────────────────────────────
         private float remainingTime;
         private float totalDuration;
         private bool almostDoneFired;
-
-
 
         [Header("Conveyor Belts (visual only)")]
         [SerializeField] private ConveyorBelt incomingConveyor;
@@ -50,14 +36,12 @@ namespace Assets.Scripts.Simulation.Machines
         [SerializeField] private ConveyorBelt secondaryIncomingConveyor;
         [SerializeField] private ConveyorBelt secondaryOutgoingConveyor;
 
-
-
         private MachineVisual visualLayer;
 
-        // ─────────────────────────────────────────────────────────
-        //  Setup
-        // ─────────────────────────────────────────────────────────
-
+        /// @brief Sets the machine identity and resets the visual layer.
+        ///
+        /// @param id Unique identifier for the machine instance.
+        /// @param type The functional @c MachineType (e.g., Mill, Lathe).
         public void Initialize(int id, MachineType type)
         {
             MachineId = id;
@@ -71,13 +55,14 @@ namespace Assets.Scripts.Simulation.Machines
             ClearConveyors();
         }
 
-        // ─────────────────────────────────────────────────────────
-        //  Commands (called ONLY by orchestrator)
-        // ─────────────────────────────────────────────────────────
-
-        /// <summary>
-        /// Orchestrator tells us to start processing. We just count down.
-        /// </summary>
+        /// @brief Commences the processing of a specific job for a defined duration.
+        ///
+        /// @param jobId The identifier of the job being processed.
+        /// @param duration The time in simulation seconds to complete the operation.
+        /// @param visual The 3D representation of the job to be snapped to the machine.
+        ///
+        /// @details Resets internal timers and flags, removes the job from the 
+        /// incoming conveyor, and triggers the machine's operational animations.
         public void StartJob(int jobId, float duration, JobVisual visual = null)
         {
             ActiveJobId = jobId;
@@ -89,7 +74,6 @@ namespace Assets.Scripts.Simulation.Machines
             AlmostDoneJobId = -1;
             almostDoneFired = false;
 
-            // Visual: remove from incoming belt, show at machine center
             RemoveFromAnyIncoming(jobId);
 
             if (visual != null)
@@ -100,9 +84,7 @@ namespace Assets.Scripts.Simulation.Machines
             visualLayer.BeginOperation(jobId, Time.time, duration);
         }
 
-        /// <summary>
-        /// Orchestrator acknowledges the finished flag. Resets for next job.
-        /// </summary>
+        /// @brief Resets the finished status after the orchestrator acknowledges the completion.
         public void ClearFinished()
         {
             FinishedFlag = false;
@@ -111,18 +93,17 @@ namespace Assets.Scripts.Simulation.Machines
             visualLayer?.CompleteOperation(-1);
         }
 
-        /// <summary>Orchestrator calls this after reading AlmostDoneFlag.</summary>
+        /// @brief Resets the pre-dispatch signaling flags.
         public void ClearAlmostDone()
         {
             AlmostDoneFlag = false;
             AlmostDoneJobId = -1;
         }
 
-        // ─────────────────────────────────────────────────────────
-        //  Visual helpers (called by orchestrator for belt visuals)
-        // ─────────────────────────────────────────────────────────
-
-        /// Place a job visual on the incoming conveyor (AGV just delivered it).
+        /// @brief Places a job visual onto the most appropriate incoming conveyor belt.
+        ///
+        /// @param jobId ID of the job being delivered.
+        /// @param visual The visual component to be queued.
         public void PlaceOnIncoming(int jobId, JobVisual visual)
         {
             ConveyorBelt belt = PickIncomingBelt();
@@ -133,7 +114,7 @@ namespace Assets.Scripts.Simulation.Machines
             }
         }
 
-        /// Remove a job visual from the outgoing conveyor (AGV picking it up).
+        /// @brief Removes a job from the outgoing belt systems.
         public void RemoveFromOutgoing(int jobId)
         {
             if (outgoingConveyor != null && outgoingConveyor.Contains(jobId))
@@ -142,7 +123,7 @@ namespace Assets.Scripts.Simulation.Machines
                 secondaryOutgoingConveyor.RemoveJob(jobId);
         }
 
-        /// Place a finished job visual on the outgoing conveyor.
+        /// @brief Transfers a finished job visual from the machine center to an outgoing belt.
         public void PlaceOnOutgoing(int jobId, JobVisual visual)
         {
             ConveyorBelt belt = PickOutgoingBelt();
@@ -153,8 +134,7 @@ namespace Assets.Scripts.Simulation.Machines
             }
         }
 
-        // ── AGV docking positions ────────────────────────────────
-
+        /// @brief Returns the world position where AGVs should drop off jobs for this machine.
         public Vector3 GetDropoffPosition()
         {
             ConveyorBelt belt = PickIncomingBelt();
@@ -162,6 +142,7 @@ namespace Assets.Scripts.Simulation.Machines
             return transform.position + transform.TransformDirection(new Vector3(-2.5f, 0.5f, 0f));
         }
 
+        /// @brief Returns the world position where AGVs should pick up jobs from this machine.
         public Vector3 GetPickupPosition()
         {
             if (outgoingConveyor != null) return outgoingConveyor.OutputEndPosition;
@@ -169,21 +150,20 @@ namespace Assets.Scripts.Simulation.Machines
             return transform.position + transform.TransformDirection(new Vector3(2.5f, 0.5f, 0f));
         }
 
-        // ─────────────────────────────────────────────────────────
-        //  Update — ONLY counts down the timer
-        // ─────────────────────────────────────────────────────────
-
+        /// @brief Updates the processing timer and fires flags based on remaining time.
+        ///
+        /// @details When @c remainingTime reaches the @c PreDispatchLeadTime defined in 
+        /// the @c SimulationBridge, the @c AlmostDoneFlag is set to trigger 
+        /// predictive AGV routing.
         private void Update()
         {
             if (IsIdle || FinishedFlag) return;
 
             remainingTime -= Time.deltaTime;
 
-            // Update visual progress bar
-            // (we don't know total duration here, so visualLayer tracks it from BeginOperation)
             if (visualLayer != null && remainingTime > 0f)
                 visualLayer.UpdateProgress(1f - (remainingTime / Mathf.Max(totalDuration, 0.001f)));
-            // Fire AlmostDoneFlag once when time drops inside the lead window.
+
             if (!almostDoneFired && remainingTime <= SimulationBridge.Instance.PreDispatchLeadTime)
             {
                 almostDoneFired = true;
@@ -194,19 +174,15 @@ namespace Assets.Scripts.Simulation.Machines
             if (remainingTime <= 0f)
             {
                 FinishedFlag = true;
-                // That's it. We do NOT call anything else.
-                // The orchestrator will pick this up next frame.
             }
         }
+
+        /// @brief Updates the numerical UI labels for the machine's current queue state.
         public void RefreshQueueLabels(int incomingCount, int outgoingCount)
         {
             visualLayer.UpdateIncomingQueueLabel(incomingCount);
             visualLayer.UpdateOutgoingQueueLabel(outgoingCount);
         }
-
-        // ─────────────────────────────────────────────────────────
-        //  Internal belt helpers
-        // ─────────────────────────────────────────────────────────
 
         private void RemoveFromAnyIncoming(int jobId)
         {
@@ -230,7 +206,6 @@ namespace Assets.Scripts.Simulation.Machines
             return outgoingConveyor ?? secondaryOutgoingConveyor;
         }
 
-
         private void ClearConveyors()
         {
             incomingConveyor?.Clear();
@@ -239,6 +214,7 @@ namespace Assets.Scripts.Simulation.Machines
             secondaryOutgoingConveyor?.Clear();
         }
 
+        /// @brief Forces the machine into an idle state and clears all belt visuals.
         public void FullReset()
         {
             IsIdle = true;
