@@ -6,6 +6,7 @@ using UnityEngine;
 using Assets.Scripts.Logging;
 using Assets.Scripts.Simulation.Machines;
 using Assets.Scripts.Simulation.Types;
+using Assets.Scripts.Simulation.Jobs;
 
 namespace Assets.Scripts.Simulation
 {
@@ -17,16 +18,24 @@ namespace Assets.Scripts.Simulation
     ///
     /// Usage (headless build):
     /// @code
-    ///   ./capstone.exe -batchmode -nographics -timescale 100 `
-    ///      -batchconfig ./BatchConfigs/BatchConfigs.json `
+    ///   # Generated job data sweep
+    ///   ./capstone.exe -batchmode -nographics -timescale 100 \
+    ///      -batchconfig ./BatchConfigs/BatchConfigs.json \
+    ///      -outputdir generated_baseline \
+    ///      -repeats 1
+    ///
+    ///   # Single Brandimarte benchmark
+    ///   ./capstone.exe -batchmode -nographics -timescale 100 \
+    ///      -benchmark ./BatchConfigs/Benchmarks/mk01.json \
+    ///      -outputdir brandimarte \
+    ///      -repeats 3
+    ///
+    ///   # All Brandimarte benchmarks in a directory
+    ///   ./capstone.exe -batchmode -nographics -timescale 100 \
+    ///      -benchmarkdir ./BatchConfigs/Benchmarks \
+    ///      -outputdir brandimarte \
     ///      -repeats 1
     /// @endcode
-    ///
-    /// The runner will:
-    ///   1. Parse the batch config file (array of FJSSPConfig JSON objects)
-    ///   2. For each config, for each DispatchingRule, run the simulation to completion
-    ///   3. Optionally repeat each combo N times with different seeds
-    ///   4. Quit the application when all runs finish
     ///
     /// Attach this MonoBehaviour to the same GameObject as SimulationBridge.
     /// In headless mode it takes over episode lifecycle; in editor mode it does nothing
@@ -59,8 +68,10 @@ namespace Assets.Scripts.Simulation
         private int completedRuns;
 
         // ── Active rule set (filtered by -rules CLI arg) ──────────
-        // Populated in Start(). Defaults to AllRules if no filter given.
         private DispatchingRule[] activeRules;
+
+        // ── Timing (shared across nested coroutines) ─────────────
+        private float startWall;
 
         // ─────────────────────────────────────────────────────────
         //  Unity Lifecycle
@@ -69,50 +80,71 @@ namespace Assets.Scripts.Simulation
         private void Start()
         {
             string batchPath = GetCLIArg("-batchconfig");
+            string benchmarkPath = GetCLIArg("-benchmark");
+            string benchmarkDirPath = GetCLIArg("-benchmarkdir");
 
-            // Only auto-start in batchmode, or if a batchconfig was explicitly passed
-            if (Application.isBatchMode || !string.IsNullOrEmpty(batchPath))
+            // Auto-start in batchmode, or if any config source was explicitly passed
+            if (!Application.isBatchMode
+                && string.IsNullOrEmpty(batchPath)
+                && string.IsNullOrEmpty(benchmarkPath)
+                && string.IsNullOrEmpty(benchmarkDirPath))
+                return;
+
+            // ── Shared setup ─────────────────────────────────────────
+
+            // Timescale
+            string timeScaleStr = GetCLIArg("-timescale");
+            if (!string.IsNullOrEmpty(timeScaleStr) && float.TryParse(timeScaleStr, out float parsedScale))
             {
-                // ── Timescale ─────────────────────────────────────────
-                string timeScaleStr = GetCLIArg("-timescale");
-                if (!string.IsNullOrEmpty(timeScaleStr) && float.TryParse(timeScaleStr, out float parsedScale))
-                {
-                    Time.timeScale = parsedScale;
-                    SimLogger.Low($"[BatchRunner] TimeScale set to {parsedScale}x via CLI.");
-                }
-                else
-                {
-                    Time.timeScale = 100f;
-                    SimLogger.Low("[BatchRunner] No timescale provided. Defaulting to 100x.");
-                }
+                Time.timeScale = parsedScale;
+                SimLogger.Low($"[BatchRunner] TimeScale set to {parsedScale}x via CLI.");
+            }
+            else
+            {
+                Time.timeScale = 100f;
+                SimLogger.Low("[BatchRunner] No timescale provided. Defaulting to 100x.");
+            }
 
-                // ── Rules filter ───────────────────────────────────────
-                // -rules SPT_SMPT,LPT_MMUR   (comma-separated, no spaces)
-                // Lets the parallel launcher assign each process a subset.
-                activeRules = ParseRulesArg(GetCLIArg("-rules"));
-                SimLogger.Low($"[BatchRunner] Active rules ({activeRules.Length}): " +
-                              string.Join(", ", activeRules));
+            // Rules filter
+            activeRules = ParseRulesArg(GetCLIArg("-rules"));
+            SimLogger.Low($"[BatchRunner] Active rules ({activeRules.Length}): " +
+                          string.Join(", ", activeRules));
 
-                // ── Output suffix ──────────────────────────────────────
-                // -outputsuffix _SPT_SMPT  →  results_SPT_SMPT.csv
-                // Prevents CSV collisions when N processes write simultaneously.
-                //
-                // ResultsLogger.SetFilenameSuffix() must append the suffix to
-                // whatever base filename ResultsLogger uses internally, e.g.:
-                //   public static void SetFilenameSuffix(string suffix) {
-                //       _filename = "results" + suffix + ".csv";
-                //   }
-                // Add this one-liner to ResultsLogger.cs if not already present.
-                string suffix = GetCLIArg("-outputsuffix") ?? string.Empty;
-                if (!string.IsNullOrEmpty(suffix))
-                    ResultsLogger.SetFilenameSuffix(suffix);
+            // Output suffix
+            string suffix = GetCLIArg("-outputsuffix") ?? string.Empty;
+            if (!string.IsNullOrEmpty(suffix))
+                ResultsLogger.SetFilenameSuffix(suffix);
 
-                // ── Repeats ────────────────────────────────────────────
-                int repeats = 1;
-                string repeatsStr = GetCLIArg("-repeats");
-                if (!string.IsNullOrEmpty(repeatsStr))
-                    int.TryParse(repeatsStr, out repeats);
+            // Output subdirectory — keeps results separated by experiment
+            // e.g. -outputdir brandimarte → Results/brandimarte/baseline_results.csv
+            string outputDir = GetCLIArg("-outputdir");
+            if (!string.IsNullOrEmpty(outputDir))
+            {
+                ResultsLogger.SetSubdirectory(outputDir);
+                SimLogger.Low($"[BatchRunner] Results subdirectory: {outputDir}");
+            }
 
+            // Repeats
+            int repeats = 1;
+            string repeatsStr = GetCLIArg("-repeats");
+            if (!string.IsNullOrEmpty(repeatsStr))
+                int.TryParse(repeatsStr, out repeats);
+
+            // ── Route to the correct coroutine ──────────────────────
+
+            if (!string.IsNullOrEmpty(benchmarkDirPath))
+            {
+                // Multi-benchmark mode: run all .json files in the directory
+                StartCoroutine(RunMultiBenchmarkCoroutine(benchmarkDirPath, repeats));
+            }
+            else if (!string.IsNullOrEmpty(benchmarkPath))
+            {
+                // Single benchmark mode
+                StartCoroutine(RunBenchmarkCoroutine(benchmarkPath, repeats));
+            }
+            else
+            {
+                // Normal mode: generated job data from batch configs
                 FJSSPConfig[] configs = LoadConfigs(batchPath);
                 if (configs.Length > 0)
                     StartCoroutine(RunBatchCoroutine(configs, repeats));
@@ -126,8 +158,6 @@ namespace Assets.Scripts.Simulation
         // ─────────────────────────────────────────────────────────
 
         /// @brief Starts a batch run from script or a UI button.
-        /// @param configs  Array of configurations to sweep.
-        /// @param repeats  How many times to repeat each (config, rule) pair with offset seeds.
         public void RunBatch(FJSSPConfig[] configs, int repeats = 1)
         {
             if (isBatchRunning)
@@ -151,13 +181,12 @@ namespace Assets.Scripts.Simulation
         }
 
         // ─────────────────────────────────────────────────────────
-        //  Core Batch Loop
+        //  Core Batch Loop (generated job data)
         // ─────────────────────────────────────────────────────────
 
         private IEnumerator RunBatchCoroutine(FJSSPConfig[] configs, int repeats)
         {
             isBatchRunning = true;
-            // Use filtered rule list (set from CLI -rules arg, defaults to all rules)
             if (activeRules == null || activeRules.Length == 0)
                 activeRules = AllRules;
 
@@ -167,7 +196,7 @@ namespace Assets.Scripts.Simulation
             SimLogger.Low($"[BatchRunner] Starting batch: {configs.Length} configs x " +
                       $"{activeRules.Length} rules x {repeats} repeats = {totalRuns} total runs");
 
-            float startWall = Time.realtimeSinceStartup;
+            startWall = Time.realtimeSinceStartup;
 
             foreach (var baseConfig in configs)
             {
@@ -175,7 +204,6 @@ namespace Assets.Scripts.Simulation
                 {
                     foreach (var rule in activeRules)
                     {
-                        // Clone config with offset seed for this repeat
                         FJSSPConfig runConfig = CloneWithSeed(baseConfig, baseConfig.Seed + rep);
 
                         SimLogger.Low($"[BatchRunner] Run {completedRuns + 1}/{totalRuns}: " +
@@ -184,14 +212,7 @@ namespace Assets.Scripts.Simulation
                         yield return RunSingleEpisode(runConfig, rule);
 
                         completedRuns++;
-
-                        float elapsed = Time.realtimeSinceStartup - startWall;
-                        float avgPerRun = elapsed / completedRuns;
-                        float eta = avgPerRun * (totalRuns - completedRuns);
-                        SimLogger.Low($"[BatchRunner] Progress: {completedRuns}/{totalRuns} " +
-                                  $"({elapsed:F1}s elapsed, ETA {eta:F1}s)");
-
-
+                        LogProgress();
                     }
                 }
             }
@@ -207,37 +228,228 @@ namespace Assets.Scripts.Simulation
             }
         }
 
-        /// @brief Runs one (config, rule) episode to completion, yielding each frame.
-        /// @brief Runs one (config, rule) episode to completion, yielding each frame.
+        // ─────────────────────────────────────────────────────────
+        //  Multi-Benchmark Loop (all .json files in a directory)
+        // ─────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Discovers all .json benchmark files in a directory, sorts them
+        /// alphabetically, and runs each through RunBenchmarkEpisodes.
+        /// </summary>
+        private IEnumerator RunMultiBenchmarkCoroutine(string dirPath, int repeats)
+        {
+            isBatchRunning = true;
+            if (activeRules == null || activeRules.Length == 0)
+                activeRules = AllRules;
+
+            if (!Directory.Exists(dirPath))
+            {
+                QuitWithError($"Benchmark directory not found: {dirPath}");
+                yield break;
+            }
+
+            // Discover and sort benchmark files alphabetically (mk01, mk02, ...)
+            string[] files = Directory.GetFiles(dirPath, "*.json");
+            Array.Sort(files, StringComparer.OrdinalIgnoreCase);
+
+            if (files.Length == 0)
+            {
+                QuitWithError($"No .json files found in {dirPath}");
+                yield break;
+            }
+
+            // Pre-load all benchmarks to calculate total run count
+            var benchmarks = new List<(string path, FJSSPConfig config,
+                Func<Dictionary<MachineType, List<int>>, FJSSPJobDefinition[]> buildJobs)>();
+
+            foreach (string file in files)
+            {
+                var (config, buildJobs) = BrandimartLoader.LoadDeferred(file);
+                if (config != null)
+                {
+                    benchmarks.Add((file, config, buildJobs));
+                    SimLogger.Low($"[BatchRunner] Loaded benchmark: {config.Name} " +
+                                  $"({config.JobCount} jobs, {config.MachineTypeLayout.Length} machines)");
+                }
+                else
+                {
+                    SimLogger.LogWarning($"[BatchRunner] Skipping invalid benchmark: {file}");
+                }
+            }
+
+            totalRuns = benchmarks.Count * activeRules.Length * repeats;
+            completedRuns = 0;
+
+            SimLogger.Low($"[BatchRunner] Multi-benchmark: {benchmarks.Count} files x " +
+                          $"{activeRules.Length} rules x {repeats} repeats = {totalRuns} total runs");
+
+            startWall = Time.realtimeSinceStartup;
+
+            foreach (var (path, config, buildJobs) in benchmarks)
+            {
+                SimLogger.Low($"[BatchRunner] ─── {config.Name} " +
+                              $"({config.JobCount}j × {config.MachineTypeLayout.Length}m) ───");
+
+                yield return RunBenchmarkEpisodes(config, buildJobs, repeats);
+            }
+
+            float totalTime = Time.realtimeSinceStartup - startWall;
+            SimLogger.Low($"[BatchRunner] All benchmarks complete: {totalRuns} runs in {totalTime:F1}s");
+            isBatchRunning = false;
+
+            if (Application.isBatchMode)
+            {
+                SimLogger.Low("[BatchRunner] Headless mode — quitting application.");
+                Application.Quit();
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────
+        //  Single Benchmark File (entry point for -benchmark)
+        // ─────────────────────────────────────────────────────────
+
+        private IEnumerator RunBenchmarkCoroutine(string jsonPath, int repeats)
+        {
+            isBatchRunning = true;
+            if (activeRules == null || activeRules.Length == 0)
+                activeRules = AllRules;
+
+            var (config, buildJobs) = BrandimartLoader.LoadDeferred(jsonPath);
+            if (config == null)
+            {
+                QuitWithError($"Failed to load benchmark: {jsonPath}");
+                yield break;
+            }
+
+            totalRuns = activeRules.Length * repeats;
+            completedRuns = 0;
+
+            SimLogger.Low($"[BatchRunner] Benchmark: {config.Name}, " +
+                          $"{activeRules.Length} rules x {repeats} repeats = {totalRuns} runs");
+
+            startWall = Time.realtimeSinceStartup;
+
+            yield return RunBenchmarkEpisodes(config, buildJobs, repeats);
+
+            float totalTime = Time.realtimeSinceStartup - startWall;
+            SimLogger.Low($"[BatchRunner] Benchmark complete: {totalRuns} runs in {totalTime:F1}s");
+            isBatchRunning = false;
+
+            if (Application.isBatchMode)
+            {
+                SimLogger.Low("[BatchRunner] Headless mode — quitting application.");
+                Application.Quit();
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────
+        //  Benchmark Episode Runner (shared by single and multi)
+        // ─────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Runs all (rule × repeat) episodes for a single benchmark config.
+        /// Shared between RunBenchmarkCoroutine and RunMultiBenchmarkCoroutine.
+        /// </summary>
+        private IEnumerator RunBenchmarkEpisodes(
+            FJSSPConfig config,
+            Func<Dictionary<MachineType, List<int>>, FJSSPJobDefinition[]> buildJobs,
+            int repeats)
+        {
+            for (int rep = 0; rep < repeats; rep++)
+            {
+                foreach (var rule in activeRules)
+                {
+                    FJSSPConfig runConfig = CloneWithSeed(config, config.Seed + rep);
+
+                    SimLogger.Low($"[BatchRunner] Run {completedRuns + 1}/{totalRuns}: " +
+                                  $"benchmark={runConfig.Name} rule={rule} seed={runConfig.Seed}");
+
+                    // ── Capture episode result via event listener ─────
+                    EpisodeResult runResult = null;
+                    UnityEngine.Events.UnityAction<EpisodeResult> onFinish = res => runResult = res;
+                    bridge.OnEpisodeFinished.AddListener(onFinish);
+
+                    // Phase 1: Set heuristic rule
+                    if (agent != null)
+                        agent.SetHeuristicRule(rule);
+
+                    // Phase 2: Load config (sets IsFactoryReady = false)
+                    bridge.LoadConfig(runConfig);
+
+                    // Phase 3: Explicitly spawn factory so machine IDs exist
+                    bridge.SpawnFactory();
+
+                    // Phase 4: Build benchmark jobs using runtime IDs, inject them
+                    var jobs = buildJobs(bridge.CachedMachinesByType);
+                    bridge.LoadPrebuiltJobs(jobs);
+
+                    // Phase 5: Arm the agent
+                    if (agent != null)
+                        agent.ArmAndStart();
+
+                    // Phase 6: Wait for episode lifecycle
+                    while (!bridge.IsEpisodeActive)
+                        yield return null;
+
+                    while (bridge.IsEpisodeActive)
+                        yield return null;
+
+                    // Phase 7: Log results
+                    int totalOps = 0;
+                    if (bridge.Jobs != null)
+                    {
+                        foreach (var job in bridge.Jobs.AllJobs)
+                            totalOps += job.TotalOperations;
+                    }
+
+                    if (runResult != null)
+                    {
+                        ResultsLogger.LogEpisode(
+                            ruleName: rule.ToString(),
+                            seed: runConfig.Seed,
+                            makespan: runResult.Makespan,
+                            jobCount: runConfig.JobCount,
+                            machineCount: runConfig.MachineTypeLayout.Length,
+                            totalOps: totalOps,
+                            decisionCount: runResult.DecisionPoints,
+                            totalReward: runResult.TotalReward,
+                            averageTimeScale: Time.timeScale
+                        );
+                    }
+
+                    bridge.OnEpisodeFinished.RemoveListener(onFinish);
+
+                    completedRuns++;
+                    LogProgress();
+
+                    yield return new WaitForSecondsRealtime(0.1f);
+                }
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────
+        //  Single Episode Runner (used by normal batch loop)
+        // ─────────────────────────────────────────────────────────
+
         private IEnumerator RunSingleEpisode(FJSSPConfig config, DispatchingRule rule)
         {
-            //bridge.AutoStartOnPlay = true;
             EpisodeResult runResult = null;
             UnityEngine.Events.UnityAction<EpisodeResult> onFinish = res => runResult = res;
             bridge.OnEpisodeFinished.AddListener(onFinish);
-            // Phase 1: Set the agent's heuristic to the target rule
+
             if (agent != null)
                 agent.SetHeuristicRule(rule);
 
-            // Phase 2: Load config (this sets IsFactoryReady = false internally)
             bridge.LoadConfig(config);
 
-            // Phase 3: Give the agent its single-use ticket to start the episode
             if (agent != null)
                 agent.ArmAndStart();
 
-            // Phase 4: Wait for ML-Agents to trigger OnEpisodeBegin() on the next FixedUpdate
-            // This will call bridge.StartEpisode(), which spawns the factory and sets episodeActive = true
             while (!bridge.IsEpisodeActive)
-            {
                 yield return null;
-            }
 
-            // Phase 5: The simulation is now running. Wait for the orchestrator to finish it.
             while (bridge.IsEpisodeActive)
-            {
                 yield return null;
-            }
 
             int totalOps = 0;
             if (bridge.Jobs != null)
@@ -261,7 +473,8 @@ namespace Assets.Scripts.Simulation
                 );
             }
 
-            // Small cooldown to let physics and ML-Agents buffers settle between episodes
+            bridge.OnEpisodeFinished.RemoveListener(onFinish);
+
             yield return new WaitForSecondsRealtime(0.1f);
         }
 
@@ -269,7 +482,13 @@ namespace Assets.Scripts.Simulation
         //  Helpers
         // ─────────────────────────────────────────────────────────
 
-        // (heuristic rule is now set via agent.SetHeuristicRule() directly)
+        private void LogProgress()
+        {
+            float elapsed = Time.realtimeSinceStartup - startWall;
+            float eta = (elapsed / completedRuns) * (totalRuns - completedRuns);
+            SimLogger.Low($"[BatchRunner] Progress: {completedRuns}/{totalRuns} " +
+                          $"({elapsed:F1}s elapsed, ETA {eta:F1}s)");
+        }
 
         private FJSSPConfig CloneWithSeed(FJSSPConfig source, int newSeed)
         {
@@ -290,11 +509,9 @@ namespace Assets.Scripts.Simulation
 
         private FJSSPConfig[] LoadConfigs(string cliPath)
         {
-            // CLI path takes priority
             if (!string.IsNullOrEmpty(cliPath))
                 return ConfigLoader.LoadBatch(cliPath);
 
-            // Fallback to editor-assigned TextAsset
             if (fallbackBatchJson != null)
                 return ConfigLoader.ParseBatch(fallbackBatchJson.text);
 
@@ -302,11 +519,6 @@ namespace Assets.Scripts.Simulation
             return Array.Empty<FJSSPConfig>();
         }
 
-        /// <summary>
-        /// Parses a comma-separated rule list from the -rules CLI argument.
-        /// Returns AllRules if the argument is absent or unparseable.
-        /// Example: -rules SPT_SMPT,LPT_MMUR,SRT_SRWT
-        /// </summary>
         private static DispatchingRule[] ParseRulesArg(string arg)
         {
             if (string.IsNullOrEmpty(arg)) return AllRules;

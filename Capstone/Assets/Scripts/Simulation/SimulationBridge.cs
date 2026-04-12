@@ -34,8 +34,11 @@ namespace Assets.Scripts.Simulation
         public int PreDispatchLeadTime = 15;
         public bool AutoStartOnPlay = false;
 
+        private FJSSPJobDefinition[] prebuiltJobs;
+
         private FJSSPConfig currentConfig;
         private Dictionary<MachineType, List<int>> cachedMachinesByType;
+        public Dictionary<MachineType, List<int>> CachedMachinesByType => cachedMachinesByType;
 
         private bool episodeActive;
         private int decisionCount;
@@ -45,7 +48,7 @@ namespace Assets.Scripts.Simulation
         private float startTime;
 
         public bool IsEpisodeActive => episodeActive;
-        public bool IsFactoryReady { get; private set; }
+        public bool IsFactoryReady { get; set; }
         public double SimTime => Time.time - startTime;
         public FJSSPConfig CurrentConfig => currentConfig;
 
@@ -92,6 +95,11 @@ namespace Assets.Scripts.Simulation
             currentConfig = config;
             IsFactoryReady = false;
         }
+        /// @brief Injects pre-built job definitions (e.g. from Brandimarte benchmarks).
+        public void LoadPrebuiltJobs(FJSSPJobDefinition[] jobs)
+        {
+            prebuiltJobs = jobs;
+        }
 
         /// @brief Physically instantiates the factory floor, machines, and AGV fleet.
         ///
@@ -119,11 +127,29 @@ namespace Assets.Scripts.Simulation
         /// and decision counts).
         public void StartEpisode()
         {
-            if (currentConfig == null) currentConfig = BuildDefaultConfig();
+            if (currentConfig == null)
+            {
+                currentConfig = BuildDefaultConfig();
+            }
 
-            if (!IsFactoryReady) SpawnFactory();
+            if (!IsFactoryReady)
+            {
+                SpawnFactory();
+            }
 
-            var jobDefs = FJSSPJobGenerator.Generate(currentConfig, cachedMachinesByType);
+            // ── Use prebuilt jobs if injected, otherwise generate ──
+            FJSSPJobDefinition[] jobDefs;
+            if (prebuiltJobs != null)
+            {
+                jobDefs = prebuiltJobs;
+                prebuiltJobs = null;   // single-use: clear after consumption
+                SimLogger.Low("[Orchestrator] Using prebuilt benchmark jobs");
+            }
+            else
+            {
+                jobDefs = FJSSPJobGenerator.Generate(currentConfig, cachedMachinesByType);
+            }
+
             Jobs.Initialize(jobDefs, spawnVisuals: true);
 
             episodeActive = true;
@@ -133,7 +159,8 @@ namespace Assets.Scripts.Simulation
             IsWaitingForAction = false;
             startTime = Time.time;
 
-            SimLogger.Low($"[Orchestrator] Episode started: {currentConfig.JobCount} jobs.");
+            SimLogger.Low($"[Orchestrator] Episode started: {currentConfig.JobCount} jobs, " +
+                           $"{layoutManager.MachineCount} machines");
         }
 
         /// @brief Aborts the current episode and cleans up all runtime data.

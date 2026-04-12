@@ -31,6 +31,19 @@ namespace Assets.Scripts.Logging
             _filename = baseName + suffix + ext;
         }
 
+        /// <summary>
+        /// Nests results inside a subdirectory under the current OutputDirectory.
+        /// e.g. if OutputDirectory is "Results/" and subdir is "brandimarte",
+        /// results will go to "Results/brandimarte/".
+        /// Creates the directory if it doesn't exist.
+        /// </summary>
+        public static void SetSubdirectory(string subdir)
+        {
+            if (string.IsNullOrEmpty(subdir)) return;
+            OutputDirectory = Path.Combine(OutputDirectory, subdir);
+            Directory.CreateDirectory(OutputDirectory);
+        }
+
         /// @brief Computes the full absolute path for the log file.
         ///
         /// @details Returns @c OutputDirectory if defined; otherwise, defaults to 

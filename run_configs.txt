@@ -11,3 +11,13 @@
 ./capstone.exe -batchmode -nographics -timescale 100 `
           -batchconfig ./BatchConfigs/BatchConfigs.json `
           -repeats 1
+
+
+.\capstone.exe -batchmode -nographics -timescale 100 `
+    -benchmark .\BatchConfigs\Benchmarks\mk01.json `
+    -repeats 3
+
+
+./capstone.exe -batchmode -nographics -timescale 100 `
+    -benchmarkdir ./BatchConfigs/Benchmarks `
+    -outputdir brandimarte
