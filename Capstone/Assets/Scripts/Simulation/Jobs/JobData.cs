@@ -1,99 +1,97 @@
 using System.Collections.Generic;
 using Assets.Scripts.Simulation.Machines;
+using UnityEngine;
 
 namespace Assets.Scripts.Simulation.Jobs
 {
-    // ═══════════════════════════════════════════════════════════════
-    //  6 states. No overlaps. No ambiguity.
-    //
-    //  Spawned ──► NeedsRouting ──► WaitingForPickup ──► InTransit ──► Queued ──► Processing ─┐
-    //                   ▲                                                                     │
-    //                   └──────────────────── (more ops remain) ──────────────────────────────┘
-    //                                                                                         │
-    //              (last op done) ──► WaitingForPickup(exit) ──► InTransit(exit) ──► Exited ◄──┘
-    //
-    // ═══════════════════════════════════════════════════════════════
-
+    /// @brief Defines the distinct lifecycle stages of a job within the factory.
+    ///
+    /// @details A job typically flows from @c NeedsRouting (spawned) through 
+    /// @c WaitingForPickup, @c InTransit, @c Queued, and @c Processing. This 
+    /// cycle repeats for each operation until the job finally reaches the 
+    /// @c Exited state.
     public enum JobState
     {
-        /// Agent must pick which machine handles the next operation.
+        /// Agent must select the next machine for processing.
         NeedsRouting,
 
-        /// Target machine chosen. Sitting at source location, needs an AGV.
+        /// Target machine assigned; job is awaiting AGV pickup at its current location.
         WaitingForPickup,
 
-        /// AGV is carrying this job.
+        /// Job is currently being transported by an AGV.
         InTransit,
 
-        /// Physically at the target machine. Waiting for the machine to become idle
-        /// and for the agent to pick it for processing.
+        /// Job has arrived at the target machine and is waiting in the machine's buffer.
         Queued,
 
-        /// Machine is actively working on this job.
+        /// Machine is actively performing the scheduled operation on this job.
         Processing,
 
-        /// All operations complete and job has left the factory.
+        /// All scheduled operations are complete and the job has left the simulation.
         Exited
     }
 
-    /// <summary>
-    /// All data for one job. Pure data — no MonoBehaviour, no callbacks, no references
-    /// to SimulationBridge or any manager. The orchestrator reads/writes these fields.
-    /// </summary>
+    /// @brief Encapsulates all persistent data, state, and tracking metrics for a single job.
+    ///
+    /// @details This is a pure data container. Logic for state transitions, AGV 
+    /// assignments, and routing is handled exclusively by the central orchestrator. 
+    /// It maintains the operation sequence, machine eligibility, and timing stats 
+    /// for reward calculation.
     public class JobData
     {
-        // ── Identity ──────────────────────────────────────────────
+        [Header("Identity")]
         public int JobId;
         public float ArrivalTime;
 
-        // ── Current state (written ONLY by orchestrator) ─────────
+        [Header("State Control")]
         public JobState State;
 
-        // ── Location context ─────────────────────────────────────
-        /// Where the job physically is right now.
-        /// -1 = factory entry area or exit area, ≥0 = machine ID.
+        [Header("Location Context")]
+        /// Current machine ID location. -1 represents the factory entry or exit zones.
         public int LocationMachineId;
 
-        /// Where the job is headed. -1 = exit, ≥0 = machine ID.
-        /// Set by routing decision, read by AGV dispatch.
+        /// Designated destination machine ID. -1 indicates the factory exit.
         public int TargetMachineId;
 
-        /// Which AGV is assigned to this job. -1 = none.
+        /// The ID of the AGV currently handling or assigned to this job. -1 if none.
         public int AssignedAgvId;
 
-        /// AGV pre-dispatched to this job's pickup while it is still Processing.
-        /// -1 = none. Set by orchestrator when AlmostDoneFlag fires.
-        /// Cleared once the AGV is upgraded to a full dispatch.
+        /// The ID of an AGV dispatched to the pickup point before processing completes.
         public int PreDispatchedAgvId = -1;
 
-        // ── Operation tracking ───────────────────────────────────
+        [Header("Operation Tracking")]
         public MachineType[] OperationTypes;
         public Dictionary<int, float>[] EligibleMachinesPerOp;
         public int TotalOperations;
-        public int CurrentOpIndex;     // next op to execute (0-based)
+        public int CurrentOpIndex;
         public int CompletedOps;
 
-        // ── Timing (for reward/stats) ────────────────────────────
+        [Header("Performance Metrics")]
         public double StateEntryTime;
         public double TotalWaitTime;
         public double TotalTransitTime;
 
-        // ── Visual (optional, orchestrator hands it off) ─────────
+        [Header("Visuals")]
         public JobVisual Visual;
 
-        // ── Helpers ──────────────────────────────────────────────
-
+        /// @brief Indicates whether the job has finished its final scheduled operation.
         public bool IsLastOperation => CompletedOps >= TotalOperations;
 
+        /// @brief Returns the @c MachineType required for the current operation index.
         public MachineType NextRequiredType =>
             CurrentOpIndex < TotalOperations
                 ? OperationTypes[CurrentOpIndex]
                 : default;
 
+        /// @brief Retrieves the processing time for a specific machine on the current operation.
+        ///
+        /// @param machineId The ID of the machine to query.
+        /// @return The processing time in simulation seconds; returns 0 if the machine is ineligible.
         public float GetProcessingTime(int machineId)
         {
             if (CurrentOpIndex < 0 || CurrentOpIndex >= EligibleMachinesPerOp.Length)
                 return 0f;
+
             return EligibleMachinesPerOp[CurrentOpIndex].TryGetValue(machineId, out float t) ? t : 0f;
         }
     }
