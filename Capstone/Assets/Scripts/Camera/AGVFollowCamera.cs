@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using Assets.Scripts.Simulation.AGV;
 using Assets.Scripts.Logging;
 
-/// <summary>
-/// Attaches the camera to AGVs within the AGVPool.
-/// Toggles control away from CameraController/OrbitCamera when active.
-/// </summary>
+/// @brief Attaches the camera to AGVs within the AGVPool.
+///
+/// @details Toggles control away from CameraController and OrbitCamera when active. 
+/// When enabled, the camera smoothly tracks a specific AGV's position and rotation 
+/// based on a defined offset.
 [RequireComponent(typeof(CameraController))]
 [RequireComponent(typeof(OrbitCamera))]
 public class AGVFollowCamera : MonoBehaviour
@@ -26,16 +27,22 @@ public class AGVFollowCamera : MonoBehaviour
 
     private int currentAgvIndex = 0;
     private bool isFollowing = false;
-    void Awake()
+
+    /// @brief Initializes references to the sibling camera control components.
+    private void Awake()
     {
         manualController = GetComponent<CameraController>();
         orbitCamera = GetComponent<OrbitCamera>();
     }
+
+    /// @brief Polls for user input to toggle camera modes or swap AGV targets.
+    ///
+    /// @details Monitors the @c Keyboard for the 'C' key to enter/exit follow mode 
+    /// and uses Arrow/Tab keys to cycle through the fleet list.
     private void Update()
     {
         if (Keyboard.current == null) return;
 
-        // Toggle AGV Follow Mode with 'C' (for Camera/Capture)
         if (Keyboard.current.cKey.wasPressedThisFrame)
         {
             ToggleFollowMode();
@@ -43,7 +50,6 @@ public class AGVFollowCamera : MonoBehaviour
 
         if (isFollowing)
         {
-            // Swap between AGVs using Left/Right arrows or Tab
             if (Keyboard.current.rightArrowKey.wasPressedThisFrame || Keyboard.current.tabKey.wasPressedThisFrame)
                 ChangeAGV(1);
             if (Keyboard.current.leftArrowKey.wasPressedThisFrame)
@@ -51,6 +57,11 @@ public class AGVFollowCamera : MonoBehaviour
         }
     }
 
+    /// @brief Performs the camera transformation updates after all movement logic is processed.
+    ///
+    /// @details Calculates a world-space target position by applying @c followOffset 
+    /// to the AGV's local rotation. Uses @c Lerp for position smoothing and 
+    /// @c LookAt to maintain focus on the target.
     private void LateUpdate()
     {
         if (!isFollowing || agvPool == null) return;
@@ -58,47 +69,45 @@ public class AGVFollowCamera : MonoBehaviour
         IReadOnlyList<AGVController> fleet = agvPool.AllAGVs;
         if (fleet == null || fleet.Count == 0) return;
 
-        // Ensure index stays valid if fleet size changes dynamically
         currentAgvIndex = Mathf.Clamp(currentAgvIndex, 0, fleet.Count - 1);
         Transform target = fleet[currentAgvIndex].transform;
 
-        // Calculate the target position based on the AGV's current orientation
-        // This keeps the camera behind the AGV even when it turns.
         Vector3 targetPosition = target.position + (target.rotation * followOffset);
-
-        // Interpolate position for a professional "cinematic" feel
         transform.position = Vector3.Lerp(transform.position, targetPosition, smoothSpeed * Time.deltaTime);
 
-        // Always look at the AGV (aiming slightly above the pivot)
         transform.LookAt(target.position + Vector3.up * 1.2f);
     }
 
+    /// @brief Switches the camera between manual navigation and automated AGV tracking.
+    ///
+    /// @details Updates the @c enabled state of @c CameraController and @c OrbitCamera 
+    /// to prevent multiple scripts from competing for the camera's Transform. 
+    /// Logs the transition to the @c SimLogger.
     private void ToggleFollowMode()
     {
         isFollowing = !isFollowing;
 
-        // Disable manual scripts so they don't fight over the camera Transform
         if (manualController != null) manualController.enabled = !isFollowing;
 
-        // If we stop following, OrbitCamera usually takes back over via CameraController logic
-        if (!isFollowing && orbitCamera != null)
+        if (orbitCamera != null)
         {
-            orbitCamera.enabled = true;
-        }
-        else if (isFollowing && orbitCamera != null)
-        {
-            orbitCamera.enabled = false;
+            orbitCamera.enabled = !isFollowing;
         }
 
         SimLogger.Medium(isFollowing ? $"[Camera] Following AGV_{currentAgvIndex}" : "[Camera] Manual Control Restored");
     }
 
+    /// @brief Increments or decrements the current AGV target index.
+    ///
+    /// @param direction The integer value to add to the index (usually 1 or -1).
+    ///
+    /// @details Performs a modulo operation on the @c currentAgvIndex to ensure 
+    /// the selection wraps around when reaching the beginning or end of the fleet list.
     private void ChangeAGV(int direction)
     {
         IReadOnlyList<AGVController> fleet = agvPool.AllAGVs;
         if (fleet == null || fleet.Count <= 1) return;
 
-        // Loop the index around the fleet list
         currentAgvIndex = (currentAgvIndex + direction + fleet.Count) % fleet.Count;
         SimLogger.Medium($"[Camera] Switched to following: {fleet[currentAgvIndex].gameObject.name}");
     }
