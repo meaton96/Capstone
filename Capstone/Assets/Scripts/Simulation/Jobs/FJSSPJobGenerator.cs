@@ -11,31 +11,14 @@ namespace Assets.Scripts.Simulation.Jobs
     {
         private static readonly MachineType[] AllTypes = (MachineType[])Enum.GetValues(typeof(MachineType));
 
-        // ── Per-type processing-time distributions ────────────────────────────────
-        //
-        //  Group 1 – Automated / Subtractive (G-code, fast, tight σ)
-        //    Mill    N(μ=15, σ=2)
-        //    Lathe   N(μ=12, σ=2)
-        //
-        //  Group 2 – Semi-Automated / Thermal (fixturing + heat cycle, wider σ)
-        //    Weld    N(μ=30, σ=6)
-        //
-        //  Group 3 – Quality Assurance (fast gateway, but can become a bottleneck)
-        //    Inspect N(μ=8,  σ=3)
-        //
-        //  Group 4 – Manual / Additive (longest, most unpredictable)
-        //    Assemble N(μ=45, σ=12)
-        //
-        //  Times are clamped to [1, ∞) so no op ever takes zero or negative time.
-        // ─────────────────────────────────────────────────────────────────────────
         private static readonly Dictionary<MachineType, (float mu, float sigma)> ProcTimeParams =
             new Dictionary<MachineType, (float mu, float sigma)>
             {
-                { MachineType.Mill,     (mu: 180f, sigma:  20f) },
-                { MachineType.Lathe,    (mu: 150f, sigma:  20f) },
-                { MachineType.Weld,     (mu: 300f, sigma:  50f) },
-                { MachineType.Inspect,  (mu: 120f, sigma:  20f) },
-                { MachineType.Assemble, (mu: 480f, sigma:  80f) },
+                { MachineType.Mill,     (mu: 90f, sigma:  10f) },
+                { MachineType.Lathe,    (mu: 75f, sigma:  10f) },
+                { MachineType.Weld,     (mu: 150f, sigma:  25f) },
+                { MachineType.Inspect,  (mu: 60f, sigma:  10f) },
+                { MachineType.Assemble, (mu: 240f, sigma:  40f) },
             };
 
         /// <summary>

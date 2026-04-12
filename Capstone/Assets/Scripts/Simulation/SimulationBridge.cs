@@ -24,7 +24,7 @@ namespace Assets.Scripts.Simulation
     ///   1. Harvest flags from machines and AGVs
     ///   2. Assign AGVs to jobs waiting for pickup
     ///   3. If not waiting for agent: find next decision (routing or dispatch)
-    ///   4. Agent responds via Step() → execute the decision
+    ///   4. Agent responds via Step() - execute the decision
     /// </summary>
     public class SimulationBridge : MonoBehaviour
     {
@@ -48,8 +48,9 @@ namespace Assets.Scripts.Simulation
         // ─────────────────────────────────────────────────────────
 
         [Header("Episode Configuration")]
+        public int PreDispatchLeadTime = 15;
         public bool AutoStartOnPlay = false;
-        // public bool AutoStartOnPlay => autoStartOnPlay;
+
         //[SerializeField] private LogLevel logLevel = LogLevel.Low;
 
         private FJSSPConfig currentConfig;
@@ -80,9 +81,6 @@ namespace Assets.Scripts.Simulation
         public UnityEvent<StepResult> OnStepCompleted;
         public UnityEvent<EpisodeResult> OnEpisodeFinished;
         public UnityEvent OnFactorySpawned;
-
-        [SerializeField] private int preDispatchLeadTime = 30;
-        public int PreDispatchLeadTime => preDispatchLeadTime;
 
         // ─────────────────────────────────────────────────────────
         //  Dispatching Rules
@@ -193,11 +191,13 @@ namespace Assets.Scripts.Simulation
             // ── Phase 1: Harvest machine completion flags ─────────
             HarvestMachineFlags();
 
-            // ── Phase 1.5: Pre-dispatch AGVs for jobs almost done ─
-            HarvestAlmostDoneFlags();
+
 
             // ── Phase 2: Harvest AGV delivery flags ──────────────
             HarvestAGVFlags();
+
+            // ── Phase 1.5: Pre-dispatch AGVs for jobs almost done ─
+            HarvestAlmostDoneFlags();
 
             // ── Phase 3: Assign idle AGVs to WaitingForPickup jobs
             AssignAGVs();
@@ -242,21 +242,40 @@ namespace Assets.Scripts.Simulation
                 RefreshMachineLabels(machine.MachineId);
                 if (job.IsLastOperation)
                 {
-                    // All ops done → needs transport to exit
+                    // All ops done - needs transport to exit
                     job.State = JobState.WaitingForPickup;
                     job.TargetMachineId = -1;  // -1 = exit
                     job.LocationMachineId = machine.MachineId;
                     job.StateEntryTime = SimTime;
-                    SimLogger.High($"[Orchestrator] Job {jobId} complete → WaitingForPickup(exit)");
+                    SimLogger.High($"[Orchestrator] Job {jobId} complete - WaitingForPickup(exit)");
+
+                    // Exit delivery never goes through ExecuteRoutingDecision, so
+                    // FinalizePreDispatch would never be called from there.
+                    // If an AGV is already waiting at the pickup dock, finalize it
+                    // now for exit delivery. Otherwise clear the stale reference
+                    // so AssignAGVs can dispatch normally.
+                    if (job.PreDispatchedAgvId >= 0)
+                    {
+                        AGVController preAgv = agvPool.GetPreDispatchedAGV(job.JobId);
+                        if (preAgv != null)
+                        {
+                            preAgv.FinalizePreDispatch(
+                                job.JobId, layoutManager.OutgoingBeltPosition, null, job.Visual);
+                            job.AssignedAgvId = preAgv.AgvId;
+                            SimLogger.High($"[Orchestrator] Finalized pre-dispatch AGV {preAgv.AgvId} " +
+                                           $"- job {jobId} - exit belt.");
+                        }
+                        job.PreDispatchedAgvId = -1;
+                    }
                 }
                 else
                 {
-                    // More ops → needs routing decision
+                    // More ops - needs routing decision
                     job.State = JobState.NeedsRouting;
                     job.LocationMachineId = machine.MachineId;
                     job.StateEntryTime = SimTime;
                     SimLogger.High($"[Orchestrator] Job {jobId} op {job.CompletedOps}/{job.TotalOperations} done " +
-                                   $"→ NeedsRouting (next={job.NextRequiredType})");
+                                   $"- NeedsRouting (next={job.NextRequiredType})");
                 }
             }
         }
@@ -291,6 +310,12 @@ namespace Assets.Scripts.Simulation
                 // Skip if already has a pre-dispatched AGV
                 if (job.PreDispatchedAgvId >= 0) continue;
 
+                // Skip the last operation — exit delivery bypasses ExecuteRoutingDecision
+                // so FinalizePreDispatch would never be called, leaving the AGV stranded
+                // at the dock and the job skipped forever by AssignAGVs. Let the normal
+                // dispatch handle exit pickups after FinishedFlag fires.
+                if (job.CompletedOps == job.TotalOperations - 1) continue;
+
                 AGVController agv = agvPool.GetAvailableAGV();
                 if (agv == null)
                 {
@@ -321,7 +346,7 @@ namespace Assets.Scripts.Simulation
                     {
                         job.State = JobState.InTransit;
                         job.StateEntryTime = SimTime;
-                        SimLogger.High($"[Orchestrator] Job {jobId} picked up by AGV {agv.AgvId} → InTransit");
+                        SimLogger.High($"[Orchestrator] Job {jobId} picked up by AGV {agv.AgvId} - InTransit");
                     }
                     // Don't clear yet — clear after checking delivered too
                 }
@@ -341,7 +366,7 @@ namespace Assets.Scripts.Simulation
                             job.LocationMachineId = -1;
                             job.StateEntryTime = SimTime;
                             if (job.Visual != null) job.Visual.gameObject.SetActive(false);
-                            SimLogger.High($"[Orchestrator] Job {jobId} → Exited");
+                            SimLogger.High($"[Orchestrator] Job {jobId} - Exited");
                         }
                         else
                         {
@@ -349,7 +374,7 @@ namespace Assets.Scripts.Simulation
                             job.State = JobState.Queued;
                             job.LocationMachineId = machineId;
                             job.StateEntryTime = SimTime;
-                            SimLogger.High($"[Orchestrator] Job {jobId} → Queued at M{machineId}");
+                            SimLogger.High($"[Orchestrator] Job {jobId} - Queued at M{machineId}");
 
                             PhysicalMachine targetMachine = layoutManager.GetMachine(machineId);
                             targetMachine.PlaceOnIncoming(jobId, job.Visual);
@@ -420,7 +445,7 @@ namespace Assets.Scripts.Simulation
                 agv.SetCarryVisual(job.Visual);
 
                 SimLogger.High($"[Orchestrator] Assigned AGV {agv.AgvId} to job {job.JobId} " +
-                               $"(M{job.LocationMachineId} → M{job.TargetMachineId})");
+                               $"(M{job.LocationMachineId} - M{job.TargetMachineId})");
             }
 
         }
@@ -498,7 +523,7 @@ namespace Assets.Scripts.Simulation
             job.State = JobState.WaitingForPickup;
             job.StateEntryTime = SimTime;
 
-            SimLogger.High($"[Orchestrator] Routed job {job.JobId} → M{chosenMachineId} " +
+            SimLogger.High($"[Orchestrator] Routed job {job.JobId} - M{chosenMachineId} " +
                            $"(type={job.NextRequiredType})");
 
             // If a pre-dispatched AGV is already waiting at (or heading to) the
@@ -518,7 +543,7 @@ namespace Assets.Scripts.Simulation
                     job.PreDispatchedAgvId = -1;
 
                     SimLogger.High($"[Orchestrator] Finalized pre-dispatch: AGV {preAgv.AgvId} " +
-                                   $"→ job {job.JobId} → M{chosenMachineId}.");
+                                   $"- job {job.JobId} - M{chosenMachineId}.");
                     return; // AGV already handling it — skip Phase 3 for this job
                 }
 

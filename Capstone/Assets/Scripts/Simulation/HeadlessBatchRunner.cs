@@ -211,7 +211,7 @@ namespace Assets.Scripts.Simulation
         /// @brief Runs one (config, rule) episode to completion, yielding each frame.
         private IEnumerator RunSingleEpisode(FJSSPConfig config, DispatchingRule rule)
         {
-            bridge.AutoStartOnPlay = true;
+            //bridge.AutoStartOnPlay = true;
             EpisodeResult runResult = null;
             UnityEngine.Events.UnityAction<EpisodeResult> onFinish = res => runResult = res;
             bridge.OnEpisodeFinished.AddListener(onFinish);
@@ -222,9 +222,9 @@ namespace Assets.Scripts.Simulation
             // Phase 2: Load config (this sets IsFactoryReady = false internally)
             bridge.LoadConfig(config);
 
-            // // Phase 3: Give the agent its single-use ticket to start the episode
-            // if (agent != null)
-            //     agent.ArmAndStart();
+            // Phase 3: Give the agent its single-use ticket to start the episode
+            if (agent != null)
+                agent.ArmAndStart();
 
             // Phase 4: Wait for ML-Agents to trigger OnEpisodeBegin() on the next FixedUpdate
             // This will call bridge.StartEpisode(), which spawns the factory and sets episodeActive = true

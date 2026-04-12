@@ -153,6 +153,22 @@ namespace Assets.Scripts.Simulation.AGV
             State = AGVState.Idle;
             ClearFlags();
         }
+        private void CancelCurrentRoute()
+        {
+            // Release any zone reserved ahead that we'll never enter
+            if (!waitingForZone && routeIndex < currentRoute.Count)
+            {
+                int aheadZoneId = currentRoute[routeIndex];
+                if (aheadZoneId != currentZoneId)
+                    trafficMgr.Release(aheadZoneId, AgvId);
+            }
+
+            currentRoute.Clear();
+            routeIndex = 0;
+            waitingForZone = false;
+            pendingZoneId = -1;
+            parkingZoneId = -1;
+        }
 
         // ─────────────────────────────────────────────────────────
         //  Dispatch — called by orchestrator
@@ -173,6 +189,7 @@ namespace Assets.Scripts.Simulation.AGV
 
             if (State == AGVState.ReturningToParking)
             {
+                CancelCurrentRoute();
                 currentRoute.Clear();
                 routeIndex = 0;
                 waitingForZone = false;
@@ -192,7 +209,8 @@ namespace Assets.Scripts.Simulation.AGV
             dropoffTimer = handshakeDuration;
             waitingForZone = false;
             pendingZoneId = -1;
-            ClearFlags();
+            PickedUpFlag = false;
+            //ClearFlags();
 
             if (currentZoneId < 0)
             {
@@ -273,6 +291,7 @@ namespace Assets.Scripts.Simulation.AGV
             // currentZoneId stays valid — we're still physically in that zone.
             if (State == AGVState.ReturningToParking)
             {
+                CancelCurrentRoute();
                 currentRoute.Clear();
                 routeIndex = 0;
                 waitingForZone = false;
@@ -294,7 +313,8 @@ namespace Assets.Scripts.Simulation.AGV
             dropoffTimer = handshakeDuration;
             waitingForZone = false;
             pendingZoneId = -1;
-            ClearFlags();
+            PickedUpFlag = false;
+            // ClearFlags();
 
             // Ensure valid starting zone
             if (currentZoneId < 0)

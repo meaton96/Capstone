@@ -7622,6 +7622,7 @@ MonoBehaviour:
   agvPool: {fileID: 1750965656}
   agent: {fileID: 516692882}
   Jobs: {fileID: 263971911}
+  PreDispatchLeadTime: 15
   AutoStartOnPlay: 0
   OnDecisionRequired:
     m_PersistentCalls:
@@ -7635,7 +7636,6 @@ MonoBehaviour:
   OnFactorySpawned:
     m_PersistentCalls:
       m_Calls: []
-  preDispatchLeadTime: 15
 --- !u!4 &1562084951
 Transform:
   m_ObjectHideFlags: 0

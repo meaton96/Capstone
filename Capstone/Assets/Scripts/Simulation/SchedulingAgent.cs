@@ -125,9 +125,16 @@ namespace Assets.Scripts.Simulation
 
         private void HandleEpisodeFinished(EpisodeResult result)
         {
-            // The simulation has naturally reached the end (all jobs exited).
-            // Tell ML-Agents to finalize the episode and loop back to OnEpisodeBegin.
-            EndEpisode();
+            // In continuous training mode (AutoStartOnPlay), drive the ML-Agents
+            // loop directly — EndEpisode() → OnEpisodeBegin() → StartEpisode().
+            //
+            // In batch mode or UI mode the CALLER (HeadlessBatchRunner or a UI
+            // button) owns the episode lifecycle and calls ArmAndStart() itself.
+            // If we call EndEpisode() here in those modes, ML-Agents immediately
+            // re-enters OnEpisodeBegin() before the caller can log the result and
+            // set up the next run, causing runaway infinite looping.
+            if (bridge != null && bridge.AutoStartOnPlay)
+                EndEpisode();
         }
 
         // ─────────────────────────────────────────────────────────
