@@ -4,10 +4,12 @@ using Assets.Scripts.Logging;
 
 namespace Assets.Scripts.Simulation
 {
-    /// <summary>
-    /// Bootstrapper for the static logging classes. 
-    /// Ensures logs are written safely outside of the macOS .app bundle.
-    /// </summary>
+    /// @brief Orchestrates the initialization of static logging utilities.
+    ///
+    /// @details Ensures that both @c ResultsLogger and @c SimLogger are configured 
+    /// with appropriate directory paths and verbosity levels. It handles cross-platform 
+    /// directory resolution to ensure logs are written to persistent storage locations 
+    /// outside of read-only application bundles.
     public class LoggingInitializer : MonoBehaviour
     {
         [Header("Logging Settings")]
@@ -16,14 +18,17 @@ namespace Assets.Scripts.Simulation
 
         public static LoggingInitializer Instance;
 
+        /// @brief Performs the initial setup of logging paths and configurations.
+        ///
+        /// @details Resolves the "Results" directory based on the execution environment 
+        /// (Editor, Windows/Linux Standalone, or macOS Standalone). It checks for the 
+        /// @c -loglevel command-line argument to allow for runtime verbosity overrides 
+        /// before initializing the file systems for both the @c ResultsLogger and 
+        /// the @c SimLogger.
         private void Awake()
         {
             Instance = this;
 
-            // ── CLI override for log level ────────────────────────
-            // Usage: -loglevel Low | Medium | High
-            // Lets headless batch runs suppress verbose output without
-            // recompiling. Inspector value is used if no CLI arg present.
             string cliLevel = GetCLIArg("-loglevel");
             if (!string.IsNullOrEmpty(cliLevel) &&
                 System.Enum.TryParse(cliLevel, ignoreCase: true, out LogLevel parsedLevel))
@@ -31,35 +36,37 @@ namespace Assets.Scripts.Simulation
                 simLoggerLevel = parsedLevel;
             }
 
-            // 1. Resolve OS-Safe Directory
             string folderPath;
 
 #if UNITY_EDITOR
             folderPath = Path.Combine(Directory.GetParent(Application.dataPath).FullName, "Results");
 #elif UNITY_STANDALONE_OSX
-            // Mac: Go up two levels to get outside the .app bundle
             folderPath = Path.Combine(Directory.GetParent(Application.dataPath).Parent.FullName, "Results");
 #else
-            // Windows/Linux: Go up one level to get outside the _Data folder
             folderPath = Path.Combine(Directory.GetParent(Application.dataPath).FullName, "Results");
 #endif
 
-            // Ensure the directory exists
             if (!Directory.Exists(folderPath))
             {
                 Directory.CreateDirectory(folderPath);
             }
 
-            // 2. Initialize Results Logger
             ResultsLogger.OutputDirectory = folderPath;
 
-            // 3. Initialize Sim Logger
             SimLogger.ActiveLevel = simLoggerLevel;
             if (enableFileLogging)
             {
                 SimLogger.InitializeFileLogging(folderPath, "simulation_log.txt");
             }
         }
+
+        /// @brief Retrieves a specific value from the application's command-line arguments.
+        ///
+        /// @param key The argument flag to search for (e.g., "-loglevel").
+        /// @return The value associated with the key if found; otherwise, @c null.
+        ///
+        /// @details Iterates through @c System.Environment.GetCommandLineArgs to find 
+        /// the key and returns the subsequent array element as the value.
         private static string GetCLIArg(string key)
         {
             string[] args = System.Environment.GetCommandLineArgs();
