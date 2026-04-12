@@ -2,6 +2,8 @@ using UnityEngine;
 using TMPro;
 using Assets.Scripts.Simulation;
 using UnityEngine.UI;
+using Assets.Scripts.Simulation.Jobs;
+using Assets.Scripts.Logging;
 
 namespace Assets.Scripts.UI
 {
@@ -64,8 +66,10 @@ namespace Assets.Scripts.UI
             if (SimulationBridge.Instance != null)
                 SimulationBridge.Instance.StopEpisode();
 
-            if (instanceSelectMenu != null)
-                instanceSelectMenu.Show();
+            // if (instanceSelectMenu != null)
+            //     instanceSelectMenu.Show();
+
+
         }
 
         /// @brief Polls the bridge and refreshes all HUD labels once per frame.
@@ -85,17 +89,13 @@ namespace Assets.Scripts.UI
                 decisionsText.text = $"DECISIONS: {SimulationBridge.Instance.DecisionCount}";
 
             if (jobsText != null
-                && SimulationBridge.Instance.JobManager != null
-                && SimulationBridge.Instance.JobManager.IsInitialized)
+                && SimulationBridge.Instance.Jobs != null
+                && SimulationBridge.Instance.Jobs.IsInitialized)
             {
-                int totalJobs = SimulationBridge.Instance.JobManager.JobCount;
-                int completedJobs = 0;
+                int totalJobs = SimulationBridge.Instance.Jobs.JobCount;
+                int completedJobs = SimulationBridge.Instance.Jobs.CountInState(JobState.Exited);
 
-                foreach (var tracker in SimulationBridge.Instance.JobManager.JobTrackers)
-                {
-                    if (tracker.State == JobLifecycleState.Complete)
-                        completedJobs++;
-                }
+
 
                 jobsText.text = $"JOBS DONE: {completedJobs} / {totalJobs}";
             }

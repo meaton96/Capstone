@@ -105,7 +105,7 @@ namespace Assets.Scripts.UI
                 return;
             }
 
-            bridge.TaillardJson = loadedInstances[index];
+            //bridge.TaillardJson = loadedInstances[index];
             SimLogger.Medium($"[InstanceSelectMenu] Selected instance: {loadedInstances[index].name}");
             bridge.StartEpisode();
 

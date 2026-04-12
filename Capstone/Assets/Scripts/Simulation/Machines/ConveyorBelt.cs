@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Assets.Scripts.Simulation.Jobs;
 
 namespace Assets.Scripts.Simulation.Machines
 {
@@ -36,11 +37,23 @@ namespace Assets.Scripts.Simulation.Machines
 
         private Vector3 OriginEnd => transform.position + Vector3.up * heightOffset;
 
+
         private Vector3 FarEnd => transform.position + transform.forward * BeltLength + Vector3.up * heightOffset;
 
         public Vector3 InputEndPosition => reverseFlow ? FarEnd : OriginEnd;
 
         public Vector3 OutputEndPosition => reverseFlow ? OriginEnd : FarEnd;
+
+        public string DumpBeltJobs()
+        {
+            string s = "[Conveyor] ";
+            for (int i = 0; i < entries.Count; i++)
+            {
+                BeltEntry job = entries[i];
+                s += $"id: {job.JobId}, visual: {job.Visual.name}\n";
+            }
+            return s;
+        }
 
         /// @brief Calculates the world-space coordinate for a specific belt slot.
         ///

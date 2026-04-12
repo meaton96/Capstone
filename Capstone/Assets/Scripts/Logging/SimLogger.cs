@@ -1,85 +1,117 @@
 using UnityEngine;
+using System.IO;
+using System;
 
 namespace Assets.Scripts.Logging
 {
-    /// @brief Verbosity levels for @c SimLogger, ordered from least to most detailed.
+    /// @brief Defines the verbosity levels for the simulation logger.
     public enum LogLevel
     {
-        /// @brief Critical errors only. Always printed regardless of the active level.
         Error = 0,
-
-        /// @brief High-level milestones: episode start/end, makespan, decision count.
         Low = 1,
-
-        /// @brief Per-decision and per-job state transitions.
         Medium = 2,
-
-        /// @brief Frame-level detail: AGV dispatches, queue arrivals, progress ticks.
         High = 3,
     }
 
-    /// @brief Static levelled logger that gates @c UnityEngine.Debug output behind a
-    ///        configurable verbosity threshold.
+    /// @brief Static utility for handling console and file-based logging within the simulation.
     ///
-    /// @details Set @c ActiveLevel once at startup (or at any time from the Inspector
-    ///          via a thin MonoBehaviour wrapper) and every call site automatically
-    ///          respects the threshold. Messages below the active level are no-ops with
-    ///          no string allocation cost because the caller controls the level tag.
-    ///
-    /// @par Usage
-    /// @code
-    /// SimLogger.ActiveLevel = LogLevel.Medium;
-    ///
-    /// SimLogger.Log(LogLevel.Low,    "[SimBridge] Episode started.");
-    /// SimLogger.Log(LogLevel.High,   $"[Ghost AGV] Dispatched Job {jobId} to Machine {machineId}.");
-    /// SimLogger.LogError(            "[SimBridge] Parse error: " + ex.Message);
-    /// @endcode
+    /// @details Provides filtered logging based on an @c ActiveLevel and supports 
+    /// persistent storage of logs to a text file for post-run analysis.
     public static class SimLogger
     {
-        /// @brief The minimum level a message must meet to be written to the console.
-        ///        Defaults to @c Low so only important milestones appear out of the box.
         public static LogLevel ActiveLevel = LogLevel.Low;
+        private static string _filePath;
+        private static bool _isFileLoggingEnabled = false;
 
-        // ─────────────────────────────────────────────────────────
-        //  Core API
-        // ─────────────────────────────────────────────────────────
+        /// @brief Configures the directory and file for persistent logging.
+        ///
+        /// @param folderPath The absolute path to the directory where logs should be stored.
+        /// @param fileName The name of the log file, including extension.
+        ///
+        /// @details Creates the target directory if it does not exist. It overwrites 
+        /// any existing file with the same name to start a fresh log for the current session.
+        public static void InitializeFileLogging(string folderPath, string fileName = "simulation_log.txt")
+        {
+            try
+            {
+                if (!Directory.Exists(folderPath))
+                {
+                    Directory.CreateDirectory(folderPath);
+                }
 
-        /// @brief Writes @p message to the console if @p level is within the active threshold.
-        /// @param level    Verbosity classification of this message.
-        /// @param message  Text to output.
+                _filePath = Path.Combine(folderPath, fileName);
+                File.WriteAllText(_filePath, $"--- Log Started: {DateTime.Now} ---\n");
+
+                _isFileLoggingEnabled = true;
+                Debug.Log($"[SimLogger] File logging initialized at: {_filePath}");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[SimLogger] Failed to initialize file logging: {ex.Message}");
+            }
+        }
+
+        /// @brief Appends a string to the current log file with a precise timestamp.
+        ///
+        /// @param message The raw string to write to the file.
+        ///
+        /// @details This method fails silently if an I/O error occurs to prevent 
+        /// recursive logging loops or simulation crashes during file access contention.
+        private static void WriteToFile(string message)
+        {
+            if (!_isFileLoggingEnabled) return;
+
+            try
+            {
+                string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+                File.AppendAllText(_filePath, $"{timestamp} {message}\n");
+            }
+            catch
+            {
+                // Silent failure to prevent infinite recursion or crash.
+            }
+        }
+
+        /// @brief Logs a message if its level is within the current @c ActiveLevel.
+        ///
+        /// @param level The importance of the message.
+        /// @param message The string content to log.
+        ///
+        /// @details Validates the @c level against @c ActiveLevel before printing 
+        /// to the Unity Console and invoking @c WriteToFile.
         public static void Log(LogLevel level, string message)
         {
             if (level <= ActiveLevel)
+            {
                 Debug.Log(message);
+                WriteToFile($"{message}");
+            }
         }
 
-        /// @brief Writes @p message as a @c Debug.LogWarning, always visible.
-        /// @param message  Warning text to output.
+        /// @brief Forces a warning message to the console and file regardless of @c ActiveLevel.
         public static void LogWarning(string message)
         {
             Debug.LogWarning(message);
+            WriteToFile($"[Warning] {message}");
         }
 
-        /// @brief Writes @p message as a @c Debug.LogError, always visible.
-        /// @param message  Error text to output.
+        /// @brief Forces an error message to the console and file regardless of @c ActiveLevel.
         public static void LogError(string message)
         {
             Debug.LogError(message);
+            WriteToFile($"[Error] {message}");
         }
 
-        // ─────────────────────────────────────────────────────────
-        //  Convenience Shorthands
-        // ─────────────────────────────────────────────────────────
-
-        /// @brief Shorthand for @c Log(LogLevel.Low, message).
+        /// @brief Shorthand for logging at @c LogLevel.Low.
         public static void Low(string message) => Log(LogLevel.Low, message);
 
-        /// @brief Shorthand for @c Log(LogLevel.Medium, message).
+        /// @brief Shorthand for logging at @c LogLevel.Medium.
         public static void Medium(string message) => Log(LogLevel.Medium, message);
 
-        /// @brief Shorthand for @c Log(LogLevel.High, message).
+        /// @brief Shorthand for logging at @c LogLevel.High.
         public static void High(string message) => Log(LogLevel.High, message);
 
+        /// @brief Shorthand for logging at @c LogLevel.Error.
         public static void Error(string message) => Log(LogLevel.Error, message);
     }
 }

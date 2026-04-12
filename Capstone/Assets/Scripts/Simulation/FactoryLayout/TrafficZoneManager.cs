@@ -42,7 +42,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
 
     /// @brief Describes positioning for AGV-conveyor interaction.
     [Serializable]
-    public struct DockPoint
+    public class DockPoint
     {
         public Vector3 ApproachPosition;
         public Vector3 HandshakePosition;
@@ -108,7 +108,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             int[] rightVertZones = BuildVerticalZones(false, rows);
 
             ConnectZoneGraph(rowAisleZones, topSpineZones, botSpineZones, leftVertZones, rightVertZones, rows, cols);
-            RegisterDockPoints(rowAisleZones, topSpineZones, botSpineZones, rows, cols);
+            RegisterDockPoints(rowAisleZones, topSpineZones, botSpineZones, rows, cols, leftVertZones);
 
             SimLogger.Medium($"[TrafficZones] Built zone graph: {zones.Count} zones.");
         }
@@ -277,7 +277,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         /// @details Resolves the handshake and approach positions for every physical machine 
         /// and maps them to the nearest reservable traffic zone.
         /// @post TrafficZone.DockPoints dictionaries are populated for relevant zones.
-        private void RegisterDockPoints(int[][] rowAisles, int[] topSpine, int[] botSpine, int rows, int cols)
+        private void RegisterDockPoints(int[][] rowAisles, int[] topSpine, int[] botSpine, int rows, int cols, int[] leftVert)
         {
             if (topSpine.Length > 0 && layoutManager.IncomingBelt != null)
             {
@@ -293,12 +293,39 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 outZone.DockPoints[OutgoingBeltId] = new DockPoint { ApproachPosition = handshake + Vector3.forward * 1.5f, HandshakePosition = handshake, FacingDirection = -Vector3.forward, IsPickup = false };
             }
 
+            // 1. Create a brand new zone dedicated exclusively to parking
             if (botSpine.Length > 0)
             {
-                TrafficZone parkZone = zoneById[botSpine[0]];
-                parkZone.Capacity = 10;
-                parkZone.DockPoints[ParkingAreaId] = new DockPoint { ApproachPosition = layoutManager.AGVParkingPosition, HandshakePosition = layoutManager.AGVParkingPosition, FacingDirection = -Vector3.left, IsPickup = false };
+                // 1. Create the Parking_Alcove zone
+                var parkingZone = new TrafficZone
+                {
+                    ZoneId = nextZoneId++,
+                    Name = "Parking_Alcove",
+                    AisleType = AisleType.SpineAisle,
+                    Flow = FlowDirection.West,
+                    Centre = layoutManager.AGVParkingPosition,
+                    Size = new Vector3(10f, 0.1f, 5f),
+                    Capacity = 10
+                };
+
+                parkingZone.DockPoints[ParkingAreaId] = new DockPoint
+                {
+                    ApproachPosition = layoutManager.AGVParkingPosition,
+                    HandshakePosition = layoutManager.AGVParkingPosition,
+                    FacingDirection = -Vector3.left,
+                    IsPickup = false
+                };
+
+                RegisterZone(parkingZone);
+
+                // 2. Link the graph using your helper method!
+                int entrySpineZone = botSpine[0];
+                int exitVerticalZone = leftVert[leftVert.Length - 1]; // Bottom of the left aisle
+
+                LinkZones(entrySpineZone, parkingZone.ZoneId); // Let AGVs drive IN
+                LinkZones(parkingZone.ZoneId, exitVerticalZone); // Let AGVs drive OUT
             }
+
 
             float standoff = 1.5f;
             for (int i = 0; i < layoutManager.MachineCount; i++)

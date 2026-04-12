@@ -112,7 +112,7 @@ public class CameraController : MonoBehaviour
 
         if (moveDirection != Vector3.zero)
         {
-            transform.position += moveDirection.normalized * (moveSpeed * Time.deltaTime);
+            transform.position += moveDirection.normalized * (moveSpeed * Time.deltaTime) / Time.timeScale;
         }
     }
 }

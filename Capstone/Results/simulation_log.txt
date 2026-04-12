@@ -1,0 +1,206 @@
+--- Log Started: 4/12/2026 1:05:59 PM ---
+2026-04-12 13:05:59.621 [Agent] OnEpisodeBegin skipped — waiting for UI to arm.
+2026-04-12 13:06:01.174 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble, Mill, Lathe
+  Row3: Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-12 13:06:01.195 [FactoryLayout] Distance matrix (15x15):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
+2026-04-12 13:06:01.196 M0      0.0    6.0   12.0   18.0    7.5    9.6   14.2   19.5   15.0   16.2   19.2   23.4   22.5   23.3   25.5 
+2026-04-12 13:06:01.196 M1      6.0    0.0    6.0   12.0    9.6    7.5    9.6   14.2   16.2   15.0   16.2   19.2   23.3   22.5   23.3 
+2026-04-12 13:06:01.196 M2     12.0    6.0    0.0    6.0   14.2    9.6    7.5    9.6   19.2   16.2   15.0   16.2   25.5   23.3   22.5 
+2026-04-12 13:06:01.196 M3     18.0   12.0    6.0    0.0   19.5   14.2    9.6    7.5   23.4   19.2   16.2   15.0   28.8   25.5   23.3 
+2026-04-12 13:06:01.197 M4      7.5    9.6   14.2   19.5    0.0    6.0   12.0   18.0    7.5    9.6   14.2   19.5   15.0   16.2   19.2 
+2026-04-12 13:06:01.198 M5      9.6    7.5    9.6   14.2    6.0    0.0    6.0   12.0    9.6    7.5    9.6   14.2   16.2   15.0   16.2 
+2026-04-12 13:06:01.198 M6     14.2    9.6    7.5    9.6   12.0    6.0    0.0    6.0   14.2    9.6    7.5    9.6   19.2   16.2   15.0 
+2026-04-12 13:06:01.199 M7     19.5   14.2    9.6    7.5   18.0   12.0    6.0    0.0   19.5   14.2    9.6    7.5   23.4   19.2   16.2 
+2026-04-12 13:06:01.199 M8     15.0   16.2   19.2   23.4    7.5    9.6   14.2   19.5    0.0    6.0   12.0   18.0    7.5    9.6   14.2 
+2026-04-12 13:06:01.199 M9     16.2   15.0   16.2   19.2    9.6    7.5    9.6   14.2    6.0    0.0    6.0   12.0    9.6    7.5    9.6 
+2026-04-12 13:06:01.200 M10    19.2   16.2   15.0   16.2   14.2    9.6    7.5    9.6   12.0    6.0    0.0    6.0   14.2    9.6    7.5 
+2026-04-12 13:06:01.200 M11    23.4   19.2   16.2   15.0   19.5   14.2    9.6    7.5   18.0   12.0    6.0    0.0   19.5   14.2    9.6 
+2026-04-12 13:06:01.201 M12    22.5   23.3   25.5   28.8   15.0   16.2   19.2   23.4    7.5    9.6   14.2   19.5    0.0    6.0   12.0 
+2026-04-12 13:06:01.201 M13    23.3   22.5   23.3   25.5   16.2   15.0   16.2   19.2    9.6    7.5    9.6   14.2    6.0    0.0    6.0 
+2026-04-12 13:06:01.201 M14    25.5   23.3   22.5   23.3   19.2   16.2   15.0   16.2   14.2    9.6    7.5    9.6   12.0    6.0    0.0 
+2026-04-12 13:06:01.211 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-04-12 13:06:01.216 [TrafficZones] Built zone graph: 33 zones.
+2026-04-12 13:06:01.218 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-12 13:06:02.097 [Orchestrator] Episode started: 20 jobs.
+2026-04-12 13:06:07.543 [AGV 0] Redirected from parking to job 15.
+2026-04-12 13:06:07.828 [AGV 1] Redirected from parking to job 14.
+2026-04-12 13:06:07.844 [AGV 2] Redirected from parking to job 13.
+2026-04-12 13:06:08.532 [AGV 0] Redirected from parking to job 12.
+2026-04-12 13:06:08.711 [AGV 1] Redirected from parking to job 11.
+2026-04-12 13:06:08.989 [AGV 2] Redirected from parking to job 10.
+2026-04-12 13:06:09.553 [AGV 0] Redirected from parking to job 0.
+2026-04-12 13:06:09.752 [AGV 1] Redirected from parking to job 17.
+2026-04-12 13:06:09.847 [AGV 2] Redirected from parking to job 9.
+2026-04-12 13:06:10.148 [AGV 0] Redirected from parking to job 8.
+2026-04-12 13:06:10.281 [AGV 1] Redirected from parking to job 13.
+2026-04-12 13:06:10.470 [AGV 1] Redirected from parking to job 7.
+2026-04-12 13:06:11.050 [AGV 2] Redirected from parking to job 14.
+2026-04-12 13:06:11.201 [AGV 0] Redirected from parking to job 12.
+2026-04-12 13:06:11.331 [AGV 1] Redirected from parking to job 6.
+2026-04-12 13:06:11.564 [AGV 2] Redirected from parking to job 5.
+2026-04-12 13:06:11.904 [AGV 0] Redirected from parking to job 17.
+2026-04-12 13:06:12.357 [AGV 0] Redirected from parking to job 10.
+2026-04-12 13:06:12.554 [AGV 1] Redirected from parking to job 9.
+2026-04-12 13:06:12.686 [AGV 2] Redirected from parking to job 11.
+2026-04-12 13:06:13.043 [AGV 1] Redirected from parking to job 4.
+2026-04-12 13:06:13.199 [AGV 0] Redirected from parking to job 13.
+2026-04-12 13:06:13.217 [AGV 2] Redirected from parking to job 3.
+2026-04-12 13:06:13.847 [AGV 0] Redirected from parking to job 17.
+2026-04-12 13:06:14.103 [AGV 1] Redirected from parking to job 15.
+2026-04-12 13:06:14.233 [AGV 2] Redirected from parking to job 12.
+2026-04-12 13:06:14.363 [AGV 0] Redirected from parking to job 2.
+2026-04-12 13:06:14.592 [AGV 1] Redirected from parking to job 1.
+2026-04-12 13:06:14.807 [AGV 2] Redirected from parking to job 10.
+2026-04-12 13:06:15.518 [AGV 0] Redirected from parking to job 11.
+2026-04-12 13:06:15.566 [AGV 2] Redirected from parking to job 9.
+2026-04-12 13:06:15.629 [AGV 1] Redirected from parking to job 8.
+2026-04-12 13:06:15.888 [AGV 1] Redirected from parking to job 16.
+2026-04-12 13:06:16.088 [AGV 2] Redirected from parking to job 18.
+2026-04-12 13:06:16.256 [AGV 0] Redirected from parking to job 19.
+2026-04-12 13:06:16.316 [AGV 1] Pre-dispatched for job 14 — heading to pickup zone.
+2026-04-12 13:06:16.580 [AGV 1] At pre-pickup dock for job 14.
+2026-04-12 13:06:16.621 [AGV 1] Finalized pre-dispatch for job 14 — starting handshake.
+2026-04-12 13:06:16.790 [AGV 1] Redirected from parking to job 12.
+2026-04-12 13:06:16.961 [AGV 2] Redirected from parking to job 2.
+2026-04-12 13:06:17.014 [AGV 0] Redirected from parking to job 3.
+2026-04-12 13:06:17.287 [AGV 0] Pre-dispatched for job 7 — heading to pickup zone.
+2026-04-12 13:06:17.487 [AGV 1] Pre-dispatched for job 8 — heading to pickup zone.
+2026-04-12 13:06:17.541 [AGV 0] At pre-pickup dock for job 7.
+2026-04-12 13:06:17.563 [AGV 1] At pre-pickup dock for job 8.
+2026-04-12 13:06:17.591 [AGV 0] Finalized pre-dispatch for job 7 — starting handshake.
+2026-04-12 13:06:17.780 [AGV 2] Pre-dispatched for job 13 — heading to pickup zone.
+2026-04-12 13:06:17.791 [AGV 1] Finalized pre-dispatch for job 8 — starting handshake.
+2026-04-12 13:06:18.008 [AGV 2] At pre-pickup dock for job 13.
+2026-04-12 13:06:18.083 [AGV 2] Finalized pre-dispatch for job 13 — starting handshake.
+2026-04-12 13:06:18.277 [AGV 0] Pre-dispatched for job 6 — heading to pickup zone.
+2026-04-12 13:06:18.335 [AGV 1] Redirected from parking to job 3.
+2026-04-12 13:06:18.582 [AGV 0] Finalized pre-dispatch for job 6 — en-route.
+2026-04-12 13:06:18.695 [AGV 2] Redirected from parking to job 14.
+2026-04-12 13:06:18.834 [AGV 1] Pre-dispatched for job 10 — heading to pickup zone.
+2026-04-12 13:06:19.059 [AGV 1] At pre-pickup dock for job 10.
+2026-04-12 13:06:19.133 [AGV 1] Finalized pre-dispatch for job 10 — starting handshake.
+2026-04-12 13:06:19.322 [AGV 2] Redirected from parking to job 5.
+2026-04-12 13:06:19.483 [AGV 0] Redirected from parking to job 19.
+2026-04-12 13:06:19.791 [AGV 2] Redirected from parking to job 16.
+2026-04-12 13:06:19.932 [AGV 0] Pre-dispatched for job 8 — heading to pickup zone.
+2026-04-12 13:06:20.031 [AGV 0] At pre-pickup dock for job 8.
+2026-04-12 13:06:20.033 [AGV 1] Redirected from parking to job 14.
+2026-04-12 13:06:20.233 [AGV 0] Finalized pre-dispatch for job 8 — starting handshake.
+2026-04-12 13:06:20.483 [AGV 2] Pre-dispatched for job 17 — heading to pickup zone.
+2026-04-12 13:06:20.753 [AGV 0] Pre-dispatched for job 3 — heading to pickup zone.
+2026-04-12 13:06:20.789 [AGV 2] Finalized pre-dispatch for job 17 — en-route.
+2026-04-12 13:06:20.820 [AGV 1] Redirected from parking to job 18.
+2026-04-12 13:06:21.053 [AGV 0] Finalized pre-dispatch for job 3 — en-route.
+2026-04-12 13:06:21.279 [AGV 0] Pre-dispatched for job 5 — heading to pickup zone.
+2026-04-12 13:06:21.315 [AGV 0] At pre-pickup dock for job 5.
+2026-04-12 13:06:21.407 [AGV 2] Redirected from parking to job 16.
+2026-04-12 13:06:21.580 [AGV 0] Finalized pre-dispatch for job 5 — starting handshake.
+2026-04-12 13:06:21.791 [AGV 1] Redirected from parking to job 10.
+2026-04-12 13:06:22.192 [AGV 0] Redirected from parking to job 12.
+2026-04-12 13:06:22.543 [AGV 2] Redirected from parking to job 2.
+2026-04-12 13:06:22.995 [AGV 1] Pre-dispatched for job 18 — heading to pickup zone.
+2026-04-12 13:06:23.061 [AGV 2] Redirected from parking to job 6.
+2026-04-12 13:06:23.290 [AGV 1] Finalized pre-dispatch for job 18 — en-route.
+2026-04-12 13:06:23.399 [AGV 0] Pre-dispatched for job 1 — heading to pickup zone.
+2026-04-12 13:06:23.631 [AGV 2] Pre-dispatched for job 9 — heading to pickup zone.
+2026-04-12 13:06:23.710 [AGV 0] Finalized pre-dispatch for job 1 — en-route.
+2026-04-12 13:06:23.936 [AGV 2] Finalized pre-dispatch for job 9 — en-route.
+2026-04-12 13:06:24.493 [AGV 1] Pre-dispatched for job 2 — heading to pickup zone.
+2026-04-12 13:06:24.593 [AGV 2] Redirected from parking to job 14.
+2026-04-12 13:06:24.800 [AGV 1] Finalized pre-dispatch for job 2 — en-route.
+2026-04-12 13:06:24.862 [AGV 0] Redirected from parking to job 10.
+2026-04-12 13:06:25.212 [AGV 1] Pre-dispatched for job 8 — heading to pickup zone.
+2026-04-12 13:06:25.514 [AGV 1] Finalized pre-dispatch for job 8 — en-route.
+2026-04-12 13:06:26.006 [AGV 0] Pre-dispatched for job 13 — heading to pickup zone.
+2026-04-12 13:06:26.201 [AGV 0] At pre-pickup dock for job 13.
+2026-04-12 13:06:26.243 [AGV 1] Pre-dispatched for job 9 — heading to pickup zone.
+2026-04-12 13:06:26.313 [AGV 0] Finalized pre-dispatch for job 13 — starting handshake.
+2026-04-12 13:06:26.454 [AGV 1] At pre-pickup dock for job 9.
+2026-04-12 13:06:26.535 [AGV 2] Pre-dispatched for job 4 — heading to pickup zone.
+2026-04-12 13:06:26.562 [AGV 1] Finalized pre-dispatch for job 9 — starting handshake.
+2026-04-12 13:06:26.829 [AGV 2] At pre-pickup dock for job 4.
+2026-04-12 13:06:26.836 [AGV 2] Finalized pre-dispatch for job 4 — starting handshake.
+2026-04-12 13:06:27.011 [AGV 0] Redirected from parking to job 6.
+2026-04-12 13:06:27.996 [AGV 0] Pre-dispatched for job 1 — heading to pickup zone.
+2026-04-12 13:06:28.207 [AGV 0] At pre-pickup dock for job 1.
+2026-04-12 13:06:28.299 [AGV 0] Finalized pre-dispatch for job 1 — starting handshake.
+2026-04-12 13:06:28.569 [AGV 0] Pre-dispatched for job 11 — heading to pickup zone.
+2026-04-12 13:06:28.685 [AGV 0] At pre-pickup dock for job 11.
+2026-04-12 13:06:28.872 [AGV 0] Finalized pre-dispatch for job 11 — starting handshake.
+2026-04-12 13:06:29.175 [AGV 1] Pre-dispatched for job 6 — heading to pickup zone.
+2026-04-12 13:06:29.424 [AGV 1] At pre-pickup dock for job 6.
+2026-04-12 13:06:29.480 [AGV 1] Finalized pre-dispatch for job 6 — starting handshake.
+2026-04-12 13:06:29.631 [AGV 0] Pre-dispatched for job 2 — heading to pickup zone.
+2026-04-12 13:06:29.745 [AGV 2] Pre-dispatched for job 1 — heading to pickup zone.
+2026-04-12 13:06:29.914 [AGV 1] Pre-dispatched for job 0 — heading to pickup zone.
+2026-04-12 13:06:29.935 [AGV 0] Finalized pre-dispatch for job 2 — en-route.
+2026-04-12 13:06:30.053 [AGV 2] Finalized pre-dispatch for job 1 — en-route.
+2026-04-12 13:06:30.219 [AGV 1] Finalized pre-dispatch for job 0 — en-route.
+2026-04-12 13:06:30.377 [AGV 2] Redirected from parking to job 3.
+2026-04-12 13:06:30.609 [AGV 0] Pre-dispatched for job 6 — heading to pickup zone.
+2026-04-12 13:06:30.625 [AGV 1] Pre-dispatched for job 11 — heading to pickup zone.
+2026-04-12 13:06:30.782 [AGV 1] At pre-pickup dock for job 11.
+2026-04-12 13:06:30.812 [AGV 2] Redirected from parking to job 9.
+2026-04-12 13:06:30.917 [AGV 0] Finalized pre-dispatch for job 6 — en-route.
+2026-04-12 13:06:30.931 [AGV 1] Finalized pre-dispatch for job 11 — starting handshake.
+2026-04-12 13:06:31.353 [AGV 1] Redirected from parking to job 7.
+2026-04-12 13:06:32.070 [AGV 0] Pre-dispatched for job 2 — heading to pickup zone.
+2026-04-12 13:06:32.376 [AGV 0] Finalized pre-dispatch for job 2 — en-route.
+2026-04-12 13:06:33.297 [AGV 1] Pre-dispatched for job 4 — heading to pickup zone.
+2026-04-12 13:06:33.603 [AGV 1] Finalized pre-dispatch for job 4 — en-route.
+2026-04-12 13:06:35.298 [AGV 0] Pre-dispatched for job 18 — heading to pickup zone.
+2026-04-12 13:06:35.390 [AGV 1] Pre-dispatched for job 4 — heading to pickup zone.
+2026-04-12 13:06:35.404 [AGV 2] Pre-dispatched for job 2 — heading to pickup zone.
+2026-04-12 13:06:35.511 [AGV 0] At pre-pickup dock for job 18.
+2026-04-12 13:06:35.603 [AGV 0] Finalized pre-dispatch for job 18 — starting handshake.
+2026-04-12 13:06:35.693 [AGV 1] Finalized pre-dispatch for job 4 — en-route.
+2026-04-12 13:06:35.707 [AGV 2] Finalized pre-dispatch for job 2 — en-route.
+2026-04-12 13:06:36.117 [AGV 0] Pre-dispatched for job 16 — heading to pickup zone.
+2026-04-12 13:06:36.266 [AGV 0] At pre-pickup dock for job 16.
+2026-04-12 13:06:36.421 [AGV 0] Finalized pre-dispatch for job 16 — starting handshake.
+2026-04-12 13:06:36.620 [AGV 1] Pre-dispatched for job 18 — heading to pickup zone.
+2026-04-12 13:06:36.926 [AGV 1] Finalized pre-dispatch for job 18 — en-route.
+2026-04-12 13:06:37.150 [AGV 2] Pre-dispatched for job 7 — heading to pickup zone.
+2026-04-12 13:06:37.455 [AGV 2] Finalized pre-dispatch for job 7 — en-route.
+2026-04-12 13:06:37.833 [AGV 1] Pre-dispatched for job 4 — heading to pickup zone.
+2026-04-12 13:06:37.946 [AGV 0] Redirected from parking to job 2.
+2026-04-12 13:06:38.141 [AGV 1] Finalized pre-dispatch for job 4 — en-route.
+2026-04-12 13:06:38.650 [AGV 0] Redirected from parking to job 16.
+2026-04-12 13:06:38.898 [AGV 1] Redirected from parking to job 18.
+2026-04-12 13:06:39.676 [AGV 0] Redirected from parking to job 6.
+2026-04-12 13:06:42.592 [AGV 0] Pre-dispatched for job 16 — heading to pickup zone.
+2026-04-12 13:06:42.801 [AGV 0] At pre-pickup dock for job 16.
+2026-04-12 13:06:42.895 [AGV 0] Finalized pre-dispatch for job 16 — starting handshake.
+2026-04-12 13:06:43.643 [AGV 0] Pre-dispatched for job 0 — heading to pickup zone.
+2026-04-12 13:06:43.950 [AGV 0] Finalized pre-dispatch for job 0 — en-route.
+2026-04-12 13:06:45.958 [AGV 0] Pre-dispatched for job 0 — heading to pickup zone.
+2026-04-12 13:06:46.203 [AGV 0] At pre-pickup dock for job 0.
+2026-04-12 13:06:46.262 [AGV 0] Finalized pre-dispatch for job 0 — starting handshake.
+2026-04-12 13:06:47.133 [AGV 0] Pre-dispatched for job 5 — heading to pickup zone.
+2026-04-12 13:06:47.326 [AGV 0] At pre-pickup dock for job 5.
+2026-04-12 13:06:47.435 [AGV 0] Finalized pre-dispatch for job 5 — starting handshake.
+2026-04-12 13:06:48.049 [AGV 2] Pre-dispatched for job 15 — heading to pickup zone.
+2026-04-12 13:06:48.272 [AGV 2] At pre-pickup dock for job 15.
+2026-04-12 13:06:48.355 [AGV 2] Finalized pre-dispatch for job 15 — starting handshake.
+2026-04-12 13:06:49.376 [AGV 0] Pre-dispatched for job 19 — heading to pickup zone.
+2026-04-12 13:06:49.628 [AGV 1] Pre-dispatched for job 15 — heading to pickup zone.
+2026-04-12 13:06:49.681 [AGV 0] Finalized pre-dispatch for job 19 — en-route.
+2026-04-12 13:06:49.877 [AGV 1] At pre-pickup dock for job 15.
+2026-04-12 13:06:49.936 [AGV 1] Finalized pre-dispatch for job 15 — starting handshake.
+2026-04-12 13:06:50.755 [AGV 0] Pre-dispatched for job 5 — heading to pickup zone.
+2026-04-12 13:06:50.987 [AGV 1] Pre-dispatched for job 19 — heading to pickup zone.
+2026-04-12 13:06:51.038 [AGV 0] At pre-pickup dock for job 5.
+2026-04-12 13:06:51.059 [AGV 0] Finalized pre-dispatch for job 5 — starting handshake.
+2026-04-12 13:06:51.122 [AGV 2] Pre-dispatched for job 15 — heading to pickup zone.
+2026-04-12 13:06:51.237 [AGV 1] At pre-pickup dock for job 19.
+2026-04-12 13:06:51.289 [AGV 1] Finalized pre-dispatch for job 19 — starting handshake.
+2026-04-12 13:06:51.431 [AGV 2] Finalized pre-dispatch for job 15 — en-route.
+2026-04-12 13:06:53.386 [AGV 1] Pre-dispatched for job 19 — heading to pickup zone.
+2026-04-12 13:06:53.670 [AGV 1] At pre-pickup dock for job 19.
+2026-04-12 13:06:53.692 [AGV 1] Finalized pre-dispatch for job 19 — starting handshake.
