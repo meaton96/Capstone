@@ -16,15 +16,15 @@ namespace Assets.Scripts.Simulation
     {
         [Header("References")]
         [SerializeField] private SimulationBridge bridge;
-        [SerializeField] private int maxCandidateSlots = 3;
+        //  [SerializeField] private int maxCandidateSlots = 3;
 
         private ObservationBuilder _obsBuilder;
 
         [Header("Observation Config")]
-        [SerializeField] private int maxQueueSlots = 10;
+        // [SerializeField] private int maxQueueSlots = 10;
 
         /// @brief The calculated size of the observation vector for ML-Agents.
-        public int ObservationSize => 5 + 2 + (maxQueueSlots * 2) + 2 + (maxCandidateSlots * 3);
+        public int ObservationSize => ObservationBuilder.TotalObservationSize;
 
         [Header("Heuristic / Baseline Config")]
         [SerializeField] private DispatchingRule heuristicRule = DispatchingRule.SPT_SMPT;
