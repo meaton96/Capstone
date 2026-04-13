@@ -333,12 +333,22 @@ namespace Assets.Scripts.Simulation
         /// to dispatch idle or returning AGVs to fulfill the transport request.
         private void AssignAGVs()
         {
-            while (true)
+            // Collect candidates upfront to avoid the while/continue pattern
+            // that can infinite-loop if GetNextUnassignedPickup returns the
+            // same pre-dispatched job repeatedly.
+            var candidates = new List<JobData>();
+            foreach (var job in Jobs.AllJobs)
             {
-                JobData job = Jobs.GetNextUnassignedPickup();
-                if (job == null) break;
-                if (job.PreDispatchedAgvId >= 0) continue;
+                if (job.State == JobState.WaitingForPickup
+                    && job.AssignedAgvId == -1
+                    && job.PreDispatchedAgvId < 0)
+                {
+                    candidates.Add(job);
+                }
+            }
 
+            foreach (var job in candidates)
+            {
                 AGVController agv = agvPool.GetAvailableAGV();
                 if (agv == null) break;
 

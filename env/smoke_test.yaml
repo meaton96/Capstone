@@ -1,0 +1,51 @@
+# ──────────────────────────────────────────────────────────────
+#  Smoke-test config for verifying Unity ↔ mlagents-learn connection.
+#
+#  This uses ML-Agents' built-in fully-connected network, NOT your
+#  custom multi-encoder architecture.  It won't produce a good policy
+#  on 13k observations — it's purely for validating that:
+#    1. The headless build launches and connects
+#    2. Observations flow (correct vector size)
+#    3. Actions flow back (discrete, 8 branches)
+#    4. Rewards are non-zero
+#    5. Episodes start and end cleanly
+#
+#  Usage (inside Docker):
+#    mlagents-learn smoke_test.yaml --env=/builds/Factory --no-graphics --run-id=smoke01
+#
+#  Usage (on host, Windows):
+#    mlagents-learn smoke_test.yaml --env=Build/Factory.exe --no-graphics --run-id=smoke01
+# ──────────────────────────────────────────────────────────────
+
+behaviors:
+  # Must match the "Behavior Name" field on your agent's
+  # BehaviorParameters component in the Unity Inspector.
+  SchedulingAgent:
+    trainer_type: ppo
+
+    hyperparameters:
+      batch_size: 64
+      buffer_size: 256        # small — just enough to see updates flowing
+      learning_rate: 3.0e-4
+      beta: 0.01              # entropy regularization
+      epsilon: 0.2            # PPO clip range
+      num_epoch: 3
+
+    network_settings:
+      normalize: true         # critical for 13k-dim input — running mean/std
+      hidden_units: 128
+      num_layers: 2
+      vis_encode_type: simple  # ignored since we only have vector obs
+
+    reward_signals:
+      extrinsic:
+        strength: 1.0
+        gamma: 0.99
+
+    # Keep these small for a quick smoke test.
+    max_steps: 5000
+    time_horizon: 64
+    summary_freq: 500
+
+    # Disable curiosity / other signals for simplicity.
+    threaded: false
