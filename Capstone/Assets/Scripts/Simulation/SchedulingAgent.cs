@@ -129,6 +129,7 @@ namespace Assets.Scripts.Simulation
         /// to allow external runners to process results before resetting.
         private void HandleEpisodeFinished(EpisodeResult result)
         {
+            SimLogger.Low("[Agent] End Episode");
             if (bridge != null && bridge.AutoStartOnPlay)
                 EndEpisode();
         }

@@ -17,11 +17,16 @@ namespace Assets.Scripts.Simulation.Jobs
         private static readonly Dictionary<MachineType, (float mu, float sigma)> ProcTimeParams =
             new Dictionary<MachineType, (float mu, float sigma)>
             {
-                { MachineType.Mill,     (mu: 90f, sigma:  10f) },
-                { MachineType.Lathe,    (mu: 75f, sigma:  10f) },
-                { MachineType.Weld,     (mu: 150f, sigma:  25f) },
-                { MachineType.Inspect,  (mu: 60f, sigma:  10f) },
-                { MachineType.Assemble, (mu: 240f, sigma:  40f) },
+                // { MachineType.Mill,     (mu: 90f, sigma:  10f) },
+                // { MachineType.Lathe,    (mu: 75f, sigma:  10f) },
+                // { MachineType.Weld,     (mu: 150f, sigma:  25f) },
+                // { MachineType.Inspect,  (mu: 60f, sigma:  10f) },
+                // { MachineType.Assemble, (mu: 240f, sigma:  40f) },
+                { MachineType.Mill,     (mu: 9f, sigma:  1f) },
+                { MachineType.Lathe,    (mu: 7f, sigma:  1f) },
+                { MachineType.Weld,     (mu: 15f, sigma:  2f) },
+                { MachineType.Inspect,  (mu: 6f, sigma:  1f) },
+                { MachineType.Assemble, (mu: 24f, sigma:  4f) },
             };
 
         /// @brief Samples a value from a normal distribution $N(\mu, \sigma)$ clamped to a minimum.

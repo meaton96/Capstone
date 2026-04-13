@@ -237,6 +237,7 @@ namespace Assets.Scripts.Simulation.Machines
 
         private void Log(string message)
         {
+            SimLogger.High($"[{Time.time:F2}] {message}");
             historyLog.Add($"[{Time.time:F2}] {message}");
         }
     }

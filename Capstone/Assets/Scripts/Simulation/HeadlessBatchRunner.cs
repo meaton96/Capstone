@@ -7,6 +7,7 @@ using Assets.Scripts.Logging;
 using Assets.Scripts.Simulation.Machines;
 using Assets.Scripts.Simulation.Types;
 using Assets.Scripts.Simulation.Jobs;
+using Unity.MLAgents;
 
 namespace Assets.Scripts.Simulation
 {
@@ -79,6 +80,12 @@ namespace Assets.Scripts.Simulation
 
         private void Start()
         {
+            if (Academy.Instance.IsCommunicatorOn)
+            {
+                SimLogger.Medium("[BatchRunner] ML-Agents communicator detected — disabling batch runner.");
+                enabled = false;
+                return;
+            }
             string batchPath = GetCLIArg("-batchconfig");
             string benchmarkPath = GetCLIArg("-benchmark");
             string benchmarkDirPath = GetCLIArg("-benchmarkdir");

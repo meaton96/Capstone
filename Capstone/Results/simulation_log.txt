@@ -1,3 +1,18 @@
---- Log Started: 4/12/2026 8:23:07 PM ---
-2026-04-12 20:23:07.982 [Agent] OnEpisodeBegin skipped — waiting for UI to arm.
-2026-04-12 20:23:08.008 [Agent] OnEpisodeBegin skipped — waiting for UI to arm.
+--- Log Started: 4/13/2026 3:27:58 PM ---
+2026-04-13 15:27:58.971 Setting timescale to 100f
+2026-04-13 15:27:58.974 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld
+  Row1: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-13 15:27:58.991 [FactoryLayout] Distance matrix (5x5):
+       M0     M1     M2     M3     M4   
+2026-04-13 15:27:58.992 M0      0.0    6.0   12.0    7.5    9.6 
+2026-04-13 15:27:58.993 M1      6.0    0.0    6.0    9.6    7.5 
+2026-04-13 15:27:58.993 M2     12.0    6.0    0.0   14.2    9.6 
+2026-04-13 15:27:58.994 M3      7.5    9.6   14.2    0.0    6.0 
+2026-04-13 15:27:58.994 M4      9.6    7.5    9.6    6.0    0.0 
+2026-04-13 15:27:59.003 [FactoryLayout] Built aisle-based floor: 5 machines.
+2026-04-13 15:27:59.007 [TrafficZones] Built zone graph: 18 zones.
+2026-04-13 15:27:59.010 [AGVPool] Spawned fleet of 3 AGVs.
+2026-04-13 15:27:59.014 [Orchestrator] Episode started: 5 jobs, 5 machines
