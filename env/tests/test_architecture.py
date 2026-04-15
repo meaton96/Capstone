@@ -6,11 +6,13 @@
 Tests cover:
   1. Tensor shape correctness through every layer
   2. Forward/backward pass (gradient flow)
-  3. Environment interface compliance
-  4. Rollout buffer GAE computation
-  5. PPO loss computation
-  6. Checkpoint save/load round-trip
-  7. Deterministic vs stochastic action selection
+  3. Rollout buffer GAE computation
+  4. PPO loss computation
+  5. Checkpoint save/load round-trip
+  6. Deterministic vs stochastic action selection
+  7. Observation slicing (slice_obs) from unity_env
+  8. UnitySchedulingEnv decision-loop logic (mocked)
+  9. VectorizedUnityEnv batching and auto-reset (mocked)
 
 @par Running
 @code{.sh}
@@ -23,18 +25,24 @@ python tests/test_architecture.py
 import sys
 import os
 import tempfile
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import torch
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from config import EncoderConfig, FusionConfig, ActorCriticConfig, PPOConfig
+from config import (
+    EncoderConfig, FusionConfig, ActorCriticConfig,
+    GRID_SIZE, GRID_CHANNELS, MAX_JOBS, MAX_MACHINES, SCHED_CHANNELS,
+    GLOBAL_SCALARS, DISTANCE_DIM, EVENT_FLAGS, TOTAL_OBS_SIZE,
+    SLICE_SPATIAL_END, SLICE_SCHED_END, SLICE_SCALARS_END,
+    SLICE_DIST_END, SLICE_FLAGS_END,
+)
 from models.encoder import CNNSPPFEncoder, SPPF, MLPEncoder, MultiModalEncoder
 from models.actor_critic import FusionHead, ActorHead, CriticHead, ActorCritic
 from models.network import SchedulingNetwork
-from env.placeholder_env import PlaceholderSchedulingEnv, VectorizedPlaceholderEnv
-from env.sensor_corruption import SensorCorruptionWrapper, SensorCorruptionConfig, ModalityCorruptionConfig
+from env.unity_env import slice_obs
 from rollout_buffer import RolloutBuffer
 
 
@@ -158,139 +166,6 @@ class TestFusionHead:
             out1 = fusion(x)
             out2 = fusion(x)
         assert torch.allclose(out1, out2)
-
-
-class TestSensorCorruption:
-    """@brief Tests for @ref SensorCorruptionWrapper and per-modality corruption."""
-
-    def test_dropout_zeros_elements(self):
-        """@brief With high dropout and zero noise, some observation
-        values must be exactly zero after corruption."""
-        cfg = SensorCorruptionConfig(
-            factory_grid=ModalityCorruptionConfig(dropout_rate=0.5, noise_std=0.0),
-            sched_matrix=ModalityCorruptionConfig(dropout_rate=0.0, noise_std=0.0),
-            global_scalars=ModalityCorruptionConfig(dropout_rate=0.0, noise_std=0.0),
-            distance_matrix=ModalityCorruptionConfig(dropout_rate=0.0, noise_std=0.0),
-            event_flags=ModalityCorruptionConfig(dropout_rate=0.0, noise_std=0.0),
-            enabled=True,
-        )
-        env = PlaceholderSchedulingEnv(seed=42)
-        env = SensorCorruptionWrapper(env, cfg, seed=0)
-        obs, _ = env.reset()
-        assert (obs["factory_grid"] == 0).any(), "Dropout should zero some grid cells"
-
-    def test_noise_perturbs_values(self):
-        """@brief With noise enabled, corrupted observations must differ
-        from the originals."""
-        cfg = SensorCorruptionConfig(
-            factory_grid=ModalityCorruptionConfig(dropout_rate=0.0, noise_std=0.1),
-            sched_matrix=ModalityCorruptionConfig(dropout_rate=0.0, noise_std=0.0),
-            global_scalars=ModalityCorruptionConfig(dropout_rate=0.0, noise_std=0.0),
-            distance_matrix=ModalityCorruptionConfig(dropout_rate=0.0, noise_std=0.0),
-            event_flags=ModalityCorruptionConfig(dropout_rate=0.0, noise_std=0.0),
-            enabled=True,
-        )
-        env_clean = PlaceholderSchedulingEnv(seed=42)
-        obs_clean, _ = env_clean.reset()
-
-        env_noisy = PlaceholderSchedulingEnv(seed=42)
-        env_noisy = SensorCorruptionWrapper(env_noisy, cfg, seed=0)
-        obs_noisy, _ = env_noisy.reset()
-
-        # Non-zero cells should be perturbed (not identical)
-        grid_clean = obs_clean["factory_grid"]
-        grid_noisy = obs_noisy["factory_grid"]
-        nonzero_mask = grid_clean > 0
-        if nonzero_mask.any():
-            assert not np.allclose(grid_clean[nonzero_mask],
-                                   grid_noisy[nonzero_mask]), \
-                "Noise should perturb non-zero values"
-
-    def test_disabled_is_passthrough(self):
-        """@brief When disabled, wrapper must return observations identical
-        to the unwrapped environment."""
-        cfg = SensorCorruptionConfig(
-            factory_grid=ModalityCorruptionConfig(dropout_rate=0.5, noise_std=0.1),
-            sched_matrix=ModalityCorruptionConfig(dropout_rate=0.5, noise_std=0.1),
-            global_scalars=ModalityCorruptionConfig(dropout_rate=0.5, noise_std=0.1),
-            distance_matrix=ModalityCorruptionConfig(dropout_rate=0.5, noise_std=0.1),
-            event_flags=ModalityCorruptionConfig(dropout_rate=0.5, noise_std=0.1),
-            enabled=False,
-        )
-        env_clean = PlaceholderSchedulingEnv(seed=42)
-        obs_clean, _ = env_clean.reset()
-
-        env_wrapped = PlaceholderSchedulingEnv(seed=42)
-        env_wrapped = SensorCorruptionWrapper(env_wrapped, cfg)
-        obs_wrapped, _ = env_wrapped.reset()
-
-        for key in obs_clean:
-            np.testing.assert_array_equal(
-                obs_clean[key], obs_wrapped[key],
-                err_msg=f"{key} should be identical when corruption is disabled",
-            )
-
-    def test_set_enabled_toggle(self):
-        """@brief @ref SensorCorruptionWrapper.set_enabled must toggle
-        corruption on and off dynamically."""
-        cfg = SensorCorruptionConfig(
-            factory_grid=ModalityCorruptionConfig(dropout_rate=0.5, noise_std=0.0),
-            sched_matrix=ModalityCorruptionConfig(dropout_rate=0.0, noise_std=0.0),
-            global_scalars=ModalityCorruptionConfig(dropout_rate=0.0, noise_std=0.0),
-            distance_matrix=ModalityCorruptionConfig(dropout_rate=0.0, noise_std=0.0),
-            event_flags=ModalityCorruptionConfig(dropout_rate=0.0, noise_std=0.0),
-            enabled=True,
-        )
-        env = PlaceholderSchedulingEnv(seed=42)
-        env = SensorCorruptionWrapper(env, cfg, seed=0)
-
-        # Corruption on
-        obs_on, _ = env.reset()
-
-        # Disable and reset with same seed
-        env.set_enabled(False)
-        env.unwrapped._rng = np.random.default_rng(42)
-        obs_off, _ = env.reset()
-
-        # With dropout disabled, the factory grid should have no
-        # dropout-induced zeros beyond the naturally sparse grid
-        env_ref = PlaceholderSchedulingEnv(seed=42)
-        obs_ref, _ = env_ref.reset()
-        for key in obs_ref:
-            np.testing.assert_array_equal(obs_off[key], obs_ref[key])
-
-    def test_event_flags_untouched_by_default(self):
-        """@brief Default config should not corrupt event flags (discrete
-        binary states, not continuous sensor readings)."""
-        cfg = SensorCorruptionConfig()  # defaults
-        env = PlaceholderSchedulingEnv(seed=42)
-        obs_clean, _ = env.reset()
-
-        env2 = PlaceholderSchedulingEnv(seed=42)
-        env2 = SensorCorruptionWrapper(env2, cfg, seed=0)
-        obs_wrapped, _ = env2.reset()
-
-        np.testing.assert_array_equal(
-            obs_clean["event_flags"], obs_wrapped["event_flags"],
-            err_msg="Event flags should be untouched with default config",
-        )
-
-    def test_obs_clamped_to_bounds(self):
-        """@brief Corrupted observations must remain in [0, 1]."""
-        cfg = SensorCorruptionConfig(
-            factory_grid=ModalityCorruptionConfig(dropout_rate=0.1, noise_std=0.5),
-            sched_matrix=ModalityCorruptionConfig(dropout_rate=0.1, noise_std=0.5),
-            global_scalars=ModalityCorruptionConfig(dropout_rate=0.1, noise_std=0.5),
-            distance_matrix=ModalityCorruptionConfig(dropout_rate=0.1, noise_std=0.5),
-            event_flags=ModalityCorruptionConfig(dropout_rate=0.1, noise_std=0.5),
-            enabled=True,
-        )
-        env = PlaceholderSchedulingEnv(seed=42)
-        env = SensorCorruptionWrapper(env, cfg, seed=0)
-        obs, _ = env.reset()
-        for key, val in obs.items():
-            assert val.min() >= 0.0, f"{key} has negative values after corruption"
-            assert val.max() <= 1.0, f"{key} exceeds 1.0 after corruption"
 
 
 class TestActorCritic:
@@ -431,87 +306,7 @@ class TestSchedulingNetwork:
 
 
 # ============================================================
-#  3. Environment tests
-# ============================================================
-
-class TestPlaceholderEnv:
-    """@brief Interface and contract tests for @ref PlaceholderSchedulingEnv."""
-
-    def test_reset(self):
-        """@brief Reset must return an observation dict with the correct
-        keys and shapes."""
-        env = PlaceholderSchedulingEnv(seed=42)
-        obs, info = env.reset()
-        assert set(obs.keys()) == {
-            "factory_grid", "sched_matrix", "global_scalars",
-            "distance_matrix", "event_flags",
-        }
-        assert obs["factory_grid"].shape == (3, 64, 64)
-        assert obs["sched_matrix"].shape == (3, 100, 40)
-        assert obs["global_scalars"].shape == (10,)
-        assert obs["distance_matrix"].shape == (64,)
-        assert obs["event_flags"].shape == (6,)
-
-    def test_step(self):
-        """@brief Step must return (obs, float reward, bool term, bool trunc, info)."""
-        env = PlaceholderSchedulingEnv(seed=42)
-        env.reset()
-        obs, reward, term, trunc, info = env.step(0)
-        assert isinstance(reward, float)
-        assert isinstance(term, bool)
-        assert isinstance(trunc, bool)
-        assert "pdr_rule" in info
-
-    def test_all_actions_valid(self):
-        """@brief Every action in [0, 7] must be accepted without error."""
-        env = PlaceholderSchedulingEnv(seed=42)
-        env.reset()
-        for a in range(8):
-            obs, r, term, trunc, info = env.step(a)
-            if term or trunc:
-                env.reset()
-
-    def test_episode_terminates(self):
-        """@brief Episode must end within @c max_steps."""
-        env = PlaceholderSchedulingEnv(max_steps=10, seed=42)
-        env.reset()
-        done = False
-        steps = 0
-        while not done:
-            _, _, term, trunc, _ = env.step(0)
-            done = term or trunc
-            steps += 1
-        assert steps <= 10
-
-    def test_obs_ranges(self):
-        """@brief All observation values must lie in [0, 1]."""
-        env = PlaceholderSchedulingEnv(seed=42)
-        obs, _ = env.reset()
-        for key, val in obs.items():
-            assert val.min() >= 0.0, f"{key} has negative values"
-            assert val.max() <= 1.0, f"{key} exceeds 1.0"
-
-
-class TestVectorizedEnv:
-    """@brief Tests for @ref VectorizedPlaceholderEnv batched interface."""
-
-    def test_batched_obs(self):
-        """@brief Batched reset must prepend the num_envs dimension."""
-        vec = VectorizedPlaceholderEnv(num_envs=3)
-        obs, infos = vec.reset()
-        assert obs["factory_grid"].shape == (3, 3, 64, 64)  # (num_envs, C, H, W)
-
-    def test_step_shapes(self):
-        """@brief Batched step must return rewards and dones of shape (num_envs,)."""
-        vec = VectorizedPlaceholderEnv(num_envs=3)
-        vec.reset()
-        obs, rewards, terms, truncs, infos = vec.step([0, 1, 2])
-        assert rewards.shape == (3,)
-        assert terms.shape == (3,)
-
-
-# ============================================================
-#  4. Rollout buffer tests
+#  3. Rollout buffer tests
 # ============================================================
 
 class TestRolloutBuffer:
@@ -584,60 +379,408 @@ class TestRolloutBuffer:
 
 
 # ============================================================
-#  Run all tests
+#  4. Observation slicing tests (unity_env.slice_obs)
 # ============================================================
 
-def run_tests():
-    """@brief Simple test runner that works without pytest.
+class TestSliceObs:
+    """@brief Tests for @ref slice_obs: flat vector → named observation dict."""
+
+    def _make_flat_obs(self) -> np.ndarray:
+        """@brief Build a synthetic flat observation vector of length
+        TOTAL_OBS_SIZE with distinguishable per-stream values.
+
+        @return 1-D float32 array of length 13,328.
+        """
+        raw = np.zeros(TOTAL_OBS_SIZE, dtype=np.float32)
+        # Tag each stream with a distinct constant so slicing errors
+        # are easy to diagnose.
+        raw[:SLICE_SPATIAL_END] = 0.1
+        raw[SLICE_SPATIAL_END:SLICE_SCHED_END] = 0.2
+        raw[SLICE_SCHED_END:SLICE_SCALARS_END] = 0.3
+        raw[SLICE_SCALARS_END:SLICE_DIST_END] = 0.4
+        raw[SLICE_DIST_END:SLICE_FLAGS_END] = 0.5
+        return raw
+
+    def test_output_keys(self):
+        """@brief slice_obs must return all five expected observation keys."""
+        raw = self._make_flat_obs()
+        d = slice_obs(raw)
+        expected_keys = {
+            "factory_grid", "sched_matrix", "global_scalars",
+            "distance_matrix", "event_flags",
+        }
+        assert set(d.keys()) == expected_keys
+
+    def test_factory_grid_shape(self):
+        """@brief factory_grid must reshape to (C, H, W) = (3, 64, 64)."""
+        d = slice_obs(self._make_flat_obs())
+        assert d["factory_grid"].shape == (GRID_CHANNELS, GRID_SIZE, GRID_SIZE)
+
+    def test_sched_matrix_shape(self):
+        """@brief sched_matrix must end up in CHW order: (3, 20, 16)."""
+        d = slice_obs(self._make_flat_obs())
+        sched_cols = 2 * MAX_MACHINES  # 16
+        assert d["sched_matrix"].shape == (SCHED_CHANNELS, MAX_JOBS, sched_cols)
+
+    def test_scalar_shapes(self):
+        """@brief global_scalars, distance_matrix, event_flags must retain
+        their 1-D shapes."""
+        d = slice_obs(self._make_flat_obs())
+        assert d["global_scalars"].shape == (GLOBAL_SCALARS,)
+        assert d["distance_matrix"].shape == (DISTANCE_DIM,)
+        assert d["event_flags"].shape == (EVENT_FLAGS,)
+
+    def test_stream_values_preserved(self):
+        """@brief Each stream must contain only the constant assigned
+        to its slice region — verifies no off-by-one in boundaries."""
+        d = slice_obs(self._make_flat_obs())
+        np.testing.assert_allclose(d["factory_grid"], 0.1, atol=1e-7)
+        np.testing.assert_allclose(d["sched_matrix"], 0.2, atol=1e-7)
+        np.testing.assert_allclose(d["global_scalars"], 0.3, atol=1e-7)
+        np.testing.assert_allclose(d["distance_matrix"], 0.4, atol=1e-7)
+        np.testing.assert_allclose(d["event_flags"], 0.5, atol=1e-7)
+
+    def test_dtype_is_float32(self):
+        """@brief Every output array must be float32."""
+        d = slice_obs(self._make_flat_obs())
+        for key, val in d.items():
+            assert val.dtype == np.float32, f"{key} dtype is {val.dtype}"
+
+    def test_wrong_length_raises(self):
+        """@brief Passing a vector of incorrect length must raise AssertionError."""
+        bad = np.zeros(100, dtype=np.float32)
+        try:
+            slice_obs(bad)
+            assert False, "Should have raised AssertionError"
+        except AssertionError:
+            pass
+
+    def test_batched_slice(self):
+        """@brief slice_obs must handle a (B, TOTAL_OBS_SIZE) batch correctly.
+
+        @details The leading batch dimension should propagate through
+        all reshapes via the `*raw.shape[:-1]` pattern.
+        """
+        B = 3
+        raw = np.random.rand(B, TOTAL_OBS_SIZE).astype(np.float32)
+        d = slice_obs(raw)
+        assert d["factory_grid"].shape == (B, GRID_CHANNELS, GRID_SIZE, GRID_SIZE)
+        assert d["sched_matrix"].shape == (B, SCHED_CHANNELS, MAX_JOBS, 2 * MAX_MACHINES)
+        assert d["global_scalars"].shape == (B, GLOBAL_SCALARS)
+        assert d["distance_matrix"].shape == (B, DISTANCE_DIM)
+        assert d["event_flags"].shape == (B, EVENT_FLAGS)
+
+    def test_sched_matrix_hwc_to_chw(self):
+        """@brief Verify HWC→CHW transposition of the scheduling matrix.
+
+        @details The flat vector stores the matrix in (jobs, cols, channels)
+        order.  After slicing, channel 0 of the CHW tensor should contain
+        the first channel's data from every (job, col) position.
+        """
+        raw = np.zeros(TOTAL_OBS_SIZE, dtype=np.float32)
+        # Fill scheduling region with identifiable pattern:
+        # channel 0 = 0.1, channel 1 = 0.2, channel 2 = 0.3
+        sched_start = SLICE_SPATIAL_END
+        sched_len = MAX_JOBS * (2 * MAX_MACHINES) * SCHED_CHANNELS
+        sched_flat = np.zeros(sched_len, dtype=np.float32)
+        for i in range(MAX_JOBS * (2 * MAX_MACHINES)):
+            sched_flat[i * SCHED_CHANNELS + 0] = 0.1  # channel 0
+            sched_flat[i * SCHED_CHANNELS + 1] = 0.2  # channel 1
+            sched_flat[i * SCHED_CHANNELS + 2] = 0.3  # channel 2
+        raw[sched_start:sched_start + sched_len] = sched_flat
+
+        d = slice_obs(raw)
+        # After moveaxis to CHW, d["sched_matrix"][c] should be uniform
+        np.testing.assert_allclose(d["sched_matrix"][0], 0.1, atol=1e-7)
+        np.testing.assert_allclose(d["sched_matrix"][1], 0.2, atol=1e-7)
+        np.testing.assert_allclose(d["sched_matrix"][2], 0.3, atol=1e-7)
+
+    def test_total_obs_size_consistent(self):
+        """@brief TOTAL_OBS_SIZE must equal the sum of all stream lengths."""
+        expected = (
+            GRID_CHANNELS * GRID_SIZE * GRID_SIZE
+            + MAX_JOBS * (2 * MAX_MACHINES) * SCHED_CHANNELS
+            + GLOBAL_SCALARS
+            + DISTANCE_DIM
+            + EVENT_FLAGS
+        )
+        assert TOTAL_OBS_SIZE == expected, (
+            f"TOTAL_OBS_SIZE={TOTAL_OBS_SIZE} != computed {expected}"
+        )
+
+    def test_slice_boundaries_contiguous(self):
+        """@brief Slice boundaries must be contiguous with no gaps or overlaps."""
+        assert SLICE_SPATIAL_END > 0
+        assert SLICE_SCHED_END > SLICE_SPATIAL_END
+        assert SLICE_SCALARS_END > SLICE_SCHED_END
+        assert SLICE_DIST_END > SLICE_SCALARS_END
+        assert SLICE_FLAGS_END > SLICE_DIST_END
+        assert SLICE_FLAGS_END == TOTAL_OBS_SIZE
+
+
+# ============================================================
+#  5. Unity environment wrapper tests (mocked)
+# ============================================================
+
+def _make_mock_steps(obs_array, reward=0.0, n_agents=1):
+    """@brief Build a mock DecisionSteps/TerminalSteps object.
+
+    @param obs_array  The flat observation vector to return.
+    @param reward     Scalar reward for agent 0.
+    @param n_agents   Number of agents (controls len()).
+    @return A MagicMock that behaves like DecisionSteps or TerminalSteps.
+    """
+    steps = MagicMock()
+    steps.obs = [obs_array.reshape(1, -1)]  # (1, TOTAL_OBS_SIZE)
+    steps.reward = np.array([reward], dtype=np.float32)
+    steps.__len__ = lambda self: n_agents
+    return steps
+
+
+def _empty_steps():
+    """@brief Build a mock steps object with len() == 0 (silent frame)."""
+    steps = MagicMock()
+    steps.__len__ = lambda self: 0
+    return steps
+
+
+class TestUnitySchedulingEnv:
+    """@brief Tests for @ref UnitySchedulingEnv using a mocked UnityEnvironment.
 
     @details
-    Iterates over all @c Test* classes, discovers methods prefixed with
-    @c test_, executes each, and prints a pass/fail summary.  Returns
-    True if every test passed.
-
-    @return True on success, False if any test failed.
+    These tests verify the decision-loop logic (_step_until_decision),
+    reward accumulation across silent frames, and episode termination
+    handling — all without requiring a running Unity process.
     """
-    import traceback
 
-    ## @brief Ordered list of test classes to execute.
-    test_classes = [
-        TestSPPF, TestCNNSPPFEncoder, TestMLPEncoder,
-        TestMultiModalEncoder, TestFusionHead, TestSensorCorruption,
-        TestActorCritic, TestSchedulingNetwork, TestPlaceholderEnv,
-        TestVectorizedEnv, TestRolloutBuffer,
-    ]
+    def _make_env(self, get_steps_sequence):
+        """@brief Construct a UnitySchedulingEnv with a fully mocked backend.
 
-    total = 0
-    passed = 0
-    failed = 0
-    errors = []
+        @param get_steps_sequence  List of (decision_steps, terminal_steps)
+                                   tuples returned by successive get_steps calls.
+        @return A patched UnitySchedulingEnv instance.
+        """
+        from env.unity_env import UnitySchedulingEnv
 
-    for cls in test_classes:
-        instance = cls()
-        methods = [m for m in dir(instance) if m.startswith("test_")]
-        for method_name in methods:
-            total += 1
-            test_id = f"{cls.__name__}.{method_name}"
-            try:
-                getattr(instance, method_name)()
-                passed += 1
-                print(f"  PASS  {test_id}")
-            except Exception as e:
-                failed += 1
-                errors.append((test_id, traceback.format_exc()))
-                print(f"  FAIL  {test_id}: {e}")
+        with patch("env.unity_env.UnityEnvironment") as MockUnity, \
+             patch("env.unity_env.EngineConfigurationChannel"):
 
-    print(f"\n{'=' * 60}")
-    print(f"Results: {passed}/{total} passed, {failed} failed")
-    if errors:
-        print(f"\nFailed tests:")
-        for test_id, tb in errors:
-            print(f"\n--- {test_id} ---")
-            print(tb)
-    print("=" * 60)
-    return failed == 0
+            mock_env_instance = MagicMock()
+
+            # Set up behavior_specs to return the correct obs shape
+            mock_spec = MagicMock()
+            mock_obs_spec = MagicMock()
+            mock_obs_spec.shape = (TOTAL_OBS_SIZE,)
+            mock_spec.observation_specs = [mock_obs_spec]
+
+            mock_env_instance.behavior_specs = {"SchedulingBehavior?team=0": mock_spec}
+
+            # __init__ calls self.env.reset() but never get_steps(),
+            # so the side-effect list starts at the caller's sequence.
+            mock_env_instance.get_steps.side_effect = list(get_steps_sequence)
+
+            MockUnity.return_value = mock_env_instance
+
+            env = UnitySchedulingEnv(file_name=None, time_scale=1.0)
+            return env, mock_env_instance
+
+    def test_step_returns_on_decision(self):
+        """@brief When Unity immediately returns a decision step, the
+        wrapper must return that observation and reward without looping."""
+        obs_vec = np.random.rand(TOTAL_OBS_SIZE).astype(np.float32)
+        decision = _make_mock_steps(obs_vec, reward=1.5, n_agents=1)
+        terminal = _empty_steps()
+
+        env, _ = self._make_env([(decision, terminal)])
+        obs, reward, done, info = env.step(3)
+
+        assert not done
+        assert abs(reward - 1.5) < 1e-6
+        assert set(obs.keys()) == {
+            "factory_grid", "sched_matrix", "global_scalars",
+            "distance_matrix", "event_flags",
+        }
+
+    def test_step_returns_on_terminal(self):
+        """@brief When Unity returns a terminal step, done must be True."""
+        obs_vec = np.random.rand(TOTAL_OBS_SIZE).astype(np.float32)
+        decision = _empty_steps()
+        terminal = _make_mock_steps(obs_vec, reward=10.0, n_agents=1)
+
+        env, _ = self._make_env([(decision, terminal)])
+        obs, reward, done, info = env.step(0)
+
+        assert done
+        assert abs(reward - 10.0) < 1e-6
+
+    def test_accumulates_reward_across_silent_frames(self):
+        """@brief Rewards from silent frames must be accumulated.
+
+        @details Three silent frames (both steps empty) followed by a
+        decision step.  Only the decision step carries reward, but the
+        wrapper must have looped through all four frames.
+        """
+        obs_vec = np.random.rand(TOTAL_OBS_SIZE).astype(np.float32)
+        silent = (_empty_steps(), _empty_steps())
+        decision = _make_mock_steps(obs_vec, reward=2.0, n_agents=1)
+        terminal = _empty_steps()
+
+        # 3 silent frames, then a decision
+        env, mock_unity = self._make_env([
+            silent, silent, silent, (decision, terminal)
+        ])
+        obs, reward, done, info = env.step(1)
+
+        assert not done
+        # Only the decision frame contributes reward (silent frames
+        # have no steps to read reward from).
+        assert abs(reward - 2.0) < 1e-6
+        # Unity.step() should have been called 4 times for this step()
+        # (plus 1 from __init__'s reset).
+        assert mock_unity.step.call_count >= 4
+
+    def test_reset_returns_valid_obs(self):
+        """@brief reset() must loop until a decision and return a valid obs dict."""
+        obs_vec = np.random.rand(TOTAL_OBS_SIZE).astype(np.float32)
+        decision = _make_mock_steps(obs_vec, reward=0.0, n_agents=1)
+        terminal = _empty_steps()
+
+        env, _ = self._make_env([(decision, terminal)])
+        obs = env.reset()
+
+        assert set(obs.keys()) == {
+            "factory_grid", "sched_matrix", "global_scalars",
+            "distance_matrix", "event_flags",
+        }
+        assert obs["factory_grid"].shape == (GRID_CHANNELS, GRID_SIZE, GRID_SIZE)
+
+    def test_close_delegates_to_unity(self):
+        """@brief close() must call the underlying Unity env's close()."""
+        obs_vec = np.random.rand(TOTAL_OBS_SIZE).astype(np.float32)
+        decision = _make_mock_steps(obs_vec, reward=0.0, n_agents=1)
+        terminal = _empty_steps()
+
+        env, mock_unity = self._make_env([(decision, terminal)])
+        env.close()
+        mock_unity.close.assert_called_once()
 
 
-if __name__ == "__main__":
-    success = run_tests()
-    sys.exit(0 if success else 1)
+class TestVectorizedUnityEnv:
+    """@brief Tests for @ref VectorizedUnityEnv using mocked sub-environments.
+
+    @details
+    Patches UnitySchedulingEnv entirely to avoid any Unity dependency.
+    Verifies stacking, auto-reset on done, and shape correctness.
+    """
+
+    def _make_dummy_obs_dict(self):
+        """@brief Create a single-env observation dict with valid shapes."""
+        return {
+            "factory_grid": np.random.rand(GRID_CHANNELS, GRID_SIZE, GRID_SIZE).astype(np.float32),
+            "sched_matrix": np.random.rand(SCHED_CHANNELS, MAX_JOBS, 2 * MAX_MACHINES).astype(np.float32),
+            "global_scalars": np.random.rand(GLOBAL_SCALARS).astype(np.float32),
+            "distance_matrix": np.random.rand(DISTANCE_DIM).astype(np.float32),
+            "event_flags": np.random.rand(EVENT_FLAGS).astype(np.float32),
+        }
+
+    def test_reset_stacks_obs(self):
+        """@brief reset() must stack observations from N sub-envs along dim 0."""
+        from env.unity_env import VectorizedUnityEnv
+
+        num_envs = 3
+        obs_dicts = [self._make_dummy_obs_dict() for _ in range(num_envs)]
+
+        with patch("env.unity_env.UnitySchedulingEnv") as MockSingle:
+            mock_instances = []
+            for i in range(num_envs):
+                m = MagicMock()
+                m.reset.return_value = obs_dicts[i]
+                mock_instances.append(m)
+
+            MockSingle.side_effect = mock_instances
+            vec = VectorizedUnityEnv(num_envs=num_envs, file_name=None)
+            obs, infos = vec.reset()
+
+        assert obs["factory_grid"].shape == (num_envs, GRID_CHANNELS, GRID_SIZE, GRID_SIZE)
+        assert obs["global_scalars"].shape == (num_envs, GLOBAL_SCALARS)
+        assert len(infos) == num_envs
+
+    def test_step_returns_correct_shapes(self):
+        """@brief step() must return stacked obs, rewards (N,), dones (N,)."""
+        from env.unity_env import VectorizedUnityEnv
+
+        num_envs = 2
+        obs_dicts = [self._make_dummy_obs_dict() for _ in range(num_envs)]
+        reset_obs = [self._make_dummy_obs_dict() for _ in range(num_envs)]
+
+        with patch("env.unity_env.UnitySchedulingEnv") as MockSingle:
+            mock_instances = []
+            for i in range(num_envs):
+                m = MagicMock()
+                m.reset.return_value = reset_obs[i]
+                m.step.return_value = (obs_dicts[i], 0.5, False, {})
+                mock_instances.append(m)
+
+            MockSingle.side_effect = mock_instances
+            vec = VectorizedUnityEnv(num_envs=num_envs, file_name=None)
+            vec.reset()
+            obs, rewards, dones, truncs, infos = vec.step(np.array([0, 1]))
+
+        assert rewards.shape == (num_envs,)
+        assert dones.shape == (num_envs,)
+        assert truncs.shape == (num_envs,)
+        assert obs["factory_grid"].shape == (num_envs, GRID_CHANNELS, GRID_SIZE, GRID_SIZE)
+
+    def test_auto_reset_on_done(self):
+        """@brief When a sub-env signals done, VectorizedUnityEnv must
+        auto-reset it and return the fresh observation."""
+        from env.unity_env import VectorizedUnityEnv
+
+        num_envs = 2
+        step_obs = [self._make_dummy_obs_dict() for _ in range(num_envs)]
+        reset_obs = self._make_dummy_obs_dict()
+        # Tag the reset obs so we can identify it
+        reset_obs["global_scalars"][:] = 99.0
+
+        with patch("env.unity_env.UnitySchedulingEnv") as MockSingle:
+            mock_instances = []
+            for i in range(num_envs):
+                m = MagicMock()
+                m.reset.return_value = reset_obs if i == 0 else step_obs[i]
+                # Env 0 is done, env 1 is not
+                m.step.return_value = (
+                    step_obs[i],
+                    1.0 if i == 0 else 0.5,
+                    i == 0,  # done for env 0
+                    {},
+                )
+                mock_instances.append(m)
+
+            MockSingle.side_effect = mock_instances
+            vec = VectorizedUnityEnv(num_envs=num_envs, file_name=None)
+            vec.reset()
+            obs, rewards, dones, truncs, infos = vec.step(np.array([0, 0]))
+
+        assert dones[0] == True
+        assert dones[1] == False
+        # Env 0 should have been auto-reset, so its obs is the reset obs
+        np.testing.assert_allclose(obs["global_scalars"][0], 99.0)
+
+    def test_close_all_sub_envs(self):
+        """@brief close() must call close() on every sub-environment."""
+        from env.unity_env import VectorizedUnityEnv
+
+        num_envs = 3
+        with patch("env.unity_env.UnitySchedulingEnv") as MockSingle:
+            mock_instances = [MagicMock() for _ in range(num_envs)]
+            for m in mock_instances:
+                m.reset.return_value = self._make_dummy_obs_dict()
+            MockSingle.side_effect = mock_instances
+
+            vec = VectorizedUnityEnv(num_envs=num_envs, file_name=None)
+            vec.close()
+
+        for i, m in enumerate(mock_instances):
+            m.close.assert_called_once(), f"Sub-env {i} was not closed"
+
+
