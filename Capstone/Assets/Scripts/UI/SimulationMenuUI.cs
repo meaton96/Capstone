@@ -9,44 +9,67 @@ using Assets.Scripts.Simulation;
 
 namespace Assets.Scripts.UI
 {
+
+    [System.Serializable]
+    public class MachineTypeProcRow
+    {
+        /// @brief Display label (not editable at runtime — just a hint in the Inspector).
+        public string TypeName;
+        public TMP_InputField MuInput;
+        public TMP_InputField SigmaInput;
+    }
+
     public class SimulationMenuUI : MonoBehaviour
     {
         [Header("References")]
         [SerializeField] private SimulationBridge bridge;
-        [SerializeField] private SchedulingAgent agent; // <-- NEW REFERENCE
+        [SerializeField] private SchedulingAgent agent;
         [SerializeField] private GameObject panel;
 
-        [Header("Sliders")]
-        [SerializeField] private Slider jobCountSlider;
-        [SerializeField] private Slider machinesPerTypeSlider;
-        [SerializeField] private Slider minProcTimeSlider;
-        [SerializeField] private Slider maxProcTimeSlider;
-        [SerializeField] private Slider minOpsSlider;
-        [SerializeField] private Slider maxOpsSlider;
-        [SerializeField] private Slider arrivalWindowSlider;
+        // ── General parameters ────────────────────────────────────────────────
+        [Header("General Input Fields")]
+        [SerializeField] private TMP_InputField jobCountInput;
+        [SerializeField] private TMP_InputField machinesPerTypeInput;
+        [SerializeField] private TMP_InputField agvCountInput;
+        [SerializeField] private TMP_InputField minOpsInput;
+        [SerializeField] private TMP_InputField maxOpsInput;
+        [SerializeField] private TMP_InputField arrivalWindowInput;
+        [SerializeField] private TMP_InputField seedInput;
+        [SerializeField] private TMP_InputField configNameInput;
 
-        [Header("Value Labels (TMP)")]
-        [SerializeField] private TextMeshProUGUI jobCountText;
-        [SerializeField] private TextMeshProUGUI machinesPerTypeText;
-        [SerializeField] private TextMeshProUGUI minProcTimeText;
-        [SerializeField] private TextMeshProUGUI maxProcTimeText;
-        [SerializeField] private TextMeshProUGUI minOpsText;
-        [SerializeField] private TextMeshProUGUI maxOpsText;
-        [SerializeField] private TextMeshProUGUI arrivalWindowText;
+        // ── Per-type proc-time distribution ──────────────────────────────────
+        /// <summary>
+        /// One entry per MachineType, ordered to match the MachineType enum.
+        /// E.g. index 0 → Mill, 1 → Lathe, 2 → Weld, 3 → Inspect, 4 → Assemble.
+        /// </summary>
+        [Header("Per-Type Processing Time (mu / sigma)")]
+        [SerializeField] private MachineTypeProcRow[] procTimeRows;
+
+        // ── Optional labels / totals ──────────────────────────────────────────
+        [Header("Optional")]
+        [SerializeField] private TextMeshProUGUI statusText;
+        [SerializeField] private TextMeshProUGUI totalMachinesText;
 
         [Header("Buttons")]
         [SerializeField] private Button spawnButton;
         [SerializeField] private Button startButton;
 
-        [Header("Optional")]
-        [SerializeField] private TextMeshProUGUI statusText;
-        [SerializeField] private TextMeshProUGUI totalMachinesText;
-        [SerializeField] private Slider seedSlider;
-        [SerializeField] private TextMeshProUGUI seedText;
-        [SerializeField] private TMP_InputField configNameField;
+
+        private static readonly (float mu, float sigma)[] DefaultProcParams =
+        {
+            (90f,  10f),   // Mill
+            (75f,  10f),   // Lathe
+            (150f, 25f),   // Weld
+            (60f,  10f),   // Inspect
+            (240f, 40f),   // Assemble
+        };
 
         private MachineType[] allMachineTypes;
         private bool panelVisible = true;
+
+        // ─────────────────────────────────────────────────────────────────────
+        //  Unity lifecycle
+        // ─────────────────────────────────────────────────────────────────────
 
         private void Awake()
         {
@@ -61,7 +84,7 @@ namespace Assets.Scripts.UI
                 return;
             }
 
-            ConfigureSliders();
+            PopulateDefaults();
             WireCallbacks();
             RefreshButtonStates();
             ShowPanel();
@@ -96,82 +119,47 @@ namespace Assets.Scripts.UI
             RefreshButtonStates();
         }
 
-        // ─────────────────────────────────────────────────────────
-        //  UI Configuration (Same as before)
-        // ─────────────────────────────────────────────────────────
+        // ─────────────────────────────────────────────────────────────────────
+        //  Initialisation
+        // ─────────────────────────────────────────────────────────────────────
 
-        private void ConfigureSliders()
+        /// @brief Fills every input field with sensible starting values.
+        private void PopulateDefaults()
         {
-            SetupSlider(jobCountSlider, 1, 200, 20, true, jobCountText);
-            SetupSlider(machinesPerTypeSlider, 1, 10, 3, true, machinesPerTypeText, _ => UpdateTotalMachines());
-            SetupSlider(minProcTimeSlider, 1, 300, 15, true, minProcTimeText, _ => ClampMinMax(minProcTimeSlider, maxProcTimeSlider, minProcTimeText, maxProcTimeText));
-            SetupSlider(maxProcTimeSlider, 1, 300, 90, true, maxProcTimeText, _ => ClampMinMax(minProcTimeSlider, maxProcTimeSlider, minProcTimeText, maxProcTimeText));
-            SetupSlider(minOpsSlider, 1, 15, 3, true, minOpsText, _ => ClampMinMax(minOpsSlider, maxOpsSlider, minOpsText, maxOpsText));
-            SetupSlider(maxOpsSlider, 1, 15, 7, true, maxOpsText, _ => ClampMinMax(minOpsSlider, maxOpsSlider, minOpsText, maxOpsText));
-            SetupSlider(arrivalWindowSlider, 0, 600, 0, true, arrivalWindowText);
+            SetInput(jobCountInput, "20");
+            SetInput(machinesPerTypeInput, "3");
+            SetInput(agvCountInput, "3");
+            SetInput(minOpsInput, "3");
+            SetInput(maxOpsInput, "7");
+            SetInput(arrivalWindowInput, "0");
+            SetInput(seedInput, "42");
 
-            if (seedSlider != null)
-                SetupSlider(seedSlider, 1, 9999, 42, true, seedText);
+            // Per-type mu/sigma rows
+            if (procTimeRows != null)
+            {
+                for (int i = 0; i < procTimeRows.Length && i < DefaultProcParams.Length; i++)
+                {
+                    SetInput(procTimeRows[i].MuInput, DefaultProcParams[i].mu.ToString("F1"));
+                    SetInput(procTimeRows[i].SigmaInput, DefaultProcParams[i].sigma.ToString("F1"));
+                }
+            }
 
-            UpdateTotalMachines();
+            UpdateTotalMachinesLabel();
         }
-
-        private void SetupSlider(Slider slider, float min, float max, float defaultVal, bool wholeNumbers, TMP_Text label, UnityEngine.Events.UnityAction<float> extraCallback = null)
-        {
-            if (slider == null) return;
-            slider.minValue = min;
-            slider.maxValue = max;
-            slider.wholeNumbers = wholeNumbers;
-            slider.value = defaultVal;
-            slider.onValueChanged.AddListener(v => UpdateLabel(label, v, wholeNumbers));
-            if (extraCallback != null) slider.onValueChanged.AddListener(extraCallback);
-            UpdateLabel(label, defaultVal, wholeNumbers);
-        }
-
-        private void UpdateLabel(TMP_Text label, float value, bool wholeNumbers)
-        {
-            if (label != null) label.text = wholeNumbers ? $"{(int)value}" : $"{value:F1}";
-        }
-
-        private void ClampMinMax(Slider minSlider, Slider maxSlider, TMP_Text minLabel, TMP_Text maxLabel)
-        {
-            if (minSlider == null || maxSlider == null) return;
-            if (minSlider.value > maxSlider.value) maxSlider.value = minSlider.value;
-            UpdateLabel(minLabel, minSlider.value, minSlider.wholeNumbers);
-            UpdateLabel(maxLabel, maxSlider.value, maxSlider.wholeNumbers);
-        }
-
-        private void UpdateTotalMachines()
-        {
-            if (totalMachinesText == null || machinesPerTypeSlider == null) return;
-            int typeCount = allMachineTypes.Length;
-            int total = typeCount * (int)machinesPerTypeSlider.value;
-            totalMachinesText.text = $"{total} machines ({typeCount} types x {(int)machinesPerTypeSlider.value})";
-        }
-
-        // ─────────────────────────────────────────────────────────
-        //  Button Handlers
-        // ─────────────────────────────────────────────────────────
 
         private void WireCallbacks()
         {
             if (spawnButton != null) spawnButton.onClick.AddListener(OnSpawnClicked);
             if (startButton != null) startButton.onClick.AddListener(OnStartClicked);
+
+            // Recompute the total-machine label whenever machines-per-type changes
+            if (machinesPerTypeInput != null)
+                machinesPerTypeInput.onValueChanged.AddListener(_ => UpdateTotalMachinesLabel());
         }
 
-        private void RefreshButtonStates()
-        {
-            if (bridge == null) return;
-
-            if (spawnButton != null)
-                spawnButton.interactable = !bridge.IsEpisodeActive;
-
-            if (startButton != null)
-            {
-                startButton.interactable = bridge.IsFactoryReady && !bridge.IsEpisodeActive;
-                startButton.gameObject.SetActive(bridge.IsFactoryReady && !bridge.IsEpisodeActive);
-            }
-        }
+        // ─────────────────────────────────────────────────────────────────────
+        //  Button handlers
+        // ─────────────────────────────────────────────────────────────────────
 
         private void OnSpawnClicked()
         {
@@ -184,16 +172,29 @@ namespace Assets.Scripts.UI
         private void OnStartClicked()
         {
             if (agent == null) return;
-
-            // Give the ML-Agent its ticket to run exactly one episode
             agent.ArmAndStart();
-            SetStatus("Simulation running...");
+            SetStatus("Simulation running…");
             HidePanel();
         }
 
-        // ─────────────────────────────────────────────────────────
-        //  Bridge Events
-        // ─────────────────────────────────────────────────────────
+        private void RefreshButtonStates()
+        {
+            if (bridge == null) return;
+
+            if (spawnButton != null)
+                spawnButton.interactable = !bridge.IsEpisodeActive;
+
+            if (startButton != null)
+            {
+                bool canStart = bridge.IsFactoryReady && !bridge.IsEpisodeActive;
+                startButton.interactable = canStart;
+                startButton.gameObject.SetActive(canStart);
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        //  Bridge events
+        // ─────────────────────────────────────────────────────────────────────
 
         private void OnFactorySpawned()
         {
@@ -202,14 +203,62 @@ namespace Assets.Scripts.UI
 
         private void OnEpisodeFinished(EpisodeResult result)
         {
-            // The simulation finished! Display the final metrics and bring the menu back up.
-            SetStatus($"<color=#00FF00>SUCCESS!</color>\nFinal Makespan: <b>{result.Makespan:F1}s</b>\nDecisions Made: <b>{result.DecisionPoints}</b>");
+            SetStatus($"<color=#00FF00>SUCCESS!</color>\n" +
+                      $"Final Makespan: <b>{result.Makespan:F1}s</b>\n" +
+                      $"Decisions Made: <b>{result.DecisionPoints}</b>");
             ShowPanel();
         }
 
-        // ─────────────────────────────────────────────────────────
-        //  UI Helpers
-        // ─────────────────────────────────────────────────────────
+        // ─────────────────────────────────────────────────────────────────────
+        //  Config builder
+        // ─────────────────────────────────────────────────────────────────────
+
+        private FJSSPConfig BuildConfig()
+        {
+            int mpt = ParseInt(machinesPerTypeInput, 3);
+
+            var layout = new MachineType[allMachineTypes.Length * mpt];
+            for (int t = 0; t < allMachineTypes.Length; t++)
+                for (int m = 0; m < mpt; m++)
+                    layout[t * mpt + m] = allMachineTypes[t];
+
+            string name = configNameInput != null && !string.IsNullOrEmpty(configNameInput.text)
+                ? configNameInput.text
+                : $"{ParseInt(jobCountInput, 20)}j_{layout.Length}m";
+
+            // Build per-type proc-time params from the UI rows
+            var procParams = new System.Collections.Generic.Dictionary<MachineType, (float mu, float sigma)>();
+            if (procTimeRows != null)
+            {
+                for (int i = 0; i < procTimeRows.Length && i < allMachineTypes.Length; i++)
+                {
+                    float mu = ParseFloat(procTimeRows[i].MuInput, DefaultProcParams[i].mu);
+                    float sigma = ParseFloat(procTimeRows[i].SigmaInput, DefaultProcParams[i].sigma);
+                    procParams[allMachineTypes[i]] = (mu, sigma);
+                }
+            }
+
+            return new FJSSPConfig
+            {
+                Name = name,
+                Seed = ParseInt(seedInput, 42),
+                JobCount = ParseInt(jobCountInput, 20),
+                MachinesPerType = mpt,
+                MachineTypeLayout = layout,
+                AGVCount = ParseInt(agvCountInput, 5),
+                MinOpsPerJob = ParseInt(minOpsInput, 3),
+                MaxOpsPerJob = ParseInt(maxOpsInput, 7),
+                MaxArrivalTime = ParseFloat(arrivalWindowInput, 0f),
+                ProcTimeParams = procParams,
+                // Fallback uniform bounds — only used for types missing from procParams
+                MinProcTime = 1f,
+                MaxProcTime = 30f,
+            };
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        //  UI helpers
+        // ─────────────────────────────────────────────────────────────────────
 
         private void ShowPanel()
         {
@@ -228,30 +277,33 @@ namespace Assets.Scripts.UI
             if (statusText != null) statusText.text = msg;
         }
 
-        private FJSSPConfig BuildConfig()
+        private void UpdateTotalMachinesLabel()
         {
-            int mpt = (int)machinesPerTypeSlider.value;
-            var layout = new MachineType[allMachineTypes.Length * mpt];
-            for (int t = 0; t < allMachineTypes.Length; t++)
-                for (int m = 0; m < mpt; m++)
-                    layout[t * mpt + m] = allMachineTypes[t];
+            if (totalMachinesText == null) return;
+            int mpt = ParseInt(machinesPerTypeInput, 1);
+            int typeCount = allMachineTypes.Length;
+            int total = typeCount * mpt;
+            totalMachinesText.text = $"{total} machines ({typeCount} types × {mpt})";
+        }
 
-            string name = configNameField != null && !string.IsNullOrEmpty(configNameField.text)
-                ? configNameField.text : $"{(int)jobCountSlider.value}j_{layout.Length}m";
+        private static void SetInput(TMP_InputField field, string value)
+        {
+            if (field != null) field.text = value;
+        }
 
-            return new FJSSPConfig
-            {
-                Name = name,
-                Seed = seedSlider != null ? (int)seedSlider.value : 42,
-                JobCount = (int)jobCountSlider.value,
-                MachinesPerType = mpt,
-                MachineTypeLayout = layout,
-                MinProcTime = minProcTimeSlider.value,
-                MaxProcTime = maxProcTimeSlider.value,
-                MinOpsPerJob = (int)minOpsSlider.value,
-                MaxOpsPerJob = (int)maxOpsSlider.value,
-                MaxArrivalTime = arrivalWindowSlider.value,
-            };
+        private static int ParseInt(TMP_InputField field, int fallback)
+        {
+            if (field == null) return fallback;
+            return int.TryParse(field.text, out int v) ? v : fallback;
+        }
+
+        private static float ParseFloat(TMP_InputField field, float fallback)
+        {
+            if (field == null) return fallback;
+            return float.TryParse(field.text,
+                System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.InvariantCulture,
+                out float v) ? v : fallback;
         }
     }
 }

@@ -116,7 +116,7 @@ namespace Assets.Scripts.Simulation
             UnityEngine.Random.InitState(currentConfig.Seed);
             cachedMachinesByType = layoutManager.BuildFloor(currentConfig);
             trafficZoneManager.BuildZoneGraph();
-            agvPool.InitializeFleet();
+            agvPool.InitializeFleet(currentConfig.AGVCount);
 
             IsFactoryReady = true;
             OnFactorySpawned?.Invoke();
@@ -152,11 +152,11 @@ namespace Assets.Scripts.Simulation
                         $"AGV={stuck.AssignedAgvId} PreAGV={stuck.PreDispatchedAgvId}");
                 }
             }
-            if (Time.timeScale - 1 <= .001f)
-            {
-                SimLogger.Low("Setting timescale to 100f");
-                Time.timeScale = 100;
-            }
+            // if (Time.timeScale - 1 <= .001f)
+            // {
+            //     SimLogger.Low("Setting timescale to 100f");
+            //     Time.timeScale = 100;
+            // }
             if (currentConfig == null)
             {
                 currentConfig = BuildDefaultConfig();
@@ -698,11 +698,40 @@ namespace Assets.Scripts.Simulation
             int b = 0; for (int i = 1; i < v.Length; i++) if (v[i] > v[b]) b = i; return b;
         }
 
+        // private FJSSPConfig BuildDefaultConfig()
+        // {
+        //     var layout = new MachineType[5];
+        //     MachineType[] types = (MachineType[])Enum.GetValues(typeof(MachineType));
+        //     for (int i = 0; i < 5; i++) layout[i] = types[i];
+
+        //     return new FJSSPConfig
+        //     {
+        //         Seed = 42,
+        //         JobCount = 5,
+        //         MachinesPerType = 1,
+        //         MachineTypeLayout = layout,
+        //         MinProcTime = 5f,
+        //         MaxProcTime = 20f,
+        //         MinOpsPerJob = 2,
+        //         MaxOpsPerJob = 4,
+        //         MaxArrivalTime = 0f
+        //     };
+        // }
+
         private FJSSPConfig BuildDefaultConfig()
         {
-            var layout = new MachineType[5];
             MachineType[] types = (MachineType[])Enum.GetValues(typeof(MachineType));
-            for (int i = 0; i < 5; i++) layout[i] = types[i];
+            var layout = new MachineType[types.Length];
+            for (int i = 0; i < types.Length; i++) layout[i] = types[i];
+
+            var procParams = new Dictionary<MachineType, (float mu, float sigma)>
+            {
+                { MachineType.Mill,     (mu:  90f, sigma: 10f) },
+                { MachineType.Lathe,    (mu:  75f, sigma: 10f) },
+                { MachineType.Weld,     (mu: 150f, sigma: 25f) },
+                { MachineType.Inspect,  (mu:  60f, sigma: 10f) },
+                { MachineType.Assemble, (mu: 240f, sigma: 40f) },
+            };
 
             return new FJSSPConfig
             {
@@ -710,36 +739,13 @@ namespace Assets.Scripts.Simulation
                 JobCount = 5,
                 MachinesPerType = 1,
                 MachineTypeLayout = layout,
-                MinProcTime = 5f,
-                MaxProcTime = 20f,
+                MinProcTime = 1f,
+                MaxProcTime = 30f,
                 MinOpsPerJob = 2,
                 MaxOpsPerJob = 4,
-                MaxArrivalTime = 0f
+                MaxArrivalTime = 0f,
+                ProcTimeParams = procParams,
             };
         }
-
-        /// @brief Generates a standard baseline configuration for the simulation.
-        /// 
-        /// @details Sets up a factory environment with 15 machines (3 per type) 
-        /// and 20 jobs to ensure a consistent environment for benchmarking rules.
-        // private FJSSPConfig BuildDefaultConfig()
-        // {
-        //     var layout = new MachineType[15];
-        //     MachineType[] types = (MachineType[])Enum.GetValues(typeof(MachineType));
-        //     for (int i = 0; i < 15; i++) layout[i] = types[i / 3];
-
-        //     return new FJSSPConfig
-        //     {
-        //         Seed = 42,
-        //         JobCount = 20,
-        //         MachinesPerType = 3,
-        //         MachineTypeLayout = layout,
-        //         MinProcTime = 15f,
-        //         MaxProcTime = 90f,
-        //         MinOpsPerJob = 5,
-        //         MaxOpsPerJob = 8,
-        //         MaxArrivalTime = 0f
-        //     };
-        // }
     }
 }

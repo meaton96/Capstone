@@ -7,15 +7,14 @@ namespace Assets.Scripts.Simulation.AGV
 {
     /// @brief Manages the lifecycle and retrieval of the AGV fleet.
     ///
-    /// @details Serves as a centralized container and factory. The @c SimulationBridge 
-    /// orchestrator queries this pool to identify and dispatch available units based 
+    /// @details Serves as a centralized container and factory. The @c SimulationBridge
+    /// orchestrator queries this pool to identify and dispatch available units based
     /// on their current operational state.
     public class AGVPool : MonoBehaviour
     {
         public static AGVPool Instance;
         private Vector3[] parkingPositions;
         [SerializeField] private AGVController agvPrefab;
-        [SerializeField] private int fleetSize = 5;
         [SerializeField] private FactoryLayoutManager layoutManager;
 
         private List<AGVController> fleet = new List<AGVController>();
@@ -29,10 +28,12 @@ namespace Assets.Scripts.Simulation.AGV
 
         /// @brief Destroys the existing fleet and instantiates new AGV units.
         ///
-        /// @details Calculates parking positions based on the @c layoutManager coordinates 
-        /// and spawns units in a linear arrangement. Each unit is initialized with 
+        /// @param fleetSize The number of AGV units to spawn, driven by @c FJSSPConfig.AGVCount.
+        ///
+        /// @details Calculates parking positions based on the @c layoutManager coordinates
+        /// and spawns units in a linear arrangement. Each unit is initialized with
         /// a unique ID corresponding to its index in the fleet.
-        public void InitializeFleet()
+        public void InitializeFleet(int fleetSize)
         {
             foreach (var agv in fleet) Destroy(agv.gameObject);
             fleet.Clear();
@@ -72,16 +73,14 @@ namespace Assets.Scripts.Simulation.AGV
         public AGVController GetIdleAGV()
         {
             foreach (var agv in fleet)
-            {
                 if (agv.IsIdle) return agv;
-            }
             return null;
         }
 
         /// @brief Identifies the best candidate for a new task dispatch.
         ///
-        /// @details Performs a two-pass search: first for units already at their 
-        /// parking stations (@c Idle), and second for units currently @c ReturningToParking 
+        /// @details Performs a two-pass search: first for units already at their
+        /// parking stations (@c Idle), and second for units currently @c ReturningToParking
         /// that can be redirected mid-route to optimize travel time.
         public AGVController GetAvailableAGV()
         {
