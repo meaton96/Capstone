@@ -167,6 +167,8 @@ namespace Assets.Scripts.Simulation
                 SpawnFactory();
             }
 
+            agent.SetHeuristicRule(currentConfig.dispatchingRule);
+
             // ── Use prebuilt jobs if injected, otherwise generate ──
             FJSSPJobDefinition[] jobDefs;
             if (prebuiltJobs != null)
@@ -747,6 +749,7 @@ namespace Assets.Scripts.Simulation
                 MaxOpsPerJob = 4,
                 MaxArrivalTime = 0f,
                 ProcTimeParams = procParams,
+                dispatchingRule = DispatchingRule.SRT_SRWT,
             };
         }
     }

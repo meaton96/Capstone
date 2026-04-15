@@ -18,6 +18,8 @@ namespace Assets.Scripts.Simulation.Types
         public float MaxArrivalTime;
         public int AGVCount;
 
+        public DispatchingRule dispatchingRule = DispatchingRule.SRT_SRWT;
+
         /// @brief Per-machine-type normal distribution parameters (mu, sigma) for processing time sampling.
         ///
         /// @details When populated, @c FJSSPJobGenerator will sample processing times from

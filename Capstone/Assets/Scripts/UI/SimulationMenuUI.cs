@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -35,7 +36,11 @@ namespace Assets.Scripts.UI
         [SerializeField] private TMP_InputField maxOpsInput;
         [SerializeField] private TMP_InputField arrivalWindowInput;
         [SerializeField] private TMP_InputField seedInput;
-        [SerializeField] private TMP_InputField configNameInput;
+        //[SerializeField] private TMP_InputField configNameInput;
+
+        // ── Dispatching Rule ──────────────────────────────────────────────────
+        [Header("Heuristics")]
+        [SerializeField] private TMP_Dropdown dispatchRuleDropdown; // <-- ADDED THIS
 
         // ── Per-type proc-time distribution ──────────────────────────────────
         /// <summary>
@@ -134,6 +139,15 @@ namespace Assets.Scripts.UI
             SetInput(arrivalWindowInput, "0");
             SetInput(seedInput, "42");
 
+            // <-- ADDED DROPDOWN POPULATION -->
+            if (dispatchRuleDropdown != null)
+            {
+                dispatchRuleDropdown.ClearOptions();
+                var ruleNames = new List<string>(Enum.GetNames(typeof(DispatchingRule)));
+                dispatchRuleDropdown.AddOptions(ruleNames);
+                dispatchRuleDropdown.value = (int)DispatchingRule.SRT_SRWT; // Sensible default
+            }
+
             // Per-type mu/sigma rows
             if (procTimeRows != null)
             {
@@ -222,9 +236,7 @@ namespace Assets.Scripts.UI
                 for (int m = 0; m < mpt; m++)
                     layout[t * mpt + m] = allMachineTypes[t];
 
-            string name = configNameInput != null && !string.IsNullOrEmpty(configNameInput.text)
-                ? configNameInput.text
-                : $"{ParseInt(jobCountInput, 20)}j_{layout.Length}m";
+            string name = $"{ParseInt(jobCountInput, 20)}j_{layout.Length}m";
 
             // Build per-type proc-time params from the UI rows
             var procParams = new System.Collections.Generic.Dictionary<MachineType, (float mu, float sigma)>();
@@ -236,6 +248,12 @@ namespace Assets.Scripts.UI
                     float sigma = ParseFloat(procTimeRows[i].SigmaInput, DefaultProcParams[i].sigma);
                     procParams[allMachineTypes[i]] = (mu, sigma);
                 }
+            }
+
+            DispatchingRule selectedRule = DispatchingRule.SRT_SRWT;
+            if (dispatchRuleDropdown != null)
+            {
+                selectedRule = (DispatchingRule)dispatchRuleDropdown.value;
             }
 
             return new FJSSPConfig
@@ -250,6 +268,7 @@ namespace Assets.Scripts.UI
                 MaxOpsPerJob = ParseInt(maxOpsInput, 7),
                 MaxArrivalTime = ParseFloat(arrivalWindowInput, 0f),
                 ProcTimeParams = procParams,
+                dispatchingRule = selectedRule,
                 // Fallback uniform bounds — only used for types missing from procParams
                 MinProcTime = 1f,
                 MaxProcTime = 30f,
