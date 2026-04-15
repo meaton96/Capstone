@@ -1,0 +1,10 @@
+services:
+  ml-agents:
+    build: ./env # Points to the Dockerfile inside /env
+    container_name: unity-ml-agents
+    ports:
+      - "6006:6006" # TensorBoard
+      - "5004:5004" # Unity ML-Agents Socket
+    volumes:
+      - .:/code # Maps the entire root to /code
+    restart: unless-stopped
