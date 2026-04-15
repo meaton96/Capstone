@@ -96,22 +96,19 @@ $(function(){initNavTree('classconfig_1_1_scheduling_matrix_config.html','','cla
 <tr class="heading"><td colspan="2"><h2 id="header-pub-static-attribs" class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
 <tr class="memitem:aaba2554ff72a7ca142ef752563a98a39" id="r_aaba2554ff72a7ca142ef752563a98a39"><td class="memItemLeft"><a id="aaba2554ff72a7ca142ef752563a98a39" name="aaba2554ff72a7ca142ef752563a98a39"></a>
-int&#160;</td><td class="memItemRight"><b>max_jobs</b> = 100</td></tr>
-<tr class="memdesc:aaba2554ff72a7ca142ef752563a98a39"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of job rows, padded to the maximum (n). <br /></td></tr>
+int&#160;</td><td class="memItemRight"><b>max_jobs</b> = MAX_JOBS</td></tr>
 <tr class="memitem:a6f678d910c22899c6146033212e42e71" id="r_a6f678d910c22899c6146033212e42e71"><td class="memItemLeft"><a id="a6f678d910c22899c6146033212e42e71" name="a6f678d910c22899c6146033212e42e71"></a>
-int&#160;</td><td class="memItemRight"><b>max_cols</b> = 40</td></tr>
-<tr class="memdesc:a6f678d910c22899c6146033212e42e71"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of columns: 2m where m = <a class="el" href="classconfig_1_1_env_config.html#aa8e740b66c70d9b6655874cceb268879" title="EnvConfig.max_machines">EnvConfig.max_machines</a>. <br /></td></tr>
+int&#160;</td><td class="memItemRight"><b>max_cols</b> = 2 * MAX_MACHINES</td></tr>
 <tr class="memitem:a543623eb3ca3abab75e69d0f4abb7e16" id="r_a543623eb3ca3abab75e69d0f4abb7e16"><td class="memItemLeft"><a id="a543623eb3ca3abab75e69d0f4abb7e16" name="a543623eb3ca3abab75e69d0f4abb7e16"></a>
-int&#160;</td><td class="memItemRight"><b>channels</b> = 3</td></tr>
-<tr class="memdesc:a543623eb3ca3abab75e69d0f4abb7e16"><td class="mdescLeft">&#160;</td><td class="mdescRight">Image channels (machines, processing time, zeros). <br /></td></tr>
+int&#160;</td><td class="memItemRight"><b>channels</b> = SCHED_CHANNELS</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><pre class="fragment">@brief Scheduling-matrix image dimensions: n × 2m × 3.
 
 @details
-The scheduling matrix is encoded as a 3-channel image where
-channel 0 holds machine assignments, channel 1 holds processing
-times, and channel 2 is reserved (zeros).
+The C# side lays out the matrix in (jobs, cols, channels) order
+— i.e. HWC.  Python reshapes to (channels, jobs, cols) = CHW
+for the CNN encoder.
 </pre> </div><hr/>The documentation for this class was generated from the following file:<ul>
 <li>C:/Users/Mike/Documents/GitHub/Capstone/env/<b>config.py</b></li>
 </ul>

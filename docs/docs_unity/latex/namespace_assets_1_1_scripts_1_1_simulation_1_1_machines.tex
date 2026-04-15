@@ -6,6 +6,29 @@
 class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt}{Conveyor\+Belt}}
 \begin{DoxyCompactList}\small\item\em A linear conveyor belt that smoothly moves job visuals between an input end and an output end. \end{DoxyCompactList}\item 
 class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_machine_visual}{Machine\+Visual}}
-\begin{DoxyCompactList}\small\item\em Handles all visual feedback for a single machine on the factory floor. \end{DoxyCompactList}\item 
+\item 
 class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine}{Physical\+Machine}}
-\begin{DoxyCompactList}\small\item\em Physical anchor for a machine in the Unity scene. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\begin{DoxyCompactList}\small\item\em Represents a physical processing unit within the factory simulation. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{namespace_assets_1_1_scripts_1_1_simulation_1_1_machines_a10d50e0522783c18d170ce7aa93c4409}\label{namespace_assets_1_1_scripts_1_1_simulation_1_1_machines_a10d50e0522783c18d170ce7aa93c4409} 
+enum {\bfseries Machine\+State} \{ \newline
+{\bfseries Idle}
+, {\bfseries Busy}
+, {\bfseries Blocked}
+, {\bfseries Failed}
+, \newline
+{\bfseries Repair}
+ \}
+\item 
+\Hypertarget{namespace_assets_1_1_scripts_1_1_simulation_1_1_machines_a0b1f257dd10a31cf5232ff9bb82845c3}\label{namespace_assets_1_1_scripts_1_1_simulation_1_1_machines_a0b1f257dd10a31cf5232ff9bb82845c3} 
+enum {\bfseries Machine\+Type} \{ \newline
+{\bfseries Mill} = 0
+, {\bfseries Lathe} = 1
+, {\bfseries Weld} = 2
+, {\bfseries Inspect} = 3
+, \newline
+{\bfseries Assemble} = 4
+ \}
+\end{DoxyCompactItemize}

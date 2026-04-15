@@ -25,6 +25,7 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
+  <td id="projectlogo"><img alt="Logo" src="logo_no_text.png"/></td>
   <td id="projectalign">
    <div id="projectname">DRL Scheduling<span id="projectnumber">&#160;0.0.1</span>
    </div>
@@ -93,7 +94,7 @@ $(function(){initNavTree('class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_
 </div><!--header-->
 <div class="contents">
 
-<p>Controls navigation, job assignment, and lifecycle of an <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a>.  
+<p>Controls navigation and physical movement of a single Automated Guided Vehicle (<a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a>).  
  <a href="#details">More...</a></p>
 <div class="dynheader">
 Inheritance diagram for Assets.Scripts.Simulation.AGV.AGVController:</div>
@@ -104,75 +105,102 @@ Inheritance diagram for Assets.Scripts.Simulation.AGV.AGVController:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a6e77a5cf6be68fb6a348d9bc2c85b3d3" id="r_a6e77a5cf6be68fb6a348d9bc2c85b3d3"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a6e77a5cf6be68fb6a348d9bc2c85b3d3">SetIdleCallback</a> (System.Action callback)</td></tr>
-<tr class="memdesc:a6e77a5cf6be68fb6a348d9bc2c85b3d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assigns a callback to be fired when the <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> returns to an Idle state.  <br /></td></tr>
+<tr class="memitem:abff52613cef522fa2b9b9975a22c70b7" id="r_abff52613cef522fa2b9b9975a22c70b7"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#abff52613cef522fa2b9b9975a22c70b7">ClearFlags</a> ()</td></tr>
+<tr class="memdesc:abff52613cef522fa2b9b9975a22c70b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resets all completion flags and delivery metadata.  <br /></td></tr>
+<tr class="memitem:a6e77a5cf6be68fb6a348d9bc2c85b3d3" id="r_a6e77a5cf6be68fb6a348d9bc2c85b3d3"><td class="memItemLeft"><a id="a6e77a5cf6be68fb6a348d9bc2c85b3d3" name="a6e77a5cf6be68fb6a348d9bc2c85b3d3"></a>
+void&#160;</td><td class="memItemRight"><b>SetIdleCallback</b> (System.Action callback)</td></tr>
 <tr class="memitem:a3b6caf80368477fe05b4ed532d0bb7dc" id="r_a3b6caf80368477fe05b4ed532d0bb7dc"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a3b6caf80368477fe05b4ed532d0bb7dc">Initialize</a> (int id)</td></tr>
-<tr class="memdesc:a3b6caf80368477fe05b4ed532d0bb7dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes the <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> controller and anchors it to the traffic grid.  <br /></td></tr>
-<tr class="memitem:a36cba0e894e790aefc7a8659c86b6191" id="r_a36cba0e894e790aefc7a8659c86b6191"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a36cba0e894e790aefc7a8659c86b6191">Dispatch</a> (int jobId, Vector3 pickupPosition, Vector3 dropoffPosition, <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine.html">PhysicalMachine</a> source, <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine.html">PhysicalMachine</a> dropoff)</td></tr>
-<tr class="memdesc:a36cba0e894e790aefc7a8659c86b6191"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assigns a pickup and delivery task to the <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a>.  <br /></td></tr>
+<tr class="memdesc:a3b6caf80368477fe05b4ed532d0bb7dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets up the <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> identity and initializes navigation components.  <br /></td></tr>
+<tr class="memitem:adb8d7544a44df506b6837dcb3bf43a3b" id="r_adb8d7544a44df506b6837dcb3bf43a3b"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#adb8d7544a44df506b6837dcb3bf43a3b">PreDispatch</a> (int jobId, Vector3 pickupPos, <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine.html">PhysicalMachine</a> source)</td></tr>
+<tr class="memdesc:adb8d7544a44df506b6837dcb3bf43a3b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Commands the <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> to move to a pickup zone before a job is finished.  <br /></td></tr>
+<tr class="memitem:a0fe06c76c2c13c95998f7e5fa3ebe4a0" id="r_a0fe06c76c2c13c95998f7e5fa3ebe4a0"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a0fe06c76c2c13c95998f7e5fa3ebe4a0">FinalizePreDispatch</a> (int jobId, Vector3 dropoffPos, <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine.html">PhysicalMachine</a> target, <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual.html">JobVisual</a> visual)</td></tr>
+<tr class="memdesc:a0fe06c76c2c13c95998f7e5fa3ebe4a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Upgrades a pre-dispatched <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> to a full pickup and delivery task.  <br /></td></tr>
+<tr class="memitem:a52c1e61e9193c9bc82166adc45a79c1e" id="r_a52c1e61e9193c9bc82166adc45a79c1e"><td class="memItemLeft"><a id="a52c1e61e9193c9bc82166adc45a79c1e" name="a52c1e61e9193c9bc82166adc45a79c1e"></a>
+void&#160;</td><td class="memItemRight"><b>Dispatch</b> (int jobId, Vector3 pickupPos, Vector3 dropoffPos, <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine.html">PhysicalMachine</a> source, <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine.html">PhysicalMachine</a> target, <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual.html">JobVisual</a> visual)</td></tr>
+<tr class="memdesc:a52c1e61e9193c9bc82166adc45a79c1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assigns a complete pickup and dropoff task to an idle <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a>. <br /></td></tr>
+<tr class="memitem:a93da5220dd29144d4df3c8f7a71ed9a2" id="r_a93da5220dd29144d4df3c8f7a71ed9a2"><td class="memItemLeft"><a id="a93da5220dd29144d4df3c8f7a71ed9a2" name="a93da5220dd29144d4df3c8f7a71ed9a2"></a>
+void&#160;</td><td class="memItemRight"><b>SetCarryVisual</b> (<a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual.html">JobVisual</a> visual)</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-properties" class="groupheader"><a id="properties" name="properties"></a>
 Properties</h2></td></tr>
 <tr class="memitem:a02482884ad8e96ea4958c208b8ee138d" id="r_a02482884ad8e96ea4958c208b8ee138d"><td class="memItemLeft"><a id="a02482884ad8e96ea4958c208b8ee138d" name="a02482884ad8e96ea4958c208b8ee138d"></a>
 int&#160;</td><td class="memItemRight"><b>AgvId</b><code> [get]</code></td></tr>
 <tr class="memitem:a44b9355229acbf7d184bed6fa2a882c5" id="r_a44b9355229acbf7d184bed6fa2a882c5"><td class="memItemLeft"><a id="a44b9355229acbf7d184bed6fa2a882c5" name="a44b9355229acbf7d184bed6fa2a882c5"></a>
-AGVState&#160;</td><td class="memItemRight"><b>State</b> = AGVState.Idle<code> [get]</code></td></tr>
+<a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html#a1d94b34561483c4dc3c4673fd25db755">AGVState</a>&#160;</td><td class="memItemRight"><b>State</b> = AGVState.Idle<code> [get]</code></td></tr>
 <tr class="memitem:ad58df716b3b530684936c47af99da416" id="r_ad58df716b3b530684936c47af99da416"><td class="memItemLeft"><a id="ad58df716b3b530684936c47af99da416" name="ad58df716b3b530684936c47af99da416"></a>
 int&#160;</td><td class="memItemRight"><b>CurrentJobId</b> = -1<code> [get]</code></td></tr>
 <tr class="memitem:ade70c75fb54ee2b3527614347359fd8c" id="r_ade70c75fb54ee2b3527614347359fd8c"><td class="memItemLeft"><a id="ade70c75fb54ee2b3527614347359fd8c" name="ade70c75fb54ee2b3527614347359fd8c"></a>
 int&#160;</td><td class="memItemRight"><b>CurrentZoneId</b><code> [get]</code></td></tr>
+<tr class="memitem:a2c44853a8bbe8edc6b69f97b95b4cfe7" id="r_a2c44853a8bbe8edc6b69f97b95b4cfe7"><td class="memItemLeft"><a id="a2c44853a8bbe8edc6b69f97b95b4cfe7" name="a2c44853a8bbe8edc6b69f97b95b4cfe7"></a>
+bool&#160;</td><td class="memItemRight"><b>IsIdle</b><code> [get]</code></td></tr>
+<tr class="memitem:a7d321501a7ce1dda99fc91eef599de47" id="r_a7d321501a7ce1dda99fc91eef599de47"><td class="memItemLeft"><a id="a7d321501a7ce1dda99fc91eef599de47" name="a7d321501a7ce1dda99fc91eef599de47"></a>
+int&#160;</td><td class="memItemRight"><b>PreDispatchedJobId</b> = -1<code> [get]</code></td></tr>
+<tr class="memitem:a632d2d7400c6f85e793893c9ba7014e5" id="r_a632d2d7400c6f85e793893c9ba7014e5"><td class="memItemLeft"><a id="a632d2d7400c6f85e793893c9ba7014e5" name="a632d2d7400c6f85e793893c9ba7014e5"></a>
+bool&#160;</td><td class="memItemRight"><b>IsPreDispatched</b><code> [get]</code></td></tr>
+<tr class="memitem:a33b6cfb41b78bbae119e6a7db22b72bd" id="r_a33b6cfb41b78bbae119e6a7db22b72bd"><td class="memItemLeft"><a id="a33b6cfb41b78bbae119e6a7db22b72bd" name="a33b6cfb41b78bbae119e6a7db22b72bd"></a>
+bool&#160;</td><td class="memItemRight"><b>PickedUpFlag</b><code> [get]</code></td></tr>
+<tr class="memitem:a582754d0ec74be6ea6549d27269d8b27" id="r_a582754d0ec74be6ea6549d27269d8b27"><td class="memItemLeft"><a id="a582754d0ec74be6ea6549d27269d8b27" name="a582754d0ec74be6ea6549d27269d8b27"></a>
+bool&#160;</td><td class="memItemRight"><b>DeliveredFlag</b><code> [get]</code></td></tr>
+<tr class="memitem:a7ee004b79ba99cea048949591f39920a" id="r_a7ee004b79ba99cea048949591f39920a"><td class="memItemLeft"><a id="a7ee004b79ba99cea048949591f39920a" name="a7ee004b79ba99cea048949591f39920a"></a>
+int&#160;</td><td class="memItemRight"><b>DeliveredJobId</b> = -1<code> [get]</code></td></tr>
+<tr class="memitem:aea9d7b673fa70a98ea8385c7d00506b0" id="r_aea9d7b673fa70a98ea8385c7d00506b0"><td class="memItemLeft"><a id="aea9d7b673fa70a98ea8385c7d00506b0" name="aea9d7b673fa70a98ea8385c7d00506b0"></a>
+int&#160;</td><td class="memItemRight"><b>DeliveredMachineId</b> = -1<code> [get]</code></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Controls navigation, job assignment, and lifecycle of an <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a>. </p>
-<p>Implements a Turn-Then-Move model. Routes are planned via the <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager.html" title="Manages the zone-based traffic control network for the factory floor.">TrafficZoneManager</a> using BFS. Deadlocks are prevented through a reserve-ahead zone system. </p>
+<div class="textblock"><p>Controls navigation and physical movement of a single Automated Guided Vehicle (<a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a>). </p>
+<p>Acts as a state-driven controller that interfaces with the <code>NavMeshAgent</code> and <code><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager.html" title="Manages the zone-based traffic control network for the factory floor.">TrafficZoneManager</a></code>. This class follows an "orchestrator-flag" pattern: it manages physical movement and sets status flags (<code>PickedUpFlag</code>, <code>DeliveredFlag</code>) for a central supervisor to process, rather than triggering job state transitions directly. </p>
 </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
-<a id="a36cba0e894e790aefc7a8659c86b6191" name="a36cba0e894e790aefc7a8659c86b6191"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a36cba0e894e790aefc7a8659c86b6191">&#9670;&#160;</a></span>Dispatch()</h2>
+<a id="abff52613cef522fa2b9b9975a22c70b7" name="abff52613cef522fa2b9b9975a22c70b7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abff52613cef522fa2b9b9975a22c70b7">&#9670;&#160;</a></span>ClearFlags()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void Assets.Scripts.Simulation.AGV.AGVController.Dispatch </td>
+          <td class="memname">void Assets.Scripts.Simulation.AGV.AGVController.ClearFlags </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Resets all completion flags and delivery metadata. </p>
+<p>Should be called by the orchestrator immediately after consuming the status of a <code>PickedUpFlag</code> or <code>DeliveredFlag</code>. </p>
+
+</div>
+</div>
+<a id="a0fe06c76c2c13c95998f7e5fa3ebe4a0" name="a0fe06c76c2c13c95998f7e5fa3ebe4a0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0fe06c76c2c13c95998f7e5fa3ebe4a0">&#9670;&#160;</a></span>FinalizePreDispatch()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Assets.Scripts.Simulation.AGV.AGVController.FinalizePreDispatch </td>
           <td>(</td>
           <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>jobId</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">Vector3</td>          <td class="paramname"><span class="paramname"><em>pickupPosition</em></span>, </td>
+          <td class="paramtype">Vector3</td>          <td class="paramname"><span class="paramname"><em>dropoffPos</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">Vector3</td>          <td class="paramname"><span class="paramname"><em>dropoffPosition</em></span>, </td>
+          <td class="paramtype"><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine.html">PhysicalMachine</a></td>          <td class="paramname"><span class="paramname"><em>target</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine.html">PhysicalMachine</a></td>          <td class="paramname"><span class="paramname"><em>source</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine.html">PhysicalMachine</a></td>          <td class="paramname"><span class="paramname"><em>dropoff</em></span>&#160;)</td>
+          <td class="paramtype"><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual.html">JobVisual</a></td>          <td class="paramname"><span class="paramname"><em>visual</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Assigns a pickup and delivery task to the <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a>. </p>
-<p>Resolves the nearest valid docks for the source and target machines, plans a BFS route to the pickup location, and initiates navigation. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">jobId</td><td>ID of the job to transport. </td></tr>
-    <tr><td class="paramname">pickupPosition</td><td>Target world position for pickup. </td></tr>
-    <tr><td class="paramname">dropoffPosition</td><td>Target world position for dropoff. </td></tr>
-    <tr><td class="paramname">source</td><td>The machine providing the job (null for incoming belt). </td></tr>
-    <tr><td class="paramname">dropoff</td><td>The machine receiving the job (null for outgoing belt). </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section pre"><dt>Precondition</dt><dd><a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> should be in an Idle state. </dd></dl>
-<dl class="section post"><dt>Postcondition</dt><dd>State changes to NavigatingToPickup if a route is found; otherwise, returns to Idle. </dd></dl>
+<p>Upgrades a pre-dispatched <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> to a full pickup and delivery task. </p>
+<p>If the <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> is already waiting at the dock, it begins the <code>handshakeDuration</code> immediately. Otherwise, it stores the target data and proceeds with the pickup on arrival. </p>
 
 </div>
 </div>
@@ -191,39 +219,51 @@ int&#160;</td><td class="memItemRight"><b>CurrentZoneId</b><code> [get]</code></
       </table>
 </div><div class="memdoc">
 
-<p>Initializes the <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> controller and anchors it to the traffic grid. </p>
-<p>Parks the NavMeshAgent to use transform-based movement and reserves the starting zone. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Sets up the <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> identity and initializes navigation components. </p>
+<dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">id</td><td>The unique identifier for this <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a>. </td></tr>
+    <tr><td class="paramname">id</td><td>The unique integer identifier for this <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> instance.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section post"><dt>Postcondition</dt><dd>Agent is stopped, ground offset is applied, and the initial zone is reserved. </dd></dl>
+<p>Disables automatic <code>NavMeshAgent</code> updates to allow for custom state-based movement and reserves the starting traffic zone. </p>
 
 </div>
 </div>
-<a id="a6e77a5cf6be68fb6a348d9bc2c85b3d3" name="a6e77a5cf6be68fb6a348d9bc2c85b3d3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6e77a5cf6be68fb6a348d9bc2c85b3d3">&#9670;&#160;</a></span>SetIdleCallback()</h2>
+<a id="adb8d7544a44df506b6837dcb3bf43a3b" name="adb8d7544a44df506b6837dcb3bf43a3b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adb8d7544a44df506b6837dcb3bf43a3b">&#9670;&#160;</a></span>PreDispatch()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void Assets.Scripts.Simulation.AGV.AGVController.SetIdleCallback </td>
+          <td class="memname">void Assets.Scripts.Simulation.AGV.AGVController.PreDispatch </td>
           <td>(</td>
-          <td class="paramtype">System.Action</td>          <td class="paramname"><span class="paramname"><em>callback</em></span></td><td>)</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>jobId</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">Vector3</td>          <td class="paramname"><span class="paramname"><em>pickupPos</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine.html">PhysicalMachine</a></td>          <td class="paramname"><span class="paramname"><em>source</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Assigns a callback to be fired when the <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> returns to an Idle state. </p>
+<p>Commands the <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> to move to a pickup zone before a job is finished. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">callback</td><td>The action to execute. </td></tr>
+    <tr><td class="paramname">jobId</td><td>The ID of the job being anticipated. </td></tr>
+    <tr><td class="paramname">pickupPos</td><td>The world position of the source conveyor/dock. </td></tr>
+    <tr><td class="paramname">source</td><td>The machine instance the <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> is heading toward.</td></tr>
   </table>
   </dd>
 </dl>
+<p>Transitions the <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> to <code>MovingToPrePickup</code>. It will wait at the designated dock until <code>FinalizePreDispatch</code> is called. </p>
 
 </div>
 </div>

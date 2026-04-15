@@ -11,7 +11,6 @@ var hierarchy =
       [ "models.actor_critic.ActorCritic", "classmodels_1_1actor__critic_1_1_actor_critic.html", null ],
       [ "models.actor_critic.ActorHead", "classmodels_1_1actor__critic_1_1_actor_head.html", null ],
       [ "models.actor_critic.CriticHead", "classmodels_1_1actor__critic_1_1_critic_head.html", null ],
-      [ "models.actor_critic.DomainRandomization", "classmodels_1_1actor__critic_1_1_domain_randomization.html", null ],
       [ "models.actor_critic.FusionHead", "classmodels_1_1actor__critic_1_1_fusion_head.html", null ],
       [ "models.encoder.CNNSPPFEncoder", "classmodels_1_1encoder_1_1_c_n_n_s_p_p_f_encoder.html", null ],
       [ "models.encoder.MLPEncoder", "classmodels_1_1encoder_1_1_m_l_p_encoder.html", null ],
@@ -30,7 +29,11 @@ var hierarchy =
     [ "tests.test_architecture.TestPlaceholderEnv", "classtests_1_1test__architecture_1_1_test_placeholder_env.html", null ],
     [ "tests.test_architecture.TestRolloutBuffer", "classtests_1_1test__architecture_1_1_test_rollout_buffer.html", null ],
     [ "tests.test_architecture.TestSchedulingNetwork", "classtests_1_1test__architecture_1_1_test_scheduling_network.html", null ],
+    [ "tests.test_architecture.TestSensorCorruption", "classtests_1_1test__architecture_1_1_test_sensor_corruption.html", null ],
     [ "tests.test_architecture.TestSPPF", "classtests_1_1test__architecture_1_1_test_s_p_p_f.html", null ],
     [ "tests.test_architecture.TestVectorizedEnv", "classtests_1_1test__architecture_1_1_test_vectorized_env.html", null ],
-    [ "env.placeholder_env.VectorizedPlaceholderEnv", "classenv_1_1placeholder__env_1_1_vectorized_placeholder_env.html", null ]
+    [ "env.mlagents_envs.UnitySchedulingEnv", "classenv_1_1mlagents__envs_1_1_unity_scheduling_env.html", null ],
+    [ "env.unity_env.UnitySchedulingEnv", "classenv_1_1unity__env_1_1_unity_scheduling_env.html", null ],
+    [ "env.placeholder_env.VectorizedPlaceholderEnv", "classenv_1_1placeholder__env_1_1_vectorized_placeholder_env.html", null ],
+    [ "env.unity_env.VectorizedUnityEnv", "classenv_1_1unity__env_1_1_vectorized_unity_env.html", null ]
 ];

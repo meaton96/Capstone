@@ -25,6 +25,7 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
+  <td id="projectlogo"><img alt="Logo" src="logo_no_text.png"/></td>
   <td id="projectalign">
    <div id="projectname">DRL Scheduling<span id="projectnumber">&#160;0.0.1</span>
    </div>
@@ -93,7 +94,7 @@ $(function(){initNavTree('class_assets_1_1_scripts_1_1_simulation_1_1_scheduling
 </div><!--header-->
 <div class="contents">
 
-<p>ML-Agents <code>Agent</code> subclass that drives job-shop scheduling decisions.  
+<p>ML-Agents Agent subclass that drives job-shop scheduling decisions.  
  <a href="#details">More...</a></p>
 <div class="dynheader">
 Inheritance diagram for Assets.Scripts.Simulation.SchedulingAgent:</div>
@@ -104,36 +105,43 @@ Inheritance diagram for Assets.Scripts.Simulation.SchedulingAgent:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
+<tr class="memitem:a33975703c0f436b7785e8e7e6a40f25d" id="r_a33975703c0f436b7785e8e7e6a40f25d"><td class="memItemLeft"><a id="a33975703c0f436b7785e8e7e6a40f25d" name="a33975703c0f436b7785e8e7e6a40f25d"></a>
+void&#160;</td><td class="memItemRight"><b>ArmAndStart</b> ()</td></tr>
+<tr class="memdesc:a33975703c0f436b7785e8e7e6a40f25d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Forces the agent into an active state and ends any current episode to trigger a reset. <br /></td></tr>
+<tr class="memitem:aaf8ecfe0e2f40f9735638997bfb90697" id="r_aaf8ecfe0e2f40f9735638997bfb90697"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#aaf8ecfe0e2f40f9735638997bfb90697">SetHeuristicRule</a> (<a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_types.html#abb51fa51a77ba502d0768ed91035c7bd">DispatchingRule</a> rule)</td></tr>
+<tr class="memdesc:aaf8ecfe0e2f40f9735638997bfb90697"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the rule used when the agent is running in Heuristic mode.  <br /></td></tr>
+<tr class="memitem:ac24f7362465d841b589a35ef9a84b65a" id="r_ac24f7362465d841b589a35ef9a84b65a"><td class="memItemLeft">override void&#160;</td><td class="memItemRight"><a class="el" href="#ac24f7362465d841b589a35ef9a84b65a">Heuristic</a> (in ActionBuffers actionsOut)</td></tr>
+<tr class="memdesc:ac24f7362465d841b589a35ef9a84b65a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Provides a baseline action based on a hardcoded dispatching rule.  <br /></td></tr>
 <tr class="memitem:ab69d116b9d52d39549588717ecf155fc" id="r_ab69d116b9d52d39549588717ecf155fc"><td class="memItemLeft"><a id="ab69d116b9d52d39549588717ecf155fc" name="ab69d116b9d52d39549588717ecf155fc"></a>
 override void&#160;</td><td class="memItemRight"><b>Initialize</b> ()</td></tr>
-<tr class="memdesc:ab69d116b9d52d39549588717ecf155fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">One-time agent setup called by ML-Agents on first activation. <br /></td></tr>
 <tr class="memitem:aaf471be28804484ab94a515831ab314a" id="r_aaf471be28804484ab94a515831ab314a"><td class="memItemLeft">override void&#160;</td><td class="memItemRight"><a class="el" href="#aaf471be28804484ab94a515831ab314a">OnEpisodeBegin</a> ()</td></tr>
-<tr class="memdesc:aaf471be28804484ab94a515831ab314a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resets the simulation and begins a new physics episode.  <br /></td></tr>
+<tr class="memdesc:aaf471be28804484ab94a515831ab314a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prepares the simulation and internal state for a new episode.  <br /></td></tr>
 <tr class="memitem:a7143c16091b5258ee2945185ce6e1f23" id="r_a7143c16091b5258ee2945185ce6e1f23"><td class="memItemLeft">override void&#160;</td><td class="memItemRight"><a class="el" href="#a7143c16091b5258ee2945185ce6e1f23">CollectObservations</a> (VectorSensor sensor)</td></tr>
-<tr class="memdesc:a7143c16091b5258ee2945185ce6e1f23"><td class="mdescLeft">&#160;</td><td class="mdescRight">Builds the observation vector sent to the neural network.  <br /></td></tr>
+<tr class="memdesc:a7143c16091b5258ee2945185ce6e1f23"><td class="mdescLeft">&#160;</td><td class="mdescRight">Populates the ML-Agents observation vector with environment state data.  <br /></td></tr>
 <tr class="memitem:ac346483ded6edef052cc8880edb75680" id="r_ac346483ded6edef052cc8880edb75680"><td class="memItemLeft">override void&#160;</td><td class="memItemRight"><a class="el" href="#ac346483ded6edef052cc8880edb75680">OnActionReceived</a> (ActionBuffers actions)</td></tr>
-<tr class="memdesc:ac346483ded6edef052cc8880edb75680"><td class="mdescLeft">&#160;</td><td class="mdescRight">Receives the network's chosen action and applies it to the simulation.  <br /></td></tr>
-<tr class="memitem:ac24f7362465d841b589a35ef9a84b65a" id="r_ac24f7362465d841b589a35ef9a84b65a"><td class="memItemLeft">override void&#160;</td><td class="memItemRight"><a class="el" href="#ac24f7362465d841b589a35ef9a84b65a">Heuristic</a> (in ActionBuffers actionsOut)</td></tr>
-<tr class="memdesc:ac24f7362465d841b589a35ef9a84b65a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Heuristic fallback: always selects action 0 (first dispatching rule).  <br /></td></tr>
+<tr class="memdesc:ac346483ded6edef052cc8880edb75680"><td class="mdescLeft">&#160;</td><td class="mdescRight">Processes the discrete action index returned by the neural network.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pro-methods" class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
 <tr class="memitem:aebb519fa43c21666ac9358d500a2b9e0" id="r_aebb519fa43c21666ac9358d500a2b9e0"><td class="memItemLeft"><a id="aebb519fa43c21666ac9358d500a2b9e0" name="aebb519fa43c21666ac9358d500a2b9e0"></a>
 override void&#160;</td><td class="memItemRight"><b>OnEnable</b> ()</td></tr>
-<tr class="memdesc:aebb519fa43c21666ac9358d500a2b9e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Subscribes to the bridge's decision-required event. <br /></td></tr>
+<tr class="memdesc:aebb519fa43c21666ac9358d500a2b9e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Subscribes to simulation events when the component is enabled. <br /></td></tr>
 <tr class="memitem:aa1fce6c7862e3dbd42ad9daee95ee3da" id="r_aa1fce6c7862e3dbd42ad9daee95ee3da"><td class="memItemLeft"><a id="aa1fce6c7862e3dbd42ad9daee95ee3da" name="aa1fce6c7862e3dbd42ad9daee95ee3da"></a>
 override void&#160;</td><td class="memItemRight"><b>OnDisable</b> ()</td></tr>
-<tr class="memdesc:aa1fce6c7862e3dbd42ad9daee95ee3da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unsubscribes from the bridge's decision-required event. <br /></td></tr>
+<tr class="memdesc:aa1fce6c7862e3dbd42ad9daee95ee3da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unsubscribes from simulation events when the component is disabled. <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-properties" class="groupheader"><a id="properties" name="properties"></a>
 Properties</h2></td></tr>
 <tr class="memitem:acff3c95eb198077691f8d56e286f5eb3" id="r_acff3c95eb198077691f8d56e286f5eb3"><td class="memItemLeft"><a id="acff3c95eb198077691f8d56e286f5eb3" name="acff3c95eb198077691f8d56e286f5eb3"></a>
 int&#160;</td><td class="memItemRight"><b>ObservationSize</b><code> [get]</code></td></tr>
-<tr class="memdesc:acff3c95eb198077691f8d56e286f5eb3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Total number of floats in one observation vector. <br /></td></tr>
+<tr class="memdesc:acff3c95eb198077691f8d56e286f5eb3"><td class="mdescLeft">&#160;</td><td class="mdescRight">The calculated size of the observation vector for ML-Agents. <br /></td></tr>
+<tr class="memitem:ada0b5eece1820be0f0eebdc21c8bbee5" id="r_ada0b5eece1820be0f0eebdc21c8bbee5"><td class="memItemLeft"><a id="ada0b5eece1820be0f0eebdc21c8bbee5" name="ada0b5eece1820be0f0eebdc21c8bbee5"></a>
+bool&#160;</td><td class="memItemRight"><b>IsArmed</b><code> [get, set]</code></td></tr>
+<tr class="memdesc:ada0b5eece1820be0f0eebdc21c8bbee5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gating property to control when an episode is allowed to start. <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>ML-Agents <code>Agent</code> subclass that drives job-shop scheduling decisions. </p>
-<p>Listens for <code><a class="el" href="struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request.html" title="Snapshot of the state presented to the agent when a scheduling decision is needed.">DecisionRequest</a></code> events from the <code><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html" title="Central coordinator between the Unity physics simulation and the scheduling agent.">SimulationBridge</a></code>, collects a fixed-width observation vector describing the current machine queue, and maps a discrete action index to a dispatching rule applied via <code><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html#a8d81d85edf95a798dd0e6ee4da84a9c1" title="Applies the agent&#39;s chosen dispatching rule to CurrentDecision.">SimulationBridge.Step()</a></code>. </p>
+<div class="textblock"><p>ML-Agents Agent subclass that drives job-shop scheduling decisions. </p>
+<p>Listens for <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_decision_request.html" title="Snapshot of the state presented to the agent when a scheduling decision is needed.">DecisionRequest</a> events from the <code><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html" title="The central orchestrator responsible for driving the factory simulation.">SimulationBridge</a></code>, collects fixed-width observation vectors, and maps discrete action indices to dispatching rules. </p>
 </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
 <a id="a7143c16091b5258ee2945185ce6e1f23" name="a7143c16091b5258ee2945185ce6e1f23"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7143c16091b5258ee2945185ce6e1f23">&#9670;&#160;</a></span>CollectObservations()</h2>
@@ -150,14 +158,14 @@ int&#160;</td><td class="memItemRight"><b>ObservationSize</b><code> [get]</code>
       </table>
 </div><div class="memdoc">
 
-<p>Builds the observation vector sent to the neural network. </p>
-<p>Writes six scalar context values followed by a fixed-width padded block of <code>maxQueueSlots</code> (job-id, duration) pairs. All slots beyond the actual queue length are zero-padded so the vector size remains constant across episodes.</p>
+<p>Populates the ML-Agents observation vector with environment state data. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">sensor</td><td>The <code>VectorSensor</code> provided by ML-Agents. </td></tr>
+    <tr><td class="paramname">sensor</td><td>The vector sensor to write observations into.</td></tr>
   </table>
   </dd>
 </dl>
+<p>Observations include simulation time, job progress, and context-specific data for either <code>Dispatch</code> or <code>Routing</code> decision types. </p>
 
 </div>
 </div>
@@ -176,10 +184,10 @@ int&#160;</td><td class="memItemRight"><b>ObservationSize</b><code> [get]</code>
       </table>
 </div><div class="memdoc">
 
-<p>Heuristic fallback: always selects action 0 (first dispatching rule). </p>
+<p>Provides a baseline action based on a hardcoded dispatching rule. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">actionsOut</td><td>Action buffer to write the heuristic choice into. </td></tr>
+    <tr><td class="paramname">actionsOut</td><td>The action buffer to be populated by the heuristic. </td></tr>
   </table>
   </dd>
 </dl>
@@ -201,14 +209,14 @@ int&#160;</td><td class="memItemRight"><b>ObservationSize</b><code> [get]</code>
       </table>
 </div><div class="memdoc">
 
-<p>Receives the network's chosen action and applies it to the simulation. </p>
-<p>Maps the discrete action index to a dispatching rule via <code><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html#a8d81d85edf95a798dd0e6ee4da84a9c1" title="Applies the agent&#39;s chosen dispatching rule to CurrentDecision.">SimulationBridge.Step()</a></code>, accumulates the returned reward, and ends the episode if the bridge signals completion. The next <code>RequestDecision()</code> call is driven by the <code>HandleDecisionRequired</code> event, not called here directly.</p>
+<p>Processes the discrete action index returned by the neural network. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">actions</td><td>Action buffers provided by ML-Agents. </td></tr>
+    <tr><td class="paramname">actions</td><td>The buffer containing the predicted actions.</td></tr>
   </table>
   </dd>
 </dl>
+<p>Maps the action to a dispatching rule, steps the simulation via <code>bridge.Step</code>, and applies the resulting reward to the agent. </p>
 
 </div>
 </div>
@@ -227,8 +235,33 @@ int&#160;</td><td class="memItemRight"><b>ObservationSize</b><code> [get]</code>
       </table>
 </div><div class="memdoc">
 
-<p>Resets the simulation and begins a new physics episode. </p>
-<p>Delegates full episode setup to <code><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html#a5d8b43c53cd38a61470816de22f1fd0c" title="Loads the configured Taillard instance, builds the factory floor, spawns job visuals,...">SimulationBridge.StartEpisode()</a></code>. The bridge spawns jobs which physically enter machine trigger colliders, causing <code>HandleDecisionRequired</code> to fire and wake this agent when the first scheduling decision is needed. </p>
+<p>Prepares the simulation and internal state for a new episode. </p>
+<p>Consumes the "armed" ticket to prevent runaway looping in batch modes and triggers <code><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html#a5d8b43c53cd38a61470816de22f1fd0c" title="Initiates a new simulation episode.">SimulationBridge.StartEpisode</a></code>. </p>
+
+</div>
+</div>
+<a id="aaf8ecfe0e2f40f9735638997bfb90697" name="aaf8ecfe0e2f40f9735638997bfb90697"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaf8ecfe0e2f40f9735638997bfb90697">&#9670;&#160;</a></span>SetHeuristicRule()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Assets.Scripts.Simulation.SchedulingAgent.SetHeuristicRule </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_types.html#abb51fa51a77ba502d0768ed91035c7bd">DispatchingRule</a></td>          <td class="paramname"><span class="paramname"><em>rule</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets the rule used when the agent is running in Heuristic mode. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">rule</td><td>The <code><a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_types.html#abb51fa51a77ba502d0768ed91035c7bd">DispatchingRule</a></code> to apply. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

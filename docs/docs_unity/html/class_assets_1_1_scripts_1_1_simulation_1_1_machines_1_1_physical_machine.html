@@ -25,6 +25,7 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
+  <td id="projectlogo"><img alt="Logo" src="logo_no_text.png"/></td>
   <td id="projectalign">
    <div id="projectname">DRL Scheduling<span id="projectnumber">&#160;0.0.1</span>
    </div>
@@ -93,7 +94,7 @@ $(function(){initNavTree('class_assets_1_1_scripts_1_1_simulation_1_1_machines_1
 </div><!--header-->
 <div class="contents">
 
-<p>Physical anchor for a machine in the Unity scene.  
+<p>Represents a physical processing unit within the factory simulation.  
  <a href="#details">More...</a></p>
 <div class="dynheader">
 Inheritance diagram for Assets.Scripts.Simulation.Machines.PhysicalMachine:</div>
@@ -104,70 +105,60 @@ Inheritance diagram for Assets.Scripts.Simulation.Machines.PhysicalMachine:</div
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a3f99564f264f9d0918a53676a7dcc33a" id="r_a3f99564f264f9d0918a53676a7dcc33a"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a3f99564f264f9d0918a53676a7dcc33a">Initialize</a> (int id, <a class="el" href="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine.html">Machine</a> coreMachineData)</td></tr>
-<tr class="memdesc:a3f99564f264f9d0918a53676a7dcc33a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes the physical machine state and links visual components.  <br /></td></tr>
-<tr class="memitem:af96dee367b938e03a6aaf83508031782" id="r_af96dee367b938e03a6aaf83508031782"><td class="memItemLeft"><a id="af96dee367b938e03a6aaf83508031782" name="af96dee367b938e03a6aaf83508031782"></a>
-void&#160;</td><td class="memItemRight"><b>ResetQueues</b> ()</td></tr>
-<tr class="memdesc:af96dee367b938e03a6aaf83508031782"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clears all jobs from primary and secondary conveyors. <br /></td></tr>
-<tr class="memitem:ab4ee422abdbd81ea44d395053555fbeb" id="r_ab4ee422abdbd81ea44d395053555fbeb"><td class="memItemLeft">Vector3&#160;</td><td class="memItemRight"><a class="el" href="#ab4ee422abdbd81ea44d395053555fbeb">ReserveIncomingSlot</a> (int jobId)</td></tr>
-<tr class="memdesc:ab4ee422abdbd81ea44d395053555fbeb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines the world position where an <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> should deliver a job.  <br /></td></tr>
-<tr class="memitem:ad4d630789dcab2e4e5e954abd1c52e08" id="r_ad4d630789dcab2e4e5e954abd1c52e08"><td class="memItemLeft">Vector3&#160;</td><td class="memItemRight"><a class="el" href="#ad4d630789dcab2e4e5e954abd1c52e08">GetPickupPositionForJob</a> (int jobId)</td></tr>
-<tr class="memdesc:ad4d630789dcab2e4e5e954abd1c52e08"><td class="mdescLeft">&#160;</td><td class="mdescRight">Locates the specific world position where an <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> should pick up a job.  <br /></td></tr>
-<tr class="memitem:a92e518f2dd3aa90ddd9dde10b113edd8" id="r_a92e518f2dd3aa90ddd9dde10b113edd8"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a92e518f2dd3aa90ddd9dde10b113edd8">ReceiveJob</a> (int jobId, <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_job_visual.html">JobVisual</a> visual)</td></tr>
-<tr class="memdesc:a92e518f2dd3aa90ddd9dde10b113edd8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handshakes with an <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> to receive a job onto an incoming conveyor.  <br /></td></tr>
-<tr class="memitem:a23a2d5cb2ac280b371459fdab8f37ac8" id="r_a23a2d5cb2ac280b371459fdab8f37ac8"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a23a2d5cb2ac280b371459fdab8f37ac8">StartProcessing</a> (int jobId, float realTimeDuration)</td></tr>
-<tr class="memdesc:a23a2d5cb2ac280b371459fdab8f37ac8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transitions a job from the queue into active processing.  <br /></td></tr>
-<tr class="memitem:a22ac04709a1eea201ad014f4886a53ca" id="r_a22ac04709a1eea201ad014f4886a53ca"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a22ac04709a1eea201ad014f4886a53ca">ReleaseFromOutgoing</a> (int jobId)</td></tr>
-<tr class="memdesc:a22ac04709a1eea201ad014f4886a53ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finalizes the removal of a job from the machine's outgoing system.  <br /></td></tr>
+<tr class="memitem:ab76919d88c460319007d02f1cceb6ae2" id="r_ab76919d88c460319007d02f1cceb6ae2"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#ab76919d88c460319007d02f1cceb6ae2">Initialize</a> (int id, MachineType type)</td></tr>
+<tr class="memdesc:ab76919d88c460319007d02f1cceb6ae2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the machine identity and resets the visual layer.  <br /></td></tr>
+<tr class="memitem:a3941992e280a903cac3d141bf65df1b6" id="r_a3941992e280a903cac3d141bf65df1b6"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a3941992e280a903cac3d141bf65df1b6">StartJob</a> (int jobId, float duration, <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual.html">JobVisual</a> visual=null)</td></tr>
+<tr class="memdesc:a3941992e280a903cac3d141bf65df1b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Commences the processing of a specific job for a defined duration.  <br /></td></tr>
+<tr class="memitem:afa8e3b157fe8591211fdce45da0c338f" id="r_afa8e3b157fe8591211fdce45da0c338f"><td class="memItemLeft"><a id="afa8e3b157fe8591211fdce45da0c338f" name="afa8e3b157fe8591211fdce45da0c338f"></a>
+void&#160;</td><td class="memItemRight"><b>ClearFinished</b> ()</td></tr>
+<tr class="memdesc:afa8e3b157fe8591211fdce45da0c338f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resets the finished status after the orchestrator acknowledges the completion. <br /></td></tr>
+<tr class="memitem:a4d1b177e658f3b76c14648834e308127" id="r_a4d1b177e658f3b76c14648834e308127"><td class="memItemLeft"><a id="a4d1b177e658f3b76c14648834e308127" name="a4d1b177e658f3b76c14648834e308127"></a>
+void&#160;</td><td class="memItemRight"><b>ClearAlmostDone</b> ()</td></tr>
+<tr class="memdesc:a4d1b177e658f3b76c14648834e308127"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resets the pre-dispatch signaling flags. <br /></td></tr>
+<tr class="memitem:a6a363fffe1c2ffe7cdd8d501e0b4b376" id="r_a6a363fffe1c2ffe7cdd8d501e0b4b376"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a6a363fffe1c2ffe7cdd8d501e0b4b376">PlaceOnIncoming</a> (int jobId, <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual.html">JobVisual</a> visual)</td></tr>
+<tr class="memdesc:a6a363fffe1c2ffe7cdd8d501e0b4b376"><td class="mdescLeft">&#160;</td><td class="mdescRight">Places a job visual onto the most appropriate incoming conveyor belt.  <br /></td></tr>
+<tr class="memitem:a0db70f0eec8129321bb5293974ea0bd5" id="r_a0db70f0eec8129321bb5293974ea0bd5"><td class="memItemLeft"><a id="a0db70f0eec8129321bb5293974ea0bd5" name="a0db70f0eec8129321bb5293974ea0bd5"></a>
+void&#160;</td><td class="memItemRight"><b>RemoveFromOutgoing</b> (int jobId)</td></tr>
+<tr class="memdesc:a0db70f0eec8129321bb5293974ea0bd5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes a job from the outgoing belt systems. <br /></td></tr>
+<tr class="memitem:af020c137012771e9bd4ce921779ff7ab" id="r_af020c137012771e9bd4ce921779ff7ab"><td class="memItemLeft"><a id="af020c137012771e9bd4ce921779ff7ab" name="af020c137012771e9bd4ce921779ff7ab"></a>
+void&#160;</td><td class="memItemRight"><b>PlaceOnOutgoing</b> (int jobId, <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual.html">JobVisual</a> visual)</td></tr>
+<tr class="memdesc:af020c137012771e9bd4ce921779ff7ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transfers a finished job visual from the machine center to an outgoing belt. <br /></td></tr>
+<tr class="memitem:a961a861fadaa94891a15a13d906225c3" id="r_a961a861fadaa94891a15a13d906225c3"><td class="memItemLeft"><a id="a961a861fadaa94891a15a13d906225c3" name="a961a861fadaa94891a15a13d906225c3"></a>
+Vector3&#160;</td><td class="memItemRight"><b>GetDropoffPosition</b> ()</td></tr>
+<tr class="memdesc:a961a861fadaa94891a15a13d906225c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the world position where AGVs should drop off jobs for this machine. <br /></td></tr>
+<tr class="memitem:a3fdd81195201aa7ed98d9820a248315f" id="r_a3fdd81195201aa7ed98d9820a248315f"><td class="memItemLeft"><a id="a3fdd81195201aa7ed98d9820a248315f" name="a3fdd81195201aa7ed98d9820a248315f"></a>
+Vector3&#160;</td><td class="memItemRight"><b>GetPickupPosition</b> ()</td></tr>
+<tr class="memdesc:a3fdd81195201aa7ed98d9820a248315f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the world position where AGVs should pick up jobs from this machine. <br /></td></tr>
+<tr class="memitem:ac8cd1fb7af624e236b8ba4c8e5442875" id="r_ac8cd1fb7af624e236b8ba4c8e5442875"><td class="memItemLeft"><a id="ac8cd1fb7af624e236b8ba4c8e5442875" name="ac8cd1fb7af624e236b8ba4c8e5442875"></a>
+void&#160;</td><td class="memItemRight"><b>RefreshQueueLabels</b> (int incomingCount, int outgoingCount)</td></tr>
+<tr class="memdesc:ac8cd1fb7af624e236b8ba4c8e5442875"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the numerical <a class="el" href="namespace_assets_1_1_scripts_1_1_u_i.html">UI</a> labels for the machine's current queue state. <br /></td></tr>
+<tr class="memitem:a2c5ad5de66822eae35be6836c5e76d7c" id="r_a2c5ad5de66822eae35be6836c5e76d7c"><td class="memItemLeft"><a id="a2c5ad5de66822eae35be6836c5e76d7c" name="a2c5ad5de66822eae35be6836c5e76d7c"></a>
+void&#160;</td><td class="memItemRight"><b>FullReset</b> ()</td></tr>
+<tr class="memdesc:a2c5ad5de66822eae35be6836c5e76d7c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Forces the machine into an idle state and clears all belt visuals. <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-properties" class="groupheader"><a id="properties" name="properties"></a>
 Properties</h2></td></tr>
 <tr class="memitem:ab9d8f4a1c74cda559b8101b89b6e998f" id="r_ab9d8f4a1c74cda559b8101b89b6e998f"><td class="memItemLeft"><a id="ab9d8f4a1c74cda559b8101b89b6e998f" name="ab9d8f4a1c74cda559b8101b89b6e998f"></a>
 int&#160;</td><td class="memItemRight"><b>MachineId</b><code> [get]</code></td></tr>
+<tr class="memitem:a48cb7c8375bc1f6207320d6669202eb7" id="r_a48cb7c8375bc1f6207320d6669202eb7"><td class="memItemLeft"><a id="a48cb7c8375bc1f6207320d6669202eb7" name="a48cb7c8375bc1f6207320d6669202eb7"></a>
+MachineType&#160;</td><td class="memItemRight"><b>MachineType</b><code> [get]</code></td></tr>
 <tr class="memitem:a552f2cb44b9047989b28af5cde664eb2" id="r_a552f2cb44b9047989b28af5cde664eb2"><td class="memItemLeft"><a id="a552f2cb44b9047989b28af5cde664eb2" name="a552f2cb44b9047989b28af5cde664eb2"></a>
 bool&#160;</td><td class="memItemRight"><b>IsIdle</b> = true<code> [get]</code></td></tr>
-<tr class="memitem:a9db19127dd141433bbd1e2199bc9ceaa" id="r_a9db19127dd141433bbd1e2199bc9ceaa"><td class="memItemLeft"><a id="a9db19127dd141433bbd1e2199bc9ceaa" name="a9db19127dd141433bbd1e2199bc9ceaa"></a>
-bool&#160;</td><td class="memItemRight"><b>IsBlocked</b> = false<code> [get]</code></td></tr>
-<tr class="memdesc:a9db19127dd141433bbd1e2199bc9ceaa"><td class="mdescLeft">&#160;</td><td class="mdescRight">True when processing is done but all outgoing belts are full. <br /></td></tr>
-<tr class="memitem:a46adc640a09c92b3679dd3d3a94865eb" id="r_a46adc640a09c92b3679dd3d3a94865eb"><td class="memItemLeft"><a id="a46adc640a09c92b3679dd3d3a94865eb" name="a46adc640a09c92b3679dd3d3a94865eb"></a>
-List&lt; int &gt;&#160;</td><td class="memItemRight"><b>IncomingQueue</b><code> [get]</code></td></tr>
-<tr class="memitem:a331efd0b54d0a3159195fdd6442016c3" id="r_a331efd0b54d0a3159195fdd6442016c3"><td class="memItemLeft"><a id="a331efd0b54d0a3159195fdd6442016c3" name="a331efd0b54d0a3159195fdd6442016c3"></a>
-List&lt; int &gt;&#160;</td><td class="memItemRight"><b>OutgoingQueue</b><code> [get]</code></td></tr>
-<tr class="memitem:ae338bacdda3f78f6a10fc66201d07f25" id="r_ae338bacdda3f78f6a10fc66201d07f25"><td class="memItemLeft"><a id="ae338bacdda3f78f6a10fc66201d07f25" name="ae338bacdda3f78f6a10fc66201d07f25"></a>
-List&lt; int &gt;&#160;</td><td class="memItemRight"><b>PhysicalQueue</b><code> [get]</code></td></tr>
+<tr class="memitem:a267deb30e5cec7fda11804ce7f075b24" id="r_a267deb30e5cec7fda11804ce7f075b24"><td class="memItemLeft"><a id="a267deb30e5cec7fda11804ce7f075b24" name="a267deb30e5cec7fda11804ce7f075b24"></a>
+bool&#160;</td><td class="memItemRight"><b>FinishedFlag</b><code> [get]</code></td></tr>
+<tr class="memitem:a1e041826940bb289aeeb54d1f0f6bc81" id="r_a1e041826940bb289aeeb54d1f0f6bc81"><td class="memItemLeft"><a id="a1e041826940bb289aeeb54d1f0f6bc81" name="a1e041826940bb289aeeb54d1f0f6bc81"></a>
+int&#160;</td><td class="memItemRight"><b>ActiveJobId</b> = -1<code> [get]</code></td></tr>
+<tr class="memitem:aa9585b1046f9a62d162cb71de3782177" id="r_aa9585b1046f9a62d162cb71de3782177"><td class="memItemLeft"><a id="aa9585b1046f9a62d162cb71de3782177" name="aa9585b1046f9a62d162cb71de3782177"></a>
+bool&#160;</td><td class="memItemRight"><b>AlmostDoneFlag</b><code> [get]</code></td></tr>
+<tr class="memitem:a3d422d2a36ff1aaf1840d45edd3a6ec0" id="r_a3d422d2a36ff1aaf1840d45edd3a6ec0"><td class="memItemLeft"><a id="a3d422d2a36ff1aaf1840d45edd3a6ec0" name="a3d422d2a36ff1aaf1840d45edd3a6ec0"></a>
+int&#160;</td><td class="memItemRight"><b>AlmostDoneJobId</b> = -1<code> [get]</code></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Physical anchor for a machine in the Unity scene. </p>
-<p>Manages real-time processing via coroutines and delegates visual updates to <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_machine_visual.html" title="Handles all visual feedback for a single machine on the factory floor.">MachineVisual</a>. Supports multi-conveyor setups for double-sided machines, handling load balancing between belts and proximity-based job reception. </p>
+<div class="textblock"><p>Represents a physical processing unit within the factory simulation. </p>
+<p>Manages processing timers and state flags (<code>FinishedFlag</code>, <code>AlmostDoneFlag</code>). This component is strictly passive; it does not initiate state transitions or communicate with the orchestrator. Instead, the <code><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html" title="The central orchestrator responsible for driving the factory simulation.">SimulationBridge</a></code> polls these flags to drive the factory lifecycle. </p>
 </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
-<a id="ad4d630789dcab2e4e5e954abd1c52e08" name="ad4d630789dcab2e4e5e954abd1c52e08"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad4d630789dcab2e4e5e954abd1c52e08">&#9670;&#160;</a></span>GetPickupPositionForJob()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">Vector3 Assets.Scripts.Simulation.Machines.PhysicalMachine.GetPickupPositionForJob </td>
-          <td>(</td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>jobId</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Locates the specific world position where an <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> should pick up a job. </p>
-<p>Searches both outgoing conveyors to find which one currently holds the job. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">jobId</td><td>The job requested for pickup. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Vector3 world position of the conveyor's output end. </dd></dl>
-
-</div>
-</div>
-<a id="a3f99564f264f9d0918a53676a7dcc33a" name="a3f99564f264f9d0918a53676a7dcc33a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3f99564f264f9d0918a53676a7dcc33a">&#9670;&#160;</a></span>Initialize()</h2>
+<a id="ab76919d88c460319007d02f1cceb6ae2" name="ab76919d88c460319007d02f1cceb6ae2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab76919d88c460319007d02f1cceb6ae2">&#9670;&#160;</a></span>Initialize()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -180,135 +171,86 @@ List&lt; int &gt;&#160;</td><td class="memItemRight"><b>PhysicalQueue</b><code> 
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine.html">Machine</a></td>          <td class="paramname"><span class="paramname"><em>coreMachineData</em></span>&#160;)</td>
+          <td class="paramtype">MachineType</td>          <td class="paramname"><span class="paramname"><em>type</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Initializes the physical machine state and links visual components. </p>
+<p>Sets the machine identity and resets the visual layer. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">id</td><td>The unique machine index. </td></tr>
-    <tr><td class="paramname">coreMachineData</td><td>The logical machine data from the simulation core. </td></tr>
+    <tr><td class="paramname">id</td><td>Unique identifier for the machine instance. </td></tr>
+    <tr><td class="paramname">type</td><td>The functional <code>MachineType</code> (e.g., Mill, Lathe). </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section post"><dt>Postcondition</dt><dd><a class="el" href="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine.html" title="Represents a single machine on the shop floor.">Machine</a> is set to Idle, and all attached conveyors are cleared. </dd></dl>
 
 </div>
 </div>
-<a id="a92e518f2dd3aa90ddd9dde10b113edd8" name="a92e518f2dd3aa90ddd9dde10b113edd8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a92e518f2dd3aa90ddd9dde10b113edd8">&#9670;&#160;</a></span>ReceiveJob()</h2>
+<a id="a6a363fffe1c2ffe7cdd8d501e0b4b376" name="a6a363fffe1c2ffe7cdd8d501e0b4b376"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6a363fffe1c2ffe7cdd8d501e0b4b376">&#9670;&#160;</a></span>PlaceOnIncoming()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void Assets.Scripts.Simulation.Machines.PhysicalMachine.ReceiveJob </td>
+          <td class="memname">void Assets.Scripts.Simulation.Machines.PhysicalMachine.PlaceOnIncoming </td>
           <td>(</td>
           <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>jobId</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_job_visual.html">JobVisual</a></td>          <td class="paramname"><span class="paramname"><em>visual</em></span>&#160;)</td>
+          <td class="paramtype"><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual.html">JobVisual</a></td>          <td class="paramname"><span class="paramname"><em>visual</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Handshakes with an <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> to receive a job onto an incoming conveyor. </p>
-<p>Selects the belt physically closest to the job visual's position (the side where the <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> is docking). Falls back to the opposite belt if the preferred one is full. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Places a job visual onto the most appropriate incoming conveyor belt. </p>
+<dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">jobId</td><td>The job being delivered. </td></tr>
-    <tr><td class="paramname">visual</td><td>The visual representation of the job. </td></tr>
+    <tr><td class="paramname">jobId</td><td>ID of the job being delivered. </td></tr>
+    <tr><td class="paramname">visual</td><td>The visual component to be queued. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section post"><dt>Postcondition</dt><dd><a class="el" href="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_job.html" title="An ordered sequence of Operation objects representing a single job.">Job</a> is enqueued on a belt and the visual state is updated to Queued. </dd></dl>
 
 </div>
 </div>
-<a id="a22ac04709a1eea201ad014f4886a53ca" name="a22ac04709a1eea201ad014f4886a53ca"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a22ac04709a1eea201ad014f4886a53ca">&#9670;&#160;</a></span>ReleaseFromOutgoing()</h2>
+<a id="a3941992e280a903cac3d141bf65df1b6" name="a3941992e280a903cac3d141bf65df1b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3941992e280a903cac3d141bf65df1b6">&#9670;&#160;</a></span>StartJob()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void Assets.Scripts.Simulation.Machines.PhysicalMachine.ReleaseFromOutgoing </td>
-          <td>(</td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>jobId</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Finalizes the removal of a job from the machine's outgoing system. </p>
-<p>Triggered by an <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> collection event. Clears the job from the physical belt. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">jobId</td><td>The job being removed. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section post"><dt>Postcondition</dt><dd>Outgoing queue count is updated in the visual layer. </dd></dl>
-
-</div>
-</div>
-<a id="ab4ee422abdbd81ea44d395053555fbeb" name="ab4ee422abdbd81ea44d395053555fbeb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab4ee422abdbd81ea44d395053555fbeb">&#9670;&#160;</a></span>ReserveIncomingSlot()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">Vector3 Assets.Scripts.Simulation.Machines.PhysicalMachine.ReserveIncomingSlot </td>
-          <td>(</td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>jobId</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Determines the world position where an <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> should deliver a job. </p>
-<p>Alternates between available incoming belts to balance the load across both sides of double-sided machines. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">jobId</td><td>The ID of the job to be delivered. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Vector3 world position of the chosen conveyor's input end. </dd></dl>
-
-</div>
-</div>
-<a id="a23a2d5cb2ac280b371459fdab8f37ac8" name="a23a2d5cb2ac280b371459fdab8f37ac8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a23a2d5cb2ac280b371459fdab8f37ac8">&#9670;&#160;</a></span>StartProcessing()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void Assets.Scripts.Simulation.Machines.PhysicalMachine.StartProcessing </td>
+          <td class="memname">void Assets.Scripts.Simulation.Machines.PhysicalMachine.StartJob </td>
           <td>(</td>
           <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>jobId</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">float</td>          <td class="paramname"><span class="paramname"><em>realTimeDuration</em></span>&#160;)</td>
+          <td class="paramtype">float</td>          <td class="paramname"><span class="paramname"><em>duration</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual.html">JobVisual</a></td>          <td class="paramname"><span class="paramname"><em>visual</em></span><span class="paramdefsep"> = </span><span class="paramdefval">null</span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Transitions a job from the queue into active processing. </p>
-<p>Removes the job from its conveyor, moves the visual into the machine body, and initiates the timed process coroutine. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Commences the processing of a specific job for a defined duration. </p>
+<dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">jobId</td><td>The job selected for processing. </td></tr>
-    <tr><td class="paramname">realTimeDuration</td><td>Time in seconds the process will take. </td></tr>
+    <tr><td class="paramname">jobId</td><td>The identifier of the job being processed. </td></tr>
+    <tr><td class="paramname">duration</td><td>The time in simulation seconds to complete the operation. </td></tr>
+    <tr><td class="paramname">visual</td><td>The 3D representation of the job to be snapped to the machine.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section pre"><dt>Precondition</dt><dd><a class="el" href="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine.html" title="Represents a single machine on the shop floor.">Machine</a> must be Idle. </dd></dl>
-<dl class="section post"><dt>Postcondition</dt><dd><a class="el" href="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_machine.html" title="Represents a single machine on the shop floor.">Machine</a> state becomes Busy; IsIdle set to false. </dd></dl>
+<p>Resets internal timers and flags, removes the job from the incoming conveyor, and triggers the machine's operational animations. </p>
 
 </div>
 </div>

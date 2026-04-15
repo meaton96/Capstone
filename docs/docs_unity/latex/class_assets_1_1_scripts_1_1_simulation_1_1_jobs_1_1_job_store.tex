@@ -1,0 +1,143 @@
+\doxysection{Assets.\+Scripts.\+Simulation.\+Jobs.\+Job\+Store Class Reference}
+\hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store}{}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store}\index{Assets.Scripts.Simulation.Jobs.JobStore@{Assets.Scripts.Simulation.Jobs.JobStore}}
+
+
+Central repository for all active \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data}{Job\+Data} instances in the simulation.  
+
+
+Inheritance diagram for Assets.\+Scripts.\+Simulation.\+Jobs.\+Job\+Store:\+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_a623d04ef37ec2d061a43565da89fbcf7}{Initialize}} (IEnumerable$<$ \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_f_j_s_s_p_job_definition}{FJSSPJob\+Definition}} $>$ definitions, bool spawn\+Visuals)
+\begin{DoxyCompactList}\small\item\em Converts static job definitions into runtime state trackers. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_aa3f76a55e6a13d7bde0e95bbe54113e5}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_aa3f76a55e6a13d7bde0e95bbe54113e5} 
+void {\bfseries Cleanup} ()
+\begin{DoxyCompactList}\small\item\em Destroys all associated {\ttfamily \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual}{Job\+Visual}} objects and clears the internal list. \end{DoxyCompactList}\item 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data}{Job\+Data}} \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_a613125a856a13724abfba4d77a2c21b5}{Get}} (int job\+Id)
+\begin{DoxyCompactList}\small\item\em Retrieves a specific {\ttfamily \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data}{Job\+Data}} instance by its unique identifier. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_aa66818cfe656131aa81af7d77af2c675}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_aa66818cfe656131aa81af7d77af2c675} 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data}{Job\+Data}} {\bfseries Get\+Next\+Needs\+Routing} ()
+\begin{DoxyCompactList}\small\item\em Finds the first job that requires a routing decision. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_afaa8b5c827ea11ac9258268493c8e439}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_afaa8b5c827ea11ac9258268493c8e439} 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data}{Job\+Data}} {\bfseries Get\+Next\+Unassigned\+Pickup} ()
+\begin{DoxyCompactList}\small\item\em Finds the first job waiting for pickup that has not yet been assigned an \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV}. \end{DoxyCompactList}\item 
+List$<$ int $>$ \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_a7d734c29dd9a3406a296b3ad3978fb84}{Get\+Dispatchable\+Jobs}} (int machine\+Id)
+\begin{DoxyCompactList}\small\item\em Returns a list of job IDs currently queued and ready for processing at a specific machine. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_a6d6c57dbacee14e7674738eb4391665c}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_a6d6c57dbacee14e7674738eb4391665c} 
+bool {\bfseries Has\+Dispatchable\+Job} (int machine\+Id)
+\begin{DoxyCompactList}\small\item\em Checks if any jobs are currently queued at the specified machine. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_ad16c668d2beb968ab259d47f87f84668}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_ad16c668d2beb968ab259d47f87f84668} 
+bool {\bfseries Are\+All\+Exited} ()
+\begin{DoxyCompactList}\small\item\em Determines if all jobs in the simulation have reached the {\ttfamily Exited} state. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_aa8e4b8ef217e872eb75977a54ee178a7}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_aa8e4b8ef217e872eb75977a54ee178a7} 
+int {\bfseries Count\+In\+State} (\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs_a1a8d173d90cd77c943232a9ddd5b7ba1}{Job\+State}} state)
+\begin{DoxyCompactList}\small\item\em Returns the total count of jobs currently in the specified {\ttfamily \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs_a1a8d173d90cd77c943232a9ddd5b7ba1}{Job\+State}}. \end{DoxyCompactList}\item 
+float \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_a176d6ffdf8cc8f3be0518a8c2af8facb}{Get\+Machine\+Load}} (int machine\+Id)
+\begin{DoxyCompactList}\small\item\em Calculates the total remaining processing load for a specific machine. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_a7bc55a7b699768bd85e73f0d98073fef}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_a7bc55a7b699768bd85e73f0d98073fef} 
+float {\bfseries Get\+Processing\+Time} (int job\+Id, int machine\+Id)
+\begin{DoxyCompactList}\small\item\em Retrieves the estimated processing time for a specific job on a specific machine. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_a38226ad6fd408bacfc130db617ff059e}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_a38226ad6fd408bacfc130db617ff059e} 
+bool {\bfseries Is\+Initialized} = false
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_aac2f01fce954c6b42128e99945e66df1}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_aac2f01fce954c6b42128e99945e66df1} 
+IRead\+Only\+List$<$ \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data}{Job\+Data}} $>$ {\bfseries All\+Jobs}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_a6dd791883af6d43821af69323e4582f6}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_a6dd791883af6d43821af69323e4582f6} 
+int {\bfseries Job\+Count}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Central repository for all active \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data}{Job\+Data} instances in the simulation. 
+
+Acts as a passive data store that translates static job definitions into live runtime trackers. The orchestrator queries and modifies these instances directly to manage the factory lifecycle. 
+
+\label{doc-func-members}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_a613125a856a13724abfba4d77a2c21b5}\index{Assets.Scripts.Simulation.Jobs.JobStore@{Assets.Scripts.Simulation.Jobs.JobStore}!Get@{Get}}
+\index{Get@{Get}!Assets.Scripts.Simulation.Jobs.JobStore@{Assets.Scripts.Simulation.Jobs.JobStore}}
+\doxysubsubsection{\texorpdfstring{Get()}{Get()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_a613125a856a13724abfba4d77a2c21b5} 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data}{Job\+Data}} Assets.\+Scripts.\+Simulation.\+Jobs.\+Job\+Store.\+Get (\begin{DoxyParamCaption}\item[{int}]{job\+Id}{}\end{DoxyParamCaption})}
+
+
+
+Retrieves a specific {\ttfamily \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data}{Job\+Data}} instance by its unique identifier. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em job\+Id} & The unique ID of the job to retrieve. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The {\ttfamily \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data}{Job\+Data}} instance if found; otherwise, {\ttfamily null}. 
+\end{DoxyReturn}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_a7d734c29dd9a3406a296b3ad3978fb84}\index{Assets.Scripts.Simulation.Jobs.JobStore@{Assets.Scripts.Simulation.Jobs.JobStore}!GetDispatchableJobs@{GetDispatchableJobs}}
+\index{GetDispatchableJobs@{GetDispatchableJobs}!Assets.Scripts.Simulation.Jobs.JobStore@{Assets.Scripts.Simulation.Jobs.JobStore}}
+\doxysubsubsection{\texorpdfstring{GetDispatchableJobs()}{GetDispatchableJobs()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_a7d734c29dd9a3406a296b3ad3978fb84} 
+List$<$ int $>$ Assets.\+Scripts.\+Simulation.\+Jobs.\+Job\+Store.\+Get\+Dispatchable\+Jobs (\begin{DoxyParamCaption}\item[{int}]{machine\+Id}{}\end{DoxyParamCaption})}
+
+
+
+Returns a list of job IDs currently queued and ready for processing at a specific machine. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em machine\+Id} & The ID of the machine to check. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_a176d6ffdf8cc8f3be0518a8c2af8facb}\index{Assets.Scripts.Simulation.Jobs.JobStore@{Assets.Scripts.Simulation.Jobs.JobStore}!GetMachineLoad@{GetMachineLoad}}
+\index{GetMachineLoad@{GetMachineLoad}!Assets.Scripts.Simulation.Jobs.JobStore@{Assets.Scripts.Simulation.Jobs.JobStore}}
+\doxysubsubsection{\texorpdfstring{GetMachineLoad()}{GetMachineLoad()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_a176d6ffdf8cc8f3be0518a8c2af8facb} 
+float Assets.\+Scripts.\+Simulation.\+Jobs.\+Job\+Store.\+Get\+Machine\+Load (\begin{DoxyParamCaption}\item[{int}]{machine\+Id}{}\end{DoxyParamCaption})}
+
+
+
+Calculates the total remaining processing load for a specific machine. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em machine\+Id} & The ID of the machine to evaluate. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The sum of processing times for all jobs currently queued at that machine. 
+\end{DoxyReturn}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_a623d04ef37ec2d061a43565da89fbcf7}\index{Assets.Scripts.Simulation.Jobs.JobStore@{Assets.Scripts.Simulation.Jobs.JobStore}!Initialize@{Initialize}}
+\index{Initialize@{Initialize}!Assets.Scripts.Simulation.Jobs.JobStore@{Assets.Scripts.Simulation.Jobs.JobStore}}
+\doxysubsubsection{\texorpdfstring{Initialize()}{Initialize()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store_a623d04ef37ec2d061a43565da89fbcf7} 
+void Assets.\+Scripts.\+Simulation.\+Jobs.\+Job\+Store.\+Initialize (\begin{DoxyParamCaption}\item[{IEnumerable$<$ \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_f_j_s_s_p_job_definition}{FJSSPJob\+Definition}} $>$}]{definitions}{, }\item[{bool}]{spawn\+Visuals}{}\end{DoxyParamCaption})}
+
+
+
+Converts static job definitions into runtime state trackers. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em definitions} & An enumerable of {\ttfamily \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_f_j_s_s_p_job_definition}{FJSSPJob\+Definition}} blueprint data. \\
+\hline
+{\em spawn\+Visuals} & Whether to instantiate 3D visuals for each job.\\
+\hline
+\end{DoxyParams}
+Clears existing data and populates the store with fresh {\ttfamily \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data}{Job\+Data}}. If {\ttfamily spawn\+Visuals} is true, it links each data entry to a newly instantiated {\ttfamily \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual}{Job\+Visual}} within the designated container. 
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Simulation/\+\+Jobs/\+Jobstore.\+cs\end{DoxyCompactItemize}

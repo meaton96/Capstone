@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['domainrandomization_0',['DomainRandomization',['../classmodels_1_1actor__critic_1_1_domain_randomization.html',1,'models::actor_critic']]]
+  ['encoderconfig_0',['EncoderConfig',['../classconfig_1_1_encoder_config.html',1,'config']]],
+  ['envconfig_1',['EnvConfig',['../classconfig_1_1_env_config.html',1,'config']]]
 ];

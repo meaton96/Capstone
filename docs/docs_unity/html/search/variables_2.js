@@ -1,6 +1,7 @@
 var searchData=
 [
-  ['decisionindex_0',['DecisionIndex',['../struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request.html#a02df458c6ccecffbd9d9fdc8a2523199',1,'Assets::Scripts::Simulation::DecisionRequest']]],
-  ['done_1',['Done',['../struct_assets_1_1_scripts_1_1_simulation_1_1_step_result.html#aee1e19dd4a9e7aad17d7ce87b8cfe706',1,'Assets::Scripts::Simulation::StepResult']]],
-  ['duration_5fmatrix_2',['duration_matrix',['../class_assets_1_1_scripts_1_1_scheduling_1_1_data_1_1_taillard_instance.html#a7590980360c981cb8e7a63498bb96f77',1,'Assets::Scripts::Scheduling::Data::TaillardInstance']]]
+  ['completion_5ftime_0',['completion_time',['../classmirror__des_1_1_job.html#a7fbc3ad37c87f7ae99fcb348396eb75a',1,'mirror_des::Job']]],
+  ['current_5fop_1',['current_op',['../classmirror__des_1_1_machine.html#aeb50646a4da8418790f7521136407980',1,'mirror_des::Machine']]],
+  ['current_5ftime_2',['current_time',['../classmirror__des_1_1_d_e_s_simulator.html#a76dadf3da9d54c3e22e82b381289671c',1,'mirror_des::DESSimulator']]],
+  ['currentmakespan_3',['CurrentMakespan',['../struct_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_step_result.html#a89101fe5af3119f42d2ad6e2d5f0ff64',1,'Assets::Scripts::Simulation::Types::StepResult']]]
 ];

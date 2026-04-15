@@ -1,9 +1,6 @@
 var searchData=
 [
-  ['max_5fcols_0',['max_cols',['../classconfig_1_1_scheduling_matrix_config.html#a6f678d910c22899c6146033212e42e71',1,'config::SchedulingMatrixConfig']]],
-  ['max_5fgrad_5fnorm_1',['max_grad_norm',['../classconfig_1_1_p_p_o_config.html#a5cee7c592a7cf3fe4bbffb05b6d7f475',1,'config::PPOConfig']]],
-  ['max_5fjobs_2',['max_jobs',['../classconfig_1_1_env_config.html#ad86a28256695e5d476afc7dbc7d33f70',1,'config.EnvConfig.max_jobs'],['../classconfig_1_1_scheduling_matrix_config.html#aaba2554ff72a7ca142ef752563a98a39',1,'config.SchedulingMatrixConfig.max_jobs']]],
-  ['max_5fmachines_3',['max_machines',['../classconfig_1_1_env_config.html#aa8e740b66c70d9b6655874cceb268879',1,'config::EnvConfig']]],
-  ['max_5fsteps_4',['max_steps',['../classenv_1_1placeholder__env_1_1_placeholder_scheduling_env.html#aa301e91266e879fc66d42dc1ccc878f5',1,'env::placeholder_env::PlaceholderSchedulingEnv']]],
-  ['metadata_5',['metadata',['../classenv_1_1placeholder__env_1_1_placeholder_scheduling_env.html#a85be25996cb5a2bdabd6065eb7bcef45',1,'env::placeholder_env::PlaceholderSchedulingEnv']]]
+  ['net_0',['net',['../classmodels_1_1actor__critic_1_1_fusion_head.html#a33cea127d72ad28b9c3003829590562b',1,'models.actor_critic.FusionHead.net'],['../classmodels_1_1actor__critic_1_1_actor_head.html#a650bba6a4dde16de624b8f4f63849604',1,'models.actor_critic.ActorHead.net'],['../classmodels_1_1actor__critic_1_1_critic_head.html#a7aabd7e2e9e3a7ac73af6422fa7388da',1,'models.actor_critic.CriticHead.net'],['../classmodels_1_1encoder_1_1_m_l_p_encoder.html#a8286e3b375361751353151f065b60d33',1,'models.encoder.MLPEncoder.net']]],
+  ['num_5factions_1',['num_actions',['../classmodels_1_1actor__critic_1_1_actor_head.html#ae2c593a49fe117c36cec7e198b466baa',1,'models::actor_critic::ActorHead']]],
+  ['num_5fenvs_2',['num_envs',['../classenv_1_1placeholder__env_1_1_vectorized_placeholder_env.html#a4b5dde948a62a5f87e8d123d91e6a23f',1,'env.placeholder_env.VectorizedPlaceholderEnv.num_envs'],['../classrollout__buffer_1_1_rollout_buffer.html#a0c098f6469e1f81934ad520b14e5b333',1,'rollout_buffer.RolloutBuffer.num_envs']]]
 ];

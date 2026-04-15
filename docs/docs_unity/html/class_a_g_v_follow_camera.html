@@ -25,6 +25,7 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
+  <td id="projectlogo"><img alt="Logo" src="logo_no_text.png"/></td>
   <td id="projectalign">
    <div id="projectname">DRL Scheduling<span id="projectnumber">&#160;0.0.1</span>
    </div>
@@ -93,7 +94,7 @@ $(function(){initNavTree('class_a_g_v_follow_camera.html','','class_a_g_v_follow
 </div><!--header-->
 <div class="contents">
 
-<p>Attaches the camera to AGVs within the <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_pool.html" title="Manages a fleet of AGVs, handling initialization, job dispatching, and request queuing.">AGVPool</a>. Toggles control away from CameraController/OrbitCamera when active.  
+<p>Attaches the camera to AGVs within the <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_pool.html" title="Manages the lifecycle and retrieval of the AGV fleet.">AGVPool</a>.  
  <a href="#details">More...</a></p>
 <div class="dynheader">
 Inheritance diagram for AGVFollowCamera:</div>
@@ -110,7 +111,8 @@ Vector3&#160;</td><td class="memItemRight"><b>followOffset</b> = new Vector3(0, 
 float&#160;</td><td class="memItemRight"><b>smoothSpeed</b> = 10f</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Attaches the camera to AGVs within the <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_pool.html" title="Manages a fleet of AGVs, handling initialization, job dispatching, and request queuing.">AGVPool</a>. Toggles control away from CameraController/OrbitCamera when active. </p>
+<div class="textblock"><p>Attaches the camera to AGVs within the <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_pool.html" title="Manages the lifecycle and retrieval of the AGV fleet.">AGVPool</a>. </p>
+<p>Toggles control away from <a class="el" href="class_camera_controller.html" title="Controls the camera behavior, allowing toggling between an orbit mode and a free-look mode....">CameraController</a> and <a class="el" href="class_orbit_camera.html" title="Continuously orbits the camera around a target Transform.">OrbitCamera</a> when active. When enabled, the camera smoothly tracks a specific <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a>'s position and rotation based on a defined offset. </p>
 </div><hr/>The documentation for this class was generated from the following file:<ul>
 <li>C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Camera/<b>AGVFollowCamera.cs</b></li>
 </ul>

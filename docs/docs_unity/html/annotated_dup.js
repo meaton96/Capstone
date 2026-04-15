@@ -31,26 +31,37 @@ var annotated_dup =
           [ "FactoryLayout", "namespace_assets_1_1_scripts_1_1_simulation_1_1_factory_layout.html", [
             [ "FactoryLayoutManager", "class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager.html", "class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_factory_layout_manager" ],
             [ "TrafficZone", "class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone.html", null ],
-            [ "DockPoint", "struct_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_dock_point.html", null ],
+            [ "DockPoint", "class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_dock_point.html", null ],
             [ "TrafficZoneManager", "class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager.html", "class_assets_1_1_scripts_1_1_simulation_1_1_factory_layout_1_1_traffic_zone_manager" ]
+          ] ],
+          [ "Jobs", "namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs.html", [
+            [ "FJSSPJobDefinition", "class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_f_j_s_s_p_job_definition.html", null ],
+            [ "FJSSPJobGenerator", "class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_f_j_s_s_p_job_generator.html", null ],
+            [ "JobData", "class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data.html", "class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data" ],
+            [ "JobStore", "class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store.html", "class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store" ],
+            [ "JobVisual", "class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual.html", "class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual" ]
           ] ],
           [ "Machines", "namespace_assets_1_1_scripts_1_1_simulation_1_1_machines.html", [
             [ "ConveyorBelt", "class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt.html", "class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt" ],
             [ "MachineVisual", "class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_machine_visual.html", "class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_machine_visual" ],
             [ "PhysicalMachine", "class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine.html", "class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine" ]
           ] ],
-          [ "JobTracker", "class_assets_1_1_scripts_1_1_simulation_1_1_job_tracker.html", null ],
-          [ "JobManager", "class_assets_1_1_scripts_1_1_simulation_1_1_job_manager.html", "class_assets_1_1_scripts_1_1_simulation_1_1_job_manager" ],
-          [ "JobVisual", "class_assets_1_1_scripts_1_1_simulation_1_1_job_visual.html", "class_assets_1_1_scripts_1_1_simulation_1_1_job_visual" ],
+          [ "Types", "namespace_assets_1_1_scripts_1_1_simulation_1_1_types.html", [
+            [ "DecisionRequest", "class_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_decision_request.html", null ],
+            [ "EpisodeResult", "class_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_episode_result.html", "class_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_episode_result" ],
+            [ "FJSSPConfig", "class_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_f_j_s_s_p_config.html", "class_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_f_j_s_s_p_config" ],
+            [ "StepResult", "struct_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_step_result.html", "struct_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_step_result" ]
+          ] ],
+          [ "HeadlessBatchRunner", "class_assets_1_1_scripts_1_1_simulation_1_1_headless_batch_runner.html", "class_assets_1_1_scripts_1_1_simulation_1_1_headless_batch_runner" ],
+          [ "LoggingInitializer", "class_assets_1_1_scripts_1_1_simulation_1_1_logging_initializer.html", null ],
+          [ "ObservationBuilder", "class_assets_1_1_scripts_1_1_simulation_1_1_observation_builder.html", null ],
           [ "SchedulingAgent", "class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent.html", "class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent" ],
-          [ "DecisionRequest", "struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request.html", "struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request" ],
-          [ "StepResult", "struct_assets_1_1_scripts_1_1_simulation_1_1_step_result.html", "struct_assets_1_1_scripts_1_1_simulation_1_1_step_result" ],
-          [ "EpisodeResult", "struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result.html", "struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result" ],
           [ "SimulationBridge", "class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html", "class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge" ]
         ] ],
         [ "UI", "namespace_assets_1_1_scripts_1_1_u_i.html", [
           [ "InstanceSelectMenu", "class_assets_1_1_scripts_1_1_u_i_1_1_instance_select_menu.html", "class_assets_1_1_scripts_1_1_u_i_1_1_instance_select_menu" ],
-          [ "SimulationHUD", "class_assets_1_1_scripts_1_1_u_i_1_1_simulation_h_u_d.html", "class_assets_1_1_scripts_1_1_u_i_1_1_simulation_h_u_d" ]
+          [ "SimulationHUD", "class_assets_1_1_scripts_1_1_u_i_1_1_simulation_h_u_d.html", "class_assets_1_1_scripts_1_1_u_i_1_1_simulation_h_u_d" ],
+          [ "SimulationMenuUI", "class_assets_1_1_scripts_1_1_u_i_1_1_simulation_menu_u_i.html", null ]
         ] ]
       ] ]
     ] ],

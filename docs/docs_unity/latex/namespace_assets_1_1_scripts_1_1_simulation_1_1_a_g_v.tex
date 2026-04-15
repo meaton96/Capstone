@@ -4,22 +4,19 @@
 \begin{DoxyCompactItemize}
 \item 
 class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller}{AGVController}}
-\begin{DoxyCompactList}\small\item\em Controls navigation, job assignment, and lifecycle of an \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV}. \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em Controls navigation and physical movement of a single Automated Guided Vehicle (\doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV}). \end{DoxyCompactList}\item 
 class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_pool}{AGVPool}}
-\begin{DoxyCompactList}\small\item\em Manages a fleet of AGVs, handling initialization, job dispatching, and request queuing. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\begin{DoxyCompactList}\small\item\em Manages the lifecycle and retrieval of the \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} fleet. \end{DoxyCompactList}\end{DoxyCompactItemize}
 \doxysubsubsection*{Enumerations}
 \begin{DoxyCompactItemize}
 \item 
 \Hypertarget{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_a1d94b34561483c4dc3c4673fd25db755}\label{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_a1d94b34561483c4dc3c4673fd25db755} 
-enum {\bfseries AGVState} \{ \newline
+enum \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_a1d94b34561483c4dc3c4673fd25db755}{AGVState}} \{ \newline
 {\bfseries Idle}
-, {\bfseries Navigating\+To\+Pickup}
-, {\bfseries Aligning\+For\+Pickup}
-, {\bfseries Executing\+Pickup}
+, {\bfseries Moving\+To\+Pickup}
+, {\bfseries Moving\+To\+Dropoff}
+, {\bfseries Returning\+To\+Parking}
 , \newline
-{\bfseries Navigating\+To\+Dropoff}
-, {\bfseries Aligning\+For\+Dropoff}
-, {\bfseries Executing\+Dropoff}
-, {\bfseries Waiting\+For\+Zone}
+{\bfseries Moving\+To\+Pre\+Pickup}
  \}
-\end{DoxyCompactItemize}
+\begin{DoxyCompactList}\small\item\em Defines the operational states of an \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} during its lifecycle. \end{DoxyCompactList}\end{DoxyCompactItemize}

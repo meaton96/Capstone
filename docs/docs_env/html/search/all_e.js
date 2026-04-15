@@ -1,11 +1,10 @@
 var searchData=
 [
-  ['parser_0',['parser',['../namespacetrain.html#a242e49c387b90838a9072c79886a10ec',1,'train']]],
-  ['pdr_5factions_1',['PDR_ACTIONS',['../namespaceconfig.html#a4f6c6b49c330f4e0243285c835c936d3',1,'config']]],
-  ['placeholderschedulingenv_2',['PlaceholderSchedulingEnv',['../classenv_1_1placeholder__env_1_1_placeholder_scheduling_env.html',1,'env::placeholder_env']]],
-  ['pool_5fsizes_3',['pool_sizes',['../classmodels_1_1encoder_1_1_s_p_p_f.html#a7ecfc4164ad87dcf846896eda4bdd68a',1,'models::encoder::SPPF']]],
-  ['pools_4',['pools',['../classmodels_1_1encoder_1_1_s_p_p_f.html#a303c294a2a673f52352100b94917aaee',1,'models::encoder::SPPF']]],
-  ['pos_5',['pos',['../classrollout__buffer_1_1_rollout_buffer.html#a33aaa20cf9a97341da02ce5e4ec2562d',1,'rollout_buffer::RolloutBuffer']]],
-  ['ppoconfig_6',['PPOConfig',['../classconfig_1_1_p_p_o_config.html',1,'config']]],
-  ['processing_5ftime_5frange_7',['processing_time_range',['../classconfig_1_1_env_config.html#af0f3bbf78a9b311fbc62435d249986f0',1,'config::EnvConfig']]]
+  ['reset_0',['reset',['../classenv_1_1placeholder__env_1_1_placeholder_scheduling_env.html#ad25aecb20a51f4c9a71cd29f7734a3eb',1,'env.placeholder_env.PlaceholderSchedulingEnv.reset()'],['../classenv_1_1placeholder__env_1_1_vectorized_placeholder_env.html#a926a65c6ae9926f901077b0ecf5de3d8',1,'env.placeholder_env.VectorizedPlaceholderEnv.reset()'],['../classenv_1_1unity__env_1_1_unity_scheduling_env.html#a03fabd1dfb60311f902c32ae8802355d',1,'env.unity_env.UnitySchedulingEnv.reset()'],['../classrollout__buffer_1_1_rollout_buffer.html#a15258c105cc6582af5361a79c84bfa76',1,'rollout_buffer.RolloutBuffer.reset(self)']]],
+  ['returns_1',['returns',['../classrollout__buffer_1_1_rollout_buffer.html#a6dab2d523390d0b15be2865192659c67',1,'rollout_buffer::RolloutBuffer']]],
+  ['rewards_2',['rewards',['../classrollout__buffer_1_1_rollout_buffer.html#a9011a4d7a8b0005fa84615514ede67ef',1,'rollout_buffer::RolloutBuffer']]],
+  ['rollout_5fbuffer_3',['rollout_buffer',['../namespacerollout__buffer.html',1,'']]],
+  ['rollout_5flength_4',['rollout_length',['../classrollout__buffer_1_1_rollout_buffer.html#af0551d4c69a639bd4741b187fe8358fd',1,'rollout_buffer::RolloutBuffer']]],
+  ['rolloutbuffer_5',['RolloutBuffer',['../classrollout__buffer_1_1_rollout_buffer.html',1,'rollout_buffer']]],
+  ['run_5ftests_6',['run_tests',['../namespacetests_1_1test__architecture.html#ac9eb772a3dbaeb77077f4716d21d8666',1,'tests::test_architecture']]]
 ];

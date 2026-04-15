@@ -113,7 +113,7 @@ Public Attributes</h2></td></tr>
 &#160;</td><td class="memItemRight"><b>encoder</b> = <a class="el" href="classmodels_1_1encoder_1_1_multi_modal_encoder.html">MultiModalEncoder</a>(encoder_cfg)</td></tr>
 <tr class="memdesc:ae1edf92108d51f2c25792c8f5cefb773"><td class="mdescLeft">&#160;</td><td class="mdescRight">Multi-modal encoder producing a 464-D concatenated embedding. <br /></td></tr>
 <tr class="memitem:a6f6e3287e9af31b1840ba8a863bece71" id="r_a6f6e3287e9af31b1840ba8a863bece71"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a6f6e3287e9af31b1840ba8a863bece71">fusion</a></td></tr>
-<tr class="memdesc:a6f6e3287e9af31b1840ba8a863bece71"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fusion MLP with domain randomization (464-D → 256-D).  <br /></td></tr>
+<tr class="memdesc:a6f6e3287e9af31b1840ba8a863bece71"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fusion MLP projecting encoder output (464-D → 256-D).  <br /></td></tr>
 <tr class="memitem:af690c8817ccf0c56595579ac7161da6b" id="r_af690c8817ccf0c56595579ac7161da6b"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#af690c8817ccf0c56595579ac7161da6b">actor_critic</a></td></tr>
 <tr class="memdesc:af690c8817ccf0c56595579ac7161da6b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shared actor-critic heads consuming the 256-D fused features.  <br /></td></tr>
 </table>
@@ -333,11 +333,9 @@ action, log_prob, value = net.act(obs)
 <div class="line">            input_dim=encoder_cfg.concat_dim,</div>
 <div class="line">            hidden_dim=fusion_cfg.hidden_dim,</div>
 <div class="line">            output_dim=fusion_cfg.output_dim,</div>
-<div class="line">            dropout_rate=fusion_cfg.dropout_rate,</div>
-<div class="line">            noise_std=fusion_cfg.noise_std,</div>
 <div class="line">        )</div>
 </div><!-- fragment -->
-<p>Fusion MLP with domain randomization (464-D → 256-D). </p>
+<p>Fusion MLP projecting encoder output (464-D → 256-D). </p>
 
 </div>
 </div>

@@ -1,0 +1,96 @@
+\doxysection{Assets.\+Scripts.\+Simulation.\+Types Namespace Reference}
+\hypertarget{namespace_assets_1_1_scripts_1_1_simulation_1_1_types}{}\label{namespace_assets_1_1_scripts_1_1_simulation_1_1_types}\index{Assets.Scripts.Simulation.Types@{Assets.Scripts.Simulation.Types}}
+\doxysubsubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class {\bfseries Config\+Loader}
+\begin{DoxyCompactList}\small\item\em Loads \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_f_j_s_s_p_config}{FJSSPConfig} instances from JSON files on disk. \end{DoxyCompactList}\item 
+class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_decision_request}{Decision\+Request}}
+\begin{DoxyCompactList}\small\item\em Snapshot of the state presented to the agent when a scheduling decision is needed. \end{DoxyCompactList}\item 
+class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_episode_result}{Episode\+Result}}
+\begin{DoxyCompactList}\small\item\em Summary statistics produced when an episode ends. \end{DoxyCompactList}\item 
+class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_f_j_s_s_p_config}{FJSSPConfig}}
+\item 
+struct \doxymbox{\hyperlink{struct_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_step_result}{Step\+Result}}
+\begin{DoxyCompactList}\small\item\em Result returned by {\ttfamily \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge_a8d81d85edf95a798dd0e6ee4da84a9c1}{Simulation\+Bridge.\+Step()}} after applying a dispatching rule. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{namespace_assets_1_1_scripts_1_1_simulation_1_1_types_a06e733810edf138e05f4bdd161f997ed}\label{namespace_assets_1_1_scripts_1_1_simulation_1_1_types_a06e733810edf138e05f4bdd161f997ed} 
+enum {\bfseries Decision\+Type} \{ {\bfseries Dispatch}
+, {\bfseries Routing}
+ \}
+\item 
+enum \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_simulation_1_1_types_abb51fa51a77ba502d0768ed91035c7bd}{Dispatching\+Rule}} \{ \newline
+\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_simulation_1_1_types_abb51fa51a77ba502d0768ed91035c7bdade91ab1cd38237cb688634ed2b95a62e}{SPT\+\_\+\+SMPT}}
+, \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_simulation_1_1_types_abb51fa51a77ba502d0768ed91035c7bda18355950aa0d135000b56aba39667cf3}{SPT\+\_\+\+SRWT}}
+, \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_simulation_1_1_types_abb51fa51a77ba502d0768ed91035c7bda40b3eb67035d572136df047c40dc195d}{LPT\+\_\+\+MMUR}}
+, \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_simulation_1_1_types_abb51fa51a77ba502d0768ed91035c7bda335656bc8a6ee16400e89f426971c4e5}{LPT\+\_\+\+SMPT}}
+, \newline
+\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_simulation_1_1_types_abb51fa51a77ba502d0768ed91035c7bda9207d43f78389b34a02df21e4c33f724}{SRT\+\_\+\+SRWT}}
+, \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_simulation_1_1_types_abb51fa51a77ba502d0768ed91035c7bda43f08a6810a17732c5bf5f20644ca7d6}{SRT\+\_\+\+SMPT}}
+, \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_simulation_1_1_types_abb51fa51a77ba502d0768ed91035c7bda3ead285f50958d8aa6e59cf3fe61b421}{LRT\+\_\+\+MMUR}}
+, \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_simulation_1_1_types_abb51fa51a77ba502d0768ed91035c7bdab3532cf9795624618f89ea415c2e173a}{SDT\+\_\+\+SRWT}}
+ \}
+\end{DoxyCompactItemize}
+
+
+\label{doc-enum-members}
+\Hypertarget{namespace_assets_1_1_scripts_1_1_simulation_1_1_types_doc-enum-members}
+\doxysubsection{Enumeration Type Documentation}
+\Hypertarget{namespace_assets_1_1_scripts_1_1_simulation_1_1_types_abb51fa51a77ba502d0768ed91035c7bd}\index{Assets.Scripts.Simulation.Types@{Assets.Scripts.Simulation.Types}!DispatchingRule@{DispatchingRule}}
+\index{DispatchingRule@{DispatchingRule}!Assets.Scripts.Simulation.Types@{Assets.Scripts.Simulation.Types}}
+\doxysubsubsection{\texorpdfstring{DispatchingRule}{DispatchingRule}}
+{\footnotesize\ttfamily \label{namespace_assets_1_1_scripts_1_1_simulation_1_1_types_abb51fa51a77ba502d0768ed91035c7bd} 
+enum \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_simulation_1_1_types_abb51fa51a77ba502d0768ed91035c7bd}{Assets.\+Scripts.\+Simulation.\+Types.\+Dispatching\+Rule}}}
+
+\begin{DoxyEnumFields}[2]{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{SPT\_SMPT@{SPT\_SMPT}!Assets.Scripts.Simulation.Types@{Assets.Scripts.Simulation.Types}}
+\index{Assets.Scripts.Simulation.Types@{Assets.Scripts.Simulation.Types}!SPT\_SMPT@{SPT\_SMPT}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_simulation_1_1_types_abb51fa51a77ba502d0768ed91035c7bdade91ab1cd38237cb688634ed2b95a62e}\label{namespace_assets_1_1_scripts_1_1_simulation_1_1_types_abb51fa51a77ba502d0768ed91035c7bdade91ab1cd38237cb688634ed2b95a62e} 
+SPT\+\_\+\+SMPT&Shortest Processing Time — primary sort by Operation.\+Duration ascending. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{SPT\_SRWT@{SPT\_SRWT}!Assets.Scripts.Simulation.Types@{Assets.Scripts.Simulation.Types}}
+\index{Assets.Scripts.Simulation.Types@{Assets.Scripts.Simulation.Types}!SPT\_SRWT@{SPT\_SRWT}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_simulation_1_1_types_abb51fa51a77ba502d0768ed91035c7bda18355950aa0d135000b56aba39667cf3}\label{namespace_assets_1_1_scripts_1_1_simulation_1_1_types_abb51fa51a77ba502d0768ed91035c7bda18355950aa0d135000b56aba39667cf3} 
+SPT\+\_\+\+SRWT&Shortest Processing Time with Shortest Remaining Work Time secondary metric. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{LPT\_MMUR@{LPT\_MMUR}!Assets.Scripts.Simulation.Types@{Assets.Scripts.Simulation.Types}}
+\index{Assets.Scripts.Simulation.Types@{Assets.Scripts.Simulation.Types}!LPT\_MMUR@{LPT\_MMUR}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_simulation_1_1_types_abb51fa51a77ba502d0768ed91035c7bda40b3eb67035d572136df047c40dc195d}\label{namespace_assets_1_1_scripts_1_1_simulation_1_1_types_abb51fa51a77ba502d0768ed91035c7bda40b3eb67035d572136df047c40dc195d} 
+LPT\+\_\+\+MMUR&Longest Processing Time — primary sort by Operation.\+Duration descending. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{LPT\_SMPT@{LPT\_SMPT}!Assets.Scripts.Simulation.Types@{Assets.Scripts.Simulation.Types}}
+\index{Assets.Scripts.Simulation.Types@{Assets.Scripts.Simulation.Types}!LPT\_SMPT@{LPT\_SMPT}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_simulation_1_1_types_abb51fa51a77ba502d0768ed91035c7bda335656bc8a6ee16400e89f426971c4e5}\label{namespace_assets_1_1_scripts_1_1_simulation_1_1_types_abb51fa51a77ba502d0768ed91035c7bda335656bc8a6ee16400e89f426971c4e5} 
+LPT\+\_\+\+SMPT&Longest Processing Time with Smallest Most Urgent Remaining Time secondary metric. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{SRT\_SRWT@{SRT\_SRWT}!Assets.Scripts.Simulation.Types@{Assets.Scripts.Simulation.Types}}
+\index{Assets.Scripts.Simulation.Types@{Assets.Scripts.Simulation.Types}!SRT\_SRWT@{SRT\_SRWT}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_simulation_1_1_types_abb51fa51a77ba502d0768ed91035c7bda9207d43f78389b34a02df21e4c33f724}\label{namespace_assets_1_1_scripts_1_1_simulation_1_1_types_abb51fa51a77ba502d0768ed91035c7bda9207d43f78389b34a02df21e4c33f724} 
+SRT\+\_\+\+SRWT&Shortest Remaining Time — primary sort by total remaining work ascending. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{SRT\_SMPT@{SRT\_SMPT}!Assets.Scripts.Simulation.Types@{Assets.Scripts.Simulation.Types}}
+\index{Assets.Scripts.Simulation.Types@{Assets.Scripts.Simulation.Types}!SRT\_SMPT@{SRT\_SMPT}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_simulation_1_1_types_abb51fa51a77ba502d0768ed91035c7bda43f08a6810a17732c5bf5f20644ca7d6}\label{namespace_assets_1_1_scripts_1_1_simulation_1_1_types_abb51fa51a77ba502d0768ed91035c7bda43f08a6810a17732c5bf5f20644ca7d6} 
+SRT\+\_\+\+SMPT&Shortest Remaining Time with Smallest Most Urgent Remaining Time secondary metric. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{LRT\_MMUR@{LRT\_MMUR}!Assets.Scripts.Simulation.Types@{Assets.Scripts.Simulation.Types}}
+\index{Assets.Scripts.Simulation.Types@{Assets.Scripts.Simulation.Types}!LRT\_MMUR@{LRT\_MMUR}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_simulation_1_1_types_abb51fa51a77ba502d0768ed91035c7bda3ead285f50958d8aa6e59cf3fe61b421}\label{namespace_assets_1_1_scripts_1_1_simulation_1_1_types_abb51fa51a77ba502d0768ed91035c7bda3ead285f50958d8aa6e59cf3fe61b421} 
+LRT\+\_\+\+MMUR&Longest Remaining Time — primary sort by total remaining work descending. Equivalent to {\ttfamily most\+\_\+work\+\_\+remaining} in job\+\_\+shop\+\_\+lib. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{SDT\_SRWT@{SDT\_SRWT}!Assets.Scripts.Simulation.Types@{Assets.Scripts.Simulation.Types}}
+\index{Assets.Scripts.Simulation.Types@{Assets.Scripts.Simulation.Types}!SDT\_SRWT@{SDT\_SRWT}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_simulation_1_1_types_abb51fa51a77ba502d0768ed91035c7bdab3532cf9795624618f89ea415c2e173a}\label{namespace_assets_1_1_scripts_1_1_simulation_1_1_types_abb51fa51a77ba502d0768ed91035c7bdab3532cf9795624618f89ea415c2e173a} 
+SDT\+\_\+\+SRWT&Smallest Due Time — FIFO based on arrival order. Equivalent to {\ttfamily first\+\_\+come\+\_\+first\+\_\+served} in job\+\_\+shop\+\_\+lib. \\
+\hline
+
+\end{DoxyEnumFields}

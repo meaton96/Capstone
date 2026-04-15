@@ -25,6 +25,7 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
+  <td id="projectlogo"><img alt="Logo" src="logo_no_text.png"/></td>
   <td id="projectalign">
    <div id="projectname">DRL Scheduling<span id="projectnumber">&#160;0.0.1</span>
    </div>
@@ -93,7 +94,7 @@ $(function(){initNavTree('class_assets_1_1_scripts_1_1_simulation_1_1_simulation
 </div><!--header-->
 <div class="contents">
 
-<p>Central coordinator between the Unity physics simulation and the scheduling agent.  
+<p>The central orchestrator responsible for driving the factory simulation.  
  <a href="#details">More...</a></p>
 <div class="dynheader">
 Inheritance diagram for Assets.Scripts.Simulation.SimulationBridge:</div>
@@ -104,125 +105,110 @@ Inheritance diagram for Assets.Scripts.Simulation.SimulationBridge:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a5d8b43c53cd38a61470816de22f1fd0c" id="r_a5d8b43c53cd38a61470816de22f1fd0c"><td class="memItemLeft"><a id="a5d8b43c53cd38a61470816de22f1fd0c" name="a5d8b43c53cd38a61470816de22f1fd0c"></a>
-void&#160;</td><td class="memItemRight"><b>StartEpisode</b> ()</td></tr>
-<tr class="memdesc:a5d8b43c53cd38a61470816de22f1fd0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads the configured Taillard instance, builds the factory floor, spawns job visuals, and dispatches every job toward its first machine. <br /></td></tr>
-<tr class="memitem:afcfbc4ada3e42cbb7e0a3cdcdb1523f6" id="r_afcfbc4ada3e42cbb7e0a3cdcdb1523f6"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#afcfbc4ada3e42cbb7e0a3cdcdb1523f6">OnJobArrivedInQueue</a> (int machineId, int jobId)</td></tr>
-<tr class="memdesc:afcfbc4ada3e42cbb7e0a3cdcdb1523f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called by <code><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine.html" title="Physical anchor for a machine in the Unity scene.">PhysicalMachine</a></code> when a job enters its trigger zone.  <br /></td></tr>
-<tr class="memitem:aa9b6417eb34dd5001ddbe0377f161330" id="r_aa9b6417eb34dd5001ddbe0377f161330"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#aa9b6417eb34dd5001ddbe0377f161330">OnMachineFinished</a> (int machineId, int jobId)</td></tr>
-<tr class="memdesc:aa9b6417eb34dd5001ddbe0377f161330"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called by <code><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine.html" title="Physical anchor for a machine in the Unity scene.">PhysicalMachine</a></code> when it finishes processing a job.  <br /></td></tr>
-<tr class="memitem:a8d81d85edf95a798dd0e6ee4da84a9c1" id="r_a8d81d85edf95a798dd0e6ee4da84a9c1"><td class="memItemLeft"><a class="el" href="struct_assets_1_1_scripts_1_1_simulation_1_1_step_result.html">StepResult</a>&#160;</td><td class="memItemRight"><a class="el" href="#a8d81d85edf95a798dd0e6ee4da84a9c1">Step</a> (int actionIndex)</td></tr>
-<tr class="memdesc:a8d81d85edf95a798dd0e6ee4da84a9c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Applies the agent's chosen dispatching rule to <code>CurrentDecision</code>.  <br /></td></tr>
-<tr class="memitem:a475fa477cd47decd17d78f587449b70e" id="r_a475fa477cd47decd17d78f587449b70e"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a475fa477cd47decd17d78f587449b70e">StopEpisode</a> ()</td></tr>
-<tr class="memdesc:a475fa477cd47decd17d78f587449b70e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Immediately halts the active episode and tears down all scene objects.  <br /></td></tr>
+<tr class="memitem:aa655d2b03bf2fe7d413f145746416639" id="r_aa655d2b03bf2fe7d413f145746416639"><td class="memItemLeft"><a id="aa655d2b03bf2fe7d413f145746416639" name="aa655d2b03bf2fe7d413f145746416639"></a>
+int&#160;</td><td class="memItemRight"><b>GetRuleIndex</b> (<a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_types.html#abb51fa51a77ba502d0768ed91035c7bd">DispatchingRule</a> rule)</td></tr>
+<tr class="memitem:a09baa864a2987b8fa2a8c71e4e5ca114" id="r_a09baa864a2987b8fa2a8c71e4e5ca114"><td class="memItemLeft"><a id="a09baa864a2987b8fa2a8c71e4e5ca114" name="a09baa864a2987b8fa2a8c71e4e5ca114"></a>
+void&#160;</td><td class="memItemRight"><b>LoadConfig</b> (<a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_f_j_s_s_p_config.html">FJSSPConfig</a> config)</td></tr>
+<tr class="memdesc:a09baa864a2987b8fa2a8c71e4e5ca114"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the active configuration for the next simulation run. <br /></td></tr>
+<tr class="memitem:a61f8fca6f8690ec1b146759a8846557e" id="r_a61f8fca6f8690ec1b146759a8846557e"><td class="memItemLeft"><a id="a61f8fca6f8690ec1b146759a8846557e" name="a61f8fca6f8690ec1b146759a8846557e"></a>
+void&#160;</td><td class="memItemRight"><b>LoadPrebuiltJobs</b> (<a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_f_j_s_s_p_job_definition.html">FJSSPJobDefinition</a>[] jobs)</td></tr>
+<tr class="memdesc:a61f8fca6f8690ec1b146759a8846557e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Injects pre-built job definitions (e.g. from Brandimarte benchmarks). <br /></td></tr>
+<tr class="memitem:a3f8a4b998434e3818102195f7d204c2e" id="r_a3f8a4b998434e3818102195f7d204c2e"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a3f8a4b998434e3818102195f7d204c2e">SpawnFactory</a> ()</td></tr>
+<tr class="memdesc:a3f8a4b998434e3818102195f7d204c2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Physically instantiates the factory floor, machines, and <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> fleet.  <br /></td></tr>
+<tr class="memitem:a5d8b43c53cd38a61470816de22f1fd0c" id="r_a5d8b43c53cd38a61470816de22f1fd0c"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a5d8b43c53cd38a61470816de22f1fd0c">StartEpisode</a> ()</td></tr>
+<tr class="memdesc:a5d8b43c53cd38a61470816de22f1fd0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initiates a new simulation episode.  <br /></td></tr>
+<tr class="memitem:a475fa477cd47decd17d78f587449b70e" id="r_a475fa477cd47decd17d78f587449b70e"><td class="memItemLeft"><a id="a475fa477cd47decd17d78f587449b70e" name="a475fa477cd47decd17d78f587449b70e"></a>
+void&#160;</td><td class="memItemRight"><b>StopEpisode</b> ()</td></tr>
+<tr class="memdesc:a475fa477cd47decd17d78f587449b70e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Aborts the current episode and cleans up all runtime data. <br /></td></tr>
+<tr class="memitem:a8d81d85edf95a798dd0e6ee4da84a9c1" id="r_a8d81d85edf95a798dd0e6ee4da84a9c1"><td class="memItemLeft"><a class="el" href="struct_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_step_result.html">StepResult</a>&#160;</td><td class="memItemRight"><a class="el" href="#a8d81d85edf95a798dd0e6ee4da84a9c1">Step</a> (int actionIndex)</td></tr>
+<tr class="memdesc:a8d81d85edf95a798dd0e6ee4da84a9c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Applies an agent's chosen action to the simulation.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a56bcb917c3507fdbf02a6fbce422c7ca" id="r_a56bcb917c3507fdbf02a6fbce422c7ca"><td class="memItemLeft"><a id="a56bcb917c3507fdbf02a6fbce422c7ca" name="a56bcb917c3507fdbf02a6fbce422c7ca"></a>
-JobManager&#160;</td><td class="memItemRight"><b>JobManager</b></td></tr>
+<tr class="memitem:a79f2c5efd0e4e89ffea9773f560272fd" id="r_a79f2c5efd0e4e89ffea9773f560272fd"><td class="memItemLeft"><a id="a79f2c5efd0e4e89ffea9773f560272fd" name="a79f2c5efd0e4e89ffea9773f560272fd"></a>
+<a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store.html">JobStore</a>&#160;</td><td class="memItemRight"><b>Jobs</b></td></tr>
+<tr class="memitem:a02efeefb3e55800957ddde10ce8a4991" id="r_a02efeefb3e55800957ddde10ce8a4991"><td class="memItemLeft"><a id="a02efeefb3e55800957ddde10ce8a4991" name="a02efeefb3e55800957ddde10ce8a4991"></a>
+int&#160;</td><td class="memItemRight"><b>PreDispatchLeadTime</b> = 15</td></tr>
+<tr class="memitem:a27b1a744c5d24d5d7a448b06582ecba8" id="r_a27b1a744c5d24d5d7a448b06582ecba8"><td class="memItemLeft"><a id="a27b1a744c5d24d5d7a448b06582ecba8" name="a27b1a744c5d24d5d7a448b06582ecba8"></a>
+bool&#160;</td><td class="memItemRight"><b>AutoStartOnPlay</b> = false</td></tr>
 <tr class="memitem:a854e0579243796cdd6203ec77df9c936" id="r_a854e0579243796cdd6203ec77df9c936"><td class="memItemLeft"><a id="a854e0579243796cdd6203ec77df9c936" name="a854e0579243796cdd6203ec77df9c936"></a>
-UnityEvent&lt; <a class="el" href="struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request.html">DecisionRequest</a> &gt;&#160;</td><td class="memItemRight"><b>OnDecisionRequired</b></td></tr>
+UnityEvent&lt; <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_decision_request.html">DecisionRequest</a> &gt;&#160;</td><td class="memItemRight"><b>OnDecisionRequired</b></td></tr>
 <tr class="memitem:a528fc679c192f759c4db16c4ae0ce1fc" id="r_a528fc679c192f759c4db16c4ae0ce1fc"><td class="memItemLeft"><a id="a528fc679c192f759c4db16c4ae0ce1fc" name="a528fc679c192f759c4db16c4ae0ce1fc"></a>
-UnityEvent&lt; <a class="el" href="struct_assets_1_1_scripts_1_1_simulation_1_1_step_result.html">StepResult</a> &gt;&#160;</td><td class="memItemRight"><b>OnStepCompleted</b></td></tr>
+UnityEvent&lt; <a class="el" href="struct_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_step_result.html">StepResult</a> &gt;&#160;</td><td class="memItemRight"><b>OnStepCompleted</b></td></tr>
 <tr class="memitem:aab6fdcaf7d8e8335dffe96b903f62438" id="r_aab6fdcaf7d8e8335dffe96b903f62438"><td class="memItemLeft"><a id="aab6fdcaf7d8e8335dffe96b903f62438" name="aab6fdcaf7d8e8335dffe96b903f62438"></a>
-UnityEvent&lt; <a class="el" href="struct_assets_1_1_scripts_1_1_simulation_1_1_episode_result.html">EpisodeResult</a> &gt;&#160;</td><td class="memItemRight"><b>OnEpisodeFinished</b></td></tr>
+UnityEvent&lt; <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_episode_result.html">EpisodeResult</a> &gt;&#160;</td><td class="memItemRight"><b>OnEpisodeFinished</b></td></tr>
+<tr class="memitem:a041a1e83f2e3ecbaa28eb8be0968054f" id="r_a041a1e83f2e3ecbaa28eb8be0968054f"><td class="memItemLeft"><a id="a041a1e83f2e3ecbaa28eb8be0968054f" name="a041a1e83f2e3ecbaa28eb8be0968054f"></a>
+UnityEvent&#160;</td><td class="memItemRight"><b>OnFactorySpawned</b></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-static-attribs" class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
 <tr class="memitem:a2a7d0f7b394af5369749e8b9243e0d5d" id="r_a2a7d0f7b394af5369749e8b9243e0d5d"><td class="memItemLeft"><a id="a2a7d0f7b394af5369749e8b9243e0d5d" name="a2a7d0f7b394af5369749e8b9243e0d5d"></a>
 static <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html">SimulationBridge</a>&#160;</td><td class="memItemRight"><b>Instance</b></td></tr>
-<tr class="memdesc:a2a7d0f7b394af5369749e8b9243e0d5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Singleton instance accessible from <code><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine.html" title="Physical anchor for a machine in the Unity scene.">PhysicalMachine</a></code> and <code><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_job_manager.html" title="Creates, tracks, and updates all jobs in a simulation episode.">JobManager</a></code>. <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-properties" class="groupheader"><a id="properties" name="properties"></a>
 Properties</h2></td></tr>
-<tr class="memitem:a9e815aa3e00e542bee0641088d719ce3" id="r_a9e815aa3e00e542bee0641088d719ce3"><td class="memItemLeft"><a id="a9e815aa3e00e542bee0641088d719ce3" name="a9e815aa3e00e542bee0641088d719ce3"></a>
-string&#160;</td><td class="memItemRight"><b>LastAppliedRule</b> = &quot;Waiting...&quot;<code> [get]</code></td></tr>
-<tr class="memdesc:a9e815aa3e00e542bee0641088d719ce3"><td class="mdescLeft">&#160;</td><td class="mdescRight">The dispatching rule last applied during <code><a class="el" href="#a8d81d85edf95a798dd0e6ee4da84a9c1" title="Applies the agent&#39;s chosen dispatching rule to CurrentDecision.">Step()</a></code>. <br /></td></tr>
-<tr class="memitem:abee3155323c3454e2614ebb20ea68447" id="r_abee3155323c3454e2614ebb20ea68447"><td class="memItemLeft"><a id="abee3155323c3454e2614ebb20ea68447" name="abee3155323c3454e2614ebb20ea68447"></a>
-float&#160;</td><td class="memItemRight"><b>StartTime</b><code> [get]</code></td></tr>
-<tr class="memdesc:abee3155323c3454e2614ebb20ea68447"><td class="mdescLeft">&#160;</td><td class="mdescRight">Wall-clock time when the current episode started. <br /></td></tr>
-<tr class="memitem:a1c62e42cbd8e907b5840574b571f5c41" id="r_a1c62e42cbd8e907b5840574b571f5c41"><td class="memItemLeft"><a id="a1c62e42cbd8e907b5840574b571f5c41" name="a1c62e42cbd8e907b5840574b571f5c41"></a>
-TextAsset&#160;</td><td class="memItemRight"><b>TaillardJson</b><code> [get, set]</code></td></tr>
-<tr class="memitem:a191796bd323709a5d2f02d2b121187f6" id="r_a191796bd323709a5d2f02d2b121187f6"><td class="memItemLeft"><a id="a191796bd323709a5d2f02d2b121187f6" name="a191796bd323709a5d2f02d2b121187f6"></a>
-static int&#160;</td><td class="memItemRight"><b>ActionCount</b><code> [get]</code></td></tr>
-<tr class="memdesc:a191796bd323709a5d2f02d2b121187f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of discrete actions available to the agent. <br /></td></tr>
+<tr class="memitem:ac128d443400fd3951f13d3178500beff" id="r_ac128d443400fd3951f13d3178500beff"><td class="memItemLeft"><a id="ac128d443400fd3951f13d3178500beff" name="ac128d443400fd3951f13d3178500beff"></a>
+Dictionary&lt; MachineType, List&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><b>CachedMachinesByType</b><code> [get]</code></td></tr>
 <tr class="memitem:adf8da4488fdeb8bb688dd615f21c5ef2" id="r_adf8da4488fdeb8bb688dd615f21c5ef2"><td class="memItemLeft"><a id="adf8da4488fdeb8bb688dd615f21c5ef2" name="adf8da4488fdeb8bb688dd615f21c5ef2"></a>
 int&#160;</td><td class="memItemRight"><b>DecisionCount</b><code> [get]</code></td></tr>
 <tr class="memitem:a904630e03924813c79e016df46629df4" id="r_a904630e03924813c79e016df46629df4"><td class="memItemLeft"><a id="a904630e03924813c79e016df46629df4" name="a904630e03924813c79e016df46629df4"></a>
 bool&#160;</td><td class="memItemRight"><b>IsEpisodeActive</b><code> [get]</code></td></tr>
-<tr class="memitem:a436e69beba136fb322c737933d6e8d79" id="r_a436e69beba136fb322c737933d6e8d79"><td class="memItemLeft"><a id="a436e69beba136fb322c737933d6e8d79" name="a436e69beba136fb322c737933d6e8d79"></a>
-bool&#160;</td><td class="memItemRight"><b>IsDone</b><code> [get]</code></td></tr>
-<tr class="memitem:a47b78b3fb2e0b63dae2f6e11aa7e3b55" id="r_a47b78b3fb2e0b63dae2f6e11aa7e3b55"><td class="memItemLeft"><a id="a47b78b3fb2e0b63dae2f6e11aa7e3b55" name="a47b78b3fb2e0b63dae2f6e11aa7e3b55"></a>
-<a class="el" href="struct_assets_1_1_scripts_1_1_simulation_1_1_decision_request.html">DecisionRequest</a>&#160;</td><td class="memItemRight"><b>CurrentDecision</b><code> [get]</code></td></tr>
-<tr class="memdesc:a47b78b3fb2e0b63dae2f6e11aa7e3b55"><td class="mdescLeft">&#160;</td><td class="mdescRight">The decision context the agent is currently expected to respond to. <br /></td></tr>
-<tr class="memitem:a02ba2996adfc6bd0d53afa83757af5a8" id="r_a02ba2996adfc6bd0d53afa83757af5a8"><td class="memItemLeft"><a id="a02ba2996adfc6bd0d53afa83757af5a8" name="a02ba2996adfc6bd0d53afa83757af5a8"></a>
-bool&#160;</td><td class="memItemRight"><b>IsWaitingForAction</b><code> [get]</code></td></tr>
-<tr class="memdesc:a02ba2996adfc6bd0d53afa83757af5a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">True from the moment <code>OnDecisionRequired</code> fires until <code><a class="el" href="#a8d81d85edf95a798dd0e6ee4da84a9c1" title="Applies the agent&#39;s chosen dispatching rule to CurrentDecision.">Step()</a></code> is called. <br /></td></tr>
+<tr class="memitem:aec96547b0fc1674f21d404f25c6fcc78" id="r_aec96547b0fc1674f21d404f25c6fcc78"><td class="memItemLeft"><a id="aec96547b0fc1674f21d404f25c6fcc78" name="aec96547b0fc1674f21d404f25c6fcc78"></a>
+bool&#160;</td><td class="memItemRight"><b>IsFactoryReady</b><code> [get, set]</code></td></tr>
 <tr class="memitem:a168e40a044c13acbb3ba00642036fe13" id="r_a168e40a044c13acbb3ba00642036fe13"><td class="memItemLeft"><a id="a168e40a044c13acbb3ba00642036fe13" name="a168e40a044c13acbb3ba00642036fe13"></a>
 double&#160;</td><td class="memItemRight"><b>SimTime</b><code> [get]</code></td></tr>
-<tr class="memdesc:a168e40a044c13acbb3ba00642036fe13"><td class="mdescLeft">&#160;</td><td class="mdescRight">Seconds elapsed since the episode started, derived from Unity wall time. <br /></td></tr>
+<tr class="memitem:a16777979817510a8e02709d972c60620" id="r_a16777979817510a8e02709d972c60620"><td class="memItemLeft"><a id="a16777979817510a8e02709d972c60620" name="a16777979817510a8e02709d972c60620"></a>
+<a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_f_j_s_s_p_config.html">FJSSPConfig</a>&#160;</td><td class="memItemRight"><b>CurrentConfig</b><code> [get]</code></td></tr>
+<tr class="memitem:a47b78b3fb2e0b63dae2f6e11aa7e3b55" id="r_a47b78b3fb2e0b63dae2f6e11aa7e3b55"><td class="memItemLeft"><a id="a47b78b3fb2e0b63dae2f6e11aa7e3b55" name="a47b78b3fb2e0b63dae2f6e11aa7e3b55"></a>
+<a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_decision_request.html">DecisionRequest</a>&#160;</td><td class="memItemRight"><b>CurrentDecision</b><code> [get]</code></td></tr>
+<tr class="memitem:a02ba2996adfc6bd0d53afa83757af5a8" id="r_a02ba2996adfc6bd0d53afa83757af5a8"><td class="memItemLeft"><a id="a02ba2996adfc6bd0d53afa83757af5a8" name="a02ba2996adfc6bd0d53afa83757af5a8"></a>
+bool&#160;</td><td class="memItemRight"><b>IsWaitingForAction</b><code> [get]</code></td></tr>
+<tr class="memitem:a9e815aa3e00e542bee0641088d719ce3" id="r_a9e815aa3e00e542bee0641088d719ce3"><td class="memItemLeft"><a id="a9e815aa3e00e542bee0641088d719ce3" name="a9e815aa3e00e542bee0641088d719ce3"></a>
+string&#160;</td><td class="memItemRight"><b>LastAppliedRule</b> = &quot;Waiting...&quot;<code> [get]</code></td></tr>
+<tr class="memitem:a191796bd323709a5d2f02d2b121187f6" id="r_a191796bd323709a5d2f02d2b121187f6"><td class="memItemLeft"><a id="a191796bd323709a5d2f02d2b121187f6" name="a191796bd323709a5d2f02d2b121187f6"></a>
+static int&#160;</td><td class="memItemRight"><b>ActionCount</b><code> [get]</code></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Central coordinator between the Unity physics simulation and the scheduling agent. </p>
-<p>The bridge owns the episode lifecycle: loading a Taillard instance, spawning physical jobs and machines, reacting to physics events from <code><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine.html" title="Physical anchor for a machine in the Unity scene.">PhysicalMachine</a></code>, maintaining a queue of pending scheduling decisions, and surfacing one decision at a time to the <code><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent.html" title="ML-Agents Agent subclass that drives job-shop scheduling decisions.">SchedulingAgent</a></code> via <code>OnDecisionRequired</code>. It also computes per-step rewards and fires <code>OnEpisodeFinished</code> when all jobs are complete. </p>
+<div class="textblock"><p>The central orchestrator responsible for driving the factory simulation. </p>
+<p><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html" title="The central orchestrator responsible for driving the factory simulation.">SimulationBridge</a> implements a strictly centralized state machine. In a single <code>Update</code> tick, it harvests status flags from physical components (<a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_machines.html">Machines</a> and AGVs), manages job transitions, resolves <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> assignments, and interfaces with the <code><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent.html" title="ML-Agents Agent subclass that drives job-shop scheduling decisions.">SchedulingAgent</a></code> to resolve scheduling conflicts. No other component is permitted to mutate <code><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data.html" title="Encapsulates all persistent data, state, and tracking metrics for a single job.">JobData</a></code> state. </p>
 </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
-<a id="afcfbc4ada3e42cbb7e0a3cdcdb1523f6" name="afcfbc4ada3e42cbb7e0a3cdcdb1523f6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afcfbc4ada3e42cbb7e0a3cdcdb1523f6">&#9670;&#160;</a></span>OnJobArrivedInQueue()</h2>
+<a id="a3f8a4b998434e3818102195f7d204c2e" name="a3f8a4b998434e3818102195f7d204c2e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3f8a4b998434e3818102195f7d204c2e">&#9670;&#160;</a></span>SpawnFactory()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void Assets.Scripts.Simulation.SimulationBridge.OnJobArrivedInQueue </td>
+          <td class="memname">void Assets.Scripts.Simulation.SimulationBridge.SpawnFactory </td>
           <td>(</td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>machineId</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td></td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>jobId</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Called by <code><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine.html" title="Physical anchor for a machine in the Unity scene.">PhysicalMachine</a></code> when a job enters its trigger zone. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">machineId</td><td>The machine the job arrived at. </td></tr>
-    <tr><td class="paramname">jobId</td><td>The job that physically arrived. </td></tr>
-  </table>
-  </dd>
-</dl>
+<p>Physically instantiates the factory floor, machines, and <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> fleet. </p>
+<p>Initializes the <code>layoutManager</code>, <code>trafficZoneManager</code>, and <code>agvPool</code> based on the current <code><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_f_j_s_s_p_config.html">FJSSPConfig</a></code>. This must be called before <code>StartEpisode</code>. </p>
 
 </div>
 </div>
-<a id="aa9b6417eb34dd5001ddbe0377f161330" name="aa9b6417eb34dd5001ddbe0377f161330"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa9b6417eb34dd5001ddbe0377f161330">&#9670;&#160;</a></span>OnMachineFinished()</h2>
+<a id="a5d8b43c53cd38a61470816de22f1fd0c" name="a5d8b43c53cd38a61470816de22f1fd0c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5d8b43c53cd38a61470816de22f1fd0c">&#9670;&#160;</a></span>StartEpisode()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void Assets.Scripts.Simulation.SimulationBridge.OnMachineFinished </td>
+          <td class="memname">void Assets.Scripts.Simulation.SimulationBridge.StartEpisode </td>
           <td>(</td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>machineId</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td></td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>jobId</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Called by <code><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine.html" title="Physical anchor for a machine in the Unity scene.">PhysicalMachine</a></code> when it finishes processing a job. </p>
-<p>Updates job tracking, checks for episode completion, dispatches an <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> to carry the job to its next machine, and checks whether the now-idle machine has further jobs waiting. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">machineId</td><td>The machine that finished. </td></tr>
-    <tr><td class="paramname">jobId</td><td>The job that was completed. </td></tr>
-  </table>
-  </dd>
-</dl>
+<p>Initiates a new simulation episode. </p>
+<p>Generates a new set of job definitions, initializes the <code><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store.html" title="Central repository for all active JobData instances in the simulation.">JobStore</a></code>, and resets all performance metrics (makespan, reward, and decision counts). </p>
 
 </div>
 </div>
@@ -233,7 +219,7 @@ double&#160;</td><td class="memItemRight"><b>SimTime</b><code> [get]</code></td>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="struct_assets_1_1_scripts_1_1_simulation_1_1_step_result.html">StepResult</a> Assets.Scripts.Simulation.SimulationBridge.Step </td>
+          <td class="memname"><a class="el" href="struct_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_step_result.html">StepResult</a> Assets.Scripts.Simulation.SimulationBridge.Step </td>
           <td>(</td>
           <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>actionIndex</em></span></td><td>)</td>
           <td></td>
@@ -241,35 +227,14 @@ double&#160;</td><td class="memItemRight"><b>SimTime</b><code> [get]</code></td>
       </table>
 </div><div class="memdoc">
 
-<p>Applies the agent's chosen dispatching rule to <code>CurrentDecision</code>. </p>
-<p>Selects the best job from the machine's physical queue according to the rule identified by <code class="param">actionIndex</code>, starts physical processing on that machine, and returns a <code><a class="el" href="struct_assets_1_1_scripts_1_1_simulation_1_1_step_result.html" title="Result returned by SimulationBridge.Step() after applying a dispatching rule.">StepResult</a></code> carrying the reward.</p>
+<p>Applies an agent's chosen action to the simulation. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">actionIndex</td><td>Index into <code>ActionToRule</code>; selects the dispatching rule. </td></tr>
+    <tr><td class="paramname">actionIndex</td><td>The discrete index of the dispatching rule to apply. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="struct_assets_1_1_scripts_1_1_simulation_1_1_step_result.html" title="Result returned by SimulationBridge.Step() after applying a dispatching rule.">StepResult</a></code> with reward and episode-done flag. </dd></dl>
-
-</div>
-</div>
-<a id="a475fa477cd47decd17d78f587449b70e" name="a475fa477cd47decd17d78f587449b70e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a475fa477cd47decd17d78f587449b70e">&#9670;&#160;</a></span>StopEpisode()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void Assets.Scripts.Simulation.SimulationBridge.StopEpisode </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Immediately halts the active episode and tears down all scene objects. </p>
-<p>Safe to call mid-episode. Notifies the <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_scheduling_agent.html" title="ML-Agents Agent subclass that drives job-shop scheduling decisions.">SchedulingAgent</a> via EndEpisode() so ML-Agents doesn't get stuck waiting for an action. </p>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="struct_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_step_result.html" title="Result returned by SimulationBridge.Step() after applying a dispatching rule.">StepResult</a></code> containing the immediate reward and episode status. </dd></dl>
 
 </div>
 </div>

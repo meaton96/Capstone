@@ -96,30 +96,25 @@ $(function(){initNavTree('classtests_1_1test__architecture_1_1_test_fusion_head.
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a82d7eb60935f682930b5dd5ed706b74c" id="r_a82d7eb60935f682930b5dd5ed706b74c"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a82d7eb60935f682930b5dd5ed706b74c">test_shape</a> (self)</td></tr>
-<tr class="memitem:a12f4e1c616aa23707ffe802b7bcb9eeb" id="r_a12f4e1c616aa23707ffe802b7bcb9eeb"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a12f4e1c616aa23707ffe802b7bcb9eeb">test_domain_rand_training_vs_eval</a> (self)</td></tr>
+<tr class="memitem:af0e08a5de7ebef4ae5820f349075699c" id="r_af0e08a5de7ebef4ae5820f349075699c"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#af0e08a5de7ebef4ae5820f349075699c">test_deterministic_eval</a> (self)</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><pre class="fragment">@brief Tests for @ref FusionHead and @ref DomainRandomization.</pre> </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
-<a id="a12f4e1c616aa23707ffe802b7bcb9eeb" name="a12f4e1c616aa23707ffe802b7bcb9eeb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a12f4e1c616aa23707ffe802b7bcb9eeb">&#9670;&#160;</a></span>test_domain_rand_training_vs_eval()</h2>
+<div class="textblock"><pre class="fragment">@brief Tests for @ref FusionHead.</pre> </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
+<a id="af0e08a5de7ebef4ae5820f349075699c" name="af0e08a5de7ebef4ae5820f349075699c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af0e08a5de7ebef4ae5820f349075699c">&#9670;&#160;</a></span>test_deterministic_eval()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">tests.test_architecture.TestFusionHead.test_domain_rand_training_vs_eval </td>
+          <td class="memname">tests.test_architecture.TestFusionHead.test_deterministic_eval </td>
           <td>(</td>
           <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>self</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
-<pre class="fragment">@brief Dropout and noise should be active in training mode only.
-
-@details
-In training mode with 50% dropout, some output values must be zero.
-In eval mode the layer should act as identity.
-</pre> 
+<pre class="fragment">@brief Eval-mode forward passes on the same input must match.</pre> 
 </div>
 </div>
 <a id="a82d7eb60935f682930b5dd5ed706b74c" name="a82d7eb60935f682930b5dd5ed706b74c"></a>

@@ -1,0 +1,47 @@
+\doxysection{Assets.\+Scripts.\+Simulation.\+Jobs.\+FJSSPJob\+Generator Class Reference}
+\hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_f_j_s_s_p_job_generator}{}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_f_j_s_s_p_job_generator}\index{Assets.Scripts.Simulation.Jobs.FJSSPJobGenerator@{Assets.Scripts.Simulation.Jobs.FJSSPJobGenerator}}
+
+
+Utility class for generating Flexible Job Shop \doxylink{namespace_assets_1_1_scripts_1_1_scheduling}{Scheduling} Problem (FJSSP) instances.  
+
+
+\doxysubsubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_f_j_s_s_p_job_definition}{FJSSPJob\+Definition}}\+[$\,$]\+ \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_f_j_s_s_p_job_generator_a983e96ff38812b488c09f4e3990c680f}{Generate}} (\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_f_j_s_s_p_config}{FJSSPConfig}} config, Dictionary$<$ Machine\+Type, List$<$ int $>$ $>$ machines\+By\+Type)
+\begin{DoxyCompactList}\small\item\em Generates an array of job definitions based on the provided configuration. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Utility class for generating Flexible Job Shop \doxylink{namespace_assets_1_1_scripts_1_1_scheduling}{Scheduling} Problem (FJSSP) instances. 
+
+Provides methods to generate a series of jobs with randomized arrival times, operation sequences, and machine eligibility based on configured probability distributions. 
+
+\label{doc-func-members}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_f_j_s_s_p_job_generator_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_f_j_s_s_p_job_generator_a983e96ff38812b488c09f4e3990c680f}\index{Assets.Scripts.Simulation.Jobs.FJSSPJobGenerator@{Assets.Scripts.Simulation.Jobs.FJSSPJobGenerator}!Generate@{Generate}}
+\index{Generate@{Generate}!Assets.Scripts.Simulation.Jobs.FJSSPJobGenerator@{Assets.Scripts.Simulation.Jobs.FJSSPJobGenerator}}
+\doxysubsubsection{\texorpdfstring{Generate()}{Generate()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_f_j_s_s_p_job_generator_a983e96ff38812b488c09f4e3990c680f} 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_f_j_s_s_p_job_definition}{FJSSPJob\+Definition}}\+[$\,$]\+ Assets.\+Scripts.\+Simulation.\+Jobs.\+FJSSPJob\+Generator.\+Generate (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_f_j_s_s_p_config}{FJSSPConfig}}}]{config}{, }\item[{Dictionary$<$ Machine\+Type, List$<$ int $>$ $>$}]{machines\+By\+Type}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Generates an array of job definitions based on the provided configuration. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em config} & The {\ttfamily \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_f_j_s_s_p_config}{FJSSPConfig}} defining job and operation counts. \\
+\hline
+{\em machines\+By\+Type} & A mapping of machine types to their physical instance IDs.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+An array of {\ttfamily \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_f_j_s_s_p_job_definition}{FJSSPJob\+Definition}} objects sorted by {\ttfamily Arrival\+Time}.
+\end{DoxyReturn}
+For each operation in a job\textquotesingle{}s sequence, this method assigns independent processing times for every eligible machine instance. This creates the "{}flexible"{} aspect of the FJSSP, providing signals for the router to exploit. 
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Simulation/\+\+Jobs/\+FJSSPJob\+Generator.\+cs\end{DoxyCompactItemize}

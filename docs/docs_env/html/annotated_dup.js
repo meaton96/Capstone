@@ -3,20 +3,26 @@ var annotated_dup =
     [ "config", "namespaceconfig.html", [
       [ "EnvConfig", "classconfig_1_1_env_config.html", null ],
       [ "SchedulingMatrixConfig", "classconfig_1_1_scheduling_matrix_config.html", null ],
-      [ "EncoderConfig", "classconfig_1_1_encoder_config.html", "classconfig_1_1_encoder_config" ],
+      [ "EncoderConfig", "classconfig_1_1_encoder_config.html", null ],
       [ "FusionConfig", "classconfig_1_1_fusion_config.html", null ],
       [ "ActorCriticConfig", "classconfig_1_1_actor_critic_config.html", null ],
       [ "PPOConfig", "classconfig_1_1_p_p_o_config.html", null ]
     ] ],
     [ "env", null, [
+      [ "mlagents_envs", null, [
+        [ "UnitySchedulingEnv", "classenv_1_1mlagents__envs_1_1_unity_scheduling_env.html", "classenv_1_1mlagents__envs_1_1_unity_scheduling_env" ]
+      ] ],
       [ "placeholder_env", "namespaceenv_1_1placeholder__env.html", [
         [ "PlaceholderSchedulingEnv", "classenv_1_1placeholder__env_1_1_placeholder_scheduling_env.html", "classenv_1_1placeholder__env_1_1_placeholder_scheduling_env" ],
         [ "VectorizedPlaceholderEnv", "classenv_1_1placeholder__env_1_1_vectorized_placeholder_env.html", "classenv_1_1placeholder__env_1_1_vectorized_placeholder_env" ]
+      ] ],
+      [ "unity_env", "namespaceenv_1_1unity__env.html", [
+        [ "UnitySchedulingEnv", "classenv_1_1unity__env_1_1_unity_scheduling_env.html", "classenv_1_1unity__env_1_1_unity_scheduling_env" ],
+        [ "VectorizedUnityEnv", "classenv_1_1unity__env_1_1_vectorized_unity_env.html", null ]
       ] ]
     ] ],
     [ "models", null, [
       [ "actor_critic", "namespacemodels_1_1actor__critic.html", [
-        [ "DomainRandomization", "classmodels_1_1actor__critic_1_1_domain_randomization.html", "classmodels_1_1actor__critic_1_1_domain_randomization" ],
         [ "FusionHead", "classmodels_1_1actor__critic_1_1_fusion_head.html", "classmodels_1_1actor__critic_1_1_fusion_head" ],
         [ "ActorHead", "classmodels_1_1actor__critic_1_1_actor_head.html", "classmodels_1_1actor__critic_1_1_actor_head" ],
         [ "CriticHead", "classmodels_1_1actor__critic_1_1_critic_head.html", "classmodels_1_1actor__critic_1_1_critic_head" ],
@@ -42,6 +48,7 @@ var annotated_dup =
         [ "TestMLPEncoder", "classtests_1_1test__architecture_1_1_test_m_l_p_encoder.html", "classtests_1_1test__architecture_1_1_test_m_l_p_encoder" ],
         [ "TestMultiModalEncoder", "classtests_1_1test__architecture_1_1_test_multi_modal_encoder.html", "classtests_1_1test__architecture_1_1_test_multi_modal_encoder" ],
         [ "TestFusionHead", "classtests_1_1test__architecture_1_1_test_fusion_head.html", "classtests_1_1test__architecture_1_1_test_fusion_head" ],
+        [ "TestSensorCorruption", "classtests_1_1test__architecture_1_1_test_sensor_corruption.html", "classtests_1_1test__architecture_1_1_test_sensor_corruption" ],
         [ "TestActorCritic", "classtests_1_1test__architecture_1_1_test_actor_critic.html", "classtests_1_1test__architecture_1_1_test_actor_critic" ],
         [ "TestSchedulingNetwork", "classtests_1_1test__architecture_1_1_test_scheduling_network.html", "classtests_1_1test__architecture_1_1_test_scheduling_network" ],
         [ "TestPlaceholderEnv", "classtests_1_1test__architecture_1_1_test_placeholder_env.html", "classtests_1_1test__architecture_1_1_test_placeholder_env" ],

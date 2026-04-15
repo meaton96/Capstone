@@ -100,6 +100,7 @@ Classes</h2></td></tr>
 <tr class="memitem:TestMLPEncoder" id="r_TestMLPEncoder"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="classtests_1_1test__architecture_1_1_test_m_l_p_encoder.html">TestMLPEncoder</a></td></tr>
 <tr class="memitem:TestMultiModalEncoder" id="r_TestMultiModalEncoder"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="classtests_1_1test__architecture_1_1_test_multi_modal_encoder.html">TestMultiModalEncoder</a></td></tr>
 <tr class="memitem:TestFusionHead" id="r_TestFusionHead"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="classtests_1_1test__architecture_1_1_test_fusion_head.html">TestFusionHead</a></td></tr>
+<tr class="memitem:TestSensorCorruption" id="r_TestSensorCorruption"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="classtests_1_1test__architecture_1_1_test_sensor_corruption.html">TestSensorCorruption</a></td></tr>
 <tr class="memitem:TestActorCritic" id="r_TestActorCritic"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="classtests_1_1test__architecture_1_1_test_actor_critic.html">TestActorCritic</a></td></tr>
 <tr class="memitem:TestSchedulingNetwork" id="r_TestSchedulingNetwork"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="classtests_1_1test__architecture_1_1_test_scheduling_network.html">TestSchedulingNetwork</a></td></tr>
 <tr class="memitem:TestPlaceholderEnv" id="r_TestPlaceholderEnv"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="classtests_1_1test__architecture_1_1_test_placeholder_env.html">TestPlaceholderEnv</a></td></tr>
@@ -136,6 +137,11 @@ Tests cover:
   6. Checkpoint save/load round-trip
   7. Deterministic vs stochastic action selection
 
+@par Running
+@code{.sh}
+python -m pytest tests/test_architecture.py -v
+# or without pytest:
+python tests/test_architecture.py
 @endcode
 </pre> </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
 <a id="ad992d23bc2f9be69a3e907e4cf32343e" name="ad992d23bc2f9be69a3e907e4cf32343e"></a>

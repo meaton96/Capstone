@@ -5,6 +5,7 @@ var namespacetests_1_1test__architecture =
     [ "TestMLPEncoder", "classtests_1_1test__architecture_1_1_test_m_l_p_encoder.html", "classtests_1_1test__architecture_1_1_test_m_l_p_encoder" ],
     [ "TestMultiModalEncoder", "classtests_1_1test__architecture_1_1_test_multi_modal_encoder.html", "classtests_1_1test__architecture_1_1_test_multi_modal_encoder" ],
     [ "TestFusionHead", "classtests_1_1test__architecture_1_1_test_fusion_head.html", "classtests_1_1test__architecture_1_1_test_fusion_head" ],
+    [ "TestSensorCorruption", "classtests_1_1test__architecture_1_1_test_sensor_corruption.html", "classtests_1_1test__architecture_1_1_test_sensor_corruption" ],
     [ "TestActorCritic", "classtests_1_1test__architecture_1_1_test_actor_critic.html", "classtests_1_1test__architecture_1_1_test_actor_critic" ],
     [ "TestSchedulingNetwork", "classtests_1_1test__architecture_1_1_test_scheduling_network.html", "classtests_1_1test__architecture_1_1_test_scheduling_network" ],
     [ "TestPlaceholderEnv", "classtests_1_1test__architecture_1_1_test_placeholder_env.html", "classtests_1_1test__architecture_1_1_test_placeholder_env" ],
