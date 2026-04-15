@@ -1,16 +1,18 @@
 # Job Shop Scheduling Simulator
 
-A real-time 3D logistics simulation of the Job Shop Scheduling Problem (JSP), where an AI agent manages a fleet of Automated Guided Vehicles (AGVs) and machine queues to minimize factory makespan.
+A real-time 3D logistics simulation of the Flexible Job Shop Scheduling Problem (FJSP), where an AI agent manages a fleet of Automated Guided Vehicles (AGVs) and machine queues to minimize factory makespan.
 
 **[⬇ Download Latest Release](https://github.com/meaton96/Capstone/releases/latest)**
+
+*Note: Builds are available for both Windows (PC) and macOS.*
 
 ---
 
 ## Getting Started
 
-1. Download and unzip the release.
-2. Run `Capstone.exe`.
-3. Select a **Taillard Instance** from the dropdown.
+1. Download and unzip the release relevant to your operating system.
+2. Run the executable file (`Capstone.exe` for Windows or the `.app` file for macOS).
+3. Configure the simulation parameters via the main menu (problem size, AGV count, etc.).
 4. Click **Start Sim** to begin the episode.
 
 ---
@@ -20,26 +22,28 @@ A real-time 3D logistics simulation of the Job Shop Scheduling Problem (JSP), wh
 The simulation features a dynamic environment governed by physical constraints. Unlike standard scheduling models, jobs in this simulator must be physically transported between workstations.
 
 ### 1. The Machines & Conveyors
-Machines are the core of the factory. Each workstation is equipped with **Conveyor Belts** for incoming and outgoing buffers. 
+The simulator has transitioned to a **Flexible Job Shop (FJSP)** model. To distinguish between different machine capabilities, workstations are now **color-coded by type**.
 
+Each machine features an **Indicator Light** that communicates its current operational state using the following status scheme:
+
+| Indicator Color | Meaning |
+|---|---|
+| Green | **Idle** — Waiting for a job to arrive in the queue. |
+| Yellow | **Busy** — Currently processing a job (progress bar visible). |
+| Orange | **Blocked** — Processing complete, but the outgoing belt is full. |
+| Red | **Failed** — Machine is broken and requires maintenance. |
+| Blue | **Repair** — Maintenance is currently being performed. |
+
+**Workstation Components:**
 * **Incoming Belts:** Hold jobs delivered by AGVs waiting for processing.
 * **Outgoing Belts:** Hold finished jobs waiting for AGV pickup.
 * **Double-Sided Logic:** High-capacity machines (center rows) feature conveyors on both sides to prevent bottlenecks.
-
-**Machine States (Visual Cues):**
-| Colour | Meaning |
-|---|---|
-| 🟢 **Green** | **Idle** — Waiting for a job to arrive in the queue. |
-| 🟡 **Yellow** | **Busy** — Currently processing a job (progress bar visible). |
-| 🟠 **Orange** | **Blocked** — Processing complete, but the outgoing belt is full. |
-| 🔴 **Red** | **Failed** — Machine is broken and requires maintenance. |
-| 🔵 **Blue** | **Repair** — Maintenance is currently being performed. |
 
 ### 2. The AGV Fleet (Automated Guided Vehicles)
 The fleet handles all logistics. These robots follow a **"Turn-Then-Move"** model, meaning they rotate in place to align with their path before driving forward, mimicking real-world industrial AGVs.
 
 * **Pathfinding:** AGVs use BFS (Breadth-First Search) to navigate a directed graph of traffic zones.
-* **Deadlock Prevention:** The floor is divided into reservable **Traffic Zones**. An AGV will only enter a zone (like a narrow aisle) if it has successfully reserved space, ensuring head-on collisions are impossible.
+* **Deadlock Prevention:** The floor is divided into reservable **Traffic Zones**. An AGV will only enter a zone (like a narrow aisle) if it has successfully reserved space, ensuring head-on collisions are avoided.
 * **The Handshake:** When an AGV arrives at a dock, it must align its orientation to the conveyor and wait for a brief **Handshake Duration** to simulate the physical transfer of the job.
 
 ### 3. Traffic Flow
@@ -53,12 +57,12 @@ To maintain efficiency, the factory uses a **One-Way Traffic** system:
 
 ## Job Lifecycle
 Each **Job Token** follows a strict path from entry to exit:
-1.  **Entry:** Jobs spawn at the **Incoming Belt** at the top-left of the factory.
-2.  **Transport:** An AGV picks up the job and navigates to the first machine in its sequence.
-3.  **Queuing:** The job sits on the machine's incoming conveyor.
-4.  **Processing:** The machine pulls the job inside (the token becomes invisible during this phase).
-5.  **Pickup:** Once finished, the job moves to the outgoing conveyor to wait for the next AGV.
-6.  **Exit:** After the final operation, an AGV delivers the job to the **Outgoing Belt** at the bottom-right.
+1. **Entry:** Jobs spawn at the **Incoming Belt** at the top-left of the factory.
+2. **Transport:** An AGV picks up the job and navigates to the first machine in its sequence.
+3. **Queuing:** The job sits on the machine's incoming conveyor.
+4. **Processing:** The machine pulls the job inside (the token becomes invisible during this phase).
+5. **Pickup:** Once finished, the job moves to the outgoing conveyor to wait for the next AGV.
+6. **Exit:** After the final operation, an AGV delivers the job to the **Outgoing Belt** at the bottom-right.
 
 ---
 
@@ -71,18 +75,39 @@ Each **Job Token** follows a strict path from entry to exit:
 - **Jobs Done:** Progress counter for completed vs. total jobs.
 
 ### Controls
-| Control | Action |
+| Key | Action |
 |---|---|
+| **F** | Toggle Free Camera mode. |
+| **W, A, S, D** | Standard Fly Camera movement. |
+| **E / R** | Fly Camera vertical elevation (Up / Down). |
+| **C** | Toggle AGV Follow Camera. |
+| **Left / Right Arrows** | Cycle through the AGV fleet while in Follow Camera mode. |
 | **Speed Slider** | Adjust the time scale (from slow-motion to high-speed). |
 | **Stop Button** | Immediately terminates the episode and returns to the menu. |
-| **Gizmos (Dev Only)** | Visualizes the AGV paths (Green for pickup, Orange for dropoff) and Zone occupancy (Red blocks). |
+| **Gizmos (Dev)** | Visualizes AGV paths (Green for pickup, Orange for dropoff) and Zone occupancy. |
 
 ---
 
-## What is a Taillard Instance?
-The scheduling problems in this simulator utilize the **Taillard (1993)** benchmark dataset. Each instance specifies:
-1.  **Job Count & Machine Count** (e.g., 20 jobs on 15 machines).
-2.  **Processing Order:** The specific sequence of machines each job must visit.
-3.  **Durations:** Exactly how long each operation takes.
+## Testing the Code Base
 
-The goal of the AI agent is to minimize the **Makespan**—the total time taken to move every job through its entire sequence and out of the factory.
+The following sections outline the testing procedures ranging from high-level simulation verification to environment unit testing.
+
+### A. Standalone Simulation Testing
+The simplest method to verify the system is by downloading the standalone build. This allows for manual verification of the simulation logic, agent behavior, and physical constraints.
+* Download the standalone build from the releases section.
+* Modify configurations via the UI (problem size, number of AGVs, etc.) to test scalability.
+* Use the **Fly Camera (F)** and **Follow Camera (C)** controls to inspect AGV pathfinding and machine state transitions.
+
+### B. Python Environment Testing
+To verify the ML-Agents environment and the Python-side logic:
+1. Clone the repository.
+2. Navigate to the environment folder: `cd repo/env`.
+3. Build and start the containers: `docker-compose up --build`.
+4. Execute the test suite within the container:
+   `docker exec -it unity-ml-agents pytest`
+
+### C. Unity Source Testing
+* **TODO:** Implementation of Unity Test Framework for C# scripts.
+
+### D. Bridge Connectivity Testing
+* **TODO:** Implementation of latency and throughput testing for the Unity-to-Python bridge.
