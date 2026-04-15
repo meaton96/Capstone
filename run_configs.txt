@@ -21,3 +21,12 @@
 ./capstone.exe -batchmode -nographics -timescale 100 `
     -benchmarkdir ./BatchConfigs/Benchmarks `
     -outputdir brandimarte
+
+copy:
+
+
+docker run -it `
+  -p 5004:5004 `
+  -v "C:\Users\Mike\Documents\GitHub\Capstone\linux_server:/builds" `
+  env-ml-agents `
+  bash

@@ -158,6 +158,7 @@ namespace Assets.Scripts.Simulation.AGV
         /// at the designated dock until @c FinalizePreDispatch is called.
         public void PreDispatch(int jobId, Vector3 pickupPos, PhysicalMachine source)
         {
+            //Debug.Log("Pre Dispatch");
             if (State != AGVState.Idle && State != AGVState.ReturningToParking)
             {
                 SimLogger.Error($"[AGV {AgvId}] PreDispatch while unavailable (state={State}).");
@@ -243,6 +244,7 @@ namespace Assets.Scripts.Simulation.AGV
                              PhysicalMachine source, PhysicalMachine target,
                              JobVisual visual)
         {
+            //Debug.Log("Dispatch");
             if (State != AGVState.Idle && State != AGVState.ReturningToParking)
             {
                 SimLogger.Error($"[AGV {AgvId}] Dispatch while busy (state={State}).");

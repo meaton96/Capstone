@@ -1,0 +1,179 @@
+\doxysection{Assets.\+Scripts.\+Simulation.\+Jobs.\+Job\+Visual Class Reference}
+\hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual}{}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual}\index{Assets.Scripts.Simulation.Jobs.JobVisual@{Assets.Scripts.Simulation.Jobs.JobVisual}}
+
+
+Visual token representing a single job on the factory floor.  
+
+
+Inheritance diagram for Assets.\+Scripts.\+Simulation.\+Jobs.\+Job\+Visual:\+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual_a04e29362fc7e0ad5ff562b18bd7a0f64}{Initialize}} (int id, int op\+Count)
+\begin{DoxyCompactList}\small\item\em Initializes the visual token and caches rendering components. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual_ade49052a54f2281527f54151d92495a3}{Set\+State}} (\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs_a1a8d173d90cd77c943232a9ddd5b7ba1}{Job\+State}} state)
+\begin{DoxyCompactList}\small\item\em Updates the token\textquotesingle{}s tint to reflect its current lifecycle state. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual_a76a9f9028180943f2bdb81ff50eb3d7a}{Set\+Target\+Position}} (Vector3 world\+Pos)
+\begin{DoxyCompactList}\small\item\em Defines a destination for the smooth interpolation logic. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual_a3a59e3cb4778c41885b3dfb794b40deb}{Snap\+To\+Position}} (Vector3 world\+Pos)
+\begin{DoxyCompactList}\small\item\em Instantly teleports the token to a position with no interpolation. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual_a06971b8721e9271ea786130c8a79a454}{Set\+On\+Conveyor}} (bool on)
+\begin{DoxyCompactList}\small\item\em Toggles external movement control by a conveyor belt. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual_af470dcbcb10e8655dbe9120626869aee}{Attach\+To\+Carrier}} (Transform carrier)
+\begin{DoxyCompactList}\small\item\em Parents the token to an \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} carrier for physical transport. \end{DoxyCompactList}\item 
+void \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual_a0626eca4942274b7c5f033ff80a8c03a}{Detach\+From\+Carrier}} (Vector3 world\+Snap\+Pos)
+\begin{DoxyCompactList}\small\item\em Detaches the token from an \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} and returns it to world space. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual_afa46d5fea60d457ef822e22b6c0eb9c0}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual_afa46d5fea60d457ef822e22b6c0eb9c0} 
+int {\bfseries Job\+Id}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual_a1e988a42ac79ed37dac2fb350bfa1af2}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual_a1e988a42ac79ed37dac2fb350bfa1af2} 
+\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs_a1a8d173d90cd77c943232a9ddd5b7ba1}{Job\+State}} {\bfseries Current\+State}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Visual token representing a single job on the factory floor. 
+
+Smoothly interpolates toward targets set by the Job\+Manager. Movement ownership switches between self-\/driven (lerp), carried (parented to \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV}), or conveyor-\/driven. 
+
+\label{doc-func-members}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual_af470dcbcb10e8655dbe9120626869aee}\index{Assets.Scripts.Simulation.Jobs.JobVisual@{Assets.Scripts.Simulation.Jobs.JobVisual}!AttachToCarrier@{AttachToCarrier}}
+\index{AttachToCarrier@{AttachToCarrier}!Assets.Scripts.Simulation.Jobs.JobVisual@{Assets.Scripts.Simulation.Jobs.JobVisual}}
+\doxysubsubsection{\texorpdfstring{AttachToCarrier()}{AttachToCarrier()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual_af470dcbcb10e8655dbe9120626869aee} 
+void Assets.\+Scripts.\+Simulation.\+Jobs.\+Job\+Visual.\+Attach\+To\+Carrier (\begin{DoxyParamCaption}\item[{Transform}]{carrier}{}\end{DoxyParamCaption})}
+
+
+
+Parents the token to an \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} carrier for physical transport. 
+
+Disables conveyor control and resets interpolation progress. 
+\begin{DoxyParams}{Parameters}
+{\em carrier} & The transform component of the \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV}. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyPostcond}{Postcondition}
+Visual is parented with a fixed local offset (0, 0.\+5, 0). 
+\end{DoxyPostcond}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual_a0626eca4942274b7c5f033ff80a8c03a}\index{Assets.Scripts.Simulation.Jobs.JobVisual@{Assets.Scripts.Simulation.Jobs.JobVisual}!DetachFromCarrier@{DetachFromCarrier}}
+\index{DetachFromCarrier@{DetachFromCarrier}!Assets.Scripts.Simulation.Jobs.JobVisual@{Assets.Scripts.Simulation.Jobs.JobVisual}}
+\doxysubsubsection{\texorpdfstring{DetachFromCarrier()}{DetachFromCarrier()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual_a0626eca4942274b7c5f033ff80a8c03a} 
+void Assets.\+Scripts.\+Simulation.\+Jobs.\+Job\+Visual.\+Detach\+From\+Carrier (\begin{DoxyParamCaption}\item[{Vector3}]{world\+Snap\+Pos}{}\end{DoxyParamCaption})}
+
+
+
+Detaches the token from an \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} and returns it to world space. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em world\+Snap\+Pos} & The world position to snap to upon release. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyPostcond}{Postcondition}
+is\+Carried is false and the visual has no parent transform. 
+\end{DoxyPostcond}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual_a04e29362fc7e0ad5ff562b18bd7a0f64}\index{Assets.Scripts.Simulation.Jobs.JobVisual@{Assets.Scripts.Simulation.Jobs.JobVisual}!Initialize@{Initialize}}
+\index{Initialize@{Initialize}!Assets.Scripts.Simulation.Jobs.JobVisual@{Assets.Scripts.Simulation.Jobs.JobVisual}}
+\doxysubsubsection{\texorpdfstring{Initialize()}{Initialize()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual_a04e29362fc7e0ad5ff562b18bd7a0f64} 
+void Assets.\+Scripts.\+Simulation.\+Jobs.\+Job\+Visual.\+Initialize (\begin{DoxyParamCaption}\item[{int}]{id}{, }\item[{int}]{op\+Count}{}\end{DoxyParamCaption})}
+
+
+
+Initializes the visual token and caches rendering components. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em id} & Zero-\/based job index. \\
+\hline
+{\em op\+Count} & Total number of operations this job must complete. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyPostcond}{Postcondition}
+State is set to Needs\+Routing and target\+Position matches current transform. 
+\end{DoxyPostcond}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual_a06971b8721e9271ea786130c8a79a454}\index{Assets.Scripts.Simulation.Jobs.JobVisual@{Assets.Scripts.Simulation.Jobs.JobVisual}!SetOnConveyor@{SetOnConveyor}}
+\index{SetOnConveyor@{SetOnConveyor}!Assets.Scripts.Simulation.Jobs.JobVisual@{Assets.Scripts.Simulation.Jobs.JobVisual}}
+\doxysubsubsection{\texorpdfstring{SetOnConveyor()}{SetOnConveyor()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual_a06971b8721e9271ea786130c8a79a454} 
+void Assets.\+Scripts.\+Simulation.\+Jobs.\+Job\+Visual.\+Set\+On\+Conveyor (\begin{DoxyParamCaption}\item[{bool}]{on}{}\end{DoxyParamCaption})}
+
+
+
+Toggles external movement control by a conveyor belt. 
+
+While enabled, the token\textquotesingle{}s internal Update loop will not process movement. 
+\begin{DoxyParams}{Parameters}
+{\em on} & True if a Conveyor\+Belt is now driving the transform. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual_ade49052a54f2281527f54151d92495a3}\index{Assets.Scripts.Simulation.Jobs.JobVisual@{Assets.Scripts.Simulation.Jobs.JobVisual}!SetState@{SetState}}
+\index{SetState@{SetState}!Assets.Scripts.Simulation.Jobs.JobVisual@{Assets.Scripts.Simulation.Jobs.JobVisual}}
+\doxysubsubsection{\texorpdfstring{SetState()}{SetState()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual_ade49052a54f2281527f54151d92495a3} 
+void Assets.\+Scripts.\+Simulation.\+Jobs.\+Job\+Visual.\+Set\+State (\begin{DoxyParamCaption}\item[{\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs_a1a8d173d90cd77c943232a9ddd5b7ba1}{Job\+State}}}]{state}{}\end{DoxyParamCaption})}
+
+
+
+Updates the token\textquotesingle{}s tint to reflect its current lifecycle state. 
+
+Uses a Material\+Property\+Block to update the "{}\+\_\+\+Color"{} property without creating material instances. 
+\begin{DoxyParams}{Parameters}
+{\em state} & The target \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs_a1a8d173d90cd77c943232a9ddd5b7ba1}{Job\+State}. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual_a76a9f9028180943f2bdb81ff50eb3d7a}\index{Assets.Scripts.Simulation.Jobs.JobVisual@{Assets.Scripts.Simulation.Jobs.JobVisual}!SetTargetPosition@{SetTargetPosition}}
+\index{SetTargetPosition@{SetTargetPosition}!Assets.Scripts.Simulation.Jobs.JobVisual@{Assets.Scripts.Simulation.Jobs.JobVisual}}
+\doxysubsubsection{\texorpdfstring{SetTargetPosition()}{SetTargetPosition()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual_a76a9f9028180943f2bdb81ff50eb3d7a} 
+void Assets.\+Scripts.\+Simulation.\+Jobs.\+Job\+Visual.\+Set\+Target\+Position (\begin{DoxyParamCaption}\item[{Vector3}]{world\+Pos}{}\end{DoxyParamCaption})}
+
+
+
+Defines a destination for the smooth interpolation logic. 
+
+If the job is carried or on a conveyor, this request is ignored. 
+\begin{DoxyParams}{Parameters}
+{\em world\+Pos} & The target global coordinates. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyPrecond}{Precondition}
+is\+Carried and is\+On\+Conveyor must be false. 
+\end{DoxyPrecond}
+\begin{DoxyPostcond}{Postcondition}
+travel\+Progress is reset to 0 to initiate movement. 
+\end{DoxyPostcond}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual_a3a59e3cb4778c41885b3dfb794b40deb}\index{Assets.Scripts.Simulation.Jobs.JobVisual@{Assets.Scripts.Simulation.Jobs.JobVisual}!SnapToPosition@{SnapToPosition}}
+\index{SnapToPosition@{SnapToPosition}!Assets.Scripts.Simulation.Jobs.JobVisual@{Assets.Scripts.Simulation.Jobs.JobVisual}}
+\doxysubsubsection{\texorpdfstring{SnapToPosition()}{SnapToPosition()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual_a3a59e3cb4778c41885b3dfb794b40deb} 
+void Assets.\+Scripts.\+Simulation.\+Jobs.\+Job\+Visual.\+Snap\+To\+Position (\begin{DoxyParamCaption}\item[{Vector3}]{world\+Pos}{}\end{DoxyParamCaption})}
+
+
+
+Instantly teleports the token to a position with no interpolation. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em world\+Pos} & The destination global coordinates. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyPostcond}{Postcondition}
+travel\+Progress is set to 1 and interpolation is finalized. 
+\end{DoxyPostcond}
+
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Simulation/\+\+Jobs/\+Job\+Visual.\+cs\end{DoxyCompactItemize}

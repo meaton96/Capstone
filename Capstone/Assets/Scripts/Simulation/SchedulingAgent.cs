@@ -16,13 +16,15 @@ namespace Assets.Scripts.Simulation
     {
         [Header("References")]
         [SerializeField] private SimulationBridge bridge;
-        [SerializeField] private int maxCandidateSlots = 3;
+        //  [SerializeField] private int maxCandidateSlots = 3;
+
+        private ObservationBuilder _obsBuilder;
 
         [Header("Observation Config")]
-        [SerializeField] private int maxQueueSlots = 10;
+        // [SerializeField] private int maxQueueSlots = 10;
 
         /// @brief The calculated size of the observation vector for ML-Agents.
-        public int ObservationSize => 5 + 2 + (maxQueueSlots * 2) + 2 + (maxCandidateSlots * 3);
+        public int ObservationSize => ObservationBuilder.TotalObservationSize;
 
         [Header("Heuristic / Baseline Config")]
         [SerializeField] private DispatchingRule heuristicRule = DispatchingRule.SPT_SMPT;
@@ -38,6 +40,7 @@ namespace Assets.Scripts.Simulation
             IsArmed = true;
             EndEpisode();
         }
+
 
         /// @brief Sets the rule used when the agent is running in Heuristic mode.
         ///
@@ -77,7 +80,10 @@ namespace Assets.Scripts.Simulation
             }
         }
 
-        public override void Initialize() { }
+        public override void Initialize()
+        {
+            _obsBuilder = new ObservationBuilder(bridge);
+        }
 
         /// @brief Prepares the simulation and internal state for a new episode.
         ///
@@ -85,6 +91,7 @@ namespace Assets.Scripts.Simulation
         /// modes and triggers @c SimulationBridge.StartEpisode.
         public override void OnEpisodeBegin()
         {
+            Initialize();
             if (bridge != null && bridge.AutoStartOnPlay)
             {
                 IsArmed = true;
@@ -122,6 +129,7 @@ namespace Assets.Scripts.Simulation
         /// to allow external runners to process results before resetting.
         private void HandleEpisodeFinished(EpisodeResult result)
         {
+            SimLogger.Low("[Agent] End Episode");
             if (bridge != null && bridge.AutoStartOnPlay)
                 EndEpisode();
         }
@@ -135,53 +143,19 @@ namespace Assets.Scripts.Simulation
         public override void CollectObservations(VectorSensor sensor)
         {
             DecisionRequest req = bridge.CurrentDecision;
-            if (!bridge.IsEpisodeActive || req == null) { PadZeros(sensor); return; }
-
-            sensor.AddObservation((float)req.Type);
-            sensor.AddObservation((float)req.SimTime);
-            sensor.AddObservation(req.DecisionIndex);
-            sensor.AddObservation(req.TotalJobs);
-            sensor.AddObservation(req.CompletedJobs);
-
-            if (req.Type == DecisionType.Dispatch)
+            if (!bridge.IsEpisodeActive || req == null)
             {
-                sensor.AddObservation(req.MachineId);
-                sensor.AddObservation(req.QueuedJobIds?.Length ?? 0);
-                for (int i = 0; i < maxQueueSlots; i++)
-                {
-                    bool valid = req.QueuedJobIds != null && i < req.QueuedJobIds.Length;
-                    sensor.AddObservation(valid ? req.QueuedJobIds[i] : 0);
-                    sensor.AddObservation(valid ? (float)req.QueuedDurations[i] : 0f);
-                }
-
-                sensor.AddObservation(0);
-                sensor.AddObservation(0);
-                for (int i = 0; i < maxCandidateSlots; i++)
-                {
-                    sensor.AddObservation(0);
-                    sensor.AddObservation(0f);
-                    sensor.AddObservation(0f);
-                }
+                PadZeros(sensor);
+                return;
             }
-            else
-            {
-                sensor.AddObservation(req.JobId);
-                sensor.AddObservation((float)req.RequiredType);
 
-                sensor.AddObservation(0);
-                sensor.AddObservation(0);
-                for (int i = 0; i < maxQueueSlots; i++)
-                {
-                    sensor.AddObservation(0);
-                    sensor.AddObservation(0f);
-                }
-                for (int i = 0; i < maxCandidateSlots; i++)
-                {
-                    bool valid = req.CandidateMachineIds != null && i < req.CandidateMachineIds.Length;
-                    sensor.AddObservation(valid ? req.CandidateMachineIds[i] : 0);
-                    sensor.AddObservation(valid ? req.CandidateJobTimes[i] : 0f);
-                    sensor.AddObservation(valid ? req.CandidateQueueLengths[i] : 0f);
-                }
+            // Get the massive 1D array containing all 5 streams
+            float[] snapshot = _obsBuilder.BuildCompleteSnapshot(req);
+
+            // Feed it to the ML-Agents sensor
+            foreach (float val in snapshot)
+            {
+                sensor.AddObservation(val);
             }
         }
 

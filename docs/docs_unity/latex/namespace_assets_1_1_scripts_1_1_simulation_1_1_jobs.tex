@@ -1,0 +1,83 @@
+\doxysection{Assets.\+Scripts.\+Simulation.\+Jobs Namespace Reference}
+\hypertarget{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs}{}\label{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs}\index{Assets.Scripts.Simulation.Jobs@{Assets.Scripts.Simulation.Jobs}}
+\doxysubsubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class {\bfseries Brandimart\+Loader}
+\begin{DoxyCompactList}\small\item\em Loads Brandimarte FJSP benchmark instances from JSON and produces \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_f_j_s_s_p_job_definition}{FJSSPJob\+Definition}\+[]\+ + \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_f_j_s_s_p_config}{FJSSPConfig} that plug directly into the existing \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge}{Simulation\+Bridge} pipeline. \end{DoxyCompactList}\item 
+class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_f_j_s_s_p_job_definition}{FJSSPJob\+Definition}}
+\item 
+class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_f_j_s_s_p_job_generator}{FJSSPJob\+Generator}}
+\begin{DoxyCompactList}\small\item\em Utility class for generating Flexible Job Shop \doxylink{namespace_assets_1_1_scripts_1_1_scheduling}{Scheduling} Problem (FJSSP) instances. \end{DoxyCompactList}\item 
+class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data}{Job\+Data}}
+\begin{DoxyCompactList}\small\item\em Encapsulates all persistent data, state, and tracking metrics for a single job. \end{DoxyCompactList}\item 
+class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_store}{Job\+Store}}
+\begin{DoxyCompactList}\small\item\em Central repository for all active \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data}{Job\+Data} instances in the simulation. \end{DoxyCompactList}\item 
+class \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual}{Job\+Visual}}
+\begin{DoxyCompactList}\small\item\em Visual token representing a single job on the factory floor. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs_a1a8d173d90cd77c943232a9ddd5b7ba1}{Job\+State}} \{ \newline
+\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs_a1a8d173d90cd77c943232a9ddd5b7ba1a2586384114bd7111aabab7fa524a1ed9}{Needs\+Routing}}
+, \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs_a1a8d173d90cd77c943232a9ddd5b7ba1a84b045b48bd9b027a8dadcb1cf54869d}{Waiting\+For\+Pickup}}
+, \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs_a1a8d173d90cd77c943232a9ddd5b7ba1a42c47d13b71a22dfdc6545ed51d49647}{In\+Transit}}
+, \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs_a1a8d173d90cd77c943232a9ddd5b7ba1a7b2f31b90fe1c2cc33a52233c1925df3}{Queued}}
+, \newline
+\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs_a1a8d173d90cd77c943232a9ddd5b7ba1a643562a9ae7099c8aabfdc93478db117}{Processing}}
+, \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs_a1a8d173d90cd77c943232a9ddd5b7ba1a268ce394e277db759f5d6ee76c59f0e7}{Exited}}
+ \}
+\begin{DoxyCompactList}\small\item\em Defines the distinct lifecycle stages of a job within the factory. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\label{doc-enum-members}
+\Hypertarget{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs_doc-enum-members}
+\doxysubsection{Enumeration Type Documentation}
+\Hypertarget{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs_a1a8d173d90cd77c943232a9ddd5b7ba1}\index{Assets.Scripts.Simulation.Jobs@{Assets.Scripts.Simulation.Jobs}!JobState@{JobState}}
+\index{JobState@{JobState}!Assets.Scripts.Simulation.Jobs@{Assets.Scripts.Simulation.Jobs}}
+\doxysubsubsection{\texorpdfstring{JobState}{JobState}}
+{\footnotesize\ttfamily \label{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs_a1a8d173d90cd77c943232a9ddd5b7ba1} 
+enum \doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs_a1a8d173d90cd77c943232a9ddd5b7ba1}{Assets.\+Scripts.\+Simulation.\+Jobs.\+Job\+State}}}
+
+
+
+Defines the distinct lifecycle stages of a job within the factory. 
+
+A job typically flows from {\ttfamily Needs\+Routing} (spawned) through {\ttfamily Waiting\+For\+Pickup}, {\ttfamily In\+Transit}, {\ttfamily Queued}, and {\ttfamily Processing}. This cycle repeats for each operation until the job finally reaches the {\ttfamily Exited} state. \begin{DoxyEnumFields}[2]{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{NeedsRouting@{NeedsRouting}!Assets.Scripts.Simulation.Jobs@{Assets.Scripts.Simulation.Jobs}}
+\index{Assets.Scripts.Simulation.Jobs@{Assets.Scripts.Simulation.Jobs}!NeedsRouting@{NeedsRouting}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs_a1a8d173d90cd77c943232a9ddd5b7ba1a2586384114bd7111aabab7fa524a1ed9}\label{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs_a1a8d173d90cd77c943232a9ddd5b7ba1a2586384114bd7111aabab7fa524a1ed9} 
+Needs\+Routing&Agent must select the next machine for processing. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{WaitingForPickup@{WaitingForPickup}!Assets.Scripts.Simulation.Jobs@{Assets.Scripts.Simulation.Jobs}}
+\index{Assets.Scripts.Simulation.Jobs@{Assets.Scripts.Simulation.Jobs}!WaitingForPickup@{WaitingForPickup}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs_a1a8d173d90cd77c943232a9ddd5b7ba1a84b045b48bd9b027a8dadcb1cf54869d}\label{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs_a1a8d173d90cd77c943232a9ddd5b7ba1a84b045b48bd9b027a8dadcb1cf54869d} 
+Waiting\+For\+Pickup&Target machine assigned; job is awaiting \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} pickup at its current location. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{InTransit@{InTransit}!Assets.Scripts.Simulation.Jobs@{Assets.Scripts.Simulation.Jobs}}
+\index{Assets.Scripts.Simulation.Jobs@{Assets.Scripts.Simulation.Jobs}!InTransit@{InTransit}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs_a1a8d173d90cd77c943232a9ddd5b7ba1a42c47d13b71a22dfdc6545ed51d49647}\label{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs_a1a8d173d90cd77c943232a9ddd5b7ba1a42c47d13b71a22dfdc6545ed51d49647} 
+In\+Transit&Job is currently being transported by an \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV}. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{Queued@{Queued}!Assets.Scripts.Simulation.Jobs@{Assets.Scripts.Simulation.Jobs}}
+\index{Assets.Scripts.Simulation.Jobs@{Assets.Scripts.Simulation.Jobs}!Queued@{Queued}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs_a1a8d173d90cd77c943232a9ddd5b7ba1a7b2f31b90fe1c2cc33a52233c1925df3}\label{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs_a1a8d173d90cd77c943232a9ddd5b7ba1a7b2f31b90fe1c2cc33a52233c1925df3} 
+Queued&Job has arrived at the target machine and is waiting in the machine\textquotesingle{}s buffer. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{Processing@{Processing}!Assets.Scripts.Simulation.Jobs@{Assets.Scripts.Simulation.Jobs}}
+\index{Assets.Scripts.Simulation.Jobs@{Assets.Scripts.Simulation.Jobs}!Processing@{Processing}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs_a1a8d173d90cd77c943232a9ddd5b7ba1a643562a9ae7099c8aabfdc93478db117}\label{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs_a1a8d173d90cd77c943232a9ddd5b7ba1a643562a9ae7099c8aabfdc93478db117} 
+Processing&Machine is actively performing the scheduled operation on this job. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{Exited@{Exited}!Assets.Scripts.Simulation.Jobs@{Assets.Scripts.Simulation.Jobs}}
+\index{Assets.Scripts.Simulation.Jobs@{Assets.Scripts.Simulation.Jobs}!Exited@{Exited}}
+}\Hypertarget{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs_a1a8d173d90cd77c943232a9ddd5b7ba1a268ce394e277db759f5d6ee76c59f0e7}\label{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs_a1a8d173d90cd77c943232a9ddd5b7ba1a268ce394e277db759f5d6ee76c59f0e7} 
+Exited&All scheduled operations are complete and the job has left the simulation. \\
+\hline
+
+\end{DoxyEnumFields}

@@ -2394,8 +2394,6 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   bridge: {fileID: 1562084950}
-  maxCandidateSlots: 3
-  maxQueueSlots: 10
   heuristicRule: 1
   logDecisions: 1
 --- !u!4 &516692883
@@ -2440,7 +2438,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.ML-Agents::Unity.MLAgents.Policies.BehaviorParameters
   m_BrainParameters:
-    VectorObservationSize: 38
+    VectorObservationSize: 13328
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 0
@@ -2451,7 +2449,7 @@ MonoBehaviour:
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 0}
   m_InferenceDevice: 0
-  m_BehaviorType: 1
+  m_BehaviorType: 0
   m_BehaviorName: SchedulingAgent
   TeamId: 0
   m_UseChildSensors: 1
@@ -7623,7 +7621,7 @@ MonoBehaviour:
   agent: {fileID: 516692882}
   Jobs: {fileID: 263971911}
   PreDispatchLeadTime: 15
-  AutoStartOnPlay: 0
+  AutoStartOnPlay: 1
   OnDecisionRequired:
     m_PersistentCalls:
       m_Calls: []
@@ -7658,7 +7656,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1562084949}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 76c5dace699a14605b6a45f8bfa08cde, type: 3}
   m_Name: 

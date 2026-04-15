@@ -3,50 +3,63 @@
 @brief Configuration for DRL Job-Shop Scheduling Architecture.
 
 @details
-All dimensions match the thesis architecture diagram.  Each dataclass
-groups a related set of hyperparameters and exposes sensible defaults
-so the system can be instantiated with zero arguments.
+All dimensions are synced to the C# ObservationBuilder constants:
+  SpatialGridSize = 64,  SpatialChannels = 3
+  MaxJobs         = 20,  MaxMachines     = 8,  SchedChannels = 3
+  GlobalScalarLength = 10
+  DistanceLength     = 64  (8 x 8)
+  EventFlagLength    = 6
 
-Sensor corruption configuration lives in
-@ref env/sensor_corruption.py alongside the wrapper itself.
+Total flat observation from ML-Agents: 13,328 floats.
 """
 
 from dataclasses import dataclass, field
 from typing import List, Tuple
 
 
+# ─────────────────────────────────────────────────────────────────────
+#  Observation-stream dimensions  (must mirror ObservationBuilder.cs)
+# ─────────────────────────────────────────────────────────────────────
+
+## @brief C#-side constants reproduced here so every Python file can
+##        import a single source of truth.
+GRID_SIZE       = 64
+GRID_CHANNELS   = 3
+MAX_JOBS        = 20
+MAX_MACHINES    = 8      # m — half-columns in the scheduling matrix
+SCHED_CHANNELS  = 3
+GLOBAL_SCALARS  = 10
+DISTANCE_DIM    = MAX_MACHINES * MAX_MACHINES   # 64
+EVENT_FLAGS     = 6
+
+## @brief Byte-lengths of each stream inside the flat vector.
+SPATIAL_LEN     = GRID_CHANNELS * GRID_SIZE * GRID_SIZE   # 12 288
+SCHED_LEN       = MAX_JOBS * (2 * MAX_MACHINES) * SCHED_CHANNELS  # 960
+TOTAL_OBS_SIZE  = SPATIAL_LEN + SCHED_LEN + GLOBAL_SCALARS + DISTANCE_DIM + EVENT_FLAGS  # 13 328
+
+## @brief Slice boundaries inside the flat observation vector.
+SLICE_SPATIAL_END   = SPATIAL_LEN
+SLICE_SCHED_END     = SLICE_SPATIAL_END + SCHED_LEN
+SLICE_SCALARS_END   = SLICE_SCHED_END  + GLOBAL_SCALARS
+SLICE_DIST_END      = SLICE_SCALARS_END + DISTANCE_DIM
+SLICE_FLAGS_END     = SLICE_DIST_END    + EVENT_FLAGS  # == TOTAL_OBS_SIZE
+
+
 @dataclass
 class EnvConfig:
-    """@brief Factory environment parameters.
+    """@brief Factory environment parameters (synced to C# ObservationBuilder)."""
 
-    @details
-    Defines the spatial grid geometry, job/machine ranges, and
-    observation-vector dimensions used by both the placeholder and
-    Unity-backed environments.
-    """
-
-    ## @brief Side length of the square spatial grid (N×N).
-    grid_size: int = 64
-    ## @brief Number of grid channels (Machine, Job, AGV layers).
-    grid_channels: int = 3
-    ## @brief Inclusive (min, max) range for sampling the number of machines per episode.
-    num_machines_range: Tuple[int, int] = (15, 20)
-    ## @brief Inclusive (min, max) range for sampling the number of jobs per episode.
-    num_jobs_range: Tuple[int, int] = (50, 100)
-    ## @brief Maximum operations per machine (O_per_mach = M).
-    ops_per_machine: int = 20
-    ## @brief Inclusive (min, max) range for random processing times.
+    grid_size: int = GRID_SIZE
+    grid_channels: int = GRID_CHANNELS
+    num_machines_range: Tuple[int, int] = (8, MAX_MACHINES)
+    num_jobs_range: Tuple[int, int] = (10, MAX_JOBS)
+    ops_per_machine: int = MAX_MACHINES
     processing_time_range: Tuple[int, int] = (1, 99)
-    ## @brief Number of normalized global scalar features.
-    num_global_scalars: int = 10
-    ## @brief Flattened pairwise distance-matrix length (8×8 = 64).
-    distance_matrix_dim: int = 64
-    ## @brief Number of binary event-flag indicators.
-    num_event_flags: int = 6
-    ## @brief Upper bound on machines for fixed-size tensor allocation.
-    max_machines: int = 20
-    ## @brief Upper bound on jobs for fixed-size tensor allocation.
-    max_jobs: int = 100
+    num_global_scalars: int = GLOBAL_SCALARS
+    distance_matrix_dim: int = DISTANCE_DIM
+    num_event_flags: int = EVENT_FLAGS
+    max_machines: int = MAX_MACHINES
+    max_jobs: int = MAX_JOBS
 
 
 @dataclass
@@ -54,48 +67,29 @@ class SchedulingMatrixConfig:
     """@brief Scheduling-matrix image dimensions: n × 2m × 3.
 
     @details
-    The scheduling matrix is encoded as a 3-channel image where
-    channel 0 holds machine assignments, channel 1 holds processing
-    times, and channel 2 is reserved (zeros).
+    The C# side lays out the matrix in (jobs, cols, channels) order
+    — i.e. HWC.  Python reshapes to (channels, jobs, cols) = CHW
+    for the CNN encoder.
     """
 
-    ## @brief Number of job rows, padded to the maximum (n).
-    max_jobs: int = 100
-    ## @brief Number of columns: 2m where m = @ref EnvConfig.max_machines.
-    max_cols: int = 40
-    ## @brief Image channels (machines, processing time, zeros).
-    channels: int = 3
+    max_jobs: int = MAX_JOBS           # 20  (rows)
+    max_cols: int = 2 * MAX_MACHINES   # 16  (columns)
+    channels: int = SCHED_CHANNELS     # 3
 
 
 @dataclass
 class EncoderConfig:
-    """@brief Encoder output dimensions from the architecture diagram.
+    """@brief Encoder output dimensions from the architecture diagram."""
 
-    @details
-    Each field specifies the embedding dimensionality produced by the
-    corresponding sub-encoder.  The read-only property @ref concat_dim
-    returns the sum of all outputs (464-D by default).
-    """
-
-    ## @brief CNN-SPPF output dim for the Factory Floor grid.
     factory_cnn_out: int = 256
-    ## @brief CNN-SPPF output dim for the Scheduling Matrix image.
     sched_cnn_out: int = 128
-    ## @brief MLP output dim for global context scalars.
     global_mlp_out: int = 32
-    ## @brief MLP output dim for the flattened distance matrix.
     distance_mlp_out: int = 32
-    ## @brief MLP output dim for binary event flags.
     event_embed_out: int = 16
-    ## @brief Max-pool kernel sizes for the SPPF pyramid.
     sppf_pool_sizes: List[int] = field(default_factory=lambda: [5, 9, 13])
 
     @property
     def concat_dim(self) -> int:
-        """@brief Total concatenated dimension: 256 + 128 + 32 + 32 + 16 = 464.
-
-        @return Sum of all sub-encoder output dimensions.
-        """
         return (
             self.factory_cnn_out
             + self.sched_cnn_out
@@ -107,88 +101,47 @@ class EncoderConfig:
 
 @dataclass
 class FusionConfig:
-    """@brief Fusion head parameters.
+    """@brief Fusion head parameters."""
 
-    @details
-    Controls the MLP widths for the projection from the concatenated
-    encoder output to the shared representation consumed by the
-    actor-critic heads.
-
-    """
-
-    ## @brief Input dimensionality (must match @ref EncoderConfig.concat_dim).
     input_dim: int = 464
-    ## @brief Width of the intermediate fully-connected layer.
     hidden_dim: int = 512
-    ## @brief Dimensionality of the fused representation.
     output_dim: int = 256
 
 
 @dataclass
 class ActorCriticConfig:
-    """@brief Actor-Critic head dimensions.
+    """@brief Actor-Critic head dimensions."""
 
-    @details
-    Both the actor and critic share the same hidden-layer width.
-    The number of actions corresponds to the composite PDR rule set.
-    """
-
-    ## @brief Input dimensionality (must match @ref FusionConfig.output_dim).
     input_dim: int = 256
-    ## @brief Width of the hidden layer in both actor and critic.
     hidden_dim: int = 256
-    ## @brief Number of discrete actions (composite PDR rules).
     num_actions: int = 8
 
 
 @dataclass
 class PPOConfig:
-    """@brief PPO training hyperparameters.
+    """@brief PPO training hyperparameters."""
 
-    @details
-    Default values follow standard PPO recommendations
-    (Schulman et al., 2017) with minor adjustments for the
-    scheduling domain.
-    """
-
-    ## @brief Adam learning rate.
     lr: float = 3e-4
-    ## @brief Discount factor for future rewards.
     gamma: float = 0.99
-    ## @brief GAE lambda for advantage estimation.
     gae_lambda: float = 0.95
-    ## @brief PPO clipping range for the surrogate objective.
     clip_epsilon: float = 0.2
-    ## @brief Coefficient for the entropy bonus in the total loss.
     entropy_coef: float = 0.01
-    ## @brief Coefficient for the value-function loss term.
     value_coef: float = 0.5
-    ## @brief Maximum gradient norm for clipping.
     max_grad_norm: float = 0.5
-    ## @brief Number of PPO optimisation epochs per rollout.
     num_epochs: int = 4
-    ## @brief Mini-batch size for each gradient step.
     batch_size: int = 64
-    ## @brief Number of environment steps collected per rollout.
     rollout_length: int = 128
-    ## @brief Number of parallel environments.
     num_envs: int = 8
-    ## @brief Total environment steps for the training run.
     total_timesteps: int = 1_000_000
 
 
-## @brief Composite PDR action labels (Job rule – Machine rule).
-## @details
-## Each entry pairs a job-dispatching rule with a machine-assignment
-## rule.  The index into this list corresponds to the discrete action
-## selected by the actor network.
 PDR_ACTIONS = [
     "SPT-SMPT",
     "SPT-SRWT",
     "LPT-MMUR",
+    "LPT-SMPT",
     "SRT-SRWT",
-    "LRT-SMPT",
-    "LRT-MMUR",
     "SRT-SMPT",
+    "LRT-MMUR",
     "SDT-SRWT",
 ]

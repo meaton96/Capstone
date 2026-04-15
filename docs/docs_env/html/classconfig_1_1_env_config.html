@@ -96,47 +96,30 @@ $(function(){initNavTree('classconfig_1_1_env_config.html','','classconfig_1_1_e
 <tr class="heading"><td colspan="2"><h2 id="header-pub-static-attribs" class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
 <tr class="memitem:ad2f6d7e7f9307931a3cb911331fb5701" id="r_ad2f6d7e7f9307931a3cb911331fb5701"><td class="memItemLeft"><a id="ad2f6d7e7f9307931a3cb911331fb5701" name="ad2f6d7e7f9307931a3cb911331fb5701"></a>
-int&#160;</td><td class="memItemRight"><b>grid_size</b> = 64</td></tr>
-<tr class="memdesc:ad2f6d7e7f9307931a3cb911331fb5701"><td class="mdescLeft">&#160;</td><td class="mdescRight">Side length of the square spatial grid (N×N). <br /></td></tr>
+int&#160;</td><td class="memItemRight"><b>grid_size</b> = <a class="el" href="namespaceconfig.html#a088a6db56820aefb640a804d77aef100">GRID_SIZE</a></td></tr>
 <tr class="memitem:afed5b1216fb552af4fc50ccb0048c029" id="r_afed5b1216fb552af4fc50ccb0048c029"><td class="memItemLeft"><a id="afed5b1216fb552af4fc50ccb0048c029" name="afed5b1216fb552af4fc50ccb0048c029"></a>
-int&#160;</td><td class="memItemRight"><b>grid_channels</b> = 3</td></tr>
-<tr class="memdesc:afed5b1216fb552af4fc50ccb0048c029"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of grid channels (Machine, Job, AGV layers). <br /></td></tr>
+int&#160;</td><td class="memItemRight"><b>grid_channels</b> = GRID_CHANNELS</td></tr>
 <tr class="memitem:adbb3f434b321e5208b381f8deed89103" id="r_adbb3f434b321e5208b381f8deed89103"><td class="memItemLeft"><a id="adbb3f434b321e5208b381f8deed89103" name="adbb3f434b321e5208b381f8deed89103"></a>
-tuple&#160;</td><td class="memItemRight"><b>num_machines_range</b> = (15, 20)</td></tr>
-<tr class="memdesc:adbb3f434b321e5208b381f8deed89103"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inclusive (min, max) range for sampling the number of machines per episode. <br /></td></tr>
+tuple&#160;</td><td class="memItemRight"><b>num_machines_range</b> = (8, MAX_MACHINES)</td></tr>
 <tr class="memitem:a0bd91d1da7f9d8c00ed18688f5657e42" id="r_a0bd91d1da7f9d8c00ed18688f5657e42"><td class="memItemLeft"><a id="a0bd91d1da7f9d8c00ed18688f5657e42" name="a0bd91d1da7f9d8c00ed18688f5657e42"></a>
-tuple&#160;</td><td class="memItemRight"><b>num_jobs_range</b> = (50, 100)</td></tr>
-<tr class="memdesc:a0bd91d1da7f9d8c00ed18688f5657e42"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inclusive (min, max) range for sampling the number of jobs per episode. <br /></td></tr>
+tuple&#160;</td><td class="memItemRight"><b>num_jobs_range</b> = (10, MAX_JOBS)</td></tr>
 <tr class="memitem:a1ef06f26ee9d24d70b1ba46a3e8d683b" id="r_a1ef06f26ee9d24d70b1ba46a3e8d683b"><td class="memItemLeft"><a id="a1ef06f26ee9d24d70b1ba46a3e8d683b" name="a1ef06f26ee9d24d70b1ba46a3e8d683b"></a>
-int&#160;</td><td class="memItemRight"><b>ops_per_machine</b> = 20</td></tr>
-<tr class="memdesc:a1ef06f26ee9d24d70b1ba46a3e8d683b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum operations per machine (O_per_mach = M). <br /></td></tr>
+int&#160;</td><td class="memItemRight"><b>ops_per_machine</b> = MAX_MACHINES</td></tr>
 <tr class="memitem:af0f3bbf78a9b311fbc62435d249986f0" id="r_af0f3bbf78a9b311fbc62435d249986f0"><td class="memItemLeft"><a id="af0f3bbf78a9b311fbc62435d249986f0" name="af0f3bbf78a9b311fbc62435d249986f0"></a>
 tuple&#160;</td><td class="memItemRight"><b>processing_time_range</b> = (1, 99)</td></tr>
-<tr class="memdesc:af0f3bbf78a9b311fbc62435d249986f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inclusive (min, max) range for random processing times. <br /></td></tr>
 <tr class="memitem:a58187e79237c554ef22e80c02aa36066" id="r_a58187e79237c554ef22e80c02aa36066"><td class="memItemLeft"><a id="a58187e79237c554ef22e80c02aa36066" name="a58187e79237c554ef22e80c02aa36066"></a>
-int&#160;</td><td class="memItemRight"><b>num_global_scalars</b> = 10</td></tr>
-<tr class="memdesc:a58187e79237c554ef22e80c02aa36066"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of normalized global scalar features. <br /></td></tr>
+int&#160;</td><td class="memItemRight"><b>num_global_scalars</b> = GLOBAL_SCALARS</td></tr>
 <tr class="memitem:ab2e77e87abf685bb178e844cd9f692e6" id="r_ab2e77e87abf685bb178e844cd9f692e6"><td class="memItemLeft"><a id="ab2e77e87abf685bb178e844cd9f692e6" name="ab2e77e87abf685bb178e844cd9f692e6"></a>
-int&#160;</td><td class="memItemRight"><b>distance_matrix_dim</b> = 64</td></tr>
-<tr class="memdesc:ab2e77e87abf685bb178e844cd9f692e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flattened pairwise distance-matrix length (8×8 = 64). <br /></td></tr>
+int&#160;</td><td class="memItemRight"><b>distance_matrix_dim</b> = DISTANCE_DIM</td></tr>
 <tr class="memitem:a27200f870d99574e7b7a6e526aa458a8" id="r_a27200f870d99574e7b7a6e526aa458a8"><td class="memItemLeft"><a id="a27200f870d99574e7b7a6e526aa458a8" name="a27200f870d99574e7b7a6e526aa458a8"></a>
-int&#160;</td><td class="memItemRight"><b>num_event_flags</b> = 6</td></tr>
-<tr class="memdesc:a27200f870d99574e7b7a6e526aa458a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of binary event-flag indicators. <br /></td></tr>
+int&#160;</td><td class="memItemRight"><b>num_event_flags</b> = EVENT_FLAGS</td></tr>
 <tr class="memitem:aa8e740b66c70d9b6655874cceb268879" id="r_aa8e740b66c70d9b6655874cceb268879"><td class="memItemLeft"><a id="aa8e740b66c70d9b6655874cceb268879" name="aa8e740b66c70d9b6655874cceb268879"></a>
-int&#160;</td><td class="memItemRight"><b>max_machines</b> = 20</td></tr>
-<tr class="memdesc:aa8e740b66c70d9b6655874cceb268879"><td class="mdescLeft">&#160;</td><td class="mdescRight">Upper bound on machines for fixed-size tensor allocation. <br /></td></tr>
+int&#160;</td><td class="memItemRight"><b>max_machines</b> = MAX_MACHINES</td></tr>
 <tr class="memitem:ad86a28256695e5d476afc7dbc7d33f70" id="r_ad86a28256695e5d476afc7dbc7d33f70"><td class="memItemLeft"><a id="ad86a28256695e5d476afc7dbc7d33f70" name="ad86a28256695e5d476afc7dbc7d33f70"></a>
-int&#160;</td><td class="memItemRight"><b>max_jobs</b> = 100</td></tr>
-<tr class="memdesc:ad86a28256695e5d476afc7dbc7d33f70"><td class="mdescLeft">&#160;</td><td class="mdescRight">Upper bound on jobs for fixed-size tensor allocation. <br /></td></tr>
+int&#160;</td><td class="memItemRight"><b>max_jobs</b> = MAX_JOBS</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><pre class="fragment">@brief Factory environment parameters.
-
-@details
-Defines the spatial grid geometry, job/machine ranges, and
-observation-vector dimensions used by both the placeholder and
-Unity-backed environments.
-</pre> </div><hr/>The documentation for this class was generated from the following file:<ul>
+<div class="textblock"><pre class="fragment">@brief Factory environment parameters (synced to C# ObservationBuilder).</pre> </div><hr/>The documentation for this class was generated from the following file:<ul>
 <li>C:/Users/Mike/Documents/GitHub/Capstone/env/<b>config.py</b></li>
 </ul>
 </div><!-- contents -->

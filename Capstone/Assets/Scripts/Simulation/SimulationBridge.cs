@@ -81,6 +81,8 @@ namespace Assets.Scripts.Simulation
         {
             if (Instance != null) { Destroy(this); return; }
             Instance = this;
+
+
         }
 
         private void Start()
@@ -127,6 +129,34 @@ namespace Assets.Scripts.Simulation
         /// and decision counts).
         public void StartEpisode()
         {
+            // ── Diagnostic: dump job states from the previous episode ──
+            if (Jobs != null && Jobs.IsInitialized && Jobs.JobCount > 0)
+            {
+                var counts = new Dictionary<JobState, int>();
+                foreach (var job in Jobs.AllJobs)
+                {
+                    if (!counts.ContainsKey(job.State)) counts[job.State] = 0;
+                    counts[job.State]++;
+                }
+                string summary = string.Join(", ", counts.Select(
+                    kvp => $"{kvp.Key}={kvp.Value}"));
+                SimLogger.Low($"[Orchestrator] Previous episode state at reset: {summary}");
+
+                // Log first stuck job details
+                var stuck = Jobs.AllJobs.FirstOrDefault(j => j.State != JobState.Exited);
+                if (stuck != null)
+                {
+                    SimLogger.Low($"[Orchestrator] Stuck job example: Job {stuck.JobId} " +
+                        $"State={stuck.State} Op={stuck.CurrentOpIndex}/{stuck.TotalOperations} " +
+                        $"Location=M{stuck.LocationMachineId} Target=M{stuck.TargetMachineId} " +
+                        $"AGV={stuck.AssignedAgvId} PreAGV={stuck.PreDispatchedAgvId}");
+                }
+            }
+            if (Time.timeScale - 1 <= .001f)
+            {
+                SimLogger.Low("Setting timescale to 100f");
+                Time.timeScale = 100;
+            }
             if (currentConfig == null)
             {
                 currentConfig = BuildDefaultConfig();
@@ -333,12 +363,22 @@ namespace Assets.Scripts.Simulation
         /// to dispatch idle or returning AGVs to fulfill the transport request.
         private void AssignAGVs()
         {
-            while (true)
+            // Collect candidates upfront to avoid the while/continue pattern
+            // that can infinite-loop if GetNextUnassignedPickup returns the
+            // same pre-dispatched job repeatedly.
+            var candidates = new List<JobData>();
+            foreach (var job in Jobs.AllJobs)
             {
-                JobData job = Jobs.GetNextUnassignedPickup();
-                if (job == null) break;
-                if (job.PreDispatchedAgvId >= 0) continue;
+                if (job.State == JobState.WaitingForPickup
+                    && job.AssignedAgvId == -1
+                    && job.PreDispatchedAgvId < 0)
+                {
+                    candidates.Add(job);
+                }
+            }
 
+            foreach (var job in candidates)
+            {
                 AGVController agv = agvPool.GetAvailableAGV();
                 if (agv == null) break;
 
@@ -658,28 +698,48 @@ namespace Assets.Scripts.Simulation
             int b = 0; for (int i = 1; i < v.Length; i++) if (v[i] > v[b]) b = i; return b;
         }
 
-        /// @brief Generates a standard baseline configuration for the simulation.
-        /// 
-        /// @details Sets up a factory environment with 15 machines (3 per type) 
-        /// and 20 jobs to ensure a consistent environment for benchmarking rules.
         private FJSSPConfig BuildDefaultConfig()
         {
-            var layout = new MachineType[15];
+            var layout = new MachineType[5];
             MachineType[] types = (MachineType[])Enum.GetValues(typeof(MachineType));
-            for (int i = 0; i < 15; i++) layout[i] = types[i / 3];
+            for (int i = 0; i < 5; i++) layout[i] = types[i];
 
             return new FJSSPConfig
             {
                 Seed = 42,
-                JobCount = 20,
-                MachinesPerType = 3,
+                JobCount = 5,
+                MachinesPerType = 1,
                 MachineTypeLayout = layout,
-                MinProcTime = 15f,
-                MaxProcTime = 90f,
-                MinOpsPerJob = 5,
-                MaxOpsPerJob = 8,
+                MinProcTime = 5f,
+                MaxProcTime = 20f,
+                MinOpsPerJob = 2,
+                MaxOpsPerJob = 4,
                 MaxArrivalTime = 0f
             };
         }
+
+        /// @brief Generates a standard baseline configuration for the simulation.
+        /// 
+        /// @details Sets up a factory environment with 15 machines (3 per type) 
+        /// and 20 jobs to ensure a consistent environment for benchmarking rules.
+        // private FJSSPConfig BuildDefaultConfig()
+        // {
+        //     var layout = new MachineType[15];
+        //     MachineType[] types = (MachineType[])Enum.GetValues(typeof(MachineType));
+        //     for (int i = 0; i < 15; i++) layout[i] = types[i / 3];
+
+        //     return new FJSSPConfig
+        //     {
+        //         Seed = 42,
+        //         JobCount = 20,
+        //         MachinesPerType = 3,
+        //         MachineTypeLayout = layout,
+        //         MinProcTime = 15f,
+        //         MaxProcTime = 90f,
+        //         MinOpsPerJob = 5,
+        //         MaxOpsPerJob = 8,
+        //         MaxArrivalTime = 0f
+        //     };
+        // }
     }
 }

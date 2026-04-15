@@ -1,0 +1,57 @@
+\doxysection{Assets.\+Scripts.\+Simulation.\+Headless\+Batch\+Runner Class Reference}
+\hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_headless_batch_runner}{}\label{class_assets_1_1_scripts_1_1_simulation_1_1_headless_batch_runner}\index{Assets.Scripts.Simulation.HeadlessBatchRunner@{Assets.Scripts.Simulation.HeadlessBatchRunner}}
+
+
+Headless batch runner that drives the simulation through multiple configs × rules.  
+
+
+Inheritance diagram for Assets.\+Scripts.\+Simulation.\+Headless\+Batch\+Runner:\+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_assets_1_1_scripts_1_1_simulation_1_1_headless_batch_runner}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_headless_batch_runner_ad9644df10b7d9cf3d590052df776a415}\label{class_assets_1_1_scripts_1_1_simulation_1_1_headless_batch_runner_ad9644df10b7d9cf3d590052df776a415} 
+void {\bfseries Run\+Batch} (\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_f_j_s_s_p_config}{FJSSPConfig}}\+[$\,$]\+ configs, int repeats=1)
+\begin{DoxyCompactList}\small\item\em Starts a batch run from script or a \doxylink{namespace_assets_1_1_scripts_1_1_u_i}{UI} button. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_headless_batch_runner_ac4441ed1eb8a57785d2830af49314baa}\label{class_assets_1_1_scripts_1_1_simulation_1_1_headless_batch_runner_ac4441ed1eb8a57785d2830af49314baa} 
+void {\bfseries Run\+Batch\+From\+File} (string path, int repeats=1)
+\begin{DoxyCompactList}\small\item\em Starts a batch from a JSON file path. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Headless batch runner that drives the simulation through multiple configs × rules. 
+
+Designed for data-\/collection builds. Reads a batch config JSON from the command line, then runs every (config, heuristic\+Rule) combination in series. Each episode\textquotesingle{}s results append to the existing CSV via Results\+Logger.
+
+Usage (headless build):\+ 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{preprocessor}{\#\ Generated\ job\ data\ sweep}}
+\DoxyCodeLine{./capstone.exe\ -\/batchmode\ -\/nographics\ -\/timescale\ 100\ \(\backslash\)}
+\DoxyCodeLine{\ \ \ -\/batchconfig\ ./BatchConfigs/BatchConfigs.json\ \(\backslash\)}
+\DoxyCodeLine{\ \ \ -\/outputdir\ generated\_baseline\ \(\backslash\)}
+\DoxyCodeLine{\ \ \ -\/repeats\ 1}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{preprocessor}{\#\ Single\ Brandimarte\ benchmark}}
+\DoxyCodeLine{./capstone.exe\ -\/batchmode\ -\/nographics\ -\/timescale\ 100\ \(\backslash\)}
+\DoxyCodeLine{\ \ \ -\/benchmark\ ./BatchConfigs/Benchmarks/mk01.json\ \(\backslash\)}
+\DoxyCodeLine{\ \ \ -\/outputdir\ brandimarte\ \(\backslash\)}
+\DoxyCodeLine{\ \ \ -\/repeats\ 3}
+\DoxyCodeLine{}
+\DoxyCodeLine{\textcolor{preprocessor}{\#\ All\ Brandimarte\ benchmarks\ in\ a\ directory}}
+\DoxyCodeLine{./capstone.exe\ -\/batchmode\ -\/nographics\ -\/timescale\ 100\ \(\backslash\)}
+\DoxyCodeLine{\ \ \ -\/benchmarkdir\ ./BatchConfigs/Benchmarks\ \(\backslash\)}
+\DoxyCodeLine{\ \ \ -\/outputdir\ brandimarte\ \(\backslash\)}
+\DoxyCodeLine{\ \ \ -\/repeats\ 1}
+
+\end{DoxyCode}
+
+
+Attach this Mono\+Behaviour to the same Game\+Object as \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge}{Simulation\+Bridge}. In headless mode it takes over episode lifecycle; in editor mode it does nothing unless you manually call \doxylink{class_assets_1_1_scripts_1_1_simulation_1_1_headless_batch_runner_ad9644df10b7d9cf3d590052df776a415}{Run\+Batch()}. 
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Simulation/\+Headless\+Batch\+Runner.\+cs\end{DoxyCompactItemize}

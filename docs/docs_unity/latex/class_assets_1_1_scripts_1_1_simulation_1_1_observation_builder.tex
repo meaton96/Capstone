@@ -1,0 +1,55 @@
+\doxysection{Assets.\+Scripts.\+Simulation.\+Observation\+Builder Class Reference}
+\hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_observation_builder}{}\label{class_assets_1_1_scripts_1_1_simulation_1_1_observation_builder}\index{Assets.Scripts.Simulation.ObservationBuilder@{Assets.Scripts.Simulation.ObservationBuilder}}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_observation_builder_a200295785f13d1d04b4f192786d48530}\label{class_assets_1_1_scripts_1_1_simulation_1_1_observation_builder_a200295785f13d1d04b4f192786d48530} 
+{\bfseries Observation\+Builder} (\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge}{Simulation\+Bridge}} bridge)
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_observation_builder_afb83de34e8eb6c115e6282f5cf7da4ca}\label{class_assets_1_1_scripts_1_1_simulation_1_1_observation_builder_afb83de34e8eb6c115e6282f5cf7da4ca} 
+float\+[$\,$]\+ {\bfseries Build\+Complete\+Snapshot} (\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_decision_request}{Decision\+Request}} current\+Decision)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_observation_builder_a09cab0fdcf528109b222375589dd4f73}\label{class_assets_1_1_scripts_1_1_simulation_1_1_observation_builder_a09cab0fdcf528109b222375589dd4f73} 
+const int {\bfseries Spatial\+Grid\+Size} = 64
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_observation_builder_adf148afee21f31b76fbc769d60c79368}\label{class_assets_1_1_scripts_1_1_simulation_1_1_observation_builder_adf148afee21f31b76fbc769d60c79368} 
+const int {\bfseries Spatial\+Channels} = 3
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_observation_builder_a3d1d4e32b8f13dc8cf45c499d0429ff3}\label{class_assets_1_1_scripts_1_1_simulation_1_1_observation_builder_a3d1d4e32b8f13dc8cf45c499d0429ff3} 
+const int {\bfseries Spatial\+Length} = Spatial\+Grid\+Size \texorpdfstring{$\ast$}{*} Spatial\+Grid\+Size \texorpdfstring{$\ast$}{*} Spatial\+Channels
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_observation_builder_ac6b6a2c9a14868ad479b8019400650cc}\label{class_assets_1_1_scripts_1_1_simulation_1_1_observation_builder_ac6b6a2c9a14868ad479b8019400650cc} 
+const int {\bfseries Max\+Jobs} = 20
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_observation_builder_a5b7da43cfaf439ed6039ce362fcef197}\label{class_assets_1_1_scripts_1_1_simulation_1_1_observation_builder_a5b7da43cfaf439ed6039ce362fcef197} 
+const int {\bfseries Max\+Machines} = 8
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_observation_builder_a89546a271818cd5558e3bf42a93bbb8d}\label{class_assets_1_1_scripts_1_1_simulation_1_1_observation_builder_a89546a271818cd5558e3bf42a93bbb8d} 
+const int {\bfseries Sched\+Channels} = 3
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_observation_builder_ac5097bbc9d60ecf542118fd28ca66920}\label{class_assets_1_1_scripts_1_1_simulation_1_1_observation_builder_ac5097bbc9d60ecf542118fd28ca66920} 
+const int {\bfseries Scheduling\+Length} = Max\+Jobs \texorpdfstring{$\ast$}{*} (2 \texorpdfstring{$\ast$}{*} Max\+Machines) \texorpdfstring{$\ast$}{*} Sched\+Channels
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_observation_builder_ab2db04b8c1f2ffe9f7042b44e1844314}\label{class_assets_1_1_scripts_1_1_simulation_1_1_observation_builder_ab2db04b8c1f2ffe9f7042b44e1844314} 
+const int {\bfseries Global\+Scalar\+Length} = 10
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_observation_builder_a849574c4ce84f07c7e16d0cf41ca1cf3}\label{class_assets_1_1_scripts_1_1_simulation_1_1_observation_builder_a849574c4ce84f07c7e16d0cf41ca1cf3} 
+const int {\bfseries Distance\+Length} = Max\+Machines \texorpdfstring{$\ast$}{*} Max\+Machines
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_observation_builder_a6da64e05cbbc5882293e38043aab5f80}\label{class_assets_1_1_scripts_1_1_simulation_1_1_observation_builder_a6da64e05cbbc5882293e38043aab5f80} 
+const int {\bfseries Event\+Flag\+Length} = 6
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_observation_builder_a8ac2296f8c4155abad2862a81ff85807}\label{class_assets_1_1_scripts_1_1_simulation_1_1_observation_builder_a8ac2296f8c4155abad2862a81ff85807} 
+static int {\bfseries Total\+Observation\+Size}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em Total observation width sent to ML-\/\+Agents. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Simulation/\+Observation\+Builder.\+cs\end{DoxyCompactItemize}

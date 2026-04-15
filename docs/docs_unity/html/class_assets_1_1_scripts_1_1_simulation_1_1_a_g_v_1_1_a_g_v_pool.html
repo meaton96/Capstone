@@ -25,6 +25,7 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
+  <td id="projectlogo"><img alt="Logo" src="logo_no_text.png"/></td>
   <td id="projectalign">
    <div id="projectname">DRL Scheduling<span id="projectnumber">&#160;0.0.1</span>
    </div>
@@ -93,7 +94,7 @@ $(function(){initNavTree('class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_
 </div><!--header-->
 <div class="contents">
 
-<p>Manages a fleet of AGVs, handling initialization, job dispatching, and request queuing.  
+<p>Manages the lifecycle and retrieval of the <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> fleet.  
  <a href="#details">More...</a></p>
 <div class="dynheader">
 Inheritance diagram for Assets.Scripts.Simulation.AGV.AGVPool:</div>
@@ -105,21 +106,29 @@ Inheritance diagram for Assets.Scripts.Simulation.AGV.AGVPool:</div>
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a40e0ea3fcbe549cce0f45ef914e56f04" id="r_a40e0ea3fcbe549cce0f45ef914e56f04"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a40e0ea3fcbe549cce0f45ef914e56f04">InitializeFleet</a> ()</td></tr>
-<tr class="memdesc:a40e0ea3fcbe549cce0f45ef914e56f04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Spawns and prepares the <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> fleet at the designated parking area.  <br /></td></tr>
-<tr class="memitem:a519d9d273599467ffd204138361b246a" id="r_a519d9d273599467ffd204138361b246a"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a519d9d273599467ffd204138361b246a">TryDispatchStaggered</a> (int jobId, Vector3 pickupPos, Vector3 dropoffSlotPos, <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine.html">PhysicalMachine</a> source, <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine.html">PhysicalMachine</a> dropoff, int dispatchIndex)</td></tr>
-<tr class="memdesc:a519d9d273599467ffd204138361b246a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initiates a job dispatch with a calculated delay.  <br /></td></tr>
-<tr class="memitem:a18eedbbe9467a0dd7ba219e912c890a9" id="r_a18eedbbe9467a0dd7ba219e912c890a9"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a18eedbbe9467a0dd7ba219e912c890a9">TryDispatch</a> (int jobId, Vector3 pickupPos, Vector3 dropoffSlotPos, <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine.html">PhysicalMachine</a> source, <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine.html">PhysicalMachine</a> dropoff)</td></tr>
-<tr class="memdesc:a18eedbbe9467a0dd7ba219e912c890a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Attempts to assign a transport task to an available <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> or queues it if the fleet is full.  <br /></td></tr>
+<tr class="memdesc:a40e0ea3fcbe549cce0f45ef914e56f04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroys the existing fleet and instantiates new <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> units.  <br /></td></tr>
+<tr class="memitem:a4998b93161178d0fd3fcc005dc57ff79" id="r_a4998b93161178d0fd3fcc005dc57ff79"><td class="memItemLeft">Vector3&#160;</td><td class="memItemRight"><a class="el" href="#a4998b93161178d0fd3fcc005dc57ff79">GetParkingPosition</a> (int agvId)</td></tr>
+<tr class="memdesc:a4998b93161178d0fd3fcc005dc57ff79"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the designated world-space parking coordinate for a specific <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a>.  <br /></td></tr>
+<tr class="memitem:aa04e12edb6feb27890d73240f07f5693" id="r_aa04e12edb6feb27890d73240f07f5693"><td class="memItemLeft"><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller.html">AGVController</a>&#160;</td><td class="memItemRight"><a class="el" href="#aa04e12edb6feb27890d73240f07f5693">GetIdleAGV</a> ()</td></tr>
+<tr class="memdesc:aa04e12edb6feb27890d73240f07f5693"><td class="mdescLeft">&#160;</td><td class="mdescRight">Locates the first unit that is currently in a strictly <code>Idle</code> state.  <br /></td></tr>
 <tr class="memitem:ab8b052f59c954bb82b2f8426df235116" id="r_ab8b052f59c954bb82b2f8426df235116"><td class="memItemLeft"><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller.html">AGVController</a>&#160;</td><td class="memItemRight"><a class="el" href="#ab8b052f59c954bb82b2f8426df235116">GetAvailableAGV</a> ()</td></tr>
-<tr class="memdesc:ab8b052f59c954bb82b2f8426df235116"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scans the fleet for an <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> in the Idle state.  <br /></td></tr>
+<tr class="memdesc:ab8b052f59c954bb82b2f8426df235116"><td class="mdescLeft">&#160;</td><td class="mdescRight">Identifies the best candidate for a new task dispatch.  <br /></td></tr>
+<tr class="memitem:a9caafb474c1a5d33a014ff73ccdd16d8" id="r_a9caafb474c1a5d33a014ff73ccdd16d8"><td class="memItemLeft"><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller.html">AGVController</a>&#160;</td><td class="memItemRight"><a class="el" href="#a9caafb474c1a5d33a014ff73ccdd16d8">GetPreDispatchedAGV</a> (int jobId)</td></tr>
+<tr class="memdesc:a9caafb474c1a5d33a014ff73ccdd16d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> unit assigned to a specific job ID via pre-dispatch.  <br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-pub-static-attribs" class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
+Static Public Attributes</h2></td></tr>
+<tr class="memitem:a441d47ed894af3cd7b192e58a15757fc" id="r_a441d47ed894af3cd7b192e58a15757fc"><td class="memItemLeft"><a id="a441d47ed894af3cd7b192e58a15757fc" name="a441d47ed894af3cd7b192e58a15757fc"></a>
+static <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_pool.html">AGVPool</a>&#160;</td><td class="memItemRight"><b>Instance</b></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-properties" class="groupheader"><a id="properties" name="properties"></a>
 Properties</h2></td></tr>
-<tr class="memitem:a071d33de635de45e4e32ce679cf4a2f9" id="r_a071d33de635de45e4e32ce679cf4a2f9"><td class="memItemLeft"><a id="a071d33de635de45e4e32ce679cf4a2f9" name="a071d33de635de45e4e32ce679cf4a2f9"></a>
-List&lt; <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller.html">AGVController</a> &gt;&#160;</td><td class="memItemRight"><b>Fleet</b><code> [get]</code></td></tr>
+<tr class="memitem:a973424bcf6fbc86c9784b4513f13e8c8" id="r_a973424bcf6fbc86c9784b4513f13e8c8"><td class="memItemLeft"><a id="a973424bcf6fbc86c9784b4513f13e8c8" name="a973424bcf6fbc86c9784b4513f13e8c8"></a>
+IReadOnlyList&lt; <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller.html">AGVController</a> &gt;&#160;</td><td class="memItemRight"><b>AllAGVs</b><code> [get]</code></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Manages a fleet of AGVs, handling initialization, job dispatching, and request queuing. </p>
+<div class="textblock"><p>Manages the lifecycle and retrieval of the <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> fleet. </p>
+<p>Serves as a centralized container and factory. The <code><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_simulation_bridge.html" title="The central orchestrator responsible for driving the factory simulation.">SimulationBridge</a></code> orchestrator queries this pool to identify and dispatch available units based on their current operational state. </p>
 </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
 <a id="ab8b052f59c954bb82b2f8426df235116" name="ab8b052f59c954bb82b2f8426df235116"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab8b052f59c954bb82b2f8426df235116">&#9670;&#160;</a></span>GetAvailableAGV()</h2>
@@ -136,8 +145,80 @@ List&lt; <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1
       </table>
 </div><div class="memdoc">
 
-<p>Scans the fleet for an <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> in the Idle state. </p>
-<dl class="section return"><dt>Returns</dt><dd>The first available <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller.html" title="AGVController">AGVController</a> found, or null if all are busy. </dd></dl>
+<p>Identifies the best candidate for a new task dispatch. </p>
+<p>Performs a two-pass search: first for units already at their parking stations (<code>Idle</code>), and second for units currently <code>ReturningToParking</code> that can be redirected mid-route to optimize travel time. </p>
+
+</div>
+</div>
+<a id="aa04e12edb6feb27890d73240f07f5693" name="aa04e12edb6feb27890d73240f07f5693"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa04e12edb6feb27890d73240f07f5693">&#9670;&#160;</a></span>GetIdleAGV()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller.html">AGVController</a> Assets.Scripts.Simulation.AGV.AGVPool.GetIdleAGV </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Locates the first unit that is currently in a strictly <code>Idle</code> state. </p>
+<dl class="section return"><dt>Returns</dt><dd>An <code><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller.html" title="Controls navigation and physical movement of a single Automated Guided Vehicle (AGV).">AGVController</a></code> instance if an idle unit exists; otherwise, <code>null</code>. </dd></dl>
+
+</div>
+</div>
+<a id="a4998b93161178d0fd3fcc005dc57ff79" name="a4998b93161178d0fd3fcc005dc57ff79"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4998b93161178d0fd3fcc005dc57ff79">&#9670;&#160;</a></span>GetParkingPosition()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Vector3 Assets.Scripts.Simulation.AGV.AGVPool.GetParkingPosition </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>agvId</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Retrieves the designated world-space parking coordinate for a specific <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">agvId</td><td>The unique identifier of the <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a>. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The <code>Vector3</code> position for the unit's parking station, or <code>Vector3.zero</code> if invalid. </dd></dl>
+
+</div>
+</div>
+<a id="a9caafb474c1a5d33a014ff73ccdd16d8" name="a9caafb474c1a5d33a014ff73ccdd16d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9caafb474c1a5d33a014ff73ccdd16d8">&#9670;&#160;</a></span>GetPreDispatchedAGV()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller.html">AGVController</a> Assets.Scripts.Simulation.AGV.AGVPool.GetPreDispatchedAGV </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>jobId</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Returns the <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> unit assigned to a specific job ID via pre-dispatch. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">jobId</td><td>The identifier of the job to check. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The assigned <code><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller.html" title="Controls navigation and physical movement of a single Automated Guided Vehicle (AGV).">AGVController</a></code> if found; otherwise, <code>null</code>. </dd></dl>
 
 </div>
 </div>
@@ -156,119 +237,13 @@ List&lt; <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1
       </table>
 </div><div class="memdoc">
 
-<p>Spawns and prepares the <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> fleet at the designated parking area. </p>
-<p>Clears any existing fleet instances and the pending request queue. Instances are staggered along the X-axis starting from the layout manager's parking position. Each <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> is initialized with a unique ID and a callback for idle state transitions.</p>
-<dl class="section post"><dt>Postcondition</dt><dd>The fleet list is populated with initialized AGVControllers and pendingRequests is empty. </dd></dl>
-
-</div>
-</div>
-<a id="a18eedbbe9467a0dd7ba219e912c890a9" name="a18eedbbe9467a0dd7ba219e912c890a9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a18eedbbe9467a0dd7ba219e912c890a9">&#9670;&#160;</a></span>TryDispatch()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void Assets.Scripts.Simulation.AGV.AGVPool.TryDispatch </td>
-          <td>(</td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>jobId</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">Vector3</td>          <td class="paramname"><span class="paramname"><em>pickupPos</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">Vector3</td>          <td class="paramname"><span class="paramname"><em>dropoffSlotPos</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine.html">PhysicalMachine</a></td>          <td class="paramname"><span class="paramname"><em>source</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine.html">PhysicalMachine</a></td>          <td class="paramname"><span class="paramname"><em>dropoff</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Attempts to assign a transport task to an available <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> or queues it if the fleet is full. </p>
-<p>Queries the fleet for an idle <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a>. If one is found, the job is dispatched immediately. If all AGVs are busy, the task is stored in pendingRequests to be processed once an <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> becomes idle.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">jobId</td><td>The unique ID of the job. </td></tr>
-    <tr><td class="paramname">pickupPos</td><td>The world position for pickup. </td></tr>
-    <tr><td class="paramname">dropoffSlotPos</td><td>The pre-reserved world position for dropoff. </td></tr>
-    <tr><td class="paramname">source</td><td>The source machine. </td></tr>
-    <tr><td class="paramname">dropoff</td><td>The destination machine.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section post"><dt>Postcondition</dt><dd>Job is either assigned to an <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> or added to the tail of the queue. </dd></dl>
-
-</div>
-</div>
-<a id="a519d9d273599467ffd204138361b246a" name="a519d9d273599467ffd204138361b246a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a519d9d273599467ffd204138361b246a">&#9670;&#160;</a></span>TryDispatchStaggered()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void Assets.Scripts.Simulation.AGV.AGVPool.TryDispatchStaggered </td>
-          <td>(</td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>jobId</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">Vector3</td>          <td class="paramname"><span class="paramname"><em>pickupPos</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">Vector3</td>          <td class="paramname"><span class="paramname"><em>dropoffSlotPos</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine.html">PhysicalMachine</a></td>          <td class="paramname"><span class="paramname"><em>source</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine.html">PhysicalMachine</a></td>          <td class="paramname"><span class="paramname"><em>dropoff</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>dispatchIndex</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Initiates a job dispatch with a calculated delay. </p>
-<p>Offloads the dispatch to a coroutine that waits for a duration based on the <code class="param">dispatchIndex</code>. This prevents CPU spikes caused by multiple AGVs calculating complex BFS paths on the same frame during simulation startup.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">jobId</td><td>The unique ID of the job. </td></tr>
-    <tr><td class="paramname">pickupPos</td><td>The world position for pickup. </td></tr>
-    <tr><td class="paramname">dropoffSlotPos</td><td>The pre-reserved world position for dropoff. </td></tr>
-    <tr><td class="paramname">source</td><td>The source machine. </td></tr>
-    <tr><td class="paramname">dropoff</td><td>The destination machine. </td></tr>
-    <tr><td class="paramname">dispatchIndex</td><td>The index used to calculate the stagger delay (index * 0.3s). </td></tr>
-  </table>
-  </dd>
-</dl>
+<p>Destroys the existing fleet and instantiates new <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> units. </p>
+<p>Calculates parking positions based on the <code>layoutManager</code> coordinates and spawns units in a linear arrangement. Each unit is initialized with a unique ID corresponding to its index in the fleet. </p>
 
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/AGV/<b>AVGPool.cs</b></li>
+<li>C:/Users/Mike/Documents/GitHub/Capstone/Capstone/Assets/Scripts/Simulation/AGV/<b>AGVPool.cs</b></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->

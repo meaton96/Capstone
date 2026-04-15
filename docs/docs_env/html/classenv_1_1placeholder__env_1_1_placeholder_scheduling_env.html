@@ -154,6 +154,9 @@ float&#160;</td><td class="memItemRight"><b>_makespan_estimate</b> = 0.0</td></t
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><pre class="fragment">@brief Synthetic environment that mimics the Unity factory sim's interface.
 
+When you connect the real Unity sim, replace this class with a wrapper
+that translates Unity observations into the same dict format.
+
 @details
 This environment generates random observations that conform to the
 expected observation-space schema, and returns a synthetic shaped

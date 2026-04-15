@@ -19,7 +19,7 @@ namespace Assets.Scripts.Logging
     /// persistent storage of logs to a text file for post-run analysis.
     public static class SimLogger
     {
-        public static LogLevel ActiveLevel = LogLevel.Low;
+        public static LogLevel ActiveLevel = LogLevel.High;
         private static string _filePath;
         private static bool _isFileLoggingEnabled = false;
 
@@ -81,9 +81,10 @@ namespace Assets.Scripts.Logging
         /// to the Unity Console and invoking @c WriteToFile.
         public static void Log(LogLevel level, string message)
         {
+            string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
             if (level <= ActiveLevel)
             {
-                Debug.Log(message);
+                Debug.Log($"{timestamp} | {message}");
                 WriteToFile($"{message}");
             }
         }

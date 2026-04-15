@@ -25,6 +25,7 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
+  <td id="projectlogo"><img alt="Logo" src="logo_no_text.png"/></td>
   <td id="projectalign">
    <div id="projectname">DRL Scheduling<span id="projectnumber">&#160;0.0.1</span>
    </div>
@@ -98,9 +99,29 @@ Classes</h2></td></tr>
 <tr class="memitem:ConveyorBelt" id="r_ConveyorBelt"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt.html">ConveyorBelt</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A linear conveyor belt that smoothly moves job visuals between an input end and an output end.  <a href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_conveyor_belt.html#details">More...</a><br /></td></tr>
 <tr class="memitem:MachineVisual" id="r_MachineVisual"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_machine_visual.html">MachineVisual</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handles all visual feedback for a single machine on the factory floor.  <a href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_machine_visual.html#details">More...</a><br /></td></tr>
 <tr class="memitem:PhysicalMachine" id="r_PhysicalMachine"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine.html">PhysicalMachine</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Physical anchor for a machine in the Unity scene.  <a href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Represents a physical processing unit within the factory simulation.  <a href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine.html#details">More...</a><br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:a10d50e0522783c18d170ce7aa93c4409" id="r_a10d50e0522783c18d170ce7aa93c4409"><td class="memItemLeft"><a id="a10d50e0522783c18d170ce7aa93c4409" name="a10d50e0522783c18d170ce7aa93c4409"></a>enum &#160;</td><td class="memItemRight"><b>MachineState</b> { <br />
+&#160;&#160;<b>Idle</b>
+, <b>Busy</b>
+, <b>Blocked</b>
+, <b>Failed</b>
+, <br />
+&#160;&#160;<b>Repair</b>
+<br />
+ }</td></tr>
+<tr class="memitem:a0b1f257dd10a31cf5232ff9bb82845c3" id="r_a0b1f257dd10a31cf5232ff9bb82845c3"><td class="memItemLeft"><a id="a0b1f257dd10a31cf5232ff9bb82845c3" name="a0b1f257dd10a31cf5232ff9bb82845c3"></a>enum &#160;</td><td class="memItemRight"><b>MachineType</b> { <br />
+&#160;&#160;<b>Mill</b> = 0
+, <b>Lathe</b> = 1
+, <b>Weld</b> = 2
+, <b>Inspect</b> = 3
+, <br />
+&#160;&#160;<b>Assemble</b> = 4
+<br />
+ }</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->

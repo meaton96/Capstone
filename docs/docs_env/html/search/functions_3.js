@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['evaluate_0',['evaluate',['../classmodels_1_1actor__critic_1_1_actor_critic.html#a0968fc4f5934ccde133df23623d8b2d4',1,'models.actor_critic.ActorCritic.evaluate()'],['../classmodels_1_1network_1_1_scheduling_network.html#a5018f17b6437d89fe11ea4203ed73af2',1,'models.network.SchedulingNetwork.evaluate()']]]
+  ['close_0',['close',['../classenv_1_1unity__env_1_1_unity_scheduling_env.html#abeda59dd90efedb45278a9f2d4001ce4',1,'env::unity_env::UnitySchedulingEnv']]],
+  ['compute_5fgae_1',['compute_gae',['../classrollout__buffer_1_1_rollout_buffer.html#ab908e03622818c18f9c114067d627be6',1,'rollout_buffer::RolloutBuffer']]]
 ];

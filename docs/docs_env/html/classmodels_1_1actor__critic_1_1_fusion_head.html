@@ -101,14 +101,11 @@ Inheritance diagram for models.actor_critic.FusionHead:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ab8cc51794fbcff700dcf4f5ae9e463bb" id="r_ab8cc51794fbcff700dcf4f5ae9e463bb"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#ab8cc51794fbcff700dcf4f5ae9e463bb">__init__</a> (self, int input_dim=464, int hidden_dim=512, int <a class="el" href="#a35ed04f1afdb90c921036481f3f9638a">output_dim</a>=256, float dropout_rate=0.1, float noise_std=0.01)</td></tr>
+<tr class="memitem:a761ace5ef12bda830808d25a65c69860" id="r_a761ace5ef12bda830808d25a65c69860"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a761ace5ef12bda830808d25a65c69860">__init__</a> (self, int input_dim=464, int hidden_dim=512, int <a class="el" href="#a35ed04f1afdb90c921036481f3f9638a">output_dim</a>=256)</td></tr>
 <tr class="memitem:a18cbd43ee70cdfe5adb3cd16282cf2d0" id="r_a18cbd43ee70cdfe5adb3cd16282cf2d0"><td class="memItemLeft">torch.Tensor&#160;</td><td class="memItemRight"><a class="el" href="#a18cbd43ee70cdfe5adb3cd16282cf2d0">forward</a> (self, torch.Tensor x)</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:ace5ee3cebca1eba3cb6f962561306153" id="r_ace5ee3cebca1eba3cb6f962561306153"><td class="memItemLeft"><a id="ace5ee3cebca1eba3cb6f962561306153" name="ace5ee3cebca1eba3cb6f962561306153"></a>
-&#160;</td><td class="memItemRight"><b>domain_rand</b> = <a class="el" href="classmodels_1_1actor__critic_1_1_domain_randomization.html">DomainRandomization</a>(dropout_rate, noise_std)</td></tr>
-<tr class="memdesc:ace5ee3cebca1eba3cb6f962561306153"><td class="mdescLeft">&#160;</td><td class="mdescRight">Domain randomization layer applied to the raw concatenation. <br /></td></tr>
 <tr class="memitem:a33cea127d72ad28b9c3003829590562b" id="r_a33cea127d72ad28b9c3003829590562b"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a33cea127d72ad28b9c3003829590562b">net</a></td></tr>
 <tr class="memdesc:a33cea127d72ad28b9c3003829590562b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Two-layer MLP with LayerNorm and SiLU activations.  <br /></td></tr>
 <tr class="memitem:a35ed04f1afdb90c921036481f3f9638a" id="r_a35ed04f1afdb90c921036481f3f9638a"><td class="memItemLeft"><a id="a35ed04f1afdb90c921036481f3f9638a" name="a35ed04f1afdb90c921036481f3f9638a"></a>
@@ -117,16 +114,16 @@ Public Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><pre class="fragment">@brief Fusion MLP: projects concatenated encoder features to a
-shared representation with domain randomization.
+shared representation.
 
 @details
-Architecture: DomainRandomization → Linear(@p input_dim, @p hidden_dim)
-→ LayerNorm → SiLU → Linear(@p hidden_dim, @p output_dim) → LayerNorm → SiLU.
+Architecture: Linear(@p input_dim, @p hidden_dim) → LayerNorm → SiLU
+→ Linear(@p hidden_dim, @p output_dim) → LayerNorm → SiLU.
 
 Default dimensionality: 464-D → 256-D.
 </pre> </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="ab8cc51794fbcff700dcf4f5ae9e463bb" name="ab8cc51794fbcff700dcf4f5ae9e463bb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab8cc51794fbcff700dcf4f5ae9e463bb">&#9670;&#160;</a></span>__init__()</h2>
+<a id="a761ace5ef12bda830808d25a65c69860" name="a761ace5ef12bda830808d25a65c69860"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a761ace5ef12bda830808d25a65c69860">&#9670;&#160;</a></span>__init__()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -149,17 +146,7 @@ Default dimensionality: 464-D → 256-D.
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">int </td>          <td class="paramname"><span class="paramname"><em>output_dim</em></span><span class="paramdefsep"> = </span><span class="paramdefval">256</span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">float </td>          <td class="paramname"><span class="paramname"><em>dropout_rate</em></span><span class="paramdefsep"> = </span><span class="paramdefval">0.1</span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">float </td>          <td class="paramname"><span class="paramname"><em>noise_std</em></span><span class="paramdefsep"> = </span><span class="paramdefval">0.01</span>&#160;)</td>
+          <td class="paramtype">int </td>          <td class="paramname"><span class="paramname"><em>output_dim</em></span><span class="paramdefsep"> = </span><span class="paramdefval">256</span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -169,8 +156,6 @@ Default dimensionality: 464-D → 256-D.
 @param hidden_dim    Width of the intermediate fully-connected layer.
 @param output_dim    Dimensionality of the shared representation
                      fed to actor and critic heads.
-@param dropout_rate  Dropout probability for domain randomization.
-@param noise_std     Gaussian noise std-dev for domain randomization.
 </pre> 
 </div>
 </div>
@@ -193,7 +178,7 @@ Default dimensionality: 464-D → 256-D.
         </tr>
       </table>
 </div><div class="memdoc">
-<pre class="fragment">@brief Project concatenated features through domain randomization and MLP.
+<pre class="fragment">@brief Project concatenated features through the MLP.
 
 @param x  Concatenated encoder output of shape (B, @p input_dim).
 @return Fused representation of shape (B, @ref output_dim).

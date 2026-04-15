@@ -25,6 +25,7 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
+  <td id="projectlogo"><img alt="Logo" src="logo_no_text.png"/></td>
   <td id="projectalign">
    <div id="projectname">DRL Scheduling<span id="projectnumber">&#160;0.0.1</span>
    </div>
@@ -95,45 +96,20 @@ $(function(){initNavTree('namespace_assets_1_1_scripts_1_1_logging.html','','');
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
+<tr class="memitem:ResultsLogger" id="r_ResultsLogger"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><b>ResultsLogger</b></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static utility for persisting simulation performance metrics to CSV. <br /></td></tr>
 <tr class="memitem:SimLogger" id="r_SimLogger"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><b>SimLogger</b></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static levelled logger that gates <code>UnityEngine.Debug</code> output behind a configurable verbosity threshold. <br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static utility for handling console and file-based logging within the simulation. <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
-<tr class="memitem:a0d54784f0b518837381332917d2002ee" id="r_a0d54784f0b518837381332917d2002ee"><td class="memItemLeft">enum &#160;</td><td class="memItemRight"><a class="el" href="#a0d54784f0b518837381332917d2002ee">LogLevel</a> { <a class="el" href="#a0d54784f0b518837381332917d2002eea902b0d55fddef6f8d651fe1035b7d4bd">Error</a> = 0
-, <a class="el" href="#a0d54784f0b518837381332917d2002eea28d0edd045e05cf5af64e35ae0c4c6ef">Low</a> = 1
-, <a class="el" href="#a0d54784f0b518837381332917d2002eea87f8a6ab85c9ced3702b4ea641ad4bb5">Medium</a> = 2
-, <a class="el" href="#a0d54784f0b518837381332917d2002eea655d20c1ca69519ca647684edbb2db35">High</a> = 3
+<tr class="memitem:a0d54784f0b518837381332917d2002ee" id="r_a0d54784f0b518837381332917d2002ee"><td class="memItemLeft"><a id="a0d54784f0b518837381332917d2002ee" name="a0d54784f0b518837381332917d2002ee"></a>enum &#160;</td><td class="memItemRight"><a class="el" href="#a0d54784f0b518837381332917d2002ee">LogLevel</a> { <b>Error</b> = 0
+, <b>Low</b> = 1
+, <b>Medium</b> = 2
+, <b>High</b> = 3
  }</td></tr>
-<tr class="memdesc:a0d54784f0b518837381332917d2002ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Verbosity levels for <code>SimLogger</code>, ordered from least to most detailed.  <a href="#a0d54784f0b518837381332917d2002ee">More...</a><br /></td></tr>
+<tr class="memdesc:a0d54784f0b518837381332917d2002ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defines the verbosity levels for the simulation logger. <br /></td></tr>
 </table>
-<a name="doc-enum-members" id="doc-enum-members"></a><h2 id="header-doc-enum-members" class="groupheader">Enumeration Type Documentation</h2>
-<a id="a0d54784f0b518837381332917d2002ee" name="a0d54784f0b518837381332917d2002ee"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0d54784f0b518837381332917d2002ee">&#9670;&#160;</a></span>LogLevel</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">enum <a class="el" href="#a0d54784f0b518837381332917d2002ee">Assets.Scripts.Logging.LogLevel</a></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Verbosity levels for <code>SimLogger</code>, ordered from least to most detailed. </p>
-<table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a0d54784f0b518837381332917d2002eea902b0d55fddef6f8d651fe1035b7d4bd" name="a0d54784f0b518837381332917d2002eea902b0d55fddef6f8d651fe1035b7d4bd"></a>Error&#160;</td><td class="fielddoc"><p>Critical errors only. Always printed regardless of the active level. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="a0d54784f0b518837381332917d2002eea28d0edd045e05cf5af64e35ae0c4c6ef" name="a0d54784f0b518837381332917d2002eea28d0edd045e05cf5af64e35ae0c4c6ef"></a>Low&#160;</td><td class="fielddoc"><p>High-level milestones: episode start/end, makespan, decision count. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="a0d54784f0b518837381332917d2002eea87f8a6ab85c9ced3702b4ea641ad4bb5" name="a0d54784f0b518837381332917d2002eea87f8a6ab85c9ced3702b4ea641ad4bb5"></a>Medium&#160;</td><td class="fielddoc"><p>Per-decision and per-job state transitions. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="a0d54784f0b518837381332917d2002eea655d20c1ca69519ca647684edbb2db35" name="a0d54784f0b518837381332917d2002eea655d20c1ca69519ca647684edbb2db35"></a>High&#160;</td><td class="fielddoc"><p>Frame-level detail: AGV dispatches, queue arrivals, progress ticks. </p>
-</td></tr>
-</table>
-
-</div>
-</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <div id="page-nav" class="page-nav-panel">

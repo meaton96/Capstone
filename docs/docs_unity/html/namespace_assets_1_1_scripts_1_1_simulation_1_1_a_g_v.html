@@ -25,6 +25,7 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
+  <td id="projectlogo"><img alt="Logo" src="logo_no_text.png"/></td>
   <td id="projectalign">
    <div id="projectname">DRL Scheduling<span id="projectnumber">&#160;0.0.1</span>
    </div>
@@ -96,24 +97,22 @@ $(function(){initNavTree('namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.
 <tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:AGVController" id="r_AGVController"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller.html">AGVController</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Controls navigation, job assignment, and lifecycle of an <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a>.  <a href="class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Controls navigation and physical movement of a single Automated Guided Vehicle (<a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a>).  <a href="class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_controller.html#details">More...</a><br /></td></tr>
 <tr class="memitem:AGVPool" id="r_AGVPool"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_pool.html">AGVPool</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Manages a fleet of AGVs, handling initialization, job dispatching, and request queuing.  <a href="class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_pool.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Manages the lifecycle and retrieval of the <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> fleet.  <a href="class_assets_1_1_scripts_1_1_simulation_1_1_a_g_v_1_1_a_g_v_pool.html#details">More...</a><br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
-<tr class="memitem:a1d94b34561483c4dc3c4673fd25db755" id="r_a1d94b34561483c4dc3c4673fd25db755"><td class="memItemLeft"><a id="a1d94b34561483c4dc3c4673fd25db755" name="a1d94b34561483c4dc3c4673fd25db755"></a>enum &#160;</td><td class="memItemRight"><b>AGVState</b> { <br />
+<tr class="memitem:a1d94b34561483c4dc3c4673fd25db755" id="r_a1d94b34561483c4dc3c4673fd25db755"><td class="memItemLeft"><a id="a1d94b34561483c4dc3c4673fd25db755" name="a1d94b34561483c4dc3c4673fd25db755"></a>enum &#160;</td><td class="memItemRight"><a class="el" href="#a1d94b34561483c4dc3c4673fd25db755">AGVState</a> { <br />
 &#160;&#160;<b>Idle</b>
-, <b>NavigatingToPickup</b>
-, <b>AligningForPickup</b>
-, <b>ExecutingPickup</b>
+, <b>MovingToPickup</b>
+, <b>MovingToDropoff</b>
+, <b>ReturningToParking</b>
 , <br />
-&#160;&#160;<b>NavigatingToDropoff</b>
-, <b>AligningForDropoff</b>
-, <b>ExecutingDropoff</b>
-, <b>WaitingForZone</b>
+&#160;&#160;<b>MovingToPrePickup</b>
 <br />
  }</td></tr>
+<tr class="memdesc:a1d94b34561483c4dc3c4673fd25db755"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defines the operational states of an <a class="el" href="namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v.html">AGV</a> during its lifecycle. <br /></td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->

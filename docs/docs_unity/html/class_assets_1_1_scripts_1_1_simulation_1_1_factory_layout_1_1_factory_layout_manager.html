@@ -25,6 +25,7 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
+  <td id="projectlogo"><img alt="Logo" src="logo_no_text.png"/></td>
   <td id="projectalign">
    <div id="projectname">DRL Scheduling<span id="projectnumber">&#160;0.0.1</span>
    </div>
@@ -104,8 +105,8 @@ Inheritance diagram for Assets.Scripts.Simulation.FactoryLayout.FactoryLayoutMan
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ac42b12bf72a7895deee455eaeb293246" id="r_ac42b12bf72a7895deee455eaeb293246"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#ac42b12bf72a7895deee455eaeb293246">BuildFloor</a> (<a class="el" href="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator.html">DESSimulator</a> simulator)</td></tr>
-<tr class="memdesc:ac42b12bf72a7895deee455eaeb293246"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates the factory floor, places machines, and builds navigation boundaries.  <br /></td></tr>
+<tr class="memitem:a58d24c982978f98755d3242100b7b69f" id="r_a58d24c982978f98755d3242100b7b69f"><td class="memItemLeft">Dictionary&lt; MachineType, List&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a58d24c982978f98755d3242100b7b69f">BuildFloor</a> (<a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_f_j_s_s_p_config.html">FJSSPConfig</a> config)</td></tr>
+<tr class="memdesc:a58d24c982978f98755d3242100b7b69f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates the factory floor, places machines, and builds navigation boundaries.  <br /></td></tr>
 <tr class="memitem:a3c72974403f8f75aad2ddb0fbe08dcb0" id="r_a3c72974403f8f75aad2ddb0fbe08dcb0"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a3c72974403f8f75aad2ddb0fbe08dcb0">ClearFloor</a> ()</td></tr>
 <tr class="memdesc:a3c72974403f8f75aad2ddb0fbe08dcb0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroys all spawned factory components and clears memory.  <br /></td></tr>
 <tr class="memitem:a860cdd2221c4bc95beb3f76549875b4e" id="r_a860cdd2221c4bc95beb3f76549875b4e"><td class="memItemLeft"><a id="a860cdd2221c4bc95beb3f76549875b4e" name="a860cdd2221c4bc95beb3f76549875b4e"></a>
@@ -177,16 +178,16 @@ Vector2&#160;</td><td class="memItemRight"><b>FloorSize</b><code> [get]</code></
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Builds an aisle-based factory floor with one-way traffic lanes, physical wall colliders, and zone markers. </p>
 </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
-<a id="ac42b12bf72a7895deee455eaeb293246" name="ac42b12bf72a7895deee455eaeb293246"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac42b12bf72a7895deee455eaeb293246">&#9670;&#160;</a></span>BuildFloor()</h2>
+<a id="a58d24c982978f98755d3242100b7b69f" name="a58d24c982978f98755d3242100b7b69f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a58d24c982978f98755d3242100b7b69f">&#9670;&#160;</a></span>BuildFloor()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void Assets.Scripts.Simulation.FactoryLayout.FactoryLayoutManager.BuildFloor </td>
+          <td class="memname">Dictionary&lt; MachineType, List&lt; int &gt; &gt; Assets.Scripts.Simulation.FactoryLayout.FactoryLayoutManager.BuildFloor </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="class_assets_1_1_scripts_1_1_scheduling_1_1_core_1_1_d_e_s_simulator.html">DESSimulator</a></td>          <td class="paramname"><span class="paramname"><em>simulator</em></span></td><td>)</td>
+          <td class="paramtype"><a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_types_1_1_f_j_s_s_p_config.html">FJSSPConfig</a></td>          <td class="paramname"><span class="paramname"><em>config</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -247,7 +248,7 @@ Vector2&#160;</td><td class="memItemRight"><b>FloorSize</b><code> [get]</code></
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>The <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine.html" title="Physical anchor for a machine in the Unity scene.">PhysicalMachine</a> component or null if out of bounds. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>The <a class="el" href="class_assets_1_1_scripts_1_1_simulation_1_1_machines_1_1_physical_machine.html" title="Represents a physical processing unit within the factory simulation.">PhysicalMachine</a> component or null if out of bounds. </dd></dl>
 
 </div>
 </div>

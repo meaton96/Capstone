@@ -3,13 +3,24 @@
 @brief PPO Training Loop for the DRL Scheduling Network.
 
 @details
-This script runs end-to-end Proximal Policy Optimisation (PPO) training
-with the placeholder environment.  It follows the standard collect →
-compute GAE → update cycle and logs per-update statistics to stdout.
+Supports two environment backends:
+  --unity          Connect to Unity Editor or built executable.
+  (default)        Use the placeholder synthetic environment.
+
+Domain randomization (noise/dropout) is handled on the C# side by
+ObservationBuilder.ApplyDomainRandomization, so no Python-side sensor
+corruption wrapper is needed.
 
 @par Usage
 @code{.sh}
-python train.py --total-timesteps 50000 --num-envs 4 --device cpu
+# Placeholder (no Unity needed):
+python train.py --total-timesteps 50000 --num-envs 4
+
+# Unity Editor (single env):
+python train.py --unity --num-envs 1
+
+# Built Unity executable (parallel):
+python train.py --unity --unity-path ./Build/Factory.x86_64 --num-envs 4
 @endcode
 """
 
@@ -28,44 +39,53 @@ from config import (
     EncoderConfig, FusionConfig, ActorCriticConfig, PPOConfig, PDR_ACTIONS,
 )
 from models.network import SchedulingNetwork
-from env.placeholder_env import VectorizedPlaceholderEnv
-from env.sensor_corruption import SensorCorruptionWrapper, SensorCorruptionConfig
 from rollout_buffer import RolloutBuffer
 
 
 def obs_to_torch(obs: dict, device: str) -> dict:
-    """@brief Convert a numpy observation dict to a dict of PyTorch tensors.
-
-    @param obs     Dict mapping observation keys to numpy arrays.
-    @param device  Target torch device string (e.g. @c "cpu" or @c "cuda").
-    @return Dict with the same keys, values cast to float32 tensors on
-            @p device.
-    """
+    """@brief Convert a numpy observation dict to a dict of PyTorch tensors."""
     return {
         k: torch.tensor(v, dtype=torch.float32).to(device)
         for k, v in obs.items()
     }
 
 
-def train(ppo_cfg: PPOConfig, device: str = "cpu"):
+def build_env(args, ppo_cfg):
+    """@brief Factory function to create the appropriate vectorized env.
+
+    @param args     Parsed CLI arguments (checked for --unity flag).
+    @param ppo_cfg  PPO config with num_envs.
+    @return Tuple of (vec_env, obs_shapes_dict).
+    """
+    obs_shapes = {
+        "factory_grid":   (3, 64, 64),
+        "sched_matrix":   (3, 20, 16),
+        "global_scalars": (10,),
+        "distance_matrix": (64,),
+        "event_flags":    (6,),
+    }
+
+    if args.unity:
+        from env.unity_env import VectorizedUnityEnv
+        vec_env = VectorizedUnityEnv(
+            num_envs=ppo_cfg.num_envs,
+            file_name=args.unity_path,
+            time_scale=args.time_scale,
+        )
+    else:
+        from env.placeholder_env import VectorizedPlaceholderEnv
+        vec_env = VectorizedPlaceholderEnv(num_envs=ppo_cfg.num_envs)
+
+    return vec_env, obs_shapes
+
+
+def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
     """@brief Main PPO training loop.
 
-    @details
-    Orchestrates the full training pipeline:
-      1. Builds and prints the @ref SchedulingNetwork.
-      2. Creates the @ref VectorizedPlaceholderEnv and @ref RolloutBuffer.
-      3. For each update iteration:
-         - Collects a rollout of @c rollout_length × @c num_envs transitions.
-         - Computes GAE advantages and discounted returns.
-         - Runs @c num_epochs of mini-batch PPO updates (clipped surrogate
-           objective, MSE value loss, entropy bonus).
-         - Logs average reward, return, losses, entropy, and throughput.
-      4. Saves a checkpoint containing model weights, optimiser state,
-         global step count, and the full config.
-
     @param ppo_cfg  PPOConfig dataclass with all training hyperparameters.
+    @param args     Parsed CLI arguments (env backend, paths, etc.).
     @param device   Torch device string for network and tensor allocation.
-    @return The trained @ref SchedulingNetwork instance.
+    @return The trained SchedulingNetwork instance.
     """
     print("=" * 60)
     print("DRL Scheduling Network — PPO Training")
@@ -86,23 +106,8 @@ def train(ppo_cfg: PPOConfig, device: str = "cpu"):
     optimizer = torch.optim.Adam(net.parameters(), lr=ppo_cfg.lr, eps=1e-5)
 
     # ---- Initialize environments ----
-    ## @brief Sensor corruption config applied to each parallel env.
-    corruption_cfg = SensorCorruptionConfig(enabled=True)
-    vec_env = VectorizedPlaceholderEnv(
-        num_envs=ppo_cfg.num_envs,
-        env_wrapper=lambda env: SensorCorruptionWrapper(env, corruption_cfg),
-    )
+    vec_env, obs_shapes = build_env(args, ppo_cfg)
     obs, infos = vec_env.reset()
-
-    ## @brief Per-environment observation shapes used to allocate the
-    ##        @ref RolloutBuffer.
-    obs_shapes = {
-        "factory_grid": (3, 64, 64),
-        "sched_matrix": (3, 100, 40),
-        "global_scalars": (10,),
-        "distance_matrix": (64,),
-        "event_flags": (6,),
-    }
 
     buffer = RolloutBuffer(
         rollout_length=ppo_cfg.rollout_length,
@@ -114,15 +119,15 @@ def train(ppo_cfg: PPOConfig, device: str = "cpu"):
     )
 
     # ---- Training loop ----
-    ## @brief Total number of PPO update iterations.
     num_updates = ppo_cfg.total_timesteps // (
         ppo_cfg.rollout_length * ppo_cfg.num_envs
     )
-    ## @brief Cumulative environment steps across all envs.
     global_step = 0
     start_time = time.time()
 
-    print(f"\nTraining for {ppo_cfg.total_timesteps:,} timesteps")
+    backend = "Unity" if args.unity else "Placeholder"
+    print(f"\nBackend: {backend}")
+    print(f"Training for {ppo_cfg.total_timesteps:,} timesteps")
     print(f"  {num_updates} updates × {ppo_cfg.rollout_length} steps "
           f"× {ppo_cfg.num_envs} envs")
     print(f"  Device: {device}")
@@ -177,7 +182,6 @@ def train(ppo_cfg: PPOConfig, device: str = "cpu"):
                     batch["obs"], batch["actions"]
                 )
 
-                # Policy loss (clipped surrogate objective)
                 ratio = torch.exp(new_log_probs - batch["old_log_probs"])
                 surr1 = ratio * batch["advantages"]
                 surr2 = (
@@ -190,13 +194,9 @@ def train(ppo_cfg: PPOConfig, device: str = "cpu"):
                 )
                 pg_loss = -torch.min(surr1, surr2).mean()
 
-                # Value loss (MSE between predicted values and returns)
                 v_loss = nn.functional.mse_loss(new_values, batch["returns"])
-
-                # Entropy bonus (negative sign so minimising encourages entropy)
                 ent_loss = -entropy.mean()
 
-                # Combined loss
                 loss = (
                     pg_loss
                     + ppo_cfg.value_coef * v_loss
@@ -254,19 +254,30 @@ def train(ppo_cfg: PPOConfig, device: str = "cpu"):
     print(f"Total training time: {elapsed:.1f}s")
     print(f"Average SPS: {global_step / elapsed:.0f}")
 
+    # Clean up Unity if active.
+    if args.unity and hasattr(vec_env, 'close'):
+        vec_env.close()
+
     return net
 
 
 if __name__ == "__main__":
-    ## @brief Argument parser for command-line training configuration.
     parser = argparse.ArgumentParser(description="Train DRL Scheduling Agent")
-    parser.add_argument("--total-timesteps", type=int, default=50_000,
-                        help="Total training timesteps (default 50k for testing)")
+    parser.add_argument("--total-timesteps", type=int, default=50_000)
     parser.add_argument("--num-envs", type=int, default=4)
     parser.add_argument("--rollout-length", type=int, default=64)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--lr", type=float, default=3e-4)
     parser.add_argument("--device", type=str, default="cpu")
+
+    # Unity-specific flags
+    parser.add_argument("--unity", action="store_true",
+                        help="Connect to Unity instead of using placeholder env")
+    parser.add_argument("--unity-path", type=str, default=None,
+                        help="Path to built Unity executable (None = Editor)")
+    parser.add_argument("--time-scale", type=float, default=20.0,
+                        help="Unity simulation speed multiplier")
+
     args = parser.parse_args()
 
     cfg = PPOConfig(
@@ -276,4 +287,4 @@ if __name__ == "__main__":
         batch_size=args.batch_size,
         lr=args.lr,
     )
-    train(cfg, device=args.device)
+    train(cfg, args, device=args.device)

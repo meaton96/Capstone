@@ -1,0 +1,105 @@
+\doxysection{Assets.\+Scripts.\+Simulation.\+Jobs.\+Job\+Data Class Reference}
+\hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data}{}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data}\index{Assets.Scripts.Simulation.Jobs.JobData@{Assets.Scripts.Simulation.Jobs.JobData}}
+
+
+Encapsulates all persistent data, state, and tracking metrics for a single job.  
+
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+float \doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_ad566bfd75e6c1671280e7bf070c7356b}{Get\+Processing\+Time}} (int machine\+Id)
+\begin{DoxyCompactList}\small\item\em Retrieves the processing time for a specific machine on the current operation. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_a4bba6d3a4de5d61c6bd0fc6fea79e257}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_a4bba6d3a4de5d61c6bd0fc6fea79e257} 
+int {\bfseries Job\+Id}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_a6b571cad9a75b1e8d55a2a2db2a97b7b}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_a6b571cad9a75b1e8d55a2a2db2a97b7b} 
+float {\bfseries Arrival\+Time}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_abdbe9da3c7548163515ec2b7636061de}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_abdbe9da3c7548163515ec2b7636061de} 
+\doxymbox{\hyperlink{namespace_assets_1_1_scripts_1_1_simulation_1_1_jobs_a1a8d173d90cd77c943232a9ddd5b7ba1}{Job\+State}} {\bfseries State}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_a5ce59b214d9d1431ee98f66b94a01880}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_a5ce59b214d9d1431ee98f66b94a01880} 
+int {\bfseries Location\+Machine\+Id}
+\begin{DoxyCompactList}\small\item\em Current machine ID location. -\/1 represents the factory entry or exit zones. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_a50e5e7595dfd060a858d1612df88cb8c}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_a50e5e7595dfd060a858d1612df88cb8c} 
+int {\bfseries Target\+Machine\+Id}
+\begin{DoxyCompactList}\small\item\em Designated destination machine ID. -\/1 indicates the factory exit. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_ac9fdf3c7973557605af939f5be5fa9b9}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_ac9fdf3c7973557605af939f5be5fa9b9} 
+int {\bfseries Assigned\+Agv\+Id}
+\begin{DoxyCompactList}\small\item\em The ID of the \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} currently handling or assigned to this job. -\/1 if none. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_a349a00d3d371389f40941cb27b7737ab}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_a349a00d3d371389f40941cb27b7737ab} 
+int {\bfseries Pre\+Dispatched\+Agv\+Id} = -\/1
+\begin{DoxyCompactList}\small\item\em The ID of an \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} dispatched to the pickup point before processing completes. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_ac03f836a366d96fcbd3031f845f21469}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_ac03f836a366d96fcbd3031f845f21469} 
+Machine\+Type\+[$\,$]\+ {\bfseries Operation\+Types}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_acb7aa8643e9f328f13fce94d70901c02}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_acb7aa8643e9f328f13fce94d70901c02} 
+Dictionary$<$ int, float $>$\+[$\,$]\+ {\bfseries Eligible\+Machines\+Per\+Op}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_a4e78a1aac8ad4d89429ddb1a3261a2f4}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_a4e78a1aac8ad4d89429ddb1a3261a2f4} 
+int {\bfseries Total\+Operations}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_a586e6dbdbd72b4b0fa449732b0700983}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_a586e6dbdbd72b4b0fa449732b0700983} 
+int {\bfseries Current\+Op\+Index}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_a5dd0790102b6620fe357b6944186c2c4}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_a5dd0790102b6620fe357b6944186c2c4} 
+int {\bfseries Completed\+Ops}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_a40bd7da3b7226fb32ddb4fadcfe18a0e}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_a40bd7da3b7226fb32ddb4fadcfe18a0e} 
+double {\bfseries State\+Entry\+Time}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_ac586148d2aaeb2a4d94ebfebec4eb8e0}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_ac586148d2aaeb2a4d94ebfebec4eb8e0} 
+double {\bfseries Total\+Wait\+Time}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_aed17095252c9e1f0aa37217e768fce8a}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_aed17095252c9e1f0aa37217e768fce8a} 
+double {\bfseries Total\+Transit\+Time}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_ac8891655eb7eaf53ad4875467aa2c9dd}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_ac8891655eb7eaf53ad4875467aa2c9dd} 
+\doxymbox{\hyperlink{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_visual}{Job\+Visual}} {\bfseries Visual}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_a4a6691d24e2344ef4ab0ce1b14c8c6c9}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_a4a6691d24e2344ef4ab0ce1b14c8c6c9} 
+bool {\bfseries Is\+Last\+Operation}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em Indicates whether the job has finished its final scheduled operation. \end{DoxyCompactList}\item 
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_ae1f269d51419ff86e1f045fbf7c90f0d}\label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_ae1f269d51419ff86e1f045fbf7c90f0d} 
+Machine\+Type {\bfseries Next\+Required\+Type}\hspace{0.3cm}{\ttfamily  \+[get]\+}
+\begin{DoxyCompactList}\small\item\em Returns the {\ttfamily Machine\+Type} required for the current operation index. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Encapsulates all persistent data, state, and tracking metrics for a single job. 
+
+This is a pure data container. Logic for state transitions, \doxylink{namespace_assets_1_1_scripts_1_1_simulation_1_1_a_g_v}{AGV} assignments, and routing is handled exclusively by the central orchestrator. It maintains the operation sequence, machine eligibility, and timing stats for reward calculation. 
+
+\label{doc-func-members}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_doc-func-members}
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_ad566bfd75e6c1671280e7bf070c7356b}\index{Assets.Scripts.Simulation.Jobs.JobData@{Assets.Scripts.Simulation.Jobs.JobData}!GetProcessingTime@{GetProcessingTime}}
+\index{GetProcessingTime@{GetProcessingTime}!Assets.Scripts.Simulation.Jobs.JobData@{Assets.Scripts.Simulation.Jobs.JobData}}
+\doxysubsubsection{\texorpdfstring{GetProcessingTime()}{GetProcessingTime()}}
+{\footnotesize\ttfamily \label{class_assets_1_1_scripts_1_1_simulation_1_1_jobs_1_1_job_data_ad566bfd75e6c1671280e7bf070c7356b} 
+float Assets.\+Scripts.\+Simulation.\+Jobs.\+Job\+Data.\+Get\+Processing\+Time (\begin{DoxyParamCaption}\item[{int}]{machine\+Id}{}\end{DoxyParamCaption})}
+
+
+
+Retrieves the processing time for a specific machine on the current operation. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em machine\+Id} & The ID of the machine to query. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The processing time in simulation seconds; returns 0 if the machine is ineligible. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file:\+\begin{DoxyCompactItemize}
+\item 
+C:\+/\+\+Users/\+\+Mike/\+\+Documents/\+\+Git\+Hub/\+\+Capstone/\+\+Capstone/\+\+Assets/\+\+Scripts/\+\+Simulation/\+\+Jobs/\+Job\+Data.\+cs\end{DoxyCompactItemize}

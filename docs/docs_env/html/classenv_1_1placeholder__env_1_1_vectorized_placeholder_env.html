@@ -95,14 +95,15 @@ $(function(){initNavTree('classenv_1_1placeholder__env_1_1_vectorized_placeholde
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ad0215b3c7032ed61c56d36c4aa7f6a42" id="r_ad0215b3c7032ed61c56d36c4aa7f6a42"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#ad0215b3c7032ed61c56d36c4aa7f6a42">__init__</a> (self, int <a class="el" href="#a4b5dde948a62a5f87e8d123d91e6a23f">num_envs</a>, **env_kwargs)</td></tr>
+<tr class="memitem:a7bf1804cef5b24777c0ca07595b53869" id="r_a7bf1804cef5b24777c0ca07595b53869"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a7bf1804cef5b24777c0ca07595b53869">__init__</a> (self, int <a class="el" href="#a4b5dde948a62a5f87e8d123d91e6a23f">num_envs</a>, env_wrapper=None, **env_kwargs)</td></tr>
 <tr class="memitem:a926a65c6ae9926f901077b0ecf5de3d8" id="r_a926a65c6ae9926f901077b0ecf5de3d8"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a926a65c6ae9926f901077b0ecf5de3d8">reset</a> (self)</td></tr>
 <tr class="memitem:a9b85d06460be14c05f17e169437d73e6" id="r_a9b85d06460be14c05f17e169437d73e6"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a9b85d06460be14c05f17e169437d73e6">step</a> (self, actions)</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a09d5a597db32393fb9247555334d7dcd" id="r_a09d5a597db32393fb9247555334d7dcd"><td class="memItemLeft">list&#160;</td><td class="memItemRight"><a class="el" href="#a09d5a597db32393fb9247555334d7dcd">envs</a></td></tr>
-<tr class="memdesc:a09d5a597db32393fb9247555334d7dcd"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of independent environment instances.  <br /></td></tr>
+<tr class="memitem:a09d5a597db32393fb9247555334d7dcd" id="r_a09d5a597db32393fb9247555334d7dcd"><td class="memItemLeft"><a id="a09d5a597db32393fb9247555334d7dcd" name="a09d5a597db32393fb9247555334d7dcd"></a>
+list&#160;</td><td class="memItemRight"><b>envs</b> = []</td></tr>
+<tr class="memdesc:a09d5a597db32393fb9247555334d7dcd"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of independent environment instances (possibly wrapped). <br /></td></tr>
 <tr class="memitem:a4b5dde948a62a5f87e8d123d91e6a23f" id="r_a4b5dde948a62a5f87e8d123d91e6a23f"><td class="memItemLeft"><a id="a4b5dde948a62a5f87e8d123d91e6a23f" name="a4b5dde948a62a5f87e8d123d91e6a23f"></a>
 &#160;</td><td class="memItemRight"><b>num_envs</b> = num_envs</td></tr>
 <tr class="memdesc:a4b5dde948a62a5f87e8d123d91e6a23f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of parallel environments. <br /></td></tr>
@@ -120,8 +121,8 @@ batched @c reset / @c step methods with automatic episode resets.
 
 @note Replace with gymnasium.vector.SyncVectorEnv if preferred.
 </pre> </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="ad0215b3c7032ed61c56d36c4aa7f6a42" name="ad0215b3c7032ed61c56d36c4aa7f6a42"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad0215b3c7032ed61c56d36c4aa7f6a42">&#9670;&#160;</a></span>__init__()</h2>
+<a id="a7bf1804cef5b24777c0ca07595b53869" name="a7bf1804cef5b24777c0ca07595b53869"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7bf1804cef5b24777c0ca07595b53869">&#9670;&#160;</a></span>__init__()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -139,16 +140,25 @@ batched @c reset / @c step methods with automatic episode resets.
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>env_wrapper</em></span><span class="paramdefsep"> = </span><span class="paramdefval">None</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">**</td>          <td class="paramname"><span class="paramname"><em>env_kwargs</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 <pre class="fragment">@brief Create a bank of parallel placeholder environments.
 
-@param num_envs    Number of independent environment instances.
-@param env_kwargs  Keyword arguments forwarded to each
-                   PlaceholderSchedulingEnv constructor.
-                   Each env receives its index as the seed.
+@param num_envs     Number of independent environment instances.
+@param env_wrapper  Optional callable that wraps each individual
+                    environment (e.g. @ref SensorCorruptionWrapper).
+                    Signature: @c wrapper(env) -&gt; wrapped_env.
+                    Applied after construction, before first reset.
+@param env_kwargs   Keyword arguments forwarded to each
+                    PlaceholderSchedulingEnv constructor.
+                    Each env receives its index as the seed.
 </pre> 
 </div>
 </div>
@@ -233,27 +243,6 @@ Automatically resets any environment whose episode has ended
 @return Tuple of (batched_obs, rewards, terminateds, truncateds, infos).
         Each array has leading dimension @ref num_envs.
 </pre> 
-</div>
-</div>
-<a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
-<a id="a09d5a597db32393fb9247555334d7dcd" name="a09d5a597db32393fb9247555334d7dcd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a09d5a597db32393fb9247555334d7dcd">&#9670;&#160;</a></span>envs</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">list env.placeholder_env.VectorizedPlaceholderEnv.envs</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">=  [</div>
-<div class="line">            PlaceholderSchedulingEnv(seed=i, **env_kwargs)</div>
-<div class="line">            <span class="keywordflow">for</span> i <span class="keywordflow">in</span> range(num_envs)</div>
-<div class="line">        ]</div>
-</div><!-- fragment -->
-<p>List of independent environment instances. </p>
-
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
