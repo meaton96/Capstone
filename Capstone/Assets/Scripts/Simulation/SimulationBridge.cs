@@ -198,8 +198,10 @@ namespace Assets.Scripts.Simulation
         {
             episodeActive = false;
             IsWaitingForAction = false;
+            IsFactoryReady = false;
             layoutManager.ClearFloor();
             Jobs.Cleanup();
+            agvPool.ClearFleet();
         }
 
         /// @brief The core execution loop of the simulation.

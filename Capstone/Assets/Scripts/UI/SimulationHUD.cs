@@ -66,8 +66,8 @@ namespace Assets.Scripts.UI
             if (SimulationBridge.Instance != null)
                 SimulationBridge.Instance.StopEpisode();
 
-            // if (instanceSelectMenu != null)
-            //     instanceSelectMenu.Show();
+            if (instanceSelectMenu != null)
+                instanceSelectMenu.Show();
 
 
         }

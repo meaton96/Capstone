@@ -56,6 +56,17 @@ namespace Assets.Scripts.Simulation.AGV
             SimLogger.Medium($"[AGVPool] Spawned fleet of {fleetSize} AGVs.");
         }
 
+        /// @brief Destroys all AGVs in the fleet and clears the pool.
+        public void ClearFleet()
+        {
+            foreach (var agv in fleet)
+            {
+                if (agv != null)
+                    Destroy(agv.gameObject);
+            }
+            fleet.Clear();
+        }
+
         /// @brief Retrieves the designated world-space parking coordinate for a specific AGV.
         ///
         /// @param agvId The unique identifier of the AGV.
