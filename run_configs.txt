@@ -2,7 +2,7 @@
         -ExePath     ".\capstone.exe" `
         -BatchConfig ".\BatchConfigs\BatchConfigs.json" `
         -ResultsDir  ".\Results" `
-        -Repeats     3 `
+        -Repeats     1 `
         -Timescale   100 `
         -LogLevel    Medium
 

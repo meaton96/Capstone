@@ -511,6 +511,8 @@ namespace Assets.Scripts.Simulation
                 MinOpsPerJob = source.MinOpsPerJob,
                 MaxOpsPerJob = source.MaxOpsPerJob,
                 MaxArrivalTime = source.MaxArrivalTime,
+                AGVCount = source.AGVCount,
+                //ProcTimeParams = source.ProcTimeParams,
             };
         }
 

@@ -304,8 +304,8 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                     AisleType = AisleType.SpineAisle,
                     Flow = FlowDirection.West,
                     Centre = layoutManager.AGVParkingPosition,
-                    Size = new Vector3(10f, 0.1f, 5f),
-                    Capacity = 10
+                    Size = new Vector3(layoutManager.FloorSize.x, 0.1f, 5f),
+                    Capacity = 20
                 };
 
                 parkingZone.DockPoints[ParkingAreaId] = new DockPoint

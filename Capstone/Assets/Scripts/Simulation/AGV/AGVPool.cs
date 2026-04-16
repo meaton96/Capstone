@@ -41,15 +41,17 @@ namespace Assets.Scripts.Simulation.AGV
             Vector3 baseParkingPos = layoutManager != null ? layoutManager.AGVParkingPosition : Vector3.zero;
             parkingPositions = new Vector3[fleetSize];
 
+            float span = (fleetSize - 1) * 2f;
+            Vector3 startPos = baseParkingPos - new Vector3(span / 2f, 0f, 0f);
+
             for (int i = 0; i < fleetSize; i++)
             {
-                Vector3 spawnPos = baseParkingPos + new Vector3(i * 2f, 0, 0);
+                Vector3 spawnPos = startPos + new Vector3(i * 2f, 0f, 0f);
                 parkingPositions[i] = spawnPos;
 
                 AGVController newAgv = Instantiate(agvPrefab, spawnPos, Quaternion.identity, this.transform);
                 newAgv.gameObject.name = $"AGV_{i}";
                 newAgv.Initialize(i);
-
                 fleet.Add(newAgv);
             }
 

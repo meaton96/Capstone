@@ -127,14 +127,14 @@ namespace Assets.Scripts.Simulation.Machines
             SetState(MachineState.Busy);
             SetProgressBarVisible(true);
             if (progressBar != null) progressBar.value = 0f;
-            Log($"Op started: Job {jobId}, dur={duration:F1}");
+            Log($"Op started: Job {jobId}, dur={duration:F1}", true);
         }
 
         public void CompleteOperation(int jobId)
         {
             SetProgressBarVisible(false);
             SetState(MachineState.Idle);
-            Log($"Op completed: Job {jobId}");
+            Log($"Op completed: Job {jobId}", true);
         }
 
         public void SetBlockedAfterProcessing(int jobId)
@@ -235,9 +235,10 @@ namespace Assets.Scripts.Simulation.Machines
             if (labelText != null) labelText.text = label;
         }
 
-        private void Log(string message)
+        private void Log(string message, bool toLog = false)
         {
-            SimLogger.High($"[{Time.time:F2}] {message}");
+            if (toLog)
+                SimLogger.High($"[{Time.time:F2}] {message}");
             historyLog.Add($"[{Time.time:F2}] {message}");
         }
     }

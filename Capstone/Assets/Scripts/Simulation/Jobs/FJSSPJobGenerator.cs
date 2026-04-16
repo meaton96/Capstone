@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Assets.Scripts.Simulation.Machines;
 using Assets.Scripts.Simulation.Types;
+using UnityEngine.Assertions.Must;
 
 namespace Assets.Scripts.Simulation.Jobs
 {
@@ -32,6 +33,16 @@ namespace Assets.Scripts.Simulation.Jobs
             return Mathf.Max(minValue, mu + sigma * z);
         }
 
+        public static Dictionary<MachineType, (float mu, float sigma)> DefaultParams
+            = new Dictionary<MachineType, (float mu, float sigma)>
+            {
+                { MachineType.Mill,     (mu:  90f, sigma: 10f) },
+                { MachineType.Lathe,    (mu:  75f, sigma: 10f) },
+                { MachineType.Weld,     (mu: 150f, sigma: 25f) },
+                { MachineType.Inspect,  (mu:  60f, sigma: 10f) },
+                { MachineType.Assemble, (mu: 240f, sigma: 40f) },
+            };
+
         /// @brief Calculates the processing time for a specific machine type.
         ///
         /// @param type The @c MachineType being sampled.
@@ -47,7 +58,7 @@ namespace Assets.Scripts.Simulation.Jobs
             if (config.ProcTimeParams != null && config.ProcTimeParams.TryGetValue(type, out var p))
                 return SampleNormal(p.mu, p.sigma);
 
-            return UnityEngine.Random.Range(config.MinProcTime, config.MaxProcTime);
+            return SampleNormal(DefaultParams[type].mu, DefaultParams[type].sigma);
         }
 
         /// @brief Generates an array of job definitions based on the provided configuration.

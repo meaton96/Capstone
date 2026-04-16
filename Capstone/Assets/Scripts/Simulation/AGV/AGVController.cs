@@ -291,6 +291,7 @@ namespace Assets.Scripts.Simulation.AGV
             }
 
             State = AGVState.MovingToPickup;
+            SimLogger.High($"[AGV] {AgvId} dispatched to pickup job {CurrentJobId} from machine {(targetMachine != null ? targetMachine.MachineId : -1)}");
             BeginNextWaypoint();
         }
 
