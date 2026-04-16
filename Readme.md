@@ -112,17 +112,13 @@ To verify the ML-Agents environment and the Python-side logic:
 
 This confirms the "Round Trip" data flow: Python starts the Unity engine, observations are received, actions are sent back, and rewards are processed.
 
-
-    Run the following commands:
-    ```bash
+Run the following commands:
 
     chmod +x linux_server/Factory.x86_64
 
     docker exec -it unity-ml-agents mlagents-learn /code/smoketest.yaml --env=/code/linux_server/Factory.x86_64 --run-id=smoke01 --no-graphics
-    ```
-
-    Success Criteria: The test is successful if the terminal displays the Unity logo and begins logging Step counts and Mean Reward values.
-
+    
+Success Criteria: The test is successful if the terminal displays the Unity logo and begins logging Step counts and Mean Reward values. 
 
 ### D. Unity Source Testing
 * **TODO:** Implementation of Unity Test Framework for C# scripts.
