@@ -38,6 +38,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
 
         public bool IsFull => OccupantAgvIds.Count >= Capacity;
         public bool IsEmpty => OccupantAgvIds.Count == 0;
+
     }
 
     /// @brief Describes positioning for AGV-conveyor interaction.
@@ -304,8 +305,8 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                     AisleType = AisleType.SpineAisle,
                     Flow = FlowDirection.West,
                     Centre = layoutManager.AGVParkingPosition,
-                    Size = new Vector3(layoutManager.FloorSize.x, 0.1f, 5f),
-                    Capacity = 20
+                    Size = new Vector3(layoutManager.FloorSize.x, 0.1f, layoutManager.ParkingAlcoveDepth),
+                    Capacity = 64
                 };
 
                 parkingZone.DockPoints[ParkingAreaId] = new DockPoint

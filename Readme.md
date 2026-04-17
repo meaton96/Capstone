@@ -102,9 +102,9 @@ The simplest method to verify the system is by downloading the standalone build.
 To verify the ML-Agents environment and the Python-side logic:
 1. Clone the repository.
 2. Navigate to the environment folder: `cd repo/env`.
-3. Build and start the containers: `docker-compose up --build`.
+3. Build and start the containers: `docker-compose up --build` (this will take several minutes)
 4. Execute the test suite within the container:
-   `docker exec -it unity-ml-agents pytest`
+   `docker exec -it unity-ml-agents-test pytest`
 
 
 
@@ -113,12 +113,16 @@ To verify the ML-Agents environment and the Python-side logic:
 This confirms the "Round Trip" data flow: Python starts the Unity engine, observations are received, actions are sent back, and rewards are processed.
 
 Run the following commands:
+```bash
+    docker exec -it unity-ml-agents-test chmod +x linux_server/capstone.x86_64
 
-    chmod +x linux_server/Factory.x86_64
+    docker exec -it unity-ml-agents-test mlagents-learn /code/smoke_test.yaml --env=/code/linux_server/capstone.x86_64 --run-id=smoke01 --no-graphics
+```
+Success Criteria: The test is successful if the terminal displays the Unity logo and begins logging Step counts and Mean Reward values. Steps print every ~1 minute, rewards print every ~20k steps (4 minutes) 
 
-    docker exec -it unity-ml-agents mlagents-learn /code/smoketest.yaml --env=/code/linux_server/Factory.x86_64 --run-id=smoke01 --no-graphics
-    
-Success Criteria: The test is successful if the terminal displays the Unity logo and begins logging Step counts and Mean Reward values. 
+Control+C once satisfied (entire training loop takes ~1.5hours)
+
+(might be longer on slower cpu)
 
 ### D. Unity Source Testing
 * **TODO:** Implementation of Unity Test Framework for C# scripts.

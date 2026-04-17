@@ -703,26 +703,6 @@ namespace Assets.Scripts.Simulation
             int b = 0; for (int i = 1; i < v.Length; i++) if (v[i] > v[b]) b = i; return b;
         }
 
-        // private FJSSPConfig BuildDefaultConfig()
-        // {
-        //     var layout = new MachineType[5];
-        //     MachineType[] types = (MachineType[])Enum.GetValues(typeof(MachineType));
-        //     for (int i = 0; i < 5; i++) layout[i] = types[i];
-
-        //     return new FJSSPConfig
-        //     {
-        //         Seed = 42,
-        //         JobCount = 5,
-        //         MachinesPerType = 1,
-        //         MachineTypeLayout = layout,
-        //         MinProcTime = 5f,
-        //         MaxProcTime = 20f,
-        //         MinOpsPerJob = 2,
-        //         MaxOpsPerJob = 4,
-        //         MaxArrivalTime = 0f
-        //     };
-        // }
-
         private FJSSPConfig BuildDefaultConfig()
         {
             MachineType[] types = (MachineType[])Enum.GetValues(typeof(MachineType));
@@ -731,11 +711,11 @@ namespace Assets.Scripts.Simulation
 
             var procParams = new Dictionary<MachineType, (float mu, float sigma)>
             {
-                { MachineType.Mill,     (mu:  90f, sigma: 10f) },
-                { MachineType.Lathe,    (mu:  75f, sigma: 10f) },
-                { MachineType.Weld,     (mu: 150f, sigma: 25f) },
-                { MachineType.Inspect,  (mu:  60f, sigma: 10f) },
-                { MachineType.Assemble, (mu: 240f, sigma: 40f) },
+                { MachineType.Mill,     (mu:  9f, sigma: 1f) },
+                { MachineType.Lathe,    (mu:  7f, sigma: 1f) },
+                { MachineType.Weld,     (mu: 15f, sigma: 2f) },
+                { MachineType.Inspect,  (mu:  6f, sigma: 1f) },
+                { MachineType.Assemble, (mu: 24f, sigma: 4f) },
             };
 
             return new FJSSPConfig
@@ -750,8 +730,41 @@ namespace Assets.Scripts.Simulation
                 MaxOpsPerJob = 4,
                 MaxArrivalTime = 0f,
                 ProcTimeParams = procParams,
+                AGVCount = 3,
                 dispatchingRule = DispatchingRule.SRT_SRWT,
             };
         }
+
+        // private FJSSPConfig BuildDefaultConfig()
+        // {
+        //     MachineType[] types = (MachineType[])Enum.GetValues(typeof(MachineType));
+        //     var layout = new MachineType[types.Length];
+        //     for (int i = 0; i < types.Length; i++) layout[i] = types[i];
+
+        //     var procParams = new Dictionary<MachineType, (float mu, float sigma)>
+        //     {
+        //         { MachineType.Mill,     (mu:  90f, sigma: 10f) },
+        //         { MachineType.Lathe,    (mu:  75f, sigma: 10f) },
+        //         { MachineType.Weld,     (mu: 150f, sigma: 25f) },
+        //         { MachineType.Inspect,  (mu:  60f, sigma: 10f) },
+        //         { MachineType.Assemble, (mu: 240f, sigma: 40f) },
+        //     };
+
+        //     return new FJSSPConfig
+        //     {
+        //         Seed = 42,
+        //         JobCount = 5,
+        //         MachinesPerType = 1,
+        //         MachineTypeLayout = layout,
+        //         MinProcTime = 1f,
+        //         MaxProcTime = 30f,
+        //         MinOpsPerJob = 2,
+        //         MaxOpsPerJob = 4,
+        //         MaxArrivalTime = 0f,
+        //         ProcTimeParams = procParams,
+        //         AGVCount = 3,
+        //         dispatchingRule = DispatchingRule.SRT_SRWT,
+        //     };
+        // }
     }
 }

@@ -13344,7 +13344,7 @@ MonoBehaviour:
   agent: {fileID: 516692882}
   Jobs: {fileID: 263971911}
   PreDispatchLeadTime: 15
-  AutoStartOnPlay: 1
+  AutoStartOnPlay: 0
   OnDecisionRequired:
     m_PersistentCalls:
       m_Calls: []
@@ -13379,7 +13379,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1562084949}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 76c5dace699a14605b6a45f8bfa08cde, type: 3}
   m_Name: 

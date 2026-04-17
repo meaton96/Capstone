@@ -1,0 +1,17 @@
+--- Log Started: 04/17/2026 18:10:26 ---
+2026-04-17 18:10:26.982 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld
+  Row1: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-04-17 18:10:27.008 [FactoryLayout] Distance matrix (5x5):
+       M0     M1     M2     M3     M4   
+2026-04-17 18:10:27.016 M0      0.0    6.0   12.0    7.5    9.6 
+2026-04-17 18:10:27.024 M1      6.0    0.0    6.0    9.6    7.5 
+2026-04-17 18:10:27.032 M2     12.0    6.0    0.0   14.2    9.6 
+2026-04-17 18:10:27.040 M3      7.5    9.6   14.2    0.0    6.0 
+2026-04-17 18:10:27.047 M4      9.6    7.5    9.6    6.0    0.0 
+2026-04-17 18:10:27.075 [FactoryLayout] Built aisle-based floor: 5 machines.
+2026-04-17 18:10:27.090 [TrafficZones] Built zone graph: 18 zones.
+2026-04-17 18:10:27.098 [AGVPool] Spawned fleet of 0 AGVs.
+2026-04-17 18:10:27.113 [Orchestrator] Episode started: 5 jobs, 5 machines

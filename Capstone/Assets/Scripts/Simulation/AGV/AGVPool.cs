@@ -41,6 +41,8 @@ namespace Assets.Scripts.Simulation.AGV
             Vector3 baseParkingPos = layoutManager != null ? layoutManager.AGVParkingPosition : Vector3.zero;
             parkingPositions = new Vector3[fleetSize];
 
+            // fleetSize = fleetSize != 0 ? fleetSize : 3;
+
             float span = (fleetSize - 1) * 2f;
             Vector3 startPos = baseParkingPos - new Vector3(span / 2f, 0f, 0f);
 

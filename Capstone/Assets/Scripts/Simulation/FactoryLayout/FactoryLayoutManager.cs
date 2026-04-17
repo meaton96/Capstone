@@ -88,6 +88,8 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         public Vector3 GridOrigin { get; private set; }
         public Vector2 FloorSize => new Vector2(totalFloorWidth, totalFloorDepth);
 
+        public float ParkingAlcoveDepth => parkingAlcoveDepth;
+
         void Awake()
         {
             Instance = this;
@@ -121,6 +123,12 @@ namespace Assets.Scripts.Simulation.FactoryLayout
 
             totalFloorWidth = verticalAisleWidth + machineAreaWidth + verticalAisleWidth;
             totalFloorDepth = spineAisleWidth + machineAreaDepth + spineAisleWidth + parkingAlcoveDepth;
+
+            int agvCount = config.AGVCount;
+            float minParkingWidth = (agvCount - 1) * 2f + 4f;
+            if (minParkingWidth > totalFloorWidth)
+                totalFloorWidth = minParkingWidth;
+
             if (floorTransform != null)
             {
                 floorTransform.localScale = new Vector3(
@@ -245,7 +253,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
 
             // Push the parking position south of the bottom spine into the new alcove
             AGVParkingPosition = new Vector3(
-                floorCentre.x - machineAreaHalfW,
+                floorCentre.x,
                 0.01f,
                 alcoveZ
             );
