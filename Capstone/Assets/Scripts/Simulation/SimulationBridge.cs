@@ -670,7 +670,8 @@ namespace Assets.Scripts.Simulation
             {
                 Makespan = SimTime,
                 DecisionPoints = decisionCount,
-                TotalReward = totalReward
+                TotalReward = totalReward,
+                AGVCount = agvPool.AllAGVs.Count,
             });
         }
 

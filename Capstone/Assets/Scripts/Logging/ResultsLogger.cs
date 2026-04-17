@@ -75,13 +75,13 @@ namespace Assets.Scripts.Logging
         /// exist, this method automatically writes the CSV header before appending data.
         public static void LogEpisode(string ruleName, int seed, double makespan,
                                        int jobCount, int machineCount, int totalOps,
-                                       int decisionCount, double totalReward, float averageTimeScale)
+                                       int decisionCount, double totalReward, float averageTimeScale, int agvCount)
         {
             bool fileExists = File.Exists(FilePath);
             using StreamWriter writer = new StreamWriter(FilePath, append: true);
 
             if (!fileExists)
-                writer.WriteLine("timestamp,rule,seed,makespan,jobs,machines,total_ops,decisions,total_reward,timescale");
+                writer.WriteLine("timestamp,rule,seed,makespan,jobs,machines,total_ops,agvCount,decisions,total_reward,timescale");
 
             writer.WriteLine(
                 $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}," +
@@ -91,6 +91,7 @@ namespace Assets.Scripts.Logging
                 $"{jobCount}," +
                 $"{machineCount}," +
                 $"{totalOps}," +
+                $"{agvCount}," +
                 $"{decisionCount}," +
                 $"{totalReward:F4}," +
                 $"{averageTimeScale:F4}"

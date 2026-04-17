@@ -16,7 +16,8 @@
             "maxProcTime": 15.0,
             "minOpsPerJob": 3,
             "maxOpsPerJob": 5,
-            "maxArrivalTime": 0.0
+            "maxArrivalTime": 0.0,
+            "agvCount": 2
         },
         {
             "name": "medium_20j_15m",
@@ -34,7 +35,8 @@
             "maxProcTime": 90.0,
             "minOpsPerJob": 5,
             "maxOpsPerJob": 8,
-            "maxArrivalTime": 0.0
+            "maxArrivalTime": 0.0,
+            "agvCount": 5
         },
         {
             "name": "large_50j_15m",
@@ -52,7 +54,8 @@
             "maxProcTime": 90.0,
             "minOpsPerJob": 3,
             "maxOpsPerJob": 7,
-            "maxArrivalTime": 0.0
+            "maxArrivalTime": 0.0,
+            "agvCount": 5
         },
         {
             "name": "xlarge_100j_20m",
@@ -70,7 +73,8 @@
             "maxProcTime": 120.0,
             "minOpsPerJob": 3,
             "maxOpsPerJob": 10,
-            "maxArrivalTime": 0.0
+            "maxArrivalTime": 0.0,
+            "agvCount": 7
         },
         {
             "name": "dynamic_30j_15m",
@@ -88,7 +92,8 @@
             "maxProcTime": 60.0,
             "minOpsPerJob": 4,
             "maxOpsPerJob": 6,
-            "maxArrivalTime": 120.0
+            "maxArrivalTime": 120.0,
+            "agvCount": 5
         }
     ]
 }

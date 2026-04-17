@@ -14,6 +14,8 @@ namespace Assets.Scripts.Simulation.Types
         public double TotalReward;
         public int[] PerMachineDecisions;
 
+        public int AGVCount;
+
         /// @brief Percentage deviation of achieved makespan from the known optimum.
         public double OptimalityGap => OptimalMakespan > 0
             ? (Makespan - OptimalMakespan) / OptimalMakespan * 100.0

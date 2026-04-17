@@ -1,7 +1,7 @@
 services:
   ml-agents:
     build: ./env # Points to the Dockerfile inside /env
-    container_name: unity-ml-agents
+    container_name: unity-ml-agents-test
     ports:
       - "6006:6006" # TensorBoard
       - "5004:5004" # Unity ML-Agents Socket

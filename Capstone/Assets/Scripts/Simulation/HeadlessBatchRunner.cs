@@ -421,7 +421,8 @@ namespace Assets.Scripts.Simulation
                             totalOps: totalOps,
                             decisionCount: runResult.DecisionPoints,
                             totalReward: runResult.TotalReward,
-                            averageTimeScale: Time.timeScale
+                            averageTimeScale: Time.timeScale,
+                            agvCount: runResult.AGVCount
                         );
                     }
 
@@ -477,7 +478,8 @@ namespace Assets.Scripts.Simulation
                     totalOps: totalOps,
                     decisionCount: runResult.DecisionPoints,
                     totalReward: runResult.TotalReward,
-                    averageTimeScale: Time.timeScale
+                    averageTimeScale: Time.timeScale,
+                    agvCount: runResult.AGVCount
                 );
             }
 

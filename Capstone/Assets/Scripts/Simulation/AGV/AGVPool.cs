@@ -33,7 +33,7 @@ namespace Assets.Scripts.Simulation.AGV
         /// @details Calculates parking positions based on the @c layoutManager coordinates
         /// and spawns units in a linear arrangement. Each unit is initialized with
         /// a unique ID corresponding to its index in the fleet.
-        public void InitializeFleet(int fleetSize)
+        public void InitializeFleet(int fleetSize = 3)
         {
             foreach (var agv in fleet) Destroy(agv.gameObject);
             fleet.Clear();
