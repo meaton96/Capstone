@@ -75,6 +75,7 @@ namespace Assets.Scripts.Simulation.Jobs
 
             int numTypes = AllTypes.Length;
             int machinesPerType = Mathf.CeilToInt((float)numMachines / numTypes);
+            int agvCount = Mathf.CeilToInt(machinesPerType * 1.5f);
 
             // Build MachineTypeLayout with one entry per BM machine using
             // the same round-robin assignment that BuildJobs uses.
@@ -114,7 +115,8 @@ namespace Assets.Scripts.Simulation.Jobs
                 MaxProcTime = maxProc,
                 MinOpsPerJob = minOps,
                 MaxOpsPerJob = maxOps,
-                MaxArrivalTime = 0f,            // BM: all jobs at t=0
+                MaxArrivalTime = 0f,
+                AGVCount = agvCount
             };
         }
 

@@ -1,0 +1,422 @@
+{
+    "configs": [
+        {
+            "name": "30j_15m_agv2",
+            "seed": 42,
+            "jobCount": 30,
+            "machinesPerType": 3,
+            "machineTypes": [
+                "Mill",
+                "Lathe",
+                "Weld",
+                "Inspect",
+                "Assemble"
+            ],
+            "minProcTime": 15.0,
+            "maxProcTime": 60.0,
+            "minOpsPerJob": 4,
+            "maxOpsPerJob": 6,
+            "maxArrivalTime": 0.0,
+            "agvCount": 2
+        },
+        {
+            "name": "30j_15m_agv5",
+            "seed": 42,
+            "jobCount": 30,
+            "machinesPerType": 3,
+            "machineTypes": [
+                "Mill",
+                "Lathe",
+                "Weld",
+                "Inspect",
+                "Assemble"
+            ],
+            "minProcTime": 15.0,
+            "maxProcTime": 60.0,
+            "minOpsPerJob": 4,
+            "maxOpsPerJob": 6,
+            "maxArrivalTime": 0.0,
+            "agvCount": 5
+        },
+        {
+            "name": "30j_15m_agv8",
+            "seed": 42,
+            "jobCount": 30,
+            "machinesPerType": 3,
+            "machineTypes": [
+                "Mill",
+                "Lathe",
+                "Weld",
+                "Inspect",
+                "Assemble"
+            ],
+            "minProcTime": 15.0,
+            "maxProcTime": 60.0,
+            "minOpsPerJob": 4,
+            "maxOpsPerJob": 6,
+            "maxArrivalTime": 0.0,
+            "agvCount": 8
+        },
+        {
+            "name": "30j_15m_agv12",
+            "seed": 42,
+            "jobCount": 30,
+            "machinesPerType": 3,
+            "machineTypes": [
+                "Mill",
+                "Lathe",
+                "Weld",
+                "Inspect",
+                "Assemble"
+            ],
+            "minProcTime": 15.0,
+            "maxProcTime": 60.0,
+            "minOpsPerJob": 4,
+            "maxOpsPerJob": 6,
+            "maxArrivalTime": 0.0,
+            "agvCount": 12
+        },
+        {
+            "name": "30j_15m_agv15",
+            "seed": 42,
+            "jobCount": 30,
+            "machinesPerType": 3,
+            "machineTypes": [
+                "Mill",
+                "Lathe",
+                "Weld",
+                "Inspect",
+                "Assemble"
+            ],
+            "minProcTime": 15.0,
+            "maxProcTime": 60.0,
+            "minOpsPerJob": 4,
+            "maxOpsPerJob": 6,
+            "maxArrivalTime": 0.0,
+            "agvCount": 15
+        },
+        {
+            "name": "30j_15m_agv20",
+            "seed": 42,
+            "jobCount": 30,
+            "machinesPerType": 3,
+            "machineTypes": [
+                "Mill",
+                "Lathe",
+                "Weld",
+                "Inspect",
+                "Assemble"
+            ],
+            "minProcTime": 15.0,
+            "maxProcTime": 60.0,
+            "minOpsPerJob": 4,
+            "maxOpsPerJob": 6,
+            "maxArrivalTime": 0.0,
+            "agvCount": 20
+        },
+        {
+            "name": "30j_5m_agv10",
+            "seed": 42,
+            "jobCount": 30,
+            "machinesPerType": 1,
+            "machineTypes": [
+                "Mill",
+                "Lathe",
+                "Weld",
+                "Inspect",
+                "Assemble"
+            ],
+            "minProcTime": 15.0,
+            "maxProcTime": 60.0,
+            "minOpsPerJob": 4,
+            "maxOpsPerJob": 6,
+            "maxArrivalTime": 0.0,
+            "agvCount": 10
+        },
+        {
+            "name": "30j_10m_agv10",
+            "seed": 42,
+            "jobCount": 30,
+            "machinesPerType": 2,
+            "machineTypes": [
+                "Mill",
+                "Lathe",
+                "Weld",
+                "Inspect",
+                "Assemble"
+            ],
+            "minProcTime": 15.0,
+            "maxProcTime": 60.0,
+            "minOpsPerJob": 4,
+            "maxOpsPerJob": 6,
+            "maxArrivalTime": 0.0,
+            "agvCount": 10
+        },
+        {
+            "name": "30j_15m_agv10",
+            "seed": 42,
+            "jobCount": 30,
+            "machinesPerType": 3,
+            "machineTypes": [
+                "Mill",
+                "Lathe",
+                "Weld",
+                "Inspect",
+                "Assemble"
+            ],
+            "minProcTime": 15.0,
+            "maxProcTime": 60.0,
+            "minOpsPerJob": 4,
+            "maxOpsPerJob": 6,
+            "maxArrivalTime": 0.0,
+            "agvCount": 10
+        },
+        {
+            "name": "30j_20m_agv10",
+            "seed": 42,
+            "jobCount": 30,
+            "machinesPerType": 4,
+            "machineTypes": [
+                "Mill",
+                "Lathe",
+                "Weld",
+                "Inspect",
+                "Assemble"
+            ],
+            "minProcTime": 15.0,
+            "maxProcTime": 60.0,
+            "minOpsPerJob": 4,
+            "maxOpsPerJob": 6,
+            "maxArrivalTime": 0.0,
+            "agvCount": 10
+        },
+        {
+            "name": "30j_25m_agv10",
+            "seed": 42,
+            "jobCount": 30,
+            "machinesPerType": 5,
+            "machineTypes": [
+                "Mill",
+                "Lathe",
+                "Weld",
+                "Inspect",
+                "Assemble"
+            ],
+            "minProcTime": 15.0,
+            "maxProcTime": 60.0,
+            "minOpsPerJob": 4,
+            "maxOpsPerJob": 6,
+            "maxArrivalTime": 0.0,
+            "agvCount": 10
+        },
+        {
+            "name": "50j_15m_agv3",
+            "seed": 42,
+            "jobCount": 50,
+            "machinesPerType": 3,
+            "machineTypes": [
+                "Mill",
+                "Lathe",
+                "Weld",
+                "Inspect",
+                "Assemble"
+            ],
+            "minProcTime": 15.0,
+            "maxProcTime": 90.0,
+            "minOpsPerJob": 3,
+            "maxOpsPerJob": 7,
+            "maxArrivalTime": 0.0,
+            "agvCount": 3
+        },
+        {
+            "name": "50j_15m_agv5",
+            "seed": 42,
+            "jobCount": 50,
+            "machinesPerType": 3,
+            "machineTypes": [
+                "Mill",
+                "Lathe",
+                "Weld",
+                "Inspect",
+                "Assemble"
+            ],
+            "minProcTime": 15.0,
+            "maxProcTime": 90.0,
+            "minOpsPerJob": 3,
+            "maxOpsPerJob": 7,
+            "maxArrivalTime": 0.0,
+            "agvCount": 5
+        },
+        {
+            "name": "50j_15m_agv10",
+            "seed": 42,
+            "jobCount": 50,
+            "machinesPerType": 3,
+            "machineTypes": [
+                "Mill",
+                "Lathe",
+                "Weld",
+                "Inspect",
+                "Assemble"
+            ],
+            "minProcTime": 15.0,
+            "maxProcTime": 90.0,
+            "minOpsPerJob": 3,
+            "maxOpsPerJob": 7,
+            "maxArrivalTime": 0.0,
+            "agvCount": 10
+        },
+        {
+            "name": "50j_15m_agv15",
+            "seed": 42,
+            "jobCount": 50,
+            "machinesPerType": 3,
+            "machineTypes": [
+                "Mill",
+                "Lathe",
+                "Weld",
+                "Inspect",
+                "Assemble"
+            ],
+            "minProcTime": 15.0,
+            "maxProcTime": 90.0,
+            "minOpsPerJob": 3,
+            "maxOpsPerJob": 7,
+            "maxArrivalTime": 0.0,
+            "agvCount": 15
+        },
+        {
+            "name": "50j_15m_agv20",
+            "seed": 42,
+            "jobCount": 50,
+            "machinesPerType": 3,
+            "machineTypes": [
+                "Mill",
+                "Lathe",
+                "Weld",
+                "Inspect",
+                "Assemble"
+            ],
+            "minProcTime": 15.0,
+            "maxProcTime": 90.0,
+            "minOpsPerJob": 3,
+            "maxOpsPerJob": 7,
+            "maxArrivalTime": 0.0,
+            "agvCount": 20
+        },
+        {
+            "name": "50j_15m_agv30",
+            "seed": 42,
+            "jobCount": 50,
+            "machinesPerType": 3,
+            "machineTypes": [
+                "Mill",
+                "Lathe",
+                "Weld",
+                "Inspect",
+                "Assemble"
+            ],
+            "minProcTime": 15.0,
+            "maxProcTime": 90.0,
+            "minOpsPerJob": 3,
+            "maxOpsPerJob": 7,
+            "maxArrivalTime": 0.0,
+            "agvCount": 30
+        },
+        {
+            "name": "50j_5m_agv15",
+            "seed": 42,
+            "jobCount": 50,
+            "machinesPerType": 1,
+            "machineTypes": [
+                "Mill",
+                "Lathe",
+                "Weld",
+                "Inspect",
+                "Assemble"
+            ],
+            "minProcTime": 15.0,
+            "maxProcTime": 90.0,
+            "minOpsPerJob": 3,
+            "maxOpsPerJob": 7,
+            "maxArrivalTime": 0.0,
+            "agvCount": 15
+        },
+        {
+            "name": "50j_10m_agv15",
+            "seed": 42,
+            "jobCount": 50,
+            "machinesPerType": 2,
+            "machineTypes": [
+                "Mill",
+                "Lathe",
+                "Weld",
+                "Inspect",
+                "Assemble"
+            ],
+            "minProcTime": 15.0,
+            "maxProcTime": 90.0,
+            "minOpsPerJob": 3,
+            "maxOpsPerJob": 7,
+            "maxArrivalTime": 0.0,
+            "agvCount": 15
+        },
+        {
+            "name": "50j_15m_agv15_msweep",
+            "seed": 42,
+            "jobCount": 50,
+            "machinesPerType": 3,
+            "machineTypes": [
+                "Mill",
+                "Lathe",
+                "Weld",
+                "Inspect",
+                "Assemble"
+            ],
+            "minProcTime": 15.0,
+            "maxProcTime": 90.0,
+            "minOpsPerJob": 3,
+            "maxOpsPerJob": 7,
+            "maxArrivalTime": 0.0,
+            "agvCount": 15
+        },
+        {
+            "name": "50j_20m_agv15",
+            "seed": 42,
+            "jobCount": 50,
+            "machinesPerType": 4,
+            "machineTypes": [
+                "Mill",
+                "Lathe",
+                "Weld",
+                "Inspect",
+                "Assemble"
+            ],
+            "minProcTime": 15.0,
+            "maxProcTime": 90.0,
+            "minOpsPerJob": 3,
+            "maxOpsPerJob": 7,
+            "maxArrivalTime": 0.0,
+            "agvCount": 15
+        },
+        {
+            "name": "50j_25m_agv15",
+            "seed": 42,
+            "jobCount": 50,
+            "machinesPerType": 5,
+            "machineTypes": [
+                "Mill",
+                "Lathe",
+                "Weld",
+                "Inspect",
+                "Assemble"
+            ],
+            "minProcTime": 15.0,
+            "maxProcTime": 90.0,
+            "minOpsPerJob": 3,
+            "maxOpsPerJob": 7,
+            "maxArrivalTime": 0.0,
+            "agvCount": 15
+        }
+    ]
+}
