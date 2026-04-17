@@ -55,7 +55,14 @@ namespace Assets.Scripts.Simulation
         /// @param actionsOut The action buffer to be populated by the heuristic.
         public override void Heuristic(in ActionBuffers actionsOut)
         {
-            actionsOut.DiscreteActions.Array[0] = SimulationBridge.Instance.GetRuleIndex(heuristicRule);
+            if (heuristicRule == DispatchingRule.Random)
+            {
+                actionsOut.DiscreteActions.Array[0] = Random.Range(0, SimulationBridge.ActionCount);
+            }
+            else
+            {
+                actionsOut.DiscreteActions.Array[0] = SimulationBridge.Instance.GetRuleIndex(heuristicRule);
+            }
         }
 
         /// @brief Subscribes to simulation events when the component is enabled.

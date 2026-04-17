@@ -10,5 +10,6 @@ namespace Assets.Scripts.Simulation.Types
         SRT_SMPT,   ///< Shortest Remaining Time with Smallest Most Urgent Remaining Time secondary metric.
         LRT_MMUR,   ///< Longest Remaining Time — primary sort by total remaining work descending. Equivalent to @c most_work_remaining in job_shop_lib.
         SDT_SRWT,   ///< Smallest Due Time — FIFO based on arrival order. Equivalent to @c first_come_first_served in job_shop_lib.
+        Random,
     }
 }
