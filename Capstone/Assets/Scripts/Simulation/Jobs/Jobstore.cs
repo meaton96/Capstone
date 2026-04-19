@@ -142,10 +142,14 @@ namespace Assets.Scripts.Simulation.Jobs
             float load = 0f;
             foreach (var job in allJobs)
             {
+                // Count jobs physically queued here
                 if (job.State == JobState.Queued && job.LocationMachineId == machineId)
-                {
                     load += job.GetProcessingTime(machineId);
-                }
+
+                // Also count jobs committed to this machine but not yet arrived
+                else if (job.TargetMachineId == machineId &&
+                         (job.State == JobState.WaitingForPickup || job.State == JobState.InTransit))
+                    load += job.GetProcessingTime(machineId);
             }
             return load;
         }

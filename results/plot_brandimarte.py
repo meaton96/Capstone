@@ -5,7 +5,7 @@ Usage:
     python plot_brandimarte.py <results.csv> [--out <output_dir>]
 
 Produces:
-    1. makespan_by_instance_bar.png  — grouped bar: PDR × MK instance
+    1. makespan_by_instance_bar.png  — grouped bar: PDR x MK instance
     2. pdr_rank_heatmap.png          — heatmap of PDR rank (1=best) per instance
     3. random_pdr_boxplot.png        — box plot of RANDOM rule variance per instance
     4. best_pdr_per_instance.png     — which PDR wins each instance
@@ -26,7 +26,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-from viz_utils import load_brandimarte, PDR_ORDER, PDR_LABELS
+from results.viz_utils import load_brandimarte, PDR_ORDER, PDR_LABELS
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
