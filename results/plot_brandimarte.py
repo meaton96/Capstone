@@ -26,7 +26,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-from results.viz_utils import load_brandimarte, PDR_ORDER, PDR_LABELS
+from viz_utils import load_brandimarte, PDR_ORDER, PDR_LABELS
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
