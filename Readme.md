@@ -91,6 +91,17 @@ Each **Job Token** follows a strict path from entry to exit:
 ### Results
 Baseline results are stored as CSV in the /results folder. Included are results for the randomly generated job sets (Guassian selection) and Brandimarte job sets mk01-mk15 across all 8 PDRs and random selection. Also included is a sensitivity sweep varying the number of AGVs and Machines across different job and operation counts.
 
+Plots can be generated using the premade python scripts and CSV files. A virtual env and package list is not provided for this as these scripts only use standard data science packages such as matplotlib, numpy, pandas and seaborn for plotting.
+
+
+```python
+python plot_random_gen.py results_rand.csv --out plots/random
+
+python plot_brandimarte.py results_brand.csv --out plots/brandimarte
+
+python plot_sensitivity.py AGV/agv_sweep.csv --out plots/agv
+```
+
 ## Testing the Code Base
 
 The following sections outline the testing procedures ranging from high-level simulation verification to environment unit testing.
