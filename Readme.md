@@ -10,10 +10,11 @@ A real-time 3D logistics simulation of the Flexible Job Shop Scheduling Problem 
 
 ## Getting Started
 
-1. Download and unzip the release relevant to your operating system.
-2. Run the executable file (`Capstone.exe` for Windows or the `.app` file for macOS).
-3. Configure the simulation parameters via the main menu (problem size, AGV count, etc.).
-4. Click **Start Sim** to begin the episode.
+1. Download and install the latest version of [Docker Desktop](https://docs.docker.com/get-started/get-docker/)
+2. Download and unzip the release relevant to your operating system.
+3. Run the executable file (`Capstone.exe` for Windows or the `.app` file for macOS).
+4. Configure the simulation parameters via the main menu (problem size, AGV count, etc.).
+5. Click **Start Sim** to begin the episode.
 
 ---
 
