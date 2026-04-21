@@ -57,9 +57,6 @@ namespace Assets.Scripts.Simulation.AGV
         public int DeliveredMachineId { get; private set; } = -1;
 
         /// @brief Resets all completion flags and delivery metadata.
-        ///
-        /// @details Should be called by the orchestrator immediately after consuming 
-        /// the status of a @c PickedUpFlag or @c DeliveredFlag.
         public void ClearFlags()
         {
             PickedUpFlag = false;
@@ -104,11 +101,6 @@ namespace Assets.Scripts.Simulation.AGV
         public void SetIdleCallback(System.Action callback) => onBecameIdle = callback;
 
         /// @brief Sets up the AGV identity and initializes navigation components.
-        ///
-        /// @param id The unique integer identifier for this AGV instance.
-        ///
-        /// @details Disables automatic @c NavMeshAgent updates to allow for custom 
-        /// state-based movement and reserves the starting traffic zone.
         public void Initialize(int id)
         {
             AgvId = id;
@@ -149,16 +141,8 @@ namespace Assets.Scripts.Simulation.AGV
         }
 
         /// @brief Commands the AGV to move to a pickup zone before a job is finished.
-        ///
-        /// @param jobId The ID of the job being anticipated.
-        /// @param pickupPos The world position of the source conveyor/dock.
-        /// @param source The machine instance the AGV is heading toward.
-        ///
-        /// @details Transitions the AGV to @c MovingToPrePickup. It will wait 
-        /// at the designated dock until @c FinalizePreDispatch is called.
         public void PreDispatch(int jobId, Vector3 pickupPos, PhysicalMachine source)
         {
-            //Debug.Log("Pre Dispatch");
             if (State != AGVState.Idle && State != AGVState.ReturningToParking)
             {
                 SimLogger.Error($"[AGV {AgvId}] PreDispatch while unavailable (state={State}).");
@@ -208,10 +192,6 @@ namespace Assets.Scripts.Simulation.AGV
         }
 
         /// @brief Upgrades a pre-dispatched AGV to a full pickup and delivery task.
-        ///
-        /// @details If the AGV is already waiting at the dock, it begins the 
-        /// @c handshakeDuration immediately. Otherwise, it stores the target data 
-        /// and proceeds with the pickup on arrival.
         public void FinalizePreDispatch(int jobId, Vector3 dropoffPos,
                                          PhysicalMachine target, JobVisual visual)
         {
@@ -244,7 +224,6 @@ namespace Assets.Scripts.Simulation.AGV
                              PhysicalMachine source, PhysicalMachine target,
                              JobVisual visual)
         {
-            //Debug.Log("Dispatch");
             if (State != AGVState.Idle && State != AGVState.ReturningToParking)
             {
                 SimLogger.Error($"[AGV {AgvId}] Dispatch while busy (state={State}).");
@@ -295,6 +274,7 @@ namespace Assets.Scripts.Simulation.AGV
             BeginNextWaypoint();
         }
 
+        /// @brief Primary state machine loop executing logic based on @c AGVState.
         private void FixedUpdate()
         {
             switch (State)
@@ -350,7 +330,7 @@ namespace Assets.Scripts.Simulation.AGV
             UpdateStatusLabel();
         }
 
-        /// @brief Executes the physical loading of a job and plans the route to the target.
+        /// @brief Executes physical loading from a machine or belt and initiates movement to dropoff.
         private void DoPickup()
         {
             if (sourceMachine != null)
@@ -380,7 +360,7 @@ namespace Assets.Scripts.Simulation.AGV
             BeginNextWaypoint();
         }
 
-        /// @brief Unloads the job at the destination and initiates the return to parking.
+        /// @brief Physical unloading logic that updates delivery flags and routes the AGV to parking.
         private void DoDropoff()
         {
             if (loadedJobVisual != null)
@@ -407,7 +387,7 @@ namespace Assets.Scripts.Simulation.AGV
             BeginParkingRoute();
         }
 
-        /// @brief Calculates the path back to the AGV's assigned parking station.
+        /// @brief Determines the return path to the assigned @c AGVPool parking station.
         private void BeginParkingRoute()
         {
             Vector3 parkPos = AGVPool.Instance.GetParkingPosition(AgvId);
@@ -434,13 +414,14 @@ namespace Assets.Scripts.Simulation.AGV
             BeginNextWaypoint();
         }
 
+        /// @brief Checks if the AGV has physically arrived at its parking coordinate.
         private bool ReachedParking()
         {
             Vector3 parkPos = AGVPool.Instance.GetParkingPosition(AgvId);
             return FlatDistance(transform.position, parkPos) <= waypointArrivalDist;
         }
 
-        /// @brief Finalizes state and releases all zone reservations once parked.
+        /// @brief Cleanup function to release final zone reservations and return to @c Idle state.
         private void ArriveAtParking()
         {
             if (previousZoneId >= 0) { trafficMgr.Release(previousZoneId, AgvId); previousZoneId = -1; }
@@ -454,10 +435,7 @@ namespace Assets.Scripts.Simulation.AGV
             onBecameIdle?.Invoke();
         }
 
-        /// @brief Forces the AGV to abort its current job and return home.
-        ///
-        /// @details Used exclusively for error recovery if a route calculation fails 
-        /// or a machine becomes unreachable mid-transit.
+        /// @brief Emergency recovery method to clear active job data and attempt a return to home.
         private void FullReset()
         {
             SimLogger.Error($"[AGV {AgvId}] FullReset for job {CurrentJobId}.");
@@ -487,7 +465,7 @@ namespace Assets.Scripts.Simulation.AGV
 
         public void SetCarryVisual(JobVisual visual) => loadedJobVisual = visual;
 
-        /// @brief Updates the AGV's position toward the current waypoint.
+        /// @brief Handles incremental movement toward the active waypoint or traffic zone center.
         private void UpdateMovement()
         {
             if (waitingForZone)
@@ -514,10 +492,7 @@ namespace Assets.Scripts.Simulation.AGV
             }
         }
 
-        /// @brief Attempts to acquire the next traffic zone in the planned route.
-        ///
-        /// @details If the next zone is occupied, the AGV sets @c waitingForZone 
-        /// to true and stays at its current position until the zone clears.
+        /// @brief Logic for attempting to reserve and navigate into the next @c TrafficZone in the route.
         private void BeginNextWaypoint()
         {
             if (routeIndex < currentRoute.Count)
@@ -555,6 +530,7 @@ namespace Assets.Scripts.Simulation.AGV
             }
         }
 
+        /// @brief Polls the @c TrafficZoneManager for a previously blocked zone reservation.
         private void TryResumeFromWait()
         {
             if (Time.fixedTime < nextRetryTime) return;
@@ -572,6 +548,7 @@ namespace Assets.Scripts.Simulation.AGV
             }
         }
 
+        /// @brief Manages the transition of reservations when crossing zone boundaries.
         private void OnEnteredZone(int newZoneId)
         {
             if (previousZoneId >= 0 && previousZoneId != newZoneId)
@@ -581,6 +558,7 @@ namespace Assets.Scripts.Simulation.AGV
             currentZoneId = newZoneId;
         }
 
+        /// @brief Requests a list of zone IDs from the @c TrafficZoneManager to form a navigation path.
         private bool PlanRoute(int fromZone, int toZone)
         {
             currentRoute.Clear();
@@ -594,6 +572,7 @@ namespace Assets.Scripts.Simulation.AGV
             return true;
         }
 
+        /// @brief Translates and rotates the AGV toward a world-space coordinate.
         private void MoveToward(Vector3 target)
         {
             Vector3 dir = target - transform.position;
@@ -610,12 +589,14 @@ namespace Assets.Scripts.Simulation.AGV
             }
         }
 
+        /// @brief Helper to rotate the AGV to face a specific direction vector.
         private void RotateToward(Vector3 flatDir)
         {
             Quaternion goal = Quaternion.LookRotation(flatDir, Vector3.up);
             transform.rotation = Quaternion.RotateTowards(transform.rotation, goal, turnSpeed * Time.fixedDeltaTime);
         }
 
+        /// @brief Aligns the AGV's forward vector to the required @c FacingDirection of a dock.
         private void AlignToDock(DockPoint dock)
         {
             Vector3 desired = dock.FacingDirection;
@@ -624,6 +605,7 @@ namespace Assets.Scripts.Simulation.AGV
                 RotateToward(desired.normalized);
         }
 
+        /// @brief Checks if the AGV's current orientation is within the @c alignmentThreshold.
         private bool IsFacingDock(DockPoint dock)
         {
             Vector3 desired = dock.FacingDirection;
@@ -632,11 +614,13 @@ namespace Assets.Scripts.Simulation.AGV
             return Vector3.Angle(transform.forward, desired) <= alignmentThreshold;
         }
 
+        /// @brief Utility to check if the AGV is within arrival distance of a dock's approach point.
         private bool ReachedDock(DockPoint dock)
         {
             return FlatDistance(transform.position, dock.ApproachPosition) <= dockArrivalDist;
         }
 
+        /// @brief Searches available traffic zones to find the optimal dock for a specific machine ID.
         private (int zoneId, DockPoint dock) FindDockForMachine(int machineId, int fromZoneId, Vector3 targetConveyorPos)
         {
             List<int> candidates = trafficMgr.GetZonesForMachine(machineId);
@@ -658,6 +642,7 @@ namespace Assets.Scripts.Simulation.AGV
             return (bestZone, bestDock);
         }
 
+        /// @brief Finds specific static docks (e.g., incoming/outgoing factory belts).
         private (int zoneId, DockPoint dock) FindSpecialDock(int specialId)
         {
             foreach (TrafficZone zone in trafficMgr.Zones)
@@ -668,12 +653,14 @@ namespace Assets.Scripts.Simulation.AGV
             return (-1, default);
         }
 
+        /// @brief Queries the @c TrafficZoneManager for the zone ID at the AGV's current position.
         private int FindZoneAtSelf()
         {
             TrafficZone z = trafficMgr.GetZoneAtPosition(transform.position);
             return z?.ZoneId ?? -1;
         }
 
+        /// @brief Calculates the Euclidean distance between two points on the XZ plane.
         private static float FlatDistance(Vector3 a, Vector3 b)
         {
             float dx = a.x - b.x;
@@ -681,12 +668,14 @@ namespace Assets.Scripts.Simulation.AGV
             return Mathf.Sqrt(dx * dx + dz * dz);
         }
 
+        /// @brief Returns a copy of a position vector snapped to the AGV's @c groundOffset.
         private Vector3 FlatY(Vector3 pos)
         {
             pos.y = groundOffset;
             return pos;
         }
 
+        /// @brief Updates the TextMeshPro debug overlay with state and navigation info.
         private void UpdateStatusLabel()
         {
             if (statusLabel == null) return;
@@ -717,6 +706,7 @@ namespace Assets.Scripts.Simulation.AGV
             };
         }
 
+        /// @brief Visualizes the planned path and current target in the Unity Editor.
         private void OnDrawGizmosSelected()
         {
             if (currentRoute == null || currentRoute.Count == 0 || trafficMgr == null) return;
