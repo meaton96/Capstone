@@ -10,25 +10,23 @@ namespace Assets.Scripts.Simulation
 {
     public class ObservationBuilder
     {
-        // ── Dimensions (must match Gymnasium Dict/Box space definitions) ──
+        // Dimensions must match Gymnasium Dict/Box space definitions.
         public const int SpatialGridSize = 64;
         public const int SpatialChannels = 3;
         public const int SpatialLength = SpatialGridSize * SpatialGridSize * SpatialChannels;
 
-        public const int MaxJobs = 20;       // n  — pad/truncate to fixed width
-        public const int MaxMachines = 8;     // m  — half-columns in scheduling matrix
+        public const int MaxJobs = 20;
+        public const int MaxMachines = 8;
         public const int SchedChannels = 3;
         public const int SchedulingLength = MaxJobs * (2 * MaxMachines) * SchedChannels;
 
         public const int GlobalScalarLength = 10;
-        public const int DistanceLength = MaxMachines * MaxMachines; // 64-D flattened
+        public const int DistanceLength = MaxMachines * MaxMachines;
         public const int EventFlagLength = 6;
 
-        /// Total observation width sent to ML-Agents.
         public static int TotalObservationSize =>
             SpatialLength + SchedulingLength + GlobalScalarLength + DistanceLength + EventFlagLength;
 
-        // ── Domain randomization parameters ──
         private const float NoiseStdDev = 0.02f;
         private const float DropoutRate = 0.05f;
 
@@ -39,10 +37,11 @@ namespace Assets.Scripts.Simulation
             _bridge = bridge;
         }
 
-        // ═══════════════════════════════════════════════════════════════════
-        //  Public entry point — called by SchedulingAgent.CollectObservations
-        // ═══════════════════════════════════════════════════════════════════
-
+        /**
+         * @brief Builds the complete observation snapshot sent to ML-Agents.
+         * @param currentDecision The decision request triggering this observation.
+         * @return Flattened float array containing all observation streams concatenated.
+         */
         public float[] BuildCompleteSnapshot(DecisionRequest currentDecision)
         {
             float[] spatialGrid = BuildSpatialOccupancyGrid();
@@ -56,17 +55,14 @@ namespace Assets.Scripts.Simulation
             return FlattenStreams(spatialGrid, schedulingMatrix, globalScalars, distanceMatrix, eventFlags);
         }
 
-        // ═══════════════════════════════════════════════════════════════════
-        //  Stream 1 — Spatial Occupancy Grid  (64 × 64 × 3)
-        // ═══════════════════════════════════════════════════════════════════
-        //
-        //  Channel 0: Machine locations and status
-        //      idle = 0.25, processing = 0.75, finished = 1.0
-        //  Channel 1: Job physical locations
-        //      value = normalized remaining-ops fraction (0→1)
-        //  Channel 2: AGV locations and heading
-        //      idle/parked = 0.25, moving-to-pickup = 0.5, carrying = 0.75, returning = 0.3
-
+        /**
+         * @brief Builds the 64x64x3 spatial occupancy grid.
+         * @details Channel 0 encodes machine status (idle=0.25, processing=0.75, finished=1.0).
+         *          Channel 1 encodes job locations, with intensity set to the normalized
+         *          remaining-ops fraction. Channel 2 encodes AGV locations and movement
+         *          state (idle=0.25, returning=0.30, moving-to-pickup=0.50, carrying=0.75).
+         * @return Flattened grid in channel-major order.
+         */
         private float[] BuildSpatialOccupancyGrid()
         {
             float[] grid = new float[SpatialLength];
@@ -74,18 +70,16 @@ namespace Assets.Scripts.Simulation
             FactoryLayoutManager layout = FactoryLayoutManager.Instance;
             if (layout == null || layout.Machines == null) return grid;
 
-            // Determine world-space bounds for normalizing positions → grid cells.
-            Vector2 floorSize = layout.FloorSize;                 // (width, depth)
-            Vector3 floorCentre = layout.GridOrigin;              // top-left of machine area
-            // Use a bounding box centred on the factory.
+            Vector2 floorSize = layout.FloorSize;
+            Vector3 floorCentre = layout.GridOrigin;
             float halfW = floorSize.x / 2f;
             float halfD = floorSize.y / 2f;
-            // Floor centre from the transform (GridOrigin is the top-left; we need the actual centre).
-            // Approximate: midpoint is GridOrigin shifted by half machine area.
+
+            // GridOrigin is the top-left of the machine area; compute the actual centre.
             float centreX = floorCentre.x + ((layout.LayoutCols - 1) * layout.MachineSpacingX) / 2f;
             float centreZ = floorCentre.z - ((layout.LayoutRows - 1) * layout.RowPitch) / 2f;
 
-            // ── Channel 0: Machines ──
+            // Channel 0: Machines
             foreach (PhysicalMachine m in layout.Machines)
             {
                 int gx, gy;
@@ -100,7 +94,7 @@ namespace Assets.Scripts.Simulation
                 SetGrid(grid, 0, gx, gy, val);
             }
 
-            // ── Channel 1: Jobs ──
+            // Channel 1: Jobs
             foreach (JobData job in _bridge.Jobs.AllJobs)
             {
                 if (job.State == JobState.Exited) continue;
@@ -110,17 +104,16 @@ namespace Assets.Scripts.Simulation
                 WorldToGrid(pos, centreX, centreZ, halfW, halfD, out gx, out gy);
                 if (!InBounds(gx, gy)) continue;
 
-                // Encode progress: 1.0 = just started, trending to 0.0 as ops complete.
                 float progress = job.TotalOperations > 0
                     ? 1f - ((float)job.CompletedOps / job.TotalOperations)
                     : 0.5f;
 
-                // Accumulate (multiple jobs can share a cell — max keeps strongest signal).
+                // Multiple jobs can share a cell; max keeps the strongest signal.
                 float existing = GetGrid(grid, 1, gx, gy);
                 SetGrid(grid, 1, gx, gy, Mathf.Max(existing, progress));
             }
 
-            // ── Channel 2: AGVs ──
+            // Channel 2: AGVs
             if (AGVPool.Instance != null)
             {
                 foreach (AGVController agv in AGVPool.Instance.AllAGVs)
@@ -134,7 +127,7 @@ namespace Assets.Scripts.Simulation
                     else if (agv.State == AGVState.ReturningToParking) val = 0.30f;
                     else if (agv.State == AGVState.MovingToPickup ||
                              agv.State == AGVState.MovingToPrePickup) val = 0.50f;
-                    else val = 0.75f; // MovingToDropoff
+                    else val = 0.75f;
 
                     float existing = GetGrid(grid, 2, gx, gy);
                     SetGrid(grid, 2, gx, gy, Mathf.Max(existing, val));
@@ -144,17 +137,15 @@ namespace Assets.Scripts.Simulation
             return grid;
         }
 
-        // ═══════════════════════════════════════════════════════════════════
-        //  Stream 2 — Scheduling Matrix  (n × 2m × 3)
-        // ═══════════════════════════════════════════════════════════════════
-        //
-        //  Rows    = jobs  (padded/truncated to MaxJobs)
-        //  Columns = 2 × MaxMachines (first m = current op, second m = next op)
-        //  Depth channels:
-        //      ch 0: normalized processing time  (0 if ineligible)
-        //      ch 1: completion flag              (1 if op already done)
-        //      ch 2: machine busy flag            (1 if machine currently processing)
-
+        /**
+         * @brief Builds the scheduling matrix of shape (MaxJobs, 2 * MaxMachines, 3).
+         * @details Rows are jobs padded/truncated to MaxJobs. The first MaxMachines columns
+         *          represent the current operation; the next MaxMachines columns represent
+         *          the next operation. Channel 0 is normalized processing time (0 if
+         *          ineligible), channel 1 is the completion flag, channel 2 is the machine
+         *          busy flag.
+         * @return Flattened scheduling matrix.
+         */
         private float[] BuildSchedulingMatrix()
         {
             float[] matrix = new float[SchedulingLength];
@@ -163,7 +154,6 @@ namespace Assets.Scripts.Simulation
             FactoryLayoutManager layout = FactoryLayoutManager.Instance;
             if (layout == null) return matrix;
 
-            // Determine normalization ceiling from config.
             float maxProcTime = _bridge.CurrentConfig != null ? _bridge.CurrentConfig.MaxProcTime : 90f;
 
             int colWidth = 2 * MaxMachines;
@@ -172,7 +162,7 @@ namespace Assets.Scripts.Simulation
             {
                 JobData job = jobs[j];
 
-                // ── Current operation slice (columns 0 .. MaxMachines-1) ──
+                // Current operation slice (columns 0 to MaxMachines-1).
                 if (job.CurrentOpIndex < job.TotalOperations)
                 {
                     var eligible = job.EligibleMachinesPerOp[job.CurrentOpIndex];
@@ -185,7 +175,7 @@ namespace Assets.Scripts.Simulation
 
                         int baseIdx = (j * colWidth + machId) * SchedChannels;
                         matrix[baseIdx + 0] = Mathf.Clamp01(normTime);
-                        matrix[baseIdx + 1] = 0f; // not yet completed
+                        matrix[baseIdx + 1] = 0f;
                         matrix[baseIdx + 2] = layout.GetMachine(machId) != null && !layout.GetMachine(machId).IsIdle ? 1f : 0f;
                     }
                 }
@@ -201,12 +191,12 @@ namespace Assets.Scripts.Simulation
                             int machId = kvp.Key;
                             if (machId >= MaxMachines) continue;
                             int baseIdx = (j * colWidth + machId) * SchedChannels;
-                            matrix[baseIdx + 1] = 1f; // completed
+                            matrix[baseIdx + 1] = 1f;
                         }
                     }
                 }
 
-                // ── Next operation slice (columns MaxMachines .. 2*MaxMachines-1) ──
+                // Next operation slice (columns MaxMachines to 2*MaxMachines-1).
                 int nextOp = job.CurrentOpIndex + 1;
                 if (nextOp < job.TotalOperations)
                 {
@@ -230,10 +220,12 @@ namespace Assets.Scripts.Simulation
             return matrix;
         }
 
-        // ═══════════════════════════════════════════════════════════════════
-        //  Stream 3 — Global Scalars  (10-D)
-        // ═══════════════════════════════════════════════════════════════════
-
+        /**
+         * @brief Builds the 10-dimensional global scalar feature vector.
+         * @details Encodes simulation time, job state fractions, machine/AGV utilization,
+         *          queue pressure, and normalized decision index.
+         * @return Float array of length GlobalScalarLength.
+         */
         private float[] BuildGlobalScalars()
         {
             float[] s = new float[GlobalScalarLength];
@@ -243,7 +235,7 @@ namespace Assets.Scripts.Simulation
             int totalJobs = Mathf.Max(store.JobCount, 1);
             int totalMachines = layout != null ? layout.MachineCount : 1;
 
-            // [0] Normalized simulation time (relative to a rough horizon estimate).
+            // [0] Normalized simulation time against a rough horizon estimate.
             float horizon = _bridge.CurrentConfig != null
                 ? _bridge.CurrentConfig.MaxProcTime * (_bridge.CurrentConfig.MaxOpsPerJob)
                 : 500f;
@@ -252,10 +244,10 @@ namespace Assets.Scripts.Simulation
             // [1] Overall completion ratio.
             s[1] = (float)store.CountInState(JobState.Exited) / totalJobs;
 
-            // [2] Fraction of jobs currently in processing.
+            // [2] Fraction of jobs currently processing.
             s[2] = (float)store.CountInState(JobState.Processing) / totalJobs;
 
-            // [3] Fraction of jobs waiting for pickup / in transit.
+            // [3] Fraction of jobs waiting for pickup or in transit.
             s[3] = (float)(store.CountInState(JobState.WaitingForPickup) +
                            store.CountInState(JobState.InTransit)) / totalJobs;
 
@@ -265,7 +257,7 @@ namespace Assets.Scripts.Simulation
             // [5] Fraction of jobs needing routing decisions.
             s[5] = (float)store.CountInState(JobState.NeedsRouting) / totalJobs;
 
-            // [6] Machine utilization — fraction of machines currently busy.
+            // [6] Machine utilization.
             if (layout != null && layout.Machines != null)
             {
                 int busy = 0;
@@ -274,7 +266,7 @@ namespace Assets.Scripts.Simulation
                 s[6] = (float)busy / Mathf.Max(totalMachines, 1);
             }
 
-            // [7] AGV utilization — fraction of AGVs not idle.
+            // [7] AGV utilization.
             if (AGVPool.Instance != null && AGVPool.Instance.AllAGVs.Count > 0)
             {
                 int activeAgvs = 0;
@@ -283,7 +275,7 @@ namespace Assets.Scripts.Simulation
                 s[7] = (float)activeAgvs / AGVPool.Instance.AllAGVs.Count;
             }
 
-            // [8] Queue pressure — max queue load across all machines, normalized.
+            // [8] Queue pressure: max queue load across all machines, normalized.
             if (layout != null && layout.Machines != null)
             {
                 float maxLoad = 0f;
@@ -295,21 +287,19 @@ namespace Assets.Scripts.Simulation
                 s[8] = Mathf.Clamp01(maxLoad / Mathf.Max(horizon, 1f));
             }
 
-            // [9] Normalized decision index (how far into the episode are we?).
-            // Use total ops as a rough ceiling for how many decisions we expect.
+            // [9] Normalized decision index. Each op generates ~2 decisions (routing + dispatch).
             int totalOps = 0;
             foreach (JobData job in store.AllJobs)
                 totalOps += job.TotalOperations;
-            // Each op generates ~2 decisions (routing + dispatch), so total ≈ 2 × totalOps.
             s[9] = Mathf.Clamp01((float)_bridge.DecisionCount / Mathf.Max(totalOps * 2, 1));
 
             return s;
         }
 
-        // ═══════════════════════════════════════════════════════════════════
-        //  Stream 4 — Distance Matrix  (MaxMachines × MaxMachines, flattened)
-        // ═══════════════════════════════════════════════════════════════════
-
+        /**
+         * @brief Copies the layout manager's precomputed machine-to-machine distance matrix.
+         * @return Flattened distance matrix of length DistanceLength.
+         */
         private float[] BuildDistanceMatrix()
         {
             float[] dist = new float[DistanceLength];
@@ -317,33 +307,32 @@ namespace Assets.Scripts.Simulation
             FactoryLayoutManager layout = FactoryLayoutManager.Instance;
             if (layout == null || layout.DistanceMatrixFlat == null) return dist;
 
-            // LayoutManager already computes a normalized 8×8 flat array — copy directly.
             int copyLen = Mathf.Min(layout.DistanceMatrixFlat.Length, dist.Length);
             System.Array.Copy(layout.DistanceMatrixFlat, dist, copyLen);
 
             return dist;
         }
 
-        // ═══════════════════════════════════════════════════════════════════
-        //  Stream 5 — Event Flags  (6-D one-hot / binary triggers)
-        // ═══════════════════════════════════════════════════════════════════
-
+        /**
+         * @brief Builds the 6-dimensional event flag vector.
+         * @param req The current decision request.
+         * @return Binary/one-hot float array indicating decision type and resource state.
+         */
         private float[] BuildEventFlags(DecisionRequest req)
         {
             float[] flags = new float[EventFlagLength];
 
-            // [0] Is this a Dispatch decision?
+            // [0] Dispatch decision flag.
             flags[0] = req.Type == DecisionType.Dispatch ? 1f : 0f;
 
-            // [1] Is this a Routing decision?
+            // [1] Routing decision flag.
             flags[1] = req.Type == DecisionType.Routing ? 1f : 0f;
 
-            // [2] Are any AGVs idle right now? (resource-availability signal)
+            // [2] At least one AGV is idle.
             if (AGVPool.Instance != null)
                 flags[2] = AGVPool.Instance.GetIdleAGV() != null ? 1f : 0f;
 
-            // [3] Is any machine idle AND has a dispatchable job queued?
-            //     (urgency signal — work is waiting)
+            // [3] At least one machine is idle and has a dispatchable job queued.
             if (FactoryLayoutManager.Instance != null)
             {
                 foreach (PhysicalMachine m in FactoryLayoutManager.Instance.Machines)
@@ -356,10 +345,10 @@ namespace Assets.Scripts.Simulation
                 }
             }
 
-            // [4] Are we past the halfway point of all operations?
+            // [4] Past the halfway point of all operations.
             flags[4] = _bridge.Jobs.CountInState(JobState.Exited) > _bridge.Jobs.JobCount / 2 ? 1f : 0f;
 
-            // [5] Is any machine's AlmostDoneFlag active? (imminent completion)
+            // [5] Any machine's AlmostDoneFlag is active.
             if (FactoryLayoutManager.Instance != null)
             {
                 foreach (PhysicalMachine m in FactoryLayoutManager.Instance.Machines)
@@ -375,32 +364,42 @@ namespace Assets.Scripts.Simulation
             return flags;
         }
 
-        // ═══════════════════════════════════════════════════════════════════
-        //  Domain Randomization — noise injection & sensor dropout
-        // ═══════════════════════════════════════════════════════════════════
-
+        /**
+         * @brief Applies Gaussian noise and dropout to observation streams for robustness.
+         * @param spatial Spatial grid stream.
+         * @param scheduling Scheduling matrix stream.
+         * @param scalars Global scalar stream.
+         */
         private void ApplyDomainRandomization(float[] spatial, float[] scheduling, float[] scalars)
         {
-            // Only apply during training (check Time.timeScale > 1 as a proxy,
-            // or always apply and let the policy become robust).
             AddGaussianNoise(spatial, NoiseStdDev);
-            AddGaussianNoise(scheduling, NoiseStdDev * 0.5f);   // lighter noise on scheduling data
-            AddGaussianNoise(scalars, NoiseStdDev * 0.25f);      // very light on global scalars
+            AddGaussianNoise(scheduling, NoiseStdDev * 0.5f);
+            AddGaussianNoise(scalars, NoiseStdDev * 0.25f);
 
             ApplyDropout(spatial, DropoutRate);
             ApplyDropout(scheduling, DropoutRate * 0.5f);
-            // No dropout on scalars — they are low-dimensional and each element matters.
+            // Scalars are low-dimensional; every element matters, so no dropout.
         }
 
+        /**
+         * @brief Adds Gaussian noise to non-zero elements of the given array in place.
+         * @param data Array to perturb.
+         * @param stdDev Standard deviation of the Gaussian distribution.
+         */
         private static void AddGaussianNoise(float[] data, float stdDev)
         {
             for (int i = 0; i < data.Length; i++)
             {
-                if (data[i] == 0f) continue; // don't inject noise into empty cells
+                if (data[i] == 0f) continue;
                 data[i] += SampleGaussian() * stdDev;
             }
         }
 
+        /**
+         * @brief Zeros out elements of the array with a given probability.
+         * @param data Array to apply dropout to.
+         * @param rate Probability of zeroing each element.
+         */
         private static void ApplyDropout(float[] data, float rate)
         {
             for (int i = 0; i < data.Length; i++)
@@ -410,18 +409,22 @@ namespace Assets.Scripts.Simulation
             }
         }
 
-        /// Box-Muller transform for Gaussian sampling without System.Random.
+        /**
+         * @brief Samples a single value from a standard normal distribution using Box-Muller.
+         * @return A random float with mean 0 and standard deviation 1.
+         */
         private static float SampleGaussian()
         {
-            float u1 = 1f - Random.value; // (0,1] to avoid log(0)
+            float u1 = 1f - Random.value;
             float u2 = Random.value;
             return Mathf.Sqrt(-2f * Mathf.Log(u1)) * Mathf.Sin(2f * Mathf.PI * u2);
         }
 
-        // ═══════════════════════════════════════════════════════════════════
-        //  Helpers
-        // ═══════════════════════════════════════════════════════════════════
-
+        /**
+         * @brief Concatenates multiple float arrays into a single contiguous array.
+         * @param streams Arrays to concatenate in order.
+         * @return Single flattened array containing all stream data.
+         */
         private float[] FlattenStreams(params float[][] streams)
         {
             int totalLength = 0;
@@ -437,11 +440,19 @@ namespace Assets.Scripts.Simulation
             return flattened;
         }
 
-        /// Converts a world XZ position into grid cell coordinates.
+        /**
+         * @brief Converts a world-space XZ position into grid cell coordinates.
+         * @param worldPos World-space position to convert.
+         * @param centreX X coordinate of the factory floor centre.
+         * @param centreZ Z coordinate of the factory floor centre.
+         * @param halfW Half-width of the factory floor on the X axis.
+         * @param halfD Half-depth of the factory floor on the Z axis.
+         * @param gx Output grid X index, clamped to valid range.
+         * @param gy Output grid Y index, clamped to valid range.
+         */
         private void WorldToGrid(Vector3 worldPos, float centreX, float centreZ,
                                   float halfW, float halfD, out int gx, out int gy)
         {
-            // Normalize to [0, 1] then scale to grid indices.
             float nx = (worldPos.x - centreX + halfW) / (2f * halfW);
             float nz = (worldPos.z - centreZ + halfD) / (2f * halfD);
 
@@ -449,30 +460,57 @@ namespace Assets.Scripts.Simulation
             gy = Mathf.Clamp(Mathf.FloorToInt(nz * SpatialGridSize), 0, SpatialGridSize - 1);
         }
 
+        /**
+         * @brief Checks whether grid coordinates fall within the spatial grid.
+         * @param gx Grid X index.
+         * @param gy Grid Y index.
+         * @return True if both indices are within bounds.
+         */
         private static bool InBounds(int gx, int gy)
         {
             return gx >= 0 && gx < SpatialGridSize && gy >= 0 && gy < SpatialGridSize;
         }
 
-        /// Channel-major indexing:  index = channel * (W*H) + gy * W + gx
+        /**
+         * @brief Writes a value into the spatial grid using channel-major indexing.
+         * @param grid Flat grid array.
+         * @param channel Channel index.
+         * @param gx Grid X index.
+         * @param gy Grid Y index.
+         * @param value Value to write.
+         */
         private static void SetGrid(float[] grid, int channel, int gx, int gy, float value)
         {
             grid[channel * (SpatialGridSize * SpatialGridSize) + gy * SpatialGridSize + gx] = value;
         }
 
+        /**
+         * @brief Reads a value from the spatial grid using channel-major indexing.
+         * @param grid Flat grid array.
+         * @param channel Channel index.
+         * @param gx Grid X index.
+         * @param gy Grid Y index.
+         * @return The stored value at the given cell.
+         */
         private static float GetGrid(float[] grid, int channel, int gx, int gy)
         {
             return grid[channel * (SpatialGridSize * SpatialGridSize) + gy * SpatialGridSize + gx];
         }
 
-        /// Resolves a job's current world position based on its lifecycle state.
+        /**
+         * @brief Resolves a job's current world-space position based on its lifecycle state.
+         * @details Prefers the visual transform when available. Otherwise falls back to the
+         *          machine location, assigned AGV position, or the incoming belt position
+         *          depending on the job's state.
+         * @param job The job whose position is requested.
+         * @param layout The factory layout manager providing machine and belt references.
+         * @return World-space position of the job.
+         */
         private Vector3 GetJobWorldPosition(JobData job, FactoryLayoutManager layout)
         {
-            // If the job has a visual, use its actual transform (most accurate).
             if (job.Visual != null && job.Visual.gameObject.activeInHierarchy)
                 return job.Visual.transform.position;
 
-            // Fallback: infer from state.
             switch (job.State)
             {
                 case JobState.Processing:
@@ -486,7 +524,6 @@ namespace Assets.Scripts.Simulation
                     break;
 
                 case JobState.InTransit:
-                    // Job is on an AGV — try to find it.
                     if (job.AssignedAgvId >= 0 && AGVPool.Instance != null)
                     {
                         foreach (AGVController agv in AGVPool.Instance.AllAGVs)
@@ -503,7 +540,6 @@ namespace Assets.Scripts.Simulation
                         PhysicalMachine m = layout.GetMachine(job.LocationMachineId);
                         if (m != null) return m.transform.position;
                     }
-                    // First operation — job is at factory entrance.
                     return layout.IncomingBeltPosition;
             }
 
