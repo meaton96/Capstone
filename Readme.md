@@ -116,7 +116,7 @@ The simplest method to verify the system is by downloading the standalone build.
 ### B. Python Environment Testing
 To verify the ML-Agents environment and the Python-side logic:
 1. Clone the repository.
-2. Navigate to the environment folder: `cd repo/env`.
+2. Navigate to the environment folder.
 3. Build and start the containers: `docker-compose up --build` (this will take several minutes)
 4. Execute the test suite within the container:
    `docker exec -it unity-ml-agents-test pytest`
