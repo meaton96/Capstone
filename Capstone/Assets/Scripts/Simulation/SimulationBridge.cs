@@ -129,34 +129,6 @@ namespace Assets.Scripts.Simulation
         /// and decision counts).
         public void StartEpisode()
         {
-            // ── Diagnostic: dump job states from the previous episode ──
-            if (Jobs != null && Jobs.IsInitialized && Jobs.JobCount > 0)
-            {
-                var counts = new Dictionary<JobState, int>();
-                foreach (var job in Jobs.AllJobs)
-                {
-                    if (!counts.ContainsKey(job.State)) counts[job.State] = 0;
-                    counts[job.State]++;
-                }
-                string summary = string.Join(", ", counts.Select(
-                    kvp => $"{kvp.Key}={kvp.Value}"));
-                SimLogger.Low($"[Orchestrator] Previous episode state at reset: {summary}");
-
-                // Log first stuck job details
-                var stuck = Jobs.AllJobs.FirstOrDefault(j => j.State != JobState.Exited);
-                if (stuck != null)
-                {
-                    SimLogger.Low($"[Orchestrator] Stuck job example: Job {stuck.JobId} " +
-                        $"State={stuck.State} Op={stuck.CurrentOpIndex}/{stuck.TotalOperations} " +
-                        $"Location=M{stuck.LocationMachineId} Target=M{stuck.TargetMachineId} " +
-                        $"AGV={stuck.AssignedAgvId} PreAGV={stuck.PreDispatchedAgvId}");
-                }
-            }
-            // if (Time.timeScale - 1 <= .001f)
-            // {
-            //     SimLogger.Low("Setting timescale to 100f");
-            //     Time.timeScale = 100;
-            // }
             if (currentConfig == null)
             {
                 currentConfig = BuildDefaultConfig();
