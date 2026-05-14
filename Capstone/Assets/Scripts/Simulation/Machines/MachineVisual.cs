@@ -212,6 +212,29 @@ namespace Assets.Scripts.Simulation.Machines
 
             indicatorRenderer.material = indicatorInstanceMaterial;
         }
+        // ── Health/Failure Callbacks ────────────────────────────────────────
+
+        public void BeginFailure()
+        {
+            SetProgressBarVisible(false);
+            SetState(MachineState.Failed);
+            Log("Machine failed!", true);
+        }
+
+        public void BeginRepair(float duration)
+        {
+            SetState(MachineState.Repair);
+            SetProgressBarVisible(true); // Re-use the progress bar for the repair timer
+            if (progressBar != null) progressBar.value = 0f;
+            Log($"Repair started, dur={duration:F1}", true);
+        }
+
+        public void EndRepair()
+        {
+            SetProgressBarVisible(false);
+            SetState(MachineState.Idle);
+            Log("Repair completed", true);
+        }
         private void SetProgressBarVisible(bool visible)
         {
             if (progressBar != null) progressBar.gameObject.SetActive(visible);

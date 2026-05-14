@@ -272,6 +272,20 @@ namespace Assets.Scripts.UI
                 // Fallback uniform bounds — only used for types missing from procParams
                 MinProcTime = 1f,
                 MaxProcTime = 30f,
+                Stochastic = BuildStochasticConfig()
+            };
+        }
+        private StochasticConfig BuildStochasticConfig()
+        {
+            return new StochasticConfig
+            {
+                MachineFailuresEnabled = true,
+                WeibullK = 1.5f,
+                WeibullLambda = 2700.0f,
+                RepairLogMu = 4.0f,
+                RepairLogSigma = 0.5f,
+                // AgvFailuresEnabled = false,
+                DynamicArrivalsEnabled = false
             };
         }
 
