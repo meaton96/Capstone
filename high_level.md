@@ -1,63 +1,52 @@
-Environment & Infrastructure
+# Project Context: DRL-Based Dynamic Flexible Job Shop Scheduling (DFJSP)
 
-These components handle the generation of the physical factory and the logical traffic network.
+This project addresses the **sim-to-real gap** in industrial scheduling by integrating high-fidelity 3D physics with Deep Reinforcement Learning. Unlike traditional discrete event simulators (DES) that treat factories as abstract logical nodes, this framework utilizes a game engine to model continuous physical constraints.
 
-    [x] FactoryLayoutManager.cs
+## 1. The Simulation Environment (Unity)
 
-        Purpose: The physical architect. It calculates grid spacing, instantiates machine prefabs, builds boundary walls for NavMesh carving, and manages I/O belt placement.
+* **Engine:** Built in **Unity 6.3** utilizing native **PhysX** and **NavMesh** pathfinding.
+* **Emergent Physicality:** AGV kinematics, robotic acceleration limits, battery depletion, and spatial congestion are emergent properties of the environment rather than static parameters.
+* **Logistics Optimization:** Implements **predictive AGV pre-dispatch**, where an idle vehicle is sent to a machine dock before an operation finishes to mask transport latency.
+* **Traffic Management:** Uses a specialized manager for **deadlock-free directed zone routing** to handle fleet movement on the factory floor.
 
-    [x] TrafficZoneManager.cs
+## 2. DRL Formulation
 
-        Purpose: The logical traffic controller. It divides the floor into a directed graph of reservable zones. It manages one-way flow constraints and provides BFS pathfinding data for the AGV fleet.
+* **Algorithm:** **Proximal Policy Optimization (PPO)** implemented via Stable-Baselines3 and PyTorch 2.1.
+* **Reward Function:** A dense reward defined as the **negative normalized makespan delta**:
 
-2. Logistics & Fleet Management
+$$\text{Reward}_t = -\frac{\Delta M_t}{N_{ops}}$$
 
-These components handle the transport of materials between workstations.
+where $\Delta M_t$ is the increase in makespan estimate and $N_{ops}$ is the number of remaining operations.
 
-    [x] AGVPool.cs
+* **Action Space (Composite PDRs):** The agent selects from **8 composite Priority Dispatching Rules (PDRs)** to manage combinatorial complexity:
+    * **Throughput Focused:** SPT (Shortest Processing Time) paired with SMPT (Shortest Machine Processing Time).
+    * **Load Balancing:** LPT (Longest Processing Time) or LRT (Longest Remaining Time) paired with MMUR (Minimum Machine Utilization).
+    * **Urgency Focused:** SDT (Shortest Due Time) paired with SRWT (Shortest Remaining Work).
 
-        Purpose: Fleet manager. Handles the instantiation of the AGV fleet and maintains a request queue. If all AGVs are busy, it buffers dispatch requests and assigns them as vehicles become idle.
+## 3. Multimodal Neural Architecture
 
-    [x] AGVController.cs
+To handle both spatial geometry and scheduling logic, the system fuses five parallel data streams:
 
-        Purpose: Individual vehicle intelligence. Implements the "Turn-Then-Move" physical model, handles zone-ahead reservations to prevent deadlocks, and performs "handshakes" with conveyors for job pickup/dropoff.
+| Stream | Format | Description |
+| :--- | :--- | :--- |
+| **Spatial Occupancy** | $64 \times 64 \times 3$ | A 3-channel tensor mapping coordinates of machines, jobs, and AGVs. |
+| **Scheduling Matrix** | $n \times 2m \times 3$ | Tracks processing times and completion flags for operations. |
+| **Global Scalars** | 10-D | Encodes overall factory utilization metrics. |
+| **Distance Matrix** | 64-D | Flattened pairwise physical distances between nodes. |
+| **Event Flags** | 6-D | Signals discrete state changes (e.g., task completion). |
 
-3. Machine Workstations
+* **Size-Agnostic Inference:** The spatial grid and scheduling matrix are processed by **CNN-SPPF** (Spatial Pyramid Pooling-Fast) encoders, allowing the model to generalize to factory configurations and job counts not seen during training.
 
-These components represent the processing units where jobs are transformed.
+## 4. Key Findings & Baselines
 
-    [x] PhysicalMachine.cs
+* **Benchmarking:** Heuristic floors were established using **Taillard** and **Brandimarte (MK01-MK15)** instances.
+* **Rule Sensitivity:** On procedurally generated random instances, PDR choice contributed less than 2% to makespan when AGV transport was the primary bottleneck.
+* **Adaptive Necessity:** On structured benchmarks with high contention, no single PDR dominated across all instances, confirming that an adaptive DRL policy is required to select the optimal rule for specific structural contexts.
 
-        Purpose: The central workstation anchor. It coordinates between the logic of the machine, the input/output conveyors, and the visual feedback. It handles double-sided load balancing.
+## 5. Planned Stochastic Extensions
 
-    [x] ConveyorBelt.cs
+Future work involves testing policy robustness against mid-episode disruptions:
 
-        Purpose: Buffer management. A linear system that moves job visuals toward an output end. It tracks capacity and "packs" items as space opens up.
-
-    [x] MachineVisual.cs
-
-        Purpose: Feedback Layer. Handles mesh color changes (Idle/Busy/Blocked/Failed) and manages the overhead World-Space UI (labels and progress bars).
-
-4. Job & Entity Tracking
-
-These components manage the lifecycle and data of the scheduling units (the Taillard jobs).
-
-    [x] JobManager.cs
-
-        Purpose: The authoritative database. It initializes trackers from JSON/Taillard data, records timestamps for wait/transit times, and drives the state transitions for every job in the episode.
-
-    [x] JobVisual.cs
-
-        Purpose: The physical token. A lightweight script attached to job prefabs that handles smooth interpolation (lerping) between targets and manages visual state colors.
-
-High-Level Data Flow
-
-    Initialization: FactoryLayoutManager builds the floor → TrafficZoneManager builds the graph → JobManager creates job entities.
-
-    Logistics Request: A machine or the incoming belt requests a pickup → AGVPool assigns an AGVController.
-
-    Navigation: AGVController queries TrafficZoneManager for a route → traverses zones via TryReserve().
-
-    Processing: AGV drops job at PhysicalMachine → ConveyorBelt queues it → PhysicalMachine runs processing timer.
-
-    Completion: JobManager updates stats → Job is routed to next machine or the factory exit.
+* **Machine/AGV Failures:** Modeled using a **two-parameter Weibull distribution** ($k=1.5$) to simulate realistic wear-out dynamics.
+* **Repair Times:** Modeled with a **log-normal distribution** to capture heavy-tailed maintenance data.
+* **Dynamic Arrivals:** New jobs arriving via a **homogeneous Poisson process** to shift factory utilization unpredictably.
