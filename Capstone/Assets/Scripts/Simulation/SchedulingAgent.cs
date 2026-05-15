@@ -125,6 +125,7 @@ namespace Assets.Scripts.Simulation
         /// @param req The @c DecisionRequest context.
         private void HandleDecisionRequired(DecisionRequest req)
         {
+            SimLogger.Low($"[Agent] RequestDecision called — communicator={Academy.Instance.IsCommunicatorOn}");
             RequestDecision();
         }
 

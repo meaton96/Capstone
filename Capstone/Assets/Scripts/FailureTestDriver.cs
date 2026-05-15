@@ -7,6 +7,7 @@ using System.Linq;
 
 public class FailureTestDriver : MonoBehaviour
 {
+#if UNITY_EDITOR
     [Header("Force a failure on this machine")]
     public int TargetMachineId = 0;
 
@@ -59,4 +60,5 @@ public class FailureTestDriver : MonoBehaviour
 
         return machines.FirstOrDefault(m => m.MachineId == id);
     }
+#endif
 }

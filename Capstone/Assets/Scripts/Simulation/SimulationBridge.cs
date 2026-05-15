@@ -83,6 +83,12 @@ namespace Assets.Scripts.Simulation
             DispatchingRule.SDT_SRWT
         };
 
+        // ── Stochastic Tracking Variables ──────────────────────────────────────
+        private int _episodeFailureCount;
+        private float _episodeTotalRepairTime;
+        private float _episodeTotalTtfObserved;
+        private Dictionary<int, double> _machineLastOperationalTime = new Dictionary<int, double>();
+
         public static int ActionCount => ActionToRule.Length;
         public int GetRuleIndex(DispatchingRule rule) => Array.IndexOf(ActionToRule, rule);
 
@@ -168,14 +174,23 @@ namespace Assets.Scripts.Simulation
 
             Jobs.Initialize(jobDefs, spawnVisuals: true);
 
-            // ── Stochastic: arm per-machine TTF countdowns ─────────────────────
-            // Re-seed the manager each episode so results are reproducible given
-            // the same config.Seed (deterministic training rollouts).
-            // For training variety, vary config.Seed across episodes at the caller.
-            StochasticEventManager.Instance?.Initialize(currentConfig);
-            foreach (var machine in layoutManager.Machines)
-                machine.InitializeStochastic();
+            if (currentConfig.Stochastic != null && currentConfig.Stochastic.AnyEnabled)
+            {
 
+                // ── Reset Stochastic Tracking ──────────────────────────────────────
+                _episodeFailureCount = 0;
+                _episodeTotalRepairTime = 0f;
+                _episodeTotalTtfObserved = 0f;
+                _machineLastOperationalTime.Clear();
+
+                // ── Stochastic: arm per-machine TTF countdowns ─────────────────────
+                StochasticEventManager.Instance?.Initialize(currentConfig);
+                foreach (var machine in layoutManager.Machines)
+                {
+                    machine.InitializeStochastic();
+                    _machineLastOperationalTime[machine.MachineId] = 0.0; // Starts operational at t=0
+                }
+            }
             episodeActive = true;
             decisionCount = 0;
             totalReward = 0;
@@ -267,6 +282,15 @@ namespace Assets.Scripts.Simulation
             int machineId = machine.MachineId;
             SimLogger.Low($"[Orchestrator] Machine {machineId} FAILED. " +
                           $"RepairTime={machine.SampledRepairDuration:F1}s");
+
+            _episodeFailureCount++;
+            _episodeTotalRepairTime += machine.SampledRepairDuration;
+
+            if (_machineLastOperationalTime.TryGetValue(machineId, out double lastOpTime))
+            {
+                _episodeTotalTtfObserved += (float)(SimTime - lastOpTime);
+            }
+
 
             // 1. Return the actively processing job to NeedsRouting.
             //    Do not credit any processing time — the operation is restarted in full.
@@ -375,9 +399,31 @@ namespace Assets.Scripts.Simulation
             machine.AcknowledgeRepairComplete();
             RefreshMachineLabels(machine.MachineId);
 
+            _machineLastOperationalTime[machine.MachineId] = SimTime;
+
             // No further action required: FindNextDecision will naturally pick up
             // any Queued jobs at this machine on the next frame now that
             // IsAvailableForWork is true again.
+        }
+
+        // Add to SimulationBridge — call from FinaliseEpisode()
+        private void LogStochasticEpisodeSummary()
+        {
+            if (StochasticEventManager.Instance == null ||
+                !StochasticEventManager.Instance.MachineFailuresEnabled)
+                return;
+
+            int totalFailures = _episodeFailureCount;
+            float totalRepairTime = _episodeTotalRepairTime;
+            float meanTtfObs = totalFailures > 0 ? _episodeTotalTtfObserved / totalFailures : 0f;
+
+            // Theoretical Weibull mean: λ × Γ(1 + 1/k)
+            // k=1.5 → Γ(1.667) ≈ 0.9027, so mean ≈ λ × 0.9027
+            float theoreticalMeanTtf = currentConfig.Stochastic.WeibullLambda * 0.9027f;
+
+            Debug.Log($"[StochasticValidation] Failures={totalFailures} " +
+                      $"MeanTTF_obs={meanTtfObs:F1}s  MeanTTF_theory={theoreticalMeanTtf:F1}s  " +
+                      $"TotalRepairTime={totalRepairTime:F1}s");
         }
 
         // ── Observation helpers (Phase 2 Global Scalars additions) ───────────
@@ -846,6 +892,7 @@ namespace Assets.Scripts.Simulation
         private void FinaliseEpisode()
         {
             episodeActive = false;
+            LogStochasticEpisodeSummary();
             OnEpisodeFinished?.Invoke(new EpisodeResult
             {
                 Makespan = SimTime,
