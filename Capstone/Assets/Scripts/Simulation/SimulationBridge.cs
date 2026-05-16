@@ -91,6 +91,15 @@ namespace Assets.Scripts.Simulation
         private float _episodeTotalTtfObserved;
         private Dictionary<int, double> _machineLastOperationalTime = new Dictionary<int, double>();
 
+        // ── Per-machine utilization tracking (deterministic + stochastic) ─────
+        // Keyed by MachineId. Initialized in StartEpisode() for every machine.
+        private Dictionary<int, double> _machineProcessingStartTime = new();
+        private Dictionary<int, double> _machineTotalProcessingTime = new();
+        private Dictionary<int, int> _machineOpsCompleted = new();
+        // Downtime = time in Failed or Repairing state. Zero for deterministic runs.
+        private Dictionary<int, double> _machineDowntimeStart = new();
+        private Dictionary<int, double> _machineTotalDowntime = new();
+
         public static int ActionCount => ActionToRule.Length;
         public int GetRuleIndex(DispatchingRule rule) => Array.IndexOf(ActionToRule, rule);
 
@@ -203,6 +212,19 @@ namespace Assets.Scripts.Simulation
                     _machineLastOperationalTime[machine.MachineId] = 0.0; // Starts operational at t=0
                 }
             }
+
+            // ── Per-machine utilization init ───────────────────────────────────────
+            _machineProcessingStartTime.Clear();
+            _machineTotalProcessingTime.Clear();
+            _machineOpsCompleted.Clear();
+            _machineDowntimeStart.Clear();
+            _machineTotalDowntime.Clear();
+            foreach (var machine in layoutManager.Machines)
+            {
+                _machineTotalProcessingTime[machine.MachineId] = 0.0;
+                _machineOpsCompleted[machine.MachineId] = 0;
+                _machineTotalDowntime[machine.MachineId] = 0.0;
+            }
             episodeActive = true;
             decisionCount = 0;
             totalReward = 0;
@@ -296,6 +318,12 @@ namespace Assets.Scripts.Simulation
                           $"RepairTime={machine.SampledRepairDuration:F1}s");
 
             _episodeFailureCount++;
+            // Discard any partial processing interval — the operation restarts in
+            // full after repair, consistent with the existing job-return logic.
+            _machineProcessingStartTime.Remove(machine.MachineId);
+
+            // Begin tracking downtime from the moment of failure.
+            _machineDowntimeStart[machine.MachineId] = SimTime;
             _episodeTotalRepairTime += machine.SampledRepairDuration;
 
             if (_machineLastOperationalTime.TryGetValue(machineId, out double lastOpTime))
@@ -409,6 +437,12 @@ namespace Assets.Scripts.Simulation
                           $"returning to OPERATIONAL.");
 
             machine.AcknowledgeRepairComplete();
+            // Close the downtime interval that opened in HandleMachineFailure.
+            if (_machineDowntimeStart.TryGetValue(machine.MachineId, out double dtStart))
+            {
+                _machineTotalDowntime[machine.MachineId] += SimTime - dtStart;
+                _machineDowntimeStart.Remove(machine.MachineId);
+            }
             RefreshMachineLabels(machine.MachineId);
 
             _machineLastOperationalTime[machine.MachineId] = SimTime;
@@ -491,6 +525,15 @@ namespace Assets.Scripts.Simulation
 
                 int jobId = machine.ActiveJobId;
                 machine.ClearFinished();
+                // Accumulate processing time and increment op counter for this machine.
+                int mid = machine.MachineId;
+                if (_machineProcessingStartTime.TryGetValue(mid, out double procStart))
+                {
+                    _machineTotalProcessingTime[mid] += SimTime - procStart;
+                    _machineProcessingStartTime.Remove(mid);
+                }
+                if (_machineOpsCompleted.ContainsKey(mid))
+                    _machineOpsCompleted[mid]++;
 
                 JobData job = Jobs.Get(jobId);
                 if (job == null) continue;
@@ -767,6 +810,9 @@ namespace Assets.Scripts.Simulation
 
             PhysicalMachine machine = layoutManager.GetMachine(machineId);
             machine.StartJob(chosenJobId, duration, job.Visual);
+            // Record when this machine began processing so HarvestMachineFlags can
+            // accumulate the exact elapsed SimTime when FinishedFlag fires.
+            _machineProcessingStartTime[machineId] = SimTime;
             RefreshMachineLabels(machineId);
 
             LastAppliedRule = ActionToRule[actionIndex].ToString();
@@ -829,7 +875,7 @@ namespace Assets.Scripts.Simulation
             };
         }
 
-        // ── Unchanged: rule application helpers ──────────────────────────────
+        // ── rule application helpers ──────────────────────────────
 
         private int ApplyDispatchingRule(int actionIndex, int machineId)
         {
@@ -920,6 +966,37 @@ namespace Assets.Scripts.Simulation
                     stochasticTag: currentConfig.Stochastic?.Tag ?? "none"
                 );
                 telemetry.Flush();
+            }
+
+            // Close any downtime intervals still open (machines still repairing at
+            // episode end — only possible in stochastic mode).
+            foreach (var machine in layoutManager.Machines)
+            {
+                if (_machineDowntimeStart.TryGetValue(machine.MachineId, out double dtStart))
+                {
+                    _machineTotalDowntime[machine.MachineId] += SimTime - dtStart;
+                    _machineDowntimeStart.Remove(machine.MachineId);
+                }
+            }
+
+            // Log one row per machine to machine_utilization.csv.
+            foreach (var machine in layoutManager.Machines)
+            {
+                int mid = machine.MachineId;
+                double timeProcessing = _machineTotalProcessingTime.TryGetValue(mid, out double tp) ? tp : 0.0;
+                double totalDowntime = _machineTotalDowntime.TryGetValue(mid, out double td) ? td : 0.0;
+                double timeOperational = SimTime - totalDowntime;   // == SimTime in deterministic runs
+
+                ResultsLogger.LogMachineUtilization(
+                    ruleName: LastAppliedRule,
+                    seed: currentConfig.Seed,
+                    makespan: SimTime,
+                    machineId: mid,
+                    machineType: machine.MachineType.ToString(),
+                    opsCompleted: _machineOpsCompleted.TryGetValue(mid, out int ops) ? ops : 0,
+                    timeProcessing: timeProcessing,
+                    timeOperational: timeOperational
+                );
             }
 
             OnEpisodeFinished?.Invoke(new EpisodeResult

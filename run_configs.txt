@@ -22,6 +22,13 @@
     -benchmarkdir ./BatchConfigs/Benchmarks `
     -outputdir brandimarte
 
+
+updated:
+.\RunBatch.ps1 -ExePath .\capstone.exe `
+    -BenchmarkDir .\BatchConfigs\Benchmarks `
+    -Repeats 3 `
+    -Timescale 100
+
 copy:
 
 

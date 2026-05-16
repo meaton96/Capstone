@@ -7,6 +7,7 @@ import numpy as np
 import sys
 import os
 import time
+import subprocess
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from channels.channels import EpisodeConfigChannel, EpisodeTelemetryChannel
@@ -34,24 +35,47 @@ for i in range(max_wait):
 else:
     print("ERROR: No behavior registered after waiting. Check Unity scene.")
     env.close()
+    subprocess.run(["pkill", "-f", "capstone.x86_64"])
     exit(1)
 
 behavior_name = list(env.behavior_specs.keys())[0]
 print(f"Connected. Behavior: {behavior_name}")
 
 # ── Test 1: send a config and see if Unity logs it ───────────────────
+# test_config = {
+#     "name": "channel_test",
+#     "seed": 99,
+#     "jobCount": 5,
+#     "machinesPerType": 1,
+#     "machineTypes": ["Mill", "Lathe", "Weld", "Inspect", "Assemble"],
+#     "minProcTime": 5.0,
+#     "maxProcTime": 15.0,
+#     "minOpsPerJob": 2,
+#     "maxOpsPerJob": 3,
+#     "maxArrivalTime": 0.0,
+#     "agvCount": 2,
+# }
 test_config = {
-    "name": "channel_test",
+    "name": "channel_test_stochastic",
     "seed": 99,
     "jobCount": 5,
-    "machinesPerType": 1,
+    "machinesPerType": 2,          
     "machineTypes": ["Mill", "Lathe", "Weld", "Inspect", "Assemble"],
     "minProcTime": 5.0,
     "maxProcTime": 15.0,
     "minOpsPerJob": 2,
     "maxOpsPerJob": 3,
     "maxArrivalTime": 0.0,
-    "agvCount": 2,
+    "agvCount": 4,                
+    "stochastic": {
+        "machineFailuresEnabled": True,
+        "weibullK": 1.5,
+        "weibullLambda": 1200.0,     
+        "repairLogMu": 2.0,
+        "repairLogSigma": 0.3,
+        "agvFailuresEnabled": False,
+        "dynamicArrivalsEnabled": False,
+    }
 }
 config_channel.send_config(test_config)
 print("Config sent. Check Unity log for: [ConfigChannel] Received config: channel_test")
@@ -94,3 +118,4 @@ else:
         print("  WARN: result block missing — is Flush() called in HandleEpisodeFinished?")
 
 env.close()
+subprocess.run(["pkill", "-f", "capstone.x86_64"])

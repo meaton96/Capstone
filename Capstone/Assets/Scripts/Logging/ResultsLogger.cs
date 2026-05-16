@@ -9,9 +9,15 @@ namespace Assets.Scripts.Logging
     /// @details Manages file I/O for recording episode results, including makespan, 
     /// rewards, and environment configurations. Supports dynamic filename suffixes 
     /// to facilitate parallel headless runs.
+    ///
+    /// Two CSV files are maintained:
+    ///   - @c baseline_results.csv        — one row per episode (unchanged schema)
+    ///   - @c machine_utilization.csv     — one row per machine per episode
     public static class ResultsLogger
     {
         public static string OutputDirectory = "";
+
+        // ── Episode-level log ─────────────────────────────────────────────────
 
         private static string _filename = "baseline_results.csv";
 
@@ -29,6 +35,13 @@ namespace Assets.Scripts.Logging
                 ? _filename[..^ext.Length]
                 : _filename;
             _filename = baseName + suffix + ext;
+
+            // Apply the same suffix to the machine utilization file so both files
+            // from the same worker stay co-located and identifiable.
+            string machineBase = _machineFilename.EndsWith(ext)
+                ? _machineFilename[..^ext.Length]
+                : _machineFilename;
+            _machineFilename = machineBase + suffix + ext;
         }
 
         /// <summary>
@@ -44,7 +57,7 @@ namespace Assets.Scripts.Logging
             Directory.CreateDirectory(OutputDirectory);
         }
 
-        /// @brief Computes the full absolute path for the log file.
+        /// @brief Computes the full absolute path for the episode log file.
         ///
         /// @details Returns @c OutputDirectory if defined; otherwise, defaults to 
         /// @c Application.persistentDataPath.
@@ -70,6 +83,7 @@ namespace Assets.Scripts.Logging
         /// @param decisionCount Number of scheduling decisions made by the agent/rule.
         /// @param totalReward The cumulative reward achieved during the episode.
         /// @param averageTimeScale The mean simulation speed maintained during the run.
+        /// @param agvCount Total number of AGVs in the fleet.
         ///
         /// @details Thread-safe for sequential writes. If the target file does not 
         /// exist, this method automatically writes the CSV header before appending data.
@@ -98,6 +112,74 @@ namespace Assets.Scripts.Logging
             );
 
             Debug.Log($"[Results] Logged: {ruleName} seed={seed} makespan={makespan:F1} - {FilePath}");
+        }
+
+        // ── Machine-level utilization log ─────────────────────────────────────
+
+        private static string _machineFilename = "machine_utilization.csv";
+
+        /// @brief Computes the full absolute path for the machine utilization log file.
+        private static string MachineFilePath
+        {
+            get
+            {
+                string dir = string.IsNullOrEmpty(OutputDirectory)
+                    ? Application.persistentDataPath
+                    : OutputDirectory;
+                return Path.Combine(dir, _machineFilename);
+            }
+        }
+
+        /// @brief Records per-machine utilization statistics for a single episode.
+        ///
+        /// @param ruleName       The scheduling rule or policy used this episode.
+        /// @param seed           The random seed used to generate the environment.
+        /// @param makespan       The total episode duration (wall-clock SimTime).
+        /// @param machineId      Unique identifier of the machine being logged.
+        /// @param machineType    String name of the machine's @c MachineType enum value.
+        /// @param opsCompleted   Number of operations successfully completed by this machine.
+        /// @param timeProcessing Cumulative SimTime seconds this machine spent actively processing.
+        /// @param timeOperational SimTime seconds this machine was in the Operational health state
+        ///                       (equals @p makespan in deterministic runs; reduced by repair
+        ///                       downtime in stochastic runs).
+        ///
+        /// @details Derived columns written to CSV:
+        ///   - @c utilization_rate = @p timeProcessing / @p timeOperational
+        ///   - @c idle_time        = @p timeOperational - @p timeProcessing
+        ///   - @c idle_rate        = @c idle_time / @p timeOperational
+        ///
+        /// One row per machine is expected per episode. Call this in a loop over all
+        /// machines immediately after @c LogEpisode inside @c FinaliseEpisode().
+        ///
+        /// The file schema is fixed regardless of machine count, making it trivially
+        /// joinable to the episode log on (rule, seed).
+        public static void LogMachineUtilization(
+            string ruleName, int seed, double makespan,
+            int machineId, string machineType,
+            int opsCompleted, double timeProcessing, double timeOperational)
+        {
+            // Guard against divide-by-zero in pathological zero-length episodes.
+            double utilizationRate = timeOperational > 0.0 ? timeProcessing / timeOperational : 0.0;
+            double idleTime = timeOperational - timeProcessing;
+            double idleRate = timeOperational > 0.0 ? idleTime / timeOperational : 0.0;
+
+            bool fileExists = File.Exists(MachineFilePath);
+            using StreamWriter writer = new StreamWriter(MachineFilePath, append: true);
+
+            if (!fileExists)
+                writer.WriteLine(
+                    "timestamp,rule,seed,makespan," +
+                    "machine_id,machine_type,ops_completed," +
+                    "time_processing,time_operational," +
+                    "utilization_rate,idle_time,idle_rate");
+
+            writer.WriteLine(
+                $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}," +
+                $"{ruleName},{seed},{makespan:F2}," +
+                $"{machineId},{machineType},{opsCompleted}," +
+                $"{timeProcessing:F2},{timeOperational:F2}," +
+                $"{utilizationRate:F4},{idleTime:F2},{idleRate:F4}"
+            );
         }
     }
 }

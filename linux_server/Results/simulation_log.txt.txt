@@ -1,31 +1,276 @@
---- Log Started: 05/16/2026 17:17:59 ---
-2026-05-16 17:17:59.163 [FactoryLayout] Distributed type layout (row x col):
+--- Log Started: 05/16/2026 20:57:08 ---
+2026-05-16 20:57:08.329 [FactoryLayout] Distributed type layout (row x col):
   Row0: Mill, Lathe, Weld
   Row1: Inspect, Assemble
   [OK] No two same-type machines share a row aisle.
 
-2026-05-16 17:17:59.178 [FactoryLayout] Distance matrix (5x5):
+2026-05-16 20:57:08.343 [FactoryLayout] Distance matrix (5x5):
        M0     M1     M2     M3     M4   
-2026-05-16 17:17:59.193 [FactoryLayout] Built aisle-based floor: 5 machines.
-2026-05-16 17:17:59.204 [TrafficZones] Built zone graph: 18 zones.
-2026-05-16 17:17:59.211 [AGVPool] Spawned fleet of 3 AGVs.
-2026-05-16 17:17:59.220 [Orchestrator] Episode started: 15 jobs, 5 machines, stochastic=False
-2026-05-16 17:17:59.460 [ConfigChannel] Received config: channel_test jobs=5 machines=5 agvs=2 stochastic=none
-2026-05-16 17:17:59.466 [Bridge] Applied Python config: channel_test
-2026-05-16 17:17:59.474 [FactoryLayout] Distributed type layout (row x col):
-  Row0: Mill, Lathe, Weld
-  Row1: Inspect, Assemble
+2026-05-16 20:57:08.357 [FactoryLayout] Built aisle-based floor: 5 machines.
+2026-05-16 20:57:08.367 [TrafficZones] Built zone graph: 18 zones.
+2026-05-16 20:57:08.373 [AGVPool] Spawned fleet of 3 AGVs.
+2026-05-16 20:57:08.381 [Orchestrator] Episode started: 15 jobs, 5 machines, stochastic=False
+2026-05-16 20:57:08.625 [ConfigChannel] Received config: channel_test_stochastic jobs=5 machines=10 agvs=4 stochastic=mf
+2026-05-16 20:57:08.629 [Bridge] Applied Python config: channel_test_stochastic
+2026-05-16 20:57:08.637 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble
   [OK] No two same-type machines share a row aisle.
 
-2026-05-16 17:17:59.483 [FactoryLayout] Distance matrix (5x5):
-       M0     M1     M2     M3     M4   
-2026-05-16 17:17:59.490 [FactoryLayout] Built aisle-based floor: 5 machines.
-2026-05-16 17:17:59.496 [TrafficZones] Built zone graph: 18 zones.
-2026-05-16 17:17:59.502 [AGVPool] Spawned fleet of 2 AGVs.
-2026-05-16 17:17:59.508 [Orchestrator] Episode started: 5 jobs, 5 machines, stochastic=False
-2026-05-16 17:20:55.757 [TelemetryChannel] Flushed 0 events to Python.
-2026-05-16 17:20:55.763 [Agent] End Episode
-2026-05-16 17:20:55.769 [Orchestrator] Episode started: 5 jobs, 5 machines, stochastic=False
-2026-05-16 17:23:58.979 [TelemetryChannel] Flushed 0 events to Python.
-2026-05-16 17:23:58.985 [Agent] End Episode
-2026-05-16 17:23:58.992 [Orchestrator] Episode started: 5 jobs, 5 machines, stochastic=False
+2026-05-16 20:57:08.645 [FactoryLayout] Distance matrix (10x10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-05-16 20:57:08.651 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-05-16 20:57:08.656 [TrafficZones] Built zone graph: 27 zones.
+2026-05-16 20:57:08.662 [AGVPool] Spawned fleet of 4 AGVs.
+2026-05-16 20:57:08.667 [StochasticMgr] Initialized — seed=99 mode=[mf] WeibullK=1.5 λ_machine=1200 λ_agv=700 repairMu=2 repairSigma=0.3 arrivalLambda=0.005
+2026-05-16 20:57:08.672 [Orchestrator] Episode started: 5 jobs, 10 machines, stochastic=True
+2026-05-16 20:57:11.447 [Orchestrator] Machine 5 FAILED. RepairTime=7.6s
+2026-05-16 20:57:11.451 [PhysicalMachine] Machine [5] failure
+2026-05-16 20:57:11.456 [PhysicalMachine] Machine [5] begin repair
+2026-05-16 20:57:13.883 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-16 20:57:13.887 Machine [5] repair complete
+2026-05-16 20:57:17.517 [Orchestrator] Machine 6 FAILED. RepairTime=7.3s
+2026-05-16 20:57:17.522 [PhysicalMachine] Machine [6] failure
+2026-05-16 20:57:17.526 [PhysicalMachine] Machine [6] begin repair
+2026-05-16 20:57:19.953 [Orchestrator] Machine 6 repair complete — returning to OPERATIONAL.
+2026-05-16 20:57:19.957 Machine [6] repair complete
+2026-05-16 20:57:23.630 [Orchestrator] Machine 7 FAILED. RepairTime=5.7s
+2026-05-16 20:57:23.634 [Orchestrator] Job 0 returned to NeedsRouting (was Processing on failed machine 7).
+2026-05-16 20:57:23.638 [Orchestrator] Queued job 2 re-routed from failed machine 7.
+2026-05-16 20:57:23.643 [PhysicalMachine] Machine [7] failure
+2026-05-16 20:57:23.648 [PhysicalMachine] Machine [7] begin repair
+2026-05-16 20:57:24.877 [Orchestrator] Machine 7 repair complete — returning to OPERATIONAL.
+2026-05-16 20:57:24.881 Machine [7] repair complete
+2026-05-16 20:57:34.425 [Orchestrator] Machine 8 FAILED. RepairTime=9.7s
+2026-05-16 20:57:34.429 [PhysicalMachine] Machine [8] failure
+2026-05-16 20:57:34.433 [PhysicalMachine] Machine [8] begin repair
+2026-05-16 20:57:36.805 [Orchestrator] Machine 8 repair complete — returning to OPERATIONAL.
+2026-05-16 20:57:36.809 Machine [8] repair complete
+2026-05-16 20:58:03.055 [Orchestrator] Machine 0 FAILED. RepairTime=6.2s
+2026-05-16 20:58:03.060 [PhysicalMachine] Machine [0] failure
+2026-05-16 20:58:03.064 [PhysicalMachine] Machine [0] begin repair
+2026-05-16 20:58:04.426 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-16 20:58:04.431 Machine [0] repair complete
+2026-05-16 20:58:04.435 [Orchestrator] Machine 1 FAILED. RepairTime=8.3s
+2026-05-16 20:58:04.439 [Orchestrator] Job 1 returned to NeedsRouting (was Processing on failed machine 1).
+2026-05-16 20:58:04.444 [Orchestrator] Queued job 2 re-routed from failed machine 1.
+2026-05-16 20:58:04.448 [PhysicalMachine] Machine [1] failure
+2026-05-16 20:58:04.453 [PhysicalMachine] Machine [1] begin repair
+2026-05-16 20:58:06.877 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-16 20:58:06.881 Machine [1] repair complete
+2026-05-16 20:58:27.609 [Orchestrator] Machine 1 FAILED. RepairTime=7.8s
+2026-05-16 20:58:27.612 [PhysicalMachine] Machine [1] failure
+2026-05-16 20:58:27.616 [PhysicalMachine] Machine [1] begin repair
+2026-05-16 20:58:29.982 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-16 20:58:29.985 Machine [1] repair complete
+2026-05-16 20:58:34.680 [Orchestrator] Machine 0 FAILED. RepairTime=9.6s
+2026-05-16 20:58:34.683 [Orchestrator] Job 1 returned to NeedsRouting (was Processing on failed machine 0).
+2026-05-16 20:58:34.687 [PhysicalMachine] Machine [0] failure
+2026-05-16 20:58:34.691 [PhysicalMachine] Machine [0] begin repair
+2026-05-16 20:58:37.046 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-16 20:58:37.050 Machine [0] repair complete
+2026-05-16 20:58:37.054 [Orchestrator] Machine 8 FAILED. RepairTime=8.1s
+2026-05-16 20:58:37.058 [PhysicalMachine] Machine [8] failure
+2026-05-16 20:58:37.062 [PhysicalMachine] Machine [8] begin repair
+2026-05-16 20:58:39.366 [Orchestrator] Machine 8 repair complete — returning to OPERATIONAL.
+2026-05-16 20:58:39.370 Machine [8] repair complete
+2026-05-16 20:58:42.967 [Orchestrator] Machine 9 FAILED. RepairTime=7.0s
+2026-05-16 20:58:42.971 [PhysicalMachine] Machine [9] failure
+2026-05-16 20:58:42.975 [PhysicalMachine] Machine [9] begin repair
+2026-05-16 20:58:45.312 [Orchestrator] Machine 9 repair complete — returning to OPERATIONAL.
+2026-05-16 20:58:45.316 Machine [9] repair complete
+2026-05-16 20:58:53.722 [Orchestrator] Machine 2 FAILED. RepairTime=7.9s
+2026-05-16 20:58:53.726 [PhysicalMachine] Machine [2] failure
+2026-05-16 20:58:53.730 [PhysicalMachine] Machine [2] begin repair
+2026-05-16 20:58:56.225 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-16 20:58:56.229 Machine [2] repair complete
+2026-05-16 20:59:05.285 [Orchestrator] Machine 8 FAILED. RepairTime=9.9s
+2026-05-16 20:59:05.290 [PhysicalMachine] Machine [8] failure
+2026-05-16 20:59:05.294 [PhysicalMachine] Machine [8] begin repair
+2026-05-16 20:59:07.883 [Orchestrator] Machine 8 repair complete — returning to OPERATIONAL.
+2026-05-16 20:59:07.887 Machine [8] repair complete
+2026-05-16 20:59:10.337 [Orchestrator] Machine 0 FAILED. RepairTime=17.2s
+2026-05-16 20:59:10.341 [PhysicalMachine] Machine [0] failure
+2026-05-16 20:59:10.346 [PhysicalMachine] Machine [0] begin repair
+2026-05-16 20:59:13.947 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-16 20:59:13.951 Machine [0] repair complete
+2026-05-16 20:59:30.759 [Orchestrator] Machine 7 FAILED. RepairTime=10.9s
+2026-05-16 20:59:30.764 [Orchestrator] Job 4 returned to NeedsRouting (was Processing on failed machine 7).
+2026-05-16 20:59:30.768 [PhysicalMachine] Machine [7] failure
+2026-05-16 20:59:30.772 [PhysicalMachine] Machine [7] begin repair
+2026-05-16 20:59:33.134 [Orchestrator] Machine 7 repair complete — returning to OPERATIONAL.
+2026-05-16 20:59:33.138 Machine [7] repair complete
+2026-05-16 20:59:57.060 [Orchestrator] Machine 9 FAILED. RepairTime=6.2s
+2026-05-16 20:59:57.065 [Orchestrator] Job 1 returned to NeedsRouting (was Processing on failed machine 9).
+2026-05-16 20:59:57.069 [PhysicalMachine] Machine [9] failure
+2026-05-16 20:59:57.074 [PhysicalMachine] Machine [9] begin repair
+2026-05-16 20:59:58.307 [Orchestrator] Machine 9 repair complete — returning to OPERATIONAL.
+2026-05-16 20:59:58.311 Machine [9] repair complete
+2026-05-16 21:00:12.138 [Orchestrator] Machine 3 FAILED. RepairTime=9.8s
+2026-05-16 21:00:12.142 [PhysicalMachine] Machine [3] failure
+2026-05-16 21:00:12.146 [PhysicalMachine] Machine [3] begin repair
+2026-05-16 21:00:13.260 [Orchestrator] Machine 9 FAILED. RepairTime=6.7s
+2026-05-16 21:00:13.264 [PhysicalMachine] Machine [9] failure
+2026-05-16 21:00:13.268 [PhysicalMachine] Machine [9] begin repair
+2026-05-16 21:00:14.423 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-16 21:00:14.427 Machine [3] repair complete
+2026-05-16 21:00:15.543 [Orchestrator] Machine 9 repair complete — returning to OPERATIONAL.
+2026-05-16 21:00:15.547 Machine [9] repair complete
+2026-05-16 21:00:33.889 [Orchestrator] Machine 9 FAILED. RepairTime=8.2s
+2026-05-16 21:00:33.893 [PhysicalMachine] Machine [9] failure
+2026-05-16 21:00:33.897 [PhysicalMachine] Machine [9] begin repair
+2026-05-16 21:00:36.132 [Orchestrator] Machine 9 repair complete — returning to OPERATIONAL.
+2026-05-16 21:00:36.136 Machine [9] repair complete
+2026-05-16 21:01:11.246 [Orchestrator] Machine 5 FAILED. RepairTime=5.8s
+2026-05-16 21:01:11.251 [PhysicalMachine] Machine [5] failure
+2026-05-16 21:01:11.256 [PhysicalMachine] Machine [5] begin repair
+2026-05-16 21:01:12.463 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-16 21:01:12.467 Machine [5] repair complete
+2026-05-16 21:01:26.743 [Orchestrator] Machine 4 FAILED. RepairTime=7.7s
+2026-05-16 21:01:26.747 [Orchestrator] Job 1 returned to NeedsRouting (was Processing on failed machine 4).
+2026-05-16 21:01:26.752 [Orchestrator] Pre-dispatch for job 1 to machine 4 cancelled. (Implement AGVController.CancelPreDispatch() for clean halt.)
+2026-05-16 21:01:26.756 [PhysicalMachine] Machine [4] failure
+2026-05-16 21:01:26.762 [PhysicalMachine] Machine [4] begin repair
+2026-05-16 21:01:29.062 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-16 21:01:29.066 Machine [4] repair complete
+2026-05-16 21:01:29.070 [Orchestrator] Machine 7 FAILED. RepairTime=9.2s
+2026-05-16 21:01:29.074 [PhysicalMachine] Machine [7] failure
+2026-05-16 21:01:29.078 [PhysicalMachine] Machine [7] begin repair
+2026-05-16 21:01:31.400 [Orchestrator] Machine 7 repair complete — returning to OPERATIONAL.
+2026-05-16 21:01:31.403 Machine [7] repair complete
+2026-05-16 21:02:10.638 [Orchestrator] Machine 7 FAILED. RepairTime=10.5s
+2026-05-16 21:02:10.644 [PhysicalMachine] Machine [7] failure
+2026-05-16 21:02:10.651 [PhysicalMachine] Machine [7] begin repair
+2026-05-16 21:02:13.105 [Orchestrator] Machine 7 repair complete — returning to OPERATIONAL.
+2026-05-16 21:02:13.109 Machine [7] repair complete
+2026-05-16 21:02:45.061 [Orchestrator] Machine 1 FAILED. RepairTime=7.5s
+2026-05-16 21:02:45.064 [PhysicalMachine] Machine [1] failure
+2026-05-16 21:02:45.068 [PhysicalMachine] Machine [1] begin repair
+2026-05-16 21:02:47.298 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-16 21:02:47.302 Machine [1] repair complete
+2026-05-16 21:02:50.766 [Orchestrator] Machine 6 FAILED. RepairTime=8.7s
+2026-05-16 21:02:50.771 [PhysicalMachine] Machine [6] failure
+2026-05-16 21:02:50.776 [PhysicalMachine] Machine [6] begin repair
+2026-05-16 21:02:53.112 [Orchestrator] Machine 6 repair complete — returning to OPERATIONAL.
+2026-05-16 21:02:53.116 Machine [6] repair complete
+2026-05-16 21:02:53.120 [Orchestrator] Machine 9 FAILED. RepairTime=8.9s
+2026-05-16 21:02:53.124 [PhysicalMachine] Machine [9] failure
+2026-05-16 21:02:53.127 [PhysicalMachine] Machine [9] begin repair
+2026-05-16 21:02:55.357 [Orchestrator] Machine 9 repair complete — returning to OPERATIONAL.
+2026-05-16 21:02:55.361 Machine [9] repair complete
+2026-05-16 21:03:23.163 [Orchestrator] Machine 2 FAILED. RepairTime=11.0s
+2026-05-16 21:03:23.167 [PhysicalMachine] Machine [2] failure
+2026-05-16 21:03:23.172 [PhysicalMachine] Machine [2] begin repair
+2026-05-16 21:03:25.529 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-16 21:03:25.533 Machine [2] repair complete
+2026-05-16 21:04:10.752 [Orchestrator] Machine 3 FAILED. RepairTime=10.0s
+2026-05-16 21:04:10.759 [PhysicalMachine] Machine [3] failure
+2026-05-16 21:04:10.766 [PhysicalMachine] Machine [3] begin repair
+2026-05-16 21:04:13.143 [Orchestrator] Machine 0 FAILED. RepairTime=7.0s
+2026-05-16 21:04:13.146 [PhysicalMachine] Machine [0] failure
+2026-05-16 21:04:13.150 [PhysicalMachine] Machine [0] begin repair
+2026-05-16 21:04:13.154 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-16 21:04:13.159 Machine [3] repair complete
+2026-05-16 21:04:15.415 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-16 21:04:15.419 Machine [0] repair complete
+2026-05-16 21:04:48.737 [Orchestrator] Machine 5 FAILED. RepairTime=6.8s
+2026-05-16 21:04:48.741 [PhysicalMachine] Machine [5] failure
+2026-05-16 21:04:48.745 [PhysicalMachine] Machine [5] begin repair
+2026-05-16 21:04:51.062 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-16 21:04:51.067 Machine [5] repair complete
+2026-05-16 21:04:55.818 [Orchestrator] Machine 4 FAILED. RepairTime=5.0s
+2026-05-16 21:04:55.822 [PhysicalMachine] Machine [4] failure
+2026-05-16 21:04:55.826 [PhysicalMachine] Machine [4] begin repair
+2026-05-16 21:04:56.977 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-16 21:04:56.981 Machine [4] repair complete
+2026-05-16 21:04:56.985 [Orchestrator] Machine 5 FAILED. RepairTime=6.1s
+2026-05-16 21:04:56.990 [PhysicalMachine] Machine [5] failure
+2026-05-16 21:04:56.995 [PhysicalMachine] Machine [5] begin repair
+2026-05-16 21:04:58.186 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-16 21:04:58.190 Machine [5] repair complete
+2026-05-16 21:05:36.816 [Orchestrator] Machine 1 FAILED. RepairTime=5.4s
+2026-05-16 21:05:36.820 [PhysicalMachine] Machine [1] failure
+2026-05-16 21:05:36.824 [PhysicalMachine] Machine [1] begin repair
+2026-05-16 21:05:37.971 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-16 21:05:37.975 Machine [1] repair complete
+2026-05-16 21:05:55.310 [Orchestrator] Machine 2 FAILED. RepairTime=5.1s
+2026-05-16 21:05:55.313 [PhysicalMachine] Machine [2] failure
+2026-05-16 21:05:55.317 [PhysicalMachine] Machine [2] begin repair
+2026-05-16 21:05:56.471 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-16 21:05:56.475 Machine [2] repair complete
+2026-05-16 21:06:06.906 [Orchestrator] Machine 6 FAILED. RepairTime=11.6s
+2026-05-16 21:06:06.910 [PhysicalMachine] Machine [6] failure
+2026-05-16 21:06:06.915 [PhysicalMachine] Machine [6] begin repair
+2026-05-16 21:06:09.227 [Orchestrator] Machine 6 repair complete — returning to OPERATIONAL.
+2026-05-16 21:06:09.231 Machine [6] repair complete
+2026-05-16 21:06:30.871 [Orchestrator] Machine 5 FAILED. RepairTime=8.3s
+2026-05-16 21:06:30.877 [PhysicalMachine] Machine [5] failure
+2026-05-16 21:06:30.883 [PhysicalMachine] Machine [5] begin repair
+2026-05-16 21:06:33.321 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-16 21:06:33.325 Machine [5] repair complete
+2026-05-16 21:06:35.722 [Orchestrator] Machine 7 FAILED. RepairTime=7.8s
+2026-05-16 21:06:35.727 [PhysicalMachine] Machine [7] failure
+2026-05-16 21:06:35.731 [PhysicalMachine] Machine [7] begin repair
+2026-05-16 21:06:38.158 [Orchestrator] Machine 7 repair complete — returning to OPERATIONAL.
+2026-05-16 21:06:38.162 Machine [7] repair complete
+2026-05-16 21:07:21.772 [Orchestrator] Machine 1 FAILED. RepairTime=6.0s
+2026-05-16 21:07:21.776 [PhysicalMachine] Machine [1] failure
+2026-05-16 21:07:21.780 [PhysicalMachine] Machine [1] begin repair
+2026-05-16 21:07:21.784 [Orchestrator] Machine 3 FAILED. RepairTime=7.9s
+2026-05-16 21:07:21.788 [PhysicalMachine] Machine [3] failure
+2026-05-16 21:07:21.792 [PhysicalMachine] Machine [3] begin repair
+2026-05-16 21:07:23.006 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-16 21:07:23.009 Machine [1] repair complete
+2026-05-16 21:07:24.198 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-16 21:07:24.202 Machine [3] repair complete
+2026-05-16 21:07:36.223 [Orchestrator] Machine 0 FAILED. RepairTime=10.0s
+2026-05-16 21:07:36.228 [PhysicalMachine] Machine [0] failure
+2026-05-16 21:07:36.232 [PhysicalMachine] Machine [0] begin repair
+2026-05-16 21:07:38.630 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-16 21:07:38.634 Machine [0] repair complete
+2026-05-16 21:07:44.669 [Orchestrator] Machine 8 FAILED. RepairTime=10.5s
+2026-05-16 21:07:44.674 [PhysicalMachine] Machine [8] failure
+2026-05-16 21:07:44.678 [PhysicalMachine] Machine [8] begin repair
+2026-05-16 21:07:47.095 [Orchestrator] Machine 8 repair complete — returning to OPERATIONAL.
+2026-05-16 21:07:47.099 Machine [8] repair complete
+2026-05-16 21:08:14.578 [Orchestrator] Machine 0 FAILED. RepairTime=9.3s
+2026-05-16 21:08:14.582 [PhysicalMachine] Machine [0] failure
+2026-05-16 21:08:14.586 [PhysicalMachine] Machine [0] begin repair
+2026-05-16 21:08:16.891 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-16 21:08:16.896 Machine [0] repair complete
+2026-05-16 21:08:50.761 [Orchestrator] Machine 2 FAILED. RepairTime=12.4s
+2026-05-16 21:08:50.765 [PhysicalMachine] Machine [2] failure
+2026-05-16 21:08:50.769 [PhysicalMachine] Machine [2] begin repair
+2026-05-16 21:08:53.217 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-16 21:08:53.221 Machine [2] repair complete
+2026-05-16 21:09:06.380 [Orchestrator] Machine 9 FAILED. RepairTime=6.4s
+2026-05-16 21:09:06.384 [PhysicalMachine] Machine [9] failure
+2026-05-16 21:09:06.388 [PhysicalMachine] Machine [9] begin repair
+2026-05-16 21:09:07.539 [Orchestrator] Machine 9 repair complete — returning to OPERATIONAL.
+2026-05-16 21:09:07.543 Machine [9] repair complete
+2026-05-16 21:09:28.738 [Orchestrator] Machine 5 FAILED. RepairTime=8.9s
+2026-05-16 21:09:28.743 [PhysicalMachine] Machine [5] failure
+2026-05-16 21:09:28.747 [PhysicalMachine] Machine [5] begin repair
+2026-05-16 21:09:31.187 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-16 21:09:31.191 Machine [5] repair complete
+2026-05-16 21:09:50.534 [Orchestrator] Machine 4 FAILED. RepairTime=7.7s
+2026-05-16 21:09:50.538 [PhysicalMachine] Machine [4] failure
+2026-05-16 21:09:50.542 [PhysicalMachine] Machine [4] begin repair
+2026-05-16 21:09:52.877 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-16 21:09:52.881 Machine [4] repair complete
+2026-05-16 21:09:55.214 [Orchestrator] Machine 9 FAILED. RepairTime=12.4s
+2026-05-16 21:09:55.217 [PhysicalMachine] Machine [9] failure
+2026-05-16 21:09:55.222 [PhysicalMachine] Machine [9] begin repair
+2026-05-16 21:09:57.721 [Orchestrator] Machine 9 repair complete — returning to OPERATIONAL.
+2026-05-16 21:09:57.726 Machine [9] repair complete
+2026-05-16 21:10:11.966 [Orchestrator] Machine 7 FAILED. RepairTime=10.5s
+2026-05-16 21:10:11.971 [PhysicalMachine] Machine [7] failure
+2026-05-16 21:10:11.975 [PhysicalMachine] Machine [7] begin repair
+2026-05-16 21:10:14.298 [Orchestrator] Machine 7 repair complete — returning to OPERATIONAL.
+2026-05-16 21:10:14.302 Machine [7] repair complete
+2026-05-16 21:11:03.544 [Orchestrator] Machine 2 FAILED. RepairTime=9.1s
+2026-05-16 21:11:03.548 [PhysicalMachine] Machine [2] failure
+2026-05-16 21:11:03.552 [PhysicalMachine] Machine [2] begin repair
+2026-05-16 21:11:06.026 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-16 21:11:06.031 Machine [2] repair complete
