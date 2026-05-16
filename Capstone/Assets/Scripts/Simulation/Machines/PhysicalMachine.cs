@@ -2,6 +2,7 @@ using UnityEngine;
 using Assets.Scripts.Simulation.Jobs;
 using Assets.Scripts.Simulation.Stochastic;
 using Assets.Scripts.Logging;
+using Assets.Scripts.Simulation.Channels;
 
 namespace Assets.Scripts.Simulation.Machines
 {
@@ -83,6 +84,7 @@ namespace Assets.Scripts.Simulation.Machines
 
 
         private float _ttfCountdown = float.MaxValue;
+        private float _ageSinceLastRepair = 0f;
 
         // ── Visual & conveyor references (unchanged) ──────────────────────────
 
@@ -160,6 +162,7 @@ namespace Assets.Scripts.Simulation.Machines
             // This prevents the policy from exploiting a failure-free warmup period.
             float fullTtf = StochasticEventManager.Instance.SampleMachineTTF();
             _ttfCountdown = Random.Range(0f, fullTtf);
+            _ageSinceLastRepair = fullTtf - _ttfCountdown;
         }
 
         // ── Processing control (unchanged public API) ─────────────────────────
@@ -227,6 +230,8 @@ namespace Assets.Scripts.Simulation.Machines
             almostDoneFired = false;
             remainingTime = 0f;
 
+
+
             // exposes a repair animation (e.g. a maintenance icon / colour tint).
             visualLayer?.CompleteOperation(-1); // at minimum, stop the processing animation
             visualLayer?.BeginRepair(SampledRepairDuration);
@@ -248,6 +253,10 @@ namespace Assets.Scripts.Simulation.Machines
             _ttfCountdown = StochasticEventManager.Instance != null
                 ? StochasticEventManager.Instance.SampleMachineTTF()
                 : float.MaxValue;
+            float actualRepair = SampledRepairDuration - RemainingRepairTime; // already 0 here, so use SampledRepairDuration
+            EpisodeTelemetryChannel.Instance?.RecordMachineRepairComplete(MachineId, SampledRepairDuration);
+            _ageSinceLastRepair = 0f;   // age resets — machine is "new" post-repair
+
             SimLogger.Medium($"Machine [{MachineId}] repair complete");
             visualLayer?.EndRepair();
         }
@@ -351,6 +360,7 @@ namespace Assets.Scripts.Simulation.Machines
 
             // Clamp to prevent multiple triggers if SimulationBridge is slow to poll.
             _ttfCountdown = float.MaxValue;
+            _ageSinceLastRepair += Time.deltaTime;
 
             // Sample repair duration now so the observation can read it in the same frame.
             SampledRepairDuration = StochasticEventManager.Instance != null
@@ -361,6 +371,13 @@ namespace Assets.Scripts.Simulation.Machines
             HealthState = MachineHealthState.Failed;
             FailedFlag = true;
             visualLayer?.BeginFailure();
+            EpisodeTelemetryChannel.Instance?.RecordMachineFailure(
+                MachineId,
+                observedTtf: _ageSinceLastRepair,
+                repairDuration: SampledRepairDuration
+            );
+
+
         }
 
         /// @brief Advances the active job's processing timer when Operational and busy.

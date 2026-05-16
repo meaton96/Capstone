@@ -1,17 +1,31 @@
---- Log Started: 05/15/2026 17:14:48 ---
-2026-05-15 17:14:48.867 [FactoryLayout] Distributed type layout (row x col):
+--- Log Started: 05/16/2026 17:17:59 ---
+2026-05-16 17:17:59.163 [FactoryLayout] Distributed type layout (row x col):
   Row0: Mill, Lathe, Weld
   Row1: Inspect, Assemble
   [OK] No two same-type machines share a row aisle.
 
-2026-05-15 17:14:48.881 [FactoryLayout] Distance matrix (5x5):
+2026-05-16 17:17:59.178 [FactoryLayout] Distance matrix (5x5):
        M0     M1     M2     M3     M4   
-2026-05-15 17:14:48.896 [FactoryLayout] Built aisle-based floor: 5 machines.
-2026-05-15 17:14:48.905 [TrafficZones] Built zone graph: 18 zones.
-2026-05-15 17:14:48.910 [AGVPool] Spawned fleet of 3 AGVs.
-2026-05-15 17:14:48.919 [Orchestrator] Episode started: 5 jobs, 5 machines, stochastic=False
-2026-05-15 17:14:48.940 [Orchestrator] Episode started: 5 jobs, 5 machines, stochastic=False
-2026-05-15 17:14:48.954 [Agent] RequestDecision called — communicator=True
-2026-05-15 17:14:49.178 [Agent] RequestDecision called — communicator=True
-2026-05-15 17:14:52.322 [Agent] RequestDecision called — communicator=True
-2026-05-15 17:14:55.737 [Agent] RequestDecision called — communicator=True
+2026-05-16 17:17:59.193 [FactoryLayout] Built aisle-based floor: 5 machines.
+2026-05-16 17:17:59.204 [TrafficZones] Built zone graph: 18 zones.
+2026-05-16 17:17:59.211 [AGVPool] Spawned fleet of 3 AGVs.
+2026-05-16 17:17:59.220 [Orchestrator] Episode started: 15 jobs, 5 machines, stochastic=False
+2026-05-16 17:17:59.460 [ConfigChannel] Received config: channel_test jobs=5 machines=5 agvs=2 stochastic=none
+2026-05-16 17:17:59.466 [Bridge] Applied Python config: channel_test
+2026-05-16 17:17:59.474 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld
+  Row1: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-05-16 17:17:59.483 [FactoryLayout] Distance matrix (5x5):
+       M0     M1     M2     M3     M4   
+2026-05-16 17:17:59.490 [FactoryLayout] Built aisle-based floor: 5 machines.
+2026-05-16 17:17:59.496 [TrafficZones] Built zone graph: 18 zones.
+2026-05-16 17:17:59.502 [AGVPool] Spawned fleet of 2 AGVs.
+2026-05-16 17:17:59.508 [Orchestrator] Episode started: 5 jobs, 5 machines, stochastic=False
+2026-05-16 17:20:55.757 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-16 17:20:55.763 [Agent] End Episode
+2026-05-16 17:20:55.769 [Orchestrator] Episode started: 5 jobs, 5 machines, stochastic=False
+2026-05-16 17:23:58.979 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-16 17:23:58.985 [Agent] End Episode
+2026-05-16 17:23:58.992 [Orchestrator] Episode started: 5 jobs, 5 machines, stochastic=False

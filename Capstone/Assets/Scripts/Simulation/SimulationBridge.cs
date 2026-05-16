@@ -10,6 +10,8 @@ using Assets.Scripts.Simulation.FactoryLayout;
 using Assets.Scripts.Simulation.Jobs;
 using Assets.Scripts.Simulation.Stochastic;
 using Assets.Scripts.Simulation.Types;
+using Assets.Scripts.Simulation.Channels;
+using Unity.MLAgents;
 
 namespace Assets.Scripts.Simulation
 {
@@ -151,6 +153,16 @@ namespace Assets.Scripts.Simulation
         /// each machine's TTF countdown with an age-randomised starting value.
         public void StartEpisode()
         {
+            // ── Consume Python-sent config if available ────────────────────────
+            // EpisodeConfigChannel.Instance is null during headless batch runs
+            // (no ML-Agents connection), so this is a safe no-op in that mode.
+            var pythonConfig = EpisodeConfigChannel.Instance?.ConsumeConfig();
+            if (pythonConfig != null)
+            {
+                currentConfig = pythonConfig;
+                IsFactoryReady = false;  // force SpawnFactory with the new config
+                SimLogger.Low($"[Bridge] Applied Python config: {currentConfig.Name}");
+            }
             if (currentConfig == null)
                 currentConfig = BuildDefaultConfig();
 
@@ -893,6 +905,23 @@ namespace Assets.Scripts.Simulation
         {
             episodeActive = false;
             LogStochasticEpisodeSummary();
+
+            var telemetry = EpisodeTelemetryChannel.Instance;
+            if (telemetry != null)
+            {
+                telemetry.RecordEpisodeResult(
+                    makespan: SimTime,
+                    jobCount: currentConfig.JobCount,
+                    machineCount: layoutManager.MachineCount,
+                    totalOps: Jobs.AllJobs.Sum(j => j.TotalOperations),
+                    decisions: decisionCount,
+                    totalReward: totalReward,
+                    ruleName: LastAppliedRule,
+                    stochasticTag: currentConfig.Stochastic?.Tag ?? "none"
+                );
+                telemetry.Flush();
+            }
+
             OnEpisodeFinished?.Invoke(new EpisodeResult
             {
                 Makespan = SimTime,
@@ -991,7 +1020,7 @@ namespace Assets.Scripts.Simulation
             return new FJSSPConfig
             {
                 Seed = 42,
-                JobCount = 5,
+                JobCount = 15,
                 MachinesPerType = 1,
                 MachineTypeLayout = layout,
                 MinProcTime = 1f,
