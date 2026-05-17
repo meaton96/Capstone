@@ -135,7 +135,7 @@ namespace Assets.Scripts.Simulation
         ///
         /// @details Only calls @c EndEpisode directly if in @c AutoStartOnPlay mode 
         /// to allow external runners to process results before resetting.
-        private void HandleEpisodeFinished(EpisodeResult result)
+        private void HandleEpisodeFinished(EpisodeRecord record)
         {
             SimLogger.Low("[Agent] End Episode");
             if (bridge != null && bridge.AutoStartOnPlay)

@@ -215,11 +215,11 @@ namespace Assets.Scripts.UI
             SetStatus($"Factory ready — {bridge.CurrentConfig.TotalMachines} machines. Press Start.");
         }
 
-        private void OnEpisodeFinished(EpisodeResult result)
+        private void OnEpisodeFinished(EpisodeRecord record)
         {
             SetStatus($"<color=#00FF00>SUCCESS!</color>\n" +
-                      $"Final Makespan: <b>{result.Makespan:F1}s</b>\n" +
-                      $"Decisions Made: <b>{result.DecisionPoints}</b>");
+                      $"Final Makespan: <b>{record.Makespan:F1}s</b>\n" +
+                      $"Decisions Made: <b>{record.DecisionPoints}</b>");
             ShowPanel();
         }
 

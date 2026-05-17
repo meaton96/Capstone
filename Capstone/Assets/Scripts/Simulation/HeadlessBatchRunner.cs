@@ -394,8 +394,8 @@ namespace Assets.Scripts.Simulation
                     SimLogger.Low($"[BatchRunner] Run {completedRuns + 1}/{totalRuns}: " +
                                   $"benchmark={runConfig.Name} rule={rule} seed={runConfig.Seed}");
 
-                    EpisodeResult runResult = null;
-                    UnityEngine.Events.UnityAction<EpisodeResult> onFinish = res => runResult = res;
+                    EpisodeRecord runResult = null;
+                    UnityEngine.Events.UnityAction<EpisodeRecord> onFinish = res => runResult = res;
                     bridge.OnEpisodeFinished.AddListener(onFinish);
 
                     if (agent != null)
@@ -416,30 +416,13 @@ namespace Assets.Scripts.Simulation
                     while (bridge.IsEpisodeActive)
                         yield return null;
 
-                    int totalOps = 0;
-                    if (bridge.Jobs != null)
-                        foreach (var job in bridge.Jobs.AllJobs)
-                            totalOps += job.TotalOperations;
+                    // int totalOps = 0;
+                    // if (bridge.Jobs != null)
+                    //     foreach (var job in bridge.Jobs.AllJobs)
+                    //         totalOps += job.TotalOperations;
 
                     if (runResult != null)
-                    {
-                        ResultsLogger.LogEpisode(
-                            instanceName: config.Name ?? string.Empty,
-                            ruleName: rule.ToString(),
-                            seed: runConfig.Seed,
-                            makespan: runResult.Makespan,
-                            jobCount: runConfig.JobCount,
-                            machineCount: runConfig.MachineTypeLayout.Length,
-                            totalOps: totalOps,
-                            decisionCount: runResult.DecisionPoints,
-                            totalReward: runResult.TotalReward,
-                            averageTimeScale: Time.timeScale,
-                            agvCount: runResult.AGVCount,
-                            stochastic: runConfig.Stochastic,
-                            episodeFailures: runResult.EpisodeFailures,
-                            totalRepairTime: runResult.TotalRepairTime
-                        );
-                    }
+                        ResultsLogger.LogAll(runResult);
 
                     bridge.OnEpisodeFinished.RemoveListener(onFinish);
 
@@ -457,8 +440,8 @@ namespace Assets.Scripts.Simulation
 
         private IEnumerator RunSingleEpisode(FJSSPConfig config, DispatchingRule rule)
         {
-            EpisodeResult runResult = null;
-            UnityEngine.Events.UnityAction<EpisodeResult> onFinish = res => runResult = res;
+            EpisodeRecord runResult = null;
+            UnityEngine.Events.UnityAction<EpisodeRecord> onFinish = res => runResult = res;
             bridge.OnEpisodeFinished.AddListener(onFinish);
 
             if (agent != null)
@@ -475,30 +458,13 @@ namespace Assets.Scripts.Simulation
             while (bridge.IsEpisodeActive)
                 yield return null;
 
-            int totalOps = 0;
-            if (bridge.Jobs != null)
-                foreach (var job in bridge.Jobs.AllJobs)
-                    totalOps += job.TotalOperations;
+            // int totalOps = 0;
+            // if (bridge.Jobs != null)
+            //     foreach (var job in bridge.Jobs.AllJobs)
+            //         totalOps += job.TotalOperations;
 
             if (runResult != null)
-            {
-                ResultsLogger.LogEpisode(
-                    instanceName: config.Name ?? string.Empty,
-                    ruleName: rule.ToString(),
-                    seed: config.Seed,
-                    makespan: runResult.Makespan,
-                    jobCount: config.JobCount,
-                    machineCount: config.MachineTypeLayout.Length,
-                    totalOps: totalOps,
-                    decisionCount: runResult.DecisionPoints,
-                    totalReward: runResult.TotalReward,
-                    averageTimeScale: Time.timeScale,
-                    agvCount: runResult.AGVCount,
-                    stochastic: config.Stochastic,
-                    episodeFailures: runResult.EpisodeFailures,
-                    totalRepairTime: runResult.TotalRepairTime
-                );
-            }
+                ResultsLogger.LogAll(runResult);
 
             bridge.OnEpisodeFinished.RemoveListener(onFinish);
 
