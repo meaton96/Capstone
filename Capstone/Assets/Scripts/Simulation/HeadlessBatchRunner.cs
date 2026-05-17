@@ -390,7 +390,7 @@ namespace Assets.Scripts.Simulation
                 foreach (var rule in activeRules)
                 {
                     FJSSPConfig runConfig = CloneWithSeed(config, config.Seed + rep);
-
+                    runConfig.dispatchingRule = rule;
                     SimLogger.Low($"[BatchRunner] Run {completedRuns + 1}/{totalRuns}: " +
                                   $"benchmark={runConfig.Name} rule={rule} seed={runConfig.Seed}");
 

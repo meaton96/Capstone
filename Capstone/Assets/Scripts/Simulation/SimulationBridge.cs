@@ -50,6 +50,8 @@ namespace Assets.Scripts.Simulation
         private FJSSPConfig currentConfig;
         private Dictionary<MachineType, List<int>> cachedMachinesByType;
         public Dictionary<MachineType, List<int>> CachedMachinesByType => cachedMachinesByType;
+        private Dictionary<int, int> _machineFailureCount = new Dictionary<int, int>();
+        private Dictionary<int, float> _machineRepairTime = new Dictionary<int, float>();
 
         private bool episodeActive;
         private int decisionCount;
@@ -207,6 +209,8 @@ namespace Assets.Scripts.Simulation
                 _episodeTotalRepairTime = 0f;
                 _episodeTotalTtfObserved = 0f;
                 _machineLastOperationalTime.Clear();
+                _machineFailureCount.Clear();
+                _machineRepairTime.Clear();
 
                 // ── Stochastic: arm per-machine TTF countdowns ─────────────────────
                 StochasticEventManager.Instance?.Initialize(currentConfig);
@@ -329,6 +333,11 @@ namespace Assets.Scripts.Simulation
             // Begin tracking downtime from the moment of failure.
             _machineDowntimeStart[machine.MachineId] = SimTime;
             _episodeTotalRepairTime += machine.SampledRepairDuration;
+
+            _machineFailureCount.TryAdd(machineId, 0);
+            _machineFailureCount[machineId]++;
+            _machineRepairTime.TryAdd(machineId, 0f);
+            _machineRepairTime[machineId] += machine.SampledRepairDuration;
 
             if (_machineLastOperationalTime.TryGetValue(machineId, out double lastOpTime))
             {
@@ -1004,7 +1013,9 @@ namespace Assets.Scripts.Simulation
                     machineType: machine.PrimaryType.ToString(),
                     opsCompleted: _machineOpsCompleted.TryGetValue(mid, out int ops) ? ops : 0,
                     timeProcessing: timeProcessing,
-                    timeOperational: timeOperational
+                    timeOperational: timeOperational,
+                    failureCount: _machineFailureCount.TryGetValue(mid, out int fc) ? fc : 0,
+                    totalRepairTime: _machineRepairTime.TryGetValue(mid, out float rt) ? rt : 0f
                 );
             }
 
