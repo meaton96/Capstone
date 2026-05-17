@@ -3,7 +3,7 @@ using UnityEngine.AI;
 using System.Collections.Generic;
 using Assets.Scripts.Simulation.Machines;
 using Assets.Scripts.Simulation.FactoryLayout;
-using Assets.Scripts.Logging;
+using Assets.Scripts.Simulation.Logging;
 using Assets.Scripts.Simulation.Jobs;
 using TMPro;
 

@@ -2,8 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using Assets.Scripts.Simulation.Types;
-using Assets.Scripts.Simulation.Stochastic;
-using Assets.Scripts.Logging;
+using Assets.Scripts.Simulation.Logging;
 
 namespace Assets.Scripts.Simulation.Stochastic
 {
@@ -54,11 +53,11 @@ namespace Assets.Scripts.Simulation.Stochastic
                     sum += s; sumSq += s * s;
                 }
                 double mean = sum / N;
-                double std  = Math.Sqrt(sumSq / N - mean * mean);
+                double std = Math.Sqrt(sumSq / N - mean * mean);
                 double expectedMean = 812.4;
-                double expectedStd  = 551.6;
+                double expectedStd = 551.6;
                 CheckStat("Weibull(1.5,900) mean", mean, expectedMean);
-                CheckStat("Weibull(1.5,900) std",  std,  expectedStd);
+                CheckStat("Weibull(1.5,900) std", std, expectedStd);
             }
 
             yield return null;
@@ -78,11 +77,11 @@ namespace Assets.Scripts.Simulation.Stochastic
                     sum += s; sumSq += s * s;
                 }
                 double mean = sum / N;
-                double std  = Math.Sqrt(sumSq / N - mean * mean);
+                double std = Math.Sqrt(sumSq / N - mean * mean);
                 double expectedMean = 61.9;
-                double expectedStd  = 33.0;
+                double expectedStd = 33.0;
                 CheckStat("LogNormal(4.0,0.5) mean", mean, expectedMean);
-                CheckStat("LogNormal(4.0,0.5) std",  std,  expectedStd);
+                CheckStat("LogNormal(4.0,0.5) std", std, expectedStd);
             }
 
             yield return null;
@@ -100,11 +99,11 @@ namespace Assets.Scripts.Simulation.Stochastic
                     sum += s; sumSq += s * s;
                 }
                 double mean = sum / N;
-                double std  = Math.Sqrt(sumSq / N - mean * mean);
+                double std = Math.Sqrt(sumSq / N - mean * mean);
                 double expectedMean = 200.0;
-                double expectedStd  = 200.0;
+                double expectedStd = 200.0;
                 CheckStat("Exponential(0.005) mean", mean, expectedMean);
-                CheckStat("Exponential(0.005) std",  std,  expectedStd);
+                CheckStat("Exponential(0.005) std", std, expectedStd);
             }
 
             yield return null;
@@ -191,13 +190,13 @@ namespace Assets.Scripts.Simulation.Stochastic
                 Stochastic = new StochasticConfig
                 {
                     MachineFailuresEnabled = machineFailures,
-                    WeibullK               = weibullK,
-                    WeibullLambda          = weibullLambda,
-                    RepairLogMu            = repairLogMu,
-                    RepairLogSigma         = repairLogSigma,
-                    AGVFailuresEnabled     = agvFailures,
+                    WeibullK = weibullK,
+                    WeibullLambda = weibullLambda,
+                    RepairLogMu = repairLogMu,
+                    RepairLogSigma = repairLogSigma,
+                    AGVFailuresEnabled = agvFailures,
                     DynamicArrivalsEnabled = dynamicArrivals,
-                    ArrivalLambda          = arrivalLambda,
+                    ArrivalLambda = arrivalLambda,
                 }
             };
         }

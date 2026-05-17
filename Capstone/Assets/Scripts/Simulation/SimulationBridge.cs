@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 using System.Collections.Generic;
-using Assets.Scripts.Logging;
+using Assets.Scripts.Simulation.Logging;
 using Assets.Scripts.Simulation.Machines;
 using Assets.Scripts.Simulation.AGV;
 using Assets.Scripts.Simulation.FactoryLayout;
@@ -1014,6 +1014,9 @@ namespace Assets.Scripts.Simulation
                 DecisionPoints = decisionCount,
                 TotalReward = totalReward,
                 AGVCount = agvPool.AllAGVs.Count,
+                EpisodeFailures = _episodeFailureCount,
+                TotalRepairTime = _episodeTotalRepairTime,
+
             });
         }
 

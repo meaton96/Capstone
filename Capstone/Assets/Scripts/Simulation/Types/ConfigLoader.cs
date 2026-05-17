@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using Assets.Scripts.Simulation.Machines;
-using Assets.Scripts.Logging;
+using Assets.Scripts.Simulation.Logging;
 
 namespace Assets.Scripts.Simulation.Types
 {

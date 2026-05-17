@@ -2,7 +2,7 @@ using UnityEngine;
 using System.IO;
 using System;
 
-namespace Assets.Scripts.Logging
+namespace Assets.Scripts.Simulation.Logging
 {
     /// @brief Defines the verbosity levels for the simulation logger.
     public enum LogLevel

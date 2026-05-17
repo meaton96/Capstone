@@ -1,7 +1,7 @@
 using UnityEngine;
 using Assets.Scripts.Simulation.Jobs;
 using Assets.Scripts.Simulation.Stochastic;
-using Assets.Scripts.Logging;
+using Assets.Scripts.Simulation.Logging;
 using Assets.Scripts.Simulation.Channels;
 using System.Collections.Generic;
 

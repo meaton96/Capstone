@@ -5,7 +5,7 @@ using TMPro;
 using Assets.Scripts.Simulation;
 using Assets.Scripts.Scheduling.Data;
 using Newtonsoft.Json;
-using Assets.Scripts.Logging;
+using Assets.Scripts.Simulation.Logging;
 
 namespace Assets.Scripts.UI
 {

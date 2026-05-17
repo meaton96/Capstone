@@ -13,6 +13,9 @@ namespace Assets.Scripts.Simulation.Types
         public int DecisionPoints;
         public double TotalReward;
         public int[] PerMachineDecisions;
+        public int EpisodeFailures = 0;
+        public float TotalRepairTime = 0f;
+
 
         public int AGVCount;
 

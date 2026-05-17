@@ -1,6 +1,6 @@
 using System;
 using Unity.MLAgents.SideChannels;
-using Assets.Scripts.Logging;
+using Assets.Scripts.Simulation.Logging;
 using Assets.Scripts.Simulation.Types;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;

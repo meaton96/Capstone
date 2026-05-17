@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Unity.MLAgents.SideChannels;
-using Assets.Scripts.Logging;
+using Assets.Scripts.Simulation.Logging;
 using Newtonsoft.Json;
 using UnityEngine;
 

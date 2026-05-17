@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Assets.Scripts.Simulation.FactoryLayout;
-using Assets.Scripts.Logging;
+using Assets.Scripts.Simulation.Logging;
 
 namespace Assets.Scripts.Simulation.AGV
 {

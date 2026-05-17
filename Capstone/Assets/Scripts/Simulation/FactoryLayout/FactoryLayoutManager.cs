@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Assets.Scripts.Scheduling.Core;
-using Assets.Scripts.Logging;
+using Assets.Scripts.Simulation.Logging;
 using Unity.AI.Navigation;
 using Assets.Scripts.Simulation.Machines;
 using Assets.Scripts.Simulation.Jobs;

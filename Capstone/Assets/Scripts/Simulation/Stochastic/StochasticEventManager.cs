@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 using Assets.Scripts.Simulation.Types;
-using Assets.Scripts.Logging;
+using Assets.Scripts.Simulation.Logging;
 
 namespace Assets.Scripts.Simulation.Stochastic
 {
@@ -48,7 +48,7 @@ namespace Assets.Scripts.Simulation.Stochastic
 
         /// @brief Convenience passthrough — safe to call even when not active.
         public bool MachineFailuresEnabled => IsActive && _cfg.MachineFailuresEnabled;
-        public bool AGVFailuresEnabled     => IsActive && _cfg.AGVFailuresEnabled;
+        public bool AGVFailuresEnabled => IsActive && _cfg.AGVFailuresEnabled;
         public bool DynamicArrivalsEnabled => IsActive && _cfg.DynamicArrivalsEnabled;
 
         // ── Initialisation ───────────────────────────────────────────────────

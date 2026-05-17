@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using Assets.Scripts.Logging;
+using Assets.Scripts.Simulation.Logging;
 using Assets.Scripts.Simulation.Machines;
 using Assets.Scripts.Simulation.Types;
 using Assets.Scripts.Simulation.Jobs;
@@ -19,23 +19,37 @@ namespace Assets.Scripts.Simulation
     ///
     /// Usage (headless build):
     /// @code
-    ///   # Generated job data sweep
+    ///   # Generated job data sweep (deterministic)
     ///   ./capstone.exe -batchmode -nographics -timescale 100 \
     ///      -batchconfig ./BatchConfigs/BatchConfigs.json \
     ///      -outputdir generated_baseline \
     ///      -repeats 1
     ///
-    ///   # Single Brandimarte benchmark
+    ///   # Single Brandimarte benchmark (deterministic)
     ///   ./capstone.exe -batchmode -nographics -timescale 100 \
     ///      -benchmark ./BatchConfigs/Benchmarks/mk01.json \
     ///      -outputdir brandimarte \
     ///      -repeats 3
     ///
-    ///   # All Brandimarte benchmarks in a directory
+    ///   # All Brandimarte benchmarks (deterministic)
     ///   ./capstone.exe -batchmode -nographics -timescale 100 \
     ///      -benchmarkdir ./BatchConfigs/Benchmarks \
     ///      -outputdir brandimarte \
     ///      -repeats 1
+    ///
+    ///   # All Brandimarte benchmarks (low disruption stochastic)
+    ///   ./capstone.exe -batchmode -nographics -timescale 100 \
+    ///      -benchmarkdir ./BatchConfigs/Benchmarks \
+    ///      -outputdir brandimarte_stochastic_low \
+    ///      -disruption low \
+    ///      -repeats 10
+    ///
+    ///   # All Brandimarte benchmarks (high disruption stochastic)
+    ///   ./capstone.exe -batchmode -nographics -timescale 100 \
+    ///      -benchmarkdir ./BatchConfigs/Benchmarks \
+    ///      -outputdir brandimarte_stochastic_high \
+    ///      -disruption high \
+    ///      -repeats 10
     /// @endcode
     ///
     /// Attach this MonoBehaviour to the same GameObject as SimulationBridge.
@@ -87,6 +101,7 @@ namespace Assets.Scripts.Simulation
                 enabled = false;
                 return;
             }
+
             string batchPath = GetCLIArg("-batchconfig");
             string benchmarkPath = GetCLIArg("-benchmark");
             string benchmarkDirPath = GetCLIArg("-benchmarkdir");
@@ -123,8 +138,7 @@ namespace Assets.Scripts.Simulation
             if (!string.IsNullOrEmpty(suffix))
                 ResultsLogger.SetFilenameSuffix(suffix);
 
-            // Output subdirectory — keeps results separated by experiment
-            // e.g. -outputdir brandimarte → Results/brandimarte/baseline_results.csv
+            // Output subdirectory
             string outputDir = GetCLIArg("-outputdir");
             if (!string.IsNullOrEmpty(outputDir))
             {
@@ -138,21 +152,34 @@ namespace Assets.Scripts.Simulation
             if (!string.IsNullOrEmpty(repeatsStr))
                 int.TryParse(repeatsStr, out repeats);
 
+            // Disruption level — only applies to benchmark modes (not generated batch)
+            StochasticDisruption disruption = StochasticDisruption.None;
+            string disruptionStr = GetCLIArg("-disruption");
+            if (!string.IsNullOrEmpty(disruptionStr))
+            {
+                if (Enum.TryParse(disruptionStr, ignoreCase: true, out StochasticDisruption parsed))
+                    disruption = parsed;
+                else
+                    SimLogger.LogWarning($"[BatchRunner] Unknown -disruption value '{disruptionStr}'. " +
+                                         "Valid values: none, low, high. Defaulting to none.");
+            }
+            SimLogger.Low($"[BatchRunner] Disruption mode: {disruption}");
+
             // ── Route to the correct coroutine ──────────────────────
 
             if (!string.IsNullOrEmpty(benchmarkDirPath))
             {
-                // Multi-benchmark mode: run all .json files in the directory
-                StartCoroutine(RunMultiBenchmarkCoroutine(benchmarkDirPath, repeats));
+                StartCoroutine(RunMultiBenchmarkCoroutine(benchmarkDirPath, repeats, disruption));
             }
             else if (!string.IsNullOrEmpty(benchmarkPath))
             {
-                // Single benchmark mode
-                StartCoroutine(RunBenchmarkCoroutine(benchmarkPath, repeats));
+                StartCoroutine(RunBenchmarkCoroutine(benchmarkPath, repeats, disruption));
             }
             else
             {
-                // Normal mode: generated job data from batch configs
+                // Generated job data — disruption flag is ignored here since
+                // stochastic params for generated configs come from FJSSPConfig.Stochastic
+                // set directly in the batch JSON (not calibrated from instance data).
                 FJSSPConfig[] configs = LoadConfigs(batchPath);
                 if (configs.Length > 0)
                     StartCoroutine(RunBatchCoroutine(configs, repeats));
@@ -202,7 +229,7 @@ namespace Assets.Scripts.Simulation
             completedRuns = 0;
 
             SimLogger.Low($"[BatchRunner] Starting batch: {configs.Length} configs x " +
-                      $"{activeRules.Length} rules x {repeats} repeats = {totalRuns} total runs");
+                          $"{activeRules.Length} rules x {repeats} repeats = {totalRuns} total runs");
 
             startWall = Time.realtimeSinceStartup;
 
@@ -215,7 +242,7 @@ namespace Assets.Scripts.Simulation
                         FJSSPConfig runConfig = CloneWithSeed(baseConfig, baseConfig.Seed + rep);
 
                         SimLogger.Low($"[BatchRunner] Run {completedRuns + 1}/{totalRuns}: " +
-                                  $"config={runConfig.Name} rule={rule} seed={runConfig.Seed}");
+                                      $"config={runConfig.Name} rule={rule} seed={runConfig.Seed}");
 
                         yield return RunSingleEpisode(runConfig, rule);
 
@@ -240,11 +267,8 @@ namespace Assets.Scripts.Simulation
         //  Multi-Benchmark Loop (all .json files in a directory)
         // ─────────────────────────────────────────────────────────
 
-        /// <summary>
-        /// Discovers all .json benchmark files in a directory, sorts them
-        /// alphabetically, and runs each through RunBenchmarkEpisodes.
-        /// </summary>
-        private IEnumerator RunMultiBenchmarkCoroutine(string dirPath, int repeats)
+        private IEnumerator RunMultiBenchmarkCoroutine(string dirPath, int repeats,
+                                                        StochasticDisruption disruption = StochasticDisruption.None)
         {
             isBatchRunning = true;
             if (activeRules == null || activeRules.Length == 0)
@@ -256,7 +280,6 @@ namespace Assets.Scripts.Simulation
                 yield break;
             }
 
-            // Discover and sort benchmark files alphabetically (mk01, mk02, ...)
             string[] files = Directory.GetFiles(dirPath, "*.json");
             Array.Sort(files, StringComparer.OrdinalIgnoreCase);
 
@@ -266,18 +289,18 @@ namespace Assets.Scripts.Simulation
                 yield break;
             }
 
-            // Pre-load all benchmarks to calculate total run count
             var benchmarks = new List<(string path, FJSSPConfig config,
                 Func<Dictionary<MachineType, List<int>>, FJSSPJobDefinition[]> buildJobs)>();
 
             foreach (string file in files)
             {
-                var (config, buildJobs) = BrandimartLoader.LoadDeferred(file);
+                var (config, buildJobs) = LoadBenchmark(file, disruption);
                 if (config != null)
                 {
                     benchmarks.Add((file, config, buildJobs));
                     SimLogger.Low($"[BatchRunner] Loaded benchmark: {config.Name} " +
-                                  $"({config.JobCount} jobs, {config.MachineTypeLayout.Length} machines)");
+                                  $"({config.JobCount} jobs, {config.MachineTypeLayout.Length} machines) " +
+                                  $"disruption={disruption}");
                 }
                 else
                 {
@@ -289,7 +312,8 @@ namespace Assets.Scripts.Simulation
             completedRuns = 0;
 
             SimLogger.Low($"[BatchRunner] Multi-benchmark: {benchmarks.Count} files x " +
-                          $"{activeRules.Length} rules x {repeats} repeats = {totalRuns} total runs");
+                          $"{activeRules.Length} rules x {repeats} repeats = {totalRuns} total runs " +
+                          $"[disruption={disruption}]");
 
             startWall = Time.realtimeSinceStartup;
 
@@ -316,13 +340,14 @@ namespace Assets.Scripts.Simulation
         //  Single Benchmark File (entry point for -benchmark)
         // ─────────────────────────────────────────────────────────
 
-        private IEnumerator RunBenchmarkCoroutine(string jsonPath, int repeats)
+        private IEnumerator RunBenchmarkCoroutine(string jsonPath, int repeats,
+                                                   StochasticDisruption disruption = StochasticDisruption.None)
         {
             isBatchRunning = true;
             if (activeRules == null || activeRules.Length == 0)
                 activeRules = AllRules;
 
-            var (config, buildJobs) = BrandimartLoader.LoadDeferred(jsonPath);
+            var (config, buildJobs) = LoadBenchmark(jsonPath, disruption);
             if (config == null)
             {
                 QuitWithError($"Failed to load benchmark: {jsonPath}");
@@ -333,7 +358,8 @@ namespace Assets.Scripts.Simulation
             completedRuns = 0;
 
             SimLogger.Low($"[BatchRunner] Benchmark: {config.Name}, " +
-                          $"{activeRules.Length} rules x {repeats} repeats = {totalRuns} runs");
+                          $"{activeRules.Length} rules x {repeats} repeats = {totalRuns} runs " +
+                          $"[disruption={disruption}]");
 
             startWall = Time.realtimeSinceStartup;
 
@@ -354,10 +380,6 @@ namespace Assets.Scripts.Simulation
         //  Benchmark Episode Runner (shared by single and multi)
         // ─────────────────────────────────────────────────────────
 
-        /// <summary>
-        /// Runs all (rule × repeat) episodes for a single benchmark config.
-        /// Shared between RunBenchmarkCoroutine and RunMultiBenchmarkCoroutine.
-        /// </summary>
         private IEnumerator RunBenchmarkEpisodes(
             FJSSPConfig config,
             Func<Dictionary<MachineType, List<int>>, FJSSPJobDefinition[]> buildJobs,
@@ -372,43 +394,32 @@ namespace Assets.Scripts.Simulation
                     SimLogger.Low($"[BatchRunner] Run {completedRuns + 1}/{totalRuns}: " +
                                   $"benchmark={runConfig.Name} rule={rule} seed={runConfig.Seed}");
 
-                    // ── Capture episode result via event listener ─────
                     EpisodeResult runResult = null;
                     UnityEngine.Events.UnityAction<EpisodeResult> onFinish = res => runResult = res;
                     bridge.OnEpisodeFinished.AddListener(onFinish);
 
-                    // Phase 1: Set heuristic rule
                     if (agent != null)
                         agent.SetHeuristicRule(rule);
 
-                    // Phase 2: Load config (sets IsFactoryReady = false)
                     bridge.LoadConfig(runConfig);
-
-                    // Phase 3: Explicitly spawn factory so machine IDs exist
                     bridge.SpawnFactory();
 
-                    // Phase 4: Build benchmark jobs using runtime IDs, inject them
                     var jobs = buildJobs(bridge.CachedMachinesByType);
                     bridge.LoadPrebuiltJobs(jobs);
 
-                    // Phase 5: Arm the agent
                     if (agent != null)
                         agent.ArmAndStart();
 
-                    // Phase 6: Wait for episode lifecycle
                     while (!bridge.IsEpisodeActive)
                         yield return null;
 
                     while (bridge.IsEpisodeActive)
                         yield return null;
 
-                    // Phase 7: Log results
                     int totalOps = 0;
                     if (bridge.Jobs != null)
-                    {
                         foreach (var job in bridge.Jobs.AllJobs)
                             totalOps += job.TotalOperations;
-                    }
 
                     if (runResult != null)
                     {
@@ -423,7 +434,10 @@ namespace Assets.Scripts.Simulation
                             decisionCount: runResult.DecisionPoints,
                             totalReward: runResult.TotalReward,
                             averageTimeScale: Time.timeScale,
-                            agvCount: runResult.AGVCount
+                            agvCount: runResult.AGVCount,
+                            stochastic: runConfig.Stochastic,
+                            episodeFailures: runResult.EpisodeFailures,
+                            totalRepairTime: runResult.TotalRepairTime
                         );
                     }
 
@@ -438,7 +452,7 @@ namespace Assets.Scripts.Simulation
         }
 
         // ─────────────────────────────────────────────────────────
-        //  Single Episode Runner (used by normal batch loop)
+        //  Single Episode Runner (used by generated batch loop)
         // ─────────────────────────────────────────────────────────
 
         private IEnumerator RunSingleEpisode(FJSSPConfig config, DispatchingRule rule)
@@ -463,10 +477,8 @@ namespace Assets.Scripts.Simulation
 
             int totalOps = 0;
             if (bridge.Jobs != null)
-            {
                 foreach (var job in bridge.Jobs.AllJobs)
                     totalOps += job.TotalOperations;
-            }
 
             if (runResult != null)
             {
@@ -481,7 +493,10 @@ namespace Assets.Scripts.Simulation
                     decisionCount: runResult.DecisionPoints,
                     totalReward: runResult.TotalReward,
                     averageTimeScale: Time.timeScale,
-                    agvCount: runResult.AGVCount
+                    agvCount: runResult.AGVCount,
+                    stochastic: config.Stochastic,
+                    episodeFailures: runResult.EpisodeFailures,
+                    totalRepairTime: runResult.TotalRepairTime
                 );
             }
 
@@ -494,10 +509,26 @@ namespace Assets.Scripts.Simulation
         //  Helpers
         // ─────────────────────────────────────────────────────────
 
+        /// <summary>
+        /// Loads a benchmark file, attaching a calibrated StochasticConfig
+        /// when disruption != None. Single point of truth for the loader call
+        /// so both single and multi benchmark coroutines stay in sync.
+        /// </summary>
+        private static (FJSSPConfig config,
+                         Func<Dictionary<MachineType, List<int>>, FJSSPJobDefinition[]> buildJobs)
+            LoadBenchmark(string jsonPath, StochasticDisruption disruption)
+        {
+            return disruption == StochasticDisruption.None
+                ? BrandimartLoader.LoadDeferred(jsonPath)
+                : BrandimartLoader.LoadDeferredWithStochastic(jsonPath, disruption);
+        }
+
         private void LogProgress()
         {
             float elapsed = Time.realtimeSinceStartup - startWall;
-            float eta = (elapsed / completedRuns) * (totalRuns - completedRuns);
+            float eta = completedRuns > 0
+                ? (elapsed / completedRuns) * (totalRuns - completedRuns)
+                : 0f;
             SimLogger.Low($"[BatchRunner] Progress: {completedRuns}/{totalRuns} " +
                           $"({elapsed:F1}s elapsed, ETA {eta:F1}s)");
         }
@@ -517,7 +548,8 @@ namespace Assets.Scripts.Simulation
                 MaxOpsPerJob = source.MaxOpsPerJob,
                 MaxArrivalTime = source.MaxArrivalTime,
                 AGVCount = source.AGVCount,
-                //ProcTimeParams = source.ProcTimeParams,
+                ProcTimeParams = source.ProcTimeParams,
+                Stochastic = source.Stochastic,  // shared across repeats — intentional
             };
         }
 

@@ -1,6 +1,6 @@
 using System.IO;
 using UnityEngine;
-using Assets.Scripts.Logging;
+using Assets.Scripts.Simulation.Logging;
 
 namespace Assets.Scripts.Simulation
 {
