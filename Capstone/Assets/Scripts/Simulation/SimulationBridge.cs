@@ -986,7 +986,7 @@ namespace Assets.Scripts.Simulation
                     _machineDowntimeStart.Remove(machine.MachineId);
                 }
             }
-
+            string instanceName = currentConfig?.Name ?? string.Empty;
             // Log one row per machine to machine_utilization.csv.
             foreach (var machine in layoutManager.Machines)
             {
@@ -996,6 +996,7 @@ namespace Assets.Scripts.Simulation
                 double timeOperational = SimTime - totalDowntime;   // == SimTime in deterministic runs
 
                 ResultsLogger.LogMachineUtilization(
+                    instanceName: instanceName,
                     ruleName: LastAppliedRule,
                     seed: currentConfig.Seed,
                     makespan: SimTime,

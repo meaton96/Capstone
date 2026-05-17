@@ -11,8 +11,12 @@ namespace Assets.Scripts.Logging
     /// to facilitate parallel headless runs.
     ///
     /// Two CSV files are maintained:
-    ///   - @c baseline_results.csv        — one row per episode (unchanged schema)
+    ///   - @c baseline_results.csv        — one row per episode
     ///   - @c machine_utilization.csv     — one row per machine per episode
+    ///
+    /// Both files include an @c instance column (second column after timestamp)
+    /// so that results can be grouped and plotted per benchmark instance or
+    /// generated-config name without relying on seed as a proxy.
     public static class ResultsLogger
     {
         public static string OutputDirectory = "";
@@ -74,31 +78,37 @@ namespace Assets.Scripts.Logging
 
         /// @brief Records the results of a single simulation episode to the CSV.
         ///
-        /// @param ruleName The identifier for the scheduling rule or policy used.
-        /// @param seed The random seed used to generate the environment.
-        /// @param makespan The total time taken to complete all jobs.
-        /// @param jobCount Total number of jobs in the problem instance.
-        /// @param machineCount Total number of machines in the shop floor.
-        /// @param totalOps Total count of operations processed.
-        /// @param decisionCount Number of scheduling decisions made by the agent/rule.
-        /// @param totalReward The cumulative reward achieved during the episode.
+        /// @param instanceName   The config or benchmark name (e.g. "MK03", "rand_5j_5m").
+        ///                       Used as the primary grouping key for cross-instance plots.
+        ///                       Pass @c FJSSPConfig.Name here. Falls back to an empty
+        ///                       string if the config has no name set.
+        /// @param ruleName       The identifier for the scheduling rule or policy used.
+        /// @param seed           The random seed used to generate the environment.
+        /// @param makespan       The total time taken to complete all jobs.
+        /// @param jobCount       Total number of jobs in the problem instance.
+        /// @param machineCount   Total number of machines in the shop floor.
+        /// @param totalOps       Total count of operations processed.
+        /// @param decisionCount  Number of scheduling decisions made by the agent/rule.
+        /// @param totalReward    The cumulative reward achieved during the episode.
         /// @param averageTimeScale The mean simulation speed maintained during the run.
-        /// @param agvCount Total number of AGVs in the fleet.
+        /// @param agvCount       Total number of AGVs in the fleet.
         ///
         /// @details Thread-safe for sequential writes. If the target file does not 
         /// exist, this method automatically writes the CSV header before appending data.
-        public static void LogEpisode(string ruleName, int seed, double makespan,
-                                       int jobCount, int machineCount, int totalOps,
-                                       int decisionCount, double totalReward, float averageTimeScale, int agvCount)
+        public static void LogEpisode(
+            string instanceName, string ruleName, int seed, double makespan,
+            int jobCount, int machineCount, int totalOps,
+            int decisionCount, double totalReward, float averageTimeScale, int agvCount)
         {
             bool fileExists = File.Exists(FilePath);
             using StreamWriter writer = new StreamWriter(FilePath, append: true);
 
             if (!fileExists)
-                writer.WriteLine("timestamp,rule,seed,makespan,jobs,machines,total_ops,agvCount,decisions,total_reward,timescale");
+                writer.WriteLine("timestamp,instance,rule,seed,makespan,jobs,machines,total_ops,agvCount,decisions,total_reward,timescale");
 
             writer.WriteLine(
                 $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}," +
+                $"{instanceName}," +
                 $"{ruleName}," +
                 $"{seed}," +
                 $"{makespan:F2}," +
@@ -111,7 +121,7 @@ namespace Assets.Scripts.Logging
                 $"{averageTimeScale:F4}"
             );
 
-            Debug.Log($"[Results] Logged: {ruleName} seed={seed} makespan={makespan:F1} - {FilePath}");
+            Debug.Log($"[Results] Logged: {instanceName} {ruleName} seed={seed} makespan={makespan:F1} - {FilePath}");
         }
 
         // ── Machine-level utilization log ─────────────────────────────────────
@@ -132,6 +142,8 @@ namespace Assets.Scripts.Logging
 
         /// @brief Records per-machine utilization statistics for a single episode.
         ///
+        /// @param instanceName   The config or benchmark name (e.g. "MK03").
+        ///                       Joins to the episode log on (instance, rule, seed).
         /// @param ruleName       The scheduling rule or policy used this episode.
         /// @param seed           The random seed used to generate the environment.
         /// @param makespan       The total episode duration (wall-clock SimTime).
@@ -148,13 +160,10 @@ namespace Assets.Scripts.Logging
         ///   - @c idle_time        = @p timeOperational - @p timeProcessing
         ///   - @c idle_rate        = @c idle_time / @p timeOperational
         ///
-        /// One row per machine is expected per episode. Call this in a loop over all
-        /// machines immediately after @c LogEpisode inside @c FinaliseEpisode().
-        ///
-        /// The file schema is fixed regardless of machine count, making it trivially
-        /// joinable to the episode log on (rule, seed).
+        /// The composite key (instance, rule, seed, machine_id) uniquely identifies
+        /// every row, enabling joins to the episode log and per-machine pivot tables.
         public static void LogMachineUtilization(
-            string ruleName, int seed, double makespan,
+            string instanceName, string ruleName, int seed, double makespan,
             int machineId, string machineType,
             int opsCompleted, double timeProcessing, double timeOperational)
         {
@@ -168,13 +177,14 @@ namespace Assets.Scripts.Logging
 
             if (!fileExists)
                 writer.WriteLine(
-                    "timestamp,rule,seed,makespan," +
+                    "timestamp,instance,rule,seed,makespan," +
                     "machine_id,machine_type,ops_completed," +
                     "time_processing,time_operational," +
                     "utilization_rate,idle_time,idle_rate");
 
             writer.WriteLine(
                 $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}," +
+                $"{instanceName}," +
                 $"{ruleName},{seed},{makespan:F2}," +
                 $"{machineId},{machineType},{opsCompleted}," +
                 $"{timeProcessing:F2},{timeOperational:F2}," +

@@ -413,6 +413,7 @@ namespace Assets.Scripts.Simulation
                     if (runResult != null)
                     {
                         ResultsLogger.LogEpisode(
+                            instanceName: config.Name ?? string.Empty,
                             ruleName: rule.ToString(),
                             seed: runConfig.Seed,
                             makespan: runResult.Makespan,
@@ -470,6 +471,7 @@ namespace Assets.Scripts.Simulation
             if (runResult != null)
             {
                 ResultsLogger.LogEpisode(
+                    instanceName: config.Name ?? string.Empty,
                     ruleName: rule.ToString(),
                     seed: config.Seed,
                     makespan: runResult.Makespan,
