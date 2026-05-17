@@ -58,7 +58,7 @@ namespace Assets.Scripts.Simulation
     public class HeadlessBatchRunner : MonoBehaviour
     {
         [Header("References")]
-        [SerializeField] private SimulationBridge bridge;
+        //[SerializeField] private FactoryOrchestrator orchestrator;
         [SerializeField] private SchedulingAgent agent;
 
         [Header("Fallback Settings (used if no CLI args)")]
@@ -396,24 +396,24 @@ namespace Assets.Scripts.Simulation
 
                     EpisodeRecord runResult = null;
                     UnityEngine.Events.UnityAction<EpisodeRecord> onFinish = res => runResult = res;
-                    bridge.OnEpisodeFinished.AddListener(onFinish);
+                    FactoryOrchestrator.Instance.OnEpisodeFinished.AddListener(onFinish);
 
                     if (agent != null)
                         agent.SetHeuristicRule(rule);
 
-                    bridge.LoadConfig(runConfig);
-                    bridge.SpawnFactory();
+                    FactoryOrchestrator.Instance.LoadConfig(runConfig);
+                    FactoryOrchestrator.Instance.SpawnFactory();
 
-                    var jobs = buildJobs(bridge.CachedMachinesByType);
-                    bridge.LoadPrebuiltJobs(jobs);
+                    var jobs = buildJobs(FactoryOrchestrator.Instance.CachedMachinesByType);
+                    FactoryOrchestrator.Instance.LoadPrebuiltJobs(jobs);
 
                     if (agent != null)
                         agent.ArmAndStart();
 
-                    while (!bridge.IsEpisodeActive)
+                    while (!FactoryOrchestrator.Instance.IsEpisodeActive)
                         yield return null;
 
-                    while (bridge.IsEpisodeActive)
+                    while (FactoryOrchestrator.Instance.IsEpisodeActive)
                         yield return null;
 
                     // int totalOps = 0;
@@ -424,7 +424,7 @@ namespace Assets.Scripts.Simulation
                     if (runResult != null)
                         ResultsLogger.LogAll(runResult);
 
-                    bridge.OnEpisodeFinished.RemoveListener(onFinish);
+                    FactoryOrchestrator.Instance.OnEpisodeFinished.RemoveListener(onFinish);
 
                     completedRuns++;
                     LogProgress();
@@ -442,20 +442,20 @@ namespace Assets.Scripts.Simulation
         {
             EpisodeRecord runResult = null;
             UnityEngine.Events.UnityAction<EpisodeRecord> onFinish = res => runResult = res;
-            bridge.OnEpisodeFinished.AddListener(onFinish);
+            FactoryOrchestrator.Instance.OnEpisodeFinished.AddListener(onFinish);
 
             if (agent != null)
                 agent.SetHeuristicRule(rule);
 
-            bridge.LoadConfig(config);
+            FactoryOrchestrator.Instance.LoadConfig(config);
 
             if (agent != null)
                 agent.ArmAndStart();
 
-            while (!bridge.IsEpisodeActive)
+            while (!FactoryOrchestrator.Instance.IsEpisodeActive)
                 yield return null;
 
-            while (bridge.IsEpisodeActive)
+            while (FactoryOrchestrator.Instance.IsEpisodeActive)
                 yield return null;
 
             // int totalOps = 0;
@@ -466,7 +466,7 @@ namespace Assets.Scripts.Simulation
             if (runResult != null)
                 ResultsLogger.LogAll(runResult);
 
-            bridge.OnEpisodeFinished.RemoveListener(onFinish);
+            FactoryOrchestrator.Instance.OnEpisodeFinished.RemoveListener(onFinish);
 
             yield return new WaitForSecondsRealtime(0.1f);
         }

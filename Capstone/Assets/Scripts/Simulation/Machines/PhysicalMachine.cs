@@ -401,7 +401,7 @@ namespace Assets.Scripts.Simulation.Machines
             if (visualLayer != null && remainingTime > 0f)
                 visualLayer.UpdateProgress(1f - (remainingTime / Mathf.Max(totalDuration, 0.001f)));
 
-            if (!almostDoneFired && remainingTime <= SimulationBridge.Instance.PreDispatchLeadTime)
+            if (!almostDoneFired && remainingTime <= FactoryOrchestrator.Instance.PreDispatchLeadTime)
             {
                 almostDoneFired = true;
                 AlmostDoneFlag = true;

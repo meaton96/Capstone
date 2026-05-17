@@ -1,18 +1,30 @@
---- Log Started: 5/16/2026 8:15:10 PM ---
-2026-05-16 20:15:11.194 [FactoryLayout] Distributed type layout (row x col):
-  Row0: Mill, Lathe, Weld
-  Row1: Inspect, Assemble
+--- Log Started: 5/17/2026 5:02:30 PM ---
+2026-05-17 17:02:31.285 [Agent] OnEpisodeBegin skipped — waiting for UI to arm.
+2026-05-17 17:02:36.179 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.005
+2026-05-17 17:02:36.182 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble, Mill, Lathe
+  Row3: Weld, Inspect, Assemble
   [OK] No two same-type machines share a row aisle.
 
-2026-05-16 20:15:11.218 [FactoryLayout] Distance matrix (5x5):
-       M0     M1     M2     M3     M4   
-2026-05-16 20:15:11.230 [FactoryLayout] Built aisle-based floor: 5 machines.
-2026-05-16 20:15:11.237 [TrafficZones] Built zone graph: 18 zones.
-2026-05-16 20:15:11.240 [AGVPool] Spawned fleet of 3 AGVs.
-2026-05-16 20:15:11.245 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=2000 λ_agv=700 repairMu=2 repairSigma=0.5 arrivalLambda=0.005
-2026-05-16 20:15:11.247 [Orchestrator] Episode started: 5 jobs, 5 machines, stochastic=True
-2026-05-16 20:15:13.008 [Orchestrator] Machine 1 FAILED. RepairTime=6.5s
-2026-05-16 20:15:13.009 [PhysicalMachine] Machine [1] failure
-2026-05-16 20:15:13.011 [PhysicalMachine] Machine [1] begin repair
-2026-05-16 20:15:19.485 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
-2026-05-16 20:15:19.486 Machine [1] repair complete
+2026-05-17 17:02:36.205 [FactoryLayout] Distance matrix (15x15):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
+2026-05-17 17:02:36.216 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-05-17 17:02:36.222 [TrafficZones] Built zone graph: 33 zones.
+2026-05-17 17:02:36.225 [AGVPool] Spawned fleet of 3 AGVs.
+2026-05-17 17:02:37.733 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.005
+2026-05-17 17:02:37.734 [Orchestrator] Episode started: 20 jobs, 15 machines, stochastic=True
+2026-05-17 17:02:46.611 [Orchestrator] Machine 13 FAILED. RepairTime=24.2s
+2026-05-17 17:02:46.612 [EpisodeTracker] Machine 13 failed. Episode total failures=1
+2026-05-17 17:02:46.612 [PhysicalMachine] Machine [13] failure
+2026-05-17 17:02:46.613 [PhysicalMachine] Machine [13] begin repair
+2026-05-17 17:02:47.894 [Orchestrator] Machine 13 repair complete — returning to OPERATIONAL.
+2026-05-17 17:02:47.894 Machine [13] repair complete
+2026-05-17 17:02:49.061 [Orchestrator] Machine 2 FAILED. RepairTime=41.1s
+2026-05-17 17:02:49.062 [EpisodeTracker] Machine 2 failed. Episode total failures=2
+2026-05-17 17:02:49.062 [Orchestrator] Job 17 returned to NeedsRouting (was Processing on failed machine 2).
+2026-05-17 17:02:49.063 [PhysicalMachine] Machine [2] failure
+2026-05-17 17:02:49.064 [PhysicalMachine] Machine [2] begin repair
+2026-05-17 17:02:51.241 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-17 17:02:51.244 Machine [2] repair complete

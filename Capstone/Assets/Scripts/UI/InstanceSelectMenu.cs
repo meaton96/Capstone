@@ -21,7 +21,7 @@ namespace Assets.Scripts.UI
     {
         [Header("References")]
         [Tooltip("The SimulationBridge to configure and start.")]
-        [SerializeField] private SimulationBridge bridge;
+        [SerializeField] private FactoryOrchestrator bridge;
 
         [Header("UI")]
         [Tooltip("Dropdown populated with the names of every instance found in Resources/Instances.")]
