@@ -3,6 +3,7 @@ using Assets.Scripts.Simulation.Jobs;
 using Assets.Scripts.Simulation.Stochastic;
 using Assets.Scripts.Logging;
 using Assets.Scripts.Simulation.Channels;
+using System.Collections.Generic;
 
 namespace Assets.Scripts.Simulation.Machines
 {
@@ -31,7 +32,9 @@ namespace Assets.Scripts.Simulation.Machines
         // ── Identity ─────────────────────────────────────────────────────────
 
         public int MachineId { get; private set; }
-        public MachineType MachineType { get; private set; }
+        public MachineType PrimaryType { get; private set; }
+        public HashSet<MachineType> Capabilities { get; private set; }
+        public bool CanProcess(MachineType opType) => Capabilities.Contains(opType);
 
         // ── Normal processing state (unchanged) ──────────────────────────────
 
@@ -102,10 +105,14 @@ namespace Assets.Scripts.Simulation.Machines
         ///
         /// @param id   Unique identifier for the machine instance.
         /// @param type The functional @c MachineType (e.g., Mill, Lathe).
-        public void Initialize(int id, MachineType type)
+        public void Initialize(int id, MachineType primary,
+                        IEnumerable<MachineType> capabilities = null)
         {
             MachineId = id;
-            MachineType = type;
+            PrimaryType = primary;
+            Capabilities = capabilities != null
+                ? new HashSet<MachineType>(capabilities)
+                : new HashSet<MachineType> { primary };
             IsIdle = true;
             FinishedFlag = false;
             ActiveJobId = -1;
@@ -117,7 +124,7 @@ namespace Assets.Scripts.Simulation.Machines
             SampledRepairDuration = 0f;
 
             visualLayer = GetComponent<MachineVisual>();
-            visualLayer?.Initialise(id, type);
+            visualLayer?.Initialise(id, PrimaryType);
             ClearConveyors();
         }
 

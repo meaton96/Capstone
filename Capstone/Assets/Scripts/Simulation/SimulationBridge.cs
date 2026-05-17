@@ -172,9 +172,13 @@ namespace Assets.Scripts.Simulation
                 IsFactoryReady = false;  // force SpawnFactory with the new config
                 SimLogger.Low($"[Bridge] Applied Python config: {currentConfig.Name}");
             }
-            if (currentConfig == null)
-                currentConfig = BuildDefaultConfig();
+            // if (currentConfig == null)
+            //     currentConfig = BuildDefaultConfig();
 
+            if (currentConfig == null)
+            {
+                currentConfig = BuildDefaultStochasticConfig();
+            }
             if (!IsFactoryReady)
                 SpawnFactory();
 
@@ -703,13 +707,15 @@ namespace Assets.Scripts.Simulation
                 // Guard: if all eligible machines for this job's required type are
                 // currently Failed/Repairing, we cannot build a valid routing decision.
                 // Skip and try again next frame — the job stays NeedsRouting.
-                MachineType required = routingJob.NextRequiredType;
+                var eligibleIds = new HashSet<int>(
+                    routingJob.EligibleMachinesPerOp[routingJob.CurrentOpIndex].Keys);
+
                 bool anyAvailable = layoutManager.Machines
-                    .Any(m => m.MachineType == required && m.IsAvailableForWork);
+                    .Any(m => eligibleIds.Contains(m.MachineId) && m.IsAvailableForWork);
 
                 if (!anyAvailable)
                 {
-                    SimLogger.Low($"[Orchestrator] Job {routingJob.JobId} needs {required} " +
+                    SimLogger.Low($"[Orchestrator] Job {routingJob.JobId} needs {eligibleIds.ToString()} " +
                                   $"but all machines of that type are Failed/Repairing. " +
                                   $"Deferring routing decision.");
                     // Fall through to check for other decisions rather than blocking entirely.
@@ -829,9 +835,11 @@ namespace Assets.Scripts.Simulation
         {
             MachineType required = job.NextRequiredType;
 
-            // Phase 2: exclude Failed and Repairing machines from candidates.
+            var eligibleIds = new HashSet<int>(
+                job.EligibleMachinesPerOp[job.CurrentOpIndex].Keys);
+
             var candidates = layoutManager.Machines
-                .Where(m => m.MachineType == required && m.IsAvailableForWork)
+                .Where(m => eligibleIds.Contains(m.MachineId) && m.IsAvailableForWork)
                 .Select(m => m.MachineId)
                 .ToList();
 
@@ -992,7 +1000,7 @@ namespace Assets.Scripts.Simulation
                     seed: currentConfig.Seed,
                     makespan: SimTime,
                     machineId: mid,
-                    machineType: machine.MachineType.ToString(),
+                    machineType: machine.PrimaryType.ToString(),
                     opsCompleted: _machineOpsCompleted.TryGetValue(mid, out int ops) ? ops : 0,
                     timeProcessing: timeProcessing,
                     timeOperational: timeOperational
@@ -1038,8 +1046,8 @@ namespace Assets.Scripts.Simulation
             {
                 MachineFailuresEnabled = true,
                 WeibullK = 1.5f,
-                WeibullLambda = 2700.0f,
-                RepairLogMu = 4.0f,
+                WeibullLambda = 2000.0f,
+                RepairLogMu = 2.0f,
                 RepairLogSigma = 0.5f,
                 // AgvFailuresEnabled = false,
                 DynamicArrivalsEnabled = false
@@ -1075,7 +1083,8 @@ namespace Assets.Scripts.Simulation
                 ProcTimeParams = procParams,
                 AGVCount = 3,
                 dispatchingRule = DispatchingRule.SRT_SRWT,
-                Stochastic = BuildStochasticConfig()
+                Stochastic = BuildStochasticConfig(),
+                MachineFlexibilityProbability = 0f,
             };
         }
 
@@ -1108,6 +1117,7 @@ namespace Assets.Scripts.Simulation
                 ProcTimeParams = procParams,
                 AGVCount = 3,
                 dispatchingRule = DispatchingRule.SRT_SRWT,
+                MachineFlexibilityProbability = 0f,
             };
         }
     }

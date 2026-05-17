@@ -129,6 +129,7 @@ namespace Assets.Scripts.Simulation.Types
             public int maxOpsPerJob = 7;
             public float maxArrivalTime = 0f;
             public int agvCount = 3;
+            public float machineFlexibilityProbability = 0f;
         }
 
         // ─────────────────────────────────────────────────────────
@@ -173,7 +174,8 @@ namespace Assets.Scripts.Simulation.Types
                 MinOpsPerJob = raw.minOpsPerJob,
                 MaxOpsPerJob = raw.maxOpsPerJob,
                 MaxArrivalTime = raw.maxArrivalTime,
-                AGVCount = raw.agvCount
+                AGVCount = raw.agvCount,
+                MachineFlexibilityProbability = raw.machineFlexibilityProbability,
             };
         }
 

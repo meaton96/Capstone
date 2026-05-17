@@ -116,7 +116,8 @@ namespace Assets.Scripts.Simulation.Jobs
                 MinOpsPerJob = minOps,
                 MaxOpsPerJob = maxOps,
                 MaxArrivalTime = 0f,
-                AGVCount = agvCount
+                AGVCount = agvCount,
+                MachineFlexibilityProbability = 0f,
             };
         }
 

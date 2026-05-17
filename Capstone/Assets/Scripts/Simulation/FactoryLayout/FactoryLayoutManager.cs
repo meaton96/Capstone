@@ -27,6 +27,12 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         [SerializeField] private Vector3 incomingBeltOffset = new Vector3(-2f, 0.01f, 1.5f);
         [SerializeField] private Vector3 outgoingBeltOffset = new Vector3(-2f, 0.01f, 1.5f);
 
+        /// Probability [0,1] that a machine gains each non-primary type as a
+        /// secondary capability. 0 = single-type, backward compatible.
+        /// 1 = full flexibility (every machine handles every operation type).
+        [Range(0f, 1f)]
+        public float MachineFlexibilityProbability = 0f;
+
         public Vector3 IncomingBeltPosition { get; private set; }
         public Vector3 OutgoingBeltPosition { get; private set; }
         public Vector3 AGVParkingPosition { get; private set; }
@@ -148,7 +154,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             // _SRWT composite PDR route jobs to a less-congested aisle instead.
             MachineType[] distributedLayout = BuildDistributedTypeLayout(
                 config.MachineTypeLayout, layoutRows, layoutCols);
-
+            MachineType[] allTypes = (MachineType[])Enum.GetValues(typeof(MachineType));
             LogDistributedLayout(distributedLayout, layoutRows, layoutCols);
 
             machines = new PhysicalMachine[machineCount];
@@ -179,15 +185,22 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                     prefabToSpawn = doubleSidedMachinePrefab != null ? doubleSidedMachinePrefab : machinePrefab;
                     rotation = Quaternion.identity;
                 }
-                MachineType type = distributedLayout[i];
+                MachineType primary = distributedLayout[i];
+                HashSet<MachineType> caps = SampleCapabilities(primary, config, allTypes);
 
                 PhysicalMachine pm = Instantiate(prefabToSpawn, worldPos, rotation, transform);
-                pm.gameObject.name = $"Machine_{i}_{type}";
-                pm.Initialize(i, type);
+                pm.gameObject.name = $"Machine_{i}_{primary}";
+                pm.Initialize(i, primary, caps);
                 machines[i] = pm;
-                if (!machinesByType.ContainsKey(type))
-                    machinesByType[type] = new List<int>();
-                machinesByType[type].Add(i);
+
+                // Register under every capability — FJSSPJobGenerator queries machinesByType[opType]
+                // so a Mill+Lathe machine must appear in both buckets.
+                foreach (MachineType cap in caps)
+                {
+                    if (!machinesByType.ContainsKey(cap))
+                        machinesByType[cap] = new List<int>();
+                    machinesByType[cap].Add(i);
+                }
             }
 
             BuildAisleWalls(floorCentre);
@@ -201,6 +214,27 @@ namespace Assets.Scripts.Simulation.FactoryLayout
 
             SimLogger.Medium($"[FactoryLayout] Built aisle-based floor: {machineCount} machines.");
             return machinesByType;
+        }
+        /// @brief Samples a set of MachineType capabilities for one machine.
+        ///
+        /// @details The primary type is always included. Each remaining type is
+        /// added independently with probability config.MachineFlexibilityProbability.
+        /// Uses UnityEngine.Random, which is seeded in SpawnFactory before BuildFloor
+        /// is called, so layouts are fully reproducible from config.Seed.
+        private static HashSet<MachineType> SampleCapabilities(
+            MachineType primary, FJSSPConfig config, MachineType[] allTypes)
+        {
+            var caps = new HashSet<MachineType> { primary };
+            float p = config.MachineFlexibilityProbability;
+            if (p <= 0f) return caps;   // fast path — backward compatible default
+
+            foreach (MachineType t in allTypes)
+            {
+                if (t == primary) continue;
+                if (UnityEngine.Random.value < p)
+                    caps.Add(t);
+            }
+            return caps;
         }
 
         /// @brief Instantiates I/O conveyors and the AGV parking zone.

@@ -19,6 +19,12 @@ namespace Assets.Scripts.Simulation.Types
         public float MaxArrivalTime;
         public int AGVCount;
 
+        /// @brief Probability [0,1] that a machine gains each non-primary type as a
+        /// secondary capability during floor construction.
+        /// 0 = fully typed (default, backward-compatible).
+        /// 1 = fully flexible (every machine processes every op type).
+        public float MachineFlexibilityProbability = 0f;
+
         public DispatchingRule dispatchingRule = DispatchingRule.SRT_SRWT;
 
         /// @brief Per-machine-type normal distribution parameters (mu, sigma) for processing time sampling.
@@ -43,20 +49,21 @@ namespace Assets.Scripts.Simulation.Types
         {
             return new FJSSPConfig
             {
-                Name           = Name,
-                Seed           = newSeed,
-                JobCount       = JobCount,
+                Name = Name,
+                Seed = newSeed,
+                JobCount = JobCount,
                 MachinesPerType = MachinesPerType,
                 MachineTypeLayout = (MachineType[])MachineTypeLayout.Clone(),
-                MinProcTime    = MinProcTime,
-                MaxProcTime    = MaxProcTime,
-                MinOpsPerJob   = MinOpsPerJob,
-                MaxOpsPerJob   = MaxOpsPerJob,
+                MinProcTime = MinProcTime,
+                MaxProcTime = MaxProcTime,
+                MinOpsPerJob = MinOpsPerJob,
+                MaxOpsPerJob = MaxOpsPerJob,
                 MaxArrivalTime = MaxArrivalTime,
-                AGVCount       = AGVCount,
+                AGVCount = AGVCount,
                 dispatchingRule = dispatchingRule,
                 ProcTimeParams = new Dictionary<MachineType, (float mu, float sigma)>(ProcTimeParams),
-                Stochastic     = Stochastic,   // intentionally shared — stochastic params don't vary per-repeat
+                Stochastic = Stochastic, 
+                MachineFlexibilityProbability = MachineFlexibilityProbability,
             };
         }
     }

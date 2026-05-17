@@ -1,32 +1,18 @@
---- Log Started: 5/14/2026 3:11:14 PM ---
-2026-05-14 15:11:14.869 [Agent] OnEpisodeBegin skipped — waiting for UI to arm.
-2026-05-14 15:11:30.676 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.005
-2026-05-14 15:11:30.680 [FactoryLayout] Distributed type layout (row x col):
+--- Log Started: 5/16/2026 8:15:10 PM ---
+2026-05-16 20:15:11.194 [FactoryLayout] Distributed type layout (row x col):
   Row0: Mill, Lathe, Weld
   Row1: Inspect, Assemble
   [OK] No two same-type machines share a row aisle.
 
-2026-05-14 15:11:30.696 [FactoryLayout] Distance matrix (5x5):
+2026-05-16 20:15:11.218 [FactoryLayout] Distance matrix (5x5):
        M0     M1     M2     M3     M4   
-2026-05-14 15:11:30.696 M0      0.0    6.0   12.0    7.5    9.6 
-2026-05-14 15:11:30.696 M1      6.0    0.0    6.0    9.6    7.5 
-2026-05-14 15:11:30.698 M2     12.0    6.0    0.0   14.2    9.6 
-2026-05-14 15:11:30.698 M3      7.5    9.6   14.2    0.0    6.0 
-2026-05-14 15:11:30.699 M4      9.6    7.5    9.6    6.0    0.0 
-2026-05-14 15:11:30.709 [FactoryLayout] Built aisle-based floor: 5 machines.
-2026-05-14 15:11:30.715 [TrafficZones] Built zone graph: 18 zones.
-2026-05-14 15:11:30.718 [AGVPool] Spawned fleet of 3 AGVs.
-2026-05-14 15:11:31.878 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.005
-2026-05-14 15:11:31.879 [Orchestrator] Episode started: 5 jobs, 5 machines, stochastic=True
-2026-05-14 15:11:31.899 [AGV] 0 dispatched to pickup job 0 from machine 1
-2026-05-14 15:11:31.912 [AGV] 1 dispatched to pickup job 1 from machine 2
-2026-05-14 15:11:31.924 [AGV] 2 dispatched to pickup job 2 from machine 2
-2026-05-14 15:11:34.121 [18.44] Machine failed!
-2026-05-14 15:11:34.128 [Orchestrator] Machine 0 FAILED. RepairTime=47.9s
-2026-05-14 15:11:34.129 [PhysicalMachine] Machine [0] failure
-2026-05-14 15:11:34.130 [18.44] Op completed: Job -1
-2026-05-14 15:11:34.131 [18.44] Repair started, dur=47.9
-2026-05-14 15:11:34.132 [PhysicalMachine] Machine [0] begin repair
-2026-05-14 15:12:03.469 [AGV 0] Redirected from parking to job 3.
-2026-05-14 15:12:03.469 [AGV] 0 dispatched to pickup job 3 from machine 2
-2026-05-14 15:12:03.489 [47.80] Op started: Job 0, dur=76.1
+2026-05-16 20:15:11.230 [FactoryLayout] Built aisle-based floor: 5 machines.
+2026-05-16 20:15:11.237 [TrafficZones] Built zone graph: 18 zones.
+2026-05-16 20:15:11.240 [AGVPool] Spawned fleet of 3 AGVs.
+2026-05-16 20:15:11.245 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=2000 λ_agv=700 repairMu=2 repairSigma=0.5 arrivalLambda=0.005
+2026-05-16 20:15:11.247 [Orchestrator] Episode started: 5 jobs, 5 machines, stochastic=True
+2026-05-16 20:15:13.008 [Orchestrator] Machine 1 FAILED. RepairTime=6.5s
+2026-05-16 20:15:13.009 [PhysicalMachine] Machine [1] failure
+2026-05-16 20:15:13.011 [PhysicalMachine] Machine [1] begin repair
+2026-05-16 20:15:19.485 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-16 20:15:19.486 Machine [1] repair complete

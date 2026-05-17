@@ -91,6 +91,8 @@ namespace Assets.Scripts.Simulation.Channels
                 MaxOpsPerJob = root["maxOpsPerJob"]?.Value<int>() ?? 6,
                 MaxArrivalTime = root["maxArrivalTime"]?.Value<float>() ?? 0f,
                 AGVCount = root["agvCount"]?.Value<int>() ?? 5,
+                MachineFlexibilityProbability = root["machineFlexibilityProbability"]?.Value<float>() ?? 0f,
+
             };
 
             // MachineTypeLayout from machineTypes string array

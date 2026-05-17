@@ -55,26 +55,27 @@ print(f"Connected. Behavior: {behavior_name}")
 #     "maxArrivalTime": 0.0,
 #     "agvCount": 2,
 # }
+# Adjusted Python dictionary to strictly map to your C# fields
 test_config = {
-    "name": "channel_test_stochastic",
-    "seed": 99,
-    "jobCount": 5,
-    "machinesPerType": 2,          
-    "machineTypes": ["Mill", "Lathe", "Weld", "Inspect", "Assemble"],
-    "minProcTime": 5.0,
-    "maxProcTime": 15.0,
-    "minOpsPerJob": 2,
-    "maxOpsPerJob": 3,
-    "maxArrivalTime": 0.0,
-    "agvCount": 4,                
-    "stochastic": {
-        "machineFailuresEnabled": True,
-        "weibullK": 1.5,
-        "weibullLambda": 1200.0,     
-        "repairLogMu": 2.0,
-        "repairLogSigma": 0.3,
-        "agvFailuresEnabled": False,
-        "dynamicArrivalsEnabled": False,
+    "Seed": 99,
+    "JobCount": 5,
+    "MachinesPerType": 2,          
+    "MachineTypeLayout": [0, 1, 2, 3, 4], 
+    "MinProcTime": 5.0,
+    "MaxProcTime": 15.0,
+    "MinOpsPerJob": 2,
+    "MaxOpsPerJob": 3,
+    "MaxArrivalTime": 0.0,
+    "AGVCount": 4, 
+    "dispatchingRule": 4, 
+    "Stochastic": {
+        "MachineFailuresEnabled": True,
+        "WeibullK": 1.5,
+        "WeibullLambda": 2000.0,     
+        "RepairLogMu": 2.0,
+        "RepairLogSigma": 0.3,
+        "AgvFailuresEnabled": False,
+        "DynamicArrivalsEnabled": False,
     }
 }
 config_channel.send_config(test_config)
