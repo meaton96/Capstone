@@ -1,6 +1,0 @@
-timestamp,rule,seed,makespan,machine_id,machine_type,ops_completed,time_processing,time_operational,utilization_rate,idle_time,idle_rate
-2026-05-17 00:20:07,SPT_SMPT,42,462.83,0,Mill,5,99.96,462.83,0.2160,362.87,0.7840
-2026-05-17 00:20:07,SPT_SMPT,42,462.83,1,Lathe,5,73.31,456.17,0.1607,382.86,0.8393
-2026-05-17 00:20:07,SPT_SMPT,42,462.83,2,Weld,5,133.29,449.50,0.2965,316.21,0.7035
-2026-05-17 00:20:07,SPT_SMPT,42,462.83,3,Inspect,5,73.30,462.83,0.1584,389.53,0.8416
-2026-05-17 00:20:07,SPT_SMPT,42,462.83,4,Assemble,5,166.63,456.17,0.3653,289.53,0.6347

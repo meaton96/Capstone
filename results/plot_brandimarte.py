@@ -9,15 +9,11 @@ Produces:
     2. pdr_rank_heatmap.png          — heatmap of PDR rank (1=best) per instance
     3. random_pdr_boxplot.png        — box plot of RANDOM rule variance per instance
     4. best_pdr_per_instance.png     — which PDR wins each instance
-
-Instances are labeled by matching each row's (jobs, machines, total_ops) against
-the canonical Brandimarte specs, so multiple seeds per instance collapse into a
-single MK label. Makespans are averaged across seeds for the heatmap, bar, and
-best-PDR plots. Raw seed values are retained for the RANDOM variance box plot.
 """
 
 import argparse
 import os
+import re
 import warnings
 
 import matplotlib.pyplot as plt
@@ -26,7 +22,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-from viz_utils import PDR_ORDER, PDR_LABELS  # load_brandimarte replaced below
+from viz_utils import PDR_ORDER, PDR_LABELS
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -65,30 +61,52 @@ FINGERPRINT_TO_MK = {fp: f"MK{i+1:02d}" for i, fp in enumerate(BRANDIMARTE_SPECS
 MK_ORDER = [f"MK{i+1:02d}" for i in range(len(BRANDIMARTE_SPECS))]
 
 
-def load_brandimarte(csv_path: str) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Load Brandimarte CSV, attach MK instance labels, split PDR vs RANDOM.
+def load_brandimarte(csv_path: str) -> tuple[pd.DataFrame, pd.DataFrame, bool]:
+    """Load Brandimarte CSV, clean/standardize MK instance labels, split PDR vs RANDOM.
 
-    Each row is labeled with an MK tag by matching (jobs, machines, total_ops)
-    against BRANDIMARTE_SPECS. Rows that don't match any canonical spec are
-    dropped with a warning — seeds are preserved as separate rows so plots that
-    want variance can keep them.
+    Tries to clean and zero-pad the explicit 'instance' column from the new schema.
+    Falls back to matching (jobs, machines, total_ops) if the instance column is missing.
+    Also auto-detects if agvCount varies across runs for individual instances.
     """
     df = pd.read_csv(csv_path)
 
-    fps = list(zip(df["jobs"], df["machines"], df["total_ops"]))
-    df["instance"] = [FINGERPRINT_TO_MK.get(fp) for fp in fps]
+    # 1. Clean or derive the instance identifier
+    if "instance" in df.columns and df["instance"].notna().any():
+        def clean_instance(val):
+            if pd.isna(val):
+                return None
+            # Matches 'MK1', 'mk01', 'instances/MK_1.fjs', etc., extracting the digits
+            match = re.search(r'MK\s*[_]*(\d+)', str(val), re.IGNORECASE)
+            return f"MK{int(match.group(1)):02d}" if match else None
 
-    unknown = df[df["instance"].isna()]
+        df["instance"] = df["instance"].apply(clean_instance)
+    else:
+        # Fallback to original fingerprinting logic
+        fps = list(zip(df["jobs"], df["machines"], df["total_ops"]))
+        df["instance"] = [FINGERPRINT_TO_MK.get(fp) for fp in fps]
+
+    # Drop rows that don't match valid canonical targets
+    unknown = df[df["instance"].isna() | ~df["instance"].isin(MK_ORDER)]
     if len(unknown) > 0:
-        bad = unknown[["jobs", "machines", "total_ops"]].drop_duplicates()
-        print(f"⚠ Dropping {len(unknown)} rows that don't match any MK01-MK15 spec:")
+        bad = unknown[["instance", "jobs", "machines", "total_ops"]].drop_duplicates()
+        print(f"⚠ Dropping {len(unknown)} rows that don't match any standard MK01-MK15 spec:")
         print(bad.to_string(index=False))
-        df = df.dropna(subset=["instance"]).copy()
+        df = df[df["instance"].isin(MK_ORDER)].copy()
+
+    # 2. Automatically check for AGV count discrepancies across runs
+    auto_agv_warning = False
+    if "agvCount" in df.columns:
+        # If any single instance contains multiple unique AGV counts, trigger the warning flag
+        agv_variance = df.groupby("instance")["agvCount"].nunique()
+        if (agv_variance > 1).any():
+            auto_agv_warning = True
+            print("⚠ Auto-detected varying AGV counts across runs within the same instance data.")
 
     rand_mask = df["rule"].str.lower() == "random"
     rand_df = df[rand_mask].copy()
     pdr_df = df[~rand_mask].copy()
-    return pdr_df, rand_df
+    
+    return pdr_df, rand_df, auto_agv_warning
 
 
 def _sorted_instances(df: pd.DataFrame) -> list[str]:
@@ -197,7 +215,6 @@ def plot_random_variance(rand_df: pd.DataFrame, out_dir: str) -> None:
     n_per = [len(d) for d in data]
 
     fig, ax = plt.subplots(figsize=(max(10, len(instances) * 0.9), 5))
-    # Matplotlib 3.9+ renamed `labels` to `tick_labels`
     try:
         bp = ax.boxplot(data, tick_labels=instances, patch_artist=True,
                         medianprops={"color": "black", "linewidth": 2})
@@ -291,7 +308,10 @@ def main():
     args = parser.parse_args()
 
     os.makedirs(args.out, exist_ok=True)
-    pdr_df, rand_df = load_brandimarte(args.csv)
+    pdr_df, rand_df, auto_agv_warning = load_brandimarte(args.csv)
+
+    # Combine manual CLI flag with automated column inspection
+    effective_agv_warning = args.agv_warning or auto_agv_warning
 
     # Sanity summary — catches seed-count mismatches early
     print(f"\nDeterministic PDR rows  : {len(pdr_df)}")
@@ -303,7 +323,7 @@ def main():
     n_range = (seeds_per["n_seeds"].min(), seeds_per["n_seeds"].max())
     print(f"Seeds per (rule, inst)  : {n_range[0]} – {n_range[1]}\n")
 
-    plot_bar_by_instance(pdr_df, rand_df, args.out, agv_warning=args.agv_warning)
+    plot_bar_by_instance(pdr_df, rand_df, args.out, agv_warning=effective_agv_warning)
     plot_rank_heatmap(pdr_df, rand_df, args.out)
     plot_random_variance(rand_df, args.out)
     plot_best_pdr(pdr_df, rand_df, args.out)

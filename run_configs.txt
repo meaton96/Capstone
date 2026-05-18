@@ -24,10 +24,14 @@
 
 
 updated:
+
+
 .\RunBatch.ps1 -ExePath .\capstone.exe `
-    -BenchmarkDir .\BatchConfigs\Benchmarks `
-    -Repeats 3 `
-    -Timescale 100
+     -BenchmarkDir .\BatchConfigs\Benchmarks `
+     -Repeats 3 `
+     -Timescale 100 `
+     -Disruption low `
+     -ResultsDir deterministic
 
 copy:
 
