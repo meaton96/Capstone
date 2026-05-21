@@ -23,6 +23,16 @@
     -outputdir brandimarte
 
 
+./capstone.x86_64 \ 
+    -nographics \
+    -timescale 100 \
+    -benchmark ./BatchConfigs/Benchmarks/mk01.json \
+    -outputdir brandimarte \
+    -repeats 3 \
+    -disruption low 
+
+
+
 updated:
 
 

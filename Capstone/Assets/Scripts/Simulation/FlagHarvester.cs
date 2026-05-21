@@ -5,6 +5,7 @@ using Assets.Scripts.Simulation.Jobs;
 using Assets.Scripts.Simulation.Machines;
 using Assets.Scripts.Simulation.AGV;
 using Assets.Scripts.Simulation.FactoryLayout;
+using Assets.Scripts.Simulation.Logging;
 
 namespace Assets.Scripts.Simulation
 {
@@ -103,6 +104,9 @@ namespace Assets.Scripts.Simulation
                 if (job == null || job.State != JobState.Processing || job.PreDispatchedAgvId >= 0) continue;
                 if (job.CompletedOps == job.TotalOperations - 1) continue;
 
+                // Don't pre-dispatch if the source machine isn't going to finish cleanly
+                if (machine.HealthState != MachineHealthState.Operational) continue;
+
                 AGVController agv = _agvPool.GetAvailableAGV();
                 if (agv == null) continue;
 
@@ -173,6 +177,22 @@ namespace Assets.Scripts.Simulation
 
             foreach (var job in candidates)
             {
+                // If the routed destination is no longer operational, return job to
+                // NeedsRouting rather than dispatching an AGV to a broken machine.
+                if (job.TargetMachineId >= 0)
+                {
+                    PhysicalMachine dst = _layout.GetMachine(job.TargetMachineId);
+                    if (dst != null && dst.HealthState != MachineHealthState.Operational)
+                    {
+                        job.State = JobState.NeedsRouting;
+                        job.TargetMachineId = -1;
+                        job.StateEntryTime = _simTimeRef;
+                        SimLogger.Low($"[FlagHarvester] Job {job.JobId} returned to NeedsRouting — " +
+                                      $"target machine {dst.MachineId} is {dst.HealthState}.");
+                        continue;
+                    }
+                }
+
                 AGVController agv = _agvPool.GetAvailableAGV();
                 if (agv == null) break;
 
@@ -181,13 +201,13 @@ namespace Assets.Scripts.Simulation
                 Vector3 pickupPos = src != null
                     ? src.GetPickupPosition() : _layout.IncomingBeltPosition;
 
-                PhysicalMachine dst = job.TargetMachineId >= 0
+                PhysicalMachine target = job.TargetMachineId >= 0
                     ? _layout.GetMachine(job.TargetMachineId) : null;
-                Vector3 dropoffPos = dst != null
-                    ? dst.GetDropoffPosition() : _layout.OutgoingBeltPosition;
+                Vector3 dropoffPos = target != null
+                    ? target.GetDropoffPosition() : _layout.OutgoingBeltPosition;
 
                 job.AssignedAgvId = agv.AgvId;
-                agv.Dispatch(job.JobId, pickupPos, dropoffPos, src, dst, job.Visual);
+                agv.Dispatch(job.JobId, pickupPos, dropoffPos, src, target, job.Visual);
                 agv.SetCarryVisual(job.Visual);
             }
         }

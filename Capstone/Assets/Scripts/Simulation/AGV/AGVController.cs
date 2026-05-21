@@ -122,6 +122,49 @@ namespace Assets.Scripts.Simulation.AGV
             State = AGVState.Idle;
             ClearFlags();
         }
+        /// @brief Aborts an in-progress dropoff when no redirect target is available.
+        /// Detaches the job visual at the AGV's current position and returns to Idle
+        /// so the job can be re-dispatched by the scheduler.
+        public void AbortTransit()
+        {
+            if (State != AGVState.MovingToDropoff) return;
+
+            if (loadedJobVisual != null)
+                loadedJobVisual.DetachFromCarrier(transform.position);
+
+            SimLogger.Low($"[AGV {AgvId}] AbortTransit — job {CurrentJobId} released at {transform.position}.");
+
+            CurrentJobId = -1;
+            loadedJobVisual = null;
+            sourceMachine = null;
+            targetMachine = null;
+
+            CancelCurrentRoute();
+            State = AGVState.ReturningToParking;
+            BeginParkingRoute();
+        }
+        /// @brief Cancels an in-progress pickup route when the destination machine fails
+        /// before the job has been loaded. AGV releases its zone reservations and
+        /// returns to parking. The job will be re-dispatched by the scheduler.
+        public void CancelPickup()
+        {
+            if (State != AGVState.MovingToPickup)
+            {
+                SimLogger.Error($"[AGV {AgvId}] CancelPickup called in wrong state ({State}).");
+                return;
+            }
+
+            SimLogger.Low($"[AGV {AgvId}] CancelPickup — abandoning pickup for job {CurrentJobId}.");
+
+            CurrentJobId = -1;
+            loadedJobVisual = null;
+            sourceMachine = null;
+            targetMachine = null;
+
+            CancelCurrentRoute();
+            State = AGVState.ReturningToParking;
+            BeginParkingRoute();
+        }
 
         /// @brief Terminates the active route and releases future traffic zone reservations.
         private void CancelCurrentRoute()
@@ -138,6 +181,41 @@ namespace Assets.Scripts.Simulation.AGV
             waitingForZone = false;
             pendingZoneId = -1;
             parkingZoneId = -1;
+        }
+        /// @brief Redirects an AGV that is already carrying a job to a new dropoff machine.
+        /// Called when the original destination machine fails mid-transit.
+        /// Safe to call from MovingToDropoff state only.
+        public void RedirectDropoff(Vector3 newDropoffPos, PhysicalMachine newTarget, JobVisual visual)
+        {
+            if (State != AGVState.MovingToDropoff)
+            {
+                SimLogger.Error($"[AGV {AgvId}] RedirectDropoff called in wrong state ({State}).");
+                return;
+            }
+
+            // Cancel the current route and any pending zone reservation
+            CancelCurrentRoute();
+
+            targetMachine = newTarget;
+            targetDropoffPos = newDropoffPos;
+            loadedJobVisual = visual ?? loadedJobVisual;
+
+            atDropoffDock = false;
+            dropoffTimer = handshakeDuration;
+
+            (dropoffZoneId, dropoffDock) = newTarget != null
+                ? FindDockForMachine(newTarget.MachineId, currentZoneId, newDropoffPos)
+                : FindSpecialDock(TrafficZoneManager.OutgoingBeltId);
+
+            if (dropoffZoneId < 0 || !PlanRoute(currentZoneId, dropoffZoneId))
+            {
+                SimLogger.Error($"[AGV {AgvId}] RedirectDropoff: no route to new target for job {CurrentJobId}. FullReset.");
+                FullReset();
+                return;
+            }
+
+            BeginNextWaypoint();
+            SimLogger.High($"[AGV {AgvId}] Redirected job {CurrentJobId} dropoff → machine {newTarget?.MachineId ?? -1}.");
         }
 
         /// @brief Commands the AGV to move to a pickup zone before a job is finished.

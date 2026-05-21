@@ -1,0 +1,1791 @@
+--- Log Started: 5/21/2026 4:03:05 PM ---
+2026-05-21 16:03:05.531 [BatchRunner] TimeScale set to 100x via CLI.
+2026-05-21 16:03:05.533 [BatchRunner] Active rules (9): SPT_SMPT, SPT_SRWT, LPT_MMUR, LPT_SMPT, SRT_SRWT, SRT_SMPT, LRT_MMUR, SDT_SRWT, Random
+2026-05-21 16:03:05.533 [BatchRunner] Results subdirectory: brandimarte
+2026-05-21 16:03:05.534 [BatchRunner] Disruption mode: Low
+2026-05-21 16:03:05.547 [BrandimartLoader] Stochastic config for mk01 (disruption=Low): meanProc=4.0s maxProc=6.0s WeibullLambda=567.6 RepairMu=-0.58 meanTTF≈512.3s meanRepair≈0.6s
+2026-05-21 16:03:05.547 [BatchRunner] Benchmark: brandimarte_mk01_low, 9 rules x 3 repeats = 27 runs [disruption=Low]
+2026-05-21 16:03:05.548 [BatchRunner] Run 1/27: benchmark=brandimarte_mk01_low rule=SPT_SMPT seed=42
+2026-05-21 16:03:05.549 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=567.5726 λ_agv=700 repairMu=-0.5800146 repairSigma=0.4 arrivalLambda=0.005
+2026-05-21 16:03:05.551 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld
+  Row1: Mill, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-05-21 16:03:05.562 [FactoryLayout] Distance matrix (6x6):
+       M0     M1     M2     M3     M4     M5   
+2026-05-21 16:03:05.571 [FactoryLayout] Built aisle-based floor: 6 machines.
+2026-05-21 16:03:05.575 [TrafficZones] Built zone graph: 18 zones.
+2026-05-21 16:03:05.577 [AGVPool] Spawned fleet of 3 AGVs.
+2026-05-21 16:03:05.579 [BrandimartLoader] Loaded 10 jobs from benchmark (6 BM machines → 6 runtime machines across 5 types)
+2026-05-21 16:03:05.582 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-21 16:03:05.583 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=567.5726 λ_agv=700 repairMu=-0.5800146 repairSigma=0.4 arrivalLambda=0.005
+2026-05-21 16:03:05.584 [Orchestrator] Episode started: 10 jobs, 6 machines, stochastic=True
+2026-05-21 16:03:05.586 [Agent] OnEpisodeBegin skipped — waiting for UI to arm.
+2026-05-21 16:03:07.789 [Orchestrator] Machine 2 FAILED. RepairTime=0.4s
+2026-05-21 16:03:07.790 [EpisodeTracker] Machine 2 failed. Episode total failures=1
+2026-05-21 16:03:07.790 [Failure] Queued job 0 re-routed from failed machine 2.
+2026-05-21 16:03:07.790 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:03:07.791 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:03:08.466 [Orchestrator] Machine 1 FAILED. RepairTime=0.6s
+2026-05-21 16:03:08.466 [EpisodeTracker] Machine 1 failed. Episode total failures=2
+2026-05-21 16:03:08.466 [Failure] Queued job 1 re-routed from failed machine 1.
+2026-05-21 16:03:08.466 [Failure] Queued job 2 re-routed from failed machine 1.
+2026-05-21 16:03:08.466 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:03:08.466 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:03:08.466 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:08.467 Machine [2] repair complete
+2026-05-21 16:03:08.467 [Orchestrator] Machine 5 FAILED. RepairTime=0.5s
+2026-05-21 16:03:08.467 [EpisodeTracker] Machine 5 failed. Episode total failures=3
+2026-05-21 16:03:08.467 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:03:08.467 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:03:08.468 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-21 16:03:09.159 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:09.159 Machine [1] repair complete
+2026-05-21 16:03:09.160 [Orchestrator] Machine 4 FAILED. RepairTime=0.4s
+2026-05-21 16:03:09.160 [EpisodeTracker] Machine 4 failed. Episode total failures=4
+2026-05-21 16:03:09.160 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:03:09.160 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:03:09.160 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:09.160 Machine [5] repair complete
+2026-05-21 16:03:09.825 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:09.825 Machine [4] repair complete
+2026-05-21 16:03:11.165 [Orchestrator] Machine 4 FAILED. RepairTime=0.4s
+2026-05-21 16:03:11.165 [EpisodeTracker] Machine 4 failed. Episode total failures=5
+2026-05-21 16:03:11.165 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:03:11.165 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:03:11.835 [Orchestrator] Machine 3 FAILED. RepairTime=0.8s
+2026-05-21 16:03:11.835 [EpisodeTracker] Machine 3 failed. Episode total failures=6
+2026-05-21 16:03:11.835 [Failure] Queued job 5 re-routed from failed machine 3.
+2026-05-21 16:03:11.835 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:03:11.835 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:03:11.835 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:11.835 Machine [4] repair complete
+2026-05-21 16:03:11.835 [FlagHarvester] Job 6 returned to NeedsRouting — target machine 3 is Repairing.
+2026-05-21 16:03:12.497 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:12.497 Machine [3] repair complete
+2026-05-21 16:03:14.515 [Orchestrator] Machine 1 FAILED. RepairTime=0.4s
+2026-05-21 16:03:14.516 [EpisodeTracker] Machine 1 failed. Episode total failures=7
+2026-05-21 16:03:14.516 [Failure] Queued job 1 re-routed from failed machine 1.
+2026-05-21 16:03:14.516 [Failure] Queued job 2 re-routed from failed machine 1.
+2026-05-21 16:03:14.516 [Failure] Queued job 3 re-routed from failed machine 1.
+2026-05-21 16:03:14.516 [Failure] Queued job 4 re-routed from failed machine 1.
+2026-05-21 16:03:14.516 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:03:14.516 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:03:14.516 [Orchestrator] Machine 4 FAILED. RepairTime=0.4s
+2026-05-21 16:03:14.516 [EpisodeTracker] Machine 4 failed. Episode total failures=8
+2026-05-21 16:03:14.516 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:03:14.516 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:03:14.516 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-21 16:03:15.204 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:15.205 Machine [1] repair complete
+2026-05-21 16:03:15.209 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:15.210 Machine [4] repair complete
+2026-05-21 16:03:17.846 [Orchestrator] Machine 2 FAILED. RepairTime=0.4s
+2026-05-21 16:03:17.846 [EpisodeTracker] Machine 2 failed. Episode total failures=9
+2026-05-21 16:03:17.846 [Failure] Queued job 5 re-routed from failed machine 2.
+2026-05-21 16:03:17.846 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:03:17.846 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:03:18.515 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:18.515 Machine [2] repair complete
+2026-05-21 16:03:18.515 [Orchestrator] Machine 5 FAILED. RepairTime=1.1s
+2026-05-21 16:03:18.515 [EpisodeTracker] Machine 5 failed. Episode total failures=10
+2026-05-21 16:03:18.515 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:03:18.515 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:03:19.170 [Orchestrator] Machine 0 FAILED. RepairTime=0.7s
+2026-05-21 16:03:19.170 [EpisodeTracker] Machine 0 failed. Episode total failures=11
+2026-05-21 16:03:19.170 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:03:19.171 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:03:19.171 [Orchestrator] Machine 1 FAILED. RepairTime=0.2s
+2026-05-21 16:03:19.171 [EpisodeTracker] Machine 1 failed. Episode total failures=12
+2026-05-21 16:03:19.171 [Failure] Queued job 0 re-routed from failed machine 1.
+2026-05-21 16:03:19.171 [Failure] Queued job 1 re-routed from failed machine 1.
+2026-05-21 16:03:19.171 [Failure] Queued job 2 re-routed from failed machine 1.
+2026-05-21 16:03:19.171 [Failure] Queued job 3 re-routed from failed machine 1.
+2026-05-21 16:03:19.171 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:03:19.171 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:03:19.171 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:19.171 Machine [5] repair complete
+2026-05-21 16:03:19.843 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:19.843 Machine [0] repair complete
+2026-05-21 16:03:19.843 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:19.843 Machine [1] repair complete
+2026-05-21 16:03:24.477 [Orchestrator] Machine 2 FAILED. RepairTime=1.2s
+2026-05-21 16:03:24.477 [EpisodeTracker] Machine 2 failed. Episode total failures=13
+2026-05-21 16:03:24.477 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:03:24.477 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:03:25.165 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:25.165 Machine [2] repair complete
+2026-05-21 16:03:25.833 [Orchestrator] Machine 3 FAILED. RepairTime=0.5s
+2026-05-21 16:03:25.834 [EpisodeTracker] Machine 3 failed. Episode total failures=14
+2026-05-21 16:03:25.834 [Failure] Queued job 5 re-routed from failed machine 3.
+2026-05-21 16:03:25.834 [Failure] Queued job 7 re-routed from failed machine 3.
+2026-05-21 16:03:25.834 [Failure] Queued job 8 re-routed from failed machine 3.
+2026-05-21 16:03:25.834 [Failure] Queued job 9 re-routed from failed machine 3.
+2026-05-21 16:03:25.834 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:03:25.834 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:03:26.488 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:26.488 Machine [3] repair complete
+2026-05-21 16:03:27.150 [Orchestrator] Machine 1 FAILED. RepairTime=0.6s
+2026-05-21 16:03:27.150 [EpisodeTracker] Machine 1 failed. Episode total failures=15
+2026-05-21 16:03:27.150 [Failure] Queued job 1 re-routed from failed machine 1.
+2026-05-21 16:03:27.150 [Failure] Queued job 2 re-routed from failed machine 1.
+2026-05-21 16:03:27.150 [Failure] Queued job 3 re-routed from failed machine 1.
+2026-05-21 16:03:27.150 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:03:27.150 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:03:27.150 [Orchestrator] Machine 2 FAILED. RepairTime=0.4s
+2026-05-21 16:03:27.151 [EpisodeTracker] Machine 2 failed. Episode total failures=16
+2026-05-21 16:03:27.151 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:03:27.151 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:03:27.151 [FlagHarvester] Job 4 returned to NeedsRouting — target machine 1 is Repairing.
+2026-05-21 16:03:27.151 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-21 16:03:27.799 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:27.799 Machine [1] repair complete
+2026-05-21 16:03:27.799 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:27.799 Machine [2] repair complete
+2026-05-21 16:03:29.773 [Orchestrator] Machine 2 FAILED. RepairTime=0.4s
+2026-05-21 16:03:29.774 [EpisodeTracker] Machine 2 failed. Episode total failures=17
+2026-05-21 16:03:29.774 [Failure] Queued job 5 re-routed from failed machine 2.
+2026-05-21 16:03:29.774 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:03:29.774 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:03:29.774 [Orchestrator] Machine 3 FAILED. RepairTime=0.2s
+2026-05-21 16:03:29.774 [EpisodeTracker] Machine 3 failed. Episode total failures=18
+2026-05-21 16:03:29.774 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:03:29.775 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:03:30.431 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:30.431 Machine [2] repair complete
+2026-05-21 16:03:30.431 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:30.431 Machine [3] repair complete
+2026-05-21 16:03:31.097 [Orchestrator] Machine 1 FAILED. RepairTime=1.1s
+2026-05-21 16:03:31.097 [EpisodeTracker] Machine 1 failed. Episode total failures=19
+2026-05-21 16:03:31.097 [Failure] Queued job 1 re-routed from failed machine 1.
+2026-05-21 16:03:31.097 [Failure] Queued job 2 re-routed from failed machine 1.
+2026-05-21 16:03:31.098 [Failure] Queued job 3 re-routed from failed machine 1.
+2026-05-21 16:03:31.098 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:03:31.098 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:03:31.098 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-21 16:03:31.764 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:31.764 Machine [1] repair complete
+2026-05-21 16:03:34.417 [Orchestrator] Machine 0 FAILED. RepairTime=1.0s
+2026-05-21 16:03:34.417 [EpisodeTracker] Machine 0 failed. Episode total failures=20
+2026-05-21 16:03:34.417 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:03:34.417 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:03:35.091 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:35.091 Machine [0] repair complete
+2026-05-21 16:03:35.091 [Orchestrator] Machine 5 FAILED. RepairTime=0.8s
+2026-05-21 16:03:35.091 [EpisodeTracker] Machine 5 failed. Episode total failures=21
+2026-05-21 16:03:35.091 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:03:35.091 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:03:35.751 [Orchestrator] Machine 4 FAILED. RepairTime=0.8s
+2026-05-21 16:03:35.751 [EpisodeTracker] Machine 4 failed. Episode total failures=22
+2026-05-21 16:03:35.751 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:03:35.751 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:03:35.751 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:35.752 Machine [5] repair complete
+2026-05-21 16:03:36.410 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:36.410 Machine [4] repair complete
+2026-05-21 16:03:39.010 [Orchestrator] Machine 1 FAILED. RepairTime=0.9s
+2026-05-21 16:03:39.010 [EpisodeTracker] Machine 1 failed. Episode total failures=23
+2026-05-21 16:03:39.010 [Failure] Queued job 2 re-routed from failed machine 1.
+2026-05-21 16:03:39.010 [Failure] Queued job 3 re-routed from failed machine 1.
+2026-05-21 16:03:39.011 [Failure] Queued job 4 re-routed from failed machine 1.
+2026-05-21 16:03:39.011 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:03:39.011 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:03:39.011 [Orchestrator] Job 2: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-21 16:03:39.691 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:39.691 Machine [1] repair complete
+2026-05-21 16:03:41.648 [Orchestrator] Machine 3 FAILED. RepairTime=1.8s
+2026-05-21 16:03:41.648 [EpisodeTracker] Machine 3 failed. Episode total failures=24
+2026-05-21 16:03:41.648 [Failure] Queued job 0 re-routed from failed machine 3.
+2026-05-21 16:03:41.648 [Failure] Queued job 5 re-routed from failed machine 3.
+2026-05-21 16:03:41.648 [Failure] Queued job 7 re-routed from failed machine 3.
+2026-05-21 16:03:41.648 [Failure] Queued job 9 re-routed from failed machine 3.
+2026-05-21 16:03:41.648 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:03:41.648 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:03:42.312 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:42.312 Machine [3] repair complete
+2026-05-21 16:03:43.637 [Orchestrator] Machine 0 FAILED. RepairTime=0.8s
+2026-05-21 16:03:43.637 [EpisodeTracker] Machine 0 failed. Episode total failures=25
+2026-05-21 16:03:43.637 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:03:43.637 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:03:43.638 [Orchestrator] Machine 2 FAILED. RepairTime=0.7s
+2026-05-21 16:03:43.638 [EpisodeTracker] Machine 2 failed. Episode total failures=26
+2026-05-21 16:03:43.638 [Failure] Queued job 0 re-routed from failed machine 2.
+2026-05-21 16:03:43.638 [Failure] Queued job 1 re-routed from failed machine 2.
+2026-05-21 16:03:43.638 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:03:43.638 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:03:43.638 [Orchestrator] Machine 5 FAILED. RepairTime=0.4s
+2026-05-21 16:03:43.638 [EpisodeTracker] Machine 5 failed. Episode total failures=27
+2026-05-21 16:03:43.638 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:03:43.638 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:03:43.638 [FlagHarvester] Job 6 returned to NeedsRouting — target machine 5 is Repairing.
+2026-05-21 16:03:44.273 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:44.273 Machine [0] repair complete
+2026-05-21 16:03:44.273 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:44.273 Machine [2] repair complete
+2026-05-21 16:03:44.273 [Orchestrator] Machine 3 FAILED. RepairTime=0.8s
+2026-05-21 16:03:44.273 [EpisodeTracker] Machine 3 failed. Episode total failures=28
+2026-05-21 16:03:44.273 [Failure] Queued job 5 re-routed from failed machine 3.
+2026-05-21 16:03:44.273 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:03:44.274 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:03:44.274 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:44.274 Machine [5] repair complete
+2026-05-21 16:03:44.274 [FlagHarvester] Job 0 returned to NeedsRouting — target machine 3 is Repairing.
+2026-05-21 16:03:44.913 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:44.913 Machine [3] repair complete
+2026-05-21 16:03:45.588 [Orchestrator] Machine 4 FAILED. RepairTime=0.4s
+2026-05-21 16:03:45.588 [EpisodeTracker] Machine 4 failed. Episode total failures=29
+2026-05-21 16:03:45.588 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:03:45.589 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:03:46.260 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:46.260 Machine [4] repair complete
+2026-05-21 16:03:47.573 [Orchestrator] Machine 2 FAILED. RepairTime=0.5s
+2026-05-21 16:03:47.573 [EpisodeTracker] Machine 2 failed. Episode total failures=30
+2026-05-21 16:03:47.573 [Failure] Queued job 0 re-routed from failed machine 2.
+2026-05-21 16:03:47.573 [Failure] Queued job 1 re-routed from failed machine 2.
+2026-05-21 16:03:47.573 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:03:47.573 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:03:48.240 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:48.240 Machine [2] repair complete
+2026-05-21 16:03:51.564 [Orchestrator] Machine 0 FAILED. RepairTime=1.3s
+2026-05-21 16:03:51.564 [EpisodeTracker] Machine 0 failed. Episode total failures=31
+2026-05-21 16:03:51.565 [Failure] Job 8 returned to NeedsRouting (was Processing on failed machine 0).
+2026-05-21 16:03:51.565 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:03:51.565 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:03:52.204 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:52.204 Machine [0] repair complete
+2026-05-21 16:03:52.205 [Orchestrator] Machine 4 FAILED. RepairTime=0.5s
+2026-05-21 16:03:52.205 [EpisodeTracker] Machine 4 failed. Episode total failures=32
+2026-05-21 16:03:52.205 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:03:52.205 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:03:52.205 [Orchestrator] Machine 5 FAILED. RepairTime=0.7s
+2026-05-21 16:03:52.205 [EpisodeTracker] Machine 5 failed. Episode total failures=33
+2026-05-21 16:03:52.205 [Failure] Queued job 6 re-routed from failed machine 5.
+2026-05-21 16:03:52.205 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:03:52.205 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:03:52.205 [FlagHarvester] Job 8 returned to NeedsRouting — target machine 5 is Repairing.
+2026-05-21 16:03:52.852 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:52.852 Machine [4] repair complete
+2026-05-21 16:03:52.852 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:52.852 Machine [5] repair complete
+2026-05-21 16:03:54.863 [Orchestrator] Machine 0 FAILED. RepairTime=0.7s
+2026-05-21 16:03:54.864 [EpisodeTracker] Machine 0 failed. Episode total failures=34
+2026-05-21 16:03:54.864 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:03:54.864 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:03:55.516 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:55.516 Machine [0] repair complete
+2026-05-21 16:03:56.180 [Orchestrator] Machine 1 FAILED. RepairTime=0.3s
+2026-05-21 16:03:56.180 [EpisodeTracker] Machine 1 failed. Episode total failures=35
+2026-05-21 16:03:56.180 [Failure] Queued job 4 re-routed from failed machine 1.
+2026-05-21 16:03:56.180 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:03:56.180 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:03:56.850 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:56.850 Machine [1] repair complete
+2026-05-21 16:03:58.838 [Orchestrator] Machine 0 FAILED. RepairTime=0.6s
+2026-05-21 16:03:58.838 [EpisodeTracker] Machine 0 failed. Episode total failures=36
+2026-05-21 16:03:58.838 [Failure] Job 8 returned to NeedsRouting (was Processing on failed machine 0).
+2026-05-21 16:03:58.838 [Failure] Queued job 1 re-routed from failed machine 0.
+2026-05-21 16:03:58.838 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:03:58.839 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:03:58.839 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-21 16:03:59.490 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:03:59.490 Machine [0] repair complete
+2026-05-21 16:03:59.490 [Orchestrator] Machine 5 FAILED. RepairTime=0.5s
+2026-05-21 16:03:59.490 [EpisodeTracker] Machine 5 failed. Episode total failures=37
+2026-05-21 16:03:59.490 [Failure] Queued job 6 re-routed from failed machine 5.
+2026-05-21 16:03:59.490 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:03:59.490 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:04:00.137 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:00.137 Machine [5] repair complete
+2026-05-21 16:04:00.799 [Orchestrator] Machine 3 FAILED. RepairTime=0.5s
+2026-05-21 16:04:00.799 [EpisodeTracker] Machine 3 failed. Episode total failures=38
+2026-05-21 16:04:00.799 [Failure] Queued job 0 re-routed from failed machine 3.
+2026-05-21 16:04:00.799 [Failure] Queued job 2 re-routed from failed machine 3.
+2026-05-21 16:04:00.800 [Failure] Queued job 5 re-routed from failed machine 3.
+2026-05-21 16:04:00.800 [Failure] Queued job 7 re-routed from failed machine 3.
+2026-05-21 16:04:00.800 [Failure] Queued job 9 re-routed from failed machine 3.
+2026-05-21 16:04:00.800 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:04:00.800 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:04:01.467 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:01.467 Machine [3] repair complete
+2026-05-21 16:04:01.467 [Orchestrator] Machine 4 FAILED. RepairTime=0.3s
+2026-05-21 16:04:01.467 [EpisodeTracker] Machine 4 failed. Episode total failures=39
+2026-05-21 16:04:01.467 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:04:01.467 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:04:02.148 [Orchestrator] Machine 2 FAILED. RepairTime=0.7s
+2026-05-21 16:04:02.148 [EpisodeTracker] Machine 2 failed. Episode total failures=40
+2026-05-21 16:04:02.148 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:04:02.148 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:04:02.149 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:02.149 Machine [4] repair complete
+2026-05-21 16:04:02.809 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:02.810 Machine [2] repair complete
+2026-05-21 16:04:04.161 [Orchestrator] Machine 2 FAILED. RepairTime=0.3s
+2026-05-21 16:04:04.161 [EpisodeTracker] Machine 2 failed. Episode total failures=41
+2026-05-21 16:04:04.161 [Failure] Queued job 0 re-routed from failed machine 2.
+2026-05-21 16:04:04.161 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:04:04.162 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:04:04.831 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:04.831 Machine [2] repair complete
+2026-05-21 16:04:05.510 [Orchestrator] Machine 0 FAILED. RepairTime=1.3s
+2026-05-21 16:04:05.510 [EpisodeTracker] Machine 0 failed. Episode total failures=42
+2026-05-21 16:04:05.510 [Failure] Queued job 1 re-routed from failed machine 0.
+2026-05-21 16:04:05.510 [Failure] Queued job 4 re-routed from failed machine 0.
+2026-05-21 16:04:05.510 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:04:05.510 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:04:05.510 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-21 16:04:06.183 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:06.183 Machine [0] repair complete
+2026-05-21 16:04:06.183 [Orchestrator] Machine 1 FAILED. RepairTime=1.1s
+2026-05-21 16:04:06.183 [EpisodeTracker] Machine 1 failed. Episode total failures=43
+2026-05-21 16:04:06.183 [Failure] Job 3 returned to NeedsRouting (was Processing on failed machine 1).
+2026-05-21 16:04:06.183 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:04:06.183 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:04:06.831 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:06.831 Machine [1] repair complete
+2026-05-21 16:04:07.514 [Orchestrator] Machine 4 FAILED. RepairTime=0.6s
+2026-05-21 16:04:07.514 [EpisodeTracker] Machine 4 failed. Episode total failures=44
+2026-05-21 16:04:07.514 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:04:07.514 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:04:08.182 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:08.182 Machine [4] repair complete
+2026-05-21 16:04:08.832 [Orchestrator] Machine 4 FAILED. RepairTime=1.0s
+2026-05-21 16:04:08.832 [EpisodeTracker] Machine 4 failed. Episode total failures=45
+2026-05-21 16:04:08.832 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:04:08.832 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:04:09.508 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:09.508 Machine [4] repair complete
+2026-05-21 16:04:10.181 [Orchestrator] Machine 5 FAILED. RepairTime=1.0s
+2026-05-21 16:04:10.181 [EpisodeTracker] Machine 5 failed. Episode total failures=46
+2026-05-21 16:04:10.181 [Failure] Queued job 6 re-routed from failed machine 5.
+2026-05-21 16:04:10.181 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:04:10.181 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:04:10.824 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:10.825 Machine [5] repair complete
+2026-05-21 16:04:12.828 [Orchestrator] Machine 0 FAILED. RepairTime=0.3s
+2026-05-21 16:04:12.828 [EpisodeTracker] Machine 0 failed. Episode total failures=47
+2026-05-21 16:04:12.828 [Failure] Job 1 returned to NeedsRouting (was Processing on failed machine 0).
+2026-05-21 16:04:12.828 [Failure] Queued job 6 re-routed from failed machine 0.
+2026-05-21 16:04:12.828 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:04:12.829 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:04:12.829 [Orchestrator] Machine 2 FAILED. RepairTime=0.4s
+2026-05-21 16:04:12.829 [EpisodeTracker] Machine 2 failed. Episode total failures=48
+2026-05-21 16:04:12.829 [Failure] Queued job 4 re-routed from failed machine 2.
+2026-05-21 16:04:12.829 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:04:12.829 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:04:12.829 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-21 16:04:13.484 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:13.484 Machine [0] repair complete
+2026-05-21 16:04:13.484 [Orchestrator] Machine 1 FAILED. RepairTime=0.5s
+2026-05-21 16:04:13.485 [EpisodeTracker] Machine 1 failed. Episode total failures=49
+2026-05-21 16:04:13.485 [Failure] Job 3 returned to NeedsRouting (was Processing on failed machine 1).
+2026-05-21 16:04:13.485 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:04:13.485 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:04:13.485 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:13.485 Machine [2] repair complete
+2026-05-21 16:04:14.148 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:14.148 Machine [1] repair complete
+2026-05-21 16:04:14.819 [Orchestrator] Machine 2 FAILED. RepairTime=0.6s
+2026-05-21 16:04:14.819 [EpisodeTracker] Machine 2 failed. Episode total failures=50
+2026-05-21 16:04:14.819 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:04:14.820 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:04:15.486 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:15.486 Machine [2] repair complete
+2026-05-21 16:04:17.512 [Orchestrator] Machine 0 FAILED. RepairTime=1.0s
+2026-05-21 16:04:17.512 [EpisodeTracker] Machine 0 failed. Episode total failures=51
+2026-05-21 16:04:17.512 [Failure] Job 0 returned to NeedsRouting (was Processing on failed machine 0).
+2026-05-21 16:04:17.512 [Failure] Queued job 1 re-routed from failed machine 0.
+2026-05-21 16:04:17.512 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:04:17.512 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:04:18.152 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:18.153 Machine [0] repair complete
+2026-05-21 16:04:18.810 [Orchestrator] Machine 1 FAILED. RepairTime=0.3s
+2026-05-21 16:04:18.810 [EpisodeTracker] Machine 1 failed. Episode total failures=52
+2026-05-21 16:04:18.810 [Failure] Queued job 3 re-routed from failed machine 1.
+2026-05-21 16:04:18.810 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:04:18.810 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:04:19.485 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:19.485 Machine [1] repair complete
+2026-05-21 16:04:22.149 [Orchestrator] Machine 0 FAILED. RepairTime=0.7s
+2026-05-21 16:04:22.149 [EpisodeTracker] Machine 0 failed. Episode total failures=53
+2026-05-21 16:04:22.149 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:04:22.149 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:04:22.824 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:22.824 Machine [0] repair complete
+2026-05-21 16:04:23.481 [Orchestrator] Machine 3 FAILED. RepairTime=0.8s
+2026-05-21 16:04:23.481 [EpisodeTracker] Machine 3 failed. Episode total failures=54
+2026-05-21 16:04:23.481 [Failure] Job 2 returned to NeedsRouting (was Processing on failed machine 3).
+2026-05-21 16:04:23.481 [Failure] Queued job 0 re-routed from failed machine 3.
+2026-05-21 16:04:23.481 [Failure] Queued job 5 re-routed from failed machine 3.
+2026-05-21 16:04:23.481 [Failure] Queued job 7 re-routed from failed machine 3.
+2026-05-21 16:04:23.481 [Failure] Queued job 9 re-routed from failed machine 3.
+2026-05-21 16:04:23.481 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:04:23.481 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:04:24.139 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:24.139 Machine [3] repair complete
+2026-05-21 16:04:28.200 [Orchestrator] Machine 5 FAILED. RepairTime=1.0s
+2026-05-21 16:04:28.200 [EpisodeTracker] Machine 5 failed. Episode total failures=55
+2026-05-21 16:04:28.200 [Failure] Queued job 3 re-routed from failed machine 5.
+2026-05-21 16:04:28.201 [Failure] Queued job 6 re-routed from failed machine 5.
+2026-05-21 16:04:28.201 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:04:28.201 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:04:28.837 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:28.837 Machine [5] repair complete
+2026-05-21 16:04:29.515 [Orchestrator] Machine 1 FAILED. RepairTime=0.9s
+2026-05-21 16:04:29.516 [EpisodeTracker] Machine 1 failed. Episode total failures=56
+2026-05-21 16:04:29.516 [Failure] Queued job 4 re-routed from failed machine 1.
+2026-05-21 16:04:29.516 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:04:29.516 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:04:29.516 [Orchestrator] Machine 4 FAILED. RepairTime=0.7s
+2026-05-21 16:04:29.516 [EpisodeTracker] Machine 4 failed. Episode total failures=57
+2026-05-21 16:04:29.516 [Failure] Queued job 8 re-routed from failed machine 4.
+2026-05-21 16:04:29.516 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:04:29.517 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:04:29.517 [Orchestrator] Job 4: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-21 16:04:30.205 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:30.205 Machine [1] repair complete
+2026-05-21 16:04:30.205 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:30.205 Machine [4] repair complete
+2026-05-21 16:04:30.866 [Orchestrator] Machine 2 FAILED. RepairTime=1.1s
+2026-05-21 16:04:30.866 [EpisodeTracker] Machine 2 failed. Episode total failures=58
+2026-05-21 16:04:30.866 [Failure] Queued job 0 re-routed from failed machine 2.
+2026-05-21 16:04:30.867 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:04:30.867 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:04:30.867 [Orchestrator] Machine 4 FAILED. RepairTime=0.4s
+2026-05-21 16:04:30.867 [EpisodeTracker] Machine 4 failed. Episode total failures=59
+2026-05-21 16:04:30.867 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:04:30.867 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:04:30.867 [Orchestrator] Job 0: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-21 16:04:31.555 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:31.555 Machine [2] repair complete
+2026-05-21 16:04:31.556 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:31.556 Machine [4] repair complete
+2026-05-21 16:04:32.209 [Orchestrator] Machine 3 FAILED. RepairTime=1.1s
+2026-05-21 16:04:32.209 [EpisodeTracker] Machine 3 failed. Episode total failures=60
+2026-05-21 16:04:32.209 [Failure] Queued job 2 re-routed from failed machine 3.
+2026-05-21 16:04:32.209 [Failure] Queued job 5 re-routed from failed machine 3.
+2026-05-21 16:04:32.209 [Failure] Queued job 7 re-routed from failed machine 3.
+2026-05-21 16:04:32.209 [Failure] Queued job 9 re-routed from failed machine 3.
+2026-05-21 16:04:32.209 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:04:32.209 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:04:32.878 [Orchestrator] Machine 1 FAILED. RepairTime=0.6s
+2026-05-21 16:04:32.878 [EpisodeTracker] Machine 1 failed. Episode total failures=61
+2026-05-21 16:04:32.878 [Failure] Queued job 4 re-routed from failed machine 1.
+2026-05-21 16:04:32.878 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:04:32.878 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:04:32.878 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:32.878 Machine [3] repair complete
+2026-05-21 16:04:33.536 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:33.536 Machine [1] repair complete
+2026-05-21 16:04:34.206 [Orchestrator] Machine 0 FAILED. RepairTime=0.4s
+2026-05-21 16:04:34.206 [EpisodeTracker] Machine 0 failed. Episode total failures=62
+2026-05-21 16:04:34.206 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:04:34.206 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:04:34.878 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:34.878 Machine [0] repair complete
+2026-05-21 16:04:36.883 [Orchestrator] Machine 3 FAILED. RepairTime=0.6s
+2026-05-21 16:04:36.883 [EpisodeTracker] Machine 3 failed. Episode total failures=63
+2026-05-21 16:04:36.883 [Failure] Queued job 3 re-routed from failed machine 3.
+2026-05-21 16:04:36.883 [Failure] Queued job 5 re-routed from failed machine 3.
+2026-05-21 16:04:36.883 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:04:36.883 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:04:37.540 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:37.540 Machine [3] repair complete
+2026-05-21 16:04:37.540 [Orchestrator] Machine 5 FAILED. RepairTime=0.4s
+2026-05-21 16:04:37.540 [EpisodeTracker] Machine 5 failed. Episode total failures=64
+2026-05-21 16:04:37.540 [Failure] Queued job 6 re-routed from failed machine 5.
+2026-05-21 16:04:37.541 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:04:37.541 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:04:38.205 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:38.205 Machine [5] repair complete
+2026-05-21 16:04:38.878 [Orchestrator] Machine 4 FAILED. RepairTime=0.9s
+2026-05-21 16:04:38.878 [EpisodeTracker] Machine 4 failed. Episode total failures=65
+2026-05-21 16:04:38.878 [Failure] Queued job 8 re-routed from failed machine 4.
+2026-05-21 16:04:38.878 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:04:38.878 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:04:39.547 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:39.548 Machine [4] repair complete
+2026-05-21 16:04:40.215 [Orchestrator] Machine 1 FAILED. RepairTime=0.5s
+2026-05-21 16:04:40.215 [EpisodeTracker] Machine 1 failed. Episode total failures=66
+2026-05-21 16:04:40.215 [Failure] Queued job 4 re-routed from failed machine 1.
+2026-05-21 16:04:40.215 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:04:40.215 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:04:40.864 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:40.865 Machine [1] repair complete
+2026-05-21 16:04:42.192 [Orchestrator] Machine 2 FAILED. RepairTime=0.5s
+2026-05-21 16:04:42.192 [EpisodeTracker] Machine 2 failed. Episode total failures=67
+2026-05-21 16:04:42.192 [Failure] Job 0 returned to NeedsRouting (was Processing on failed machine 2).
+2026-05-21 16:04:42.192 [Failure] Queued job 2 re-routed from failed machine 2.
+2026-05-21 16:04:42.192 [Failure] Queued job 3 re-routed from failed machine 2.
+2026-05-21 16:04:42.192 [Failure] Queued job 8 re-routed from failed machine 2.
+2026-05-21 16:04:42.192 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:04:42.193 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:04:42.193 [Orchestrator] Job 0: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-21 16:04:42.825 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:42.825 Machine [2] repair complete
+2026-05-21 16:04:45.488 [Orchestrator] Machine 1 FAILED. RepairTime=0.7s
+2026-05-21 16:04:45.489 [EpisodeTracker] Machine 1 failed. Episode total failures=68
+2026-05-21 16:04:45.489 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:04:45.489 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:04:45.489 [Orchestrator] Machine 2 FAILED. RepairTime=0.6s
+2026-05-21 16:04:45.489 [EpisodeTracker] Machine 2 failed. Episode total failures=69
+2026-05-21 16:04:45.489 [Failure] Queued job 0 re-routed from failed machine 2.
+2026-05-21 16:04:45.489 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:04:45.489 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:04:45.489 [FlagHarvester] Job 4 returned to NeedsRouting — target machine 2 is Repairing.
+2026-05-21 16:04:45.489 [Orchestrator] Job 0: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-21 16:04:46.146 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:46.146 Machine [1] repair complete
+2026-05-21 16:04:46.146 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:46.146 Machine [2] repair complete
+2026-05-21 16:04:47.484 [Orchestrator] Machine 3 FAILED. RepairTime=0.8s
+2026-05-21 16:04:47.484 [EpisodeTracker] Machine 3 failed. Episode total failures=70
+2026-05-21 16:04:47.484 [Failure] Queued job 3 re-routed from failed machine 3.
+2026-05-21 16:04:47.484 [Failure] Queued job 7 re-routed from failed machine 3.
+2026-05-21 16:04:47.484 [Failure] Queued job 9 re-routed from failed machine 3.
+2026-05-21 16:04:47.484 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:04:47.484 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:04:48.163 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:48.163 Machine [3] repair complete
+2026-05-21 16:04:52.198 [Orchestrator] Machine 4 FAILED. RepairTime=0.3s
+2026-05-21 16:04:52.198 [EpisodeTracker] Machine 4 failed. Episode total failures=71
+2026-05-21 16:04:52.198 [Failure] Queued job 8 re-routed from failed machine 4.
+2026-05-21 16:04:52.198 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:04:52.198 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:04:52.839 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:52.839 Machine [4] repair complete
+2026-05-21 16:04:54.172 [Orchestrator] Machine 5 FAILED. RepairTime=0.4s
+2026-05-21 16:04:54.172 [EpisodeTracker] Machine 5 failed. Episode total failures=72
+2026-05-21 16:04:54.172 [Failure] Queued job 6 re-routed from failed machine 5.
+2026-05-21 16:04:54.172 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:04:54.172 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:04:54.830 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:54.830 Machine [5] repair complete
+2026-05-21 16:04:57.478 [Orchestrator] Machine 4 FAILED. RepairTime=0.7s
+2026-05-21 16:04:57.478 [EpisodeTracker] Machine 4 failed. Episode total failures=73
+2026-05-21 16:04:57.478 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:04:57.478 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:04:58.174 [Orchestrator] Machine 0 FAILED. RepairTime=0.3s
+2026-05-21 16:04:58.175 [EpisodeTracker] Machine 0 failed. Episode total failures=74
+2026-05-21 16:04:58.175 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:04:58.175 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:04:58.175 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:58.175 Machine [4] repair complete
+2026-05-21 16:04:58.852 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:04:58.852 Machine [0] repair complete
+2026-05-21 16:05:03.491 [Orchestrator] Machine 0 FAILED. RepairTime=0.6s
+2026-05-21 16:05:03.491 [EpisodeTracker] Machine 0 failed. Episode total failures=75
+2026-05-21 16:05:03.491 [Failure] Job 2 returned to NeedsRouting (was Processing on failed machine 0).
+2026-05-21 16:05:03.491 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:05:03.492 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:05:04.168 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:04.168 Machine [0] repair complete
+2026-05-21 16:05:08.159 [Orchestrator] Machine 5 FAILED. RepairTime=1.1s
+2026-05-21 16:05:08.159 [EpisodeTracker] Machine 5 failed. Episode total failures=76
+2026-05-21 16:05:08.160 [Failure] Queued job 2 re-routed from failed machine 5.
+2026-05-21 16:05:08.160 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:05:08.160 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:05:08.800 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:08.800 Machine [5] repair complete
+2026-05-21 16:05:09.470 [Orchestrator] Machine 2 FAILED. RepairTime=0.7s
+2026-05-21 16:05:09.470 [EpisodeTracker] Machine 2 failed. Episode total failures=77
+2026-05-21 16:05:09.470 [Failure] Queued job 0 re-routed from failed machine 2.
+2026-05-21 16:05:09.470 [Failure] Queued job 8 re-routed from failed machine 2.
+2026-05-21 16:05:09.470 [Failure] Queued job 9 re-routed from failed machine 2.
+2026-05-21 16:05:09.470 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:05:09.470 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:05:10.151 [Orchestrator] Machine 1 FAILED. RepairTime=0.7s
+2026-05-21 16:05:10.151 [EpisodeTracker] Machine 1 failed. Episode total failures=78
+2026-05-21 16:05:10.152 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:05:10.152 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:05:10.152 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:10.152 Machine [2] repair complete
+2026-05-21 16:05:10.838 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:10.838 Machine [1] repair complete
+2026-05-21 16:05:10.839 [Orchestrator] Machine 5 FAILED. RepairTime=0.9s
+2026-05-21 16:05:10.839 [EpisodeTracker] Machine 5 failed. Episode total failures=79
+2026-05-21 16:05:10.839 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:05:10.839 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:05:11.522 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:11.522 Machine [5] repair complete
+2026-05-21 16:05:12.195 [Orchestrator] Machine 4 FAILED. RepairTime=0.6s
+2026-05-21 16:05:12.195 [EpisodeTracker] Machine 4 failed. Episode total failures=80
+2026-05-21 16:05:12.195 [Failure] Queued job 0 re-routed from failed machine 4.
+2026-05-21 16:05:12.195 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:05:12.195 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:05:12.860 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:12.860 Machine [4] repair complete
+2026-05-21 16:05:14.819 [Orchestrator] Machine 0 FAILED. RepairTime=0.6s
+2026-05-21 16:05:14.820 [EpisodeTracker] Machine 0 failed. Episode total failures=81
+2026-05-21 16:05:14.820 [Failure] Job 5 returned to NeedsRouting (was Processing on failed machine 0).
+2026-05-21 16:05:14.820 [Failure] Queued job 7 re-routed from failed machine 0.
+2026-05-21 16:05:14.820 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:05:14.820 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:05:14.820 [Orchestrator] Machine 3 FAILED. RepairTime=0.5s
+2026-05-21 16:05:14.820 [EpisodeTracker] Machine 3 failed. Episode total failures=82
+2026-05-21 16:05:14.820 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:05:14.820 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:05:15.477 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:15.477 Machine [0] repair complete
+2026-05-21 16:05:15.477 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:15.477 Machine [3] repair complete
+2026-05-21 16:05:16.155 [Orchestrator] Machine 2 FAILED. RepairTime=0.4s
+2026-05-21 16:05:16.155 [EpisodeTracker] Machine 2 failed. Episode total failures=83
+2026-05-21 16:05:16.155 [Failure] Queued job 0 re-routed from failed machine 2.
+2026-05-21 16:05:16.155 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:05:16.155 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:05:16.820 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:16.821 Machine [2] repair complete
+2026-05-21 16:05:18.817 [Orchestrator] Machine 5 FAILED. RepairTime=0.6s
+2026-05-21 16:05:18.817 [EpisodeTracker] Machine 5 failed. Episode total failures=84
+2026-05-21 16:05:18.817 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:05:18.818 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:05:19.475 [Orchestrator] Machine 0 FAILED. RepairTime=0.8s
+2026-05-21 16:05:19.475 [EpisodeTracker] Machine 0 failed. Episode total failures=85
+2026-05-21 16:05:19.475 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:05:19.475 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:05:19.475 [Orchestrator] Machine 1 FAILED. RepairTime=1.0s
+2026-05-21 16:05:19.476 [EpisodeTracker] Machine 1 failed. Episode total failures=86
+2026-05-21 16:05:19.476 [Failure] Job 9 returned to NeedsRouting (was Processing on failed machine 1).
+2026-05-21 16:05:19.476 [Failure] Queued job 5 re-routed from failed machine 1.
+2026-05-21 16:05:19.476 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:05:19.476 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:05:19.476 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:19.476 Machine [5] repair complete
+2026-05-21 16:05:19.476 [FlagHarvester] Job 7 returned to NeedsRouting — target machine 1 is Repairing.
+2026-05-21 16:05:20.115 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:20.115 Machine [0] repair complete
+2026-05-21 16:05:20.115 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:20.115 Machine [1] repair complete
+2026-05-21 16:05:21.453 [Orchestrator] Machine 1 FAILED. RepairTime=0.3s
+2026-05-21 16:05:21.453 [EpisodeTracker] Machine 1 failed. Episode total failures=87
+2026-05-21 16:05:21.453 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:05:21.453 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:05:21.454 [FlagHarvester] Job 9 returned to NeedsRouting — target machine 1 is Repairing.
+2026-05-21 16:05:22.110 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:22.110 Machine [1] repair complete
+2026-05-21 16:05:23.397 [Orchestrator] Machine 1 FAILED. RepairTime=0.5s
+2026-05-21 16:05:23.397 [EpisodeTracker] Machine 1 failed. Episode total failures=88
+2026-05-21 16:05:23.397 [Failure] Job 7 returned to NeedsRouting (was Processing on failed machine 1).
+2026-05-21 16:05:23.398 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:05:23.398 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:05:23.398 [Orchestrator] Job 7: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-21 16:05:24.046 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:24.046 Machine [1] repair complete
+2026-05-21 16:05:24.046 [Orchestrator] Machine 2 FAILED. RepairTime=0.5s
+2026-05-21 16:05:24.046 [EpisodeTracker] Machine 2 failed. Episode total failures=89
+2026-05-21 16:05:24.046 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:05:24.046 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:05:24.699 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:24.699 Machine [2] repair complete
+2026-05-21 16:05:24.699 [Orchestrator] Machine 4 FAILED. RepairTime=1.0s
+2026-05-21 16:05:24.700 [EpisodeTracker] Machine 4 failed. Episode total failures=90
+2026-05-21 16:05:24.700 [Failure] Job 0 returned to NeedsRouting (was Processing on failed machine 4).
+2026-05-21 16:05:24.700 [Failure] Queued job 8 re-routed from failed machine 4.
+2026-05-21 16:05:24.700 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:05:24.700 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:05:24.700 [FlagHarvester] Job 5 returned to NeedsRouting — target machine 4 is Repairing.
+2026-05-21 16:05:25.343 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:25.343 Machine [4] repair complete
+2026-05-21 16:05:26.647 [Orchestrator] Machine 4 FAILED. RepairTime=0.4s
+2026-05-21 16:05:26.647 [EpisodeTracker] Machine 4 failed. Episode total failures=91
+2026-05-21 16:05:26.647 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:05:26.648 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:05:27.321 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:27.321 Machine [4] repair complete
+2026-05-21 16:05:29.277 [Orchestrator] Machine 4 FAILED. RepairTime=0.4s
+2026-05-21 16:05:29.277 [EpisodeTracker] Machine 4 failed. Episode total failures=92
+2026-05-21 16:05:29.277 [Failure] Queued job 5 re-routed from failed machine 4.
+2026-05-21 16:05:29.277 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:05:29.277 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:05:29.945 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:29.945 Machine [4] repair complete
+2026-05-21 16:05:37.248 [Orchestrator] Machine 4 FAILED. RepairTime=0.6s
+2026-05-21 16:05:37.249 [EpisodeTracker] Machine 4 failed. Episode total failures=93
+2026-05-21 16:05:37.249 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:05:37.249 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:05:37.891 [Orchestrator] Machine 3 FAILED. RepairTime=0.4s
+2026-05-21 16:05:37.892 [EpisodeTracker] Machine 3 failed. Episode total failures=94
+2026-05-21 16:05:37.892 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:05:37.892 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:05:37.892 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:37.892 Machine [4] repair complete
+2026-05-21 16:05:38.536 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:38.536 Machine [3] repair complete
+2026-05-21 16:05:38.536 [Orchestrator] Machine 5 FAILED. RepairTime=0.4s
+2026-05-21 16:05:38.536 [EpisodeTracker] Machine 5 failed. Episode total failures=95
+2026-05-21 16:05:38.536 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:05:38.536 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:05:39.214 [Orchestrator] Machine 0 FAILED. RepairTime=0.9s
+2026-05-21 16:05:39.215 [EpisodeTracker] Machine 0 failed. Episode total failures=96
+2026-05-21 16:05:39.215 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:05:39.215 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:05:39.215 [Orchestrator] Machine 2 FAILED. RepairTime=1.0s
+2026-05-21 16:05:39.215 [EpisodeTracker] Machine 2 failed. Episode total failures=97
+2026-05-21 16:05:39.215 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:05:39.215 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:05:39.215 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:39.215 Machine [5] repair complete
+2026-05-21 16:05:39.887 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:39.887 Machine [0] repair complete
+2026-05-21 16:05:39.887 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:39.887 Machine [2] repair complete
+2026-05-21 16:05:40.521 [Orchestrator] Machine 0 FAILED. RepairTime=0.8s
+2026-05-21 16:05:40.521 [EpisodeTracker] Machine 0 failed. Episode total failures=98
+2026-05-21 16:05:40.521 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:05:40.521 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:05:41.188 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:41.188 Machine [0] repair complete
+2026-05-21 16:05:41.189 [Orchestrator] Machine 3 FAILED. RepairTime=0.4s
+2026-05-21 16:05:41.189 [EpisodeTracker] Machine 3 failed. Episode total failures=99
+2026-05-21 16:05:41.189 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:05:41.189 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:05:41.851 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:41.851 Machine [3] repair complete
+2026-05-21 16:05:41.906 [TelemetryChannel] Flushed 198 events to Python.
+2026-05-21 16:05:41.908 [StochasticSummary] Failures=99 TotalRepairTime=64.6s MeanTTF_theory=512.3s
+2026-05-21 16:05:41.908 [BatchRunner] Progress: 1/27 (156.4s elapsed, ETA 4065.4s)
+2026-05-21 16:05:42.348 [BatchRunner] Run 2/27: benchmark=brandimarte_mk01_low rule=SPT_SRWT seed=42
+2026-05-21 16:05:42.348 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=567.5726 λ_agv=700 repairMu=-0.5800146 repairSigma=0.4 arrivalLambda=0.005
+2026-05-21 16:05:42.349 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld
+  Row1: Mill, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-05-21 16:05:42.352 [FactoryLayout] Distance matrix (6x6):
+       M0     M1     M2     M3     M4     M5   
+2026-05-21 16:05:42.354 [FactoryLayout] Built aisle-based floor: 6 machines.
+2026-05-21 16:05:42.354 [TrafficZones] Built zone graph: 18 zones.
+2026-05-21 16:05:42.354 [AGVPool] Spawned fleet of 3 AGVs.
+2026-05-21 16:05:42.354 [BrandimartLoader] Loaded 10 jobs from benchmark (6 BM machines → 6 runtime machines across 5 types)
+2026-05-21 16:05:42.355 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-21 16:05:42.355 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=567.5726 λ_agv=700 repairMu=-0.5800146 repairSigma=0.4 arrivalLambda=0.005
+2026-05-21 16:05:42.355 [Orchestrator] Episode started: 10 jobs, 6 machines, stochastic=True
+2026-05-21 16:05:44.332 [Orchestrator] Machine 2 FAILED. RepairTime=0.4s
+2026-05-21 16:05:44.332 [EpisodeTracker] Machine 2 failed. Episode total failures=1
+2026-05-21 16:05:44.332 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:05:44.333 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:05:45.016 [Orchestrator] Machine 1 FAILED. RepairTime=0.6s
+2026-05-21 16:05:45.017 [EpisodeTracker] Machine 1 failed. Episode total failures=2
+2026-05-21 16:05:45.017 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:05:45.017 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:05:45.017 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:45.017 Machine [2] repair complete
+2026-05-21 16:05:45.017 [Orchestrator] Machine 5 FAILED. RepairTime=0.5s
+2026-05-21 16:05:45.017 [EpisodeTracker] Machine 5 failed. Episode total failures=3
+2026-05-21 16:05:45.017 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:05:45.017 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:05:45.017 [FlagHarvester] Job 2 returned to NeedsRouting — target machine 1 is Repairing.
+2026-05-21 16:05:45.017 [Orchestrator] Job 2: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-21 16:05:45.660 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:45.660 Machine [1] repair complete
+2026-05-21 16:05:45.660 [Orchestrator] Machine 4 FAILED. RepairTime=0.4s
+2026-05-21 16:05:45.660 [EpisodeTracker] Machine 4 failed. Episode total failures=4
+2026-05-21 16:05:45.660 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:05:45.661 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:05:45.661 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:45.661 Machine [5] repair complete
+2026-05-21 16:05:46.291 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:46.291 Machine [4] repair complete
+2026-05-21 16:05:47.646 [Orchestrator] Machine 4 FAILED. RepairTime=0.4s
+2026-05-21 16:05:47.646 [EpisodeTracker] Machine 4 failed. Episode total failures=5
+2026-05-21 16:05:47.646 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:05:47.646 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:05:48.324 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:48.324 Machine [4] repair complete
+2026-05-21 16:05:48.978 [Orchestrator] Machine 3 FAILED. RepairTime=1.1s
+2026-05-21 16:05:48.978 [EpisodeTracker] Machine 3 failed. Episode total failures=6
+2026-05-21 16:05:48.978 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:05:48.978 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:05:48.978 [FlagHarvester] Job 5 returned to NeedsRouting — target machine 3 is Repairing.
+2026-05-21 16:05:49.633 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:49.633 Machine [3] repair complete
+2026-05-21 16:05:50.973 [Orchestrator] Machine 1 FAILED. RepairTime=0.4s
+2026-05-21 16:05:50.974 [EpisodeTracker] Machine 1 failed. Episode total failures=7
+2026-05-21 16:05:50.974 [Failure] Queued job 1 re-routed from failed machine 1.
+2026-05-21 16:05:50.974 [Failure] Queued job 2 re-routed from failed machine 1.
+2026-05-21 16:05:50.974 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:05:50.974 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:05:50.974 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-21 16:05:51.648 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:51.648 Machine [1] repair complete
+2026-05-21 16:05:53.632 [Orchestrator] Machine 1 FAILED. RepairTime=0.7s
+2026-05-21 16:05:53.632 [EpisodeTracker] Machine 1 failed. Episode total failures=8
+2026-05-21 16:05:53.632 [Failure] Queued job 1 re-routed from failed machine 1.
+2026-05-21 16:05:53.632 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:05:53.632 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:05:53.632 [FlagHarvester] Job 3 returned to NeedsRouting — target machine 1 is Repairing.
+2026-05-21 16:05:53.632 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-21 16:05:54.280 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:54.280 Machine [1] repair complete
+2026-05-21 16:05:54.281 [Orchestrator] Machine 2 FAILED. RepairTime=0.5s
+2026-05-21 16:05:54.281 [EpisodeTracker] Machine 2 failed. Episode total failures=9
+2026-05-21 16:05:54.281 [Failure] Job 5 returned to NeedsRouting (was Processing on failed machine 2).
+2026-05-21 16:05:54.281 [Failure] Queued job 0 re-routed from failed machine 2.
+2026-05-21 16:05:54.281 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:05:54.281 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:05:54.928 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:54.928 Machine [2] repair complete
+2026-05-21 16:05:54.928 [Orchestrator] Machine 5 FAILED. RepairTime=1.1s
+2026-05-21 16:05:54.929 [EpisodeTracker] Machine 5 failed. Episode total failures=10
+2026-05-21 16:05:54.929 [Failure] Queued job 4 re-routed from failed machine 5.
+2026-05-21 16:05:54.929 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:05:54.929 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:05:54.929 [FlagHarvester] Job 0 returned to NeedsRouting — target machine 5 is Repairing.
+2026-05-21 16:05:55.586 [Orchestrator] Machine 0 FAILED. RepairTime=0.7s
+2026-05-21 16:05:55.586 [EpisodeTracker] Machine 0 failed. Episode total failures=11
+2026-05-21 16:05:55.591 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:05:55.591 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:05:55.591 [Orchestrator] Machine 4 FAILED. RepairTime=0.2s
+2026-05-21 16:05:55.591 [EpisodeTracker] Machine 4 failed. Episode total failures=12
+2026-05-21 16:05:55.591 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:05:55.591 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:05:55.591 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:55.591 Machine [5] repair complete
+2026-05-21 16:05:56.259 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:56.259 Machine [0] repair complete
+2026-05-21 16:05:56.260 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:05:56.260 Machine [4] repair complete
+2026-05-21 16:06:00.953 [Orchestrator] Machine 2 FAILED. RepairTime=1.2s
+2026-05-21 16:06:00.953 [EpisodeTracker] Machine 2 failed. Episode total failures=13
+2026-05-21 16:06:00.953 [Failure] Job 9 returned to NeedsRouting (was Processing on failed machine 2).
+2026-05-21 16:06:00.953 [Failure] Queued job 0 re-routed from failed machine 2.
+2026-05-21 16:06:00.953 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:06:00.953 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:06:01.596 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:01.596 Machine [2] repair complete
+2026-05-21 16:06:02.940 [Orchestrator] Machine 3 FAILED. RepairTime=0.5s
+2026-05-21 16:06:02.940 [EpisodeTracker] Machine 3 failed. Episode total failures=14
+2026-05-21 16:06:02.940 [Failure] Queued job 5 re-routed from failed machine 3.
+2026-05-21 16:06:02.940 [Failure] Queued job 6 re-routed from failed machine 3.
+2026-05-21 16:06:02.940 [Failure] Queued job 7 re-routed from failed machine 3.
+2026-05-21 16:06:02.940 [Failure] Queued job 8 re-routed from failed machine 3.
+2026-05-21 16:06:02.941 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:06:02.941 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:06:03.616 [Orchestrator] Machine 1 FAILED. RepairTime=0.6s
+2026-05-21 16:06:03.616 [EpisodeTracker] Machine 1 failed. Episode total failures=15
+2026-05-21 16:06:03.616 [Failure] Queued job 2 re-routed from failed machine 1.
+2026-05-21 16:06:03.616 [Failure] Queued job 3 re-routed from failed machine 1.
+2026-05-21 16:06:03.616 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:06:03.616 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:06:03.617 [Orchestrator] Machine 2 FAILED. RepairTime=0.5s
+2026-05-21 16:06:03.617 [EpisodeTracker] Machine 2 failed. Episode total failures=16
+2026-05-21 16:06:03.617 [Failure] Queued job 1 re-routed from failed machine 2.
+2026-05-21 16:06:03.617 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:06:03.617 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:06:03.617 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:03.617 Machine [3] repair complete
+2026-05-21 16:06:03.617 [Orchestrator] Machine 4 FAILED. RepairTime=0.7s
+2026-05-21 16:06:03.617 [EpisodeTracker] Machine 4 failed. Episode total failures=17
+2026-05-21 16:06:03.617 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:06:03.617 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:06:03.617 [FlagHarvester] Job 5 returned to NeedsRouting — target machine 2 is Repairing.
+2026-05-21 16:06:03.617 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-21 16:06:04.261 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:04.261 Machine [1] repair complete
+2026-05-21 16:06:04.261 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:04.262 Machine [2] repair complete
+2026-05-21 16:06:04.262 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:04.262 Machine [4] repair complete
+2026-05-21 16:06:05.578 [Orchestrator] Machine 3 FAILED. RepairTime=0.5s
+2026-05-21 16:06:05.578 [EpisodeTracker] Machine 3 failed. Episode total failures=18
+2026-05-21 16:06:05.579 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:06:05.579 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:06:05.579 [FlagHarvester] Job 0 returned to NeedsRouting — target machine 3 is Repairing.
+2026-05-21 16:06:06.217 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:06.217 Machine [3] repair complete
+2026-05-21 16:06:06.217 [Orchestrator] Machine 4 FAILED. RepairTime=0.6s
+2026-05-21 16:06:06.217 [EpisodeTracker] Machine 4 failed. Episode total failures=19
+2026-05-21 16:06:06.217 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:06:06.217 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:06:06.880 [Orchestrator] Machine 3 FAILED. RepairTime=0.5s
+2026-05-21 16:06:06.880 [EpisodeTracker] Machine 3 failed. Episode total failures=20
+2026-05-21 16:06:06.880 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:06:06.881 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:06:06.881 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:06.881 Machine [4] repair complete
+2026-05-21 16:06:07.558 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:07.558 Machine [3] repair complete
+2026-05-21 16:06:08.889 [Orchestrator] Machine 4 FAILED. RepairTime=0.2s
+2026-05-21 16:06:08.889 [EpisodeTracker] Machine 4 failed. Episode total failures=21
+2026-05-21 16:06:08.889 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:06:08.889 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:06:09.558 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:09.559 Machine [4] repair complete
+2026-05-21 16:06:10.231 [Orchestrator] Machine 4 FAILED. RepairTime=0.4s
+2026-05-21 16:06:10.231 [EpisodeTracker] Machine 4 failed. Episode total failures=22
+2026-05-21 16:06:10.231 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:06:10.231 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:06:10.898 [Orchestrator] Machine 0 FAILED. RepairTime=0.4s
+2026-05-21 16:06:10.898 [EpisodeTracker] Machine 0 failed. Episode total failures=23
+2026-05-21 16:06:10.898 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:06:10.898 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:06:10.898 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:10.899 Machine [4] repair complete
+2026-05-21 16:06:11.557 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:11.557 Machine [0] repair complete
+2026-05-21 16:06:11.557 [Orchestrator] Machine 4 FAILED. RepairTime=0.7s
+2026-05-21 16:06:11.557 [EpisodeTracker] Machine 4 failed. Episode total failures=24
+2026-05-21 16:06:11.557 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:06:11.557 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:06:11.557 [Orchestrator] Machine 5 FAILED. RepairTime=2.0s
+2026-05-21 16:06:11.557 [EpisodeTracker] Machine 5 failed. Episode total failures=25
+2026-05-21 16:06:11.557 [Failure] Queued job 4 re-routed from failed machine 5.
+2026-05-21 16:06:11.557 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:06:11.557 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:06:12.198 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:12.198 Machine [4] repair complete
+2026-05-21 16:06:12.198 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:12.198 Machine [5] repair complete
+2026-05-21 16:06:13.566 [Orchestrator] Machine 2 FAILED. RepairTime=0.5s
+2026-05-21 16:06:13.566 [EpisodeTracker] Machine 2 failed. Episode total failures=26
+2026-05-21 16:06:13.566 [Failure] Queued job 0 re-routed from failed machine 2.
+2026-05-21 16:06:13.566 [Failure] Queued job 9 re-routed from failed machine 2.
+2026-05-21 16:06:13.566 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:06:13.567 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:06:13.567 [Orchestrator] Machine 4 FAILED. RepairTime=0.4s
+2026-05-21 16:06:13.567 [EpisodeTracker] Machine 4 failed. Episode total failures=27
+2026-05-21 16:06:13.567 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:06:13.567 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:06:14.236 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:14.236 Machine [2] repair complete
+2026-05-21 16:06:14.237 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:14.237 Machine [4] repair complete
+2026-05-21 16:06:15.591 [Orchestrator] Machine 1 FAILED. RepairTime=0.3s
+2026-05-21 16:06:15.591 [EpisodeTracker] Machine 1 failed. Episode total failures=28
+2026-05-21 16:06:15.596 [Failure] Queued job 3 re-routed from failed machine 1.
+2026-05-21 16:06:15.596 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:06:15.597 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:06:15.597 [Orchestrator] Job 3: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-21 16:06:16.266 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:16.266 Machine [1] repair complete
+2026-05-21 16:06:16.267 [Orchestrator] Machine 2 FAILED. RepairTime=0.4s
+2026-05-21 16:06:16.267 [EpisodeTracker] Machine 2 failed. Episode total failures=29
+2026-05-21 16:06:16.267 [Failure] Job 9 returned to NeedsRouting (was Processing on failed machine 2).
+2026-05-21 16:06:16.267 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:06:16.267 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:06:16.897 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:16.897 Machine [2] repair complete
+2026-05-21 16:06:20.894 [Orchestrator] Machine 3 FAILED. RepairTime=0.5s
+2026-05-21 16:06:20.894 [EpisodeTracker] Machine 3 failed. Episode total failures=30
+2026-05-21 16:06:20.894 [Failure] Queued job 0 re-routed from failed machine 3.
+2026-05-21 16:06:20.894 [Failure] Queued job 2 re-routed from failed machine 3.
+2026-05-21 16:06:20.894 [Failure] Queued job 5 re-routed from failed machine 3.
+2026-05-21 16:06:20.894 [Failure] Queued job 6 re-routed from failed machine 3.
+2026-05-21 16:06:20.894 [Failure] Queued job 7 re-routed from failed machine 3.
+2026-05-21 16:06:20.894 [Failure] Queued job 8 re-routed from failed machine 3.
+2026-05-21 16:06:20.894 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:06:20.894 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:06:21.580 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:21.580 Machine [3] repair complete
+2026-05-21 16:06:21.580 [Orchestrator] Machine 4 FAILED. RepairTime=0.8s
+2026-05-21 16:06:21.580 [EpisodeTracker] Machine 4 failed. Episode total failures=31
+2026-05-21 16:06:21.580 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:06:21.580 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:06:22.253 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:22.253 Machine [4] repair complete
+2026-05-21 16:06:22.926 [Orchestrator] Machine 2 FAILED. RepairTime=0.5s
+2026-05-21 16:06:22.926 [EpisodeTracker] Machine 2 failed. Episode total failures=32
+2026-05-21 16:06:22.926 [Failure] Queued job 0 re-routed from failed machine 2.
+2026-05-21 16:06:22.926 [Failure] Queued job 9 re-routed from failed machine 2.
+2026-05-21 16:06:22.926 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:06:22.927 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:06:23.611 [Orchestrator] Machine 0 FAILED. RepairTime=1.0s
+2026-05-21 16:06:23.611 [EpisodeTracker] Machine 0 failed. Episode total failures=33
+2026-05-21 16:06:23.611 [Failure] Queued job 1 re-routed from failed machine 0.
+2026-05-21 16:06:23.611 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:06:23.612 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:06:23.612 [Orchestrator] Machine 1 FAILED. RepairTime=0.4s
+2026-05-21 16:06:23.612 [EpisodeTracker] Machine 1 failed. Episode total failures=34
+2026-05-21 16:06:23.612 [Failure] Queued job 3 re-routed from failed machine 1.
+2026-05-21 16:06:23.612 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:06:23.612 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:06:23.612 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:23.612 Machine [2] repair complete
+2026-05-21 16:06:24.303 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:24.303 Machine [0] repair complete
+2026-05-21 16:06:24.303 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:24.303 Machine [1] repair complete
+2026-05-21 16:06:27.678 [Orchestrator] Machine 1 FAILED. RepairTime=0.3s
+2026-05-21 16:06:27.678 [EpisodeTracker] Machine 1 failed. Episode total failures=35
+2026-05-21 16:06:27.678 [Failure] Queued job 3 re-routed from failed machine 1.
+2026-05-21 16:06:27.679 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:06:27.679 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:06:27.679 [Orchestrator] Job 3: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-21 16:06:28.360 [Orchestrator] Machine 0 FAILED. RepairTime=0.9s
+2026-05-21 16:06:28.360 [EpisodeTracker] Machine 0 failed. Episode total failures=36
+2026-05-21 16:06:28.360 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:06:28.360 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:06:28.360 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:28.360 Machine [1] repair complete
+2026-05-21 16:06:29.021 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:29.021 Machine [0] repair complete
+2026-05-21 16:06:32.998 [Orchestrator] Machine 5 FAILED. RepairTime=0.5s
+2026-05-21 16:06:32.998 [EpisodeTracker] Machine 5 failed. Episode total failures=37
+2026-05-21 16:06:32.998 [Failure] Queued job 4 re-routed from failed machine 5.
+2026-05-21 16:06:32.998 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:06:32.998 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:06:33.663 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:33.663 Machine [5] repair complete
+2026-05-21 16:06:39.070 [Orchestrator] Machine 2 FAILED. RepairTime=0.5s
+2026-05-21 16:06:39.070 [EpisodeTracker] Machine 2 failed. Episode total failures=38
+2026-05-21 16:06:39.071 [Failure] Queued job 9 re-routed from failed machine 2.
+2026-05-21 16:06:39.071 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:06:39.071 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:06:39.736 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:39.736 Machine [2] repair complete
+2026-05-21 16:06:41.105 [Orchestrator] Machine 2 FAILED. RepairTime=0.9s
+2026-05-21 16:06:41.105 [EpisodeTracker] Machine 2 failed. Episode total failures=39
+2026-05-21 16:06:41.105 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:06:41.105 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:06:41.106 [Orchestrator] Machine 3 FAILED. RepairTime=0.7s
+2026-05-21 16:06:41.106 [EpisodeTracker] Machine 3 failed. Episode total failures=40
+2026-05-21 16:06:41.106 [Failure] Queued job 0 re-routed from failed machine 3.
+2026-05-21 16:06:41.106 [Failure] Queued job 1 re-routed from failed machine 3.
+2026-05-21 16:06:41.106 [Failure] Queued job 2 re-routed from failed machine 3.
+2026-05-21 16:06:41.106 [Failure] Queued job 5 re-routed from failed machine 3.
+2026-05-21 16:06:41.106 [Failure] Queued job 6 re-routed from failed machine 3.
+2026-05-21 16:06:41.106 [Failure] Queued job 8 re-routed from failed machine 3.
+2026-05-21 16:06:41.106 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:06:41.106 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:06:41.106 [Orchestrator] Job 0: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-21 16:06:41.748 [Orchestrator] Machine 0 FAILED. RepairTime=1.1s
+2026-05-21 16:06:41.749 [EpisodeTracker] Machine 0 failed. Episode total failures=41
+2026-05-21 16:06:41.749 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:06:41.749 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:06:41.749 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:41.749 Machine [2] repair complete
+2026-05-21 16:06:41.749 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:41.749 Machine [3] repair complete
+2026-05-21 16:06:42.406 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:42.407 Machine [0] repair complete
+2026-05-21 16:06:43.084 [Orchestrator] Machine 1 FAILED. RepairTime=1.3s
+2026-05-21 16:06:43.084 [EpisodeTracker] Machine 1 failed. Episode total failures=42
+2026-05-21 16:06:43.084 [Failure] Queued job 7 re-routed from failed machine 1.
+2026-05-21 16:06:43.084 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:06:43.085 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:06:43.780 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:43.780 Machine [1] repair complete
+2026-05-21 16:06:43.780 [Orchestrator] Machine 5 FAILED. RepairTime=1.1s
+2026-05-21 16:06:43.780 [EpisodeTracker] Machine 5 failed. Episode total failures=43
+2026-05-21 16:06:43.780 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:06:43.780 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:06:44.447 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:44.447 Machine [5] repair complete
+2026-05-21 16:06:46.450 [Orchestrator] Machine 2 FAILED. RepairTime=0.6s
+2026-05-21 16:06:46.450 [EpisodeTracker] Machine 2 failed. Episode total failures=44
+2026-05-21 16:06:46.450 [Failure] Queued job 3 re-routed from failed machine 2.
+2026-05-21 16:06:46.450 [Failure] Queued job 9 re-routed from failed machine 2.
+2026-05-21 16:06:46.450 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:06:46.451 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:06:47.142 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:47.142 Machine [2] repair complete
+2026-05-21 16:06:47.143 [Orchestrator] Machine 4 FAILED. RepairTime=1.8s
+2026-05-21 16:06:47.143 [EpisodeTracker] Machine 4 failed. Episode total failures=45
+2026-05-21 16:06:47.143 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:06:47.143 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:06:47.807 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:47.807 Machine [4] repair complete
+2026-05-21 16:06:50.528 [Orchestrator] Machine 0 FAILED. RepairTime=1.0s
+2026-05-21 16:06:50.528 [EpisodeTracker] Machine 0 failed. Episode total failures=46
+2026-05-21 16:06:50.529 [Failure] Job 1 returned to NeedsRouting (was Processing on failed machine 0).
+2026-05-21 16:06:50.529 [Failure] Queued job 4 re-routed from failed machine 0.
+2026-05-21 16:06:50.529 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:06:50.529 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:06:50.529 [Orchestrator] Machine 1 FAILED. RepairTime=0.5s
+2026-05-21 16:06:50.529 [EpisodeTracker] Machine 1 failed. Episode total failures=47
+2026-05-21 16:06:50.529 [Failure] Job 7 returned to NeedsRouting (was Processing on failed machine 1).
+2026-05-21 16:06:50.529 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:06:50.529 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:06:51.172 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:51.172 Machine [0] repair complete
+2026-05-21 16:06:51.173 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:51.173 Machine [1] repair complete
+2026-05-21 16:06:51.173 [Orchestrator] Machine 5 FAILED. RepairTime=0.4s
+2026-05-21 16:06:51.173 [EpisodeTracker] Machine 5 failed. Episode total failures=48
+2026-05-21 16:06:51.173 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:06:51.173 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:06:51.843 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:51.844 Machine [5] repair complete
+2026-05-21 16:06:52.537 [Orchestrator] Machine 3 FAILED. RepairTime=1.2s
+2026-05-21 16:06:52.537 [EpisodeTracker] Machine 3 failed. Episode total failures=49
+2026-05-21 16:06:52.537 [Failure] Queued job 0 re-routed from failed machine 3.
+2026-05-21 16:06:52.537 [Failure] Queued job 1 re-routed from failed machine 3.
+2026-05-21 16:06:52.537 [Failure] Queued job 2 re-routed from failed machine 3.
+2026-05-21 16:06:52.537 [Failure] Queued job 3 re-routed from failed machine 3.
+2026-05-21 16:06:52.537 [Failure] Queued job 5 re-routed from failed machine 3.
+2026-05-21 16:06:52.537 [Failure] Queued job 6 re-routed from failed machine 3.
+2026-05-21 16:06:52.537 [Failure] Queued job 8 re-routed from failed machine 3.
+2026-05-21 16:06:52.537 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:06:52.537 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:06:53.221 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:53.221 Machine [3] repair complete
+2026-05-21 16:06:55.873 [Orchestrator] Machine 1 FAILED. RepairTime=0.6s
+2026-05-21 16:06:55.873 [EpisodeTracker] Machine 1 failed. Episode total failures=50
+2026-05-21 16:06:55.873 [Failure] Queued job 7 re-routed from failed machine 1.
+2026-05-21 16:06:55.873 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:06:55.873 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:06:56.552 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:56.552 Machine [1] repair complete
+2026-05-21 16:06:57.871 [Orchestrator] Machine 3 FAILED. RepairTime=1.0s
+2026-05-21 16:06:57.871 [EpisodeTracker] Machine 3 failed. Episode total failures=51
+2026-05-21 16:06:57.871 [Failure] Queued job 1 re-routed from failed machine 3.
+2026-05-21 16:06:57.871 [Failure] Queued job 2 re-routed from failed machine 3.
+2026-05-21 16:06:57.871 [Failure] Queued job 3 re-routed from failed machine 3.
+2026-05-21 16:06:57.871 [Failure] Queued job 6 re-routed from failed machine 3.
+2026-05-21 16:06:57.871 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:06:57.872 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:06:57.872 [Orchestrator] Machine 5 FAILED. RepairTime=0.5s
+2026-05-21 16:06:57.872 [EpisodeTracker] Machine 5 failed. Episode total failures=52
+2026-05-21 16:06:57.872 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:06:57.872 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:06:57.872 [FlagHarvester] Job 8 returned to NeedsRouting — target machine 3 is Repairing.
+2026-05-21 16:06:58.546 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:58.547 Machine [3] repair complete
+2026-05-21 16:06:58.547 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:06:58.547 Machine [5] repair complete
+2026-05-21 16:07:02.473 [Orchestrator] Machine 0 FAILED. RepairTime=0.7s
+2026-05-21 16:07:02.473 [EpisodeTracker] Machine 0 failed. Episode total failures=53
+2026-05-21 16:07:02.473 [Failure] Job 1 returned to NeedsRouting (was Processing on failed machine 0).
+2026-05-21 16:07:02.474 [Failure] Queued job 4 re-routed from failed machine 0.
+2026-05-21 16:07:02.474 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:07:02.474 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:07:03.149 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:03.149 Machine [0] repair complete
+2026-05-21 16:07:04.500 [Orchestrator] Machine 2 FAILED. RepairTime=0.8s
+2026-05-21 16:07:04.500 [EpisodeTracker] Machine 2 failed. Episode total failures=54
+2026-05-21 16:07:04.501 [Failure] Queued job 0 re-routed from failed machine 2.
+2026-05-21 16:07:04.501 [Failure] Queued job 5 re-routed from failed machine 2.
+2026-05-21 16:07:04.501 [Failure] Queued job 9 re-routed from failed machine 2.
+2026-05-21 16:07:04.501 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:07:04.501 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:07:05.130 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:05.130 Machine [2] repair complete
+2026-05-21 16:07:07.815 [Orchestrator] Machine 4 FAILED. RepairTime=1.0s
+2026-05-21 16:07:07.815 [EpisodeTracker] Machine 4 failed. Episode total failures=55
+2026-05-21 16:07:07.815 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:07:07.815 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:07:08.475 [Orchestrator] Machine 3 FAILED. RepairTime=0.3s
+2026-05-21 16:07:08.475 [EpisodeTracker] Machine 3 failed. Episode total failures=56
+2026-05-21 16:07:08.475 [Failure] Queued job 0 re-routed from failed machine 3.
+2026-05-21 16:07:08.475 [Failure] Queued job 2 re-routed from failed machine 3.
+2026-05-21 16:07:08.475 [Failure] Queued job 3 re-routed from failed machine 3.
+2026-05-21 16:07:08.475 [Failure] Queued job 6 re-routed from failed machine 3.
+2026-05-21 16:07:08.475 [Failure] Queued job 8 re-routed from failed machine 3.
+2026-05-21 16:07:08.475 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:07:08.475 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:07:08.475 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:08.475 Machine [4] repair complete
+2026-05-21 16:07:08.475 [Orchestrator] Machine 5 FAILED. RepairTime=0.6s
+2026-05-21 16:07:08.476 [EpisodeTracker] Machine 5 failed. Episode total failures=57
+2026-05-21 16:07:08.476 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:07:08.476 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:07:09.154 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:09.154 Machine [3] repair complete
+2026-05-21 16:07:09.154 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:09.154 Machine [5] repair complete
+2026-05-21 16:07:09.838 [Orchestrator] Machine 5 FAILED. RepairTime=1.1s
+2026-05-21 16:07:09.838 [EpisodeTracker] Machine 5 failed. Episode total failures=58
+2026-05-21 16:07:09.838 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:07:09.838 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:07:10.489 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:10.490 Machine [5] repair complete
+2026-05-21 16:07:11.826 [Orchestrator] Machine 1 FAILED. RepairTime=0.4s
+2026-05-21 16:07:11.827 [EpisodeTracker] Machine 1 failed. Episode total failures=59
+2026-05-21 16:07:11.827 [Failure] Queued job 4 re-routed from failed machine 1.
+2026-05-21 16:07:11.827 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:07:11.827 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:07:11.827 [Orchestrator] Machine 3 FAILED. RepairTime=0.8s
+2026-05-21 16:07:11.827 [EpisodeTracker] Machine 3 failed. Episode total failures=60
+2026-05-21 16:07:11.827 [Failure] Queued job 2 re-routed from failed machine 3.
+2026-05-21 16:07:11.827 [Failure] Queued job 3 re-routed from failed machine 3.
+2026-05-21 16:07:11.827 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:07:11.827 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:07:11.828 [Orchestrator] Machine 4 FAILED. RepairTime=0.7s
+2026-05-21 16:07:11.828 [EpisodeTracker] Machine 4 failed. Episode total failures=61
+2026-05-21 16:07:11.828 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:07:11.828 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:07:11.828 [FlagHarvester] Job 8 returned to NeedsRouting — target machine 3 is Repairing.
+2026-05-21 16:07:12.498 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:12.499 Machine [1] repair complete
+2026-05-21 16:07:12.499 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:12.499 Machine [3] repair complete
+2026-05-21 16:07:12.499 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:12.499 Machine [4] repair complete
+2026-05-21 16:07:13.176 [Orchestrator] Machine 2 FAILED. RepairTime=0.4s
+2026-05-21 16:07:13.177 [EpisodeTracker] Machine 2 failed. Episode total failures=62
+2026-05-21 16:07:13.177 [Failure] Queued job 0 re-routed from failed machine 2.
+2026-05-21 16:07:13.177 [Failure] Queued job 5 re-routed from failed machine 2.
+2026-05-21 16:07:13.177 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:07:13.177 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:07:13.843 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:13.843 Machine [2] repair complete
+2026-05-21 16:07:14.507 [Orchestrator] Machine 0 FAILED. RepairTime=0.6s
+2026-05-21 16:07:14.507 [EpisodeTracker] Machine 0 failed. Episode total failures=63
+2026-05-21 16:07:14.507 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:07:14.508 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:07:15.188 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:15.189 Machine [0] repair complete
+2026-05-21 16:07:16.509 [Orchestrator] Machine 3 FAILED. RepairTime=0.3s
+2026-05-21 16:07:16.509 [EpisodeTracker] Machine 3 failed. Episode total failures=64
+2026-05-21 16:07:16.509 [Failure] Queued job 0 re-routed from failed machine 3.
+2026-05-21 16:07:16.509 [Failure] Queued job 3 re-routed from failed machine 3.
+2026-05-21 16:07:16.509 [Failure] Queued job 6 re-routed from failed machine 3.
+2026-05-21 16:07:16.509 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:07:16.510 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:07:17.154 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:17.154 Machine [3] repair complete
+2026-05-21 16:07:19.201 [Orchestrator] Machine 4 FAILED. RepairTime=0.9s
+2026-05-21 16:07:19.201 [EpisodeTracker] Machine 4 failed. Episode total failures=65
+2026-05-21 16:07:19.201 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:07:19.201 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:07:19.828 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:19.828 Machine [4] repair complete
+2026-05-21 16:07:21.168 [Orchestrator] Machine 0 FAILED. RepairTime=0.5s
+2026-05-21 16:07:21.168 [EpisodeTracker] Machine 0 failed. Episode total failures=66
+2026-05-21 16:07:21.168 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:07:21.168 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:07:21.169 [FlagHarvester] Job 0 returned to NeedsRouting — target machine 0 is Repairing.
+2026-05-21 16:07:21.815 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:21.815 Machine [0] repair complete
+2026-05-21 16:07:24.452 [Orchestrator] Machine 5 FAILED. RepairTime=0.5s
+2026-05-21 16:07:24.452 [EpisodeTracker] Machine 5 failed. Episode total failures=67
+2026-05-21 16:07:24.452 [Failure] Queued job 9 re-routed from failed machine 5.
+2026-05-21 16:07:24.452 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:07:24.453 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:07:25.131 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:25.131 Machine [5] repair complete
+2026-05-21 16:07:26.497 [Orchestrator] Machine 0 FAILED. RepairTime=0.7s
+2026-05-21 16:07:26.497 [EpisodeTracker] Machine 0 failed. Episode total failures=68
+2026-05-21 16:07:26.497 [Failure] Job 2 returned to NeedsRouting (was Processing on failed machine 0).
+2026-05-21 16:07:26.497 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:07:26.497 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:07:27.162 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:27.163 Machine [0] repair complete
+2026-05-21 16:07:27.825 [Orchestrator] Machine 5 FAILED. RepairTime=0.7s
+2026-05-21 16:07:27.825 [EpisodeTracker] Machine 5 failed. Episode total failures=69
+2026-05-21 16:07:27.825 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:07:27.825 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:07:28.453 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:28.453 Machine [5] repair complete
+2026-05-21 16:07:31.759 [Orchestrator] Machine 1 FAILED. RepairTime=0.8s
+2026-05-21 16:07:31.759 [EpisodeTracker] Machine 1 failed. Episode total failures=70
+2026-05-21 16:07:31.759 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:07:31.759 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:07:31.759 [FlagHarvester] Job 2 returned to NeedsRouting — target machine 1 is Repairing.
+2026-05-21 16:07:32.429 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:32.430 Machine [1] repair complete
+2026-05-21 16:07:32.430 [Orchestrator] Machine 4 FAILED. RepairTime=0.6s
+2026-05-21 16:07:32.430 [EpisodeTracker] Machine 4 failed. Episode total failures=71
+2026-05-21 16:07:32.430 [Failure] Queued job 6 re-routed from failed machine 4.
+2026-05-21 16:07:32.430 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:07:32.430 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:07:33.106 [Orchestrator] Machine 3 FAILED. RepairTime=0.4s
+2026-05-21 16:07:33.106 [EpisodeTracker] Machine 3 failed. Episode total failures=72
+2026-05-21 16:07:33.106 [Failure] Queued job 0 re-routed from failed machine 3.
+2026-05-21 16:07:33.106 [Failure] Queued job 3 re-routed from failed machine 3.
+2026-05-21 16:07:33.106 [Failure] Queued job 8 re-routed from failed machine 3.
+2026-05-21 16:07:33.106 [Failure] Queued job 9 re-routed from failed machine 3.
+2026-05-21 16:07:33.106 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:07:33.106 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:07:33.106 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:33.106 Machine [4] repair complete
+2026-05-21 16:07:33.771 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:33.771 Machine [3] repair complete
+2026-05-21 16:07:37.076 [Orchestrator] Machine 2 FAILED. RepairTime=0.7s
+2026-05-21 16:07:37.076 [EpisodeTracker] Machine 2 failed. Episode total failures=73
+2026-05-21 16:07:37.076 [Failure] Queued job 2 re-routed from failed machine 2.
+2026-05-21 16:07:37.077 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:07:37.077 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:07:37.739 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:37.739 Machine [2] repair complete
+2026-05-21 16:07:42.351 [Orchestrator] Machine 4 FAILED. RepairTime=0.5s
+2026-05-21 16:07:42.351 [EpisodeTracker] Machine 4 failed. Episode total failures=74
+2026-05-21 16:07:42.351 [Failure] Queued job 6 re-routed from failed machine 4.
+2026-05-21 16:07:42.351 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:07:42.351 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:07:42.990 [Orchestrator] Machine 1 FAILED. RepairTime=0.3s
+2026-05-21 16:07:42.990 [EpisodeTracker] Machine 1 failed. Episode total failures=75
+2026-05-21 16:07:42.990 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:07:42.990 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:07:42.991 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:42.991 Machine [4] repair complete
+2026-05-21 16:07:43.670 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:43.670 Machine [1] repair complete
+2026-05-21 16:07:44.363 [Orchestrator] Machine 2 FAILED. RepairTime=1.1s
+2026-05-21 16:07:44.363 [EpisodeTracker] Machine 2 failed. Episode total failures=76
+2026-05-21 16:07:44.363 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:07:44.363 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:07:45.001 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:45.001 Machine [2] repair complete
+2026-05-21 16:07:46.339 [Orchestrator] Machine 0 FAILED. RepairTime=0.7s
+2026-05-21 16:07:46.339 [EpisodeTracker] Machine 0 failed. Episode total failures=77
+2026-05-21 16:07:46.339 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:07:46.339 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:07:46.339 [FlagHarvester] Job 5 returned to NeedsRouting — target machine 0 is Repairing.
+2026-05-21 16:07:46.981 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:46.981 Machine [0] repair complete
+2026-05-21 16:07:46.981 [Orchestrator] Machine 2 FAILED. RepairTime=0.7s
+2026-05-21 16:07:46.981 [EpisodeTracker] Machine 2 failed. Episode total failures=78
+2026-05-21 16:07:46.981 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:07:46.981 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:07:46.981 [Orchestrator] Machine 3 FAILED. RepairTime=0.5s
+2026-05-21 16:07:46.981 [EpisodeTracker] Machine 3 failed. Episode total failures=79
+2026-05-21 16:07:46.981 [Failure] Queued job 2 re-routed from failed machine 3.
+2026-05-21 16:07:46.981 [Failure] Queued job 3 re-routed from failed machine 3.
+2026-05-21 16:07:46.981 [Failure] Queued job 9 re-routed from failed machine 3.
+2026-05-21 16:07:46.981 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:07:46.982 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:07:47.651 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:47.651 Machine [2] repair complete
+2026-05-21 16:07:47.651 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:47.651 Machine [3] repair complete
+2026-05-21 16:07:51.514 [Orchestrator] Machine 5 FAILED. RepairTime=0.6s
+2026-05-21 16:07:51.514 [EpisodeTracker] Machine 5 failed. Episode total failures=80
+2026-05-21 16:07:51.514 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:07:51.514 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:07:52.217 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:52.217 Machine [5] repair complete
+2026-05-21 16:07:54.216 [Orchestrator] Machine 1 FAILED. RepairTime=0.6s
+2026-05-21 16:07:54.216 [EpisodeTracker] Machine 1 failed. Episode total failures=81
+2026-05-21 16:07:54.216 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:07:54.216 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:07:54.848 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:54.848 Machine [1] repair complete
+2026-05-21 16:07:54.848 [Orchestrator] Machine 3 FAILED. RepairTime=0.5s
+2026-05-21 16:07:54.848 [EpisodeTracker] Machine 3 failed. Episode total failures=82
+2026-05-21 16:07:54.848 [Failure] Queued job 8 re-routed from failed machine 3.
+2026-05-21 16:07:54.848 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:07:54.848 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:07:55.524 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:55.524 Machine [3] repair complete
+2026-05-21 16:07:56.197 [Orchestrator] Machine 2 FAILED. RepairTime=0.4s
+2026-05-21 16:07:56.197 [EpisodeTracker] Machine 2 failed. Episode total failures=83
+2026-05-21 16:07:56.197 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:07:56.197 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:07:56.833 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:56.833 Machine [2] repair complete
+2026-05-21 16:07:58.175 [Orchestrator] Machine 4 FAILED. RepairTime=0.6s
+2026-05-21 16:07:58.175 [EpisodeTracker] Machine 4 failed. Episode total failures=84
+2026-05-21 16:07:58.175 [Failure] Queued job 9 re-routed from failed machine 4.
+2026-05-21 16:07:58.175 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:07:58.175 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:07:58.805 [Orchestrator] Machine 1 FAILED. RepairTime=0.8s
+2026-05-21 16:07:58.806 [EpisodeTracker] Machine 1 failed. Episode total failures=85
+2026-05-21 16:07:58.806 [Failure] Queued job 6 re-routed from failed machine 1.
+2026-05-21 16:07:58.806 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:07:58.806 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:07:58.806 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:58.806 Machine [4] repair complete
+2026-05-21 16:07:58.806 [FlagHarvester] Job 9 returned to NeedsRouting — target machine 1 is Repairing.
+2026-05-21 16:07:59.446 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:07:59.446 Machine [1] repair complete
+2026-05-21 16:08:04.192 [Orchestrator] Machine 2 FAILED. RepairTime=0.7s
+2026-05-21 16:08:04.192 [EpisodeTracker] Machine 2 failed. Episode total failures=86
+2026-05-21 16:08:04.192 [Failure] Queued job 6 re-routed from failed machine 2.
+2026-05-21 16:08:04.192 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:08:04.192 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:08:04.192 [Orchestrator] Machine 5 FAILED. RepairTime=0.4s
+2026-05-21 16:08:04.192 [EpisodeTracker] Machine 5 failed. Episode total failures=87
+2026-05-21 16:08:04.192 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:08:04.193 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:08:04.864 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:04.864 Machine [2] repair complete
+2026-05-21 16:08:04.864 [Orchestrator] Machine 4 FAILED. RepairTime=0.8s
+2026-05-21 16:08:04.864 [EpisodeTracker] Machine 4 failed. Episode total failures=88
+2026-05-21 16:08:04.864 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:08:04.865 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:08:04.865 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:04.865 Machine [5] repair complete
+2026-05-21 16:08:05.550 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:05.551 Machine [4] repair complete
+2026-05-21 16:08:06.216 [Orchestrator] Machine 0 FAILED. RepairTime=0.8s
+2026-05-21 16:08:06.216 [EpisodeTracker] Machine 0 failed. Episode total failures=89
+2026-05-21 16:08:06.216 [Failure] Job 9 returned to NeedsRouting (was Processing on failed machine 0).
+2026-05-21 16:08:06.216 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:08:06.216 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:08:06.872 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:06.873 Machine [0] repair complete
+2026-05-21 16:08:12.905 [Orchestrator] Machine 0 FAILED. RepairTime=0.6s
+2026-05-21 16:08:12.905 [EpisodeTracker] Machine 0 failed. Episode total failures=90
+2026-05-21 16:08:12.905 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:08:12.905 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:08:12.905 [Orchestrator] Machine 5 FAILED. RepairTime=0.3s
+2026-05-21 16:08:12.905 [EpisodeTracker] Machine 5 failed. Episode total failures=91
+2026-05-21 16:08:12.905 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:08:12.906 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:08:13.546 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:13.546 Machine [0] repair complete
+2026-05-21 16:08:13.546 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:13.546 Machine [5] repair complete
+2026-05-21 16:08:14.205 [TelemetryChannel] Flushed 182 events to Python.
+2026-05-21 16:08:14.205 [StochasticSummary] Failures=91 TotalRepairTime=60.0s MeanTTF_theory=512.3s
+2026-05-21 16:08:14.205 [BatchRunner] Progress: 2/27 (308.7s elapsed, ETA 3858.2s)
+2026-05-21 16:08:14.634 [BatchRunner] Run 3/27: benchmark=brandimarte_mk01_low rule=LPT_MMUR seed=42
+2026-05-21 16:08:14.634 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=567.5726 λ_agv=700 repairMu=-0.5800146 repairSigma=0.4 arrivalLambda=0.005
+2026-05-21 16:08:14.635 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld
+  Row1: Mill, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-05-21 16:08:14.636 [FactoryLayout] Distance matrix (6x6):
+       M0     M1     M2     M3     M4     M5   
+2026-05-21 16:08:14.638 [FactoryLayout] Built aisle-based floor: 6 machines.
+2026-05-21 16:08:14.638 [TrafficZones] Built zone graph: 18 zones.
+2026-05-21 16:08:14.638 [AGVPool] Spawned fleet of 3 AGVs.
+2026-05-21 16:08:14.640 [BrandimartLoader] Loaded 10 jobs from benchmark (6 BM machines → 6 runtime machines across 5 types)
+2026-05-21 16:08:14.640 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-21 16:08:14.640 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=567.5726 λ_agv=700 repairMu=-0.5800146 repairSigma=0.4 arrivalLambda=0.005
+2026-05-21 16:08:14.640 [Orchestrator] Episode started: 10 jobs, 6 machines, stochastic=True
+2026-05-21 16:08:16.584 [Orchestrator] Machine 2 FAILED. RepairTime=0.4s
+2026-05-21 16:08:16.585 [EpisodeTracker] Machine 2 failed. Episode total failures=1
+2026-05-21 16:08:16.585 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:08:16.585 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:08:17.272 [Orchestrator] Machine 1 FAILED. RepairTime=0.6s
+2026-05-21 16:08:17.272 [EpisodeTracker] Machine 1 failed. Episode total failures=2
+2026-05-21 16:08:17.272 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:08:17.272 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:08:17.272 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:17.272 Machine [2] repair complete
+2026-05-21 16:08:17.272 [Orchestrator] Machine 5 FAILED. RepairTime=0.5s
+2026-05-21 16:08:17.272 [EpisodeTracker] Machine 5 failed. Episode total failures=3
+2026-05-21 16:08:17.273 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:08:17.273 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:08:17.273 [FlagHarvester] Job 2 returned to NeedsRouting — target machine 1 is Repairing.
+2026-05-21 16:08:17.273 [Orchestrator] Job 2: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-21 16:08:17.938 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:17.938 Machine [1] repair complete
+2026-05-21 16:08:17.938 [Orchestrator] Machine 4 FAILED. RepairTime=0.4s
+2026-05-21 16:08:17.939 [EpisodeTracker] Machine 4 failed. Episode total failures=4
+2026-05-21 16:08:17.939 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:08:17.939 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:08:17.939 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:17.939 Machine [5] repair complete
+2026-05-21 16:08:18.606 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:18.606 Machine [4] repair complete
+2026-05-21 16:08:19.962 [Orchestrator] Machine 4 FAILED. RepairTime=0.4s
+2026-05-21 16:08:19.962 [EpisodeTracker] Machine 4 failed. Episode total failures=5
+2026-05-21 16:08:19.962 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:08:19.962 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:08:20.648 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:20.648 Machine [4] repair complete
+2026-05-21 16:08:21.342 [Orchestrator] Machine 3 FAILED. RepairTime=1.1s
+2026-05-21 16:08:21.342 [EpisodeTracker] Machine 3 failed. Episode total failures=6
+2026-05-21 16:08:21.342 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:08:21.342 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:08:21.342 [Orchestrator] Job 6: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-21 16:08:22.029 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:22.029 Machine [3] repair complete
+2026-05-21 16:08:23.372 [Orchestrator] Machine 1 FAILED. RepairTime=0.4s
+2026-05-21 16:08:23.372 [EpisodeTracker] Machine 1 failed. Episode total failures=7
+2026-05-21 16:08:23.372 [Failure] Queued job 0 re-routed from failed machine 1.
+2026-05-21 16:08:23.372 [Failure] Queued job 2 re-routed from failed machine 1.
+2026-05-21 16:08:23.372 [Failure] Queued job 3 re-routed from failed machine 1.
+2026-05-21 16:08:23.372 [Failure] Queued job 4 re-routed from failed machine 1.
+2026-05-21 16:08:23.372 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:08:23.372 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:08:24.056 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:24.056 Machine [1] repair complete
+2026-05-21 16:08:26.062 [Orchestrator] Machine 1 FAILED. RepairTime=0.7s
+2026-05-21 16:08:26.062 [EpisodeTracker] Machine 1 failed. Episode total failures=8
+2026-05-21 16:08:26.062 [Failure] Queued job 2 re-routed from failed machine 1.
+2026-05-21 16:08:26.062 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:08:26.062 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:08:26.062 [FlagHarvester] Job 4 returned to NeedsRouting — target machine 1 is Repairing.
+2026-05-21 16:08:26.063 [Orchestrator] Job 2: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-21 16:08:26.734 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:26.734 Machine [1] repair complete
+2026-05-21 16:08:26.734 [Orchestrator] Machine 2 FAILED. RepairTime=0.5s
+2026-05-21 16:08:26.735 [EpisodeTracker] Machine 2 failed. Episode total failures=9
+2026-05-21 16:08:26.735 [Failure] Job 0 returned to NeedsRouting (was Processing on failed machine 2).
+2026-05-21 16:08:26.735 [Failure] Queued job 1 re-routed from failed machine 2.
+2026-05-21 16:08:26.735 [Failure] Queued job 5 re-routed from failed machine 2.
+2026-05-21 16:08:26.735 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:08:26.735 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:08:27.433 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:27.433 Machine [2] repair complete
+2026-05-21 16:08:27.434 [Orchestrator] Machine 5 FAILED. RepairTime=1.1s
+2026-05-21 16:08:27.434 [EpisodeTracker] Machine 5 failed. Episode total failures=10
+2026-05-21 16:08:27.434 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:08:27.434 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:08:28.100 [Orchestrator] Machine 0 FAILED. RepairTime=0.7s
+2026-05-21 16:08:28.101 [EpisodeTracker] Machine 0 failed. Episode total failures=11
+2026-05-21 16:08:28.101 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:08:28.101 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:08:28.101 [Orchestrator] Machine 4 FAILED. RepairTime=0.2s
+2026-05-21 16:08:28.101 [EpisodeTracker] Machine 4 failed. Episode total failures=12
+2026-05-21 16:08:28.101 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:08:28.102 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:08:28.102 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:28.102 Machine [5] repair complete
+2026-05-21 16:08:28.785 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:28.785 Machine [0] repair complete
+2026-05-21 16:08:28.786 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:28.786 Machine [4] repair complete
+2026-05-21 16:08:33.441 [Orchestrator] Machine 2 FAILED. RepairTime=1.2s
+2026-05-21 16:08:33.441 [EpisodeTracker] Machine 2 failed. Episode total failures=13
+2026-05-21 16:08:33.441 [Failure] Job 5 returned to NeedsRouting (was Processing on failed machine 2).
+2026-05-21 16:08:33.441 [Failure] Queued job 1 re-routed from failed machine 2.
+2026-05-21 16:08:33.441 [Failure] Queued job 7 re-routed from failed machine 2.
+2026-05-21 16:08:33.441 [Failure] Queued job 9 re-routed from failed machine 2.
+2026-05-21 16:08:33.441 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:08:33.441 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:08:33.442 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-21 16:08:34.090 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:34.090 Machine [2] repair complete
+2026-05-21 16:08:35.399 [Orchestrator] Machine 3 FAILED. RepairTime=0.5s
+2026-05-21 16:08:35.399 [EpisodeTracker] Machine 3 failed. Episode total failures=14
+2026-05-21 16:08:35.399 [Failure] Queued job 6 re-routed from failed machine 3.
+2026-05-21 16:08:35.399 [Failure] Queued job 8 re-routed from failed machine 3.
+2026-05-21 16:08:35.399 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:08:35.400 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:08:35.400 [FlagHarvester] Job 2 returned to NeedsRouting — target machine 3 is Repairing.
+2026-05-21 16:08:36.033 [Orchestrator] Machine 1 FAILED. RepairTime=0.6s
+2026-05-21 16:08:36.033 [EpisodeTracker] Machine 1 failed. Episode total failures=15
+2026-05-21 16:08:36.033 [Failure] Queued job 0 re-routed from failed machine 1.
+2026-05-21 16:08:36.033 [Failure] Queued job 4 re-routed from failed machine 1.
+2026-05-21 16:08:36.033 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:08:36.033 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:08:36.033 [Orchestrator] Machine 2 FAILED. RepairTime=0.5s
+2026-05-21 16:08:36.033 [EpisodeTracker] Machine 2 failed. Episode total failures=16
+2026-05-21 16:08:36.033 [Failure] Queued job 1 re-routed from failed machine 2.
+2026-05-21 16:08:36.033 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:08:36.033 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:08:36.033 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:36.033 Machine [3] repair complete
+2026-05-21 16:08:36.033 [Orchestrator] Machine 4 FAILED. RepairTime=0.7s
+2026-05-21 16:08:36.033 [EpisodeTracker] Machine 4 failed. Episode total failures=17
+2026-05-21 16:08:36.034 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:08:36.034 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:08:36.034 [FlagHarvester] Job 2 returned to NeedsRouting — target machine 2 is Repairing.
+2026-05-21 16:08:36.680 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:36.680 Machine [1] repair complete
+2026-05-21 16:08:36.680 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:36.680 Machine [2] repair complete
+2026-05-21 16:08:36.680 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:36.680 Machine [4] repair complete
+2026-05-21 16:08:38.031 [Orchestrator] Machine 3 FAILED. RepairTime=0.5s
+2026-05-21 16:08:38.031 [EpisodeTracker] Machine 3 failed. Episode total failures=18
+2026-05-21 16:08:38.031 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:08:38.032 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:08:38.680 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:38.680 Machine [3] repair complete
+2026-05-21 16:08:38.681 [Orchestrator] Machine 4 FAILED. RepairTime=0.6s
+2026-05-21 16:08:38.681 [EpisodeTracker] Machine 4 failed. Episode total failures=19
+2026-05-21 16:08:38.681 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:08:38.681 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:08:39.340 [Orchestrator] Machine 3 FAILED. RepairTime=0.5s
+2026-05-21 16:08:39.340 [EpisodeTracker] Machine 3 failed. Episode total failures=20
+2026-05-21 16:08:39.340 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:08:39.340 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:08:39.340 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:39.340 Machine [4] repair complete
+2026-05-21 16:08:40.035 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:40.035 Machine [3] repair complete
+2026-05-21 16:08:41.384 [Orchestrator] Machine 4 FAILED. RepairTime=0.2s
+2026-05-21 16:08:41.384 [EpisodeTracker] Machine 4 failed. Episode total failures=21
+2026-05-21 16:08:41.384 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:08:41.385 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:08:42.051 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:42.051 Machine [4] repair complete
+2026-05-21 16:08:42.698 [Orchestrator] Machine 4 FAILED. RepairTime=0.4s
+2026-05-21 16:08:42.698 [EpisodeTracker] Machine 4 failed. Episode total failures=22
+2026-05-21 16:08:42.698 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:08:42.698 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:08:43.382 [Orchestrator] Machine 0 FAILED. RepairTime=0.4s
+2026-05-21 16:08:43.382 [EpisodeTracker] Machine 0 failed. Episode total failures=23
+2026-05-21 16:08:43.382 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:08:43.382 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:08:43.382 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:43.382 Machine [4] repair complete
+2026-05-21 16:08:44.065 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:44.066 Machine [0] repair complete
+2026-05-21 16:08:44.066 [Orchestrator] Machine 4 FAILED. RepairTime=0.7s
+2026-05-21 16:08:44.066 [EpisodeTracker] Machine 4 failed. Episode total failures=24
+2026-05-21 16:08:44.066 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:08:44.066 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:08:44.066 [Orchestrator] Machine 5 FAILED. RepairTime=2.0s
+2026-05-21 16:08:44.066 [EpisodeTracker] Machine 5 failed. Episode total failures=25
+2026-05-21 16:08:44.066 [Failure] Queued job 0 re-routed from failed machine 5.
+2026-05-21 16:08:44.066 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:08:44.066 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:08:44.706 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:44.706 Machine [4] repair complete
+2026-05-21 16:08:44.706 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:44.706 Machine [5] repair complete
+2026-05-21 16:08:46.049 [Orchestrator] Machine 2 FAILED. RepairTime=0.5s
+2026-05-21 16:08:46.049 [EpisodeTracker] Machine 2 failed. Episode total failures=26
+2026-05-21 16:08:46.049 [Failure] Queued job 0 re-routed from failed machine 2.
+2026-05-21 16:08:46.049 [Failure] Queued job 1 re-routed from failed machine 2.
+2026-05-21 16:08:46.049 [Failure] Queued job 5 re-routed from failed machine 2.
+2026-05-21 16:08:46.049 [Failure] Queued job 7 re-routed from failed machine 2.
+2026-05-21 16:08:46.049 [Failure] Queued job 9 re-routed from failed machine 2.
+2026-05-21 16:08:46.049 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:08:46.050 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:08:46.050 [Orchestrator] Machine 4 FAILED. RepairTime=0.4s
+2026-05-21 16:08:46.050 [EpisodeTracker] Machine 4 failed. Episode total failures=27
+2026-05-21 16:08:46.050 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:08:46.050 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:08:46.050 [FlagHarvester] Job 3 returned to NeedsRouting — target machine 2 is Repairing.
+2026-05-21 16:08:46.699 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:46.699 Machine [2] repair complete
+2026-05-21 16:08:46.699 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:46.699 Machine [4] repair complete
+2026-05-21 16:08:48.141 [Orchestrator] Machine 1 FAILED. RepairTime=0.3s
+2026-05-21 16:08:48.142 [EpisodeTracker] Machine 1 failed. Episode total failures=28
+2026-05-21 16:08:48.142 [Failure] Queued job 0 re-routed from failed machine 1.
+2026-05-21 16:08:48.142 [Failure] Queued job 4 re-routed from failed machine 1.
+2026-05-21 16:08:48.142 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:08:48.142 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:08:48.799 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:48.799 Machine [1] repair complete
+2026-05-21 16:08:48.799 [Orchestrator] Machine 2 FAILED. RepairTime=0.4s
+2026-05-21 16:08:48.799 [EpisodeTracker] Machine 2 failed. Episode total failures=29
+2026-05-21 16:08:48.799 [Failure] Queued job 1 re-routed from failed machine 2.
+2026-05-21 16:08:48.799 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:08:48.800 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:08:48.800 [FlagHarvester] Job 0 returned to NeedsRouting — target machine 2 is Repairing.
+2026-05-21 16:08:49.489 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:49.489 Machine [2] repair complete
+2026-05-21 16:08:53.505 [Orchestrator] Machine 3 FAILED. RepairTime=0.5s
+2026-05-21 16:08:53.505 [EpisodeTracker] Machine 3 failed. Episode total failures=30
+2026-05-21 16:08:53.505 [Failure] Queued job 2 re-routed from failed machine 3.
+2026-05-21 16:08:53.505 [Failure] Queued job 6 re-routed from failed machine 3.
+2026-05-21 16:08:53.505 [Failure] Queued job 8 re-routed from failed machine 3.
+2026-05-21 16:08:53.505 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:08:53.505 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:08:54.154 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:54.154 Machine [3] repair complete
+2026-05-21 16:08:54.154 [Orchestrator] Machine 4 FAILED. RepairTime=0.8s
+2026-05-21 16:08:54.154 [EpisodeTracker] Machine 4 failed. Episode total failures=31
+2026-05-21 16:08:54.154 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:08:54.155 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:08:54.837 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:54.837 Machine [4] repair complete
+2026-05-21 16:08:55.531 [Orchestrator] Machine 2 FAILED. RepairTime=0.5s
+2026-05-21 16:08:55.531 [EpisodeTracker] Machine 2 failed. Episode total failures=32
+2026-05-21 16:08:55.531 [Failure] Queued job 1 re-routed from failed machine 2.
+2026-05-21 16:08:55.531 [Failure] Queued job 3 re-routed from failed machine 2.
+2026-05-21 16:08:55.532 [Failure] Queued job 4 re-routed from failed machine 2.
+2026-05-21 16:08:55.532 [Failure] Queued job 5 re-routed from failed machine 2.
+2026-05-21 16:08:55.532 [Failure] Queued job 7 re-routed from failed machine 2.
+2026-05-21 16:08:55.532 [Failure] Queued job 9 re-routed from failed machine 2.
+2026-05-21 16:08:55.532 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:08:55.532 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:08:55.532 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-21 16:08:56.191 [Orchestrator] Machine 0 FAILED. RepairTime=1.0s
+2026-05-21 16:08:56.191 [EpisodeTracker] Machine 0 failed. Episode total failures=33
+2026-05-21 16:08:56.191 [Failure] Job 2 returned to NeedsRouting (was Processing on failed machine 0).
+2026-05-21 16:08:56.191 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:08:56.191 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:08:56.191 [Orchestrator] Machine 1 FAILED. RepairTime=0.4s
+2026-05-21 16:08:56.191 [EpisodeTracker] Machine 1 failed. Episode total failures=34
+2026-05-21 16:08:56.192 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:08:56.192 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:08:56.192 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:56.192 Machine [2] repair complete
+2026-05-21 16:08:56.829 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:56.829 Machine [0] repair complete
+2026-05-21 16:08:56.829 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:08:56.830 Machine [1] repair complete
+2026-05-21 16:09:00.211 [Orchestrator] Machine 1 FAILED. RepairTime=0.3s
+2026-05-21 16:09:00.211 [EpisodeTracker] Machine 1 failed. Episode total failures=35
+2026-05-21 16:09:00.211 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:09:00.212 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:09:00.894 [Orchestrator] Machine 0 FAILED. RepairTime=0.9s
+2026-05-21 16:09:00.895 [EpisodeTracker] Machine 0 failed. Episode total failures=36
+2026-05-21 16:09:00.895 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:09:00.895 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:09:00.895 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:09:00.895 Machine [1] repair complete
+2026-05-21 16:09:01.583 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:09:01.583 Machine [0] repair complete
+2026-05-21 16:09:05.630 [Orchestrator] Machine 5 FAILED. RepairTime=0.5s
+2026-05-21 16:09:05.630 [EpisodeTracker] Machine 5 failed. Episode total failures=37
+2026-05-21 16:09:05.630 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:09:05.630 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:09:06.326 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:09:06.326 Machine [5] repair complete
+2026-05-21 16:09:11.825 [Orchestrator] Machine 2 FAILED. RepairTime=0.5s
+2026-05-21 16:09:11.825 [EpisodeTracker] Machine 2 failed. Episode total failures=38
+2026-05-21 16:09:11.825 [Failure] Job 4 returned to NeedsRouting (was Processing on failed machine 2).
+2026-05-21 16:09:11.825 [Failure] Queued job 1 re-routed from failed machine 2.
+2026-05-21 16:09:11.825 [Failure] Queued job 3 re-routed from failed machine 2.
+2026-05-21 16:09:11.825 [Failure] Queued job 5 re-routed from failed machine 2.
+2026-05-21 16:09:11.825 [Failure] Queued job 7 re-routed from failed machine 2.
+2026-05-21 16:09:11.825 [Failure] Queued job 9 re-routed from failed machine 2.
+2026-05-21 16:09:11.825 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:09:11.825 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:09:11.825 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-21 16:09:12.502 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:09:12.502 Machine [2] repair complete
+2026-05-21 16:09:13.919 [Orchestrator] Machine 2 FAILED. RepairTime=0.9s
+2026-05-21 16:09:13.919 [EpisodeTracker] Machine 2 failed. Episode total failures=39
+2026-05-21 16:09:13.919 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:09:13.920 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:09:13.920 [Orchestrator] Machine 3 FAILED. RepairTime=0.7s
+2026-05-21 16:09:13.920 [EpisodeTracker] Machine 3 failed. Episode total failures=40
+2026-05-21 16:09:13.920 [Failure] Queued job 6 re-routed from failed machine 3.
+2026-05-21 16:09:13.920 [Failure] Queued job 8 re-routed from failed machine 3.
+2026-05-21 16:09:13.920 [PhysicalMachine] Machine [3] failure
+2026-05-21 16:09:13.920 [PhysicalMachine] Machine [3] begin repair
+2026-05-21 16:09:13.920 [FlagHarvester] Job 1 returned to NeedsRouting — target machine 2 is Repairing.
+2026-05-21 16:09:13.920 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-21 16:09:14.614 [Orchestrator] Machine 0 FAILED. RepairTime=1.1s
+2026-05-21 16:09:14.615 [EpisodeTracker] Machine 0 failed. Episode total failures=41
+2026-05-21 16:09:14.615 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:09:14.615 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:09:14.615 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:09:14.615 Machine [2] repair complete
+2026-05-21 16:09:14.616 [Orchestrator] Machine 3 repair complete — returning to OPERATIONAL.
+2026-05-21 16:09:14.616 Machine [3] repair complete
+2026-05-21 16:09:15.283 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:09:15.283 Machine [0] repair complete
+2026-05-21 16:09:15.956 [Orchestrator] Machine 1 FAILED. RepairTime=1.3s
+2026-05-21 16:09:15.956 [EpisodeTracker] Machine 1 failed. Episode total failures=42
+2026-05-21 16:09:15.957 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:09:15.957 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:09:16.638 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:09:16.638 Machine [1] repair complete
+2026-05-21 16:09:16.639 [Orchestrator] Machine 5 FAILED. RepairTime=1.1s
+2026-05-21 16:09:16.639 [EpisodeTracker] Machine 5 failed. Episode total failures=43
+2026-05-21 16:09:16.639 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:09:16.639 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:09:17.306 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:09:17.306 Machine [5] repair complete
+2026-05-21 16:09:19.363 [Orchestrator] Machine 2 FAILED. RepairTime=0.6s
+2026-05-21 16:09:19.364 [EpisodeTracker] Machine 2 failed. Episode total failures=44
+2026-05-21 16:09:19.364 [Failure] Queued job 0 re-routed from failed machine 2.
+2026-05-21 16:09:19.364 [Failure] Queued job 1 re-routed from failed machine 2.
+2026-05-21 16:09:19.364 [Failure] Queued job 3 re-routed from failed machine 2.
+2026-05-21 16:09:19.364 [Failure] Queued job 4 re-routed from failed machine 2.
+2026-05-21 16:09:19.364 [Failure] Queued job 5 re-routed from failed machine 2.
+2026-05-21 16:09:19.364 [PhysicalMachine] Machine [2] failure
+2026-05-21 16:09:19.364 [PhysicalMachine] Machine [2] begin repair
+2026-05-21 16:09:19.364 [Orchestrator] Job 0: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-21 16:09:20.032 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-21 16:09:20.032 Machine [2] repair complete
+2026-05-21 16:09:20.032 [Orchestrator] Machine 4 FAILED. RepairTime=1.8s
+2026-05-21 16:09:20.032 [EpisodeTracker] Machine 4 failed. Episode total failures=45
+2026-05-21 16:09:20.032 [PhysicalMachine] Machine [4] failure
+2026-05-21 16:09:20.033 [PhysicalMachine] Machine [4] begin repair
+2026-05-21 16:09:20.699 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-21 16:09:20.699 Machine [4] repair complete
+2026-05-21 16:09:23.468 [Orchestrator] Machine 0 FAILED. RepairTime=1.0s
+2026-05-21 16:09:23.468 [EpisodeTracker] Machine 0 failed. Episode total failures=46
+2026-05-21 16:09:23.468 [PhysicalMachine] Machine [0] failure
+2026-05-21 16:09:23.468 [PhysicalMachine] Machine [0] begin repair
+2026-05-21 16:09:23.468 [Orchestrator] Machine 1 FAILED. RepairTime=0.5s
+2026-05-21 16:09:23.468 [EpisodeTracker] Machine 1 failed. Episode total failures=47
+2026-05-21 16:09:23.468 [PhysicalMachine] Machine [1] failure
+2026-05-21 16:09:23.468 [PhysicalMachine] Machine [1] begin repair
+2026-05-21 16:09:24.168 [Orchestrator] Machine 0 repair complete — returning to OPERATIONAL.
+2026-05-21 16:09:24.168 Machine [0] repair complete
+2026-05-21 16:09:24.168 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-21 16:09:24.168 Machine [1] repair complete
+2026-05-21 16:09:24.168 [Orchestrator] Machine 5 FAILED. RepairTime=0.4s
+2026-05-21 16:09:24.168 [EpisodeTracker] Machine 5 failed. Episode total failures=48
+2026-05-21 16:09:24.168 [PhysicalMachine] Machine [5] failure
+2026-05-21 16:09:24.168 [PhysicalMachine] Machine [5] begin repair
+2026-05-21 16:09:24.838 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-21 16:09:24.838 Machine [5] repair complete

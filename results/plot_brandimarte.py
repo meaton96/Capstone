@@ -210,17 +210,25 @@ def plot_rank_heatmap(pdr_df: pd.DataFrame, rand_df: pd.DataFrame,
 # ── Plot 3 — box plot: RANDOM rule variance per instance ─────────────────────
 
 def plot_random_variance(rand_df: pd.DataFrame, out_dir: str) -> None:
-    instances = _sorted_instances(rand_df)
-    data = [rand_df[rand_df["instance"] == i]["makespan"].values for i in instances]
+    # 1. Filter to include only instances that have data in rand_df
+    present_instances = [i for i in MK_ORDER if i in rand_df["instance"].unique()]
+    
+    # 2. Build the data list and match the labels list to it
+    data = [rand_df[rand_df["instance"] == i]["makespan"].values for i in present_instances]
+    
+    # 3. Only proceed if we actually have data to plot
+    if not data:
+        print("  Skipping random_pdr_boxplot: No RANDOM data found.")
+        return
+
     n_per = [len(d) for d in data]
 
-    fig, ax = plt.subplots(figsize=(max(10, len(instances) * 0.9), 5))
-    try:
-        bp = ax.boxplot(data, tick_labels=instances, patch_artist=True,
-                        medianprops={"color": "black", "linewidth": 2})
-    except TypeError:
-        bp = ax.boxplot(data, labels=instances, patch_artist=True,
-                        medianprops={"color": "black", "linewidth": 2})
+    fig, ax = plt.subplots(figsize=(max(10, len(present_instances) * 0.9), 5))
+    
+    # Use the filtered present_instances list for tick_labels
+    bp = ax.boxplot(data, tick_labels=present_instances, patch_artist=True,
+                    medianprops={"color": "black", "linewidth": 2})
+
     for patch in bp["boxes"]:
         patch.set_facecolor("steelblue")
         patch.set_alpha(0.6)

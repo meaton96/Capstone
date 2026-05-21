@@ -98,7 +98,7 @@ namespace Assets.Scripts.Simulation
         /// modes and triggers @c SimulationBridge.StartEpisode.
         public override void OnEpisodeBegin()
         {
-            Initialize();
+            //Initialize();
             if (FactoryOrchestrator.Instance != null && FactoryOrchestrator.Instance.AutoStartOnPlay)
             {
                 IsArmed = true;
@@ -111,6 +111,13 @@ namespace Assets.Scripts.Simulation
             }
 
             if (FactoryOrchestrator.Instance == null) return;
+
+            if (FactoryOrchestrator.Instance != null && FactoryOrchestrator.Instance.IsEpisodeActive)
+            {
+                SimLogger.Low("[Agent] OnEpisodeBegin: factory episode already active — " +
+                              "suppressing duplicate StartEpisode call.");
+                return;
+            }
 
             if (!FactoryOrchestrator.Instance.AutoStartOnPlay)
             {
