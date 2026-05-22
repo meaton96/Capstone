@@ -324,7 +324,12 @@ namespace Assets.Scripts.Simulation
             );
 
             if (!Academy.Instance.IsCommunicatorOn)
-                ResultsLogger.LogAll(record);
+            {
+                SimLogger.Low($"[Orchestrator] Logging Academy Epiosde");
+                //TODO: uncomment
+                //ResultsLogger.LogAll(record);
+            }
+
 
             if (record.MachineFailureCount > 0)
             {

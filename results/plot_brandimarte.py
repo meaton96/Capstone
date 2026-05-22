@@ -249,56 +249,82 @@ def plot_random_variance(rand_df: pd.DataFrame, out_dir: str) -> None:
 
 # ── Plot 4 — which PDR wins each instance ────────────────────────────────────
 
-def plot_best_pdr(pdr_df: pd.DataFrame, rand_df: pd.DataFrame, out_dir: str) -> None:
+def plot_pdr_rank_distribution(pdr_df: pd.DataFrame, rand_df: pd.DataFrame,
+                                out_dir: str) -> None:
+    """
+    Stacked bar showing rank distribution for each PDR across all MK instances.
+    Each bar = one PDR; segments = fraction of instances where it ranked 1st, 2nd, etc.
+    Directly supports the adaptive policy argument: no single PDR dominates.
+    """
     instances = _sorted_instances(pdr_df)
-    rules = [r for r in PDR_ORDER if r in pdr_df["rule"].values]
-    colors = _rule_color(rules + ["RANDOM"])
+    n_instances = len(instances)
 
-    # Seed-averaged lookup
-    pdr_mean = pdr_df.groupby(["rule", "instance"])["makespan"].mean()
-    rand_mean = rand_df.groupby("instance")["makespan"].mean()
+    # Build seed-averaged pivot (rules x instances)
+    pivot = pdr_df.pivot_table(index="rule", columns="instance",
+                               values="makespan", aggfunc="mean")
+    rand_means = rand_df.groupby("instance")["makespan"].mean()
+    pivot.loc["RANDOM"] = [rand_means.get(i, np.nan) for i in instances]
+    pivot = pivot[instances]
 
-    best_rules, best_makespans = [], []
-    for inst in instances:
-        candidates = {rule: pdr_mean.get((rule, inst), np.nan) for rule in rules}
-        candidates = {k: v for k, v in candidates.items() if not np.isnan(v)}
-        if inst in rand_mean.index and not np.isnan(rand_mean.loc[inst]):
-            candidates["RANDOM"] = rand_mean.loc[inst]
-        if not candidates:
-            best_rules.append("—")
-            best_makespans.append(np.nan)
-            continue
-        best_rule = min(candidates, key=candidates.get)
-        best_rules.append(best_rule)
-        best_makespans.append(candidates[best_rule])
+    # Rank per instance (1 = best)
+    rank_df = pivot.rank(axis=0, method="min").astype(int)
 
-    bar_colors = [colors.get(r, "gray") for r in best_rules]
-    x = np.arange(len(instances))
+    ordered_rules = [r for r in PDR_ORDER if r in rank_df.index] + \
+                    [r for r in rank_df.index if r not in PDR_ORDER]
+    rank_df = rank_df.loc[ordered_rules]
 
-    fig, ax = plt.subplots(figsize=(max(10, len(instances)), 5))
-    bars = ax.bar(x, best_makespans, color=bar_colors, alpha=0.85, edgecolor="white")
-    ymax = np.nanmax(best_makespans) if best_makespans else 1.0
-    for bar, rule in zip(bars, best_rules):
-        ax.text(bar.get_x() + bar.get_width() / 2,
-                bar.get_height() + ymax * 0.01,
-                rule.replace("_", "\n"), ha="center", va="bottom",
-                fontsize=6.5, rotation=0)
+    n_rules = len(ordered_rules)
+    rank_counts = np.zeros((n_rules, n_rules), dtype=int)  # [rule_idx, rank-1]
+    for r_idx, rule in enumerate(ordered_rules):
+        for rank_val in range(1, n_rules + 1):
+            rank_counts[r_idx, rank_val - 1] = (rank_df.loc[rule] == rank_val).sum()
 
-    ax.set_xticks(x)
-    ax.set_xticklabels(instances, rotation=45, ha="right")
-    ax.set_xlabel("Brandimarte Instance")
-    ax.set_ylabel("Best Makespan Achieved (seed-averaged)")
-    ax.set_title("Best-Performing PDR per Brandimarte Instance")
-    ax.yaxis.set_major_formatter(mticker.FuncFormatter(lambda v, _: f"{v:,.0f}"))
+    # Color: rank 1 = dark green, middle = yellow, last = dark red
+    rank_colors = plt.cm.RdYlGn(np.linspace(1.0, 0.0, n_rules))
 
-    from matplotlib.patches import Patch
-    legend_handles = [Patch(color=colors[r], alpha=0.85, label=r)
-                      for r in (rules + ["RANDOM"]) if r in colors]
-    ax.legend(handles=legend_handles, title="PDR", bbox_to_anchor=(1.01, 1),
-              loc="upper left", fontsize=8)
+    fig, ax = plt.subplots(figsize=(11, 5))
+    bottoms = np.zeros(n_rules)
+    for rank_idx in range(n_rules):
+        vals = rank_counts[:, rank_idx]
+        bars = ax.bar(ordered_rules, vals, bottom=bottoms,
+                      color=rank_colors[rank_idx],
+                      label=f"Rank {rank_idx + 1}",
+                      edgecolor="white", linewidth=0.4)
+        # Annotate rank-1 counts only (avoids clutter)
+        if rank_idx == 0:
+            for bar, val in zip(bars, vals):
+                if val > 0:
+                    ax.text(bar.get_x() + bar.get_width() / 2,
+                            bar.get_height() / 2,
+                            str(val),
+                            ha="center", va="center",
+                            fontsize=9, fontweight="bold", color="white")
+        bottoms += vals
+
+    ax.set_ylim(0, n_instances * 1.05)
+    ax.set_yticks(range(0, n_instances + 1, 3))
+    ax.set_ylabel("Number of MK instances")
+    ax.set_xlabel("PDR")
+    ax.set_title(
+        f"PDR Rank Distribution Across Brandimarte Instances (n={n_instances})\n"
+        "White numbers = rank-1 (win) count"
+    )
+    ax.tick_params(axis="x", rotation=30)
+
+    # Compact legend: just show rank 1, middle, last
+    handles, labels = ax.get_legend_handles_labels()
+    keep = [0, n_rules // 2, n_rules - 1]
+    ax.legend([handles[i] for i in keep], [labels[i] for i in keep],
+              title="Rank", bbox_to_anchor=(1.01, 1), loc="upper left", fontsize=8)
+
+    # Dashed line at n_instances/n_rules = random-baseline wins
+    expected = n_instances / n_rules
+    ax.axhline(expected, color="gray", linestyle="--", linewidth=0.8, alpha=0.6)
+    ax.text(n_rules - 0.5, expected + 0.15, f"random baseline ({expected:.1f})",
+            ha="right", va="bottom", fontsize=7, color="gray")
 
     fig.tight_layout()
-    path = os.path.join(out_dir, "best_pdr_per_instance.png")
+    path = os.path.join(out_dir, "pdr_rank_distribution.png")
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
     print(f"  Saved: {path}")
@@ -334,7 +360,7 @@ def main():
     plot_bar_by_instance(pdr_df, rand_df, args.out, agv_warning=effective_agv_warning)
     plot_rank_heatmap(pdr_df, rand_df, args.out)
     plot_random_variance(rand_df, args.out)
-    plot_best_pdr(pdr_df, rand_df, args.out)
+    plot_pdr_rank_distribution(pdr_df, rand_df, args.out)
 
     print("\nDone.")
 

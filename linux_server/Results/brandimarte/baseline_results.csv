@@ -1,5 +1,0 @@
-timestamp,instance,rule,seed,makespan,jobs,machines,total_ops,agvCount,decisions,total_reward,timescale,stochastic_tag,weibull_k,weibull_lambda,mean_ttf_theoretical,repair_log_mu,repair_log_sigma,episode_failures,total_repair_time
-2026-05-21 16:05:41,brandimarte_mk01_low,SPT_SMPT,42,7836.80,10,6,55,3,236,-1.4067,100.0000,mf,1.50,567.6,512.3,-0.580,0.400,99,64.6
-2026-05-21 16:05:41,brandimarte_mk01_low,SPT_SMPT,42,7836.80,10,6,55,3,236,-1.4067,100.0000,mf,1.50,567.6,512.3,-0.580,0.400,99,64.6
-2026-05-21 16:08:14,brandimarte_mk01_low,SPT_SRWT,42,7600.00,10,6,55,3,222,-1.3636,100.0000,mf,1.50,567.6,512.3,-0.580,0.400,91,60.0
-2026-05-21 16:08:14,brandimarte_mk01_low,SPT_SRWT,42,7600.00,10,6,55,3,222,-1.3636,100.0000,mf,1.50,567.6,512.3,-0.580,0.400,91,60.0
