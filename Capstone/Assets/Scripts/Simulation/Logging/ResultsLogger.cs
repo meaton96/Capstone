@@ -8,27 +8,34 @@ namespace Assets.Scripts.Simulation.Logging
     /// <summary>
     /// Serialises EpisodeRecord objects to CSV.
     ///
-    /// All logging methods take an EpisodeRecord — no more long parameter lists.
-    /// Adding a new stochastic event means adding a field to EpisodeRecord and
-    /// a column here. Nothing else needs to change.
-    ///
-    /// Two files:
-    ///   baseline_results.csv      — one row per episode (LogEpisode)
+    /// Four files:
+    ///   results.csv               — one row per episode            (LogEpisode)
     ///   machine_utilization.csv   — one row per machine per episode (LogMachineUtilization)
+    ///   agv_performance.csv       — one row per AGV per episode     (LogAGVPerformance)
+    ///   segment_congestion.csv    — one row per zone per episode    (LogSegmentCongestion)
+    ///
+    /// All four share the same filename suffix set by SetFilenameSuffix so output
+    /// from different run configurations lands in clearly named files:
+    ///   results_det.csv / results_low.csv, etc.
     /// </summary>
     public static class ResultsLogger
     {
         public static string OutputDirectory = "";
 
-        // ── Episode log ───────────────────────────────────────────────────────
+        // ── Filename management ───────────────────────────────────────────────
 
-        private static string _filename = "baseline_results.csv";
+        private static string _filename = "results.csv";
+        private static string _machineFilename = "machine_utilization.csv";
+        private static string _agvFilename = "agv_performance.csv";
+        private static string _segmentFilename = "segment_congestion.csv";
 
         public static void SetFilenameSuffix(string suffix)
         {
             const string ext = ".csv";
             _filename = StripExt(_filename, ext) + suffix + ext;
             _machineFilename = StripExt(_machineFilename, ext) + suffix + ext;
+            _agvFilename = StripExt(_agvFilename, ext) + suffix + ext;
+            _segmentFilename = StripExt(_segmentFilename, ext) + suffix + ext;
         }
 
         public static void SetSubdirectory(string subdir)
@@ -39,15 +46,31 @@ namespace Assets.Scripts.Simulation.Logging
         }
 
         private static string FilePath => BuildPath(_filename);
+        private static string MachineFilePath => BuildPath(_machineFilename);
+        private static string AGVFilePath => BuildPath(_agvFilename);
+        private static string SegmentFilePath => BuildPath(_segmentFilename);
+
+        // ── Convenience: write all logs in one call ───────────────────────────
 
         /// <summary>
-        /// Appends one episode row to baseline_results.csv.
-        /// Header is written automatically on first call.
+        /// Standard call-site in HeadlessBatchRunner — writes all four CSVs.
+        /// </summary>
+        public static void LogAll(EpisodeRecord r)
+        {
+            LogEpisode(r);
+            LogMachineUtilization(r);
+            if (r.AGVRecords.Count > 0) LogAGVPerformance(r);
+            if (r.SegmentRecords.Count > 0) LogSegmentCongestion(r);
+        }
+
+        // ── Episode log (results.csv) ─────────────────────────────────────────
+
+        /// <summary>
+        /// Appends one episode row. Header written automatically on first call.
         /// </summary>
         public static void LogEpisode(EpisodeRecord r)
         {
             bool hasMf = r.Stochastic != null && r.Stochastic.MachineFailuresEnabled;
-            string stochasticTag = r.StochasticTag;
             float weibullK = hasMf ? r.Stochastic.WeibullK : 0f;
             float weibullLambda = hasMf ? r.Stochastic.WeibullLambda : 0f;
             float meanTtfTheory = weibullLambda > 0f ? weibullLambda * 0.9027f : 0f;
@@ -64,8 +87,8 @@ namespace Assets.Scripts.Simulation.Logging
                     "stochastic_tag,weibull_k,weibull_lambda,mean_ttf_theoretical," +
                     "repair_log_mu,repair_log_sigma," +
                     "episode_failures,total_repair_time"
-                // Phase 3: append ",agv_failures,agv_repair_time" here
-                // Phase 4: append ",dynamic_arrivals" here
+                // Phase 3: + ",agv_failures,agv_repair_time"
+                // Phase 4: + ",dynamic_arrivals"
                 );
 
             writer.WriteLine(
@@ -73,24 +96,20 @@ namespace Assets.Scripts.Simulation.Logging
                 $"{r.InstanceName},{r.RuleName},{r.Seed},{r.Makespan:F2}," +
                 $"{r.JobCount},{r.MachineCount},{r.TotalOperations},{r.AGVCount}," +
                 $"{r.DecisionPoints},{r.TotalReward:F4},{r.AverageTimeScale:F4}," +
-                $"{stochasticTag},{weibullK:F2},{weibullLambda:F1},{meanTtfTheory:F1}," +
+                $"{r.StochasticTag},{weibullK:F2},{weibullLambda:F1},{meanTtfTheory:F1}," +
                 $"{repairLogMu:F3},{repairLogSig:F3}," +
                 $"{r.MachineFailureCount},{r.MachineRepairTime:F1}"
             );
 
             Debug.Log($"[Results] {r.InstanceName} {r.RuleName} seed={r.Seed} " +
-                      $"makespan={r.Makespan:F1} stochastic={stochasticTag} " +
+                      $"makespan={r.Makespan:F1} stochastic={r.StochasticTag} " +
                       $"failures={r.MachineFailureCount}");
         }
 
         // ── Machine utilization log ───────────────────────────────────────────
 
-        private static string _machineFilename = "machine_utilization.csv";
-        private static string MachineFilePath => BuildPath(_machineFilename);
-
         /// <summary>
-        /// Appends one row per machine in the EpisodeRecord to machine_utilization.csv.
-        /// All machine rows share the same timestamp so the episode is atomic in the file.
+        /// Appends one row per machine. All rows share the same timestamp.
         /// </summary>
         public static void LogMachineUtilization(EpisodeRecord r)
         {
@@ -107,7 +126,6 @@ namespace Assets.Scripts.Simulation.Logging
                 );
 
             string ts = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-
             foreach (var m in r.MachineRecords)
             {
                 writer.WriteLine(
@@ -121,14 +139,81 @@ namespace Assets.Scripts.Simulation.Logging
             }
         }
 
+        // ── AGV performance log (new) ─────────────────────────────────────────
+
         /// <summary>
-        /// Logs both episode and machine rows in one call — standard call-site
-        /// in HeadlessBatchRunner.
+        /// Appends one row per AGV per episode to agv_performance.csv.
+        ///
+        /// Key columns for diagnosing the AGV-bottleneck / congestion question:
+        ///   time_waiting_route  — blocked by quadrant reservation (congestion signal)
+        ///   time_idle           — parked with no work (over-provisioning signal)
+        ///   congestion_fraction — time_waiting_route / total_accounted_time
         /// </summary>
-        public static void LogAll(EpisodeRecord r)
+        public static void LogAGVPerformance(EpisodeRecord r)
         {
-            LogEpisode(r);
-            LogMachineUtilization(r);
+            bool fileExists = File.Exists(AGVFilePath);
+            using var writer = new StreamWriter(AGVFilePath, append: true);
+
+            if (!fileExists)
+                writer.WriteLine(
+                    "timestamp,instance,rule,seed,makespan," +
+                    "agv_id,total_trips,mean_trip_duration," +
+                    "time_idle,time_waiting_route,time_traveling," +
+                    "time_loading,time_unloading," +
+                    "total_path_length,reroute_count,congestion_fraction"
+                );
+
+            string ts = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            foreach (var a in r.AGVRecords)
+            {
+                writer.WriteLine(
+                    $"{ts}," +
+                    $"{r.InstanceName},{r.RuleName},{r.Seed},{r.Makespan:F2}," +
+                    $"{a.AgvId},{a.TotalTrips},{a.MeanTripDuration:F2}," +
+                    $"{a.TimeIdle:F2},{a.TimeWaitingRoute:F2},{a.TimeTraveling:F2}," +
+                    $"{a.TimeLoading:F2},{a.TimeUnloading:F2}," +
+                    $"{a.TotalPathLength:F2},{a.RerouteCount},{a.CongestionFraction:F4}"
+                );
+            }
+        }
+
+        // ── Segment congestion log (new) ──────────────────────────────────────
+
+        /// <summary>
+        /// Appends one row per TrafficZone per episode to segment_congestion.csv.
+        ///
+        /// Key columns:
+        ///   block_rate        — BlockEvents / (TraversalCount + BlockEvents)
+        ///   mean_block_time   — how long each blockage lasts on average
+        ///
+        /// Sort by block_rate descending to find congestion hotspots.
+        /// Zones whose name contains "RowAisle" and sit adjacent to spine
+        /// intersections are expected hotspots given the unidirectional layout.
+        /// </summary>
+        public static void LogSegmentCongestion(EpisodeRecord r)
+        {
+            bool fileExists = File.Exists(SegmentFilePath);
+            using var writer = new StreamWriter(SegmentFilePath, append: true);
+
+            if (!fileExists)
+                writer.WriteLine(
+                    "timestamp,instance,rule,seed,makespan," +
+                    "zone_id,zone_name,aisle_type,flow_direction," +
+                    "traversal_count,block_events,total_block_time," +
+                    "mean_block_time,block_rate"
+                );
+
+            string ts = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            foreach (var s in r.SegmentRecords)
+            {
+                writer.WriteLine(
+                    $"{ts}," +
+                    $"{r.InstanceName},{r.RuleName},{r.Seed},{r.Makespan:F2}," +
+                    $"{s.ZoneId},{s.ZoneName},{s.AisleType},{s.FlowDirection}," +
+                    $"{s.TraversalCount},{s.BlockEvents},{s.TotalBlockTime:F2}," +
+                    $"{s.MeanBlockTime:F2},{s.BlockRate:F4}"
+                );
+            }
         }
 
         // ── Private helpers ───────────────────────────────────────────────────

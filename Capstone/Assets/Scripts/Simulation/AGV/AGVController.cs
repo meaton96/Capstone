@@ -64,6 +64,50 @@ namespace Assets.Scripts.Simulation.AGV
             DeliveredJobId = -1;
             DeliveredMachineId = -1;
         }
+        /// <summary>
+        /// Zeros all per-episode statistics. Called from Initialize() and from
+        /// FactoryOrchestrator.StartEpisode() when the factory is reused.
+        /// </summary>
+        public void ResetEpisodeStats()
+        {
+            _statTimeIdle = 0.0;
+            _statTimeWaitingRoute = 0.0;
+            _statTimeTraveling = 0.0;
+            _statTimeLoading = 0.0;
+            _statTimeUnloading = 0.0;
+            _statTotalPathLength = 0.0;
+            _statRerouteCount = 0;
+            _statTotalTrips = 0;
+            _statTripAccumulator = 0.0;
+            _statCurrentTripStart = 0.0;
+            _blockStartTime = -1f;
+        }
+
+        /// <summary>
+        /// Builds an AGVRecord snapshot from accumulated stats at episode end.
+        /// Pass the episode makespan so derived fractions are well-defined.
+        /// </summary>
+        public Assets.Scripts.Simulation.Types.AGVRecord GetRecord(double makespan)
+        {
+            double meanTrip = _statTotalTrips > 0
+                ? _statTripAccumulator / _statTotalTrips
+                : 0.0;
+
+            return new Assets.Scripts.Simulation.Types.AGVRecord
+            {
+                AgvId = AgvId,
+                TotalTrips = _statTotalTrips,
+                MeanTripDuration = meanTrip,
+                TimeIdle = _statTimeIdle,
+                TimeWaitingRoute = _statTimeWaitingRoute,
+                TimeTraveling = _statTimeTraveling,
+                TimeLoading = _statTimeLoading,
+                TimeUnloading = _statTimeUnloading,
+                TotalPathLength = _statTotalPathLength,
+                RerouteCount = _statRerouteCount,
+            };
+        }
+
 
         private NavMeshAgent navAgent;
         private TrafficZoneManager trafficMgr;
@@ -100,6 +144,23 @@ namespace Assets.Scripts.Simulation.AGV
 
         public void SetIdleCallback(System.Action callback) => onBecameIdle = callback;
 
+        // ── Per-episode statistics ────────────────────────────────────────────────
+        // Accumulated in FixedUpdate; reset by ResetEpisodeStats() each episode.
+        // Collected by FactoryOrchestrator.FinaliseEpisode() via GetRecord().
+
+        private double _statTimeIdle;
+        private double _statTimeWaitingRoute;  // blocked waiting for zone clearance
+        private double _statTimeTraveling;
+        private double _statTimeLoading;       // handshake timer at pickup dock
+        private double _statTimeUnloading;     // handshake timer at dropoff dock
+        private double _statTotalPathLength;   // cumulative NavMesh distance
+        private int _statRerouteCount;      // RedirectDropoff calls
+        private int _statTotalTrips;        // complete pickup→dropoff cycles
+        private double _statTripAccumulator;   // sum of completed trip durations
+        private double _statCurrentTripStart;  // fixedTime when current trip began (set in DoPickup)
+        private float _blockStartTime = -1f;  // fixedTime when zone blocking began
+
+
         /// @brief Sets up the AGV identity and initializes navigation components.
         public void Initialize(int id)
         {
@@ -121,6 +182,7 @@ namespace Assets.Scripts.Simulation.AGV
 
             State = AGVState.Idle;
             ClearFlags();
+            ResetEpisodeStats();
         }
         /// @brief Aborts an in-progress dropoff when no redirect target is available.
         /// Detaches the job visual at the AGV's current position and returns to Idle
@@ -195,6 +257,7 @@ namespace Assets.Scripts.Simulation.AGV
 
             // Cancel the current route and any pending zone reservation
             CancelCurrentRoute();
+            _statRerouteCount++;
 
             targetMachine = newTarget;
             targetDropoffPos = newDropoffPos;
@@ -355,9 +418,23 @@ namespace Assets.Scripts.Simulation.AGV
         /// @brief Primary state machine loop executing logic based on @c AGVState.
         private void FixedUpdate()
         {
+            float dt = Time.fixedDeltaTime;
+
             switch (State)
             {
+                case AGVState.Idle:
+                    _statTimeIdle += dt;    // ← NEW
+                    break;
+
                 case AGVState.MovingToPickup:
+                    // Time accounting: waiting-for-zone takes priority, then loading, then traveling
+                    if (waitingForZone)
+                        _statTimeWaitingRoute += dt;    // ← NEW
+                    else if (atPickupDock && pickupTimer > 0f)
+                        _statTimeLoading += dt;          // ← NEW
+                    else
+                        _statTimeTraveling += dt;        // ← NEW
+
                     UpdateMovement();
                     if (!waitingForZone && ReachedDock(pickupDock))
                     {
@@ -372,6 +449,13 @@ namespace Assets.Scripts.Simulation.AGV
                     break;
 
                 case AGVState.MovingToDropoff:
+                    if (waitingForZone)
+                        _statTimeWaitingRoute += dt;    // ← NEW
+                    else if (atDropoffDock && dropoffTimer > 0f)
+                        _statTimeUnloading += dt;        // ← NEW
+                    else
+                        _statTimeTraveling += dt;        // ← NEW
+
                     UpdateMovement();
                     if (!waitingForZone && ReachedDock(dropoffDock))
                     {
@@ -386,11 +470,23 @@ namespace Assets.Scripts.Simulation.AGV
                     break;
 
                 case AGVState.ReturningToParking:
+                    if (waitingForZone)
+                        _statTimeWaitingRoute += dt;    // ← NEW
+                    else
+                        _statTimeTraveling += dt;        // ← NEW
+
                     UpdateMovement();
                     if (!waitingForZone && ReachedParking()) ArriveAtParking();
                     break;
 
                 case AGVState.MovingToPrePickup:
+                    if (waitingForZone)
+                        _statTimeWaitingRoute += dt;     // ← NEW
+                    else if (atPickupDock)
+                        _statTimeIdle += dt;             // ← NEW — waiting for job to finish
+                    else
+                        _statTimeTraveling += dt;        // ← NEW
+
                     UpdateMovement();
                     if (!waitingForZone && ReachedDock(pickupDock))
                     {
@@ -407,6 +503,7 @@ namespace Assets.Scripts.Simulation.AGV
             navAgent.nextPosition = transform.position;
             UpdateStatusLabel();
         }
+
 
         /// @brief Executes physical loading from a machine or belt and initiates movement to dropoff.
         private void DoPickup()
@@ -432,6 +529,9 @@ namespace Assets.Scripts.Simulation.AGV
             }
 
             PickedUpFlag = true;
+            _statTotalTrips++;
+            _statCurrentTripStart = Time.fixedTime;     // ← NEW
+
             State = AGVState.MovingToDropoff;
             atPickupDock = false;
             dropoffTimer = handshakeDuration;
@@ -460,6 +560,12 @@ namespace Assets.Scripts.Simulation.AGV
             pickupZoneId = -1;
             dropoffZoneId = -1;
             atDropoffDock = false;
+            if (_statCurrentTripStart > 0)              // ← NEW
+            {
+                _statTripAccumulator += Time.fixedTime - _statCurrentTripStart;
+                _statCurrentTripStart = 0;
+            }
+
 
             State = AGVState.ReturningToParking;
             BeginParkingRoute();
@@ -589,6 +695,7 @@ namespace Assets.Scripts.Simulation.AGV
                     waitingForZone = true;
                     pendingZoneId = nextZoneId;
                     nextRetryTime = Time.fixedTime + reservationRetryInterval;
+                    _blockStartTime = Time.fixedTime;
                     return;
                 }
 
@@ -615,11 +722,19 @@ namespace Assets.Scripts.Simulation.AGV
 
             if (trafficMgr.TryReserve(pendingZoneId, AgvId))
             {
+                // Report block duration to zone manager for congestion logging  ← NEW
+                if (_blockStartTime >= 0f)
+                {
+                    trafficMgr.RecordBlockTime(pendingZoneId, Time.fixedTime - _blockStartTime);
+                    _blockStartTime = -1f;
+                }
+
                 TrafficZone zone = trafficMgr.GetZone(pendingZoneId);
                 currentWaypoint = FlatY(zone.Centre);
                 waitingForZone = false;
                 pendingZoneId = -1;
             }
+
             else
             {
                 nextRetryTime = Time.fixedTime + reservationRetryInterval;
@@ -663,8 +778,11 @@ namespace Assets.Scripts.Simulation.AGV
             else
             {
                 transform.rotation = Quaternion.LookRotation(dir.normalized, Vector3.up);
-                transform.position = Vector3.MoveTowards(transform.position, target, moveSpeed * Time.fixedDeltaTime);
+                float step = moveSpeed * Time.fixedDeltaTime;
+                transform.position = Vector3.MoveTowards(transform.position, target, step);
+                _statTotalPathLength += step;    // ← NEW
             }
+
         }
 
         /// @brief Helper to rotate the AGV to face a specific direction vector.

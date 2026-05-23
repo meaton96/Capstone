@@ -116,11 +116,15 @@ namespace Assets.Scripts.Simulation
                 SimLogger.Low($"[Bridge] Applied Python config: {currentConfig.Name}");
             }
 
-            if (currentConfig == null)
-                currentConfig = DefaultConfigFactory.BuildDefaultStochastic();
+            currentConfig ??= DefaultConfigFactory.BuildDefault();//DefaultConfigFactory.BuildDefaultStochastic();
 
             if (!IsFactoryReady)
                 SpawnFactory();
+
+            trafficZoneManager.ResetEpisodeStats();
+            foreach (var agv in agvPool.AllAGVs)
+                agv.ResetEpisodeStats();
+
 
             agent.SetHeuristicRule(currentConfig.dispatchingRule);
 
@@ -322,6 +326,28 @@ namespace Assets.Scripts.Simulation
                 machines: layoutManager.Machines,
                 averageTimeScale: Time.timeScale
             );
+            // ── Collect AGV performance records ──────────────────────────────────────
+            foreach (var agv in agvPool.AllAGVs)
+                record.AGVRecords.Add(agv.GetRecord(record.Makespan));
+
+            // ── Collect segment congestion records ───────────────────────────────────
+            // Skip parking alcove (Capacity=64) — it's intentionally unconstrained and
+            // would inflate the zone count without diagnostic value.
+            foreach (TrafficZone zone in trafficZoneManager.Zones)
+            {
+                if (zone.Name == "Parking_Alcove") continue;
+                record.SegmentRecords.Add(new SegmentRecord
+                {
+                    ZoneId = zone.ZoneId,
+                    ZoneName = zone.Name,
+                    AisleType = zone.AisleType.ToString(),
+                    FlowDirection = zone.Flow.ToString(),
+                    TraversalCount = zone.TraversalCount,
+                    BlockEvents = zone.BlockEvents,
+                    TotalBlockTime = zone.TotalBlockTime,
+                });
+            }
+
 
             if (!Academy.Instance.IsCommunicatorOn)
             {
