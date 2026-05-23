@@ -1,2 +1,15 @@
---- Log Started: 5/21/2026 3:25:09 PM ---
-2026-05-21 15:25:10.209 [Agent] OnEpisodeBegin skipped — waiting for UI to arm.
+--- Log Started: 5/23/2026 2:53:40 PM ---
+2026-05-23 14:53:40.869 [Agent] OnEpisodeBegin skipped — waiting for UI to arm.
+2026-05-23 14:53:46.065 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.005
+2026-05-23 14:53:46.069 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble, Mill, Lathe
+  Row3: Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-05-23 14:53:46.093 [FactoryLayout] Distance matrix (15x15):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
+2026-05-23 14:53:46.102 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-05-23 14:53:46.105 [TrafficZones] Built zone graph: 33 zones.
+2026-05-23 14:53:46.107 [AGVPool] Spawned fleet of 3 AGVs.

@@ -67,6 +67,32 @@ def _instance_order(col) -> list:
     return sorted(vals, key=_key)
 
 
+def _strip_regime_suffix(df: pd.DataFrame) -> pd.DataFrame:
+    """Strip stochastic-tag suffixes from instance names in-place (returns copy).
+    Compares det vs stoch instance sets and auto-detects the trailing suffix
+    (e.g. '_low', '_high') that the stochastic file appends.
+    Safe to call when only one regime is present — returns unchanged."""
+    import re
+    if "regime" not in df.columns:
+        return df
+    det_insts = set(df.loc[df["regime"] == "deterministic", "instance"].astype(str).unique())
+    sto_insts = set(df.loc[df["regime"] == "stochastic_low", "instance"].astype(str).unique())
+    if not (det_insts and sto_insts and det_insts != sto_insts):
+        return df
+    suffix = None
+    for inst in sorted(sto_insts):
+        m = re.match(r"^(.+?)(_[^_0-9][^_]*)$", inst)
+        if m and m.group(1) in det_insts:
+            suffix = m.group(2)
+            break
+    if not suffix:
+        return df
+    df = df.copy()
+    df["instance"] = df["instance"].astype(str).apply(
+        lambda x: x[: -len(suffix)] if x.endswith(suffix) else x)
+    return df
+
+
 # ---------------------------------------------------------------------------
 # Data loading
 # ---------------------------------------------------------------------------
@@ -84,6 +110,8 @@ def load_data(det_path: str | None, stoch_path: str | None, combined: str | None
         det = pd.read_csv(det_path); det["regime"] = "deterministic"
         sto = pd.read_csv(stoch_path); sto["regime"] = "stochastic_low"
         df = pd.concat([det, sto], ignore_index=True)
+
+    df = _strip_regime_suffix(df)
 
     # Order instances by trailing number — works for any naming convention
     df["instance"] = pd.Categorical(
@@ -113,6 +141,7 @@ def merge_results(df: pd.DataFrame, det_results: str | None, stoch_results: str 
         return df
 
     results = pd.concat(pieces, ignore_index=True)
+    results = _strip_regime_suffix(results)   # align 'brandimarte_mk01_low' → 'brandimarte_mk01'
     join_keys = ["timestamp", "instance", "rule", "seed", "regime"]
     join_keys = [k for k in join_keys if k in df.columns and k in results.columns]
     # Avoid clobbering — drop overlapping non-key columns from the right side
