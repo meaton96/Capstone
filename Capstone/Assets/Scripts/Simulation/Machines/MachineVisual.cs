@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using Assets.Scripts.Simulation.Types;
-using Assets.Scripts.Logging;
+using Assets.Scripts.Simulation.Logging;
 
 namespace Assets.Scripts.Simulation.Machines
 {
@@ -211,6 +211,29 @@ namespace Assets.Scripts.Simulation.Machines
             indicatorInstanceMaterial.EnableKeyword("_EMISSION");
 
             indicatorRenderer.material = indicatorInstanceMaterial;
+        }
+        // ── Health/Failure Callbacks ────────────────────────────────────────
+
+        public void BeginFailure()
+        {
+            SetProgressBarVisible(false);
+            SetState(MachineState.Failed);
+            Log("Machine failed!", true);
+        }
+
+        public void BeginRepair(float duration)
+        {
+            SetState(MachineState.Repair);
+            SetProgressBarVisible(true); // Re-use the progress bar for the repair timer
+            if (progressBar != null) progressBar.value = 0f;
+            Log($"Repair started, dur={duration:F1}", true);
+        }
+
+        public void EndRepair()
+        {
+            SetProgressBarVisible(false);
+            SetState(MachineState.Idle);
+            Log("Repair completed", true);
         }
         private void SetProgressBarVisible(bool visible)
         {

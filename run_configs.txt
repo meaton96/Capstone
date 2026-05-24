@@ -22,6 +22,40 @@
     -benchmarkdir ./BatchConfigs/Benchmarks `
     -outputdir brandimarte
 
+
+./capstone.x86_64 \ 
+    -batchmode \
+    -nographics \
+    -timescale 100 \
+    -benchmark ./BatchConfigs/Benchmarks/mk01.json \
+    -outputdir brandimarte \
+    -repeats 3 \
+    -disruption low 
+
+
+
+updated:
+
+./capstone.x86_64 \
+    -batchmode \
+    -nographics \
+    -timescale 100 \
+    -benchmark ./BatchConfigs/Benchmarks/mk01.json \
+    -outputdir brandimarte \
+    -repeats 3 \
+    -disruption low
+
+
+.\RunBatch.ps1 -ExePath .\capstone.exe `
+     -BenchmarkDir .\BatchConfigs\Benchmarks `
+     -Repeats 3 `
+     -Timescale 100 `
+     -Disruption low `
+     -ResultsDir deterministic
+
+./run_batch.sh --exe-path ./capstone.x86_64 --benchmark-dir ./BatchConfigs/Benchmarks --repeats 3 --timescale 100 --disruption low
+
+
 copy:
 
 

@@ -1,4 +1,4 @@
-using Assets.Scripts.Logging;
+using Assets.Scripts.Simulation.Logging;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
@@ -15,7 +15,7 @@ namespace Assets.Scripts.Simulation
     public class SchedulingAgent : Agent
     {
         [Header("References")]
-        [SerializeField] private SimulationBridge bridge;
+        //[SerializeField] private FactoryOrchestrator orchestrator;
         //  [SerializeField] private int maxCandidateSlots = 3;
 
         private ObservationBuilder _obsBuilder;
@@ -57,11 +57,11 @@ namespace Assets.Scripts.Simulation
         {
             if (heuristicRule == DispatchingRule.Random)
             {
-                actionsOut.DiscreteActions.Array[0] = Random.Range(0, SimulationBridge.ActionCount);
+                actionsOut.DiscreteActions.Array[0] = Random.Range(0, FactoryOrchestrator.ActionCount);
             }
             else
             {
-                actionsOut.DiscreteActions.Array[0] = SimulationBridge.Instance.GetRuleIndex(heuristicRule);
+                actionsOut.DiscreteActions.Array[0] = FactoryOrchestrator.Instance.GetRuleIndex(heuristicRule);
             }
         }
 
@@ -69,10 +69,10 @@ namespace Assets.Scripts.Simulation
         protected override void OnEnable()
         {
             base.OnEnable();
-            if (bridge != null)
+            if (FactoryOrchestrator.Instance != null)
             {
-                bridge.OnDecisionRequired.AddListener(HandleDecisionRequired);
-                bridge.OnEpisodeFinished.AddListener(HandleEpisodeFinished);
+                FactoryOrchestrator.Instance.OnDecisionRequired.AddListener(HandleDecisionRequired);
+                FactoryOrchestrator.Instance.OnEpisodeFinished.AddListener(HandleEpisodeFinished);
             }
         }
 
@@ -80,16 +80,16 @@ namespace Assets.Scripts.Simulation
         protected override void OnDisable()
         {
             base.OnDisable();
-            if (bridge != null)
+            if (FactoryOrchestrator.Instance != null)
             {
-                bridge.OnDecisionRequired.RemoveListener(HandleDecisionRequired);
-                bridge.OnEpisodeFinished.RemoveListener(HandleEpisodeFinished);
+                FactoryOrchestrator.Instance.OnDecisionRequired.RemoveListener(HandleDecisionRequired);
+                FactoryOrchestrator.Instance.OnEpisodeFinished.RemoveListener(HandleEpisodeFinished);
             }
         }
 
         public override void Initialize()
         {
-            _obsBuilder = new ObservationBuilder(bridge);
+            _obsBuilder = new ObservationBuilder(FactoryOrchestrator.Instance);
         }
 
         /// @brief Prepares the simulation and internal state for a new episode.
@@ -98,8 +98,8 @@ namespace Assets.Scripts.Simulation
         /// modes and triggers @c SimulationBridge.StartEpisode.
         public override void OnEpisodeBegin()
         {
-            Initialize();
-            if (bridge != null && bridge.AutoStartOnPlay)
+            //Initialize();
+            if (FactoryOrchestrator.Instance != null && FactoryOrchestrator.Instance.AutoStartOnPlay)
             {
                 IsArmed = true;
             }
@@ -110,14 +110,21 @@ namespace Assets.Scripts.Simulation
                 return;
             }
 
-            if (bridge == null) return;
+            if (FactoryOrchestrator.Instance == null) return;
 
-            if (!bridge.AutoStartOnPlay)
+            if (FactoryOrchestrator.Instance != null && FactoryOrchestrator.Instance.IsEpisodeActive)
+            {
+                SimLogger.Low("[Agent] OnEpisodeBegin: factory episode already active — " +
+                              "suppressing duplicate StartEpisode call.");
+                return;
+            }
+
+            if (!FactoryOrchestrator.Instance.AutoStartOnPlay)
             {
                 IsArmed = false;
             }
 
-            bridge.StartEpisode();
+            FactoryOrchestrator.Instance.StartEpisode();
         }
 
         /// @brief Relays the decision requirement from the bridge to ML-Agents.
@@ -125,6 +132,7 @@ namespace Assets.Scripts.Simulation
         /// @param req The @c DecisionRequest context.
         private void HandleDecisionRequired(DecisionRequest req)
         {
+            SimLogger.High($"[Agent] RequestDecision called — communicator={Academy.Instance.IsCommunicatorOn}");
             RequestDecision();
         }
 
@@ -134,10 +142,10 @@ namespace Assets.Scripts.Simulation
         ///
         /// @details Only calls @c EndEpisode directly if in @c AutoStartOnPlay mode 
         /// to allow external runners to process results before resetting.
-        private void HandleEpisodeFinished(EpisodeResult result)
+        private void HandleEpisodeFinished(EpisodeRecord record)
         {
             SimLogger.Low("[Agent] End Episode");
-            if (bridge != null && bridge.AutoStartOnPlay)
+            if (FactoryOrchestrator.Instance != null && FactoryOrchestrator.Instance.AutoStartOnPlay)
                 EndEpisode();
         }
 
@@ -149,8 +157,8 @@ namespace Assets.Scripts.Simulation
         /// data for either @c Dispatch or @c Routing decision types.
         public override void CollectObservations(VectorSensor sensor)
         {
-            DecisionRequest req = bridge.CurrentDecision;
-            if (!bridge.IsEpisodeActive || req == null)
+            DecisionRequest req = FactoryOrchestrator.Instance.CurrentDecision;
+            if (!FactoryOrchestrator.Instance.IsEpisodeActive || req == null)
             {
                 PadZeros(sensor);
                 return;
@@ -180,10 +188,10 @@ namespace Assets.Scripts.Simulation
         /// @c bridge.Step, and applies the resulting reward to the agent.
         public override void OnActionReceived(ActionBuffers actions)
         {
-            if (!bridge.IsWaitingForAction) return;
+            if (!FactoryOrchestrator.Instance.IsWaitingForAction) return;
 
             int pdrIndex = actions.DiscreteActions[0];
-            StepResult result = bridge.Step(pdrIndex);
+            StepResult result = FactoryOrchestrator.Instance.Step(pdrIndex);
             AddReward(result.Reward);
         }
     }

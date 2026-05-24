@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Assets.Scripts.Simulation.Machines;
+using Assets.Scripts.Simulation.Stochastic;
 
 namespace Assets.Scripts.Simulation.Types
 {
@@ -18,17 +19,52 @@ namespace Assets.Scripts.Simulation.Types
         public float MaxArrivalTime;
         public int AGVCount;
 
+        /// @brief Probability [0,1] that a machine gains each non-primary type as a
+        /// secondary capability during floor construction.
+        /// 0 = fully typed (default, backward-compatible).
+        /// 1 = fully flexible (every machine processes every op type).
+        public float MachineFlexibilityProbability = 0f;
+
         public DispatchingRule dispatchingRule = DispatchingRule.SRT_SRWT;
 
         /// @brief Per-machine-type normal distribution parameters (mu, sigma) for processing time sampling.
         ///
-        /// @details When populated, @c FJSSPJobGenerator will sample processing times from
-        /// N(mu, sigma) for each type. Types not present in this dictionary fall back to
-        /// a uniform sample within [MinProcTime, MaxProcTime].
+        /// @details When populated, FJSSPJobGenerator will sample processing times from
+        /// N(mu, sigma) for each type. Types not present fall back to Uniform[MinProcTime, MaxProcTime].
         public Dictionary<MachineType, (float mu, float sigma)> ProcTimeParams
             = new Dictionary<MachineType, (float mu, float sigma)>();
 
+        /// @brief Optional stochastic disruption parameters.
+        /// Null = fully deterministic episode. Non-null activates StochasticEventManager
+        /// for the subset of disruption types flagged in the config.
+        /// Deserialised from the optional "stochastic" block in batch JSON configs.
+        public StochasticConfig Stochastic = null;
+
         /// @brief Total number of machines in this configuration.
         public int TotalMachines => MachineTypeLayout?.Length ?? 0;
+
+        /// @brief Returns a deep clone with a new seed. Used by HeadlessBatchRunner
+        /// per-repeat to vary job generation while keeping all other parameters identical.
+        public FJSSPConfig CloneWithSeed(int newSeed)
+        {
+            return new FJSSPConfig
+            {
+                Name = Name,
+                Seed = newSeed,
+                JobCount = JobCount,
+                MachinesPerType = MachinesPerType,
+                MachineTypeLayout = (MachineType[])MachineTypeLayout.Clone(),
+                MinProcTime = MinProcTime,
+                MaxProcTime = MaxProcTime,
+                MinOpsPerJob = MinOpsPerJob,
+                MaxOpsPerJob = MaxOpsPerJob,
+                MaxArrivalTime = MaxArrivalTime,
+                AGVCount = AGVCount,
+                dispatchingRule = dispatchingRule,
+                ProcTimeParams = new Dictionary<MachineType, (float mu, float sigma)>(ProcTimeParams),
+                Stochastic = Stochastic, 
+                MachineFlexibilityProbability = MachineFlexibilityProbability,
+            };
+        }
     }
 }

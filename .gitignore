@@ -84,3 +84,4 @@ Capstone/[Aa]ssets/[Ss]treamingAssets/aa/*
 /headless_builds
 /linux
 
+/results/.venv

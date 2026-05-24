@@ -3,7 +3,7 @@ using TMPro;
 using Assets.Scripts.Simulation;
 using UnityEngine.UI;
 using Assets.Scripts.Simulation.Jobs;
-using Assets.Scripts.Logging;
+using Assets.Scripts.Simulation.Logging;
 
 namespace Assets.Scripts.UI
 {
@@ -63,8 +63,8 @@ namespace Assets.Scripts.UI
         /// @brief Stops the active episode and returns to the instance select menu.
         private void OnStopClicked()
         {
-            if (SimulationBridge.Instance != null)
-                SimulationBridge.Instance.StopEpisode();
+            if (FactoryOrchestrator.Instance != null)
+                FactoryOrchestrator.Instance.StopEpisode();
 
             if (instanceSelectMenu != null)
                 instanceSelectMenu.Show();
@@ -76,24 +76,24 @@ namespace Assets.Scripts.UI
         /// @details Exits early if no active episode is running.
         private void Update()
         {
-            if (SimulationBridge.Instance == null || !SimulationBridge.Instance.IsEpisodeActive)
+            if (FactoryOrchestrator.Instance == null || !FactoryOrchestrator.Instance.IsEpisodeActive)
                 return;
 
             if (timeText != null)
-                timeText.text = $"SIM TIME: {SimulationBridge.Instance.SimTime:F1}s";
+                timeText.text = $"SIM TIME: {FactoryOrchestrator.Instance.SimTime:F1}s";
 
             if (ruleText != null)
-                ruleText.text = $"LAST RULE: {SimulationBridge.Instance.LastAppliedRule}";
+                ruleText.text = $"LAST RULE: {FactoryOrchestrator.Instance.LastAppliedRule}";
 
             if (decisionsText != null)
-                decisionsText.text = $"DECISIONS: {SimulationBridge.Instance.DecisionCount}";
+                decisionsText.text = $"DECISIONS: {FactoryOrchestrator.Instance.DecisionCount}";
 
             if (jobsText != null
-                && SimulationBridge.Instance.Jobs != null
-                && SimulationBridge.Instance.Jobs.IsInitialized)
+                && FactoryOrchestrator.Instance.Jobs != null
+                && FactoryOrchestrator.Instance.Jobs.IsInitialized)
             {
-                int totalJobs = SimulationBridge.Instance.Jobs.JobCount;
-                int completedJobs = SimulationBridge.Instance.Jobs.CountInState(JobState.Exited);
+                int totalJobs = FactoryOrchestrator.Instance.Jobs.JobCount;
+                int completedJobs = FactoryOrchestrator.Instance.Jobs.CountInState(JobState.Exited);
 
 
 

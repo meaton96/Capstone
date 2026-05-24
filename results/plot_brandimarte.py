@@ -9,15 +9,11 @@ Produces:
     2. pdr_rank_heatmap.png          — heatmap of PDR rank (1=best) per instance
     3. random_pdr_boxplot.png        — box plot of RANDOM rule variance per instance
     4. best_pdr_per_instance.png     — which PDR wins each instance
-
-Instances are labeled by matching each row's (jobs, machines, total_ops) against
-the canonical Brandimarte specs, so multiple seeds per instance collapse into a
-single MK label. Makespans are averaged across seeds for the heatmap, bar, and
-best-PDR plots. Raw seed values are retained for the RANDOM variance box plot.
 """
 
 import argparse
 import os
+import re
 import warnings
 
 import matplotlib.pyplot as plt
@@ -26,7 +22,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-from viz_utils import PDR_ORDER, PDR_LABELS  # load_brandimarte replaced below
+from viz_utils import PDR_ORDER, PDR_LABELS
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -65,30 +61,52 @@ FINGERPRINT_TO_MK = {fp: f"MK{i+1:02d}" for i, fp in enumerate(BRANDIMARTE_SPECS
 MK_ORDER = [f"MK{i+1:02d}" for i in range(len(BRANDIMARTE_SPECS))]
 
 
-def load_brandimarte(csv_path: str) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Load Brandimarte CSV, attach MK instance labels, split PDR vs RANDOM.
+def load_brandimarte(csv_path: str) -> tuple[pd.DataFrame, pd.DataFrame, bool]:
+    """Load Brandimarte CSV, clean/standardize MK instance labels, split PDR vs RANDOM.
 
-    Each row is labeled with an MK tag by matching (jobs, machines, total_ops)
-    against BRANDIMARTE_SPECS. Rows that don't match any canonical spec are
-    dropped with a warning — seeds are preserved as separate rows so plots that
-    want variance can keep them.
+    Tries to clean and zero-pad the explicit 'instance' column from the new schema.
+    Falls back to matching (jobs, machines, total_ops) if the instance column is missing.
+    Also auto-detects if agvCount varies across runs for individual instances.
     """
     df = pd.read_csv(csv_path)
 
-    fps = list(zip(df["jobs"], df["machines"], df["total_ops"]))
-    df["instance"] = [FINGERPRINT_TO_MK.get(fp) for fp in fps]
+    # 1. Clean or derive the instance identifier
+    if "instance" in df.columns and df["instance"].notna().any():
+        def clean_instance(val):
+            if pd.isna(val):
+                return None
+            # Matches 'MK1', 'mk01', 'instances/MK_1.fjs', etc., extracting the digits
+            match = re.search(r'MK\s*[_]*(\d+)', str(val), re.IGNORECASE)
+            return f"MK{int(match.group(1)):02d}" if match else None
 
-    unknown = df[df["instance"].isna()]
+        df["instance"] = df["instance"].apply(clean_instance)
+    else:
+        # Fallback to original fingerprinting logic
+        fps = list(zip(df["jobs"], df["machines"], df["total_ops"]))
+        df["instance"] = [FINGERPRINT_TO_MK.get(fp) for fp in fps]
+
+    # Drop rows that don't match valid canonical targets
+    unknown = df[df["instance"].isna() | ~df["instance"].isin(MK_ORDER)]
     if len(unknown) > 0:
-        bad = unknown[["jobs", "machines", "total_ops"]].drop_duplicates()
-        print(f"⚠ Dropping {len(unknown)} rows that don't match any MK01-MK15 spec:")
+        bad = unknown[["instance", "jobs", "machines", "total_ops"]].drop_duplicates()
+        print(f"⚠ Dropping {len(unknown)} rows that don't match any standard MK01-MK15 spec:")
         print(bad.to_string(index=False))
-        df = df.dropna(subset=["instance"]).copy()
+        df = df[df["instance"].isin(MK_ORDER)].copy()
+
+    # 2. Automatically check for AGV count discrepancies across runs
+    auto_agv_warning = False
+    if "agvCount" in df.columns:
+        # If any single instance contains multiple unique AGV counts, trigger the warning flag
+        agv_variance = df.groupby("instance")["agvCount"].nunique()
+        if (agv_variance > 1).any():
+            auto_agv_warning = True
+            print("⚠ Auto-detected varying AGV counts across runs within the same instance data.")
 
     rand_mask = df["rule"].str.lower() == "random"
     rand_df = df[rand_mask].copy()
     pdr_df = df[~rand_mask].copy()
-    return pdr_df, rand_df
+    
+    return pdr_df, rand_df, auto_agv_warning
 
 
 def _sorted_instances(df: pd.DataFrame) -> list[str]:
@@ -192,18 +210,25 @@ def plot_rank_heatmap(pdr_df: pd.DataFrame, rand_df: pd.DataFrame,
 # ── Plot 3 — box plot: RANDOM rule variance per instance ─────────────────────
 
 def plot_random_variance(rand_df: pd.DataFrame, out_dir: str) -> None:
-    instances = _sorted_instances(rand_df)
-    data = [rand_df[rand_df["instance"] == i]["makespan"].values for i in instances]
+    # 1. Filter to include only instances that have data in rand_df
+    present_instances = [i for i in MK_ORDER if i in rand_df["instance"].unique()]
+    
+    # 2. Build the data list and match the labels list to it
+    data = [rand_df[rand_df["instance"] == i]["makespan"].values for i in present_instances]
+    
+    # 3. Only proceed if we actually have data to plot
+    if not data:
+        print("  Skipping random_pdr_boxplot: No RANDOM data found.")
+        return
+
     n_per = [len(d) for d in data]
 
-    fig, ax = plt.subplots(figsize=(max(10, len(instances) * 0.9), 5))
-    # Matplotlib 3.9+ renamed `labels` to `tick_labels`
-    try:
-        bp = ax.boxplot(data, tick_labels=instances, patch_artist=True,
-                        medianprops={"color": "black", "linewidth": 2})
-    except TypeError:
-        bp = ax.boxplot(data, labels=instances, patch_artist=True,
-                        medianprops={"color": "black", "linewidth": 2})
+    fig, ax = plt.subplots(figsize=(max(10, len(present_instances) * 0.9), 5))
+    
+    # Use the filtered present_instances list for tick_labels
+    bp = ax.boxplot(data, tick_labels=present_instances, patch_artist=True,
+                    medianprops={"color": "black", "linewidth": 2})
+
     for patch in bp["boxes"]:
         patch.set_facecolor("steelblue")
         patch.set_alpha(0.6)
@@ -224,56 +249,82 @@ def plot_random_variance(rand_df: pd.DataFrame, out_dir: str) -> None:
 
 # ── Plot 4 — which PDR wins each instance ────────────────────────────────────
 
-def plot_best_pdr(pdr_df: pd.DataFrame, rand_df: pd.DataFrame, out_dir: str) -> None:
+def plot_pdr_rank_distribution(pdr_df: pd.DataFrame, rand_df: pd.DataFrame,
+                                out_dir: str) -> None:
+    """
+    Stacked bar showing rank distribution for each PDR across all MK instances.
+    Each bar = one PDR; segments = fraction of instances where it ranked 1st, 2nd, etc.
+    Directly supports the adaptive policy argument: no single PDR dominates.
+    """
     instances = _sorted_instances(pdr_df)
-    rules = [r for r in PDR_ORDER if r in pdr_df["rule"].values]
-    colors = _rule_color(rules + ["RANDOM"])
+    n_instances = len(instances)
 
-    # Seed-averaged lookup
-    pdr_mean = pdr_df.groupby(["rule", "instance"])["makespan"].mean()
-    rand_mean = rand_df.groupby("instance")["makespan"].mean()
+    # Build seed-averaged pivot (rules x instances)
+    pivot = pdr_df.pivot_table(index="rule", columns="instance",
+                               values="makespan", aggfunc="mean")
+    rand_means = rand_df.groupby("instance")["makespan"].mean()
+    pivot.loc["RANDOM"] = [rand_means.get(i, np.nan) for i in instances]
+    pivot = pivot[instances]
 
-    best_rules, best_makespans = [], []
-    for inst in instances:
-        candidates = {rule: pdr_mean.get((rule, inst), np.nan) for rule in rules}
-        candidates = {k: v for k, v in candidates.items() if not np.isnan(v)}
-        if inst in rand_mean.index and not np.isnan(rand_mean.loc[inst]):
-            candidates["RANDOM"] = rand_mean.loc[inst]
-        if not candidates:
-            best_rules.append("—")
-            best_makespans.append(np.nan)
-            continue
-        best_rule = min(candidates, key=candidates.get)
-        best_rules.append(best_rule)
-        best_makespans.append(candidates[best_rule])
+    # Rank per instance (1 = best)
+    rank_df = pivot.rank(axis=0, method="min").astype(int)
 
-    bar_colors = [colors.get(r, "gray") for r in best_rules]
-    x = np.arange(len(instances))
+    ordered_rules = [r for r in PDR_ORDER if r in rank_df.index] + \
+                    [r for r in rank_df.index if r not in PDR_ORDER]
+    rank_df = rank_df.loc[ordered_rules]
 
-    fig, ax = plt.subplots(figsize=(max(10, len(instances)), 5))
-    bars = ax.bar(x, best_makespans, color=bar_colors, alpha=0.85, edgecolor="white")
-    ymax = np.nanmax(best_makespans) if best_makespans else 1.0
-    for bar, rule in zip(bars, best_rules):
-        ax.text(bar.get_x() + bar.get_width() / 2,
-                bar.get_height() + ymax * 0.01,
-                rule.replace("_", "\n"), ha="center", va="bottom",
-                fontsize=6.5, rotation=0)
+    n_rules = len(ordered_rules)
+    rank_counts = np.zeros((n_rules, n_rules), dtype=int)  # [rule_idx, rank-1]
+    for r_idx, rule in enumerate(ordered_rules):
+        for rank_val in range(1, n_rules + 1):
+            rank_counts[r_idx, rank_val - 1] = (rank_df.loc[rule] == rank_val).sum()
 
-    ax.set_xticks(x)
-    ax.set_xticklabels(instances, rotation=45, ha="right")
-    ax.set_xlabel("Brandimarte Instance")
-    ax.set_ylabel("Best Makespan Achieved (seed-averaged)")
-    ax.set_title("Best-Performing PDR per Brandimarte Instance")
-    ax.yaxis.set_major_formatter(mticker.FuncFormatter(lambda v, _: f"{v:,.0f}"))
+    # Color: rank 1 = dark green, middle = yellow, last = dark red
+    rank_colors = plt.cm.RdYlGn(np.linspace(1.0, 0.0, n_rules))
 
-    from matplotlib.patches import Patch
-    legend_handles = [Patch(color=colors[r], alpha=0.85, label=r)
-                      for r in (rules + ["RANDOM"]) if r in colors]
-    ax.legend(handles=legend_handles, title="PDR", bbox_to_anchor=(1.01, 1),
-              loc="upper left", fontsize=8)
+    fig, ax = plt.subplots(figsize=(11, 5))
+    bottoms = np.zeros(n_rules)
+    for rank_idx in range(n_rules):
+        vals = rank_counts[:, rank_idx]
+        bars = ax.bar(ordered_rules, vals, bottom=bottoms,
+                      color=rank_colors[rank_idx],
+                      label=f"Rank {rank_idx + 1}",
+                      edgecolor="white", linewidth=0.4)
+        # Annotate rank-1 counts only (avoids clutter)
+        if rank_idx == 0:
+            for bar, val in zip(bars, vals):
+                if val > 0:
+                    ax.text(bar.get_x() + bar.get_width() / 2,
+                            bar.get_height() / 2,
+                            str(val),
+                            ha="center", va="center",
+                            fontsize=9, fontweight="bold", color="white")
+        bottoms += vals
+
+    ax.set_ylim(0, n_instances * 1.05)
+    ax.set_yticks(range(0, n_instances + 1, 3))
+    ax.set_ylabel("Number of MK instances")
+    ax.set_xlabel("PDR")
+    ax.set_title(
+        f"PDR Rank Distribution Across Brandimarte Instances (n={n_instances})\n"
+        "White numbers = rank-1 (win) count"
+    )
+    ax.tick_params(axis="x", rotation=30)
+
+    # Compact legend: just show rank 1, middle, last
+    handles, labels = ax.get_legend_handles_labels()
+    keep = [0, n_rules // 2, n_rules - 1]
+    ax.legend([handles[i] for i in keep], [labels[i] for i in keep],
+              title="Rank", bbox_to_anchor=(1.01, 1), loc="upper left", fontsize=8)
+
+    # Dashed line at n_instances/n_rules = random-baseline wins
+    expected = n_instances / n_rules
+    ax.axhline(expected, color="gray", linestyle="--", linewidth=0.8, alpha=0.6)
+    ax.text(n_rules - 0.5, expected + 0.15, f"random baseline ({expected:.1f})",
+            ha="right", va="bottom", fontsize=7, color="gray")
 
     fig.tight_layout()
-    path = os.path.join(out_dir, "best_pdr_per_instance.png")
+    path = os.path.join(out_dir, "pdr_rank_distribution.png")
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
     print(f"  Saved: {path}")
@@ -291,7 +342,10 @@ def main():
     args = parser.parse_args()
 
     os.makedirs(args.out, exist_ok=True)
-    pdr_df, rand_df = load_brandimarte(args.csv)
+    pdr_df, rand_df, auto_agv_warning = load_brandimarte(args.csv)
+
+    # Combine manual CLI flag with automated column inspection
+    effective_agv_warning = args.agv_warning or auto_agv_warning
 
     # Sanity summary — catches seed-count mismatches early
     print(f"\nDeterministic PDR rows  : {len(pdr_df)}")
@@ -303,10 +357,10 @@ def main():
     n_range = (seeds_per["n_seeds"].min(), seeds_per["n_seeds"].max())
     print(f"Seeds per (rule, inst)  : {n_range[0]} – {n_range[1]}\n")
 
-    plot_bar_by_instance(pdr_df, rand_df, args.out, agv_warning=args.agv_warning)
+    plot_bar_by_instance(pdr_df, rand_df, args.out, agv_warning=effective_agv_warning)
     plot_rank_heatmap(pdr_df, rand_df, args.out)
     plot_random_variance(rand_df, args.out)
-    plot_best_pdr(pdr_df, rand_df, args.out)
+    plot_pdr_rank_distribution(pdr_df, rand_df, args.out)
 
     print("\nDone.")
 

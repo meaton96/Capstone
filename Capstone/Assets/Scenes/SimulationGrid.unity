@@ -675,6 +675,55 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 47500713}
   m_CullTransparentMesh: 1
+--- !u!1 &48298954
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 48298956}
+  - component: {fileID: 48298955}
+  m_Layer: 0
+  m_Name: FailureCauser
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &48298955
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 48298954}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 606aea0bbb0b8a149be758a9ac634647, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FailureTestDriver
+  TargetMachineId: 0
+  healthState: 
+  ttfCountdown: 0
+  repairRemaining: 0
+  sampledRepair: 0
+--- !u!4 &48298956
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 48298954}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.54839, y: 0, z: -2.37182}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &59894238
 GameObject:
   m_ObjectHideFlags: 0
@@ -1420,7 +1469,6 @@ GameObject:
   - component: {fileID: 192365269}
   - component: {fileID: 192365268}
   - component: {fileID: 192365267}
-  - component: {fileID: 192365271}
   - component: {fileID: 192365272}
   m_Layer: 5
   m_Name: StartMenu
@@ -1512,23 +1560,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
---- !u!114 &192365271
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 192365266}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 72684e1edf85c5e43bedadea842c50a9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.UI.InstanceSelectMenu
-  bridge: {fileID: 1562084950}
-  instanceDropdown: {fileID: 0}
-  startButton: {fileID: 0}
-  previewText: {fileID: 0}
-  menuPanel: {fileID: 1280180071}
 --- !u!114 &192365272
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1541,7 +1572,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ec669e85d33242f78a51f3f9a7bcc88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.UI.SimulationMenuUI
-  bridge: {fileID: 1562084950}
   agent: {fileID: 516692882}
   panel: {fileID: 1280180071}
   jobCountInput: {fileID: 1149106291}
@@ -5088,7 +5118,6 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
-  bridge: {fileID: 1562084950}
   heuristicRule: 1
   logDecisions: 1
 --- !u!4 &516692883
@@ -5721,6 +5750,50 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.RectMask2D
   m_Padding: {x: -8, y: -5, z: -8, w: -5}
   m_Softness: {x: 0, y: 0}
+--- !u!1 &597270528
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 597270530}
+  - component: {fileID: 597270529}
+  m_Layer: 0
+  m_Name: ChannelRegistrar
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &597270529
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 597270528}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfaa748f8af83194f97924f336b9aa88, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Simulation::Assets.Scripts.Simulation.Channels.SideChannelRegistrar
+--- !u!4 &597270530
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 597270528}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -103.43117, y: -0.00001, z: 5973.798}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &600081546
 GameObject:
   m_ObjectHideFlags: 0
@@ -8177,7 +8250,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb468411eae5f45c1a1d6eba77b23cf1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Simulation::Assets.Scripts.Simulation.LoggingInitializer
-  simLoggerLevel: 3
+  simLoggerLevel: 2
   enableFileLogging: 1
 --- !u!4 &895129767
 Transform:
@@ -8232,6 +8305,7 @@ MonoBehaviour:
   incomingBeltMaterial: {fileID: 2100000, guid: 51d8a3821f9c63147ae8d05d1c9e4fe0, type: 2}
   incomingBeltOffset: {x: -2.5, y: 0.01, z: 1.5}
   outgoingBeltOffset: {x: -1, y: 0.01, z: -2}
+  MachineFlexibilityProbability: 0
   wallPrefab: {fileID: 8214164735923952847, guid: 80dbfde9c2c33664ca74062703b00a2b, type: 3}
   floorTransform: {fileID: 473100912}
   machineSpacingX: 6
@@ -9032,6 +9106,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 995028132}
   m_CullTransparentMesh: 1
+--- !u!1 &1006906076
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1006906077}
+  - component: {fileID: 1006906078}
+  m_Layer: 0
+  m_Name: StochasticEventManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1006906077
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1006906076}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -103.43117, y: -0.00001, z: 5973.798}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1006906078
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1006906076}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e4dc84aba1986248b23d325c78fbfbc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Simulation::Assets.Scripts.Simulation.Stochastic.StochasticEventManager
 --- !u!1 &1025283962
 GameObject:
   m_ObjectHideFlags: 0
@@ -11691,6 +11809,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1280180071}
   m_CullTransparentMesh: 1
+--- !u!1 &1283772557
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1283772559}
+  - component: {fileID: 1283772558}
+  m_Layer: 0
+  m_Name: StochasticValidator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1283772558
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1283772557}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2228cacf3d0ce0947991a4b8b19c6fe2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Simulation::Assets.Scripts.Simulation.Stochastic.StochasticDistributionValidator
+--- !u!4 &1283772559
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1283772557}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -103.43117, y: -0.00001, z: 5973.798}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1294615531
 GameObject:
   m_ObjectHideFlags: 0
@@ -13317,8 +13479,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1562084951}
-  - component: {fileID: 1562084950}
   - component: {fileID: 1562084952}
+  - component: {fileID: 1562084953}
   m_Layer: 0
   m_Name: Bridge
   m_TagString: Untagged
@@ -13326,37 +13488,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1562084950
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1562084949}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 596d6ff3314006a42824daaf42c219b3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Simulation::Assets.Scripts.Simulation.SimulationBridge
-  layoutManager: {fileID: 909580045}
-  trafficZoneManager: {fileID: 909580047}
-  agvPool: {fileID: 1750965656}
-  agent: {fileID: 516692882}
-  Jobs: {fileID: 263971911}
-  PreDispatchLeadTime: 15
-  AutoStartOnPlay: 0
-  OnDecisionRequired:
-    m_PersistentCalls:
-      m_Calls: []
-  OnStepCompleted:
-    m_PersistentCalls:
-      m_Calls: []
-  OnEpisodeFinished:
-    m_PersistentCalls:
-      m_Calls: []
-  OnFactorySpawned:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!4 &1562084951
 Transform:
   m_ObjectHideFlags: 0
@@ -13384,10 +13515,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76c5dace699a14605b6a45f8bfa08cde, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Simulation::Assets.Scripts.Simulation.HeadlessBatchRunner
-  bridge: {fileID: 1562084950}
   agent: {fileID: 516692882}
   fallbackBatchJson: {fileID: 4900000, guid: ac6254305ac4c4fb7a6176bc1e3522ef, type: 3}
   fallbackRepeats: 1
+--- !u!114 &1562084953
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1562084949}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cafb70f26e9ea5e488eebb89f5f6b031, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Simulation::Assets.Scripts.Simulation.FactoryOrchestrator
+  layoutManager: {fileID: 909580045}
+  trafficZoneManager: {fileID: 909580047}
+  agvPool: {fileID: 1750965656}
+  agent: {fileID: 516692882}
+  Jobs: {fileID: 263971911}
+  PreDispatchLeadTime: 15
+  AutoStartOnPlay: 0
+  OnDecisionRequired:
+    m_PersistentCalls:
+      m_Calls: []
+  OnStepCompleted:
+    m_PersistentCalls:
+      m_Calls: []
+  OnEpisodeFinished:
+    m_PersistentCalls:
+      m_Calls: []
+  OnFactorySpawned:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1599695576
 GameObject:
   m_ObjectHideFlags: 0
@@ -13425,7 +13586,7 @@ MonoBehaviour:
   jobsText: {fileID: 889920152}
   decisionsText: {fileID: 1715778141}
   stopButton: {fileID: 208920607}
-  instanceSelectMenu: {fileID: 192365271}
+  instanceSelectMenu: {fileID: 0}
   timeScaleSlider: {fileID: 483234310}
   timeScaleValueText: {fileID: 827222081}
 --- !u!114 &1599695578
@@ -18154,3 +18315,7 @@ SceneRoots:
   - {fileID: 192365270}
   - {fileID: 1750965657}
   - {fileID: 895129767}
+  - {fileID: 1006906077}
+  - {fileID: 1283772559}
+  - {fileID: 597270530}
+  - {fileID: 48298956}

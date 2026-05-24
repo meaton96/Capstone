@@ -5,7 +5,7 @@ using TMPro;
 using Assets.Scripts.Simulation;
 using Assets.Scripts.Scheduling.Data;
 using Newtonsoft.Json;
-using Assets.Scripts.Logging;
+using Assets.Scripts.Simulation.Logging;
 
 namespace Assets.Scripts.UI
 {
@@ -21,7 +21,7 @@ namespace Assets.Scripts.UI
     {
         [Header("References")]
         [Tooltip("The SimulationBridge to configure and start.")]
-        [SerializeField] private SimulationBridge bridge;
+        [SerializeField] private FactoryOrchestrator bridge;
 
         [Header("UI")]
         [Tooltip("Dropdown populated with the names of every instance found in Resources/Instances.")]

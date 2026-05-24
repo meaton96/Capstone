@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Assets.Scripts.Logging;
+using Assets.Scripts.Simulation.Logging;
 
 namespace Assets.Scripts.Simulation.FactoryLayout
 {
@@ -38,6 +38,9 @@ namespace Assets.Scripts.Simulation.FactoryLayout
 
         public bool IsFull => OccupantAgvIds.Count >= Capacity;
         public bool IsEmpty => OccupantAgvIds.Count == 0;
+        [NonSerialized] public int TraversalCount;   // successful TryReserve entries
+        [NonSerialized] public int BlockEvents;       // failed TryReserve calls (zone full)
+        [NonSerialized] public float TotalBlockTime;    // cumulative wait time reported by AGVs
 
     }
 
@@ -75,6 +78,9 @@ namespace Assets.Scripts.Simulation.FactoryLayout
 
         /// @brief Retrieves a zone by its unique ID.
         public TrafficZone GetZone(int zoneId) => zoneById.TryGetValue(zoneId, out var z) ? z : null;
+
+
+
 
         void Awake()
         {
@@ -368,12 +374,46 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         public bool TryReserve(int zoneId, int agvId)
         {
             if (!zoneById.TryGetValue(zoneId, out TrafficZone zone)) return false;
-            if (zone.OccupantAgvIds.Contains(agvId)) return true;
-            if (zone.IsFull) return false;
+            if (zone.OccupantAgvIds.Contains(agvId)) return true;   // re-entry, no stat change
+
+            if (zone.IsFull)
+            {
+                zone.BlockEvents++;    // ← NEW — zone was contended
+                return false;
+            }
 
             zone.OccupantAgvIds.Add(agvId);
+            zone.TraversalCount++;     // ← NEW — successful entry
             return true;
         }
+        /// <summary>
+        /// Called by AGVController when it finally acquires a previously-blocked zone.
+        /// Accumulates the wait duration on the zone that caused the block.
+        /// </summary>
+        public void RecordBlockTime(int zoneId, float blockTime)
+        {
+            if (blockTime <= 0f) return;
+            if (zoneById.TryGetValue(zoneId, out TrafficZone zone))
+                zone.TotalBlockTime += blockTime;
+        }
+        /// <summary>
+        /// Zeros per-episode congestion counters on all zones.
+        /// Called from FactoryOrchestrator.StartEpisode() before each run
+        /// so that stats from prior episodes don't bleed through when the
+        /// factory is reused (IsFactoryReady = true).
+        /// </summary>
+        public void ResetEpisodeStats()
+        {
+            foreach (TrafficZone zone in zones)
+            {
+                zone.TraversalCount = 0;
+                zone.BlockEvents = 0;
+                zone.TotalBlockTime = 0f;
+            }
+        }
+
+
+
 
         /// @brief Releases an AGV's reservation on a specific zone.
         /// @post The occupant count for the zone is decremented.

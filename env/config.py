@@ -51,7 +51,7 @@ class EnvConfig:
 
     grid_size: int = GRID_SIZE
     grid_channels: int = GRID_CHANNELS
-    num_machines_range: Tuple[int, int] = (8, MAX_MACHINES)
+    num_machines_range: Tuple[int, int] = (4, MAX_MACHINES)
     num_jobs_range: Tuple[int, int] = (10, MAX_JOBS)
     ops_per_machine: int = MAX_MACHINES
     processing_time_range: Tuple[int, int] = (1, 99)

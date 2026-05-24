@@ -42,7 +42,7 @@ from config import (
 from models.encoder import CNNSPPFEncoder, SPPF, MLPEncoder, MultiModalEncoder
 from models.actor_critic import FusionHead, ActorHead, CriticHead, ActorCritic
 from models.network import SchedulingNetwork
-from mlagent_env.unity_env import slice_obs
+from env_wrappers.unity_env import slice_obs
 from rollout_buffer import RolloutBuffer
 
 
@@ -560,10 +560,10 @@ class TestUnitySchedulingEnv:
                                    tuples returned by successive get_steps calls.
         @return A patched UnitySchedulingEnv instance.
         """
-        from mlagent_env.unity_env import UnitySchedulingEnv
+        from env_wrappers.unity_env import UnitySchedulingEnv
 
-        with patch("mlagent_env.unity_env.UnityEnvironment") as MockUnity, \
-             patch("mlagent_env.unity_env.EngineConfigurationChannel"):
+        with patch("env_wrappers.unity_env.UnityEnvironment") as MockUnity, \
+             patch("env_wrappers.unity_env.EngineConfigurationChannel"):
 
             mock_env_instance = MagicMock()
 
@@ -685,12 +685,12 @@ class TestVectorizedUnityEnv:
 
     def test_reset_stacks_obs(self):
         """@brief reset() must stack observations from N sub-envs along dim 0."""
-        from mlagent_env.unity_env import VectorizedUnityEnv
+        from env_wrappers.unity_env import VectorizedUnityEnv
 
         num_envs = 3
         obs_dicts = [self._make_dummy_obs_dict() for _ in range(num_envs)]
 
-        with patch("mlagent_env.unity_env.UnitySchedulingEnv") as MockSingle:
+        with patch("env_wrappers.unity_env.UnitySchedulingEnv") as MockSingle:
             mock_instances = []
             for i in range(num_envs):
                 m = MagicMock()
@@ -707,13 +707,13 @@ class TestVectorizedUnityEnv:
 
     def test_step_returns_correct_shapes(self):
         """@brief step() must return stacked obs, rewards (N,), dones (N,)."""
-        from mlagent_env.unity_env import VectorizedUnityEnv
+        from env_wrappers.unity_env import VectorizedUnityEnv
 
         num_envs = 2
         obs_dicts = [self._make_dummy_obs_dict() for _ in range(num_envs)]
         reset_obs = [self._make_dummy_obs_dict() for _ in range(num_envs)]
 
-        with patch("mlagent_env.unity_env.UnitySchedulingEnv") as MockSingle:
+        with patch("env_wrappers.unity_env.UnitySchedulingEnv") as MockSingle:
             mock_instances = []
             for i in range(num_envs):
                 m = MagicMock()
@@ -734,7 +734,7 @@ class TestVectorizedUnityEnv:
     def test_auto_reset_on_done(self):
         """@brief When a sub-env signals done, VectorizedUnityEnv must
         auto-reset it and return the fresh observation."""
-        from mlagent_env.unity_env import VectorizedUnityEnv
+        from env_wrappers.unity_env import VectorizedUnityEnv
 
         num_envs = 2
         step_obs = [self._make_dummy_obs_dict() for _ in range(num_envs)]
@@ -742,7 +742,7 @@ class TestVectorizedUnityEnv:
         # Tag the reset obs so we can identify it
         reset_obs["global_scalars"][:] = 99.0
 
-        with patch("mlagent_env.unity_env.UnitySchedulingEnv") as MockSingle:
+        with patch("env_wrappers.unity_env.UnitySchedulingEnv") as MockSingle:
             mock_instances = []
             for i in range(num_envs):
                 m = MagicMock()
@@ -768,10 +768,10 @@ class TestVectorizedUnityEnv:
 
     def test_close_all_sub_envs(self):
         """@brief close() must call close() on every sub-environment."""
-        from mlagent_env.unity_env import VectorizedUnityEnv
+        from env_wrappers.unity_env import VectorizedUnityEnv
 
         num_envs = 3
-        with patch("mlagent_env.unity_env.UnitySchedulingEnv") as MockSingle:
+        with patch("env_wrappers.unity_env.UnitySchedulingEnv") as MockSingle:
             mock_instances = [MagicMock() for _ in range(num_envs)]
             for m in mock_instances:
                 m.reset.return_value = self._make_dummy_obs_dict()

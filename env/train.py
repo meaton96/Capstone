@@ -66,14 +66,14 @@ def build_env(args, ppo_cfg):
     }
 
     if args.unity:
-        from env.unity_env import VectorizedUnityEnv
+        from env_wrappers.unity_env import VectorizedUnityEnv
         vec_env = VectorizedUnityEnv(
             num_envs=ppo_cfg.num_envs,
             file_name=args.unity_path,
             time_scale=args.time_scale,
         )
     else:
-        from env.placeholder_env import VectorizedPlaceholderEnv
+        from env_wrappers.placeholder_env import VectorizedPlaceholderEnv
         vec_env = VectorizedPlaceholderEnv(num_envs=ppo_cfg.num_envs)
 
     return vec_env, obs_shapes

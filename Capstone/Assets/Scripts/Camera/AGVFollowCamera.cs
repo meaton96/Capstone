@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
 using Assets.Scripts.Simulation.AGV;
-using Assets.Scripts.Logging;
+using Assets.Scripts.Simulation.Logging;
 
 /// @brief Attaches the camera to AGVs within the AGVPool.
 ///

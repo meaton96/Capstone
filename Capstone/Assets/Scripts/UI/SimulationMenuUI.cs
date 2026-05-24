@@ -23,7 +23,7 @@ namespace Assets.Scripts.UI
     public class SimulationMenuUI : MonoBehaviour
     {
         [Header("References")]
-        [SerializeField] private SimulationBridge bridge;
+        //[SerializeField] private FactoryOrchestrator bridge;
         [SerializeField] private SchedulingAgent agent;
         [SerializeField] private GameObject panel;
 
@@ -83,7 +83,7 @@ namespace Assets.Scripts.UI
 
         private void Start()
         {
-            if (Application.isBatchMode || (bridge != null && bridge.AutoStartOnPlay))
+            if (Application.isBatchMode || (FactoryOrchestrator.Instance != null && FactoryOrchestrator.Instance.AutoStartOnPlay))
             {
                 HidePanel();
                 return;
@@ -97,19 +97,19 @@ namespace Assets.Scripts.UI
 
         private void OnEnable()
         {
-            if (bridge != null)
+            if (FactoryOrchestrator.Instance != null)
             {
-                bridge.OnFactorySpawned.AddListener(OnFactorySpawned);
-                bridge.OnEpisodeFinished.AddListener(OnEpisodeFinished);
+                FactoryOrchestrator.Instance.OnFactorySpawned.AddListener(OnFactorySpawned);
+                FactoryOrchestrator.Instance.OnEpisodeFinished.AddListener(OnEpisodeFinished);
             }
         }
 
         private void OnDisable()
         {
-            if (bridge != null)
+            if (FactoryOrchestrator.Instance != null)
             {
-                bridge.OnFactorySpawned.RemoveListener(OnFactorySpawned);
-                bridge.OnEpisodeFinished.RemoveListener(OnEpisodeFinished);
+                FactoryOrchestrator.Instance.OnFactorySpawned.RemoveListener(OnFactorySpawned);
+                FactoryOrchestrator.Instance.OnEpisodeFinished.RemoveListener(OnEpisodeFinished);
             }
         }
 
@@ -177,10 +177,10 @@ namespace Assets.Scripts.UI
 
         private void OnSpawnClicked()
         {
-            if (bridge == null) return;
+            if (FactoryOrchestrator.Instance == null) return;
             FJSSPConfig config = BuildConfig();
-            bridge.LoadConfig(config);
-            bridge.SpawnFactory();
+            FactoryOrchestrator.Instance.LoadConfig(config);
+            FactoryOrchestrator.Instance.SpawnFactory();
         }
 
         private void OnStartClicked()
@@ -193,14 +193,14 @@ namespace Assets.Scripts.UI
 
         private void RefreshButtonStates()
         {
-            if (bridge == null) return;
+            if (FactoryOrchestrator.Instance == null) return;
 
             if (spawnButton != null)
-                spawnButton.interactable = !bridge.IsEpisodeActive;
+                spawnButton.interactable = !FactoryOrchestrator.Instance.IsEpisodeActive;
 
             if (startButton != null)
             {
-                bool canStart = bridge.IsFactoryReady && !bridge.IsEpisodeActive;
+                bool canStart = FactoryOrchestrator.Instance.IsFactoryReady && !FactoryOrchestrator.Instance.IsEpisodeActive;
                 startButton.interactable = canStart;
                 startButton.gameObject.SetActive(canStart);
             }
@@ -212,14 +212,14 @@ namespace Assets.Scripts.UI
 
         private void OnFactorySpawned()
         {
-            SetStatus($"Factory ready — {bridge.CurrentConfig.TotalMachines} machines. Press Start.");
+            SetStatus($"Factory ready — {FactoryOrchestrator.Instance.CurrentConfig.TotalMachines} machines. Press Start.");
         }
 
-        private void OnEpisodeFinished(EpisodeResult result)
+        private void OnEpisodeFinished(EpisodeRecord record)
         {
             SetStatus($"<color=#00FF00>SUCCESS!</color>\n" +
-                      $"Final Makespan: <b>{result.Makespan:F1}s</b>\n" +
-                      $"Decisions Made: <b>{result.DecisionPoints}</b>");
+                      $"Final Makespan: <b>{record.Makespan:F1}s</b>\n" +
+                      $"Decisions Made: <b>{record.DecisionPoints}</b>");
             ShowPanel();
         }
 
@@ -272,6 +272,20 @@ namespace Assets.Scripts.UI
                 // Fallback uniform bounds — only used for types missing from procParams
                 MinProcTime = 1f,
                 MaxProcTime = 30f,
+                Stochastic = BuildStochasticConfig()
+            };
+        }
+        private StochasticConfig BuildStochasticConfig()
+        {
+            return new StochasticConfig
+            {
+                MachineFailuresEnabled = true,
+                WeibullK = 1.5f,
+                WeibullLambda = 2700.0f,
+                RepairLogMu = 4.0f,
+                RepairLogSigma = 0.5f,
+                // AgvFailuresEnabled = false,
+                DynamicArrivalsEnabled = false
             };
         }
 
