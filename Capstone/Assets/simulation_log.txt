@@ -1,0 +1,6 @@
+python dfjsp_phase2_analysis.py \
+    --machine  res_5-24/det/machine_utilization.csv  res_5-24/stoch/machine_utilization.csv \
+    --results  res_5-24/det/results.csv              res_5-24/stoch/results.csv             \
+    --agv      res_5-24/det/agv_performance.csv      res_5-24/stoch/agv_performance.csv     \
+    --segments res_5-24/det/segment_congestion.csv   res_5-24/stoch/segment_congestion.csv  \
+    --out figs/

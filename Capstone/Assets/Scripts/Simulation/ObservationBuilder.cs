@@ -30,11 +30,11 @@ namespace Assets.Scripts.Simulation
         private const float NoiseStdDev = 0.02f;
         private const float DropoutRate = 0.05f;
 
-        private readonly FactoryOrchestrator _orchestrator;
+        //  private readonly FactoryOrchestrator _orchestrator;
 
         public ObservationBuilder(FactoryOrchestrator bridge)
         {
-            _orchestrator = bridge;
+            //_orchestrator = bridge;
         }
 
         /**
@@ -95,7 +95,7 @@ namespace Assets.Scripts.Simulation
             }
 
             // Channel 1: Jobs
-            foreach (JobData job in _orchestrator.Jobs.AllJobs)
+            foreach (JobData job in FactoryOrchestrator.Instance.Jobs.AllJobs)
             {
                 if (job.State == JobState.Exited) continue;
 
@@ -150,11 +150,11 @@ namespace Assets.Scripts.Simulation
         {
             float[] matrix = new float[SchedulingLength];
 
-            IReadOnlyList<JobData> jobs = _orchestrator.Jobs.AllJobs;
+            IReadOnlyList<JobData> jobs = FactoryOrchestrator.Instance.Jobs.AllJobs;
             FactoryLayoutManager layout = FactoryLayoutManager.Instance;
             if (layout == null) return matrix;
 
-            float maxProcTime = _orchestrator.CurrentConfig != null ? _orchestrator.CurrentConfig.MaxProcTime : 90f;
+            float maxProcTime = FactoryOrchestrator.Instance.CurrentConfig != null ? FactoryOrchestrator.Instance.CurrentConfig.MaxProcTime : 90f;
 
             int colWidth = 2 * MaxMachines;
 
@@ -229,17 +229,17 @@ namespace Assets.Scripts.Simulation
         private float[] BuildGlobalScalars()
         {
             float[] s = new float[GlobalScalarLength];
-            JobStore store = _orchestrator.Jobs;
+            JobStore store = FactoryOrchestrator.Instance.Jobs;
             FactoryLayoutManager layout = FactoryLayoutManager.Instance;
 
             int totalJobs = Mathf.Max(store.JobCount, 1);
             int totalMachines = layout != null ? layout.MachineCount : 1;
 
             // [0] Normalized simulation time against a rough horizon estimate.
-            float horizon = _orchestrator.CurrentConfig != null
-                ? _orchestrator.CurrentConfig.MaxProcTime * (_orchestrator.CurrentConfig.MaxOpsPerJob)
+            float horizon = FactoryOrchestrator.Instance.CurrentConfig != null
+                ? FactoryOrchestrator.Instance.CurrentConfig.MaxProcTime * (FactoryOrchestrator.Instance.CurrentConfig.MaxOpsPerJob)
                 : 500f;
-            s[0] = Mathf.Clamp01((float)_orchestrator.SimTime / horizon);
+            s[0] = Mathf.Clamp01((float)FactoryOrchestrator.Instance.SimTime / horizon);
 
             // [1] Overall completion ratio.
             s[1] = (float)store.CountInState(JobState.Exited) / totalJobs;
@@ -291,7 +291,7 @@ namespace Assets.Scripts.Simulation
             int totalOps = 0;
             foreach (JobData job in store.AllJobs)
                 totalOps += job.TotalOperations;
-            s[9] = Mathf.Clamp01((float)_orchestrator.DecisionCount / Mathf.Max(totalOps * 2, 1));
+            s[9] = Mathf.Clamp01((float)FactoryOrchestrator.Instance.DecisionCount / Mathf.Max(totalOps * 2, 1));
 
             return s;
         }
@@ -337,7 +337,7 @@ namespace Assets.Scripts.Simulation
             {
                 foreach (PhysicalMachine m in FactoryLayoutManager.Instance.Machines)
                 {
-                    if (m.IsIdle && _orchestrator.Jobs.HasDispatchableJob(m.MachineId))
+                    if (m.IsIdle && FactoryOrchestrator.Instance.Jobs.HasDispatchableJob(m.MachineId))
                     {
                         flags[3] = 1f;
                         break;
@@ -346,7 +346,7 @@ namespace Assets.Scripts.Simulation
             }
 
             // [4] Past the halfway point of all operations.
-            flags[4] = _orchestrator.Jobs.CountInState(JobState.Exited) > _orchestrator.Jobs.JobCount / 2 ? 1f : 0f;
+            flags[4] = FactoryOrchestrator.Instance.Jobs.CountInState(JobState.Exited) > FactoryOrchestrator.Instance.Jobs.JobCount / 2 ? 1f : 0f;
 
             // [5] Any machine's AlmostDoneFlag is active.
             if (FactoryLayoutManager.Instance != null)
