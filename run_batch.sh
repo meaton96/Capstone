@@ -3,7 +3,7 @@
 #  run_batch_parallel.sh
 #
 #  Launches one Unity process per PDR rule simultaneously, waits for all to
-#  finish, then merges their CSVs into a single results.csv.
+#  finish, then merges their CSVs into their respective single CSVs.
 #
 #  Usage:
 #    chmod +x run_batch_parallel.sh
@@ -14,12 +14,7 @@
 #        --repeats    3 \
 #        --timescale  100 \
 #        --loglevel   Low
-#
-#  macOS app bundle:
-#    --exe "./capstone.app/Contents/MacOS/capstone"
 ##############################################################################
-
-    
 
 set -euo pipefail
 
@@ -71,7 +66,7 @@ echo ""
 PIDS=()
 
 for RULE in "${RULES[@]}"; do
-    SUFFIX="_${RULE}"
+    SUFFIX="_bm_${RULE}"
     LOG_FILE="${RESULTS_DIR}/worker_${RULE}.log"
 
     "$EXE" \
@@ -122,37 +117,59 @@ echo "[Launcher] All workers finished in ~${TOTAL_MIN} min."
 
 # ── Merge CSVs ────────────────────────────────────────────────────────────
 echo ""
-echo "[Launcher] Merging CSV files..."
+echo "[Launcher] Merging CSV file groups..."
+echo "--------------------------------------------------"
 
-MERGED="${RESULTS_DIR}/results.csv"
-HEADER_WRITTEN=0
-ROWS_TOTAL=0
+# Array mapping output targets to their unique filename prefix
+declare -A CATEGORIES=(
+    ["merged_agv_performance.csv"]="agv_performance_bm_"
+    ["merged_results.csv"]="results_bm_"
+    ["merged_segment_congestion.csv"]="segment_congestion_bm_"
+    ["merged_machine_utilization.csv"]="machine_utilization_bm_"
+)
 
-for RULE in "${RULES[@]}"; do
-    CSV="${RESULTS_DIR}/results_${RULE}.csv"
-    if [[ ! -f "$CSV" ]]; then
-        echo "  [WARN] Missing: $CSV"
-        continue
+for OUT_FILE in "${!CATEGORIES[@]}"; do
+    PREFIX="${CATEGORIES[$OUT_FILE]}"
+    MERGED="${RESULTS_DIR}/${OUT_FILE}"
+    
+    HEADER_WRITTEN=0
+    ROWS_TOTAL=0
+
+    echo "⚙️  Generating ${OUT_FILE}..."
+
+    for RULE in "${RULES[@]}"; do
+        # Dynamically matches names like agv_performance_bm_SPT_SMPT.csv
+        CSV="${RESULTS_DIR}/${PREFIX}${RULE}.csv"
+        
+        if [[ ! -f "$CSV" ]]; then
+            echo "  [WARN] Missing file: $(basename "$CSV")"
+            continue
+        fi
+
+        LINE_COUNT=$(wc -l < "$CSV")
+        if (( LINE_COUNT < 2 )); then
+            echo "  [WARN] No data rows in: $(basename "$CSV")"
+            continue
+        fi
+
+        if [[ $HEADER_WRITTEN -eq 0 ]]; then
+            head -1 "$CSV" > "$MERGED"
+            HEADER_WRITTEN=1
+        fi
+
+        # Append rows skipping the header line
+        tail -n +2 "$CSV" >> "$MERGED"
+        DATA_ROWS=$(( LINE_COUNT - 1 ))
+        ROWS_TOTAL=$(( ROWS_TOTAL + DATA_ROWS ))
+    done
+
+    if [[ $HEADER_WRITTEN -eq 1 ]]; then
+        echo "  ✅ Success: ${ROWS_TOTAL} total rows written to ${OUT_FILE}"
+    else
+        echo "  ❌ Failed: No files found or merged for this category."
     fi
-
-    LINE_COUNT=$(wc -l < "$CSV")
-    if (( LINE_COUNT < 2 )); then
-        echo "  [WARN] No data rows in: $CSV"
-        continue
-    fi
-
-    if [[ $HEADER_WRITTEN -eq 0 ]]; then
-        head -1 "$CSV" > "$MERGED"
-        HEADER_WRITTEN=1
-    fi
-
-    # Append data rows (skip header)
-    tail -n +2 "$CSV" >> "$MERGED"
-    DATA_ROWS=$(( LINE_COUNT - 1 ))
-    ROWS_TOTAL=$(( ROWS_TOTAL + DATA_ROWS ))
-    echo "  Merged ${DATA_ROWS} rows from results_${RULE}.csv"
+    echo "--------------------------------------------------"
 done
 
 echo ""
-echo "[Launcher] Done. ${ROWS_TOTAL} total rows written to:"
-echo "  ${MERGED}"
+echo "🎉 All CSV groups merged successfully inside: ${RESULTS_DIR}"
