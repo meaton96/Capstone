@@ -19,11 +19,11 @@ Output figures (deterministic = green, stochastic = red convention throughout):
   Combined (23–25)  — cross-domain cascade chain and PDR stability
 
 Usage:
-  python dfjsp_phase2_analysis.py \\
-      --machine  det/machine_utilization.csv  stoch/machine_utilization.csv \\
-      --results  det/results.csv              stoch/results.csv             \\
-      --agv      det/agv_performance.csv      stoch/agv_performance.csv     \\
-      --segments det/segment_congestion.csv   stoch/segment_congestion.csv  \\
+  python dfjsp_phase2_analysis.py \
+      --machine  time_scale/none/machine_utilization.csv  time_scale/low/machine_utilization.csv \
+      --results  time_scale/none/results.csv              time_scale/low/results.csv             \
+      --agv      time_scale/none/agv_performance.csv      time_scale/low/agv_performance.csv     \
+      --segments time_scale/none/segment_congestion.csv   time_scale/low/segment_congestion.csv  \
       --out figs/
 
 Or pass a single already-merged file per domain:

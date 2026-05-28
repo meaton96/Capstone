@@ -85,3 +85,4 @@ Capstone/[Aa]ssets/[Ss]treamingAssets/aa/*
 /linux
 
 /results/.venv
+run_agent.sh
