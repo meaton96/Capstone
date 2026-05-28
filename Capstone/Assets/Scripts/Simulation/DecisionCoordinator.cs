@@ -30,7 +30,7 @@ namespace Assets.Scripts.Simulation
             _incrementDecisionCount = incrementDecisionCount;
         }
 
-        public DecisionRequest? FindNextDecision()
+        public DecisionRequest FindNextDecision()
         {
             JobData routingJob = _jobs.GetNextNeedsRouting();
             if (routingJob != null)
@@ -43,6 +43,7 @@ namespace Assets.Scripts.Simulation
 
                 if (!anyAvailable)
                 {
+                    _jobs.DeferredJobIds.Add(routingJob.JobId);
                     SimLogger.Low($"[Orchestrator] Job {routingJob.JobId}: all eligible machines " +
                                   $"are Failed/Repairing. Deferring routing decision.");
                 }

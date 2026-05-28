@@ -17,7 +17,8 @@ namespace Assets.Scripts.Simulation
             DispatchingRule.SRT_SRWT,
             DispatchingRule.SRT_SMPT,
             DispatchingRule.LRT_MMUR,
-            DispatchingRule.SDT_SRWT
+            DispatchingRule.SDT_SRWT,
+            DispatchingRule.Random
         };
 
         public static int ActionCount => ActionToRule.Length;
@@ -27,8 +28,12 @@ namespace Assets.Scripts.Simulation
         public static int SelectJob(int actionIndex, int machineId, JobStore jobs, double simTime)
         {
             DispatchingRule rule = ActionToRule[actionIndex];
-            List<int> queue = jobs.GetDispatchableJobs(machineId);
 
+            // Re-roll every decision point — don't just fall through to queue[0]
+            if (rule == DispatchingRule.Random)
+                rule = ActionToRule[UnityEngine.Random.Range(0, ActionToRule.Length - 1)];
+
+            List<int> queue = jobs.GetDispatchableJobs(machineId);
             if (queue.Count == 0) return -1;
             if (queue.Count == 1) return queue[0];
 
@@ -44,13 +49,18 @@ namespace Assets.Scripts.Simulation
                     => ArgMax(queue, id => GetRemainingWork(id, jobs)),
                 DispatchingRule.SDT_SRWT
                     => ArgMin(queue, id => (float)(simTime - jobs.Get(id).ArrivalTime)),
-                _ => queue[0]
+                _ => queue[UnityEngine.Random.Range(0, queue.Count)]
             };
         }
 
         public static int SelectMachine(int actionIndex, DecisionRequest req)
         {
             DispatchingRule rule = ActionToRule[actionIndex];
+
+            // Re-roll every decision point
+            if (rule == DispatchingRule.Random)
+                rule = ActionToRule[UnityEngine.Random.Range(0, ActionToRule.Length - 1)];
+
             int[] candidates = req.CandidateMachineIds;
             if (candidates.Length == 1) return candidates[0];
 
@@ -62,7 +72,7 @@ namespace Assets.Scripts.Simulation
                     => candidates[ArgMinIdx(req.CandidateQueueLengths)],
                 DispatchingRule.LPT_MMUR or DispatchingRule.LRT_MMUR
                     => candidates[ArgMaxIdx(req.CandidateQueueLengths)],
-                _ => candidates[0]
+                _ => candidates[UnityEngine.Random.Range(0, candidates.Length)]
             };
         }
 

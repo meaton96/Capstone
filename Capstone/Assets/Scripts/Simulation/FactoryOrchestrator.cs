@@ -23,6 +23,7 @@ namespace Assets.Scripts.Simulation
         [SerializeField] private FactoryLayoutManager layoutManager;
         [SerializeField] private TrafficZoneManager trafficZoneManager;
         [SerializeField] private AGVPool agvPool;
+        private string _configuredRuleName = "unknown";
         [SerializeField] private SchedulingAgent agent;
         public JobStore Jobs;
 
@@ -67,6 +68,8 @@ namespace Assets.Scripts.Simulation
 
         public static int ActionCount => DispatchingEngine.ActionCount;
         public int GetRuleIndex(DispatchingRule rule) => DispatchingEngine.IndexForRule(rule);
+
+        private const double MAX_EPISODE_SIM_SECONDS = 500_000.0;
 
         private void Awake()
         {
@@ -127,6 +130,7 @@ namespace Assets.Scripts.Simulation
 
 
             agent.SetHeuristicRule(currentConfig.dispatchingRule);
+            _configuredRuleName = currentConfig.dispatchingRule.ToString();
 
             FJSSPJobDefinition[] jobDefs;
             if (prebuiltJobs != null)
@@ -165,7 +169,7 @@ namespace Assets.Scripts.Simulation
                         CurrentDecision.MachineId == machineId)
                     {
                         IsWaitingForAction = false;
-                        SimLogger.Low($"[Orchestrator] Pending dispatch decision for machine " +
+                        SimLogger.Medium($"[Orchestrator] Pending dispatch decision for machine " +
                                       $"{machineId} invalidated (machine failed).");
                     }
                 },
@@ -205,6 +209,13 @@ namespace Assets.Scripts.Simulation
         private void Update()
         {
             if (!episodeActive) return;
+
+            if (SimTime > MAX_EPISODE_SIM_SECONDS)
+            {
+                SimLogger.Low($"[Orchestrator] Episode timeout at {SimTime:F0}s — terminating.");
+                FinaliseEpisode();
+                return;
+            }
 
             _failures.SetSimTime(SimTime);
             _flags.SetSimTime(SimTime);
@@ -291,7 +302,7 @@ namespace Assets.Scripts.Simulation
             _machineProcessingStartTime[machineId] = SimTime;
 
             _flags.RefreshMachineLabels(machineId);
-            LastAppliedRule = DispatchingEngine.RuleForIndex(actionIndex).ToString();
+            LastAppliedRule = _configuredRuleName;
         }
 
         private void FinaliseEpisode()

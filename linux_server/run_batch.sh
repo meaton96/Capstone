@@ -1,248 +1,292 @@
-#!/bin/bash
+#!/usr/bin/env bash
 ##############################################################################
-#  run_batch.sh
+#  run_batch_parallel.sh
 #
-#  Launches one Unity process per PDR rule simultaneously for:
-#     - Generated job data   (optional, via --batch-config)
-#     - Brandimarte benchmarks (optional, via --benchmark-dir)
+#  Brandimarte-only parallel runner.
+#  Launches ALL workers across ALL disruption levels simultaneously
+#  (9 rules × N disruptions), waits for all to finish, then merges
+#  the four CSV types per disruption level.
 #
-#  EXAMPLE USAGE:
-#     # Benchmark-only:
-#     ./run_batch.sh --exe-path ./capstone.x86_64 \
-#         --benchmark-dir ./BatchConfigs/Benchmarks \
-#         --repeats 3 --timescale 100 --disruption low
+#  Mirrors RunBatchParallel.ps1 — same arguments, same output layout.
 #
-#     # Generated data only:
-#     ./run_batch.sh --exe-path ./capstone.x86_64 \
-#         --batch-config ./BatchConfigs/BatchConfigs.json \
-#         --repeats 1 --timescale 100 --disruption none
+#  Usage:
+#    chmod +x run_batch_parallel.sh
+#
+#    # Two disruption levels, 18 workers at once:
+#    ./run_batch_parallel.sh \
+#        --exe         ./capstone.x86_64 \
+#        --benchmarks  ./BatchConfigs/Benchmarks \
+#        --results     ./Results \
+#        --repeats     3 \
+#        --timescale   100 \
+#        --loglevel    Low \
+#        --disruption  none,low
+#
+#    # Three levels, 27 workers at once:
+#    ./run_batch_parallel.sh ... --disruption none,low,high
+#
+#  Output layout:
+#    Results/brandimarte/<disruption>/results_bm_<rule>.csv        (per-worker)
+#    Results/brandimarte/<disruption>/merged_results.csv           (merged)
+#    Results/brandimarte/<disruption>/merged_machine_utilization.csv
+#    Results/brandimarte/<disruption>/merged_agv_performance.csv
+#    Results/brandimarte/<disruption>/merged_segment_congestion.csv
 ##############################################################################
 
-# Default parameters
-EXE_PATH="./capstone.x86_64"
-BATCH_CONFIG=""
+set -euo pipefail
+
+# ── Defaults ──────────────────────────────────────────────────────────────────
+EXE=""
 BENCHMARK_DIR=""
 RESULTS_DIR="./Results"
-REPEATS=1
+REPEATS=3
 TIMESCALE=100
 LOG_LEVEL="Low"
-DISRUPTION="none"
+DISRUPTION_LIST="none"          # comma-separated: none,low,high
 
-# Parse command-line arguments
-while [[ "$#" -gt 0 ]]; do
+RULES=(
+    "SPT_SMPT"
+    "SPT_SRWT"
+    "LPT_MMUR"
+    "LPT_SMPT"
+    "SRT_SRWT"
+    "SRT_SMPT"
+    "LRT_MMUR"
+    "SDT_SRWT"
+    "random"
+)
+
+# ── Parse args ────────────────────────────────────────────────────────────────
+while [[ $# -gt 0 ]]; do
     case $1 in
-        --exe-path) EXE_PATH="$2"; shift ;;
-        --batch-config) BATCH_CONFIG="$2"; shift ;;
-        --benchmark-dir) BENCHMARK_DIR="$2"; shift ;;
-        --results-dir) RESULTS_DIR="$2"; shift ;;
-        --repeats) REPEATS="$2"; shift ;;
-        --timescale) TIMESCALE="$2"; shift ;;
-        --log-level) LOG_LEVEL="$2"; shift ;;
-        --disruption) DISRUPTION="$2"; shift ;;
-        *) echo -e "\e[31m[Launcher] ERROR: Unknown parameter passed: $1\e[0m"; exit 1 ;;
+        --exe)         EXE="$2";              shift 2 ;;
+        --benchmarks)  BENCHMARK_DIR="$2";    shift 2 ;;
+        --results)     RESULTS_DIR="$2";      shift 2 ;;
+        --repeats)     REPEATS="$2";          shift 2 ;;
+        --timescale)   TIMESCALE="$2";        shift 2 ;;
+        --loglevel)    LOG_LEVEL="$2";        shift 2 ;;
+        --disruption)  DISRUPTION_LIST="$2";  shift 2 ;;
+        *) echo "[ERROR] Unknown argument: $1"; exit 1 ;;
     esac
-    shift
 done
 
-# Validate: at least one data source must be provided
-if [[ -z "$BATCH_CONFIG" && -z "$BENCHMARK_DIR" ]]; then
-    echo -e "\e[31m[Launcher] ERROR: Provide at least one of --batch-config or --benchmark-dir.\e[0m"
+# ── Validate ──────────────────────────────────────────────────────────────────
+if [[ -z "$EXE" ]]; then
+    echo "[ERROR] --exe is required."
+    exit 1
+fi
+if [[ ! -f "$EXE" ]]; then
+    echo "[ERROR] Executable not found: $EXE"
+    exit 1
+fi
+if [[ -z "$BENCHMARK_DIR" ]]; then
+    echo "[ERROR] --benchmarks is required."
+    exit 1
+fi
+if [[ ! -d "$BENCHMARK_DIR" ]]; then
+    echo "[ERROR] Benchmark directory not found: $BENCHMARK_DIR"
     exit 1
 fi
 
-RULES=("SPT_SMPT" "SPT_SRWT" "LPT_MMUR" "LPT_SMPT" "SRT_SRWT" "SRT_SMPT" "LRT_MMUR" "SDT_SRWT" "random")
+# Convert comma-separated disruption list to array
+IFS=',' read -ra DISRUPTIONS <<< "$DISRUPTION_LIST"
 
-# PIDs array for cleanup
-PIDS=()
-
-# Cleanup function to prevent orphaned processes
-cleanup() {
-    echo -e "\n\e[31m[Cleanup] Interrupt detected. Terminating running workers...\e[0m"
-    for pid in "${PIDS[@]}"; do
-        if kill -0 "$pid" 2>/dev/null; then
-            kill -9 "$pid" 2>/dev/null
-            echo -e "\e[31m  - Killed PID: $pid\e[0m"
-        fi
-    done
-    exit 1
-}
-trap cleanup SIGINT SIGTERM
-
-# Merge CSVs function
+# ── Merge helper ──────────────────────────────────────────────────────────────
+# merge_csvs <output_file> <label> <input_file1> [input_file2 ...]
 merge_csvs() {
-    local OUT_PATH=$1
-    local LABEL=$2
+    local out_file="$1"
+    local label="$2"
     shift 2
-    local CSV_PATHS=("$@")
+    local inputs=("$@")
 
-    echo -e "\n\e[36m[Launcher] Merging $LABEL CSVs...\e[0m"
-    local HEADER_WRITTEN=0
-    local ROWS_TOTAL=0
+    echo ""
+    echo "[Merge] Merging $label → $(basename "$out_file")"
 
-    for csv in "${CSV_PATHS[@]}"; do
+    local header_written=0
+    local rows_total=0
+
+    for csv in "${inputs[@]}"; do
         if [[ ! -f "$csv" ]]; then
-            echo -e "\e[33m  [WARN] Missing: $csv\e[0m"
+            echo "  [WARN] Missing: $(basename "$csv")"
             continue
         fi
 
-        local LINES=$(wc -l < "$csv")
-        if [[ "$LINES" -lt 2 ]]; then continue; fi
+        local line_count
+        line_count=$(wc -l < "$csv")
 
-        if [[ "$HEADER_WRITTEN" -eq 0 ]]; then
-            head -n 1 "$csv" > "$OUT_PATH"
-            HEADER_WRITTEN=1
+        if (( line_count < 2 )); then
+            echo "  [WARN] No data rows in: $(basename "$csv")"
+            continue
         fi
 
-        tail -n +2 "$csv" >> "$OUT_PATH"
-        local DATA_LINES=$((LINES - 1))
-        ROWS_TOTAL=$((ROWS_TOTAL + DATA_LINES))
-        echo "  Merged $DATA_LINES rows from $(basename "$csv")"
+        if [[ $header_written -eq 0 ]]; then
+            head -1 "$csv" > "$out_file"
+            header_written=1
+        fi
+
+        # Append data rows (skip header)
+        tail -n +2 "$csv" >> "$out_file"
+        local data_rows=$(( line_count - 1 ))
+        rows_total=$(( rows_total + data_rows ))
+        echo "  Merged $data_rows rows from $(basename "$csv")"
     done
 
-    if [[ "$HEADER_WRITTEN" -eq 1 ]]; then
-        echo -e "\e[32m[Launcher] $ROWS_TOTAL total rows -> $OUT_PATH\e[0m"
+    if [[ $header_written -eq 1 ]]; then
+        echo "  ✅ $rows_total total rows → $(basename "$out_file")"
     else
-        echo -e "\e[33m[Launcher] No data rows found for $LABEL.\e[0m"
+        echo "  ❌ No files found or merged for: $label"
     fi
 }
 
-# Resolve paths
-EXE_PATH=$(realpath "$EXE_PATH")
+# ── Main ──────────────────────────────────────────────────────────────────────
 mkdir -p "$RESULTS_DIR"
-RESULTS_DIR=$(realpath "$RESULTS_DIR")
 
-RUN_GENERATED=0
-if [[ -n "$BATCH_CONFIG" ]]; then
-    if [[ ! -f "$BATCH_CONFIG" ]]; then
-        echo -e "\e[33m[Launcher] WARNING: --batch-config '$BATCH_CONFIG' not found -- skipping.\e[0m"
-    else
-        BATCH_CONFIG=$(realpath "$BATCH_CONFIG")
-        RUN_GENERATED=1
-    fi
-fi
+SCRIPT_START=$SECONDS
 
-RUN_BENCHMARKS=0
-BM_RESULTS_DIR=""
-if [[ -n "$BENCHMARK_DIR" ]]; then
-    if [[ ! -d "$BENCHMARK_DIR" ]]; then
-        echo -e "\e[33m[Launcher] WARNING: --benchmark-dir '$BENCHMARK_DIR' not found -- skipping.\e[0m"
-    else
-        BENCHMARK_DIR=$(realpath "$BENCHMARK_DIR")
-        RUN_BENCHMARKS=1
-        BM_RESULTS_DIR="$RESULTS_DIR/brandimarte"
-        mkdir -p "$BM_RESULTS_DIR"
-    fi
-fi
+echo "========================================================================"
+echo "[Launcher] Brandimarte parallel batch runner"
+echo "[Launcher] Exe:          $EXE"
+echo "[Launcher] Benchmarks:   $BENCHMARK_DIR"
+echo "[Launcher] Results:      $RESULTS_DIR"
+echo "[Launcher] Rules:        ${RULES[*]}"
+echo "[Launcher] Disruptions:  ${DISRUPTIONS[*]}"
+echo "[Launcher] Workers:      $(( ${#RULES[@]} * ${#DISRUPTIONS[@]} )) total (${#RULES[@]} rules × ${#DISRUPTIONS[@]} disruption levels)"
+echo "[Launcher] Repeats:      $REPEATS  |  Timescale: ${TIMESCALE}x  |  LogLevel: $LOG_LEVEL"
+echo "========================================================================"
 
-if [[ $RUN_GENERATED -eq 0 && $RUN_BENCHMARKS -eq 0 ]]; then
-    echo -e "\e[31m[Launcher] ERROR: No valid data sources found. Exiting.\e[0m"
-    exit 1
-fi
+# ── Spawn all workers across all disruption levels simultaneously ─────────────
+declare -a ALL_PIDS=()
+declare -a ALL_RULES=()
+declare -a ALL_DISRUPTIONS=()
 
-TOTAL_WORKERS=$(( ${#RULES[@]} * (RUN_GENERATED + RUN_BENCHMARKS) ))
-echo -e "\e[36m[Launcher] Starting $TOTAL_WORKERS workers simultaneously...\e[0m"
-echo "Exe:         $EXE_PATH"
-[[ $RUN_GENERATED -eq 1 ]] && echo "BatchConfig: $BATCH_CONFIG"
-[[ $RUN_BENCHMARKS -eq 1 ]] && echo "Benchmarks:  $BENCHMARK_DIR"
-echo "Results:     $RESULTS_DIR"
-echo "Params:      Repeats: $REPEATS | Timescale: ${TIMESCALE}x | Disruption: $DISRUPTION"
-echo ""
+for DISRUPTION in "${DISRUPTIONS[@]}"; do
+    DISRUPTION="${DISRUPTION// /}"
+    BM_OUT_DIR="${RESULTS_DIR}/brandimarte/${DISRUPTION}"
+    mkdir -p "$BM_OUT_DIR"
 
-START_TIME=$(date +%s)
-
-# Wave 1: Generated Data
-if [[ $RUN_GENERATED -eq 1 ]]; then
-    echo -e "\e[36m[Launcher] Wave 1: Generated job-data workers\e[0m"
-    for rule in "${RULES[@]}"; do
-        LOG_FILE="$RESULTS_DIR/worker_${rule}.log"
-        echo "  Spawning generated worker: $rule"
-        
-        "$EXE_PATH" -batchmode -nographics \
-            -batchconfig "$BATCH_CONFIG" \
-            -rules "$rule" \
-            -outputsuffix "_${rule}" \
-            -repeats "$REPEATS" \
-            -timescale "$TIMESCALE" \
-            -loglevel "$LOG_LEVEL" \
-            -disruption "$DISRUPTION" \
-            -logFile "$LOG_FILE" &
-            
-        PIDS+=($!)
-    done
-fi
-
-# Wave 2: Benchmarks
-if [[ $RUN_BENCHMARKS -eq 1 ]]; then
     echo ""
-    echo -e "\e[36m[Launcher] Wave 2: Brandimarte benchmark workers\e[0m"
-    for rule in "${RULES[@]}"; do
-        LOG_FILE="$RESULTS_DIR/worker_bm_${rule}.log"
-        echo "  Spawning benchmark worker: $rule"
-        
-        "$EXE_PATH" -batchmode -nographics \
-            -benchmarkdir "$BENCHMARK_DIR" \
-            -rules "$rule" \
-            -outputsuffix "_bm_${rule}" \
-            -outputdir "brandimarte" \
-            -repeats "$REPEATS" \
-            -timescale "$TIMESCALE" \
-            -loglevel "$LOG_LEVEL" \
-            -disruption "$DISRUPTION" \
-            -logFile "$LOG_FILE" &
-            
-        PIDS+=($!)
+    echo "[Launcher] Spawning workers for disruption=$DISRUPTION → $BM_OUT_DIR"
+
+    for RULE in "${RULES[@]}"; do
+        SUFFIX="_bm_${RULE}"
+        LOG_FILE="${BM_OUT_DIR}/worker_bm_${RULE}.log"
+
+        "$EXE" \
+            -batchmode -nographics \
+            -benchmarkdir   "$BENCHMARK_DIR" \
+            -rules          "$RULE" \
+            -outputsuffix   "$SUFFIX" \
+            -outputdir      "brandimarte/${DISRUPTION}" \
+            -repeats        "$REPEATS" \
+            -timescale      "$TIMESCALE" \
+            -loglevel       "$LOG_LEVEL" \
+            -disruption     "$DISRUPTION" \
+            -logFile        "$LOG_FILE" \
+            > /dev/null 2>&1 &
+
+        PID=$!
+        ALL_PIDS+=("$PID")
+        ALL_RULES+=("$RULE")
+        ALL_DISRUPTIONS+=("$DISRUPTION")
+        echo "[Launcher]   Spawned [$DISRUPTION] $RULE  (PID $PID)"
     done
-fi
+done
 
-echo -e "\n\e[33m[Launcher] All workers launched. Waiting for completion...\e[0m"
+TOTAL_WORKERS=${#ALL_PIDS[@]}
+echo ""
+echo "[Launcher] All $TOTAL_WORKERS workers launched. Waiting for completion..."
 
-# Polling and progress reporting
-LAST_REPORT=$START_TIME
+# ── Poll until every worker is done ──────────────────────────────────────────
+LAST_REPORT=$SECONDS
+
 while true; do
-    RUNNING_COUNT=0
-    for pid in "${PIDS[@]}"; do
-        if kill -0 "$pid" 2>/dev/null; then
-            RUNNING_COUNT=$((RUNNING_COUNT + 1))
+    RUNNING=0
+    STILL_RUNNING=()
+
+    for i in "${!ALL_PIDS[@]}"; do
+        if kill -0 "${ALL_PIDS[$i]}" 2>/dev/null; then
+            RUNNING=$(( RUNNING + 1 ))
+            STILL_RUNNING+=("[${ALL_DISRUPTIONS[$i]}] ${ALL_RULES[$i]}")
         fi
     done
 
-    if [[ $RUNNING_COUNT -eq 0 ]]; then
-        break
+    NOW=$SECONDS
+    if (( NOW - LAST_REPORT >= 30 )); then
+        DONE=$(( TOTAL_WORKERS - RUNNING ))
+        ELAPSED_MIN=$(( (NOW - SCRIPT_START) / 60 ))
+        echo "[Launcher] $DONE/$TOTAL_WORKERS done  (${ELAPSED_MIN} min elapsed)"
+        if [[ ${#STILL_RUNNING[@]} -gt 0 ]]; then
+            echo "[Launcher]   Still running: ${STILL_RUNNING[*]}"
+        fi
+        LAST_REPORT=$NOW
     fi
 
-    CURRENT_TIME=$(date +%s)
-    if (( CURRENT_TIME - LAST_REPORT >= 30 )); then
-        ELAPSED_MIN=$(echo "scale=1; ($CURRENT_TIME - $START_TIME) / 60" | bc)
-        echo -e "\e[36m[Launcher] $RUNNING_COUNT workers still running (${ELAPSED_MIN} min elapsed)\e[0m"
-        LAST_REPORT=$CURRENT_TIME
-    fi
+    [[ $RUNNING -eq 0 ]] && break
     sleep 5
 done
 
-TOTAL_MIN=$(echo "scale=1; ($(date +%s) - $START_TIME) / 60" | bc)
-echo -e "\n\e[32m[Launcher] All workers finished in ${TOTAL_MIN} min.\e[0m"
+TOTAL_MIN=$(( (SECONDS - SCRIPT_START) / 60 ))
+echo ""
+echo "[Launcher] All $TOTAL_WORKERS workers finished in ~${TOTAL_MIN} min."
 
-# MERGE PHASE
-if [[ $RUN_GENERATED -eq 1 ]]; then
-    GEN_EPISODES=()
-    GEN_MACHINES=()
-    for rule in "${RULES[@]}"; do
-        GEN_EPISODES+=("$RESULTS_DIR/baseline_results_${rule}.csv")
-        GEN_MACHINES+=("$RESULTS_DIR/machine_utilization_${rule}.csv")
+# ── Merge phase — one set of 4 CSVs per disruption level ─────────────────────
+echo ""
+echo "[Launcher] Merging CSVs..."
+
+for DISRUPTION in "${DISRUPTIONS[@]}"; do
+    DISRUPTION="${DISRUPTION// /}"
+    BM_OUT_DIR="${RESULTS_DIR}/brandimarte/${DISRUPTION}"
+
+    echo ""
+    echo "────────────────────────────────────────────────────────────────────"
+    echo "[Launcher] Merging disruption=$DISRUPTION"
+    echo "────────────────────────────────────────────────────────────────────"
+
+    declare -a RESULTS_CSVS=()
+    declare -a MACHINE_CSVS=()
+    declare -a AGV_CSVS=()
+    declare -a SEGMENT_CSVS=()
+
+    for RULE in "${RULES[@]}"; do
+        RESULTS_CSVS+=( "${BM_OUT_DIR}/results_bm_${RULE}.csv" )
+        MACHINE_CSVS+=( "${BM_OUT_DIR}/machine_utilization_bm_${RULE}.csv" )
+        AGV_CSVS+=(     "${BM_OUT_DIR}/agv_performance_bm_${RULE}.csv" )
+        SEGMENT_CSVS+=( "${BM_OUT_DIR}/segment_congestion_bm_${RULE}.csv" )
     done
-    merge_csvs "$RESULTS_DIR/results.csv" "generated (episodes)" "${GEN_EPISODES[@]}"
-    merge_csvs "$RESULTS_DIR/machine_utilization.csv" "generated (machine utilization)" "${GEN_MACHINES[@]}"
-fi
 
-if [[ $RUN_BENCHMARKS -eq 1 ]]; then
-    BM_EPISODES=()
-    BM_MACHINES=()
-    for rule in "${RULES[@]}"; do
-        BM_EPISODES+=("$BM_RESULTS_DIR/baseline_results_bm_${rule}.csv")
-        BM_MACHINES+=("$BM_RESULTS_DIR/machine_utilization_bm_${rule}.csv")
-    done
-    merge_csvs "$BM_RESULTS_DIR/results.csv" "brandimarte (episodes)" "${BM_EPISODES[@]}"
-    merge_csvs "$BM_RESULTS_DIR/machine_utilization.csv" "brandimarte (machine utilization)" "${BM_MACHINES[@]}"
-fi
+    merge_csvs "${BM_OUT_DIR}/merged_results.csv" \
+        "results ($DISRUPTION)" \
+        "${RESULTS_CSVS[@]}"
 
-echo -e "\n\e[36m[Launcher] Processing Complete.\e[0m"
+    merge_csvs "${BM_OUT_DIR}/merged_machine_utilization.csv" \
+        "machine_utilization ($DISRUPTION)" \
+        "${MACHINE_CSVS[@]}"
+
+    merge_csvs "${BM_OUT_DIR}/merged_agv_performance.csv" \
+        "agv_performance ($DISRUPTION)" \
+        "${AGV_CSVS[@]}"
+
+    merge_csvs "${BM_OUT_DIR}/merged_segment_congestion.csv" \
+        "segment_congestion ($DISRUPTION)" \
+        "${SEGMENT_CSVS[@]}"
+
+    echo ""
+    echo "[Launcher] Output files for disruption=$DISRUPTION:"
+    echo "  ${BM_OUT_DIR}/merged_results.csv"
+    echo "  ${BM_OUT_DIR}/merged_machine_utilization.csv"
+    echo "  ${BM_OUT_DIR}/merged_agv_performance.csv"
+    echo "  ${BM_OUT_DIR}/merged_segment_congestion.csv"
+
+    unset RESULTS_CSVS MACHINE_CSVS AGV_CSVS SEGMENT_CSVS
+done
+
+echo ""
+echo "========================================================================"
+echo "🎉 All done in ~${TOTAL_MIN} min."
+echo ""
+echo "Merged output locations:"
+for DISRUPTION in "${DISRUPTIONS[@]}"; do
+    DISRUPTION="${DISRUPTION// /}"
+    echo "  ${RESULTS_DIR}/brandimarte/${DISRUPTION}/merged_*.csv"
+done
+echo "========================================================================"

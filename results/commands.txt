@@ -1,0 +1,17 @@
+#merge
+python merge.py -dir time_scale/det/raw -out time_scale/det
+
+
+#phase 2 analysis
+
+python dfjsp_phase2_analysis2.py       --machine  time_scale/det/machine_utilization.csv       --results  time_scale/det/results.csv                   --agv      time_scale/det/agv_performance.csv           --segments time_scale/det/segment_congestion.csv        --out time_scale/det/figs/
+
+
+#phase 1 analysis
+
+python analysis.py \
+    --machine time_scale/det/machine_utilization.csv \
+    --results time_scale/det/results.csv \
+    --agv time_scale/det/agv_performance.csv \
+    --segments time_scale/det/segment_congestion.csv \
+    --out time_scale/det/figs/

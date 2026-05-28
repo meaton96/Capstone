@@ -1,0 +1,1531 @@
+--- Log Started: 5/27/2026 12:06:35 PM ---
+2026-05-27 12:06:35.258 [BatchRunner] TimeScale set to 100x via CLI.
+2026-05-27 12:06:35.260 [BatchRunner] Active rules (1): SRT_SRWT
+2026-05-27 12:06:35.262 [BatchRunner] Results subdirectory: brandimarte/low
+2026-05-27 12:06:35.262 [BatchRunner] Disruption mode: Low
+2026-05-27 12:06:35.283 [BrandimartLoader] Stochastic config for mk01 (disruption=Low): meanProc=80.9s maxProc=120.0s WeibullLambda=24968.6 RepairMu=2.42 meanTTF≈22539.1s meanRepair≈12.1s expectedFailuresPerMachinePerEpisode≈0.0
+2026-05-27 12:06:35.284 [BatchRunner] Loaded benchmark: brandimarte_mk01_low (10 jobs, 6 machines) disruption=Low
+2026-05-27 12:06:35.285 [BrandimartLoader] Stochastic config for mk02 (disruption=Low): meanProc=76.4s maxProc=120.0s WeibullLambda=24174.0 RepairMu=2.36 meanTTF≈21821.9s meanRepair≈11.5s expectedFailuresPerMachinePerEpisode≈0.0
+2026-05-27 12:06:35.285 [BatchRunner] Loaded benchmark: brandimarte_mk02_low (10 jobs, 6 machines) disruption=Low
+2026-05-27 12:06:35.289 [BrandimartLoader] Stochastic config for mk03 (disruption=Low): meanProc=209.3s maxProc=380.0s WeibullLambda=47726.7 RepairMu=3.37 meanTTF≈43082.9s meanRepair≈31.4s expectedFailuresPerMachinePerEpisode≈0.1
+2026-05-27 12:06:35.289 [BatchRunner] Loaded benchmark: brandimarte_mk03_low (15 jobs, 8 machines) disruption=Low
+2026-05-27 12:06:35.290 [BrandimartLoader] Stochastic config for mk04 (disruption=Low): meanProc=100.9s maxProc=180.0s WeibullLambda=28524.3 RepairMu=2.64 meanTTF≈25748.8s meanRepair≈15.1s expectedFailuresPerMachinePerEpisode≈0.0
+2026-05-27 12:06:35.290 [BatchRunner] Loaded benchmark: brandimarte_mk04_low (15 jobs, 8 machines) disruption=Low
+2026-05-27 12:06:35.291 [BrandimartLoader] Stochastic config for mk05 (disruption=Low): meanProc=134.6s maxProc=180.0s WeibullLambda=34489.5 RepairMu=2.93 meanTTF≈31133.7s meanRepair≈20.2s expectedFailuresPerMachinePerEpisode≈0.1
+2026-05-27 12:06:35.291 [BatchRunner] Loaded benchmark: brandimarte_mk05_low (15 jobs, 4 machines) disruption=Low
+2026-05-27 12:06:35.293 [BrandimartLoader] Stochastic config for mk06 (disruption=Low): meanProc=99.6s maxProc=180.0s WeibullLambda=28287.0 RepairMu=2.62 meanTTF≈25534.7s meanRepair≈14.9s expectedFailuresPerMachinePerEpisode≈0.1
+2026-05-27 12:06:35.293 [BatchRunner] Loaded benchmark: brandimarte_mk06_low (10 jobs, 10 machines) disruption=Low
+2026-05-27 12:06:35.294 [BrandimartLoader] Stochastic config for mk07 (disruption=Low): meanProc=200.8s maxProc=380.0s WeibullLambda=46221.8 RepairMu=3.33 meanTTF≈41724.4s meanRepair≈30.1s expectedFailuresPerMachinePerEpisode≈0.1
+2026-05-27 12:06:35.294 [BatchRunner] Loaded benchmark: brandimarte_mk07_low (20 jobs, 5 machines) disruption=Low
+2026-05-27 12:06:35.296 [BrandimartLoader] Stochastic config for mk08 (disruption=Low): meanProc=240.7s maxProc=380.0s WeibullLambda=53305.9 RepairMu=3.51 meanTTF≈48119.3s meanRepair≈36.1s expectedFailuresPerMachinePerEpisode≈0.1
+2026-05-27 12:06:35.296 [BatchRunner] Loaded benchmark: brandimarte_mk08_low (20 jobs, 10 machines) disruption=Low
+2026-05-27 12:06:35.297 [BrandimartLoader] Stochastic config for mk09 (disruption=Low): meanProc=227.8s maxProc=380.0s WeibullLambda=51009.4 RepairMu=3.45 meanTTF≈46046.2s meanRepair≈34.2s expectedFailuresPerMachinePerEpisode≈0.1
+2026-05-27 12:06:35.298 [BatchRunner] Loaded benchmark: brandimarte_mk09_low (20 jobs, 10 machines) disruption=Low
+2026-05-27 12:06:35.300 [BrandimartLoader] Stochastic config for mk10 (disruption=Low): meanProc=220.6s maxProc=380.0s WeibullLambda=49727.9 RepairMu=3.42 meanTTF≈44889.4s meanRepair≈33.1s expectedFailuresPerMachinePerEpisode≈0.1
+2026-05-27 12:06:35.301 [BatchRunner] Loaded benchmark: brandimarte_mk10_low (20 jobs, 15 machines) disruption=Low
+2026-05-27 12:06:35.302 [BrandimartLoader] Stochastic config for mk11 (disruption=Low): meanProc=365.1s maxProc=580.0s WeibullLambda=75349.3 RepairMu=3.92 meanTTF≈68017.8s meanRepair≈54.8s expectedFailuresPerMachinePerEpisode≈0.2
+2026-05-27 12:06:35.302 [BatchRunner] Loaded benchmark: brandimarte_mk11_low (30 jobs, 5 machines) disruption=Low
+2026-05-27 12:06:35.302 [BrandimartLoader] Stochastic config for mk12 (disruption=Low): meanProc=357.0s maxProc=580.0s WeibullLambda=73914.1 RepairMu=3.90 meanTTF≈66722.2s meanRepair≈53.6s expectedFailuresPerMachinePerEpisode≈0.1
+2026-05-27 12:06:35.302 [BatchRunner] Loaded benchmark: brandimarte_mk12_low (30 jobs, 10 machines) disruption=Low
+2026-05-27 12:06:35.305 [BrandimartLoader] Stochastic config for mk13 (disruption=Low): meanProc=397.2s maxProc=580.0s WeibullLambda=81041.1 RepairMu=4.01 meanTTF≈73155.8s meanRepair≈59.6s expectedFailuresPerMachinePerEpisode≈0.1
+2026-05-27 12:06:35.305 [BatchRunner] Loaded benchmark: brandimarte_mk13_low (30 jobs, 10 machines) disruption=Low
+2026-05-27 12:06:35.306 [BrandimartLoader] Stochastic config for mk14 (disruption=Low): meanProc=399.1s maxProc=580.0s WeibullLambda=81377.3 RepairMu=4.01 meanTTF≈73459.3s meanRepair≈59.9s expectedFailuresPerMachinePerEpisode≈0.1
+2026-05-27 12:06:35.306 [BatchRunner] Loaded benchmark: brandimarte_mk14_low (30 jobs, 15 machines) disruption=Low
+2026-05-27 12:06:35.310 [BrandimartLoader] Stochastic config for mk15 (disruption=Low): meanProc=377.8s maxProc=580.0s WeibullLambda=77597.1 RepairMu=3.96 meanTTF≈70046.9s meanRepair≈56.7s expectedFailuresPerMachinePerEpisode≈0.1
+2026-05-27 12:06:35.310 [BatchRunner] Loaded benchmark: brandimarte_mk15_low (30 jobs, 15 machines) disruption=Low
+2026-05-27 12:06:35.310 [BatchRunner] Multi-benchmark: 15 files x 1 rules x 3 repeats = 45 total runs [disruption=Low]
+2026-05-27 12:06:35.310 [BatchRunner] ─── brandimarte_mk01_low (10j × 6m) ───
+2026-05-27 12:06:35.310 [BatchRunner] Run 1/45: benchmark=brandimarte_mk01_low rule=SRT_SRWT seed=42
+2026-05-27 12:06:35.312 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=24968.57 λ_agv=700 repairMu=2.415718 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:06:35.340 [BrandimartLoader] Loaded 10 jobs from benchmark (6 BM machines → 6 runtime machines across 5 types)
+2026-05-27 12:06:35.342 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 12:06:35.343 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=24968.57 λ_agv=700 repairMu=2.415718 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:06:35.344 [Orchestrator] Episode started: 10 jobs, 6 machines, stochastic=True
+2026-05-27 12:06:35.345 [Agent] OnEpisodeBegin skipped — waiting for UI to arm.
+2026-05-27 12:07:16.280 [EpisodeTracker] Machine 2 failed. Episode total failures=1
+2026-05-27 12:07:47.495 [TelemetryChannel] Flushed 2 events to Python.
+2026-05-27 12:07:47.496 [Orchestrator] Logging Academy Epiosde
+2026-05-27 12:07:47.496 [StochasticSummary] Failures=1 TotalRepairTime=8.1s MeanTTF_theory=22539.1s
+2026-05-27 12:07:47.499 [BatchRunner] Progress: 1/45 (72.2s elapsed, ETA 3176.3s)
+2026-05-27 12:07:47.914 [BatchRunner] Run 2/45: benchmark=brandimarte_mk01_low rule=SRT_SRWT seed=43
+2026-05-27 12:07:47.914 [StochasticMgr] Initialized — seed=43 mode=[mf] WeibullK=1.5 λ_machine=24968.57 λ_agv=700 repairMu=2.415718 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:07:47.918 [BrandimartLoader] Loaded 10 jobs from benchmark (6 BM machines → 6 runtime machines across 5 types)
+2026-05-27 12:07:47.920 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 12:07:47.920 [StochasticMgr] Initialized — seed=43 mode=[mf] WeibullK=1.5 λ_machine=24968.57 λ_agv=700 repairMu=2.415718 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:07:47.920 [Orchestrator] Episode started: 10 jobs, 6 machines, stochastic=True
+2026-05-27 12:08:45.154 [EpisodeTracker] Machine 1 failed. Episode total failures=1
+2026-05-27 12:08:45.154 [Orchestrator] Job 4: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 12:08:45.755 [Failure] Deferred job 4 re-queued after repair.
+2026-05-27 12:09:03.461 [EpisodeTracker] Machine 5 failed. Episode total failures=2
+2026-05-27 12:09:04.082 [TelemetryChannel] Flushed 4 events to Python.
+2026-05-27 12:09:04.082 [Orchestrator] Logging Academy Epiosde
+2026-05-27 12:09:04.082 [StochasticSummary] Failures=2 TotalRepairTime=48.4s MeanTTF_theory=22539.1s
+2026-05-27 12:09:04.082 [BatchRunner] Progress: 2/45 (148.8s elapsed, ETA 3198.6s)
+2026-05-27 12:09:04.497 [BatchRunner] Run 3/45: benchmark=brandimarte_mk01_low rule=SRT_SRWT seed=44
+2026-05-27 12:09:04.497 [StochasticMgr] Initialized — seed=44 mode=[mf] WeibullK=1.5 λ_machine=24968.57 λ_agv=700 repairMu=2.415718 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:09:04.501 [BrandimartLoader] Loaded 10 jobs from benchmark (6 BM machines → 6 runtime machines across 5 types)
+2026-05-27 12:09:04.501 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 12:09:04.502 [StochasticMgr] Initialized — seed=44 mode=[mf] WeibullK=1.5 λ_machine=24968.57 λ_agv=700 repairMu=2.415718 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:09:04.502 [Orchestrator] Episode started: 10 jobs, 6 machines, stochastic=True
+2026-05-27 12:09:20.659 [EpisodeTracker] Machine 4 failed. Episode total failures=1
+2026-05-27 12:09:21.890 [EpisodeTracker] Machine 5 failed. Episode total failures=2
+2026-05-27 12:10:19.485 [TelemetryChannel] Flushed 4 events to Python.
+2026-05-27 12:10:19.485 [Orchestrator] Logging Academy Epiosde
+2026-05-27 12:10:19.485 [StochasticSummary] Failures=2 TotalRepairTime=17.5s MeanTTF_theory=22539.1s
+2026-05-27 12:10:19.486 [BatchRunner] Progress: 3/45 (224.2s elapsed, ETA 3138.4s)
+2026-05-27 12:10:19.907 [BatchRunner] ─── brandimarte_mk02_low (10j × 6m) ───
+2026-05-27 12:10:19.907 [BatchRunner] Run 4/45: benchmark=brandimarte_mk02_low rule=SRT_SRWT seed=42
+2026-05-27 12:10:19.907 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=24173.98 λ_agv=700 repairMu=2.358687 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:10:19.913 [BrandimartLoader] Loaded 10 jobs from benchmark (6 BM machines → 6 runtime machines across 5 types)
+2026-05-27 12:10:19.914 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 12:10:19.914 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=24173.98 λ_agv=700 repairMu=2.358687 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:10:19.914 [Orchestrator] Episode started: 10 jobs, 6 machines, stochastic=True
+2026-05-27 12:10:59.138 [EpisodeTracker] Machine 2 failed. Episode total failures=1
+2026-05-27 12:11:33.558 [EpisodeTracker] Machine 5 failed. Episode total failures=2
+2026-05-27 12:11:35.417 [EpisodeTracker] Machine 1 failed. Episode total failures=3
+2026-05-27 12:11:43.376 [TelemetryChannel] Flushed 6 events to Python.
+2026-05-27 12:11:43.376 [Orchestrator] Logging Academy Epiosde
+2026-05-27 12:11:43.376 [StochasticSummary] Failures=3 TotalRepairTime=27.2s MeanTTF_theory=21821.9s
+2026-05-27 12:11:43.377 [BatchRunner] Progress: 4/45 (308.1s elapsed, ETA 3157.7s)
+2026-05-27 12:11:43.786 [BatchRunner] Run 5/45: benchmark=brandimarte_mk02_low rule=SRT_SRWT seed=43
+2026-05-27 12:11:43.786 [StochasticMgr] Initialized — seed=43 mode=[mf] WeibullK=1.5 λ_machine=24173.98 λ_agv=700 repairMu=2.358687 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:11:43.792 [BrandimartLoader] Loaded 10 jobs from benchmark (6 BM machines → 6 runtime machines across 5 types)
+2026-05-27 12:11:43.792 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 12:11:43.792 [StochasticMgr] Initialized — seed=43 mode=[mf] WeibullK=1.5 λ_machine=24173.98 λ_agv=700 repairMu=2.358687 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:11:43.792 [Orchestrator] Episode started: 10 jobs, 6 machines, stochastic=True
+2026-05-27 12:12:40.006 [EpisodeTracker] Machine 1 failed. Episode total failures=1
+2026-05-27 12:12:58.024 [EpisodeTracker] Machine 5 failed. Episode total failures=2
+2026-05-27 12:13:09.600 [TelemetryChannel] Flushed 4 events to Python.
+2026-05-27 12:13:09.600 [Orchestrator] Logging Academy Epiosde
+2026-05-27 12:13:09.600 [StochasticSummary] Failures=2 TotalRepairTime=45.7s MeanTTF_theory=21821.9s
+2026-05-27 12:13:09.600 [BatchRunner] Progress: 5/45 (394.3s elapsed, ETA 3154.3s)
+2026-05-27 12:13:10.015 [BatchRunner] Run 6/45: benchmark=brandimarte_mk02_low rule=SRT_SRWT seed=44
+2026-05-27 12:13:10.015 [StochasticMgr] Initialized — seed=44 mode=[mf] WeibullK=1.5 λ_machine=24173.98 λ_agv=700 repairMu=2.358687 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:13:10.020 [BrandimartLoader] Loaded 10 jobs from benchmark (6 BM machines → 6 runtime machines across 5 types)
+2026-05-27 12:13:10.020 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 12:13:10.020 [StochasticMgr] Initialized — seed=44 mode=[mf] WeibullK=1.5 λ_machine=24173.98 λ_agv=700 repairMu=2.358687 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:13:10.020 [Orchestrator] Episode started: 10 jobs, 6 machines, stochastic=True
+2026-05-27 12:13:25.681 [EpisodeTracker] Machine 4 failed. Episode total failures=1
+2026-05-27 12:13:26.939 [EpisodeTracker] Machine 5 failed. Episode total failures=2
+2026-05-27 12:14:31.909 [TelemetryChannel] Flushed 4 events to Python.
+2026-05-27 12:14:31.909 [Orchestrator] Logging Academy Epiosde
+2026-05-27 12:14:31.909 [StochasticSummary] Failures=2 TotalRepairTime=16.5s MeanTTF_theory=21821.9s
+2026-05-27 12:14:31.909 [BatchRunner] Progress: 6/45 (476.6s elapsed, ETA 3097.9s)
+2026-05-27 12:14:32.330 [BatchRunner] ─── brandimarte_mk03_low (15j × 8m) ───
+2026-05-27 12:14:32.330 [BatchRunner] Run 7/45: benchmark=brandimarte_mk03_low rule=SRT_SRWT seed=42
+2026-05-27 12:14:32.331 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=47726.74 λ_agv=700 repairMu=3.366497 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:14:32.338 [BrandimartLoader] Loaded 15 jobs from benchmark (8 BM machines → 8 runtime machines across 5 types)
+2026-05-27 12:14:32.338 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 12:14:32.339 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=47726.74 λ_agv=700 repairMu=3.366497 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:14:32.339 [Orchestrator] Episode started: 15 jobs, 8 machines, stochastic=True
+2026-05-27 12:15:49.854 [EpisodeTracker] Machine 2 failed. Episode total failures=1
+2026-05-27 12:16:58.909 [EpisodeTracker] Machine 5 failed. Episode total failures=2
+2026-05-27 12:17:02.673 [EpisodeTracker] Machine 1 failed. Episode total failures=3
+2026-05-27 12:17:58.831 [EpisodeTracker] Machine 4 failed. Episode total failures=4
+2026-05-27 12:18:35.759 [TelemetryChannel] Flushed 8 events to Python.
+2026-05-27 12:18:35.759 [Orchestrator] Logging Academy Epiosde
+2026-05-27 12:18:35.759 [StochasticSummary] Failures=4 TotalRepairTime=117.0s MeanTTF_theory=43082.9s
+2026-05-27 12:18:35.760 [BatchRunner] Progress: 7/45 (720.4s elapsed, ETA 3911.0s)
+2026-05-27 12:18:36.177 [BatchRunner] Run 8/45: benchmark=brandimarte_mk03_low rule=SRT_SRWT seed=43
+2026-05-27 12:18:36.178 [StochasticMgr] Initialized — seed=43 mode=[mf] WeibullK=1.5 λ_machine=47726.74 λ_agv=700 repairMu=3.366497 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:18:36.184 [BrandimartLoader] Loaded 15 jobs from benchmark (8 BM machines → 8 runtime machines across 5 types)
+2026-05-27 12:18:36.185 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 12:18:36.185 [StochasticMgr] Initialized — seed=43 mode=[mf] WeibullK=1.5 λ_machine=47726.74 λ_agv=700 repairMu=3.366497 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:18:36.185 [Orchestrator] Episode started: 15 jobs, 8 machines, stochastic=True
+2026-05-27 12:18:37.424 [EpisodeTracker] Machine 7 failed. Episode total failures=1
+2026-05-27 12:19:21.575 [EpisodeTracker] Machine 6 failed. Episode total failures=2
+2026-05-27 12:20:27.161 [EpisodeTracker] Machine 1 failed. Episode total failures=3
+2026-05-27 12:21:02.918 [EpisodeTracker] Machine 5 failed. Episode total failures=4
+2026-05-27 12:21:38.340 [EpisodeTracker] Machine 0 failed. Episode total failures=5
+2026-05-27 12:21:38.340 [Orchestrator] Job 11: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 12:21:38.957 [Failure] Deferred job 11 re-queued after repair.
+2026-05-27 12:22:34.010 [TelemetryChannel] Flushed 10 events to Python.
+2026-05-27 12:22:34.010 [Orchestrator] Logging Academy Epiosde
+2026-05-27 12:22:34.010 [StochasticSummary] Failures=5 TotalRepairTime=198.2s MeanTTF_theory=43082.9s
+2026-05-27 12:22:34.011 [BatchRunner] Progress: 8/45 (958.7s elapsed, ETA 4434.0s)
+2026-05-27 12:22:34.416 [BatchRunner] Run 9/45: benchmark=brandimarte_mk03_low rule=SRT_SRWT seed=44
+2026-05-27 12:22:34.417 [StochasticMgr] Initialized — seed=44 mode=[mf] WeibullK=1.5 λ_machine=47726.74 λ_agv=700 repairMu=3.366497 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:22:34.424 [BrandimartLoader] Loaded 15 jobs from benchmark (8 BM machines → 8 runtime machines across 5 types)
+2026-05-27 12:22:34.424 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 12:22:34.424 [StochasticMgr] Initialized — seed=44 mode=[mf] WeibullK=1.5 λ_machine=47726.74 λ_agv=700 repairMu=3.366497 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:22:34.424 [Orchestrator] Episode started: 15 jobs, 8 machines, stochastic=True
+2026-05-27 12:23:04.778 [EpisodeTracker] Machine 4 failed. Episode total failures=1
+2026-05-27 12:23:07.287 [EpisodeTracker] Machine 5 failed. Episode total failures=2
+2026-05-27 12:23:07.287 [FlagHarvester] Job 0 returned to NeedsRouting — target machine 5 is Repairing.
+2026-05-27 12:25:26.046 [EpisodeTracker] Machine 0 failed. Episode total failures=3
+2026-05-27 12:26:37.841 [TelemetryChannel] Flushed 6 events to Python.
+2026-05-27 12:26:37.841 [Orchestrator] Logging Academy Epiosde
+2026-05-27 12:26:37.841 [StochasticSummary] Failures=3 TotalRepairTime=73.9s MeanTTF_theory=43082.9s
+2026-05-27 12:26:37.841 [BatchRunner] Progress: 9/45 (1202.5s elapsed, ETA 4810.1s)
+2026-05-27 12:26:38.252 [BatchRunner] ─── brandimarte_mk04_low (15j × 8m) ───
+2026-05-27 12:26:38.252 [BatchRunner] Run 10/45: benchmark=brandimarte_mk04_low rule=SRT_SRWT seed=42
+2026-05-27 12:26:38.252 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=28524.25 λ_agv=700 repairMu=2.63731 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:26:38.258 [BrandimartLoader] Loaded 15 jobs from benchmark (8 BM machines → 8 runtime machines across 5 types)
+2026-05-27 12:26:38.259 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 12:26:38.259 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=28524.25 λ_agv=700 repairMu=2.63731 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:26:38.259 [Orchestrator] Episode started: 15 jobs, 8 machines, stochastic=True
+2026-05-27 12:27:24.423 [EpisodeTracker] Machine 2 failed. Episode total failures=1
+2026-05-27 12:28:05.105 [EpisodeTracker] Machine 5 failed. Episode total failures=2
+2026-05-27 12:28:06.933 [EpisodeTracker] Machine 1 failed. Episode total failures=3
+2026-05-27 12:28:40.482 [EpisodeTracker] Machine 4 failed. Episode total failures=4
+2026-05-27 12:28:44.125 [TelemetryChannel] Flushed 8 events to Python.
+2026-05-27 12:28:44.125 [Orchestrator] Logging Academy Epiosde
+2026-05-27 12:28:44.125 [StochasticSummary] Failures=4 TotalRepairTime=56.4s MeanTTF_theory=25748.8s
+2026-05-27 12:28:44.125 [BatchRunner] Progress: 10/45 (1328.8s elapsed, ETA 4650.8s)
+2026-05-27 12:28:44.537 [BatchRunner] Run 11/45: benchmark=brandimarte_mk04_low rule=SRT_SRWT seed=43
+2026-05-27 12:28:44.537 [StochasticMgr] Initialized — seed=43 mode=[mf] WeibullK=1.5 λ_machine=28524.25 λ_agv=700 repairMu=2.63731 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:28:44.543 [BrandimartLoader] Loaded 15 jobs from benchmark (8 BM machines → 8 runtime machines across 5 types)
+2026-05-27 12:28:44.543 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 12:28:44.543 [StochasticMgr] Initialized — seed=43 mode=[mf] WeibullK=1.5 λ_machine=28524.25 λ_agv=700 repairMu=2.63731 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:28:44.543 [Orchestrator] Episode started: 15 jobs, 8 machines, stochastic=True
+2026-05-27 12:28:45.764 [EpisodeTracker] Machine 7 failed. Episode total failures=1
+2026-05-27 12:29:12.117 [EpisodeTracker] Machine 6 failed. Episode total failures=2
+2026-05-27 12:29:50.620 [EpisodeTracker] Machine 1 failed. Episode total failures=3
+2026-05-27 12:30:11.663 [EpisodeTracker] Machine 5 failed. Episode total failures=4
+2026-05-27 12:30:32.515 [EpisodeTracker] Machine 0 failed. Episode total failures=5
+2026-05-27 12:30:45.252 [TelemetryChannel] Flushed 10 events to Python.
+2026-05-27 12:30:45.252 [Orchestrator] Logging Academy Epiosde
+2026-05-27 12:30:45.252 [StochasticSummary] Failures=5 TotalRepairTime=95.6s MeanTTF_theory=25748.8s
+2026-05-27 12:30:45.253 [BatchRunner] Progress: 11/45 (1449.9s elapsed, ETA 4481.6s)
+2026-05-27 12:30:45.666 [BatchRunner] Run 12/45: benchmark=brandimarte_mk04_low rule=SRT_SRWT seed=44
+2026-05-27 12:30:45.666 [StochasticMgr] Initialized — seed=44 mode=[mf] WeibullK=1.5 λ_machine=28524.25 λ_agv=700 repairMu=2.63731 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:30:45.673 [BrandimartLoader] Loaded 15 jobs from benchmark (8 BM machines → 8 runtime machines across 5 types)
+2026-05-27 12:30:45.673 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 12:30:45.673 [StochasticMgr] Initialized — seed=44 mode=[mf] WeibullK=1.5 λ_machine=28524.25 λ_agv=700 repairMu=2.63731 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:30:45.673 [Orchestrator] Episode started: 15 jobs, 8 machines, stochastic=True
+2026-05-27 12:31:03.807 [EpisodeTracker] Machine 4 failed. Episode total failures=1
+2026-05-27 12:31:03.808 [Orchestrator] Job 4: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 12:31:04.413 [Failure] Deferred job 4 re-queued after repair.
+2026-05-27 12:31:05.635 [EpisodeTracker] Machine 5 failed. Episode total failures=2
+2026-05-27 12:32:27.581 [EpisodeTracker] Machine 0 failed. Episode total failures=3
+2026-05-27 12:32:45.248 [TelemetryChannel] Flushed 6 events to Python.
+2026-05-27 12:32:45.249 [Orchestrator] Logging Academy Epiosde
+2026-05-27 12:32:45.249 [StochasticSummary] Failures=3 TotalRepairTime=35.6s MeanTTF_theory=25748.8s
+2026-05-27 12:32:45.249 [BatchRunner] Progress: 12/45 (1569.9s elapsed, ETA 4317.3s)
+2026-05-27 12:32:45.656 [BatchRunner] ─── brandimarte_mk05_low (15j × 4m) ───
+2026-05-27 12:32:45.656 [BatchRunner] Run 13/45: benchmark=brandimarte_mk05_low rule=SRT_SRWT seed=42
+2026-05-27 12:32:45.656 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=34489.53 λ_agv=700 repairMu=2.925081 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:32:45.660 [BrandimartLoader] Loaded 15 jobs from benchmark (4 BM machines → 4 runtime machines across 4 types)
+2026-05-27 12:32:45.660 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 12:32:45.660 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=34489.53 λ_agv=700 repairMu=2.925081 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:32:45.660 [Orchestrator] Episode started: 15 jobs, 4 machines, stochastic=True
+2026-05-27 12:33:39.770 [EpisodeTracker] Machine 2 failed. Episode total failures=1
+2026-05-27 12:34:30.561 [EpisodeTracker] Machine 1 failed. Episode total failures=2
+2026-05-27 12:35:29.193 [TelemetryChannel] Flushed 4 events to Python.
+2026-05-27 12:35:29.193 [Orchestrator] Logging Academy Epiosde
+2026-05-27 12:35:29.193 [StochasticSummary] Failures=2 TotalRepairTime=40.6s MeanTTF_theory=31133.7s
+2026-05-27 12:35:29.194 [BatchRunner] Progress: 13/45 (1733.9s elapsed, ETA 4268.0s)
+2026-05-27 12:35:29.599 [BatchRunner] Run 14/45: benchmark=brandimarte_mk05_low rule=SRT_SRWT seed=43
+2026-05-27 12:35:29.599 [StochasticMgr] Initialized — seed=43 mode=[mf] WeibullK=1.5 λ_machine=34489.53 λ_agv=700 repairMu=2.925081 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:35:29.603 [BrandimartLoader] Loaded 15 jobs from benchmark (4 BM machines → 4 runtime machines across 4 types)
+2026-05-27 12:35:29.604 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 12:35:29.604 [StochasticMgr] Initialized — seed=43 mode=[mf] WeibullK=1.5 λ_machine=34489.53 λ_agv=700 repairMu=2.925081 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:35:29.604 [Orchestrator] Episode started: 15 jobs, 4 machines, stochastic=True
+2026-05-27 12:36:47.567 [EpisodeTracker] Machine 1 failed. Episode total failures=1
+2026-05-27 12:37:37.167 [EpisodeTracker] Machine 0 failed. Episode total failures=2
+2026-05-27 12:37:37.167 [FlagHarvester] Job 5 returned to NeedsRouting — target machine 0 is Repairing.
+2026-05-27 12:38:16.042 [TelemetryChannel] Flushed 4 events to Python.
+2026-05-27 12:38:16.042 [Orchestrator] Logging Academy Epiosde
+2026-05-27 12:38:16.042 [StochasticSummary] Failures=2 TotalRepairTime=37.3s MeanTTF_theory=31133.7s
+2026-05-27 12:38:16.043 [BatchRunner] Progress: 14/45 (1900.7s elapsed, ETA 4208.7s)
+2026-05-27 12:38:16.452 [BatchRunner] Run 15/45: benchmark=brandimarte_mk05_low rule=SRT_SRWT seed=44
+2026-05-27 12:38:16.452 [StochasticMgr] Initialized — seed=44 mode=[mf] WeibullK=1.5 λ_machine=34489.53 λ_agv=700 repairMu=2.925081 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:38:16.456 [BrandimartLoader] Loaded 15 jobs from benchmark (4 BM machines → 4 runtime machines across 4 types)
+2026-05-27 12:38:16.456 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 12:38:16.456 [StochasticMgr] Initialized — seed=44 mode=[mf] WeibullK=1.5 λ_machine=34489.53 λ_agv=700 repairMu=2.925081 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:38:16.456 [Orchestrator] Episode started: 15 jobs, 4 machines, stochastic=True
+2026-05-27 12:40:17.422 [EpisodeTracker] Machine 0 failed. Episode total failures=1
+2026-05-27 12:40:51.662 [TelemetryChannel] Flushed 2 events to Python.
+2026-05-27 12:40:51.662 [Orchestrator] Logging Academy Epiosde
+2026-05-27 12:40:51.663 [StochasticSummary] Failures=1 TotalRepairTime=46.6s MeanTTF_theory=31133.7s
+2026-05-27 12:40:51.663 [BatchRunner] Progress: 15/45 (2056.3s elapsed, ETA 4112.7s)
+2026-05-27 12:40:52.064 [BatchRunner] ─── brandimarte_mk06_low (10j × 10m) ───
+2026-05-27 12:40:52.064 [BatchRunner] Run 16/45: benchmark=brandimarte_mk06_low rule=SRT_SRWT seed=42
+2026-05-27 12:40:52.064 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=28287.02 λ_agv=700 repairMu=2.62396 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:40:52.072 [BrandimartLoader] Loaded 10 jobs from benchmark (10 BM machines → 10 runtime machines across 5 types)
+2026-05-27 12:40:52.073 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 12:40:52.073 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=28287.02 λ_agv=700 repairMu=2.62396 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:40:52.073 [Orchestrator] Episode started: 10 jobs, 10 machines, stochastic=True
+2026-05-27 12:41:36.685 [EpisodeTracker] Machine 2 failed. Episode total failures=1
+2026-05-27 12:42:16.954 [EpisodeTracker] Machine 5 failed. Episode total failures=2
+2026-05-27 12:42:18.793 [EpisodeTracker] Machine 1 failed. Episode total failures=3
+2026-05-27 12:42:18.794 [FlagHarvester] Job 2 returned to NeedsRouting — target machine 1 is Repairing.
+2026-05-27 12:42:51.842 [EpisodeTracker] Machine 4 failed. Episode total failures=4
+2026-05-27 12:43:37.558 [EpisodeTracker] Machine 8 failed. Episode total failures=5
+2026-05-27 12:44:23.377 [TelemetryChannel] Flushed 10 events to Python.
+2026-05-27 12:44:23.377 [Orchestrator] Logging Academy Epiosde
+2026-05-27 12:44:23.377 [StochasticSummary] Failures=5 TotalRepairTime=64.5s MeanTTF_theory=25534.7s
+2026-05-27 12:44:23.378 [BatchRunner] Progress: 16/45 (2268.1s elapsed, ETA 4110.9s)
+2026-05-27 12:44:23.782 [BatchRunner] Run 17/45: benchmark=brandimarte_mk06_low rule=SRT_SRWT seed=43
+2026-05-27 12:44:23.782 [StochasticMgr] Initialized — seed=43 mode=[mf] WeibullK=1.5 λ_machine=28287.02 λ_agv=700 repairMu=2.62396 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:44:23.790 [BrandimartLoader] Loaded 10 jobs from benchmark (10 BM machines → 10 runtime machines across 5 types)
+2026-05-27 12:44:23.790 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 12:44:23.790 [StochasticMgr] Initialized — seed=43 mode=[mf] WeibullK=1.5 λ_machine=28287.02 λ_agv=700 repairMu=2.62396 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:44:23.790 [Orchestrator] Episode started: 10 jobs, 10 machines, stochastic=True
+2026-05-27 12:44:25.018 [EpisodeTracker] Machine 7 failed. Episode total failures=1
+2026-05-27 12:44:50.312 [EpisodeTracker] Machine 6 failed. Episode total failures=2
+2026-05-27 12:45:28.465 [EpisodeTracker] Machine 1 failed. Episode total failures=3
+2026-05-27 12:45:34.554 [EpisodeTracker] Machine 8 failed. Episode total failures=4
+2026-05-27 12:45:49.257 [EpisodeTracker] Machine 5 failed. Episode total failures=5
+2026-05-27 12:46:10.128 [EpisodeTracker] Machine 0 failed. Episode total failures=6
+2026-05-27 12:46:16.224 [EpisodeTracker] Machine 9 failed. Episode total failures=7
+2026-05-27 12:47:32.767 [EpisodeTracker] Machine 7 failed. Episode total failures=8
+2026-05-27 12:47:39.998 [EpisodeTracker] Machine 9 failed. Episode total failures=9
+2026-05-27 12:47:51.927 [TelemetryChannel] Flushed 18 events to Python.
+2026-05-27 12:47:51.927 [Orchestrator] Logging Academy Epiosde
+2026-05-27 12:47:51.927 [StochasticSummary] Failures=9 TotalRepairTime=141.8s MeanTTF_theory=25534.7s
+2026-05-27 12:47:51.928 [BatchRunner] Progress: 17/45 (2476.6s elapsed, ETA 4079.1s)
+2026-05-27 12:47:52.331 [BatchRunner] Run 18/45: benchmark=brandimarte_mk06_low rule=SRT_SRWT seed=44
+2026-05-27 12:47:52.331 [StochasticMgr] Initialized — seed=44 mode=[mf] WeibullK=1.5 λ_machine=28287.02 λ_agv=700 repairMu=2.62396 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:47:52.339 [BrandimartLoader] Loaded 10 jobs from benchmark (10 BM machines → 10 runtime machines across 5 types)
+2026-05-27 12:47:52.339 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 12:47:52.339 [StochasticMgr] Initialized — seed=44 mode=[mf] WeibullK=1.5 λ_machine=28287.02 λ_agv=700 repairMu=2.62396 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:47:52.339 [Orchestrator] Episode started: 10 jobs, 10 machines, stochastic=True
+2026-05-27 12:48:10.283 [EpisodeTracker] Machine 4 failed. Episode total failures=1
+2026-05-27 12:48:12.147 [EpisodeTracker] Machine 5 failed. Episode total failures=2
+2026-05-27 12:49:32.435 [EpisodeTracker] Machine 0 failed. Episode total failures=3
+2026-05-27 12:50:49.453 [EpisodeTracker] Machine 7 failed. Episode total failures=4
+2026-05-27 12:50:57.375 [EpisodeTracker] Machine 6 failed. Episode total failures=5
+2026-05-27 12:51:11.347 [TelemetryChannel] Flushed 10 events to Python.
+2026-05-27 12:51:11.347 [Orchestrator] Logging Academy Epiosde
+2026-05-27 12:51:11.347 [StochasticSummary] Failures=5 TotalRepairTime=63.0s MeanTTF_theory=25534.7s
+2026-05-27 12:51:11.347 [BatchRunner] Progress: 18/45 (2676.0s elapsed, ETA 4014.0s)
+2026-05-27 12:51:11.761 [BatchRunner] ─── brandimarte_mk07_low (20j × 5m) ───
+2026-05-27 12:51:11.761 [BatchRunner] Run 19/45: benchmark=brandimarte_mk07_low rule=SRT_SRWT seed=42
+2026-05-27 12:51:11.761 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=46221.76 λ_agv=700 repairMu=3.325077 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:51:11.767 [BrandimartLoader] Loaded 20 jobs from benchmark (5 BM machines → 5 runtime machines across 5 types)
+2026-05-27 12:51:11.767 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 12:51:11.767 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=46221.76 λ_agv=700 repairMu=3.325077 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:51:11.768 [Orchestrator] Episode started: 20 jobs, 5 machines, stochastic=True
+2026-05-27 12:52:25.809 [EpisodeTracker] Machine 2 failed. Episode total failures=1
+2026-05-27 12:53:34.125 [EpisodeTracker] Machine 1 failed. Episode total failures=2
+2026-05-27 12:53:46.703 [TelemetryChannel] Flushed 4 events to Python.
+2026-05-27 12:53:46.703 [Orchestrator] Logging Academy Epiosde
+2026-05-27 12:53:46.703 [StochasticSummary] Failures=2 TotalRepairTime=54.3s MeanTTF_theory=41724.4s
+2026-05-27 12:53:46.703 [BatchRunner] Progress: 19/45 (2831.4s elapsed, ETA 3874.5s)
+2026-05-27 12:53:47.103 [BatchRunner] Run 20/45: benchmark=brandimarte_mk07_low rule=SRT_SRWT seed=43
+2026-05-27 12:53:47.103 [StochasticMgr] Initialized — seed=43 mode=[mf] WeibullK=1.5 λ_machine=46221.76 λ_agv=700 repairMu=3.325077 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:53:47.109 [BrandimartLoader] Loaded 20 jobs from benchmark (5 BM machines → 5 runtime machines across 5 types)
+2026-05-27 12:53:47.109 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 12:53:47.109 [StochasticMgr] Initialized — seed=43 mode=[mf] WeibullK=1.5 λ_machine=46221.76 λ_agv=700 repairMu=3.325077 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:53:47.109 [Orchestrator] Episode started: 20 jobs, 5 machines, stochastic=True
+2026-05-27 12:55:32.539 [EpisodeTracker] Machine 1 failed. Episode total failures=1
+2026-05-27 12:56:17.898 [TelemetryChannel] Flushed 2 events to Python.
+2026-05-27 12:56:17.898 [Orchestrator] Logging Academy Epiosde
+2026-05-27 12:56:17.898 [StochasticSummary] Failures=1 TotalRepairTime=40.4s MeanTTF_theory=41724.4s
+2026-05-27 12:56:17.899 [BatchRunner] Progress: 20/45 (2982.6s elapsed, ETA 3728.2s)
+2026-05-27 12:56:18.298 [BatchRunner] Run 21/45: benchmark=brandimarte_mk07_low rule=SRT_SRWT seed=44
+2026-05-27 12:56:18.298 [StochasticMgr] Initialized — seed=44 mode=[mf] WeibullK=1.5 λ_machine=46221.76 λ_agv=700 repairMu=3.325077 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:56:18.302 [BrandimartLoader] Loaded 20 jobs from benchmark (5 BM machines → 5 runtime machines across 5 types)
+2026-05-27 12:56:18.303 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 12:56:18.303 [StochasticMgr] Initialized — seed=44 mode=[mf] WeibullK=1.5 λ_machine=46221.76 λ_agv=700 repairMu=3.325077 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:56:18.303 [Orchestrator] Episode started: 20 jobs, 5 machines, stochastic=True
+2026-05-27 12:56:47.044 [EpisodeTracker] Machine 4 failed. Episode total failures=1
+2026-05-27 12:59:00.744 [EpisodeTracker] Machine 0 failed. Episode total failures=2
+2026-05-27 12:59:13.936 [TelemetryChannel] Flushed 4 events to Python.
+2026-05-27 12:59:13.936 [Orchestrator] Logging Academy Epiosde
+2026-05-27 12:59:13.936 [StochasticSummary] Failures=2 TotalRepairTime=28.0s MeanTTF_theory=41724.4s
+2026-05-27 12:59:13.937 [BatchRunner] Progress: 21/45 (3158.6s elapsed, ETA 3609.8s)
+2026-05-27 12:59:14.340 [BatchRunner] ─── brandimarte_mk08_low (20j × 10m) ───
+2026-05-27 12:59:14.340 [BatchRunner] Run 22/45: benchmark=brandimarte_mk08_low rule=SRT_SRWT seed=42
+2026-05-27 12:59:14.340 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=53305.93 λ_agv=700 repairMu=3.50662 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:59:14.347 [BrandimartLoader] Loaded 20 jobs from benchmark (10 BM machines → 10 runtime machines across 5 types)
+2026-05-27 12:59:14.347 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 12:59:14.348 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=53305.93 λ_agv=700 repairMu=3.50662 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:59:14.348 [Orchestrator] Episode started: 20 jobs, 10 machines, stochastic=True
+2026-05-27 13:00:39.357 [EpisodeTracker] Machine 2 failed. Episode total failures=1
+2026-05-27 13:00:39.357 [Orchestrator] Job 7: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 13:00:40.008 [Failure] Deferred job 7 re-queued after repair.
+2026-05-27 13:01:55.127 [EpisodeTracker] Machine 5 failed. Episode total failures=2
+2026-05-27 13:01:59.324 [EpisodeTracker] Machine 1 failed. Episode total failures=3
+2026-05-27 13:03:01.121 [EpisodeTracker] Machine 4 failed. Episode total failures=4
+2026-05-27 13:04:26.506 [EpisodeTracker] Machine 8 failed. Episode total failures=5
+2026-05-27 13:05:39.628 [TelemetryChannel] Flushed 10 events to Python.
+2026-05-27 13:05:39.628 [Orchestrator] Logging Academy Epiosde
+2026-05-27 13:05:39.628 [StochasticSummary] Failures=5 TotalRepairTime=155.8s MeanTTF_theory=48119.3s
+2026-05-27 13:05:39.629 [BatchRunner] Progress: 22/45 (3544.3s elapsed, ETA 3705.4s)
+2026-05-27 13:05:40.038 [BatchRunner] Run 23/45: benchmark=brandimarte_mk08_low rule=SRT_SRWT seed=43
+2026-05-27 13:05:40.038 [StochasticMgr] Initialized — seed=43 mode=[mf] WeibullK=1.5 λ_machine=53305.93 λ_agv=700 repairMu=3.50662 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 13:05:40.046 [BrandimartLoader] Loaded 20 jobs from benchmark (10 BM machines → 10 runtime machines across 5 types)
+2026-05-27 13:05:40.047 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 13:05:40.047 [StochasticMgr] Initialized — seed=43 mode=[mf] WeibullK=1.5 λ_machine=53305.93 λ_agv=700 repairMu=3.50662 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 13:05:40.047 [Orchestrator] Episode started: 20 jobs, 10 machines, stochastic=True
+2026-05-27 13:05:41.251 [EpisodeTracker] Machine 7 failed. Episode total failures=1
+2026-05-27 13:06:30.116 [EpisodeTracker] Machine 6 failed. Episode total failures=2
+2026-05-27 13:06:30.116 [Orchestrator] Job 0: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 13:06:30.724 [Orchestrator] Job 0: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 13:06:31.318 [Failure] Deferred job 0 re-queued after repair.
+2026-05-27 13:07:42.542 [EpisodeTracker] Machine 1 failed. Episode total failures=3
+2026-05-27 13:07:53.543 [EpisodeTracker] Machine 8 failed. Episode total failures=4
+2026-05-27 13:08:21.303 [EpisodeTracker] Machine 5 failed. Episode total failures=5
+2026-05-27 13:09:00.429 [EpisodeTracker] Machine 0 failed. Episode total failures=6
+2026-05-27 13:09:00.429 [Orchestrator] Job 2: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 13:09:01.063 [Orchestrator] Job 2: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 13:09:01.663 [Failure] Deferred job 2 re-queued after repair.
+2026-05-27 13:09:12.708 [EpisodeTracker] Machine 9 failed. Episode total failures=7
+2026-05-27 13:09:12.708 [Orchestrator] Job 2: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 13:09:13.332 [Failure] Deferred job 2 re-queued after repair.
+2026-05-27 13:11:34.175 [EpisodeTracker] Machine 7 failed. Episode total failures=8
+2026-05-27 13:11:47.898 [EpisodeTracker] Machine 9 failed. Episode total failures=9
+2026-05-27 13:11:47.898 [Orchestrator] Job 9: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 13:11:48.504 [Failure] Deferred job 9 re-queued after repair.
+2026-05-27 13:12:15.874 [TelemetryChannel] Flushed 18 events to Python.
+2026-05-27 13:12:15.874 [Orchestrator] Logging Academy Epiosde
+2026-05-27 13:12:15.874 [StochasticSummary] Failures=9 TotalRepairTime=342.8s MeanTTF_theory=48119.3s
+2026-05-27 13:12:15.875 [BatchRunner] Progress: 23/45 (3940.5s elapsed, ETA 3769.2s)
+2026-05-27 13:12:16.282 [BatchRunner] Run 24/45: benchmark=brandimarte_mk08_low rule=SRT_SRWT seed=44
+2026-05-27 13:12:16.282 [StochasticMgr] Initialized — seed=44 mode=[mf] WeibullK=1.5 λ_machine=53305.93 λ_agv=700 repairMu=3.50662 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 13:12:16.291 [BrandimartLoader] Loaded 20 jobs from benchmark (10 BM machines → 10 runtime machines across 5 types)
+2026-05-27 13:12:16.291 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 13:12:16.291 [StochasticMgr] Initialized — seed=44 mode=[mf] WeibullK=1.5 λ_machine=53305.93 λ_agv=700 repairMu=3.50662 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 13:12:16.292 [Orchestrator] Episode started: 20 jobs, 10 machines, stochastic=True
+2026-05-27 13:12:49.301 [EpisodeTracker] Machine 4 failed. Episode total failures=1
+2026-05-27 13:12:49.301 [FlagHarvester] Job 3 returned to NeedsRouting — target machine 4 is Repairing.
+2026-05-27 13:12:52.421 [EpisodeTracker] Machine 5 failed. Episode total failures=2
+2026-05-27 13:15:24.786 [EpisodeTracker] Machine 0 failed. Episode total failures=3
+2026-05-27 13:15:24.786 [Orchestrator] Job 2: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 13:15:25.393 [Failure] Deferred job 2 re-queued after repair.
+2026-05-27 13:17:49.234 [EpisodeTracker] Machine 7 failed. Episode total failures=4
+2026-05-27 13:18:03.869 [EpisodeTracker] Machine 6 failed. Episode total failures=5
+2026-05-27 13:18:36.801 [EpisodeTracker] Machine 9 failed. Episode total failures=6
+2026-05-27 13:18:44.544 [TelemetryChannel] Flushed 12 events to Python.
+2026-05-27 13:18:44.544 [Orchestrator] Logging Academy Epiosde
+2026-05-27 13:18:44.544 [StochasticSummary] Failures=6 TotalRepairTime=186.4s MeanTTF_theory=48119.3s
+2026-05-27 13:18:44.545 [BatchRunner] Progress: 24/45 (4329.2s elapsed, ETA 3788.1s)
+2026-05-27 13:18:44.953 [BatchRunner] ─── brandimarte_mk09_low (20j × 10m) ───
+2026-05-27 13:18:44.953 [BatchRunner] Run 25/45: benchmark=brandimarte_mk09_low rule=SRT_SRWT seed=42
+2026-05-27 13:18:44.953 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=51009.42 λ_agv=700 repairMu=3.451299 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 13:18:44.961 [BrandimartLoader] Loaded 20 jobs from benchmark (10 BM machines → 10 runtime machines across 5 types)
+2026-05-27 13:18:44.961 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 13:18:44.962 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=51009.42 λ_agv=700 repairMu=3.451299 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 13:18:44.962 [Orchestrator] Episode started: 20 jobs, 10 machines, stochastic=True
+2026-05-27 13:20:06.123 [EpisodeTracker] Machine 2 failed. Episode total failures=1
+2026-05-27 13:20:06.123 [FlagHarvester] Job 5 returned to NeedsRouting — target machine 2 is Repairing.
+2026-05-27 13:20:06.123 [Orchestrator] Job 5: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 13:20:06.710 [Failure] Deferred job 5 re-queued after repair.
+2026-05-27 13:21:18.551 [EpisodeTracker] Machine 5 failed. Episode total failures=2
+2026-05-27 13:21:22.363 [EpisodeTracker] Machine 1 failed. Episode total failures=3
+2026-05-27 13:21:22.986 [Orchestrator] Job 5: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 13:21:23.617 [Failure] Deferred job 5 re-queued after repair.
+2026-05-27 13:22:21.665 [EpisodeTracker] Machine 4 failed. Episode total failures=4
+2026-05-27 13:23:43.803 [EpisodeTracker] Machine 8 failed. Episode total failures=5
+2026-05-27 13:24:35.504 [TelemetryChannel] Flushed 10 events to Python.
+2026-05-27 13:24:35.504 [Orchestrator] Logging Academy Epiosde
+2026-05-27 13:24:35.504 [StochasticSummary] Failures=5 TotalRepairTime=147.5s MeanTTF_theory=46046.2s
+2026-05-27 13:24:35.505 [BatchRunner] Progress: 25/45 (4680.2s elapsed, ETA 3744.1s)
+2026-05-27 13:24:35.916 [BatchRunner] Run 26/45: benchmark=brandimarte_mk09_low rule=SRT_SRWT seed=43
+2026-05-27 13:24:35.916 [StochasticMgr] Initialized — seed=43 mode=[mf] WeibullK=1.5 λ_machine=51009.42 λ_agv=700 repairMu=3.451299 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 13:24:35.924 [BrandimartLoader] Loaded 20 jobs from benchmark (10 BM machines → 10 runtime machines across 5 types)
+2026-05-27 13:24:35.925 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 13:24:35.925 [StochasticMgr] Initialized — seed=43 mode=[mf] WeibullK=1.5 λ_machine=51009.42 λ_agv=700 repairMu=3.451299 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 13:24:35.925 [Orchestrator] Episode started: 20 jobs, 10 machines, stochastic=True
+2026-05-27 13:24:37.157 [EpisodeTracker] Machine 7 failed. Episode total failures=1
+2026-05-27 13:24:37.157 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 13:24:37.798 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 13:24:38.435 [Failure] Deferred job 1 re-queued after repair.
+2026-05-27 13:25:23.882 [EpisodeTracker] Machine 6 failed. Episode total failures=2
+2026-05-27 13:26:32.527 [EpisodeTracker] Machine 1 failed. Episode total failures=3
+2026-05-27 13:26:43.614 [EpisodeTracker] Machine 8 failed. Episode total failures=4
+2026-05-27 13:27:10.152 [EpisodeTracker] Machine 5 failed. Episode total failures=5
+2026-05-27 13:27:47.683 [EpisodeTracker] Machine 0 failed. Episode total failures=6
+2026-05-27 13:27:59.249 [EpisodeTracker] Machine 9 failed. Episode total failures=7
+2026-05-27 13:30:15.295 [EpisodeTracker] Machine 7 failed. Episode total failures=8
+2026-05-27 13:30:27.275 [TelemetryChannel] Flushed 16 events to Python.
+2026-05-27 13:30:27.275 [Orchestrator] Logging Academy Epiosde
+2026-05-27 13:30:27.275 [StochasticSummary] Failures=8 TotalRepairTime=300.0s MeanTTF_theory=46046.2s
+2026-05-27 13:30:27.276 [BatchRunner] Progress: 26/45 (5031.9s elapsed, ETA 3677.2s)
+2026-05-27 13:30:27.686 [BatchRunner] Run 27/45: benchmark=brandimarte_mk09_low rule=SRT_SRWT seed=44
+2026-05-27 13:30:27.686 [StochasticMgr] Initialized — seed=44 mode=[mf] WeibullK=1.5 λ_machine=51009.42 λ_agv=700 repairMu=3.451299 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 13:30:27.695 [BrandimartLoader] Loaded 20 jobs from benchmark (10 BM machines → 10 runtime machines across 5 types)
+2026-05-27 13:30:27.695 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 13:30:27.695 [StochasticMgr] Initialized — seed=44 mode=[mf] WeibullK=1.5 λ_machine=51009.42 λ_agv=700 repairMu=3.451299 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 13:30:27.696 [Orchestrator] Episode started: 20 jobs, 10 machines, stochastic=True
+2026-05-27 13:30:59.517 [EpisodeTracker] Machine 4 failed. Episode total failures=1
+2026-05-27 13:31:02.677 [EpisodeTracker] Machine 5 failed. Episode total failures=2
+2026-05-27 13:33:28.983 [EpisodeTracker] Machine 0 failed. Episode total failures=3
+2026-05-27 13:35:47.903 [EpisodeTracker] Machine 7 failed. Episode total failures=4
+2026-05-27 13:36:01.117 [EpisodeTracker] Machine 6 failed. Episode total failures=5
+2026-05-27 13:36:19.070 [TelemetryChannel] Flushed 11 events to Python.
+2026-05-27 13:36:19.075 [Orchestrator] Logging Academy Epiosde
+2026-05-27 13:36:19.075 [StochasticSummary] Failures=5 TotalRepairTime=144.2s MeanTTF_theory=46046.2s
+2026-05-27 13:36:19.075 [BatchRunner] Progress: 27/45 (5383.7s elapsed, ETA 3589.2s)
+2026-05-27 13:36:19.481 [BatchRunner] ─── brandimarte_mk10_low (20j × 15m) ───
+2026-05-27 13:36:19.481 [BatchRunner] Run 28/45: benchmark=brandimarte_mk10_low rule=SRT_SRWT seed=42
+2026-05-27 13:36:19.481 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=49727.91 λ_agv=700 repairMu=3.419044 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 13:36:19.492 [BrandimartLoader] Loaded 20 jobs from benchmark (15 BM machines → 15 runtime machines across 5 types)
+2026-05-27 13:36:19.492 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 13:36:19.492 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=49727.91 λ_agv=700 repairMu=3.419044 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 13:36:19.492 [Orchestrator] Episode started: 20 jobs, 15 machines, stochastic=True
+2026-05-27 13:36:45.987 [EpisodeTracker] Machine 10 failed. Episode total failures=1
+2026-05-27 13:36:58.348 [EpisodeTracker] Machine 11 failed. Episode total failures=2
+2026-05-27 13:37:39.419 [EpisodeTracker] Machine 2 failed. Episode total failures=3
+2026-05-27 13:38:27.609 [EpisodeTracker] Machine 10 failed. Episode total failures=4
+2026-05-27 13:38:50.576 [EpisodeTracker] Machine 5 failed. Episode total failures=5
+2026-05-27 13:38:54.296 [EpisodeTracker] Machine 1 failed. Episode total failures=6
+2026-05-27 13:38:55.534 [EpisodeTracker] Machine 12 failed. Episode total failures=7
+2026-05-27 13:39:53.125 [EpisodeTracker] Machine 4 failed. Episode total failures=8
+2026-05-27 13:40:25.972 [EpisodeTracker] Machine 10 failed. Episode total failures=9
+2026-05-27 13:41:14.199 [EpisodeTracker] Machine 8 failed. Episode total failures=10
+2026-05-27 13:41:31.701 [EpisodeTracker] Machine 13 failed. Episode total failures=11
+2026-05-27 13:43:04.422 [EpisodeTracker] Machine 7 failed. Episode total failures=12
+2026-05-27 13:43:25.580 [EpisodeTracker] Machine 8 failed. Episode total failures=13
+2026-05-27 13:43:36.148 [EpisodeTracker] Machine 3 failed. Episode total failures=14
+2026-05-27 13:43:36.148 [AGV 2] CancelPickup — abandoning pickup for job 2.
+2026-05-27 13:43:43.620 [EpisodeTracker] Machine 9 failed. Episode total failures=15
+2026-05-27 13:43:43.620 [AGV 4] CancelPickup — abandoning pickup for job 3.
+2026-05-27 13:43:43.620 [FlagHarvester] Job 4 returned to NeedsRouting — target machine 9 is Repairing.
+2026-05-27 13:43:56.654 [EpisodeTracker] Machine 14 failed. Episode total failures=16
+2026-05-27 13:44:18.483 [EpisodeTracker] Machine 1 failed. Episode total failures=17
+2026-05-27 13:44:35.908 [EpisodeTracker] Machine 6 failed. Episode total failures=18
+2026-05-27 13:44:35.908 [AGV 1] CancelPickup — abandoning pickup for job 12.
+2026-05-27 13:45:21.295 [EpisodeTracker] Machine 13 failed. Episode total failures=19
+2026-05-27 13:45:25.618 [EpisodeTracker] Machine 6 failed. Episode total failures=20
+2026-05-27 13:45:25.618 [EpisodeTracker] Machine 8 failed. Episode total failures=21
+2026-05-27 13:45:25.618 [AGV 1] CancelPickup — abandoning pickup for job 3.
+2026-05-27 13:45:25.618 [FlagHarvester] Job 5 returned to NeedsRouting — target machine 6 is Repairing.
+2026-05-27 13:45:46.685 [EpisodeTracker] Machine 3 failed. Episode total failures=22
+2026-05-27 13:45:46.685 [EpisodeTracker] Machine 6 failed. Episode total failures=23
+2026-05-27 13:46:48.080 [EpisodeTracker] Machine 11 failed. Episode total failures=24
+2026-05-27 13:47:58.212 [EpisodeTracker] Machine 8 failed. Episode total failures=25
+2026-05-27 13:49:59.574 [EpisodeTracker] Machine 10 failed. Episode total failures=26
+2026-05-27 13:50:39.348 [EpisodeTracker] Machine 7 failed. Episode total failures=27
+2026-05-27 13:50:39.348 [AGV 4] CancelPickup — abandoning pickup for job 2.
+2026-05-27 13:52:49.121 [EpisodeTracker] Machine 0 failed. Episode total failures=28
+2026-05-27 13:52:49.121 [AGV 2] CancelPickup — abandoning pickup for job 1.
+2026-05-27 13:52:49.121 [AGV 3] CancelPickup — abandoning pickup for job 0.
+2026-05-27 13:52:49.121 [FlagHarvester] Job 5 returned to NeedsRouting — target machine 0 is Repairing.
+2026-05-27 13:52:51.599 [EpisodeTracker] Machine 4 failed. Episode total failures=29
+2026-05-27 13:53:03.936 [EpisodeTracker] Machine 12 failed. Episode total failures=30
+2026-05-27 13:53:05.777 [EpisodeTracker] Machine 14 failed. Episode total failures=31
+2026-05-27 13:55:09.039 [EpisodeTracker] Machine 6 failed. Episode total failures=32
+2026-05-27 13:55:19.655 [EpisodeTracker] Machine 2 failed. Episode total failures=33
+2026-05-27 13:55:19.656 [FlagHarvester] Job 0 returned to NeedsRouting — target machine 2 is Repairing.
+2026-05-27 13:56:07.489 [EpisodeTracker] Machine 11 failed. Episode total failures=34
+2026-05-27 13:57:00.956 [EpisodeTracker] Machine 3 failed. Episode total failures=35
+2026-05-27 13:57:00.956 [AGV 2] CancelPickup — abandoning pickup for job 2.
+2026-05-27 13:57:23.335 [EpisodeTracker] Machine 14 failed. Episode total failures=36
+2026-05-27 13:57:43.900 [EpisodeTracker] Machine 10 failed. Episode total failures=37
+2026-05-27 13:57:45.153 [EpisodeTracker] Machine 4 failed. Episode total failures=38
+2026-05-27 13:57:47.022 [EpisodeTracker] Machine 13 failed. Episode total failures=39
+2026-05-27 13:58:19.939 [EpisodeTracker] Machine 3 failed. Episode total failures=40
+2026-05-27 13:58:48.933 [EpisodeTracker] Machine 14 failed. Episode total failures=41
+2026-05-27 13:59:05.103 [EpisodeTracker] Machine 9 failed. Episode total failures=42
+2026-05-27 13:59:05.103 [AGV 1] CancelPickup — abandoning pickup for job 4.
+2026-05-27 13:59:05.103 [AGV 4] CancelPickup — abandoning pickup for job 3.
+2026-05-27 13:59:30.558 [EpisodeTracker] Machine 14 failed. Episode total failures=43
+2026-05-27 13:59:31.795 [EpisodeTracker] Machine 10 failed. Episode total failures=44
+2026-05-27 14:01:32.420 [EpisodeTracker] Machine 12 failed. Episode total failures=45
+2026-05-27 14:01:45.381 [EpisodeTracker] Machine 13 failed. Episode total failures=46
+2026-05-27 14:02:24.261 [EpisodeTracker] Machine 1 failed. Episode total failures=47
+2026-05-27 14:02:24.261 [AGV 1] CancelPickup — abandoning pickup for job 1.
+2026-05-27 14:06:15.618 [EpisodeTracker] Machine 5 failed. Episode total failures=48
+2026-05-27 14:06:15.618 [AGV 3] CancelPickup — abandoning pickup for job 6.
+2026-05-27 14:06:34.120 [EpisodeTracker] Machine 3 failed. Episode total failures=49
+2026-05-27 14:07:31.277 [EpisodeTracker] Machine 6 failed. Episode total failures=50
+2026-05-27 14:07:31.277 [FlagHarvester] Job 4 returned to NeedsRouting — target machine 6 is Repairing.
+2026-05-27 14:07:31.277 [FlagHarvester] Job 5 returned to NeedsRouting — target machine 6 is Repairing.
+2026-05-27 14:07:31.277 [FlagHarvester] Job 6 returned to NeedsRouting — target machine 6 is Repairing.
+2026-05-27 14:08:04.090 [EpisodeTracker] Machine 4 failed. Episode total failures=51
+2026-05-27 14:08:04.704 [EpisodeTracker] Machine 13 failed. Episode total failures=52
+2026-05-27 14:08:49.269 [EpisodeTracker] Machine 8 failed. Episode total failures=53
+2026-05-27 14:08:49.269 [AGV 1] CancelPickup — abandoning pickup for job 3.
+2026-05-27 14:09:14.077 [EpisodeTracker] Machine 12 failed. Episode total failures=54
+2026-05-27 14:09:17.164 [EpisodeTracker] Machine 7 failed. Episode total failures=55
+2026-05-27 14:09:17.164 [AGV 4] CancelPickup — abandoning pickup for job 2.
+2026-05-27 14:09:25.827 [EpisodeTracker] Machine 11 failed. Episode total failures=56
+2026-05-27 14:09:33.862 [EpisodeTracker] Machine 12 failed. Episode total failures=57
+2026-05-27 14:11:40.007 [EpisodeTracker] Machine 5 failed. Episode total failures=58
+2026-05-27 14:11:53.632 [EpisodeTracker] Machine 2 failed. Episode total failures=59
+2026-05-27 14:12:38.832 [EpisodeTracker] Machine 14 failed. Episode total failures=60
+2026-05-27 14:14:59.375 [EpisodeTracker] Machine 10 failed. Episode total failures=61
+2026-05-27 14:19:16.558 [EpisodeTracker] Machine 11 failed. Episode total failures=62
+2026-05-27 14:19:19.045 [EpisodeTracker] Machine 13 failed. Episode total failures=63
+2026-05-27 14:19:58.525 [EpisodeTracker] Machine 3 failed. Episode total failures=64
+2026-05-27 14:19:58.525 [FlagHarvester] Job 2 returned to NeedsRouting — target machine 3 is Repairing.
+2026-05-27 14:19:59.762 [EpisodeTracker] Machine 14 failed. Episode total failures=65
+2026-05-27 14:20:07.771 [EpisodeTracker] Machine 5 failed. Episode total failures=66
+2026-05-27 14:22:00.003 [EpisodeTracker] Machine 6 failed. Episode total failures=67
+2026-05-27 14:22:46.176 [EpisodeTracker] Machine 1 failed. Episode total failures=68
+2026-05-27 14:22:58.583 [EpisodeTracker] Machine 3 failed. Episode total failures=69
+2026-05-27 14:25:35.470 [EpisodeTracker] Machine 13 failed. Episode total failures=70
+2026-05-27 14:25:36.702 [EpisodeTracker] Machine 9 failed. Episode total failures=71
+2026-05-27 14:25:36.703 [AGV 1] CancelPickup — abandoning pickup for job 4.
+2026-05-27 14:25:36.703 [AGV 4] CancelPickup — abandoning pickup for job 3.
+2026-05-27 14:26:01.438 [EpisodeTracker] Machine 0 failed. Episode total failures=72
+2026-05-27 14:26:01.438 [AGV 2] CancelPickup — abandoning pickup for job 0.
+2026-05-27 14:26:01.438 [AGV 3] CancelPickup — abandoning pickup for job 1.
+2026-05-27 14:26:01.438 [AGV 4] CancelPickup — abandoning pickup for job 5.
+2026-05-27 14:27:23.033 [EpisodeTracker] Machine 7 failed. Episode total failures=73
+2026-05-27 14:27:23.038 [AGV 1] CancelPickup — abandoning pickup for job 2.
+2026-05-27 14:28:40.901 [EpisodeTracker] Machine 1 failed. Episode total failures=74
+2026-05-27 14:28:40.901 [FlagHarvester] Job 1 returned to NeedsRouting — target machine 1 is Repairing.
+2026-05-27 14:29:35.823 [EpisodeTracker] Machine 7 failed. Episode total failures=75
+2026-05-27 14:30:26.370 [EpisodeTracker] Machine 8 failed. Episode total failures=76
+2026-05-27 14:30:26.370 [AGV 2] CancelPickup — abandoning pickup for job 3.
+2026-05-27 14:31:17.943 [EpisodeTracker] Machine 9 failed. Episode total failures=77
+2026-05-27 14:31:17.943 [AGV 3] CancelPickup — abandoning pickup for job 4.
+2026-05-27 14:31:17.943 [FlagHarvester] Job 3 returned to NeedsRouting — target machine 9 is Repairing.
+2026-05-27 14:35:37.624 [EpisodeTracker] Machine 11 failed. Episode total failures=78
+2026-05-27 14:36:20.220 [EpisodeTracker] Machine 10 failed. Episode total failures=79
+2026-05-27 14:36:44.337 [EpisodeTracker] Machine 1 failed. Episode total failures=80
+2026-05-27 14:36:45.570 [EpisodeTracker] Machine 7 failed. Episode total failures=81
+2026-05-27 14:39:38.182 [EpisodeTracker] Machine 8 failed. Episode total failures=82
+2026-05-27 14:39:38.183 [FlagHarvester] Job 3 returned to NeedsRouting — target machine 8 is Repairing.
+2026-05-27 14:40:08.269 [EpisodeTracker] Machine 0 failed. Episode total failures=83
+2026-05-27 14:40:08.269 [AGV 2] CancelPickup — abandoning pickup for job 1.
+2026-05-27 14:40:43.877 [EpisodeTracker] Machine 3 failed. Episode total failures=84
+2026-05-27 14:40:43.877 [AGV 3] CancelPickup — abandoning pickup for job 2.
+2026-05-27 14:41:10.792 [EpisodeTracker] Machine 0 failed. Episode total failures=85
+2026-05-27 14:41:50.641 [EpisodeTracker] Machine 3 failed. Episode total failures=86
+2026-05-27 14:42:23.757 [EpisodeTracker] Machine 4 failed. Episode total failures=87
+2026-05-27 14:42:56.853 [EpisodeTracker] Machine 2 failed. Episode total failures=88
+2026-05-27 14:42:56.853 [AGV 1] CancelPickup — abandoning pickup for job 0.
+2026-05-27 14:43:47.356 [EpisodeTracker] Machine 13 failed. Episode total failures=89
+2026-05-27 14:43:54.817 [EpisodeTracker] Machine 12 failed. Episode total failures=90
+2026-05-27 14:43:57.298 [EpisodeTracker] Machine 4 failed. Episode total failures=91
+2026-05-27 14:44:53.023 [EpisodeTracker] Machine 2 failed. Episode total failures=92
+2026-05-27 14:45:31.459 [EpisodeTracker] Machine 14 failed. Episode total failures=93
+2026-05-27 14:46:24.758 [EpisodeTracker] Machine 1 failed. Episode total failures=94
+2026-05-27 14:46:24.758 [AGV 3] CancelPickup — abandoning pickup for job 1.
+2026-05-27 14:47:41.843 [EpisodeTracker] Machine 9 failed. Episode total failures=95
+2026-05-27 14:47:41.844 [AGV 2] CancelPickup — abandoning pickup for job 3.
+2026-05-27 14:47:41.844 [FlagHarvester] Job 4 returned to NeedsRouting — target machine 9 is Repairing.
+2026-05-27 14:48:18.091 [EpisodeTracker] Machine 7 failed. Episode total failures=96
+2026-05-27 14:48:18.091 [AGV 1] CancelPickup — abandoning pickup for job 2.
+2026-05-27 14:49:13.861 [EpisodeTracker] Machine 2 failed. Episode total failures=97
+2026-05-27 14:49:37.064 [EpisodeTracker] Machine 3 failed. Episode total failures=98
+2026-05-27 14:49:37.064 [FlagHarvester] Job 2 returned to NeedsRouting — target machine 3 is Repairing.
+2026-05-27 14:51:22.600 [EpisodeTracker] Machine 5 failed. Episode total failures=99
+2026-05-27 14:52:15.397 [EpisodeTracker] Machine 4 failed. Episode total failures=100
+2026-05-27 14:52:59.557 [EpisodeTracker] Machine 13 failed. Episode total failures=101
+2026-05-27 14:53:04.519 [EpisodeTracker] Machine 9 failed. Episode total failures=102
+2026-05-27 14:54:56.116 [EpisodeTracker] Machine 2 failed. Episode total failures=103
+2026-05-27 14:57:35.786 [EpisodeTracker] Machine 6 failed. Episode total failures=104
+2026-05-27 14:57:35.786 [AGV 4] CancelPickup — abandoning pickup for job 6.
+2026-05-27 14:57:35.786 [FlagHarvester] Job 4 returned to NeedsRouting — target machine 6 is Repairing.
+2026-05-27 14:58:02.670 [EpisodeTracker] Machine 0 failed. Episode total failures=105
+2026-05-27 14:58:02.670 [AGV 2] CancelPickup — abandoning pickup for job 1.
+2026-05-27 14:58:02.670 [AGV 3] CancelPickup — abandoning pickup for job 0.
+2026-05-27 14:58:02.670 [FlagHarvester] Job 5 returned to NeedsRouting — target machine 0 is Repairing.
+2026-05-27 14:58:45.326 [EpisodeTracker] Machine 12 failed. Episode total failures=106
+2026-05-27 14:59:49.702 [EpisodeTracker] Machine 11 failed. Episode total failures=107
+2026-05-27 15:00:33.833 [EpisodeTracker] Machine 1 failed. Episode total failures=108
+2026-05-27 15:01:46.654 [EpisodeTracker] Machine 5 failed. Episode total failures=109
+2026-05-27 15:01:46.654 [AGV 3] CancelPickup — abandoning pickup for job 6.
+2026-05-27 15:03:00.185 [EpisodeTracker] Machine 2 failed. Episode total failures=110
+2026-05-27 15:03:00.185 [AGV 3] CancelPickup — abandoning pickup for job 0.
+2026-05-27 15:07:04.451 [EpisodeTracker] Machine 10 failed. Episode total failures=111
+2026-05-27 15:08:22.493 [EpisodeTracker] Machine 8 failed. Episode total failures=112
+2026-05-27 15:08:22.493 [AGV 1] CancelPickup — abandoning pickup for job 3.
+2026-05-27 15:09:41.192 [EpisodeTracker] Machine 13 failed. Episode total failures=113
+2026-05-27 15:10:01.885 [EpisodeTracker] Machine 11 failed. Episode total failures=114
+2026-05-27 15:10:26.413 [EpisodeTracker] Machine 10 failed. Episode total failures=115
+2026-05-27 15:10:57.057 [EpisodeTracker] Machine 12 failed. Episode total failures=116
+2026-05-27 15:13:11.394 [EpisodeTracker] Machine 4 failed. Episode total failures=117
+2026-05-27 15:13:29.511 [EpisodeTracker] Machine 12 failed. Episode total failures=118
+2026-05-27 15:14:01.407 [EpisodeTracker] Machine 3 failed. Episode total failures=119
+2026-05-27 15:14:15.190 [EpisodeTracker] Machine 1 failed. Episode total failures=120
+2026-05-27 15:14:48.384 [EpisodeTracker] Machine 2 failed. Episode total failures=121
+2026-05-27 15:14:59.096 [EpisodeTracker] Machine 6 failed. Episode total failures=122
+2026-05-27 15:17:25.197 [EpisodeTracker] Machine 0 failed. Episode total failures=123
+2026-05-27 15:17:25.197 [AGV 1] CancelPickup — abandoning pickup for job 0.
+2026-05-27 15:17:25.197 [AGV 3] CancelPickup — abandoning pickup for job 1.
+2026-05-27 15:18:13.968 [EpisodeTracker] Machine 12 failed. Episode total failures=124
+2026-05-27 15:19:45.126 [EpisodeTracker] Machine 8 failed. Episode total failures=125
+2026-05-27 15:19:53.340 [EpisodeTracker] Machine 7 failed. Episode total failures=126
+2026-05-27 15:19:53.340 [AGV 4] CancelPickup — abandoning pickup for job 2.
+2026-05-27 15:20:24.267 [EpisodeTracker] Machine 12 failed. Episode total failures=127
+2026-05-27 15:21:56.541 [EpisodeTracker] Machine 13 failed. Episode total failures=128
+2026-05-27 15:23:06.119 [EpisodeTracker] Machine 8 failed. Episode total failures=129
+2026-05-27 15:23:26.878 [EpisodeTracker] Machine 3 failed. Episode total failures=130
+2026-05-27 15:23:46.965 [EpisodeTracker] Machine 14 failed. Episode total failures=131
+2026-05-27 15:24:57.135 [EpisodeTracker] Machine 6 failed. Episode total failures=132
+2026-05-27 15:24:57.135 [AGV 3] CancelPickup — abandoning pickup for job 5.
+2026-05-27 15:28:35.499 [EpisodeTracker] Machine 4 failed. Episode total failures=133
+2026-05-27 15:30:07.522 [EpisodeTracker] Machine 9 failed. Episode total failures=134
+2026-05-27 15:30:07.522 [AGV 1] CancelPickup — abandoning pickup for job 3.
+2026-05-27 15:30:07.522 [AGV 2] CancelPickup — abandoning pickup for job 4.
+2026-05-27 15:30:27.774 [EpisodeTracker] Machine 1 failed. Episode total failures=135
+2026-05-27 15:30:27.774 [AGV 3] CancelPickup — abandoning pickup for job 1.
+2026-05-27 15:32:00.826 [EpisodeTracker] Machine 13 failed. Episode total failures=136
+2026-05-27 15:32:42.336 [EpisodeTracker] Machine 7 failed. Episode total failures=137
+2026-05-27 15:33:59.045 [EpisodeTracker] Machine 10 failed. Episode total failures=138
+2026-05-27 15:34:37.408 [EpisodeTracker] Machine 5 failed. Episode total failures=139
+2026-05-27 15:35:51.479 [EpisodeTracker] Machine 9 failed. Episode total failures=140
+2026-05-27 15:36:01.637 [EpisodeTracker] Machine 11 failed. Episode total failures=141
+2026-05-27 15:37:24.429 [EpisodeTracker] Machine 12 failed. Episode total failures=142
+2026-05-27 15:37:26.322 [EpisodeTracker] Machine 9 failed. Episode total failures=143
+2026-05-27 15:37:35.152 [EpisodeTracker] Machine 10 failed. Episode total failures=144
+2026-05-27 15:38:35.179 [EpisodeTracker] Machine 0 failed. Episode total failures=145
+2026-05-27 15:38:35.179 [AGV 2] CancelPickup — abandoning pickup for job 5.
+2026-05-27 15:38:35.180 [FlagHarvester] Job 1 returned to NeedsRouting — target machine 0 is Repairing.
+2026-05-27 15:39:42.417 [EpisodeTracker] Machine 1 failed. Episode total failures=146
+2026-05-27 15:39:42.418 [FlagHarvester] Job 1 returned to NeedsRouting — target machine 1 is Repairing.
+2026-05-27 15:40:02.544 [EpisodeTracker] Machine 3 failed. Episode total failures=147
+2026-05-27 15:40:02.544 [AGV 1] CancelPickup — abandoning pickup for job 2.
+2026-05-27 15:41:42.879 [EpisodeTracker] Machine 7 failed. Episode total failures=148
+2026-05-27 15:41:42.880 [FlagHarvester] Job 2 returned to NeedsRouting — target machine 7 is Repairing.
+2026-05-27 15:43:13.239 [EpisodeTracker] Machine 6 failed. Episode total failures=149
+2026-05-27 15:43:13.239 [AGV 2] CancelPickup — abandoning pickup for job 4.
+2026-05-27 15:43:38.883 [EpisodeTracker] Machine 2 failed. Episode total failures=150
+2026-05-27 15:43:38.883 [AGV 4] CancelPickup — abandoning pickup for job 0.
+2026-05-27 15:44:26.539 [EpisodeTracker] Machine 11 failed. Episode total failures=151
+2026-05-27 15:45:59.295 [EpisodeTracker] Machine 2 failed. Episode total failures=152
+2026-05-27 15:46:58.426 [EpisodeTracker] Machine 8 failed. Episode total failures=153
+2026-05-27 15:46:58.426 [AGV 3] CancelPickup — abandoning pickup for job 3.
+2026-05-27 15:49:03.226 [EpisodeTracker] Machine 9 failed. Episode total failures=154
+2026-05-27 15:49:03.226 [AGV 4] CancelPickup — abandoning pickup for job 4.
+2026-05-27 15:49:03.227 [FlagHarvester] Job 3 returned to NeedsRouting — target machine 9 is Repairing.
+2026-05-27 15:50:57.007 [EpisodeTracker] Machine 4 failed. Episode total failures=155
+2026-05-27 15:52:50.998 [EpisodeTracker] Machine 2 failed. Episode total failures=156
+2026-05-27 15:52:52.289 [EpisodeTracker] Machine 1 failed. Episode total failures=157
+2026-05-27 15:53:27.130 [EpisodeTracker] Machine 6 failed. Episode total failures=158
+2026-05-27 15:54:31.243 [EpisodeTracker] Machine 14 failed. Episode total failures=159
+2026-05-27 15:56:54.946 [EpisodeTracker] Machine 12 failed. Episode total failures=160
+2026-05-27 15:58:27.660 [EpisodeTracker] Machine 4 failed. Episode total failures=161
+2026-05-27 16:00:51.096 [EpisodeTracker] Machine 5 failed. Episode total failures=162
+2026-05-27 16:01:05.082 [EpisodeTracker] Machine 13 failed. Episode total failures=163
+2026-05-27 16:02:21.808 [EpisodeTracker] Machine 8 failed. Episode total failures=164
+2026-05-27 16:02:21.809 [FlagHarvester] Job 3 returned to NeedsRouting — target machine 8 is Repairing.
+2026-05-27 16:04:38.248 [EpisodeTracker] Machine 5 failed. Episode total failures=165
+2026-05-27 16:05:02.010 [EpisodeTracker] Machine 2 failed. Episode total failures=166
+2026-05-27 16:05:30.569 [EpisodeTracker] Machine 1 failed. Episode total failures=167
+2026-05-27 16:05:51.126 [EpisodeTracker] Machine 3 failed. Episode total failures=168
+2026-05-27 16:05:51.127 [AGV 2] CancelPickup — abandoning pickup for job 2.
+2026-05-27 16:06:02.051 [EpisodeTracker] Machine 4 failed. Episode total failures=169
+2026-05-27 16:07:54.607 [EpisodeTracker] Machine 11 failed. Episode total failures=170
+2026-05-27 16:09:04.627 [EpisodeTracker] Machine 1 failed. Episode total failures=171
+2026-05-27 16:09:14.660 [EpisodeTracker] Machine 9 failed. Episode total failures=172
+2026-05-27 16:09:14.660 [AGV 2] CancelPickup — abandoning pickup for job 3.
+2026-05-27 16:09:14.661 [FlagHarvester] Job 4 returned to NeedsRouting — target machine 9 is Repairing.
+2026-05-27 16:10:48.707 [EpisodeTracker] Machine 6 failed. Episode total failures=173
+2026-05-27 16:10:55.513 [EpisodeTracker] Machine 13 failed. Episode total failures=174
+2026-05-27 16:10:58.601 [EpisodeTracker] Machine 2 failed. Episode total failures=175
+2026-05-27 16:12:41.289 [Orchestrator] Episode timeout at 500000s — terminating.
+2026-05-27 16:12:41.291 [TelemetryChannel] Flushed 350 events to Python.
+2026-05-27 16:12:41.291 [Orchestrator] Logging Academy Epiosde
+2026-05-27 16:12:41.292 [StochasticSummary] Failures=175 TotalRepairTime=5936.0s MeanTTF_theory=44889.4s
+2026-05-27 16:12:41.292 [BatchRunner] Progress: 28/45 (14765.9s elapsed, ETA 8965.0s)
+2026-05-27 16:12:41.720 [BatchRunner] Run 29/45: benchmark=brandimarte_mk10_low rule=SRT_SRWT seed=43
+2026-05-27 16:12:41.720 [StochasticMgr] Initialized — seed=43 mode=[mf] WeibullK=1.5 λ_machine=49727.91 λ_agv=700 repairMu=3.419044 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 16:12:41.731 [BrandimartLoader] Loaded 20 jobs from benchmark (15 BM machines → 15 runtime machines across 5 types)
+2026-05-27 16:12:41.732 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 16:12:41.732 [StochasticMgr] Initialized — seed=43 mode=[mf] WeibullK=1.5 λ_machine=49727.91 λ_agv=700 repairMu=3.419044 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 16:12:41.732 [Orchestrator] Episode started: 20 jobs, 15 machines, stochastic=True
+2026-05-27 16:12:42.967 [EpisodeTracker] Machine 7 failed. Episode total failures=1
+2026-05-27 16:13:21.706 [EpisodeTracker] Machine 14 failed. Episode total failures=2
+2026-05-27 16:13:29.189 [EpisodeTracker] Machine 6 failed. Episode total failures=3
+2026-05-27 16:13:40.717 [EpisodeTracker] Machine 11 failed. Episode total failures=4
+2026-05-27 16:13:55.736 [EpisodeTracker] Machine 12 failed. Episode total failures=5
+2026-05-27 16:14:38.108 [EpisodeTracker] Machine 1 failed. Episode total failures=6
+2026-05-27 16:14:38.108 [Orchestrator] Job 6: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 16:14:39.378 [Failure] Deferred job 6 re-queued after repair.
+2026-05-27 16:14:48.791 [EpisodeTracker] Machine 8 failed. Episode total failures=7
+2026-05-27 16:15:15.068 [EpisodeTracker] Machine 5 failed. Episode total failures=8
+2026-05-27 16:15:15.069 [FlagHarvester] Job 14 returned to NeedsRouting — target machine 5 is Repairing.
+2026-05-27 16:15:47.485 [EpisodeTracker] Machine 6 failed. Episode total failures=9
+2026-05-27 16:15:51.870 [EpisodeTracker] Machine 0 failed. Episode total failures=10
+2026-05-27 16:16:03.705 [EpisodeTracker] Machine 9 failed. Episode total failures=11
+2026-05-27 16:18:27.313 [TelemetryChannel] Flushed 22 events to Python.
+2026-05-27 16:18:27.313 [Orchestrator] Logging Academy Epiosde
+2026-05-27 16:18:27.313 [StochasticSummary] Failures=11 TotalRepairTime=335.1s MeanTTF_theory=44889.4s
+2026-05-27 16:18:27.313 [BatchRunner] Progress: 29/45 (15111.9s elapsed, ETA 8337.6s)
+2026-05-27 16:18:27.736 [BatchRunner] Run 30/45: benchmark=brandimarte_mk10_low rule=SRT_SRWT seed=44
+2026-05-27 16:18:27.736 [StochasticMgr] Initialized — seed=44 mode=[mf] WeibullK=1.5 λ_machine=49727.91 λ_agv=700 repairMu=3.419044 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 16:18:27.747 [BrandimartLoader] Loaded 20 jobs from benchmark (15 BM machines → 15 runtime machines across 5 types)
+2026-05-27 16:18:27.747 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 16:18:27.747 [StochasticMgr] Initialized — seed=44 mode=[mf] WeibullK=1.5 λ_machine=49727.91 λ_agv=700 repairMu=3.419044 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 16:18:27.747 [Orchestrator] Episode started: 20 jobs, 15 machines, stochastic=True
+2026-05-27 16:18:59.757 [EpisodeTracker] Machine 4 failed. Episode total failures=1
+2026-05-27 16:19:02.852 [EpisodeTracker] Machine 5 failed. Episode total failures=2
+2026-05-27 16:21:30.046 [EpisodeTracker] Machine 0 failed. Episode total failures=3
+2026-05-27 16:23:01.665 [EpisodeTracker] Machine 12 failed. Episode total failures=4
+2026-05-27 16:23:49.874 [EpisodeTracker] Machine 7 failed. Episode total failures=5
+2026-05-27 16:24:03.625 [EpisodeTracker] Machine 6 failed. Episode total failures=6
+2026-05-27 16:24:32.078 [TelemetryChannel] Flushed 12 events to Python.
+2026-05-27 16:24:32.079 [Orchestrator] Logging Academy Epiosde
+2026-05-27 16:24:32.079 [StochasticSummary] Failures=6 TotalRepairTime=204.0s MeanTTF_theory=44889.4s
+2026-05-27 16:24:32.079 [BatchRunner] Progress: 30/45 (15476.7s elapsed, ETA 7738.3s)
+2026-05-27 16:24:32.519 [BatchRunner] ─── brandimarte_mk11_low (30j × 5m) ───
+2026-05-27 16:24:32.519 [BatchRunner] Run 31/45: benchmark=brandimarte_mk11_low rule=SRT_SRWT seed=42
+2026-05-27 16:24:32.519 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=75349.26 λ_agv=700 repairMu=3.923082 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 16:24:32.525 [BrandimartLoader] Loaded 30 jobs from benchmark (5 BM machines → 5 runtime machines across 5 types)
+2026-05-27 16:24:32.525 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 16:24:32.526 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=75349.26 λ_agv=700 repairMu=3.923082 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 16:24:32.526 [Orchestrator] Episode started: 30 jobs, 5 machines, stochastic=True
+2026-05-27 16:26:36.516 [EpisodeTracker] Machine 2 failed. Episode total failures=1
+2026-05-27 16:26:36.516 [Orchestrator] Job 9: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 16:26:37.149 [Orchestrator] Job 9: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 16:26:37.770 [Failure] Deferred job 9 re-queued after repair.
+2026-05-27 16:28:30.063 [EpisodeTracker] Machine 1 failed. Episode total failures=2
+2026-05-27 16:28:30.063 [Orchestrator] Job 10: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 16:28:30.661 [Orchestrator] Job 10: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 16:28:31.289 [Failure] Deferred job 10 re-queued after repair.
+2026-05-27 16:29:57.468 [EpisodeTracker] Machine 4 failed. Episode total failures=3
+2026-05-27 16:31:07.393 [TelemetryChannel] Flushed 6 events to Python.
+2026-05-27 16:31:07.393 [Orchestrator] Logging Academy Epiosde
+2026-05-27 16:31:07.393 [StochasticSummary] Failures=3 TotalRepairTime=125.0s MeanTTF_theory=68017.8s
+2026-05-27 16:31:07.394 [BatchRunner] Progress: 31/45 (15872.0s elapsed, ETA 7168.0s)
+2026-05-27 16:31:07.804 [BatchRunner] Run 32/45: benchmark=brandimarte_mk11_low rule=SRT_SRWT seed=43
+2026-05-27 16:31:07.804 [StochasticMgr] Initialized — seed=43 mode=[mf] WeibullK=1.5 λ_machine=75349.26 λ_agv=700 repairMu=3.923082 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 16:31:07.809 [BrandimartLoader] Loaded 30 jobs from benchmark (5 BM machines → 5 runtime machines across 5 types)
+2026-05-27 16:31:07.810 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 16:31:07.810 [StochasticMgr] Initialized — seed=43 mode=[mf] WeibullK=1.5 λ_machine=75349.26 λ_agv=700 repairMu=3.923082 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 16:31:07.810 [Orchestrator] Episode started: 30 jobs, 5 machines, stochastic=True
+2026-05-27 16:34:05.345 [EpisodeTracker] Machine 1 failed. Episode total failures=1
+2026-05-27 16:35:32.773 [EpisodeTracker] Machine 1 failed. Episode total failures=2
+2026-05-27 16:35:32.774 [Orchestrator] Job 10: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 16:35:33.408 [Orchestrator] Job 10: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 16:35:34.044 [Orchestrator] Job 10: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 16:35:34.654 [Failure] Deferred job 10 re-queued after repair.
+2026-05-27 16:35:57.886 [EpisodeTracker] Machine 0 failed. Episode total failures=3
+2026-05-27 16:37:32.917 [TelemetryChannel] Flushed 6 events to Python.
+2026-05-27 16:37:32.917 [Orchestrator] Logging Academy Epiosde
+2026-05-27 16:37:32.917 [StochasticSummary] Failures=3 TotalRepairTime=223.2s MeanTTF_theory=68017.8s
+2026-05-27 16:37:32.918 [BatchRunner] Progress: 32/45 (16257.5s elapsed, ETA 6604.6s)
+2026-05-27 16:37:33.330 [BatchRunner] Run 33/45: benchmark=brandimarte_mk11_low rule=SRT_SRWT seed=44
+2026-05-27 16:37:33.330 [StochasticMgr] Initialized — seed=44 mode=[mf] WeibullK=1.5 λ_machine=75349.26 λ_agv=700 repairMu=3.923082 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 16:37:33.336 [BrandimartLoader] Loaded 30 jobs from benchmark (5 BM machines → 5 runtime machines across 5 types)
+2026-05-27 16:37:33.336 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 16:37:33.336 [StochasticMgr] Initialized — seed=44 mode=[mf] WeibullK=1.5 λ_machine=75349.26 λ_agv=700 repairMu=3.923082 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 16:37:33.336 [Orchestrator] Episode started: 30 jobs, 5 machines, stochastic=True
+2026-05-27 16:38:21.043 [EpisodeTracker] Machine 4 failed. Episode total failures=1
+2026-05-27 16:38:21.044 [Orchestrator] Job 2: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 16:38:21.682 [Failure] Deferred job 2 re-queued after repair.
+2026-05-27 16:42:03.686 [EpisodeTracker] Machine 0 failed. Episode total failures=2
+2026-05-27 16:44:14.527 [TelemetryChannel] Flushed 4 events to Python.
+2026-05-27 16:44:14.527 [Orchestrator] Logging Academy Epiosde
+2026-05-27 16:44:14.527 [StochasticSummary] Failures=2 TotalRepairTime=50.9s MeanTTF_theory=68017.8s
+2026-05-27 16:44:14.527 [BatchRunner] Progress: 33/45 (16659.1s elapsed, ETA 6057.9s)
+2026-05-27 16:44:14.934 [BatchRunner] ─── brandimarte_mk12_low (30j × 10m) ───
+2026-05-27 16:44:14.934 [BatchRunner] Run 34/45: benchmark=brandimarte_mk12_low rule=SRT_SRWT seed=42
+2026-05-27 16:44:14.934 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=73914.06 λ_agv=700 repairMu=3.900655 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 16:44:14.942 [BrandimartLoader] Loaded 30 jobs from benchmark (10 BM machines → 10 runtime machines across 5 types)
+2026-05-27 16:44:14.942 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 16:44:14.942 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=73914.06 λ_agv=700 repairMu=3.900655 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 16:44:14.942 [Orchestrator] Episode started: 30 jobs, 10 machines, stochastic=True
+2026-05-27 16:46:16.175 [EpisodeTracker] Machine 2 failed. Episode total failures=1
+2026-05-27 16:48:01.790 [EpisodeTracker] Machine 5 failed. Episode total failures=2
+2026-05-27 16:48:07.431 [EpisodeTracker] Machine 1 failed. Episode total failures=3
+2026-05-27 16:49:33.537 [EpisodeTracker] Machine 4 failed. Episode total failures=4
+2026-05-27 16:50:39.974 [TelemetryChannel] Flushed 8 events to Python.
+2026-05-27 16:50:39.974 [Orchestrator] Logging Academy Epiosde
+2026-05-27 16:50:39.974 [StochasticSummary] Failures=4 TotalRepairTime=192.4s MeanTTF_theory=66722.2s
+2026-05-27 16:50:39.975 [BatchRunner] Progress: 34/45 (17044.6s elapsed, ETA 5514.4s)
+2026-05-27 16:50:40.381 [BatchRunner] Run 35/45: benchmark=brandimarte_mk12_low rule=SRT_SRWT seed=43
+2026-05-27 16:50:40.381 [StochasticMgr] Initialized — seed=43 mode=[mf] WeibullK=1.5 λ_machine=73914.06 λ_agv=700 repairMu=3.900655 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 16:50:40.389 [BrandimartLoader] Loaded 30 jobs from benchmark (10 BM machines → 10 runtime machines across 5 types)
+2026-05-27 16:50:40.389 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 16:50:40.390 [StochasticMgr] Initialized — seed=43 mode=[mf] WeibullK=1.5 λ_machine=73914.06 λ_agv=700 repairMu=3.900655 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 16:50:40.390 [Orchestrator] Episode started: 30 jobs, 10 machines, stochastic=True
+2026-05-27 16:50:41.615 [EpisodeTracker] Machine 7 failed. Episode total failures=1
+2026-05-27 16:51:50.499 [EpisodeTracker] Machine 6 failed. Episode total failures=2
+2026-05-27 16:51:51.101 [Orchestrator] Job 6: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 16:51:51.735 [Failure] Deferred job 6 re-queued after repair.
+2026-05-27 16:53:30.939 [EpisodeTracker] Machine 1 failed. Episode total failures=3
+2026-05-27 16:53:46.567 [EpisodeTracker] Machine 8 failed. Episode total failures=4
+2026-05-27 16:54:26.203 [EpisodeTracker] Machine 5 failed. Episode total failures=5
+2026-05-27 16:55:21.589 [EpisodeTracker] Machine 0 failed. Episode total failures=6
+2026-05-27 16:55:38.052 [EpisodeTracker] Machine 9 failed. Episode total failures=7
+2026-05-27 16:57:15.695 [TelemetryChannel] Flushed 14 events to Python.
+2026-05-27 16:57:15.695 [Orchestrator] Logging Academy Epiosde
+2026-05-27 16:57:15.695 [StochasticSummary] Failures=7 TotalRepairTime=431.2s MeanTTF_theory=66722.2s
+2026-05-27 16:57:15.696 [BatchRunner] Progress: 35/45 (17440.3s elapsed, ETA 4982.9s)
+2026-05-27 16:57:16.126 [BatchRunner] Run 36/45: benchmark=brandimarte_mk12_low rule=SRT_SRWT seed=44
+2026-05-27 16:57:16.126 [StochasticMgr] Initialized — seed=44 mode=[mf] WeibullK=1.5 λ_machine=73914.06 λ_agv=700 repairMu=3.900655 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 16:57:16.135 [BrandimartLoader] Loaded 30 jobs from benchmark (10 BM machines → 10 runtime machines across 5 types)
+2026-05-27 16:57:16.135 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 16:57:16.136 [StochasticMgr] Initialized — seed=44 mode=[mf] WeibullK=1.5 λ_machine=73914.06 λ_agv=700 repairMu=3.900655 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 16:57:16.136 [Orchestrator] Episode started: 30 jobs, 10 machines, stochastic=True
+2026-05-27 16:58:03.666 [EpisodeTracker] Machine 4 failed. Episode total failures=1
+2026-05-27 16:58:03.666 [Orchestrator] Job 2: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 16:58:04.327 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 16:58:04.933 [Failure] Deferred job 2 re-queued after repair.
+2026-05-27 16:58:04.933 [Failure] Deferred job 1 re-queued after repair.
+2026-05-27 16:58:08.114 [EpisodeTracker] Machine 5 failed. Episode total failures=2
+2026-05-27 16:58:08.728 [Orchestrator] Job 11: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 16:58:09.355 [Failure] Deferred job 11 re-queued after repair.
+2026-05-27 17:01:47.426 [EpisodeTracker] Machine 0 failed. Episode total failures=3
+2026-05-27 17:03:54.843 [TelemetryChannel] Flushed 6 events to Python.
+2026-05-27 17:03:54.843 [Orchestrator] Logging Academy Epiosde
+2026-05-27 17:03:54.843 [StochasticSummary] Failures=3 TotalRepairTime=157.2s MeanTTF_theory=66722.2s
+2026-05-27 17:03:54.844 [BatchRunner] Progress: 36/45 (17839.5s elapsed, ETA 4459.9s)
+2026-05-27 17:03:55.261 [BatchRunner] ─── brandimarte_mk13_low (30j × 10m) ───
+2026-05-27 17:03:55.261 [BatchRunner] Run 37/45: benchmark=brandimarte_mk13_low rule=SRT_SRWT seed=42
+2026-05-27 17:03:55.261 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=81041.09 λ_agv=700 repairMu=4.00738 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 17:03:55.271 [BrandimartLoader] Loaded 30 jobs from benchmark (10 BM machines → 10 runtime machines across 5 types)
+2026-05-27 17:03:55.271 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 17:03:55.271 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=81041.09 λ_agv=700 repairMu=4.00738 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 17:03:55.271 [Orchestrator] Episode started: 30 jobs, 10 machines, stochastic=True
+2026-05-27 17:06:10.511 [EpisodeTracker] Machine 2 failed. Episode total failures=1
+2026-05-27 17:08:11.028 [EpisodeTracker] Machine 5 failed. Episode total failures=2
+2026-05-27 17:08:11.028 [FlagHarvester] Job 14 returned to NeedsRouting — target machine 5 is Repairing.
+2026-05-27 17:08:16.692 [EpisodeTracker] Machine 1 failed. Episode total failures=3
+2026-05-27 17:09:54.547 [EpisodeTracker] Machine 4 failed. Episode total failures=4
+2026-05-27 17:10:07.761 [TelemetryChannel] Flushed 8 events to Python.
+2026-05-27 17:10:07.761 [Orchestrator] Logging Academy Epiosde
+2026-05-27 17:10:07.761 [StochasticSummary] Failures=4 TotalRepairTime=214.1s MeanTTF_theory=73155.8s
+2026-05-27 17:10:07.762 [BatchRunner] Progress: 37/45 (18212.4s elapsed, ETA 3937.8s)
+2026-05-27 17:10:08.188 [BatchRunner] Run 38/45: benchmark=brandimarte_mk13_low rule=SRT_SRWT seed=43
+2026-05-27 17:10:08.188 [StochasticMgr] Initialized — seed=43 mode=[mf] WeibullK=1.5 λ_machine=81041.09 λ_agv=700 repairMu=4.00738 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 17:10:08.198 [BrandimartLoader] Loaded 30 jobs from benchmark (10 BM machines → 10 runtime machines across 5 types)
+2026-05-27 17:10:08.198 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 17:10:08.198 [StochasticMgr] Initialized — seed=43 mode=[mf] WeibullK=1.5 λ_machine=81041.09 λ_agv=700 repairMu=4.00738 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 17:10:08.198 [Orchestrator] Episode started: 30 jobs, 10 machines, stochastic=True
+2026-05-27 17:10:09.480 [EpisodeTracker] Machine 7 failed. Episode total failures=1
+2026-05-27 17:11:27.299 [EpisodeTracker] Machine 6 failed. Episode total failures=2
+2026-05-27 17:13:21.595 [EpisodeTracker] Machine 1 failed. Episode total failures=3
+2026-05-27 17:13:39.791 [EpisodeTracker] Machine 8 failed. Episode total failures=4
+2026-05-27 17:14:24.122 [EpisodeTracker] Machine 5 failed. Episode total failures=5
+2026-05-27 17:15:26.167 [EpisodeTracker] Machine 0 failed. Episode total failures=6
+2026-05-27 17:15:26.167 [Orchestrator] Job 8: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 17:15:26.790 [Orchestrator] Job 8: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 17:15:27.427 [Orchestrator] Job 8: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 17:15:28.662 [Failure] Deferred job 8 re-queued after repair.
+2026-05-27 17:15:45.154 [EpisodeTracker] Machine 9 failed. Episode total failures=7
+2026-05-27 17:16:50.037 [TelemetryChannel] Flushed 14 events to Python.
+2026-05-27 17:16:50.037 [Orchestrator] Logging Academy Epiosde
+2026-05-27 17:16:50.037 [StochasticSummary] Failures=7 TotalRepairTime=479.8s MeanTTF_theory=73155.8s
+2026-05-27 17:16:50.038 [BatchRunner] Progress: 38/45 (18614.6s elapsed, ETA 3429.0s)
+2026-05-27 17:16:50.456 [BatchRunner] Run 39/45: benchmark=brandimarte_mk13_low rule=SRT_SRWT seed=44
+2026-05-27 17:16:50.456 [StochasticMgr] Initialized — seed=44 mode=[mf] WeibullK=1.5 λ_machine=81041.09 λ_agv=700 repairMu=4.00738 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 17:16:50.466 [BrandimartLoader] Loaded 30 jobs from benchmark (10 BM machines → 10 runtime machines across 5 types)
+2026-05-27 17:16:50.466 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 17:16:50.467 [StochasticMgr] Initialized — seed=44 mode=[mf] WeibullK=1.5 λ_machine=81041.09 λ_agv=700 repairMu=4.00738 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 17:16:50.467 [Orchestrator] Episode started: 30 jobs, 10 machines, stochastic=True
+2026-05-27 17:17:42.880 [EpisodeTracker] Machine 4 failed. Episode total failures=1
+2026-05-27 17:17:48.067 [EpisodeTracker] Machine 5 failed. Episode total failures=2
+2026-05-27 17:21:47.465 [EpisodeTracker] Machine 0 failed. Episode total failures=3
+2026-05-27 17:21:47.465 [AGV 0] CancelPickup — abandoning pickup for job 0.
+2026-05-27 17:21:47.465 [FlagHarvester] Job 2 returned to NeedsRouting — target machine 0 is Repairing.
+2026-05-27 17:25:38.032 [EpisodeTracker] Machine 7 failed. Episode total failures=4
+2026-05-27 17:26:00.801 [EpisodeTracker] Machine 6 failed. Episode total failures=5
+2026-05-27 17:26:53.105 [EpisodeTracker] Machine 9 failed. Episode total failures=6
+2026-05-27 17:27:24.005 [EpisodeTracker] Machine 6 failed. Episode total failures=7
+2026-05-27 17:27:34.813 [EpisodeTracker] Machine 8 failed. Episode total failures=8
+2026-05-27 17:32:41.615 [EpisodeTracker] Machine 2 failed. Episode total failures=9
+2026-05-27 17:32:41.616 [FlagHarvester] Job 0 returned to NeedsRouting — target machine 2 is Repairing.
+2026-05-27 17:33:04.846 [EpisodeTracker] Machine 8 failed. Episode total failures=10
+2026-05-27 17:38:30.661 [EpisodeTracker] Machine 5 failed. Episode total failures=11
+2026-05-27 17:38:30.661 [AGV 0] CancelPickup — abandoning pickup for job 1.
+2026-05-27 17:45:18.294 [EpisodeTracker] Machine 6 failed. Episode total failures=12
+2026-05-27 17:46:23.555 [EpisodeTracker] Machine 1 failed. Episode total failures=13
+2026-05-27 17:51:32.539 [EpisodeTracker] Machine 5 failed. Episode total failures=14
+2026-05-27 17:52:20.819 [EpisodeTracker] Machine 7 failed. Episode total failures=15
+2026-05-27 17:52:26.015 [EpisodeTracker] Machine 2 failed. Episode total failures=16
+2026-05-27 17:53:08.950 [EpisodeTracker] Machine 7 failed. Episode total failures=17
+2026-05-27 17:59:05.914 [EpisodeTracker] Machine 2 failed. Episode total failures=18
+2026-05-27 18:00:53.276 [EpisodeTracker] Machine 4 failed. Episode total failures=19
+2026-05-27 18:03:44.433 [EpisodeTracker] Machine 0 failed. Episode total failures=20
+2026-05-27 18:03:44.433 [AGV 0] CancelPickup — abandoning pickup for job 0.
+2026-05-27 18:03:44.434 [FlagHarvester] Job 1 returned to NeedsRouting — target machine 0 is Repairing.
+2026-05-27 18:04:31.916 [EpisodeTracker] Machine 7 failed. Episode total failures=21
+2026-05-27 18:04:55.616 [EpisodeTracker] Machine 1 failed. Episode total failures=22
+2026-05-27 18:05:04.740 [EpisodeTracker] Machine 3 failed. Episode total failures=23
+2026-05-27 18:05:04.740 [AGV 2] CancelPickup — abandoning pickup for job 20.
+2026-05-27 18:07:42.816 [EpisodeTracker] Machine 6 failed. Episode total failures=24
+2026-05-27 18:10:06.918 [EpisodeTracker] Machine 0 failed. Episode total failures=25
+2026-05-27 18:14:11.006 [EpisodeTracker] Machine 5 failed. Episode total failures=26
+2026-05-27 18:14:11.007 [FlagHarvester] Job 1 returned to NeedsRouting — target machine 5 is Repairing.
+2026-05-27 18:18:10.799 [EpisodeTracker] Machine 3 failed. Episode total failures=27
+2026-05-27 18:21:06.638 [EpisodeTracker] Machine 7 failed. Episode total failures=28
+2026-05-27 18:21:23.269 [EpisodeTracker] Machine 9 failed. Episode total failures=29
+2026-05-27 18:21:23.269 [AGV 0] CancelPickup — abandoning pickup for job 2.
+2026-05-27 18:25:26.044 [EpisodeTracker] Machine 8 failed. Episode total failures=30
+2026-05-27 18:28:04.440 [EpisodeTracker] Machine 9 failed. Episode total failures=31
+2026-05-27 18:32:52.667 [EpisodeTracker] Machine 6 failed. Episode total failures=32
+2026-05-27 18:33:35.697 [EpisodeTracker] Machine 3 failed. Episode total failures=33
+2026-05-27 18:35:27.073 [EpisodeTracker] Machine 1 failed. Episode total failures=34
+2026-05-27 18:35:47.213 [EpisodeTracker] Machine 5 failed. Episode total failures=35
+2026-05-27 18:35:47.214 [FlagHarvester] Job 2 returned to NeedsRouting — target machine 5 is Repairing.
+2026-05-27 18:38:35.132 [EpisodeTracker] Machine 4 failed. Episode total failures=36
+2026-05-27 18:41:59.171 [EpisodeTracker] Machine 1 failed. Episode total failures=37
+2026-05-27 18:43:06.068 [EpisodeTracker] Machine 8 failed. Episode total failures=38
+2026-05-27 18:44:33.314 [EpisodeTracker] Machine 2 failed. Episode total failures=39
+2026-05-27 18:44:33.315 [AGV 2] CancelPickup — abandoning pickup for job 0.
+2026-05-27 18:46:10.074 [EpisodeTracker] Machine 4 failed. Episode total failures=40
+2026-05-27 18:46:31.685 [EpisodeTracker] Machine 7 failed. Episode total failures=41
+2026-05-27 18:49:03.324 [EpisodeTracker] Machine 3 failed. Episode total failures=42
+2026-05-27 18:49:23.869 [EpisodeTracker] Machine 3 failed. Episode total failures=43
+2026-05-27 18:51:50.565 [EpisodeTracker] Machine 1 failed. Episode total failures=44
+2026-05-27 18:53:37.709 [EpisodeTracker] Machine 6 failed. Episode total failures=45
+2026-05-27 18:59:29.187 [EpisodeTracker] Machine 8 failed. Episode total failures=46
+2026-05-27 19:01:46.256 [EpisodeTracker] Machine 9 failed. Episode total failures=47
+2026-05-27 19:01:46.256 [AGV 2] CancelPickup — abandoning pickup for job 2.
+2026-05-27 19:03:08.389 [EpisodeTracker] Machine 6 failed. Episode total failures=48
+2026-05-27 19:03:44.670 [EpisodeTracker] Machine 4 failed. Episode total failures=49
+2026-05-27 19:05:08.086 [EpisodeTracker] Machine 5 failed. Episode total failures=50
+2026-05-27 19:05:08.086 [FlagHarvester] Job 2 returned to NeedsRouting — target machine 5 is Repairing.
+2026-05-27 19:06:12.517 [EpisodeTracker] Machine 2 failed. Episode total failures=51
+2026-05-27 19:15:14.407 [EpisodeTracker] Machine 3 failed. Episode total failures=52
+2026-05-27 19:18:46.864 [EpisodeTracker] Machine 5 failed. Episode total failures=53
+2026-05-27 19:19:24.312 [EpisodeTracker] Machine 9 failed. Episode total failures=54
+2026-05-27 19:19:24.312 [FlagHarvester] Job 2 returned to NeedsRouting — target machine 9 is Repairing.
+2026-05-27 19:23:28.807 [EpisodeTracker] Machine 2 failed. Episode total failures=55
+2026-05-27 19:24:14.029 [EpisodeTracker] Machine 1 failed. Episode total failures=56
+2026-05-27 19:26:24.003 [EpisodeTracker] Machine 0 failed. Episode total failures=57
+2026-05-27 19:26:24.003 [AGV 0] CancelPickup — abandoning pickup for job 1.
+2026-05-27 19:26:24.003 [AGV 2] CancelPickup — abandoning pickup for job 0.
+2026-05-27 19:26:24.003 [FlagHarvester] Job 4 returned to NeedsRouting — target machine 0 is Repairing.
+2026-05-27 19:33:22.689 [EpisodeTracker] Machine 0 failed. Episode total failures=58
+2026-05-27 19:39:13.393 [EpisodeTracker] Machine 4 failed. Episode total failures=59
+2026-05-27 19:41:30.359 [EpisodeTracker] Machine 2 failed. Episode total failures=60
+2026-05-27 19:41:30.359 [FlagHarvester] Job 0 returned to NeedsRouting — target machine 2 is Repairing.
+2026-05-27 19:41:30.967 [EpisodeTracker] Machine 0 failed. Episode total failures=61
+2026-05-27 19:41:30.967 [FlagHarvester] Job 0 returned to NeedsRouting — target machine 0 is Repairing.
+2026-05-27 19:41:30.967 [FlagHarvester] Job 1 returned to NeedsRouting — target machine 0 is Repairing.
+2026-05-27 19:41:30.967 [FlagHarvester] Job 4 returned to NeedsRouting — target machine 0 is Repairing.
+2026-05-27 19:41:30.967 [Orchestrator] Job 0: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 19:41:31.593 [Failure] Deferred job 0 re-queued after repair.
+2026-05-27 19:46:57.012 [EpisodeTracker] Machine 3 failed. Episode total failures=62
+2026-05-27 19:47:48.380 [EpisodeTracker] Machine 5 failed. Episode total failures=63
+2026-05-27 19:47:48.381 [AGV 0] CancelPickup — abandoning pickup for job 2.
+2026-05-27 19:53:44.529 [Orchestrator] Episode timeout at 500033s — terminating.
+2026-05-27 19:53:44.530 [TelemetryChannel] Flushed 126 events to Python.
+2026-05-27 19:53:44.530 [Orchestrator] Logging Academy Epiosde
+2026-05-27 19:53:44.530 [StochasticSummary] Failures=63 TotalRepairTime=3665.2s MeanTTF_theory=73155.8s
+2026-05-27 19:53:44.531 [BatchRunner] Progress: 39/45 (28029.1s elapsed, ETA 4312.2s)
+2026-05-27 19:53:44.945 [BatchRunner] ─── brandimarte_mk14_low (30j × 15m) ───
+2026-05-27 19:53:44.945 [BatchRunner] Run 40/45: benchmark=brandimarte_mk14_low rule=SRT_SRWT seed=42
+2026-05-27 19:53:44.945 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=81377.27 λ_agv=700 repairMu=4.012143 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 19:53:44.955 [BrandimartLoader] Loaded 30 jobs from benchmark (15 BM machines → 15 runtime machines across 5 types)
+2026-05-27 19:53:44.955 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 19:53:44.956 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=81377.27 λ_agv=700 repairMu=4.012143 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 19:53:44.956 [Orchestrator] Episode started: 30 jobs, 15 machines, stochastic=True
+2026-05-27 19:54:27.085 [EpisodeTracker] Machine 10 failed. Episode total failures=1
+2026-05-27 19:54:27.085 [Orchestrator] Job 8: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 19:54:27.672 [Failure] Deferred job 8 re-queued after repair.
+2026-05-27 19:54:48.228 [EpisodeTracker] Machine 11 failed. Episode total failures=2
+2026-05-27 19:54:48.228 [Orchestrator] Job 0: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 19:54:48.856 [Orchestrator] Job 0: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 19:54:49.452 [Failure] Deferred job 0 re-queued after repair.
+2026-05-27 19:55:55.816 [EpisodeTracker] Machine 2 failed. Episode total failures=3
+2026-05-27 19:57:13.369 [EpisodeTracker] Machine 10 failed. Episode total failures=4
+2026-05-27 19:57:52.182 [EpisodeTracker] Machine 5 failed. Episode total failures=5
+2026-05-27 19:57:57.724 [EpisodeTracker] Machine 1 failed. Episode total failures=6
+2026-05-27 19:57:57.725 [AGV 4] CancelPickup — abandoning pickup for job 13.
+2026-05-27 19:57:57.725 [Orchestrator] Job 13: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 19:57:58.339 [Orchestrator] Job 13: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 19:57:58.964 [Failure] Deferred job 13 re-queued after repair.
+2026-05-27 19:58:00.188 [EpisodeTracker] Machine 12 failed. Episode total failures=7
+2026-05-27 19:59:33.746 [EpisodeTracker] Machine 4 failed. Episode total failures=8
+2026-05-27 20:00:26.404 [EpisodeTracker] Machine 10 failed. Episode total failures=9
+2026-05-27 20:01:46.642 [EpisodeTracker] Machine 8 failed. Episode total failures=10
+2026-05-27 20:01:46.642 [AGV 3] CancelPickup — abandoning pickup for job 10.
+2026-05-27 20:02:15.017 [EpisodeTracker] Machine 13 failed. Episode total failures=11
+2026-05-27 20:02:15.017 [AGV 2] CancelPickup — abandoning pickup for job 8.
+2026-05-27 20:02:15.018 [FlagHarvester] Job 7 returned to NeedsRouting — target machine 13 is Repairing.
+2026-05-27 20:02:15.018 [Orchestrator] Job 7: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 20:02:15.674 [Orchestrator] Job 7: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 20:02:16.277 [Failure] Deferred job 7 re-queued after repair.
+2026-05-27 20:04:45.115 [EpisodeTracker] Machine 7 failed. Episode total failures=12
+2026-05-27 20:05:19.784 [EpisodeTracker] Machine 8 failed. Episode total failures=13
+2026-05-27 20:05:37.132 [EpisodeTracker] Machine 3 failed. Episode total failures=14
+2026-05-27 20:05:48.352 [EpisodeTracker] Machine 9 failed. Episode total failures=15
+2026-05-27 20:06:10.777 [EpisodeTracker] Machine 14 failed. Episode total failures=16
+2026-05-27 20:06:46.227 [EpisodeTracker] Machine 1 failed. Episode total failures=17
+2026-05-27 20:07:14.230 [EpisodeTracker] Machine 6 failed. Episode total failures=18
+2026-05-27 20:08:28.637 [EpisodeTracker] Machine 13 failed. Episode total failures=19
+2026-05-27 20:08:28.637 [FlagHarvester] Job 7 returned to NeedsRouting — target machine 13 is Repairing.
+2026-05-27 20:08:28.637 [FlagHarvester] Job 8 returned to NeedsRouting — target machine 13 is Repairing.
+2026-05-27 20:08:28.637 [Orchestrator] Job 7: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 20:08:29.240 [Orchestrator] Job 7: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 20:08:29.830 [Failure] Deferred job 7 re-queued after repair.
+2026-05-27 20:08:34.668 [EpisodeTracker] Machine 6 failed. Episode total failures=20
+2026-05-27 20:08:35.266 [EpisodeTracker] Machine 8 failed. Episode total failures=21
+2026-05-27 20:09:08.014 [EpisodeTracker] Machine 6 failed. Episode total failures=22
+2026-05-27 20:09:09.233 [EpisodeTracker] Machine 3 failed. Episode total failures=23
+2026-05-27 20:10:47.369 [EpisodeTracker] Machine 11 failed. Episode total failures=24
+2026-05-27 20:12:39.190 [EpisodeTracker] Machine 8 failed. Episode total failures=25
+2026-05-27 20:15:51.655 [EpisodeTracker] Machine 10 failed. Episode total failures=26
+2026-05-27 20:15:51.656 [AGV 2] AbortTransit — job 5 released at (-11.12, 0.32, -14.00).
+2026-05-27 20:15:51.656 [Orchestrator] Job 5: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 20:15:52.288 [Orchestrator] Job 5: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 20:15:52.902 [Failure] Deferred job 5 re-queued after repair.
+2026-05-27 20:16:56.207 [EpisodeTracker] Machine 7 failed. Episode total failures=27
+2026-05-27 20:20:26.074 [EpisodeTracker] Machine 0 failed. Episode total failures=28
+2026-05-27 20:20:29.700 [EpisodeTracker] Machine 4 failed. Episode total failures=29
+2026-05-27 20:20:50.840 [EpisodeTracker] Machine 12 failed. Episode total failures=30
+2026-05-27 20:20:53.879 [EpisodeTracker] Machine 14 failed. Episode total failures=31
+2026-05-27 20:24:09.170 [EpisodeTracker] Machine 3 failed. Episode total failures=32
+2026-05-27 20:24:27.823 [EpisodeTracker] Machine 2 failed. Episode total failures=33
+2026-05-27 20:25:42.491 [EpisodeTracker] Machine 11 failed. Episode total failures=34
+2026-05-27 20:27:07.897 [EpisodeTracker] Machine 6 failed. Episode total failures=35
+2026-05-27 20:27:43.829 [EpisodeTracker] Machine 14 failed. Episode total failures=36
+2026-05-27 20:28:15.295 [EpisodeTracker] Machine 10 failed. Episode total failures=37
+2026-05-27 20:28:15.295 [FlagHarvester] Job 5 returned to NeedsRouting — target machine 10 is Repairing.
+2026-05-27 20:28:15.295 [Orchestrator] Job 5: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 20:28:15.904 [Orchestrator] Job 5: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 20:28:16.518 [Failure] Deferred job 5 re-queued after repair.
+2026-05-27 20:28:18.895 [EpisodeTracker] Machine 4 failed. Episode total failures=38
+2026-05-27 20:28:23.130 [EpisodeTracker] Machine 13 failed. Episode total failures=39
+2026-05-27 20:28:23.131 [AGV 2] CancelPickup — abandoning pickup for job 7.
+2026-05-27 20:28:23.131 [FlagHarvester] Job 8 returned to NeedsRouting — target machine 13 is Repairing.
+2026-05-27 20:28:23.131 [Orchestrator] Job 7: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 20:28:23.736 [Orchestrator] Job 7: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 20:28:24.358 [Orchestrator] Job 7: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 20:28:24.965 [Orchestrator] Job 7: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 20:28:25.589 [Failure] Deferred job 7 re-queued after repair.
+2026-05-27 20:29:14.527 [EpisodeTracker] Machine 6 failed. Episode total failures=40
+2026-05-27 20:30:00.655 [EpisodeTracker] Machine 14 failed. Episode total failures=41
+2026-05-27 20:30:27.366 [EpisodeTracker] Machine 9 failed. Episode total failures=42
+2026-05-27 20:31:07.069 [EpisodeTracker] Machine 14 failed. Episode total failures=43
+2026-05-27 20:31:07.677 [EpisodeTracker] Machine 10 failed. Episode total failures=44
+2026-05-27 20:31:07.677 [AGV 2] CancelPickup — abandoning pickup for job 5.
+2026-05-27 20:31:07.678 [Orchestrator] Job 5: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 20:31:08.287 [Orchestrator] Job 5: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 20:31:08.885 [Failure] Deferred job 5 re-queued after repair.
+2026-05-27 20:34:22.283 [EpisodeTracker] Machine 12 failed. Episode total failures=45
+2026-05-27 20:34:43.482 [EpisodeTracker] Machine 13 failed. Episode total failures=46
+2026-05-27 20:34:43.482 [AGV 2] CancelPickup — abandoning pickup for job 7.
+2026-05-27 20:34:43.482 [FlagHarvester] Job 8 returned to NeedsRouting — target machine 13 is Repairing.
+2026-05-27 20:34:43.482 [Orchestrator] Job 7: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 20:34:44.079 [Orchestrator] Job 7: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 20:34:44.689 [Orchestrator] Job 7: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 20:34:45.314 [Orchestrator] Job 7: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 20:34:45.923 [Failure] Deferred job 7 re-queued after repair.
+2026-05-27 20:35:45.078 [EpisodeTracker] Machine 1 failed. Episode total failures=47
+2026-05-27 20:42:00.826 [EpisodeTracker] Machine 5 failed. Episode total failures=48
+2026-05-27 20:42:00.827 [AGV 4] CancelPickup — abandoning pickup for job 18.
+2026-05-27 20:42:01.499 [FlagHarvester] Job 10 returned to NeedsRouting — target machine 5 is Repairing.
+2026-05-27 20:42:30.711 [EpisodeTracker] Machine 6 failed. Episode total failures=49
+2026-05-27 20:44:00.669 [EpisodeTracker] Machine 3 failed. Episode total failures=50
+2026-05-27 20:44:54.243 [EpisodeTracker] Machine 4 failed. Episode total failures=51
+2026-05-27 20:44:54.243 [FlagHarvester] Job 1 returned to NeedsRouting — target machine 4 is Repairing.
+2026-05-27 20:44:54.243 [FlagHarvester] Job 7 returned to NeedsRouting — target machine 4 is Repairing.
+2026-05-27 20:44:56.668 [EpisodeTracker] Machine 13 failed. Episode total failures=52
+2026-05-27 20:44:56.668 [AGV 4] CancelPickup — abandoning pickup for job 8.
+2026-05-27 20:44:56.668 [Orchestrator] Job 8: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 20:44:57.274 [Orchestrator] Job 8: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 20:44:57.882 [Orchestrator] Job 8: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 20:44:58.496 [Failure] Deferred job 8 re-queued after repair.
+2026-05-27 20:46:06.547 [EpisodeTracker] Machine 8 failed. Episode total failures=53
+2026-05-27 20:46:06.547 [AGV 4] CancelPickup — abandoning pickup for job 1.
+2026-05-27 20:46:06.547 [FlagHarvester] Job 7 returned to NeedsRouting — target machine 8 is Repairing.
+2026-05-27 20:46:06.547 [FlagHarvester] Job 10 returned to NeedsRouting — target machine 8 is Repairing.
+2026-05-27 20:46:46.457 [EpisodeTracker] Machine 12 failed. Episode total failures=54
+2026-05-27 20:46:51.978 [EpisodeTracker] Machine 7 failed. Episode total failures=55
+2026-05-27 20:47:06.768 [EpisodeTracker] Machine 11 failed. Episode total failures=56
+2026-05-27 20:47:06.769 [AGV 3] CancelPickup — abandoning pickup for job 9.
+2026-05-27 20:47:06.769 [Orchestrator] Job 9: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 20:47:07.373 [Orchestrator] Job 9: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 20:47:07.972 [Failure] Deferred job 9 re-queued after repair.
+2026-05-27 20:47:19.594 [EpisodeTracker] Machine 12 failed. Episode total failures=57
+2026-05-27 20:50:44.738 [EpisodeTracker] Machine 5 failed. Episode total failures=58
+2026-05-27 20:51:06.531 [EpisodeTracker] Machine 2 failed. Episode total failures=59
+2026-05-27 20:52:18.632 [EpisodeTracker] Machine 10 failed. Episode total failures=60
+2026-05-27 20:52:18.632 [AGV 2] AbortTransit — job 5 released at (-11.48, 0.32, -7.85).
+2026-05-27 20:52:18.632 [Orchestrator] Job 5: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 20:52:19.289 [Orchestrator] Job 5: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 20:52:19.895 [Failure] Deferred job 5 re-queued after repair.
+2026-05-27 20:56:04.449 [EpisodeTracker] Machine 14 failed. Episode total failures=61
+2026-05-27 21:02:18.433 [EpisodeTracker] Machine 4 failed. Episode total failures=62
+2026-05-27 21:02:55.391 [EpisodeTracker] Machine 11 failed. Episode total failures=63
+2026-05-27 21:02:59.546 [EpisodeTracker] Machine 13 failed. Episode total failures=64
+2026-05-27 21:02:59.546 [AGV 4] CancelPickup — abandoning pickup for job 8.
+2026-05-27 21:02:59.546 [Orchestrator] Job 8: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 21:03:00.140 [Orchestrator] Job 8: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 21:03:00.723 [Failure] Deferred job 8 re-queued after repair.
+2026-05-27 21:03:59.863 [EpisodeTracker] Machine 6 failed. Episode total failures=65
+2026-05-27 21:04:01.047 [EpisodeTracker] Machine 10 failed. Episode total failures=66
+2026-05-27 21:04:01.047 [AGV 4] AbortTransit — job 5 released at (-11.12, 0.32, -14.00).
+2026-05-27 21:04:01.047 [Orchestrator] Job 5: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 21:04:01.631 [Orchestrator] Job 5: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 21:04:02.228 [Failure] Deferred job 5 re-queued after repair.
+2026-05-27 21:04:14.004 [EpisodeTracker] Machine 5 failed. Episode total failures=67
+2026-05-27 21:07:07.317 [EpisodeTracker] Machine 3 failed. Episode total failures=68
+2026-05-27 21:07:38.750 [EpisodeTracker] Machine 13 failed. Episode total failures=69
+2026-05-27 21:07:38.750 [AGV 4] CancelPickup — abandoning pickup for job 8.
+2026-05-27 21:07:38.751 [Orchestrator] Job 8: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 21:07:39.349 [Orchestrator] Job 8: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 21:07:39.940 [Failure] Deferred job 8 re-queued after repair.
+2026-05-27 21:08:19.167 [EpisodeTracker] Machine 1 failed. Episode total failures=70
+2026-05-27 21:12:42.040 [EpisodeTracker] Machine 11 failed. Episode total failures=71
+2026-05-27 21:12:47.407 [EpisodeTracker] Machine 9 failed. Episode total failures=72
+2026-05-27 21:13:24.500 [EpisodeTracker] Machine 0 failed. Episode total failures=73
+2026-05-27 21:15:33.987 [EpisodeTracker] Machine 7 failed. Episode total failures=74
+2026-05-27 21:16:22.215 [EpisodeTracker] Machine 3 failed. Episode total failures=75
+2026-05-27 21:16:53.479 [EpisodeTracker] Machine 0 failed. Episode total failures=76
+2026-05-27 21:20:21.275 [EpisodeTracker] Machine 8 failed. Episode total failures=77
+2026-05-27 21:21:38.108 [EpisodeTracker] Machine 11 failed. Episode total failures=78
+2026-05-27 21:22:03.181 [EpisodeTracker] Machine 1 failed. Episode total failures=79
+2026-05-27 21:27:33.316 [EpisodeTracker] Machine 3 failed. Episode total failures=80
+2026-05-27 21:27:49.786 [EpisodeTracker] Machine 4 failed. Episode total failures=81
+2026-05-27 21:28:08.429 [EpisodeTracker] Machine 7 failed. Episode total failures=82
+2026-05-27 21:29:30.007 [EpisodeTracker] Machine 14 failed. Episode total failures=83
+2026-05-27 21:31:06.017 [EpisodeTracker] Machine 14 failed. Episode total failures=84
+2026-05-27 21:31:12.476 [EpisodeTracker] Machine 0 failed. Episode total failures=85
+2026-05-27 21:32:47.696 [EpisodeTracker] Machine 14 failed. Episode total failures=86
+2026-05-27 21:34:45.239 [EpisodeTracker] Machine 9 failed. Episode total failures=87
+2026-05-27 21:35:18.340 [EpisodeTracker] Machine 13 failed. Episode total failures=88
+2026-05-27 21:35:18.340 [FlagHarvester] Job 8 returned to NeedsRouting — target machine 13 is Repairing.
+2026-05-27 21:35:18.340 [Orchestrator] Job 8: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 21:35:18.921 [Orchestrator] Job 8: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 21:35:19.507 [Failure] Deferred job 8 re-queued after repair.
+2026-05-27 21:37:09.664 [EpisodeTracker] Machine 9 failed. Episode total failures=89
+2026-05-27 21:38:18.206 [EpisodeTracker] Machine 13 failed. Episode total failures=90
+2026-05-27 21:38:18.206 [FlagHarvester] Job 8 returned to NeedsRouting — target machine 13 is Repairing.
+2026-05-27 21:38:18.206 [Orchestrator] Job 8: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 21:38:18.783 [Orchestrator] Job 8: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 21:38:19.374 [Failure] Deferred job 8 re-queued after repair.
+2026-05-27 21:39:45.720 [EpisodeTracker] Machine 2 failed. Episode total failures=91
+2026-05-27 21:41:16.551 [EpisodeTracker] Machine 12 failed. Episode total failures=92
+2026-05-27 21:42:29.342 [EpisodeTracker] Machine 3 failed. Episode total failures=93
+2026-05-27 21:44:47.393 [EpisodeTracker] Machine 14 failed. Episode total failures=94
+2026-05-27 21:45:37.621 [EpisodeTracker] Machine 4 failed. Episode total failures=95
+2026-05-27 21:45:44.034 [EpisodeTracker] Machine 8 failed. Episode total failures=96
+2026-05-27 21:47:58.523 [EpisodeTracker] Machine 12 failed. Episode total failures=97
+2026-05-27 21:51:24.628 [EpisodeTracker] Machine 9 failed. Episode total failures=98
+2026-05-27 21:52:32.646 [EpisodeTracker] Machine 10 failed. Episode total failures=99
+2026-05-27 21:52:32.646 [AGV 4] CancelPickup — abandoning pickup for job 5.
+2026-05-27 21:52:32.646 [Orchestrator] Job 5: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 21:52:33.241 [Orchestrator] Job 5: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 21:52:33.836 [Failure] Deferred job 5 re-queued after repair.
+2026-05-27 21:52:35.026 [EpisodeTracker] Machine 2 failed. Episode total failures=100
+2026-05-27 21:53:57.289 [EpisodeTracker] Machine 4 failed. Episode total failures=101
+2026-05-27 21:54:44.921 [EpisodeTracker] Machine 6 failed. Episode total failures=102
+2026-05-27 21:56:50.559 [EpisodeTracker] Machine 12 failed. Episode total failures=103
+2026-05-27 21:57:17.118 [EpisodeTracker] Machine 0 failed. Episode total failures=104
+2026-05-27 21:59:04.023 [EpisodeTracker] Machine 11 failed. Episode total failures=105
+2026-05-27 21:59:30.148 [EpisodeTracker] Machine 5 failed. Episode total failures=106
+2026-05-27 22:01:19.972 [EpisodeTracker] Machine 13 failed. Episode total failures=107
+2026-05-27 22:01:19.972 [AGV 4] CancelPickup — abandoning pickup for job 8.
+2026-05-27 22:01:19.973 [Orchestrator] Job 8: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 22:01:20.565 [Orchestrator] Job 8: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 22:01:21.168 [Orchestrator] Job 8: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 22:01:21.754 [Failure] Deferred job 8 re-queued after repair.
+2026-05-27 22:06:45.122 [EpisodeTracker] Machine 14 failed. Episode total failures=108
+2026-05-27 22:08:44.930 [EpisodeTracker] Machine 10 failed. Episode total failures=109
+2026-05-27 22:08:44.931 [AGV 4] CancelPickup — abandoning pickup for job 5.
+2026-05-27 22:08:44.931 [Orchestrator] Job 5: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 22:08:45.528 [Orchestrator] Job 5: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 22:08:46.124 [Orchestrator] Job 5: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 22:08:46.708 [Failure] Deferred job 5 re-queued after repair.
+2026-05-27 22:09:24.290 [EpisodeTracker] Machine 12 failed. Episode total failures=110
+2026-05-27 22:09:42.195 [EpisodeTracker] Machine 1 failed. Episode total failures=111
+2026-05-27 22:12:45.291 [EpisodeTracker] Machine 7 failed. Episode total failures=112
+2026-05-27 22:14:57.256 [EpisodeTracker] Machine 1 failed. Episode total failures=113
+2026-05-27 22:17:12.917 [EpisodeTracker] Machine 13 failed. Episode total failures=114
+2026-05-27 22:17:12.917 [AGV 4] CancelPickup — abandoning pickup for job 8.
+2026-05-27 22:17:12.917 [Orchestrator] Job 8: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 22:17:13.524 [Orchestrator] Job 8: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 22:17:14.121 [Orchestrator] Job 8: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 22:17:14.694 [Orchestrator] Job 8: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 22:17:15.273 [Failure] Deferred job 8 re-queued after repair.
+2026-05-27 22:18:32.378 [EpisodeTracker] Machine 5 failed. Episode total failures=115
+2026-05-27 22:19:59.471 [EpisodeTracker] Machine 4 failed. Episode total failures=116
+2026-05-27 22:23:47.325 [Orchestrator] Episode timeout at 500033s — terminating.
+2026-05-27 22:23:47.327 [TelemetryChannel] Flushed 232 events to Python.
+2026-05-27 22:23:47.327 [Orchestrator] Logging Academy Epiosde
+2026-05-27 22:23:47.327 [StochasticSummary] Failures=116 TotalRepairTime=7256.5s MeanTTF_theory=73459.3s
+2026-05-27 22:23:47.328 [BatchRunner] Progress: 40/45 (37031.8s elapsed, ETA 4629.0s)
+2026-05-27 22:23:47.720 [BatchRunner] Run 41/45: benchmark=brandimarte_mk14_low rule=SRT_SRWT seed=43
+2026-05-27 22:23:47.720 [StochasticMgr] Initialized — seed=43 mode=[mf] WeibullK=1.5 λ_machine=81377.27 λ_agv=700 repairMu=4.012143 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 22:23:47.731 [BrandimartLoader] Loaded 30 jobs from benchmark (15 BM machines → 15 runtime machines across 5 types)
+2026-05-27 22:23:47.731 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 22:23:47.731 [StochasticMgr] Initialized — seed=43 mode=[mf] WeibullK=1.5 λ_machine=81377.27 λ_agv=700 repairMu=4.012143 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 22:23:47.732 [Orchestrator] Episode started: 30 jobs, 15 machines, stochastic=True
+2026-05-27 22:23:48.899 [EpisodeTracker] Machine 7 failed. Episode total failures=1
+2026-05-27 22:24:49.371 [EpisodeTracker] Machine 14 failed. Episode total failures=2
+2026-05-27 22:25:00.739 [EpisodeTracker] Machine 6 failed. Episode total failures=3
+2026-05-27 22:25:17.272 [EpisodeTracker] Machine 11 failed. Episode total failures=4
+2026-05-27 22:25:17.273 [Orchestrator] Job 0: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 22:25:17.845 [Orchestrator] Job 0: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 22:25:18.429 [Failure] Deferred job 0 re-queued after repair.
+2026-05-27 22:25:41.441 [EpisodeTracker] Machine 12 failed. Episode total failures=5
+2026-05-27 22:26:46.470 [EpisodeTracker] Machine 1 failed. Episode total failures=6
+2026-05-27 22:26:46.470 [AGV 4] CancelPickup — abandoning pickup for job 13.
+2026-05-27 22:27:02.467 [EpisodeTracker] Machine 8 failed. Episode total failures=7
+2026-05-27 22:27:02.467 [AGV 1] CancelPickup — abandoning pickup for job 10.
+2026-05-27 22:27:02.468 [Orchestrator] Job 10: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 22:27:03.066 [Failure] Deferred job 10 re-queued after repair.
+2026-05-27 22:27:43.865 [EpisodeTracker] Machine 5 failed. Episode total failures=8
+2026-05-27 22:28:33.980 [EpisodeTracker] Machine 6 failed. Episode total failures=9
+2026-05-27 22:28:41.077 [EpisodeTracker] Machine 0 failed. Episode total failures=10
+2026-05-27 22:28:58.732 [EpisodeTracker] Machine 9 failed. Episode total failures=11
+2026-05-27 22:35:19.076 [EpisodeTracker] Machine 9 failed. Episode total failures=12
+2026-05-27 22:37:44.107 [EpisodeTracker] Machine 4 failed. Episode total failures=13
+2026-05-27 22:44:22.189 [EpisodeTracker] Machine 14 failed. Episode total failures=14
+2026-05-27 22:45:23.405 [EpisodeTracker] Machine 2 failed. Episode total failures=15
+2026-05-27 22:47:54.524 [EpisodeTracker] Machine 4 failed. Episode total failures=16
+2026-05-27 22:48:24.004 [EpisodeTracker] Machine 7 failed. Episode total failures=17
+2026-05-27 22:48:28.054 [EpisodeTracker] Machine 1 failed. Episode total failures=18
+2026-05-27 22:49:55.544 [EpisodeTracker] Machine 0 failed. Episode total failures=19
+2026-05-27 22:50:00.741 [EpisodeTracker] Machine 13 failed. Episode total failures=20
+2026-05-27 22:50:00.741 [AGV 1] CancelPickup — abandoning pickup for job 1.
+2026-05-27 22:50:00.741 [AGV 2] CancelPickup — abandoning pickup for job 11.
+2026-05-27 22:50:00.741 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 22:50:01.310 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 22:50:01.869 [Failure] Deferred job 1 re-queued after repair.
+2026-05-27 22:50:15.127 [EpisodeTracker] Machine 8 failed. Episode total failures=21
+2026-05-27 22:50:28.848 [EpisodeTracker] Machine 9 failed. Episode total failures=22
+2026-05-27 22:51:40.405 [EpisodeTracker] Machine 3 failed. Episode total failures=23
+2026-05-27 22:51:40.405 [AGV 3] CancelPickup — abandoning pickup for job 3.
+2026-05-27 22:51:40.405 [Orchestrator] Job 3: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 22:51:40.976 [Orchestrator] Job 3: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 22:51:41.549 [Orchestrator] Job 3: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 22:51:42.122 [Failure] Deferred job 3 re-queued after repair.
+2026-05-27 22:52:11.314 [EpisodeTracker] Machine 14 failed. Episode total failures=24
+2026-05-27 22:52:48.425 [EpisodeTracker] Machine 12 failed. Episode total failures=25
+2026-05-27 22:53:16.473 [EpisodeTracker] Machine 6 failed. Episode total failures=26
+2026-05-27 22:54:33.764 [EpisodeTracker] Machine 5 failed. Episode total failures=27
+2026-05-27 22:56:09.817 [EpisodeTracker] Machine 8 failed. Episode total failures=28
+2026-05-27 22:56:30.914 [EpisodeTracker] Machine 1 failed. Episode total failures=29
+2026-05-27 22:56:42.901 [EpisodeTracker] Machine 7 failed. Episode total failures=30
+2026-05-27 22:56:42.901 [AGV 2] CancelPickup — abandoning pickup for job 4.
+2026-05-27 22:59:36.409 [EpisodeTracker] Machine 9 failed. Episode total failures=31
+2026-05-27 23:00:10.717 [EpisodeTracker] Machine 0 failed. Episode total failures=32
+2026-05-27 23:00:19.835 [EpisodeTracker] Machine 8 failed. Episode total failures=33
+2026-05-27 23:01:31.674 [EpisodeTracker] Machine 2 failed. Episode total failures=34
+2026-05-27 23:05:59.466 [EpisodeTracker] Machine 0 failed. Episode total failures=35
+2026-05-27 23:06:29.699 [EpisodeTracker] Machine 13 failed. Episode total failures=36
+2026-05-27 23:06:29.699 [AGV 3] CancelPickup — abandoning pickup for job 1.
+2026-05-27 23:06:29.700 [FlagHarvester] Job 4 returned to NeedsRouting — target machine 13 is Repairing.
+2026-05-27 23:06:29.700 [FlagHarvester] Job 7 returned to NeedsRouting — target machine 13 is Repairing.
+2026-05-27 23:06:29.700 [FlagHarvester] Job 8 returned to NeedsRouting — target machine 13 is Repairing.
+2026-05-27 23:06:29.700 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 23:06:30.273 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 23:06:30.840 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 23:06:31.399 [Failure] Deferred job 1 re-queued after repair.
+2026-05-27 23:06:34.847 [EpisodeTracker] Machine 11 failed. Episode total failures=37
+2026-05-27 23:06:34.847 [AGV 4] CancelPickup — abandoning pickup for job 0.
+2026-05-27 23:06:34.847 [Orchestrator] Job 0: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 23:06:35.441 [Orchestrator] Job 0: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 23:06:36.029 [Orchestrator] Job 0: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 23:06:36.609 [Orchestrator] Job 0: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 23:06:37.190 [Failure] Deferred job 0 re-queued after repair.
+2026-05-27 23:09:31.389 [EpisodeTracker] Machine 4 failed. Episode total failures=38
+2026-05-27 23:10:36.936 [EpisodeTracker] Machine 3 failed. Episode total failures=39
+2026-05-27 23:10:36.936 [AGV 2] CancelPickup — abandoning pickup for job 3.
+2026-05-27 23:10:36.936 [Orchestrator] Job 3: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 23:10:37.541 [Orchestrator] Job 3: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 23:10:38.133 [Failure] Deferred job 3 re-queued after repair.
+2026-05-27 23:11:22.587 [EpisodeTracker] Machine 0 failed. Episode total failures=40
+2026-05-27 23:11:46.192 [EpisodeTracker] Machine 10 failed. Episode total failures=41
+2026-05-27 23:11:46.193 [AGV 3] CancelPickup — abandoning pickup for job 5.
+2026-05-27 23:11:46.193 [Orchestrator] Job 5: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 23:11:46.764 [Orchestrator] Job 5: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 23:11:47.347 [Orchestrator] Job 5: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 23:11:47.927 [Failure] Deferred job 5 re-queued after repair.
+2026-05-27 23:14:07.973 [EpisodeTracker] Machine 0 failed. Episode total failures=42
+2026-05-27 23:14:32.671 [EpisodeTracker] Machine 9 failed. Episode total failures=43
+2026-05-27 23:16:34.660 [EpisodeTracker] Machine 10 failed. Episode total failures=44
+2026-05-27 23:19:34.224 [EpisodeTracker] Machine 5 failed. Episode total failures=45
+2026-05-27 23:19:55.494 [EpisodeTracker] Machine 11 failed. Episode total failures=46
+2026-05-27 23:19:55.494 [AGV 2] CancelPickup — abandoning pickup for job 0.
+2026-05-27 23:19:55.494 [Orchestrator] Job 0: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 23:19:56.052 [Orchestrator] Job 0: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 23:19:56.614 [Orchestrator] Job 0: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 23:19:57.175 [Failure] Deferred job 0 re-queued after repair.
+2026-05-27 23:20:56.592 [EpisodeTracker] Machine 8 failed. Episode total failures=47
+2026-05-27 23:21:26.793 [EpisodeTracker] Machine 7 failed. Episode total failures=48
+2026-05-27 23:21:55.891 [EpisodeTracker] Machine 4 failed. Episode total failures=49
+2026-05-27 23:26:10.256 [EpisodeTracker] Machine 8 failed. Episode total failures=50
+2026-05-27 23:26:45.788 [EpisodeTracker] Machine 9 failed. Episode total failures=51
+2026-05-27 23:29:22.149 [EpisodeTracker] Machine 12 failed. Episode total failures=52
+2026-05-27 23:29:44.761 [EpisodeTracker] Machine 6 failed. Episode total failures=53
+2026-05-27 23:29:56.469 [EpisodeTracker] Machine 3 failed. Episode total failures=54
+2026-05-27 23:29:56.470 [AGV 3] CancelPickup — abandoning pickup for job 3.
+2026-05-27 23:29:56.470 [Orchestrator] Job 3: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 23:29:57.035 [Orchestrator] Job 3: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 23:29:57.578 [Failure] Deferred job 3 re-queued after repair.
+2026-05-27 23:30:59.077 [EpisodeTracker] Machine 1 failed. Episode total failures=55
+2026-05-27 23:32:38.939 [EpisodeTracker] Machine 8 failed. Episode total failures=56
+2026-05-27 23:33:27.415 [EpisodeTracker] Machine 14 failed. Episode total failures=57
+2026-05-27 23:35:13.875 [EpisodeTracker] Machine 9 failed. Episode total failures=58
+2026-05-27 23:35:45.118 [EpisodeTracker] Machine 6 failed. Episode total failures=59
+2026-05-27 23:37:17.057 [EpisodeTracker] Machine 2 failed. Episode total failures=60
+2026-05-27 23:37:23.734 [EpisodeTracker] Machine 10 failed. Episode total failures=61
+2026-05-27 23:38:44.530 [EpisodeTracker] Machine 4 failed. Episode total failures=62
+2026-05-27 23:42:41.135 [EpisodeTracker] Machine 13 failed. Episode total failures=63
+2026-05-27 23:42:41.135 [AGV 2] CancelPickup — abandoning pickup for job 4.
+2026-05-27 23:42:41.135 [AGV 4] CancelPickup — abandoning pickup for job 1.
+2026-05-27 23:42:41.136 [FlagHarvester] Job 7 returned to NeedsRouting — target machine 13 is Repairing.
+2026-05-27 23:42:41.136 [FlagHarvester] Job 8 returned to NeedsRouting — target machine 13 is Repairing.
+2026-05-27 23:42:41.136 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 23:42:41.688 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 23:42:42.233 [Failure] Deferred job 1 re-queued after repair.
+2026-05-27 23:43:59.084 [EpisodeTracker] Machine 6 failed. Episode total failures=64
+2026-05-27 23:44:21.945 [EpisodeTracker] Machine 5 failed. Episode total failures=65
+2026-05-27 23:46:06.782 [EpisodeTracker] Machine 0 failed. Episode total failures=66
+2026-05-27 23:49:35.672 [EpisodeTracker] Machine 0 failed. Episode total failures=67
+2026-05-27 23:50:07.392 [EpisodeTracker] Machine 3 failed. Episode total failures=68
+2026-05-27 23:50:07.392 [AGV 2] CancelPickup — abandoning pickup for job 3.
+2026-05-27 23:50:07.392 [Orchestrator] Job 3: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 23:50:07.930 [Orchestrator] Job 3: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 23:50:08.496 [Failure] Deferred job 3 re-queued after repair.
+2026-05-27 23:51:13.688 [EpisodeTracker] Machine 13 failed. Episode total failures=69
+2026-05-27 23:51:13.688 [AGV 2] CancelPickup — abandoning pickup for job 1.
+2026-05-27 23:51:13.688 [FlagHarvester] Job 4 returned to NeedsRouting — target machine 13 is Repairing.
+2026-05-27 23:51:13.688 [FlagHarvester] Job 7 returned to NeedsRouting — target machine 13 is Repairing.
+2026-05-27 23:51:13.688 [FlagHarvester] Job 8 returned to NeedsRouting — target machine 13 is Repairing.
+2026-05-27 23:51:13.688 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 23:51:14.250 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 23:51:14.813 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 23:51:15.376 [Failure] Deferred job 1 re-queued after repair.
+2026-05-27 23:51:24.160 [EpisodeTracker] Machine 2 failed. Episode total failures=70
+2026-05-27 23:52:06.273 [EpisodeTracker] Machine 12 failed. Episode total failures=71
+2026-05-27 23:52:37.940 [EpisodeTracker] Machine 1 failed. Episode total failures=72
+2026-05-27 23:52:53.337 [EpisodeTracker] Machine 4 failed. Episode total failures=73
+2026-05-27 23:53:59.053 [EpisodeTracker] Machine 3 failed. Episode total failures=74
+2026-05-27 23:53:59.053 [AGV 2] CancelPickup — abandoning pickup for job 3.
+2026-05-27 23:53:59.053 [Orchestrator] Job 3: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 23:53:59.604 [Failure] Deferred job 3 re-queued after repair.
+2026-05-27 23:55:06.867 [EpisodeTracker] Machine 11 failed. Episode total failures=75
+2026-05-27 23:55:06.867 [AGV 3] CancelPickup — abandoning pickup for job 0.
+2026-05-27 23:55:06.867 [Orchestrator] Job 0: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 23:55:07.424 [Orchestrator] Job 0: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 23:55:07.985 [Failure] Deferred job 0 re-queued after repair.
+2026-05-27 23:55:09.103 [EpisodeTracker] Machine 8 failed. Episode total failures=76
+2026-05-27 23:55:38.844 [EpisodeTracker] Machine 10 failed. Episode total failures=77
+2026-05-27 23:55:38.844 [AGV 4] CancelPickup — abandoning pickup for job 5.
+2026-05-27 23:55:38.844 [Orchestrator] Job 5: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 23:55:39.403 [Orchestrator] Job 5: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 23:55:39.948 [Failure] Deferred job 5 re-queued after repair.
+2026-05-27 23:56:39.990 [EpisodeTracker] Machine 5 failed. Episode total failures=78
+2026-05-27 23:59:50.824 [EpisodeTracker] Machine 7 failed. Episode total failures=79
+2026-05-28 00:00:34.344 [EpisodeTracker] Machine 7 failed. Episode total failures=80
+2026-05-28 00:04:16.545 [EpisodeTracker] Machine 14 failed. Episode total failures=81
+2026-05-28 00:05:19.078 [EpisodeTracker] Machine 1 failed. Episode total failures=82
+2026-05-28 00:06:23.706 [EpisodeTracker] Machine 3 failed. Episode total failures=83
+2026-05-28 00:06:23.706 [AGV 3] CancelPickup — abandoning pickup for job 3.
+2026-05-28 00:06:23.706 [Orchestrator] Job 3: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-28 00:06:24.264 [Orchestrator] Job 3: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-28 00:06:24.820 [Orchestrator] Job 3: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-28 00:06:25.379 [Orchestrator] Job 3: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-28 00:06:25.932 [Failure] Deferred job 3 re-queued after repair.
+2026-05-28 00:07:14.761 [EpisodeTracker] Machine 2 failed. Episode total failures=84
+2026-05-28 00:07:20.833 [EpisodeTracker] Machine 4 failed. Episode total failures=85
+2026-05-28 00:09:57.788 [EpisodeTracker] Machine 8 failed. Episode total failures=86
+2026-05-28 00:11:25.188 [EpisodeTracker] Machine 7 failed. Episode total failures=87
+2026-05-28 00:11:36.331 [EpisodeTracker] Machine 2 failed. Episode total failures=88
+2026-05-28 00:11:36.331 [EpisodeTracker] Machine 14 failed. Episode total failures=89
+2026-05-28 00:13:47.940 [EpisodeTracker] Machine 0 failed. Episode total failures=90
+2026-05-28 00:13:51.274 [EpisodeTracker] Machine 6 failed. Episode total failures=91
+2026-05-28 00:14:15.476 [EpisodeTracker] Machine 4 failed. Episode total failures=92
+2026-05-28 00:17:01.049 [EpisodeTracker] Machine 12 failed. Episode total failures=93
+2026-05-28 00:22:20.658 [EpisodeTracker] Machine 1 failed. Episode total failures=94
+2026-05-28 00:22:59.544 [EpisodeTracker] Machine 14 failed. Episode total failures=95
+2026-05-28 00:23:26.540 [EpisodeTracker] Machine 4 failed. Episode total failures=96
+2026-05-28 00:30:07.430 [EpisodeTracker] Machine 0 failed. Episode total failures=97
+2026-05-28 00:32:10.723 [EpisodeTracker] Machine 6 failed. Episode total failures=98
+2026-05-28 00:33:03.126 [EpisodeTracker] Machine 3 failed. Episode total failures=99
+2026-05-28 00:33:03.126 [FlagHarvester] Job 3 returned to NeedsRouting — target machine 3 is Repairing.
+2026-05-28 00:33:03.126 [Orchestrator] Job 3: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-28 00:33:03.677 [Orchestrator] Job 3: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-28 00:33:04.237 [Orchestrator] Job 3: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-28 00:33:04.795 [Failure] Deferred job 3 re-queued after repair.
+2026-05-28 00:33:56.555 [EpisodeTracker] Machine 13 failed. Episode total failures=100
+2026-05-28 00:33:56.555 [AGV 2] CancelPickup — abandoning pickup for job 1.
+2026-05-28 00:33:56.555 [AGV 3] CancelPickup — abandoning pickup for job 4.
+2026-05-28 00:33:56.556 [FlagHarvester] Job 7 returned to NeedsRouting — target machine 13 is Repairing.
+2026-05-28 00:33:56.556 [FlagHarvester] Job 8 returned to NeedsRouting — target machine 13 is Repairing.
+2026-05-28 00:33:56.556 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-28 00:33:57.103 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-28 00:33:57.656 [Failure] Deferred job 1 re-queued after repair.
+2026-05-28 00:34:06.595 [EpisodeTracker] Machine 9 failed. Episode total failures=101
+2026-05-28 00:34:14.928 [EpisodeTracker] Machine 0 failed. Episode total failures=102
+2026-05-28 00:35:05.225 [EpisodeTracker] Machine 2 failed. Episode total failures=103
+2026-05-28 00:35:55.747 [EpisodeTracker] Machine 11 failed. Episode total failures=104
+2026-05-28 00:35:55.747 [AGV 4] CancelPickup — abandoning pickup for job 0.
+2026-05-28 00:35:55.747 [Orchestrator] Job 0: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-28 00:35:56.287 [Orchestrator] Job 0: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-28 00:35:56.813 [Failure] Deferred job 0 re-queued after repair.
+2026-05-28 00:42:46.965 [EpisodeTracker] Machine 8 failed. Episode total failures=105
+2026-05-28 00:44:21.737 [Orchestrator] Episode timeout at 500000s — terminating.
+2026-05-28 00:44:21.739 [TelemetryChannel] Flushed 210 events to Python.
+2026-05-28 00:44:21.739 [Orchestrator] Logging Academy Epiosde
+2026-05-28 00:44:21.739 [StochasticSummary] Failures=105 TotalRepairTime=6580.9s MeanTTF_theory=73459.3s
+2026-05-28 00:44:21.741 [BatchRunner] Progress: 41/45 (45466.2s elapsed, ETA 4435.7s)
+2026-05-28 00:44:22.111 [BatchRunner] Run 42/45: benchmark=brandimarte_mk14_low rule=SRT_SRWT seed=44
+2026-05-28 00:44:22.112 [StochasticMgr] Initialized — seed=44 mode=[mf] WeibullK=1.5 λ_machine=81377.27 λ_agv=700 repairMu=4.012143 repairSigma=0.4 arrivalLambda=0.005
+2026-05-28 00:44:22.120 [BrandimartLoader] Loaded 30 jobs from benchmark (15 BM machines → 15 runtime machines across 5 types)
+2026-05-28 00:44:22.121 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-28 00:44:22.121 [StochasticMgr] Initialized — seed=44 mode=[mf] WeibullK=1.5 λ_machine=81377.27 λ_agv=700 repairMu=4.012143 repairSigma=0.4 arrivalLambda=0.005
+2026-05-28 00:44:22.121 [Orchestrator] Episode started: 30 jobs, 15 machines, stochastic=True
+2026-05-28 00:45:06.831 [EpisodeTracker] Machine 4 failed. Episode total failures=1
+2026-05-28 00:45:11.496 [EpisodeTracker] Machine 5 failed. Episode total failures=2
+2026-05-28 00:45:11.496 [FlagHarvester] Job 27 returned to NeedsRouting — target machine 5 is Repairing.
+2026-05-28 00:48:40.448 [EpisodeTracker] Machine 0 failed. Episode total failures=3
+2026-05-28 00:50:51.101 [EpisodeTracker] Machine 12 failed. Episode total failures=4
+2026-05-28 00:51:58.134 [EpisodeTracker] Machine 7 failed. Episode total failures=5
+2026-05-28 00:52:17.398 [EpisodeTracker] Machine 6 failed. Episode total failures=6
+2026-05-28 00:52:17.399 [TelemetryChannel] Flushed 11 events to Python.
+2026-05-28 00:52:17.399 [Orchestrator] Logging Academy Epiosde
+2026-05-28 00:52:17.399 [StochasticSummary] Failures=6 TotalRepairTime=369.2s MeanTTF_theory=73459.3s
+2026-05-28 00:52:17.399 [BatchRunner] Progress: 42/45 (45941.9s elapsed, ETA 3281.6s)
+2026-05-28 00:52:17.772 [BatchRunner] ─── brandimarte_mk15_low (30j × 15m) ───
+2026-05-28 00:52:17.772 [BatchRunner] Run 43/45: benchmark=brandimarte_mk15_low rule=SRT_SRWT seed=42
+2026-05-28 00:52:17.773 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=77597.13 λ_agv=700 repairMu=3.957227 repairSigma=0.4 arrivalLambda=0.005
+2026-05-28 00:52:17.783 [BrandimartLoader] Loaded 30 jobs from benchmark (15 BM machines → 15 runtime machines across 5 types)
+2026-05-28 00:52:17.784 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-28 00:52:17.784 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=77597.13 λ_agv=700 repairMu=3.957227 repairSigma=0.4 arrivalLambda=0.005
+2026-05-28 00:52:17.784 [Orchestrator] Episode started: 30 jobs, 15 machines, stochastic=True
+2026-05-28 00:52:53.839 [EpisodeTracker] Machine 10 failed. Episode total failures=1
+2026-05-28 00:53:12.068 [EpisodeTracker] Machine 11 failed. Episode total failures=2
+2026-05-28 00:53:12.068 [Orchestrator] Job 8: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-28 00:53:13.153 [Failure] Deferred job 8 re-queued after repair.
+2026-05-28 00:54:09.130 [EpisodeTracker] Machine 2 failed. Episode total failures=3
+2026-05-28 00:55:15.976 [EpisodeTracker] Machine 10 failed. Episode total failures=4
+2026-05-28 00:55:48.590 [EpisodeTracker] Machine 5 failed. Episode total failures=5
+2026-05-28 00:55:53.554 [EpisodeTracker] Machine 1 failed. Episode total failures=6
+2026-05-28 00:55:53.554 [Orchestrator] Job 7: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-28 00:55:54.117 [Orchestrator] Job 7: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-28 00:55:54.643 [Failure] Deferred job 7 re-queued after repair.
+2026-05-28 00:55:55.731 [EpisodeTracker] Machine 12 failed. Episode total failures=7
+2026-05-28 00:55:55.731 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-28 00:55:56.279 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-28 00:55:56.820 [Failure] Deferred job 1 re-queued after repair.
+2026-05-28 00:57:15.214 [EpisodeTracker] Machine 4 failed. Episode total failures=8
+2026-05-28 00:57:15.766 [Orchestrator] Job 12: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-28 00:57:16.352 [Orchestrator] Job 12: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-28 00:57:16.914 [Failure] Deferred job 12 re-queued after repair.
+2026-05-28 00:58:00.105 [EpisodeTracker] Machine 10 failed. Episode total failures=9
+2026-05-28 00:58:29.776 [TelemetryChannel] Flushed 18 events to Python.
+2026-05-28 00:58:29.777 [Orchestrator] Logging Academy Epiosde
+2026-05-28 00:58:29.777 [StochasticSummary] Failures=9 TotalRepairTime=467.3s MeanTTF_theory=70046.9s
+2026-05-28 00:58:29.777 [BatchRunner] Progress: 43/45 (46314.2s elapsed, ETA 2154.2s)
+2026-05-28 00:58:30.148 [BatchRunner] Run 44/45: benchmark=brandimarte_mk15_low rule=SRT_SRWT seed=43
+2026-05-28 00:58:30.148 [StochasticMgr] Initialized — seed=43 mode=[mf] WeibullK=1.5 λ_machine=77597.13 λ_agv=700 repairMu=3.957227 repairSigma=0.4 arrivalLambda=0.005
+2026-05-28 00:58:30.159 [BrandimartLoader] Loaded 30 jobs from benchmark (15 BM machines → 15 runtime machines across 5 types)
+2026-05-28 00:58:30.159 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-28 00:58:30.159 [StochasticMgr] Initialized — seed=43 mode=[mf] WeibullK=1.5 λ_machine=77597.13 λ_agv=700 repairMu=3.957227 repairSigma=0.4 arrivalLambda=0.005
+2026-05-28 00:58:30.159 [Orchestrator] Episode started: 30 jobs, 15 machines, stochastic=True
+2026-05-28 00:58:31.231 [EpisodeTracker] Machine 7 failed. Episode total failures=1
+2026-05-28 00:59:25.024 [EpisodeTracker] Machine 14 failed. Episode total failures=2
+2026-05-28 00:59:34.965 [EpisodeTracker] Machine 6 failed. Episode total failures=3
+2026-05-28 00:59:50.580 [EpisodeTracker] Machine 11 failed. Episode total failures=4
+2026-05-28 00:59:50.580 [Orchestrator] Job 8: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-28 00:59:51.135 [Orchestrator] Job 8: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-28 00:59:51.669 [Failure] Deferred job 8 re-queued after repair.
+2026-05-28 01:00:11.491 [EpisodeTracker] Machine 12 failed. Episode total failures=5
+2026-05-28 01:00:11.491 [Orchestrator] Job 1: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-28 01:00:12.066 [Failure] Deferred job 1 re-queued after repair.
+2026-05-28 01:01:09.978 [EpisodeTracker] Machine 1 failed. Episode total failures=6
+2026-05-28 01:01:09.978 [Orchestrator] Job 7: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-28 01:01:10.529 [Orchestrator] Job 7: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-28 01:01:11.058 [Failure] Deferred job 7 re-queued after repair.
+2026-05-28 01:01:24.424 [EpisodeTracker] Machine 8 failed. Episode total failures=7
+2026-05-28 01:02:01.044 [EpisodeTracker] Machine 5 failed. Episode total failures=8
+2026-05-28 01:02:46.051 [EpisodeTracker] Machine 6 failed. Episode total failures=9
+2026-05-28 01:02:52.672 [EpisodeTracker] Machine 0 failed. Episode total failures=10
+2026-05-28 01:03:08.679 [EpisodeTracker] Machine 9 failed. Episode total failures=11
+2026-05-28 01:04:51.539 [TelemetryChannel] Flushed 22 events to Python.
+2026-05-28 01:04:51.540 [Orchestrator] Logging Academy Epiosde
+2026-05-28 01:04:51.540 [StochasticSummary] Failures=11 TotalRepairTime=574.0s MeanTTF_theory=70046.9s
+2026-05-28 01:04:51.540 [BatchRunner] Progress: 44/45 (46696.0s elapsed, ETA 1061.3s)
+2026-05-28 01:04:51.918 [BatchRunner] Run 45/45: benchmark=brandimarte_mk15_low rule=SRT_SRWT seed=44
+2026-05-28 01:04:51.919 [StochasticMgr] Initialized — seed=44 mode=[mf] WeibullK=1.5 λ_machine=77597.13 λ_agv=700 repairMu=3.957227 repairSigma=0.4 arrivalLambda=0.005
+2026-05-28 01:04:51.929 [BrandimartLoader] Loaded 30 jobs from benchmark (15 BM machines → 15 runtime machines across 5 types)
+2026-05-28 01:04:51.929 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-28 01:04:51.929 [StochasticMgr] Initialized — seed=44 mode=[mf] WeibullK=1.5 λ_machine=77597.13 λ_agv=700 repairMu=3.957227 repairSigma=0.4 arrivalLambda=0.005
+2026-05-28 01:04:51.930 [Orchestrator] Episode started: 30 jobs, 15 machines, stochastic=True
+2026-05-28 01:05:35.289 [EpisodeTracker] Machine 4 failed. Episode total failures=1
+2026-05-28 01:05:39.118 [EpisodeTracker] Machine 5 failed. Episode total failures=2
+2026-05-28 01:08:53.485 [EpisodeTracker] Machine 0 failed. Episode total failures=3
+2026-05-28 01:10:51.658 [TelemetryChannel] Flushed 6 events to Python.
+2026-05-28 01:10:51.658 [Orchestrator] Logging Academy Epiosde
+2026-05-28 01:10:51.658 [StochasticSummary] Failures=3 TotalRepairTime=122.4s MeanTTF_theory=70046.9s
+2026-05-28 01:10:51.658 [BatchRunner] Progress: 45/45 (47056.1s elapsed, ETA 0.0s)
+2026-05-28 01:10:52.013 [BatchRunner] All benchmarks complete: 45 runs in 47056.5s
+2026-05-28 01:10:52.013 [BatchRunner] Headless mode — quitting application.

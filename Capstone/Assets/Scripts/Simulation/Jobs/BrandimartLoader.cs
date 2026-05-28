@@ -60,6 +60,15 @@ namespace Assets.Scripts.Simulation.Jobs
         /// RepairMu_high → mean repair ≈ 0.25 × mean_proc_time
         private const float REPAIR_SIGMA = 0.4f;
 
+        /// <summary>
+        /// Scales Brandimarte abstract time units to sim-seconds.
+        /// Brandimarte (1993) units are dimensionless integers typically in [1, 20].
+        /// A factor of 300 maps 1 unit → 5 minutes, giving realistic industrial
+        /// processing times relative to AGV travel overhead of ~60 seconds.
+        /// Adjust based on desired utilization target.
+        /// </summary>
+        private const float PROC_TIME_SCALE = 20f;
+
         // ─────────────────────────────────────────────────────────────────────
         //  Public: one-shot convenience
         // ─────────────────────────────────────────────────────────────────────
@@ -127,7 +136,7 @@ namespace Assets.Scripts.Simulation.Jobs
             var typeLayout = new MachineType[numMachines];
             for (int bm = 0; bm < numMachines; bm++)
                 typeLayout[bm] = AllTypes[bm % numTypes];
-
+            int totalOps = 0;
             // ── Scan processing times ─────────────────────────────────────────
             int minOps = int.MaxValue, maxOps = 0;
             float minProc = float.MaxValue, maxProc = 0f;
@@ -138,11 +147,11 @@ namespace Assets.Scripts.Simulation.Jobs
             {
                 minOps = Mathf.Min(minOps, job.Count);
                 maxOps = Mathf.Max(maxOps, job.Count);
-
+                totalOps += job.Count;
                 foreach (JArray op in job)
                     foreach (JObject opt in op)
                     {
-                        float p = opt["processing"].Value<float>();
+                        float p = opt["processing"].Value<float>() * PROC_TIME_SCALE;
                         minProc = Mathf.Min(minProc, p);
                         maxProc = Mathf.Max(maxProc, p);
                         sumProc += p;
@@ -160,12 +169,13 @@ namespace Assets.Scripts.Simulation.Jobs
             if (stochastic != null)
             {
                 SimLogger.Low($"[BrandimartLoader] Stochastic config for {name} " +
-                              $"(disruption={disruption}): " +
-                              $"meanProc={meanProc:F1}s maxProc={maxProc:F1}s " +
-                              $"WeibullLambda={stochastic.WeibullLambda:F1} " +
-                              $"RepairMu={stochastic.RepairLogMu:F2} " +
-                              $"meanTTF≈{stochastic.WeibullLambda * WEIBULL_MEAN_FACTOR:F1}s " +
-                              $"meanRepair≈{Mathf.Exp(stochastic.RepairLogMu + 0.5f * stochastic.RepairLogSigma * stochastic.RepairLogSigma):F1}s");
+                    $"(disruption={disruption}): " +
+                    $"meanProc={meanProc:F1}s maxProc={maxProc:F1}s " +
+                    $"WeibullLambda={stochastic.WeibullLambda:F1} " +
+                    $"RepairMu={stochastic.RepairLogMu:F2} " +
+                    $"meanTTF≈{stochastic.WeibullLambda * WEIBULL_MEAN_FACTOR:F1}s " +
+                    $"meanRepair≈{Mathf.Exp(stochastic.RepairLogMu + 0.5f * stochastic.RepairLogSigma * stochastic.RepairLogSigma):F1}s " +
+                    $"expectedFailuresPerMachinePerEpisode≈{(meanProc * (float)totalOps / numMachines) / (stochastic.WeibullLambda * WEIBULL_MEAN_FACTOR):F1}");
             }
 
             return new FJSSPConfig
@@ -223,7 +233,7 @@ namespace Assets.Scripts.Simulation.Jobs
             float minAllowedMeanTtf = maxCycleTime * 1.5f;
 
             float meanTtf = Mathf.Max(desiredMeanTtf, minAllowedMeanTtf);
-            float lambda = meanTtf / WEIBULL_MEAN_FACTOR;
+            float lambda = meanTtf / WEIBULL_MEAN_FACTOR * PROC_TIME_SCALE;
 
             // Repair duration: log-normal mu derived so mean repair = repairFraction × meanProc
             // repairFraction: low=0.15, high=0.25
@@ -290,8 +300,7 @@ namespace Assets.Scripts.Simulation.Jobs
                     foreach (JObject opt in rawOp)
                     {
                         int bmIdx = opt["machine"].Value<int>();
-                        float pTime = opt["processing"].Value<float>();
-
+                        float pTime = opt["processing"].Value<float>() * PROC_TIME_SCALE;
                         var (type, idxInType) = bmMap[bmIdx];
 
                         if (!firstSet)

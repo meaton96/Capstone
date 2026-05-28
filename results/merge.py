@@ -20,6 +20,18 @@ def merge_csv_group(search_pattern, output_path):
     for file in all_files:
         try:
             df = pd.read_csv(file)
+            filename = os.path.basename(file).lower()
+            
+            # Catch ANY file across ALL categories that has 'random' in the name
+            if "random" in filename:
+                if "rule" in df.columns:
+                    df["rule"] = "random"
+                    print(f"🔄 FORCED 'rule' column to 'random' for: {os.path.basename(file)}")
+                else:
+                    # If the column isn't there, create it so it aligns during concat
+                    df["rule"] = "random"
+                    print(f"➕ Created 'rule' column and set to 'random' for: {os.path.basename(file)}")
+                    
             df_list.append(df)
         except Exception as e:
             print(f"❌ Error reading {file}: {e}")

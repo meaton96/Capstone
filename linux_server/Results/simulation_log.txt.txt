@@ -1,0 +1,393 @@
+--- Log Started: 5/27/2026 11:53:29 AM ---
+2026-05-27 11:53:29.406 [BatchRunner] TimeScale set to 100x via CLI.
+2026-05-27 11:53:29.408 [BatchRunner] Active rules (9): SPT_SMPT, SPT_SRWT, LPT_MMUR, LPT_SMPT, SRT_SRWT, SRT_SMPT, LRT_MMUR, SDT_SRWT, Random
+2026-05-27 11:53:29.408 [BatchRunner] Results subdirectory: brandimarte/low
+2026-05-27 11:53:29.409 [BatchRunner] Disruption mode: Low
+2026-05-27 11:53:29.420 [BrandimartLoader] Stochastic config for mk01 (disruption=Low): meanProc=80.9s maxProc=120.0s WeibullLambda=24968.6 RepairMu=2.42 meanTTF≈22539.1s meanRepair≈12.1s expectedFailuresPerMachinePerEpisode≈0.0
+2026-05-27 11:53:29.420 [BatchRunner] Benchmark: brandimarte_mk01_low, 9 rules x 1 repeats = 9 runs [disruption=Low]
+2026-05-27 11:53:29.420 [BatchRunner] Run 1/9: benchmark=brandimarte_mk01_low rule=SPT_SMPT seed=42
+2026-05-27 11:53:29.421 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=24968.57 λ_agv=700 repairMu=2.415718 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 11:53:29.424 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld
+  Row1: Mill, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-05-27 11:53:29.432 [FactoryLayout] Distance matrix (6x6):
+       M0     M1     M2     M3     M4     M5   
+2026-05-27 11:53:29.440 [FactoryLayout] Built aisle-based floor: 6 machines.
+2026-05-27 11:53:29.443 [TrafficZones] Built zone graph: 18 zones.
+2026-05-27 11:53:29.445 [AGVPool] Spawned fleet of 3 AGVs.
+2026-05-27 11:53:29.447 [BrandimartLoader] Loaded 10 jobs from benchmark (6 BM machines → 6 runtime machines across 5 types)
+2026-05-27 11:53:29.449 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 11:53:29.450 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=24968.57 λ_agv=700 repairMu=2.415718 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 11:53:29.451 [Orchestrator] Episode started: 10 jobs, 6 machines, stochastic=True
+2026-05-27 11:53:29.452 [Agent] OnEpisodeBegin skipped — waiting for UI to arm.
+2026-05-27 11:54:02.271 [Orchestrator] Machine 2 FAILED. RepairTime=8.1s
+2026-05-27 11:54:02.271 [EpisodeTracker] Machine 2 failed. Episode total failures=1
+2026-05-27 11:54:02.271 [Failure] Job 4 returned to NeedsRouting (was Processing on failed machine 2).
+2026-05-27 11:54:02.271 [Failure] Queued job 5 re-routed from failed machine 2.
+2026-05-27 11:54:02.271 [PhysicalMachine] Machine [2] failure
+2026-05-27 11:54:02.272 [PhysicalMachine] Machine [2] begin repair
+2026-05-27 11:54:02.749 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-27 11:54:02.750 Machine [2] repair complete
+2026-05-27 11:54:30.889 [Orchestrator] Machine 5 FAILED. RepairTime=11.5s
+2026-05-27 11:54:30.889 [EpisodeTracker] Machine 5 failed. Episode total failures=2
+2026-05-27 11:54:30.889 [PhysicalMachine] Machine [5] failure
+2026-05-27 11:54:30.889 [PhysicalMachine] Machine [5] begin repair
+2026-05-27 11:54:31.395 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-27 11:54:31.395 Machine [5] repair complete
+2026-05-27 11:54:31.875 [Orchestrator] Machine 1 FAILED. RepairTime=9.2s
+2026-05-27 11:54:31.875 [EpisodeTracker] Machine 1 failed. Episode total failures=3
+2026-05-27 11:54:31.875 [PhysicalMachine] Machine [1] failure
+2026-05-27 11:54:31.875 [PhysicalMachine] Machine [1] begin repair
+2026-05-27 11:54:32.373 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-27 11:54:32.373 Machine [1] repair complete
+2026-05-27 11:54:33.412 [TelemetryChannel] Flushed 6 events to Python.
+2026-05-27 11:54:33.413 [Orchestrator] Logging Academy Epiosde
+2026-05-27 11:54:33.413 [StochasticSummary] Failures=3 TotalRepairTime=28.8s MeanTTF_theory=22539.1s
+2026-05-27 11:54:33.415 [BatchRunner] Progress: 1/9 (64.0s elapsed, ETA 512.0s)
+2026-05-27 11:54:33.751 [BatchRunner] Run 2/9: benchmark=brandimarte_mk01_low rule=SPT_SRWT seed=42
+2026-05-27 11:54:33.751 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=24968.57 λ_agv=700 repairMu=2.415718 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 11:54:33.752 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld
+  Row1: Mill, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-05-27 11:54:33.753 [FactoryLayout] Distance matrix (6x6):
+       M0     M1     M2     M3     M4     M5   
+2026-05-27 11:54:33.755 [FactoryLayout] Built aisle-based floor: 6 machines.
+2026-05-27 11:54:33.755 [TrafficZones] Built zone graph: 18 zones.
+2026-05-27 11:54:33.755 [AGVPool] Spawned fleet of 3 AGVs.
+2026-05-27 11:54:33.755 [BrandimartLoader] Loaded 10 jobs from benchmark (6 BM machines → 6 runtime machines across 5 types)
+2026-05-27 11:54:33.756 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 11:54:33.756 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=24968.57 λ_agv=700 repairMu=2.415718 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 11:54:33.756 [Orchestrator] Episode started: 10 jobs, 6 machines, stochastic=True
+2026-05-27 11:55:06.149 [Orchestrator] Machine 2 FAILED. RepairTime=8.1s
+2026-05-27 11:55:06.149 [EpisodeTracker] Machine 2 failed. Episode total failures=1
+2026-05-27 11:55:06.149 [Failure] Job 7 returned to NeedsRouting (was Processing on failed machine 2).
+2026-05-27 11:55:06.149 [PhysicalMachine] Machine [2] failure
+2026-05-27 11:55:06.149 [PhysicalMachine] Machine [2] begin repair
+2026-05-27 11:55:06.149 [Orchestrator] Job 6: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 11:55:06.632 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-27 11:55:06.632 Machine [2] repair complete
+2026-05-27 11:55:06.633 [Failure] Deferred job 6 re-queued after repair.
+2026-05-27 11:55:34.621 [Orchestrator] Machine 5 FAILED. RepairTime=11.5s
+2026-05-27 11:55:34.621 [EpisodeTracker] Machine 5 failed. Episode total failures=2
+2026-05-27 11:55:34.621 [PhysicalMachine] Machine [5] failure
+2026-05-27 11:55:34.621 [PhysicalMachine] Machine [5] begin repair
+2026-05-27 11:55:35.119 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-27 11:55:35.119 Machine [5] repair complete
+2026-05-27 11:55:36.096 [Orchestrator] Machine 1 FAILED. RepairTime=9.2s
+2026-05-27 11:55:36.097 [EpisodeTracker] Machine 1 failed. Episode total failures=3
+2026-05-27 11:55:36.097 [PhysicalMachine] Machine [1] failure
+2026-05-27 11:55:36.097 [PhysicalMachine] Machine [1] begin repair
+2026-05-27 11:55:36.588 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-27 11:55:36.589 Machine [1] repair complete
+2026-05-27 11:55:36.589 [TelemetryChannel] Flushed 6 events to Python.
+2026-05-27 11:55:36.589 [Orchestrator] Logging Academy Epiosde
+2026-05-27 11:55:36.589 [StochasticSummary] Failures=3 TotalRepairTime=28.8s MeanTTF_theory=22539.1s
+2026-05-27 11:55:36.589 [BatchRunner] Progress: 2/9 (127.2s elapsed, ETA 445.1s)
+2026-05-27 11:55:36.921 [BatchRunner] Run 3/9: benchmark=brandimarte_mk01_low rule=LPT_MMUR seed=42
+2026-05-27 11:55:36.921 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=24968.57 λ_agv=700 repairMu=2.415718 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 11:55:36.921 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld
+  Row1: Mill, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-05-27 11:55:36.923 [FactoryLayout] Distance matrix (6x6):
+       M0     M1     M2     M3     M4     M5   
+2026-05-27 11:55:36.924 [FactoryLayout] Built aisle-based floor: 6 machines.
+2026-05-27 11:55:36.924 [TrafficZones] Built zone graph: 18 zones.
+2026-05-27 11:55:36.924 [AGVPool] Spawned fleet of 3 AGVs.
+2026-05-27 11:55:36.924 [BrandimartLoader] Loaded 10 jobs from benchmark (6 BM machines → 6 runtime machines across 5 types)
+2026-05-27 11:55:36.925 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 11:55:36.925 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=24968.57 λ_agv=700 repairMu=2.415718 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 11:55:36.925 [Orchestrator] Episode started: 10 jobs, 6 machines, stochastic=True
+2026-05-27 11:56:09.661 [Orchestrator] Machine 2 FAILED. RepairTime=8.1s
+2026-05-27 11:56:09.661 [EpisodeTracker] Machine 2 failed. Episode total failures=1
+2026-05-27 11:56:09.661 [PhysicalMachine] Machine [2] failure
+2026-05-27 11:56:09.661 [PhysicalMachine] Machine [2] begin repair
+2026-05-27 11:56:10.147 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-27 11:56:10.148 Machine [2] repair complete
+2026-05-27 11:56:37.832 [Orchestrator] Machine 5 FAILED. RepairTime=11.5s
+2026-05-27 11:56:37.832 [EpisodeTracker] Machine 5 failed. Episode total failures=2
+2026-05-27 11:56:37.832 [PhysicalMachine] Machine [5] failure
+2026-05-27 11:56:37.832 [PhysicalMachine] Machine [5] begin repair
+2026-05-27 11:56:38.336 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-27 11:56:38.337 Machine [5] repair complete
+2026-05-27 11:56:39.290 [Orchestrator] Machine 1 FAILED. RepairTime=9.2s
+2026-05-27 11:56:39.290 [EpisodeTracker] Machine 1 failed. Episode total failures=3
+2026-05-27 11:56:39.290 [Failure] Job 8 returned to NeedsRouting (was Processing on failed machine 1).
+2026-05-27 11:56:39.290 [Failure] Queued job 0 re-routed from failed machine 1.
+2026-05-27 11:56:39.290 [Failure] Queued job 3 re-routed from failed machine 1.
+2026-05-27 11:56:39.290 [Failure] Queued job 4 re-routed from failed machine 1.
+2026-05-27 11:56:39.290 [Failure] Queued job 7 re-routed from failed machine 1.
+2026-05-27 11:56:39.290 [Failure] Queued job 9 re-routed from failed machine 1.
+2026-05-27 11:56:39.290 [PhysicalMachine] Machine [1] failure
+2026-05-27 11:56:39.290 [PhysicalMachine] Machine [1] begin repair
+2026-05-27 11:56:39.758 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-27 11:56:39.758 Machine [1] repair complete
+2026-05-27 11:57:01.983 [Orchestrator] Machine 4 FAILED. RepairTime=5.8s
+2026-05-27 11:57:01.985 [EpisodeTracker] Machine 4 failed. Episode total failures=4
+2026-05-27 11:57:01.985 [PhysicalMachine] Machine [4] failure
+2026-05-27 11:57:01.985 [PhysicalMachine] Machine [4] begin repair
+2026-05-27 11:57:02.475 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-27 11:57:02.475 Machine [4] repair complete
+2026-05-27 11:57:12.604 [TelemetryChannel] Flushed 8 events to Python.
+2026-05-27 11:57:12.604 [Orchestrator] Logging Academy Epiosde
+2026-05-27 11:57:12.604 [StochasticSummary] Failures=4 TotalRepairTime=34.7s MeanTTF_theory=22539.1s
+2026-05-27 11:57:12.605 [BatchRunner] Progress: 3/9 (223.2s elapsed, ETA 446.4s)
+2026-05-27 11:57:12.942 [BatchRunner] Run 4/9: benchmark=brandimarte_mk01_low rule=LPT_SMPT seed=42
+2026-05-27 11:57:12.942 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=24968.57 λ_agv=700 repairMu=2.415718 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 11:57:12.942 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld
+  Row1: Mill, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-05-27 11:57:12.944 [FactoryLayout] Distance matrix (6x6):
+       M0     M1     M2     M3     M4     M5   
+2026-05-27 11:57:12.945 [FactoryLayout] Built aisle-based floor: 6 machines.
+2026-05-27 11:57:12.945 [TrafficZones] Built zone graph: 18 zones.
+2026-05-27 11:57:12.945 [AGVPool] Spawned fleet of 3 AGVs.
+2026-05-27 11:57:12.945 [BrandimartLoader] Loaded 10 jobs from benchmark (6 BM machines → 6 runtime machines across 5 types)
+2026-05-27 11:57:12.946 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 11:57:12.946 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=24968.57 λ_agv=700 repairMu=2.415718 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 11:57:12.946 [Orchestrator] Episode started: 10 jobs, 6 machines, stochastic=True
+2026-05-27 11:57:45.392 [Orchestrator] Machine 2 FAILED. RepairTime=8.1s
+2026-05-27 11:57:45.392 [EpisodeTracker] Machine 2 failed. Episode total failures=1
+2026-05-27 11:57:45.392 [Failure] Queued job 9 re-routed from failed machine 2.
+2026-05-27 11:57:45.392 [PhysicalMachine] Machine [2] failure
+2026-05-27 11:57:45.392 [PhysicalMachine] Machine [2] begin repair
+2026-05-27 11:57:45.864 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-27 11:57:45.865 Machine [2] repair complete
+2026-05-27 11:58:14.290 [Orchestrator] Machine 5 FAILED. RepairTime=11.5s
+2026-05-27 11:58:14.290 [EpisodeTracker] Machine 5 failed. Episode total failures=2
+2026-05-27 11:58:14.290 [PhysicalMachine] Machine [5] failure
+2026-05-27 11:58:14.290 [PhysicalMachine] Machine [5] begin repair
+2026-05-27 11:58:14.782 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-27 11:58:14.782 Machine [5] repair complete
+2026-05-27 11:58:15.316 [TelemetryChannel] Flushed 4 events to Python.
+2026-05-27 11:58:15.316 [Orchestrator] Logging Academy Epiosde
+2026-05-27 11:58:15.317 [StochasticSummary] Failures=2 TotalRepairTime=19.7s MeanTTF_theory=22539.1s
+2026-05-27 11:58:15.317 [BatchRunner] Progress: 4/9 (285.9s elapsed, ETA 357.4s)
+2026-05-27 11:58:15.667 [BatchRunner] Run 5/9: benchmark=brandimarte_mk01_low rule=SRT_SRWT seed=42
+2026-05-27 11:58:15.667 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=24968.57 λ_agv=700 repairMu=2.415718 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 11:58:15.667 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld
+  Row1: Mill, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-05-27 11:58:15.669 [FactoryLayout] Distance matrix (6x6):
+       M0     M1     M2     M3     M4     M5   
+2026-05-27 11:58:15.670 [FactoryLayout] Built aisle-based floor: 6 machines.
+2026-05-27 11:58:15.670 [TrafficZones] Built zone graph: 18 zones.
+2026-05-27 11:58:15.670 [AGVPool] Spawned fleet of 3 AGVs.
+2026-05-27 11:58:15.671 [BrandimartLoader] Loaded 10 jobs from benchmark (6 BM machines → 6 runtime machines across 5 types)
+2026-05-27 11:58:15.671 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 11:58:15.671 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=24968.57 λ_agv=700 repairMu=2.415718 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 11:58:15.671 [Orchestrator] Episode started: 10 jobs, 6 machines, stochastic=True
+2026-05-27 11:58:48.080 [Orchestrator] Machine 2 FAILED. RepairTime=8.1s
+2026-05-27 11:58:48.080 [EpisodeTracker] Machine 2 failed. Episode total failures=1
+2026-05-27 11:58:48.080 [Failure] Job 3 returned to NeedsRouting (was Processing on failed machine 2).
+2026-05-27 11:58:48.080 [Failure] Queued job 4 re-routed from failed machine 2.
+2026-05-27 11:58:48.080 [PhysicalMachine] Machine [2] failure
+2026-05-27 11:58:48.080 [PhysicalMachine] Machine [2] begin repair
+2026-05-27 11:58:48.080 [Orchestrator] Job 3: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 11:58:48.596 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-27 11:58:48.596 Machine [2] repair complete
+2026-05-27 11:58:48.596 [Failure] Deferred job 3 re-queued after repair.
+2026-05-27 11:59:16.964 [Orchestrator] Machine 5 FAILED. RepairTime=11.5s
+2026-05-27 11:59:16.964 [EpisodeTracker] Machine 5 failed. Episode total failures=2
+2026-05-27 11:59:16.964 [PhysicalMachine] Machine [5] failure
+2026-05-27 11:59:16.964 [PhysicalMachine] Machine [5] begin repair
+2026-05-27 11:59:17.449 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-27 11:59:17.449 Machine [5] repair complete
+2026-05-27 11:59:18.441 [Orchestrator] Machine 1 FAILED. RepairTime=9.2s
+2026-05-27 11:59:18.441 [EpisodeTracker] Machine 1 failed. Episode total failures=3
+2026-05-27 11:59:18.441 [PhysicalMachine] Machine [1] failure
+2026-05-27 11:59:18.441 [PhysicalMachine] Machine [1] begin repair
+2026-05-27 11:59:18.922 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-27 11:59:18.922 Machine [1] repair complete
+2026-05-27 11:59:21.780 [TelemetryChannel] Flushed 7 events to Python.
+2026-05-27 11:59:21.780 [Orchestrator] Logging Academy Epiosde
+2026-05-27 11:59:21.780 [StochasticSummary] Failures=3 TotalRepairTime=28.8s MeanTTF_theory=22539.1s
+2026-05-27 11:59:21.781 [BatchRunner] Progress: 5/9 (352.4s elapsed, ETA 281.9s)
+2026-05-27 11:59:22.115 [BatchRunner] Run 6/9: benchmark=brandimarte_mk01_low rule=SRT_SMPT seed=42
+2026-05-27 11:59:22.115 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=24968.57 λ_agv=700 repairMu=2.415718 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 11:59:22.115 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld
+  Row1: Mill, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-05-27 11:59:22.117 [FactoryLayout] Distance matrix (6x6):
+       M0     M1     M2     M3     M4     M5   
+2026-05-27 11:59:22.118 [FactoryLayout] Built aisle-based floor: 6 machines.
+2026-05-27 11:59:22.118 [TrafficZones] Built zone graph: 18 zones.
+2026-05-27 11:59:22.118 [AGVPool] Spawned fleet of 3 AGVs.
+2026-05-27 11:59:22.119 [BrandimartLoader] Loaded 10 jobs from benchmark (6 BM machines → 6 runtime machines across 5 types)
+2026-05-27 11:59:22.119 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 11:59:22.119 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=24968.57 λ_agv=700 repairMu=2.415718 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 11:59:22.119 [Orchestrator] Episode started: 10 jobs, 6 machines, stochastic=True
+2026-05-27 11:59:54.883 [Orchestrator] Machine 2 FAILED. RepairTime=8.1s
+2026-05-27 11:59:54.883 [EpisodeTracker] Machine 2 failed. Episode total failures=1
+2026-05-27 11:59:54.883 [Failure] Queued job 9 re-routed from failed machine 2.
+2026-05-27 11:59:54.884 [PhysicalMachine] Machine [2] failure
+2026-05-27 11:59:54.884 [PhysicalMachine] Machine [2] begin repair
+2026-05-27 11:59:55.376 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-27 11:59:55.376 Machine [2] repair complete
+2026-05-27 12:00:23.718 [Orchestrator] Machine 5 FAILED. RepairTime=11.5s
+2026-05-27 12:00:23.718 [EpisodeTracker] Machine 5 failed. Episode total failures=2
+2026-05-27 12:00:23.718 [PhysicalMachine] Machine [5] failure
+2026-05-27 12:00:23.718 [PhysicalMachine] Machine [5] begin repair
+2026-05-27 12:00:24.211 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-27 12:00:24.211 Machine [5] repair complete
+2026-05-27 12:00:25.185 [Orchestrator] Machine 1 FAILED. RepairTime=9.2s
+2026-05-27 12:00:25.185 [EpisodeTracker] Machine 1 failed. Episode total failures=3
+2026-05-27 12:00:25.185 [Failure] Job 7 returned to NeedsRouting (was Processing on failed machine 1).
+2026-05-27 12:00:25.185 [PhysicalMachine] Machine [1] failure
+2026-05-27 12:00:25.185 [PhysicalMachine] Machine [1] begin repair
+2026-05-27 12:00:25.670 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-27 12:00:25.670 Machine [1] repair complete
+2026-05-27 12:00:29.145 [TelemetryChannel] Flushed 6 events to Python.
+2026-05-27 12:00:29.145 [Orchestrator] Logging Academy Epiosde
+2026-05-27 12:00:29.145 [StochasticSummary] Failures=3 TotalRepairTime=28.8s MeanTTF_theory=22539.1s
+2026-05-27 12:00:29.146 [BatchRunner] Progress: 6/9 (419.7s elapsed, ETA 209.9s)
+2026-05-27 12:00:29.492 [BatchRunner] Run 7/9: benchmark=brandimarte_mk01_low rule=LRT_MMUR seed=42
+2026-05-27 12:00:29.492 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=24968.57 λ_agv=700 repairMu=2.415718 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:00:29.492 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld
+  Row1: Mill, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-05-27 12:00:29.494 [FactoryLayout] Distance matrix (6x6):
+       M0     M1     M2     M3     M4     M5   
+2026-05-27 12:00:29.495 [FactoryLayout] Built aisle-based floor: 6 machines.
+2026-05-27 12:00:29.495 [TrafficZones] Built zone graph: 18 zones.
+2026-05-27 12:00:29.495 [AGVPool] Spawned fleet of 3 AGVs.
+2026-05-27 12:00:29.495 [BrandimartLoader] Loaded 10 jobs from benchmark (6 BM machines → 6 runtime machines across 5 types)
+2026-05-27 12:00:29.495 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 12:00:29.496 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=24968.57 λ_agv=700 repairMu=2.415718 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:00:29.496 [Orchestrator] Episode started: 10 jobs, 6 machines, stochastic=True
+2026-05-27 12:01:02.109 [Orchestrator] Machine 2 FAILED. RepairTime=8.1s
+2026-05-27 12:01:02.109 [EpisodeTracker] Machine 2 failed. Episode total failures=1
+2026-05-27 12:01:02.109 [PhysicalMachine] Machine [2] failure
+2026-05-27 12:01:02.109 [PhysicalMachine] Machine [2] begin repair
+2026-05-27 12:01:02.595 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-27 12:01:02.595 Machine [2] repair complete
+2026-05-27 12:01:30.678 [Orchestrator] Machine 5 FAILED. RepairTime=11.5s
+2026-05-27 12:01:30.678 [EpisodeTracker] Machine 5 failed. Episode total failures=2
+2026-05-27 12:01:30.678 [PhysicalMachine] Machine [5] failure
+2026-05-27 12:01:30.678 [PhysicalMachine] Machine [5] begin repair
+2026-05-27 12:01:31.194 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-27 12:01:31.194 Machine [5] repair complete
+2026-05-27 12:01:32.169 [Orchestrator] Machine 1 FAILED. RepairTime=9.2s
+2026-05-27 12:01:32.169 [EpisodeTracker] Machine 1 failed. Episode total failures=3
+2026-05-27 12:01:32.169 [Failure] Job 1 returned to NeedsRouting (was Processing on failed machine 1).
+2026-05-27 12:01:32.169 [Failure] Queued job 0 re-routed from failed machine 1.
+2026-05-27 12:01:32.169 [Failure] Queued job 2 re-routed from failed machine 1.
+2026-05-27 12:01:32.169 [Failure] Queued job 3 re-routed from failed machine 1.
+2026-05-27 12:01:32.169 [Failure] Queued job 4 re-routed from failed machine 1.
+2026-05-27 12:01:32.169 [Failure] Queued job 5 re-routed from failed machine 1.
+2026-05-27 12:01:32.169 [Failure] Queued job 6 re-routed from failed machine 1.
+2026-05-27 12:01:32.169 [Failure] Queued job 7 re-routed from failed machine 1.
+2026-05-27 12:01:32.169 [Failure] Queued job 8 re-routed from failed machine 1.
+2026-05-27 12:01:32.169 [PhysicalMachine] Machine [1] failure
+2026-05-27 12:01:32.169 [PhysicalMachine] Machine [1] begin repair
+2026-05-27 12:01:32.659 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-27 12:01:32.659 Machine [1] repair complete
+2026-05-27 12:01:55.346 [Orchestrator] Machine 4 FAILED. RepairTime=5.8s
+2026-05-27 12:01:55.347 [EpisodeTracker] Machine 4 failed. Episode total failures=4
+2026-05-27 12:01:55.347 [PhysicalMachine] Machine [4] failure
+2026-05-27 12:01:55.347 [PhysicalMachine] Machine [4] begin repair
+2026-05-27 12:01:55.827 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
+2026-05-27 12:01:55.827 Machine [4] repair complete
+2026-05-27 12:02:07.034 [TelemetryChannel] Flushed 8 events to Python.
+2026-05-27 12:02:07.034 [Orchestrator] Logging Academy Epiosde
+2026-05-27 12:02:07.034 [StochasticSummary] Failures=4 TotalRepairTime=34.7s MeanTTF_theory=22539.1s
+2026-05-27 12:02:07.034 [BatchRunner] Progress: 7/9 (517.6s elapsed, ETA 147.9s)
+2026-05-27 12:02:07.367 [BatchRunner] Run 8/9: benchmark=brandimarte_mk01_low rule=SDT_SRWT seed=42
+2026-05-27 12:02:07.367 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=24968.57 λ_agv=700 repairMu=2.415718 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:02:07.367 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld
+  Row1: Mill, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-05-27 12:02:07.369 [FactoryLayout] Distance matrix (6x6):
+       M0     M1     M2     M3     M4     M5   
+2026-05-27 12:02:07.370 [FactoryLayout] Built aisle-based floor: 6 machines.
+2026-05-27 12:02:07.370 [TrafficZones] Built zone graph: 18 zones.
+2026-05-27 12:02:07.371 [AGVPool] Spawned fleet of 3 AGVs.
+2026-05-27 12:02:07.371 [BrandimartLoader] Loaded 10 jobs from benchmark (6 BM machines → 6 runtime machines across 5 types)
+2026-05-27 12:02:07.371 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 12:02:07.371 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=24968.57 λ_agv=700 repairMu=2.415718 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:02:07.371 [Orchestrator] Episode started: 10 jobs, 6 machines, stochastic=True
+2026-05-27 12:02:39.967 [Orchestrator] Machine 2 FAILED. RepairTime=8.1s
+2026-05-27 12:02:39.967 [EpisodeTracker] Machine 2 failed. Episode total failures=1
+2026-05-27 12:02:39.967 [PhysicalMachine] Machine [2] failure
+2026-05-27 12:02:39.967 [PhysicalMachine] Machine [2] begin repair
+2026-05-27 12:02:40.477 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-27 12:02:40.477 Machine [2] repair complete
+2026-05-27 12:03:09.013 [Orchestrator] Machine 5 FAILED. RepairTime=11.5s
+2026-05-27 12:03:09.014 [EpisodeTracker] Machine 5 failed. Episode total failures=2
+2026-05-27 12:03:09.014 [PhysicalMachine] Machine [5] failure
+2026-05-27 12:03:09.014 [PhysicalMachine] Machine [5] begin repair
+2026-05-27 12:03:09.502 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-27 12:03:09.502 Machine [5] repair complete
+2026-05-27 12:03:10.467 [Orchestrator] Machine 1 FAILED. RepairTime=9.2s
+2026-05-27 12:03:10.467 [EpisodeTracker] Machine 1 failed. Episode total failures=3
+2026-05-27 12:03:10.467 [Failure] Job 8 returned to NeedsRouting (was Processing on failed machine 1).
+2026-05-27 12:03:10.467 [PhysicalMachine] Machine [1] failure
+2026-05-27 12:03:10.467 [PhysicalMachine] Machine [1] begin repair
+2026-05-27 12:03:10.938 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-27 12:03:10.938 Machine [1] repair complete
+2026-05-27 12:03:14.297 [TelemetryChannel] Flushed 6 events to Python.
+2026-05-27 12:03:14.297 [Orchestrator] Logging Academy Epiosde
+2026-05-27 12:03:14.297 [StochasticSummary] Failures=3 TotalRepairTime=28.8s MeanTTF_theory=22539.1s
+2026-05-27 12:03:14.297 [BatchRunner] Progress: 8/9 (584.9s elapsed, ETA 73.1s)
+2026-05-27 12:03:14.628 [BatchRunner] Run 9/9: benchmark=brandimarte_mk01_low rule=Random seed=42
+2026-05-27 12:03:14.628 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=24968.57 λ_agv=700 repairMu=2.415718 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:03:14.628 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld
+  Row1: Mill, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-05-27 12:03:14.629 [FactoryLayout] Distance matrix (6x6):
+       M0     M1     M2     M3     M4     M5   
+2026-05-27 12:03:14.630 [FactoryLayout] Built aisle-based floor: 6 machines.
+2026-05-27 12:03:14.631 [TrafficZones] Built zone graph: 18 zones.
+2026-05-27 12:03:14.631 [AGVPool] Spawned fleet of 3 AGVs.
+2026-05-27 12:03:14.632 [BrandimartLoader] Loaded 10 jobs from benchmark (6 BM machines → 6 runtime machines across 5 types)
+2026-05-27 12:03:14.632 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-27 12:03:14.632 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=24968.57 λ_agv=700 repairMu=2.415718 repairSigma=0.4 arrivalLambda=0.005
+2026-05-27 12:03:14.632 [Orchestrator] Episode started: 10 jobs, 6 machines, stochastic=True
+2026-05-27 12:03:47.083 [Orchestrator] Machine 2 FAILED. RepairTime=8.1s
+2026-05-27 12:03:47.083 [EpisodeTracker] Machine 2 failed. Episode total failures=1
+2026-05-27 12:03:47.083 [Failure] Job 8 returned to NeedsRouting (was Processing on failed machine 2).
+2026-05-27 12:03:47.083 [Failure] Queued job 0 re-routed from failed machine 2.
+2026-05-27 12:03:47.083 [Failure] Queued job 2 re-routed from failed machine 2.
+2026-05-27 12:03:47.083 [Failure] Queued job 3 re-routed from failed machine 2.
+2026-05-27 12:03:47.083 [PhysicalMachine] Machine [2] failure
+2026-05-27 12:03:47.083 [PhysicalMachine] Machine [2] begin repair
+2026-05-27 12:03:47.083 [Orchestrator] Job 0: all eligible machines are Failed/Repairing. Deferring routing decision.
+2026-05-27 12:03:47.571 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
+2026-05-27 12:03:47.571 Machine [2] repair complete
+2026-05-27 12:03:47.572 [Failure] Deferred job 0 re-queued after repair.
+2026-05-27 12:04:15.925 [Orchestrator] Machine 5 FAILED. RepairTime=11.5s
+2026-05-27 12:04:15.925 [EpisodeTracker] Machine 5 failed. Episode total failures=2
+2026-05-27 12:04:15.925 [PhysicalMachine] Machine [5] failure
+2026-05-27 12:04:15.925 [PhysicalMachine] Machine [5] begin repair
+2026-05-27 12:04:16.418 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
+2026-05-27 12:04:16.419 Machine [5] repair complete
+2026-05-27 12:04:17.383 [Orchestrator] Machine 1 FAILED. RepairTime=9.2s
+2026-05-27 12:04:17.384 [EpisodeTracker] Machine 1 failed. Episode total failures=3
+2026-05-27 12:04:17.384 [Failure] Job 9 returned to NeedsRouting (was Processing on failed machine 1).
+2026-05-27 12:04:17.384 [PhysicalMachine] Machine [1] failure
+2026-05-27 12:04:17.384 [PhysicalMachine] Machine [1] begin repair
+2026-05-27 12:04:17.884 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
+2026-05-27 12:04:17.884 Machine [1] repair complete
+2026-05-27 12:04:23.754 [TelemetryChannel] Flushed 6 events to Python.
+2026-05-27 12:04:23.754 [Orchestrator] Logging Academy Epiosde
+2026-05-27 12:04:23.754 [StochasticSummary] Failures=3 TotalRepairTime=28.8s MeanTTF_theory=22539.1s
+2026-05-27 12:04:23.754 [BatchRunner] Progress: 9/9 (654.3s elapsed, ETA 0.0s)
+2026-05-27 12:04:24.086 [BatchRunner] Benchmark complete: 9 runs in 654.7s
+2026-05-27 12:04:24.086 [BatchRunner] Headless mode — quitting application.

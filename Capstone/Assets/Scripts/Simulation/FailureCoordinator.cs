@@ -6,6 +6,7 @@ using Assets.Scripts.Simulation.FactoryLayout;
 using Assets.Scripts.Simulation.Stochastic;
 using Assets.Scripts.Simulation.Logging;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Assets.Scripts.Simulation
 {
@@ -19,6 +20,7 @@ namespace Assets.Scripts.Simulation
         private Action<int> _onMachineFailedInvalidateDecision;
         private Action<int> _refreshLabels;
         private double _simTimeRef;
+
 
         public void Initialize(
             JobStore jobs,
@@ -54,14 +56,37 @@ namespace Assets.Scripts.Simulation
                 if (machine.FailedFlag)
                     HandleMachineFailure(machine);
                 else if (machine.RepairCompleteFlag)
+                {
                     HandleMachineRepairComplete(machine);
+                    RetryDeferredJobs();
+                }
+
+            }
+        }
+        private void RetryDeferredJobs()
+        {
+            foreach (int jobId in _jobs.DeferredJobIds.ToList())
+            {
+                JobData job = _jobs.Get(jobId);
+                if (job == null) { _jobs.DeferredJobIds.Remove(jobId); continue; }
+
+                bool anyOperational = job.EligibleMachinesPerOp[job.CurrentOpIndex]
+                    .Keys.Any(mid => _layout.GetMachine(mid)?.HealthState
+                                     == MachineHealthState.Operational);
+                if (anyOperational)
+                {
+                    _jobs.DeferredJobIds.Remove(jobId);
+                    // Re-queue as NeedsRouting so the next Update() tick picks it up
+                    job.State = JobState.NeedsRouting;
+                    SimLogger.Low($"[Failure] Deferred job {jobId} re-queued after repair.");
+                }
             }
         }
 
         private void HandleMachineFailure(PhysicalMachine machine)
         {
             int machineId = machine.MachineId;
-            SimLogger.Low($"[Orchestrator] Machine {machineId} FAILED. RepairTime={machine.SampledRepairDuration:F1}s");
+            SimLogger.Medium($"[Orchestrator] Machine {machineId} FAILED. RepairTime={machine.SampledRepairDuration:F1}s");
 
             _machineProcessingStartTime.Remove(machineId);
             _tracker.RecordMachineFailure(machineId, machine.SampledRepairDuration, _simTimeRef);
@@ -75,7 +100,7 @@ namespace Assets.Scripts.Simulation
                     processingJob.State = JobState.NeedsRouting;
                     processingJob.LocationMachineId = machineId;
                     processingJob.StateEntryTime = _simTimeRef;
-                    SimLogger.Low($"[Failure] Job {processingJob.JobId} returned to NeedsRouting " +
+                    SimLogger.Medium($"[Failure] Job {processingJob.JobId} returned to NeedsRouting " +
                                   $"(was Processing on failed machine {machineId}).");
                 }
             }
@@ -88,7 +113,7 @@ namespace Assets.Scripts.Simulation
 
                 job.State = JobState.NeedsRouting;
                 job.StateEntryTime = _simTimeRef;
-                SimLogger.Low($"[Failure] Queued job {job.JobId} re-routed from failed machine {machineId}.");
+                SimLogger.Medium($"[Failure] Queued job {job.JobId} re-routed from failed machine {machineId}.");
             }
 
             // ── 3. WaitingForPickup jobs routed TO this machine ───────────────────────
@@ -112,7 +137,7 @@ namespace Assets.Scripts.Simulation
                 waitingJob.TargetMachineId = -1;
                 waitingJob.AssignedAgvId = -1;
                 waitingJob.StateEntryTime = _simTimeRef;
-                SimLogger.Low($"[Failure] WaitingForPickup job {waitingJob.JobId}: " +
+                SimLogger.Medium($"[Failure] WaitingForPickup job {waitingJob.JobId}: " +
                               $"AGV {agv.AgvId} pickup cancelled, job re-routed.");
             }
 
@@ -137,7 +162,7 @@ namespace Assets.Scripts.Simulation
                     transitJob.StateEntryTime = _simTimeRef;
 
                     agv.RedirectDropoff(alternate.GetDropoffPosition(), alternate, transitJob.Visual);
-                    SimLogger.Low($"[Failure] AGV {agv.AgvId} carrying job {agvJobId} " +
+                    SimLogger.Medium($"[Failure] AGV {agv.AgvId} carrying job {agvJobId} " +
                                   $"redirected: machine {machineId} failed → machine {alternate.MachineId}.");
                 }
                 else
@@ -149,7 +174,7 @@ namespace Assets.Scripts.Simulation
                     transitJob.StateEntryTime = _simTimeRef;
 
                     agv.AbortTransit();
-                    SimLogger.Low($"[Failure] AGV {agv.AgvId} carrying job {agvJobId}: " +
+                    SimLogger.Medium($"[Failure] AGV {agv.AgvId} carrying job {agvJobId}: " +
                                   $"no alternate found, transit aborted.");
                 }
             }
@@ -160,7 +185,7 @@ namespace Assets.Scripts.Simulation
                 if (job.PreDispatchedAgvId < 0) continue;
                 if (job.TargetMachineId != machineId) continue;
 
-                SimLogger.Low($"[Failure] Pre-dispatch for job {job.JobId} to machine {machineId} cancelled.");
+                SimLogger.Medium($"[Failure] Pre-dispatch for job {job.JobId} to machine {machineId} cancelled.");
                 job.PreDispatchedAgvId = -1;
             }
 
@@ -202,7 +227,7 @@ namespace Assets.Scripts.Simulation
         }
         private void HandleMachineRepairComplete(PhysicalMachine machine)
         {
-            SimLogger.Low($"[Orchestrator] Machine {machine.MachineId} repair complete — " +
+            SimLogger.Medium($"[Orchestrator] Machine {machine.MachineId} repair complete — " +
                           $"returning to OPERATIONAL.");
 
             machine.AcknowledgeRepairComplete();

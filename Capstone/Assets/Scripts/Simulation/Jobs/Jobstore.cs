@@ -19,6 +19,7 @@ namespace Assets.Scripts.Simulation.Jobs
 
         public IReadOnlyList<JobData> AllJobs => allJobs;
         public int JobCount => allJobs.Count;
+        public readonly HashSet<int> DeferredJobIds = new HashSet<int>();
 
         public bool IsInitialized = false;
 

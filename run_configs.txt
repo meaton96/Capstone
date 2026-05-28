@@ -53,8 +53,13 @@ updated:
      -Disruption low `
      -ResultsDir deterministic
 
-./run_batch.sh --exe-path ./capstone.x86_64 --benchmark-dir ./BatchConfigs/Benchmarks --repeats 3 --timescale 100 --disruption low
-
+./run_batch.sh \
+        --exe        "./capstone.x86_64" \
+        --config     "./BatchConfigs/BatchConfigs.json" \
+        --results    "./Results" \
+        --repeats    3 \
+        --timescale  100 \
+        --loglevel   None
 
 copy:
 
