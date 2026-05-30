@@ -1,29 +1,66 @@
 using Assets.Scripts.Simulation.Machines;
 namespace Assets.Scripts.Simulation.Types
 {
+    /// @brief Enumerates the two categories of scheduling decisions the agent can make.
     public enum DecisionType { Dispatch, Routing }
-    /// @brief Snapshot of the state presented to the agent when a scheduling decision is needed.
+
+    /// @brief Snapshot of the simulation state presented to the agent when a scheduling decision is required.
+    ///
+    /// @details Carries both shared state (time, job counts) and decision-specific fields.
+    ///          Only the fields relevant to @c Type are populated; unused arrays are null.
+    ///          - Dispatch: @c MachineId identifies the idle machine, @c QueuedJobIds/@c QueuedDurations
+    ///            list candidate jobs waiting in that machine's queue.
+    ///          - Routing: @c JobId identifies the completed operation, @c RequiredType specifies the
+    ///            machine type needed next, and @c CandidateMachineIds lists eligible destinations.
     public class DecisionRequest
     {
+        /// @brief Type of decision: Dispatch (assign job to idle machine) or Routing (route finished job to next machine).
         public DecisionType Type;
 
-        // --- Shared ---
+        // ── Shared fields (populated for both decision types) ──
+
+        /// @brief Current simulation time when this decision was generated.
         public double SimTime;
+
+        /// @brief Sequential index of this decision point within the episode.
         public int DecisionIndex;
+
+        /// @brief Total number of jobs in the episode.
         public int TotalJobs;
+
+        /// @brief Number of jobs fully completed at the time of this decision.
         public int CompletedJobs;
+
+        /// @brief ID of the machine that triggered this decision (idle machine for Dispatch,
+        ///        finished machine for Routing).
         public int SourceMachineId;
 
-        // --- Dispatch decision (idle machine, pick a job) ---
+        // ── Dispatch decision fields (populated when Type == Dispatch) ──
+
+        /// @brief ID of the idle machine awaiting job assignment.
         public int MachineId;
+
+        /// @brief IDs of jobs currently queued for this machine.
         public int[] QueuedJobIds;
+
+        /// @brief Processing durations for each queued job at this machine (parallel to @c QueuedJobIds).
         public double[] QueuedDurations;
 
-        // --- Routing decision (finished job, pick a machine) ---
+        // ── Routing decision fields (populated when Type == Routing) ──
+
+        /// @brief ID of the job that just finished processing and needs routing.
         public int JobId;
+
+        /// @brief Machine type required for the next operation of @c JobId.
         public MachineType RequiredType;
-        public int[] CandidateMachineIds;   // eligible machines of required type
+
+        /// @brief IDs of candidate machines of the required type that are available for routing.
+        public int[] CandidateMachineIds;
+
+        /// @brief Current queue lengths at each candidate machine (parallel to @c CandidateMachineIds).
         public float[] CandidateQueueLengths;
-        public float[] CandidateJobTimes;   // this job's proc time at each candidate
+
+        /// @brief Processing time of @c JobId at each candidate machine (parallel to @c CandidateMachineIds).
+        public float[] CandidateJobTimes;
     }
 }

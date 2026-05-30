@@ -3,16 +3,20 @@ using Assets.Scripts.Simulation.Types;
 
 namespace Assets.Scripts.Simulation.Types
 {
-    /// <summary>
-    /// Immutable snapshot of a completed episode's statistics.
-    /// Built by EpisodeTracker.Build() at episode end.
+    /// @brief Immutable snapshot of a completed episode's statistics.
+    ///
+    /// @details Built by EpisodeTracker.Build() at episode end. This class serves as the single
+    ///          source of truth for all post-episode analytics and CSV export.
     ///
     /// Adding a new logging domain (e.g. Phase 3 AGV failures):
     ///   1. Add fields here
     ///   2. Add a RecordX() method in EpisodeTracker
     ///   3. Add columns in ResultsLogger
     ///   Nothing else changes.
-    /// </summary>
+    ///
+    /// @note This class is mutable in its current implementation; fields are assigned by EpisodeTracker.
+    /// @see EpisodeTracker.Build
+    /// @see ResultsLogger
     public class EpisodeRecord
     {
         // ── Identity ─────────────────────────────────────────────────────────
@@ -61,13 +65,12 @@ namespace Assets.Scripts.Simulation.Types
         public List<SegmentRecord> SegmentRecords = new List<SegmentRecord>();
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  Per-machine
-    // ─────────────────────────────────────────────────────────────────────────
+    // ── Per-machine statistics ──
 
-    /// <summary>
-    /// Per-machine statistics for one episode. One row in machine_utilization.csv.
-    /// </summary>
+    /// @brief Per-machine statistics for one episode. One row in machine_utilization.csv.
+    ///
+    /// @details Tracks processing time, idle time, availability, and failure metrics
+    ///          for each machine. Utilization and idle rates are computed on access.
     public class MachineRecord
     {
         public int MachineId;
@@ -89,24 +92,20 @@ namespace Assets.Scripts.Simulation.Types
         // Phase 3: AGV-stranded time per machine, etc.
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  Per-AGV  (new — Phase 2)
-    // ─────────────────────────────────────────────────────────────────────────
+    // ── Per-AGV statistics (Phase 2) ──
 
-    /// <summary>
-    /// Per-AGV time budget and throughput for one episode.
-    /// One row per AGV in agv_performance.csv.
+    /// @brief Per-AGV time budget and throughput for one episode. One row per AGV in agv_performance.csv.
     ///
-    /// Key diagnostic split:
-    ///   time_idle          — parked with no assignment (demand-side slack)
-    ///   time_waiting_route — assigned but blocked by quadrant reservation (congestion)
-    ///   time_traveling     — actively moving along NavMesh path (productive)
-    ///   time_loading       — handshake at pickup dock
-    ///   time_unloading     — handshake at dropoff dock
+    /// @details Tracks the AGV's time budget across five mutually exclusive states:
+    ///          - TimeIdle: parked with no assignment (demand-side slack)
+    ///          - TimeWaitingRoute: assigned but blocked by zone clearance (congestion)
+    ///          - TimeTraveling: actively following NavMesh path (productive movement)
+    ///          - TimeLoading: handshake at pickup dock
+    ///          - TimeUnloading: handshake at dropoff dock
     ///
-    /// If time_waiting_route >> time_traveling, the floor is congestion-limited.
-    /// If time_idle >> everything else, the floor is AGV-over-provisioned.
-    /// </summary>
+    /// Diagnostic guidance:
+    ///          - If TimeWaitingRoute >> TimeTraveling, the floor is congestion-limited.
+    ///          - If TimeIdle >> all other states, the floor is AGV-over-provisioned.
     public class AGVRecord
     {
         public int AgvId;
@@ -130,18 +129,15 @@ namespace Assets.Scripts.Simulation.Types
             TotalAccountedTime > 0 ? TimeWaitingRoute / TotalAccountedTime : 0;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  Per-segment congestion  (new — Phase 2)
-    // ─────────────────────────────────────────────────────────────────────────
+    // ── Per-segment congestion (Phase 2) ──
 
-    /// <summary>
-    /// Per-zone congestion metrics for one episode.
-    /// One row per TrafficZone in segment_congestion.csv.
+    /// @brief Per-zone congestion metrics for one episode. One row per TrafficZone in segment_congestion.csv.
     ///
-    /// High block_events / traversal_count  → this zone is a chronic bottleneck.
-    /// High mean_block_time                  → blockages are long when they occur.
-    /// Combine with ZoneName (encodes topology) to locate physical hotspots.
-    /// </summary>
+    /// @details Tracks traversal counts, block events, and cumulative block time per zone.
+    ///          High BlockEvents / TraversalCount indicates a chronic bottleneck.
+    ///          High MeanBlockTime indicates prolonged blockages when they occur.
+    ///          Combine with ZoneName (which encodes topology, e.g. "RowAisle1_Seg2")
+    ///          to locate physical hotspots on the floor.
     public class SegmentRecord
     {
         public int ZoneId;

@@ -35,9 +35,7 @@ namespace Assets.Scripts.Simulation.Types
     /// @endcode
     public static class ConfigLoader
     {
-        // ─────────────────────────────────────────────────────────
-        //  Public API
-        // ─────────────────────────────────────────────────────────
+        // ── Public API ──
 
         /// @brief Loads a single FJSSPConfig from a JSON file path.
         /// @param path  Absolute or relative path to the .json file.
@@ -54,9 +52,10 @@ namespace Assets.Scripts.Simulation.Types
             return ParseSingle(json);
         }
 
-        /// @brief Loads an array of configs from a batch JSON file.
+        /// @brief Loads an array of FJSSPConfig instances from a batch JSON file.
+        /// @details Falls back to single-config parsing if the "configs" array is empty.
         /// @param path  Path to a JSON file containing a "configs" array.
-        /// @returns     Array of parsed FJSSPConfig objects, or empty on failure.
+        /// @returns     Array of parsed FJSSPConfig objects, or empty array on failure.
         public static FJSSPConfig[] LoadBatch(string path)
         {
             if (!File.Exists(path))
@@ -69,7 +68,9 @@ namespace Assets.Scripts.Simulation.Types
             return ParseBatch(json);
         }
 
-        /// @brief Parses a single config from a JSON string.
+        /// @brief Parses a single FJSSPConfig from a JSON string.
+        /// @param json  JSON-formatted configuration string.
+        /// @returns     Parsed FJSSPConfig, or null on failure.
         public static FJSSPConfig ParseSingle(string json)
         {
             try
@@ -84,7 +85,10 @@ namespace Assets.Scripts.Simulation.Types
             }
         }
 
-        /// @brief Parses a batch of configs from a JSON string.
+        /// @brief Parses a batch of FJSSPConfig instances from a JSON string.
+        /// @details Expects a "configs" array; falls back to single-config parsing if absent.
+        /// @param json  JSON-formatted string containing a "configs" array or single config object.
+        /// @returns     Array of parsed FJSSPConfig objects, or empty array on failure.
         public static FJSSPConfig[] ParseBatch(string json)
         {
             try
@@ -105,16 +109,17 @@ namespace Assets.Scripts.Simulation.Types
             }
         }
 
-        // ─────────────────────────────────────────────────────────
-        //  JSON Data Classes  (JsonUtility-compatible)
-        // ─────────────────────────────────────────────────────────
+        // ── Internal JSON data classes (JsonUtility-compatible) ──
 
+        /// @brief Wrapper for batch config JSON with a "configs" array field.
         [Serializable]
         private class JsonBatchWrapper
         {
             public JsonConfig[] configs;
         }
 
+        /// @brief Serializable representation of a single FJSSPConfig for JSON deserialization.
+        /// @details Field names and defaults mirror FJSSPConfig to enable direct JsonUtility mapping.
         [Serializable]
         private class JsonConfig
         {
@@ -122,7 +127,7 @@ namespace Assets.Scripts.Simulation.Types
             public int seed = 42;
             public int jobCount = 20;
             public int machinesPerType = 3;
-            public string[] machineTypes;     // e.g. ["Mill","Lathe","Weld","Inspect","Assemble"]
+            public string[] machineTypes;
             public float minProcTime = 15f;
             public float maxProcTime = 90f;
             public int minOpsPerJob = 3;
@@ -132,10 +137,13 @@ namespace Assets.Scripts.Simulation.Types
             public float machineFlexibilityProbability = 0f;
         }
 
-        // ─────────────────────────────────────────────────────────
-        //  Conversion
-        // ─────────────────────────────────────────────────────────
+        // ── Conversion ──
 
+        /// @brief Converts a JsonConfig to a runtime FJSSPConfig.
+        /// @details Maps string-based machine type names to MachineType enum values and expands
+        ///          the layout by repeating each type machinesPerType times.
+        /// @param raw  Parsed JSON config data.
+        /// @returns     Runtime FJSSPConfig, or null if raw is null.
         private static FJSSPConfig Convert(JsonConfig raw)
         {
             if (raw == null) return null;
@@ -179,6 +187,9 @@ namespace Assets.Scripts.Simulation.Types
             };
         }
 
+        /// @brief Parses a machine type name string to its corresponding MachineType enum value.
+        /// @param name  Case-insensitive machine type name from JSON (e.g. "Mill", "Lathe").
+        /// @returns     Parsed MachineType enum value, or null if unrecognised (with warning).
         private static MachineType? ParseMachineType(string name)
         {
             if (Enum.TryParse<MachineType>(name, ignoreCase: true, out var result))

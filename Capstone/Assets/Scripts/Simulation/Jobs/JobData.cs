@@ -4,12 +4,14 @@ using UnityEngine;
 
 namespace Assets.Scripts.Simulation.Jobs
 {
-    /// @brief Defines the distinct lifecycle stages of a job within the factory.
-    ///
-    /// @details A job typically flows from @c NeedsRouting (spawned) through 
-    /// @c WaitingForPickup, @c InTransit, @c Queued, and @c Processing. This 
-    /// cycle repeats for each operation until the job finally reaches the 
-    /// @c Exited state.
+    /// <summary>
+    /// Defines the distinct lifecycle stages of a job within the factory.
+    /// </summary>
+    /// <remarks>
+    /// A job typically flows from <c>NeedsRouting</c> (spawned) through <c>WaitingForPickup</c>,
+    /// <c>InTransit</c>, <c>Queued</c>, and <c>Processing</c>. This cycle repeats for each
+    /// operation until the job finally reaches the <c>Exited</c> state.
+    /// </remarks>
     public enum JobState
     {
         /// Agent must select the next machine for processing.
@@ -31,62 +33,98 @@ namespace Assets.Scripts.Simulation.Jobs
         Exited
     }
 
-    /// @brief Encapsulates all persistent data, state, and tracking metrics for a single job.
-    ///
-    /// @details This is a pure data container. Logic for state transitions, AGV 
-    /// assignments, and routing is handled exclusively by the central orchestrator. 
-    /// It maintains the operation sequence, machine eligibility, and timing stats 
-    /// for reward calculation.
+    /// <summary>
+    /// Encapsulates all persistent data, state, and tracking metrics for a single job.
+    /// </summary>
+    /// <remarks>
+    /// This is a pure data container. Logic for state transitions, AGV assignments,
+    /// and routing is handled exclusively by the central orchestrator. It maintains
+    /// the operation sequence, machine eligibility, and timing stats for reward calculation.
+    /// </remarks>
     public class JobData
     {
         [Header("Identity")]
+        /// <summary>Unique identifier for this job.</summary>
         public int JobId;
+
+        /// <summary>Time at which the job becomes available in the system.</summary>
         public float ArrivalTime;
 
         [Header("State Control")]
+        /// <summary>Current lifecycle state of the job.</summary>
         public JobState State;
 
         [Header("Location Context")]
-        /// Current machine ID location. -1 represents the factory entry or exit zones.
+        /// <summary>
+        /// Current machine ID where the job is located. -1 represents the factory entry or exit zones.
+        /// </summary>
         public int LocationMachineId;
 
-        /// Designated destination machine ID. -1 indicates the factory exit.
+        /// <summary>
+        /// Designated destination machine ID for the job. -1 indicates the factory exit.
+        /// </summary>
         public int TargetMachineId;
 
+        /// <summary>
         /// The ID of the AGV currently handling or assigned to this job. -1 if none.
+        /// </summary>
         public int AssignedAgvId;
 
+        /// <summary>
         /// The ID of an AGV dispatched to the pickup point before processing completes.
+        /// </summary>
         public int PreDispatchedAgvId = -1;
 
         [Header("Operation Tracking")]
+        /// <summary>Machine types required for each operation in the job sequence.</summary>
         public MachineType[] OperationTypes;
+
+        /// <summary>
+        /// Per-operation mapping of eligible machine IDs to processing times.
+        /// </summary>
         public Dictionary<int, float>[] EligibleMachinesPerOp;
+
+        /// <summary>Total number of operations scheduled for this job.</summary>
         public int TotalOperations;
+
+        /// <summary>Index of the current operation being processed (0-based).</summary>
         public int CurrentOpIndex;
+
+        /// <summary>Number of operations completed so far.</summary>
         public int CompletedOps;
 
         [Header("Performance Metrics")]
+        /// <summary>Simulation time when the current state was entered.</summary>
         public double StateEntryTime;
+
+        /// <summary>Total accumulated waiting time across all operations.</summary>
         public double TotalWaitTime;
+
+        /// <summary>Total accumulated transit time across all operations.</summary>
         public double TotalTransitTime;
 
         [Header("Visuals")]
+        /// <summary>Visual representation of this job on the factory floor.</summary>
         public JobVisual Visual;
 
-        /// @brief Indicates whether the job has finished its final scheduled operation.
+        /// <summary>
+        /// Indicates whether the job has finished its final scheduled operation.
+        /// </summary>
         public bool IsLastOperation => CompletedOps >= TotalOperations;
 
-        /// @brief Returns the @c MachineType required for the current operation index.
+        /// <summary>
+        /// Returns the <see cref="MachineType"/> required for the current operation index.
+        /// </summary>
         public MachineType NextRequiredType =>
             CurrentOpIndex < TotalOperations
                 ? OperationTypes[CurrentOpIndex]
                 : default;
 
-        /// @brief Retrieves the processing time for a specific machine on the current operation.
-        ///
-        /// @param machineId The ID of the machine to query.
-        /// @return The processing time in simulation seconds; returns 0 if the machine is ineligible.
+        /// <summary>
+        /// Retrieves the processing time for a specific machine on the current operation.
+        /// </summary>
+        /// <param name="machineId">The ID of the machine to query.</param>
+        /// <returns>The processing time in simulation seconds; returns 0 if the machine is ineligible.</returns>
         public float GetProcessingTime(int machineId)
         {
             if (CurrentOpIndex < 0 || CurrentOpIndex >= EligibleMachinesPerOp.Length)

@@ -7,24 +7,28 @@ using UnityEngine.Assertions.Must;
 
 namespace Assets.Scripts.Simulation.Jobs
 {
-    /// @brief Utility class for generating Flexible Job Shop Scheduling Problem (FJSSP) instances.
-    ///
-    /// @details Provides methods to generate a series of jobs with randomized arrival times,
-    /// operation sequences, and machine eligibility based on configured probability distributions.
+    /// <summary>
+    /// Utility class for generating Flexible Job Shop Scheduling Problem (FJSSP) instances.
+    /// </summary>
+    /// <remarks>
+    /// Provides methods to generate jobs with randomized arrival times, operation sequences,
+    /// and machine eligibility based on configured normal distributions.
+    /// </remarks>
     public class FJSSPJobGenerator
     {
         private static readonly MachineType[] AllTypes = (MachineType[])Enum.GetValues(typeof(MachineType));
 
-        /// @brief Samples a value from a normal distribution N(mu, sigma) clamped to a minimum.
-        ///
-        /// @param mu The mean of the distribution.
-        /// @param sigma The standard deviation.
-        /// @param minValue The lower bound for the returned sample (defaults to 1.0).
-        ///
-        /// @return A float value sampled via the Box-Muller transform.
-        ///
-        /// @details Uses @c UnityEngine.Random.value to generate uniform samples in (0, 1]
+        /// <summary>
+        /// Samples a value from a normal distribution N(mu, sigma) clamped to a minimum.
+        /// </summary>
+        /// <param name="mu">The mean of the distribution.</param>
+        /// <param name="sigma">The standard deviation.</param>
+        /// <param name="minValue">The lower bound for the returned sample (defaults to 1.0).</param>
+        /// <returns>A float value sampled via the Box-Muller transform.</returns>
+        /// <remarks>
+        /// Uses <c>UnityEngine.Random.value</c> to generate uniform samples in (0, 1]
         /// to ensure the logarithmic component of the transform remains valid.
+        /// </remarks>
         private static float SampleNormal(float mu, float sigma, float minValue = 1f)
         {
             float u1 = 1f - UnityEngine.Random.value;
@@ -43,16 +47,16 @@ namespace Assets.Scripts.Simulation.Jobs
                 { MachineType.Assemble, (mu: 240f, sigma: 40f) },
             };
 
-        /// @brief Calculates the processing time for a specific machine type.
-        ///
-        /// @param type The @c MachineType being sampled.
-        /// @param config The simulation configuration containing per-type N(mu,sigma) params
-        ///               and fallback uniform bounds.
-        ///
-        /// @return A sampled processing time.
-        ///
-        /// @details Uses @c config.ProcTimeParams for the type when available; otherwise
-        /// falls back to a uniform sample in [config.MinProcTime, config.MaxProcTime].
+        /// <summary>
+        /// Samples the processing time for a specific machine type.
+        /// </summary>
+        /// <param name="type">The <see cref="MachineType"/> being sampled.</param>
+        /// <param name="config">The simulation configuration containing per-type N(mu,sigma) parameters.</param>
+        /// <returns>A sampled processing time.</returns>
+        /// <remarks>
+        /// Uses <c>config.ProcTimeParams</c> for the type when available; otherwise
+        /// falls back to the default parameters defined in <see cref="DefaultParams"/>.
+        /// </remarks>
         private static float SampleProcTime(MachineType type, FJSSPConfig config)
         {
             if (config.ProcTimeParams != null && config.ProcTimeParams.TryGetValue(type, out var p))
@@ -61,17 +65,16 @@ namespace Assets.Scripts.Simulation.Jobs
             return SampleNormal(DefaultParams[type].mu, DefaultParams[type].sigma);
         }
 
-        /// @brief Generates an array of job definitions based on the provided configuration.
-        ///
-        /// @param config The @c FJSSPConfig defining job counts, operation counts, and
-        ///               per-type processing time distributions.
-        /// @param machinesByType A mapping of machine types to their physical instance IDs.
-        ///
-        /// @return An array of @c FJSSPJobDefinition objects sorted by @c ArrivalTime.
-        ///
-        /// @details For each operation in a job's sequence, this method assigns independent
-        /// processing times for every eligible machine instance. This creates the "flexible"
-        /// aspect of the FJSSP, providing signals for the router to exploit.
+        /// <summary>
+        /// Generates an array of job definitions based on the provided configuration.
+        /// </summary>
+        /// <param name="config">The <see cref="FJSSPConfig"/> defining job counts, operation counts, and per-type distributions.</param>
+        /// <param name="machinesByType">A mapping of machine types to their physical instance IDs.</param>
+        /// <returns>An array of <see cref="FJSSPJobDefinition"/> objects sorted by <see cref="FJSSPJobDefinition.ArrivalTime"/>.</returns>
+        /// <remarks>
+        /// For each operation in a job's sequence, this method assigns independent processing
+        /// times for every eligible machine instance, creating the "flexible" aspect of the FJSSP.
+        /// </remarks>
         public static FJSSPJobDefinition[] Generate(FJSSPConfig config,
                                                     Dictionary<MachineType, List<int>> machinesByType)
         {
@@ -107,16 +110,17 @@ namespace Assets.Scripts.Simulation.Jobs
             return jobs;
         }
 
-        /// @brief Constructs a randomized sequence of machine types for a job's operations.
-        ///
-        /// @param opCount The desired number of operations in the sequence.
-        ///
-        /// @return An array of @c MachineType values representing the production path.
-        ///
-        /// @details Ensures every available @c MachineType appears at least once in the
-        /// sequence to guarantee full coverage during training/simulation. Remaining slots
-        /// are filled with random second visits. The final list is shuffled and "repaired"
-        /// to prevent the same machine type from appearing consecutively.
+        /// <summary>
+        /// Constructs a randomized sequence of machine types for a job's operations.
+        /// </summary>
+        /// <param name="opCount">The desired number of operations in the sequence.</param>
+        /// <returns>An array of <see cref="MachineType"/> values representing the production path.</returns>
+        /// <remarks>
+        /// Ensures every available <c>MachineType</c> appears at least once in the sequence
+        /// to guarantee full coverage. Remaining slots are filled with random second visits.
+        /// The final list is shuffled using Fisher-Yates and repaired to prevent consecutive
+        /// duplicates of the same machine type.
+        /// </remarks>
         private static MachineType[] GenerateOpSequence(int opCount)
         {
             int typeCount = AllTypes.Length;

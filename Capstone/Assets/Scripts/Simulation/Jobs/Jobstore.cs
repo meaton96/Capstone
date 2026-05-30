@@ -4,11 +4,14 @@ using UnityEngine;
 
 namespace Assets.Scripts.Simulation.Jobs
 {
-    /// @brief Central repository for all active JobData instances in the simulation.
-    ///
-    /// @details Acts as a passive data store that translates static job definitions into 
-    /// live runtime trackers. The orchestrator queries and modifies these instances 
-    /// directly to manage the factory lifecycle.
+    /// <summary>
+    /// Central repository for all active <see cref="JobData"/> instances in the simulation.
+    /// </summary>
+    /// <remarks>
+    /// Acts as a passive data store that translates static job definitions into live
+    /// runtime trackers. The orchestrator queries and modifies these instances directly
+    /// to manage the factory lifecycle.
+    /// </remarks>
     public class JobStore : MonoBehaviour
     {
         [Header("Visuals")]
@@ -23,14 +26,16 @@ namespace Assets.Scripts.Simulation.Jobs
 
         public bool IsInitialized = false;
 
-        /// @brief Converts static job definitions into runtime state trackers.
-        ///
-        /// @param definitions An enumerable of @c FJSSPJobDefinition blueprint data.
-        /// @param spawnVisuals Whether to instantiate 3D visuals for each job.
-        ///
-        /// @details Clears existing data and populates the store with fresh @c JobData. 
-        /// If @c spawnVisuals is true, it links each data entry to a newly instantiated 
-        /// @c JobVisual within the designated container.
+        /// <summary>
+        /// Converts static job definitions into runtime state trackers.
+        /// </summary>
+        /// <param name="definitions">An enumerable of <see cref="FJSSPJobDefinition"/> blueprint data.</param>
+        /// <param name="spawnVisuals">Whether to instantiate 3D visuals for each job.</param>
+        /// <remarks>
+        /// Clears existing data and populates the store with fresh <see cref="JobData"/>.
+        /// If <c>spawnVisuals</c> is true, it links each data entry to a newly instantiated
+        /// <see cref="JobVisual"/> within the designated container.
+        /// </remarks>
         public void Initialize(IEnumerable<FJSSPJobDefinition> definitions, bool spawnVisuals)
         {
             allJobs.Clear();
@@ -69,7 +74,9 @@ namespace Assets.Scripts.Simulation.Jobs
             IsInitialized = true;
         }
 
-        /// @brief Destroys all associated @c JobVisual objects and clears the internal list.
+        /// <summary>
+        /// Destroys all associated <see cref="JobVisual"/> objects and clears the internal list.
+        /// </summary>
         public void Cleanup()
         {
             foreach (var job in allJobs)
@@ -83,30 +90,39 @@ namespace Assets.Scripts.Simulation.Jobs
             IsInitialized = false;
         }
 
-        /// @brief Retrieves a specific @c JobData instance by its unique identifier.
-        ///
-        /// @param jobId The unique ID of the job to retrieve.
-        /// @return The @c JobData instance if found; otherwise, @c null.
+        /// <summary>
+        /// Retrieves a specific <see cref="JobData"/> instance by its unique identifier.
+        /// </summary>
+        /// <param name="jobId">The unique ID of the job to retrieve.</param>
+        /// <returns>The <see cref="JobData"/> instance if found; otherwise, <c>null</c>.</returns>
         public JobData Get(int jobId)
         {
             return allJobs.FirstOrDefault(j => j.JobId == jobId);
         }
 
-        /// @brief Finds the first job that requires a routing decision.
+        /// <summary>
+        /// Finds the first job that requires a routing decision.
+        /// </summary>
+        /// <returns>The first <see cref="JobData"/> with state <see cref="JobState.NeedsRouting"/>, or <c>null</c>.</returns>
         public JobData GetNextNeedsRouting()
         {
             return allJobs.FirstOrDefault(j => j.State == JobState.NeedsRouting);
         }
 
-        /// @brief Finds the first job waiting for pickup that has not yet been assigned an AGV.
+        /// <summary>
+        /// Finds the first job waiting for pickup that has not yet been assigned an AGV.
+        /// </summary>
+        /// <returns>The first unassigned <see cref="JobData"/> with state <see cref="JobState.WaitingForPickup"/>, or <c>null</c>.</returns>
         public JobData GetNextUnassignedPickup()
         {
             return allJobs.FirstOrDefault(j => j.State == JobState.WaitingForPickup && j.AssignedAgvId == -1);
         }
 
-        /// @brief Returns a list of job IDs currently queued and ready for processing at a specific machine.
-        ///
-        /// @param machineId The ID of the machine to check.
+        /// <summary>
+        /// Returns a list of job IDs currently queued and ready for processing at a specific machine.
+        /// </summary>
+        /// <param name="machineId">The ID of the machine to check.</param>
+        /// <returns>A list of job IDs with state <see cref="JobState.Queued"/> at the specified machine.</returns>
         public List<int> GetDispatchableJobs(int machineId)
         {
             return allJobs
@@ -115,29 +131,44 @@ namespace Assets.Scripts.Simulation.Jobs
                 .ToList();
         }
 
-        /// @brief Checks if any jobs are currently queued at the specified machine.
+        /// <summary>
+        /// Checks if any jobs are currently queued at the specified machine.
+        /// </summary>
+        /// <param name="machineId">The ID of the machine to check.</param>
+        /// <returns><c>true</c> if any jobs have state <see cref="JobState.Queued"/> at the specified machine.</returns>
         public bool HasDispatchableJob(int machineId)
         {
             return allJobs.Any(j => j.State == JobState.Queued && j.LocationMachineId == machineId);
         }
 
-        /// @brief Determines if all jobs in the simulation have reached the @c Exited state.
+        /// <summary>
+        /// Determines if all jobs in the simulation have reached the <c>Exited</c> state.
+        /// </summary>
+        /// <returns><c>true</c> if all jobs have state <see cref="JobState.Exited"/>; otherwise, <c>false</c>.</returns>
         public bool AreAllExited()
         {
             if (allJobs.Count == 0) return false;
             return allJobs.All(j => j.State == JobState.Exited);
         }
 
-        /// @brief Returns the total count of jobs currently in the specified @c JobState.
+        /// <summary>
+        /// Returns the total count of jobs currently in the specified <see cref="JobState"/>.
+        /// </summary>
+        /// <param name="state">The job state to count.</param>
+        /// <returns>The number of jobs in the specified state.</returns>
         public int CountInState(JobState state)
         {
             return allJobs.Count(j => j.State == state);
         }
 
-        /// @brief Calculates the total remaining processing load for a specific machine.
-        ///
-        /// @param machineId The ID of the machine to evaluate.
-        /// @return The sum of processing times for all jobs currently queued at that machine.
+        /// <summary>
+        /// Calculates the total remaining processing load for a specific machine.
+        /// </summary>
+        /// <param name="machineId">The ID of the machine to evaluate.</param>
+        /// <returns>
+        /// The sum of processing times for all jobs currently queued at the machine,
+        /// plus all jobs committed to the machine but not yet arrived.
+        /// </returns>
         public float GetMachineLoad(int machineId)
         {
             float load = 0f;
@@ -155,7 +186,12 @@ namespace Assets.Scripts.Simulation.Jobs
             return load;
         }
 
-        /// @brief Retrieves the estimated processing time for a specific job on a specific machine.
+        /// <summary>
+        /// Retrieves the estimated processing time for a specific job on a specific machine.
+        /// </summary>
+        /// <param name="jobId">The ID of the job.</param>
+        /// <param name="machineId">The ID of the machine.</param>
+        /// <returns>The processing time in simulation seconds; returns 0 if the job or machine is not found.</returns>
         public float GetProcessingTime(int jobId, int machineId)
         {
             var job = Get(jobId);

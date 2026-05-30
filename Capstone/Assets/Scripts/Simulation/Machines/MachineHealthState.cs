@@ -1,15 +1,15 @@
 namespace Assets.Scripts.Simulation.Machines
 {
-    /// @brief Represents the health lifecycle of a physical machine.
+    /// @brief Represents the health lifecycle state of a physical machine in the simulation.
     ///
-    /// @details Used by @c PhysicalMachine to gate processing, by @c SimulationBridge
+    /// @details Used by @c PhysicalMachine to gate processing availability, by @c SimulationBridge
     /// to filter routing candidates and dispatch decisions, and encoded as a 4th channel
     /// in the 64×64 spatial occupancy tensor for the RL observation.
     ///
-    /// State transitions (driven by @c SimulationBridge, not self-initiated):
-    ///   Operational → Failed        (TTF countdown expires in PhysicalMachine.Update)
-    ///   Failed       → Repairing    (SimulationBridge calls AcknowledgeFailure after job return)
-    ///   Repairing    → Operational  (SimulationBridge calls AcknowledgeRepairComplete)
+    /// State transitions are driven externally by @c SimulationBridge methods, not self-initiated:
+    ///   - Operational → Failed:        TTF countdown expires in @c PhysicalMachine.TickTTF
+    ///   - Failed → Repairing:          @c SimulationBridge calls @c PhysicalMachine.AcknowledgeFailure after job return
+    ///   - Repairing → Operational:     @c SimulationBridge calls @c PhysicalMachine.AcknowledgeRepairComplete
     public enum MachineHealthState
     {
         /// @brief Normal processing state. TTF countdown is running.

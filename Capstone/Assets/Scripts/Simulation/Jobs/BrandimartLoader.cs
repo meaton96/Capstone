@@ -12,26 +12,18 @@ namespace Assets.Scripts.Simulation.Jobs
 {
     /// <summary>
     /// Loads Brandimarte FJSP benchmark instances from JSON and produces
-    /// FJSSPJobDefinition[] + FJSSPConfig that plug directly into the
-    /// existing SimulationBridge pipeline.
-    ///
-    /// Machine mapping: Brandimarte uses generic numbered machines (0..M-1).
-    /// This loader assigns them round-robin across MachineType values:
-    ///   BM 0 → Mill,  BM 1 → Lathe,  BM 2 → Weld,  BM 3 → Inspect,
-    ///   BM 4 → Assemble,  BM 5 → Mill (2nd),  BM 6 → Lathe (2nd), ...
-    ///
-    /// Stochastic calibration:
-    ///   WeibullLambda is derived from instance processing time statistics so
-    ///   that mean TTF is always a safe multiple of mean operation cycle time.
-    ///   "Cycle time" = mean processing time + AGV travel overhead (estimated).
-    ///   This prevents the infinite-loop failure mode where TTF < processing time.
-    ///
-    ///   Disruption regimes:
-    ///     None  — deterministic, no StochasticConfig attached
-    ///     Low   — mean TTF ≈ LOW_TTF_FACTOR  × mean_cycle_time
-    ///     High  — mean TTF ≈ HIGH_TTF_FACTOR × mean_cycle_time
-    ///             (clamped to always exceed max_proc_time + travel overhead)
+    /// FJSSPJobDefinition arrays and FJSSPConfig objects that integrate with
+    /// the SimulationBridge pipeline.
     /// </summary>
+    /// <remarks>
+    /// Machine mapping uses round-robin assignment across MachineType values:
+    /// BM 0 → Mill, BM 1 → Lathe, BM 2 → Weld, BM 3 → Inspect,
+    /// BM 4 → Assemble, BM 5 → Mill (2nd), BM 6 → Lathe (2nd), ...
+    ///
+    /// Stochastic calibration derives WeibullLambda from instance processing
+    /// time statistics so mean TTF is a safe multiple of mean operation cycle
+    /// time, preventing infinite-loop failures where TTF < processing time.
+    /// </remarks>
     public static class BrandimartLoader
     {
         private static readonly MachineType[] AllTypes =
@@ -39,25 +31,27 @@ namespace Assets.Scripts.Simulation.Jobs
 
         // ── Stochastic calibration constants ─────────────────────────────────
 
-        /// @brief Estimated AGV round-trip travel overhead per operation (sim-seconds).
-        /// Pickup transit + dropoff transit. Calibrated from observed ~30s each way.
+        /// <summary>Estimated AGV round-trip travel overhead per operation in simulation seconds.</summary>
         private const float AGV_TRAVEL_OVERHEAD = 60f;
 
-        /// @brief k=1.5 Weibull: mean TTF = lambda × Γ(1 + 1/k) ≈ lambda × 0.9027
+        /// <summary>
+        /// Weibull mean factor for k=1.5: mean TTF = lambda × Γ(1 + 1/k) ≈ lambda × 0.9027.
+        /// </summary>
         private const float WEIBULL_MEAN_FACTOR = 0.9027f;
 
-        /// @brief Low disruption: mean TTF = this multiple of mean cycle time.
+        /// <summary>Low disruption: mean TTF is this multiple of mean cycle time.</summary>
         private const float LOW_TTF_FACTOR = 8f;
 
-        /// @brief High disruption: mean TTF = this multiple of mean cycle time.
-        /// Clamped so mean TTF > max_cycle_time (prevents infinite restart loops).
+        /// <summary>
+        /// High disruption: mean TTF is this multiple of mean cycle time.
+        /// Clamped so mean TTF exceeds max_cycle_time to prevent infinite restart loops.
+        /// </summary>
         private const float HIGH_TTF_FACTOR = 3f;
 
-        /// @brief Repair log-normal parameters. Real-space mean = exp(mu + sigma²/2).
-        /// These are kept proportional to mean processing time so repairs are
-        /// disruptive but not job-blocking.
-        /// RepairMu_low  → mean repair ≈ 0.15 × mean_proc_time
-        /// RepairMu_high → mean repair ≈ 0.25 × mean_proc_time
+        /// <summary>
+        /// Repair log-normal sigma parameter. Repair durations are kept proportional
+        /// to mean processing time so repairs are disruptive but not job-blocking.
+        /// </summary>
         private const float REPAIR_SIGMA = 0.4f;
 
         /// <summary>
@@ -74,21 +68,27 @@ namespace Assets.Scripts.Simulation.Jobs
         // ─────────────────────────────────────────────────────────────────────
 
         /// <summary>
-        /// Returns a config (for SpawnFactory) and a deferred job builder.
-        /// The config will have Stochastic = null (deterministic) by default.
-        /// Call LoadDeferredWithStochastic for stochastic variants.
+        /// Loads a Brandimarte benchmark instance and returns a deferred configuration
+        /// and job builder. Uses deterministic mode (no stochastic disruptions) by default.
         /// </summary>
+        /// <param name="jsonPath">Path to the JSON benchmark file.</param>
+        /// <param name="seed">Random seed for reproducibility.</param>
+        /// <returns>A tuple of FJSSPConfig and a job builder function.</returns>
         public static (FJSSPConfig config,
                         Func<Dictionary<MachineType, List<int>>, FJSSPJobDefinition[]> buildJobs)
             LoadDeferred(string jsonPath, int seed = 42)
             => LoadDeferredInternal(jsonPath, seed, StochasticDisruption.None);
 
         /// <summary>
-        /// Returns a config with a calibrated StochasticConfig attached.
-        /// WeibullLambda and repair parameters are derived from the instance's
-        /// actual processing time distribution so that failures are realistic
-        /// but never produce infinite operation-restart loops.
+        /// Loads a Brandimarte benchmark instance with calibrated stochastic disruptions.
+        /// WeibullLambda and repair parameters are derived from the instance's processing
+        /// time distribution to ensure realistic failure behavior without infinite
+        /// operation-restart loops.
         /// </summary>
+        /// <param name="jsonPath">Path to the JSON benchmark file.</param>
+        /// <param name="disruption">The disruption level (None, Low, or High).</param>
+        /// <param name="seed">Random seed for reproducibility.</param>
+        /// <returns>A tuple of FJSSPConfig and a job builder function.</returns>
         public static (FJSSPConfig config,
                         Func<Dictionary<MachineType, List<int>>, FJSSPJobDefinition[]> buildJobs)
             LoadDeferredWithStochastic(string jsonPath, StochasticDisruption disruption,
@@ -99,6 +99,13 @@ namespace Assets.Scripts.Simulation.Jobs
         //  Internal loader
         // ─────────────────────────────────────────────────────────────────────
 
+        /// <summary>
+        /// Internal loader that parses JSON and constructs the configuration and deferred job builder.
+        /// </summary>
+        /// <param name="jsonPath">Path to the JSON benchmark file.</param>
+        /// <param name="seed">Random seed for reproducibility.</param>
+        /// <param name="disruption">The stochastic disruption level.</param>
+        /// <returns>A tuple of FJSSPConfig and a job builder function.</returns>
         private static (FJSSPConfig config,
                          Func<Dictionary<MachineType, List<int>>, FJSSPJobDefinition[]> buildJobs)
             LoadDeferredInternal(string jsonPath, int seed, StochasticDisruption disruption)
@@ -118,10 +125,15 @@ namespace Assets.Scripts.Simulation.Jobs
             return (config, machinesByType => BuildJobs(json, machinesByType));
         }
 
-        // ─────────────────────────────────────────────────────────────────────
-        //  Config builder
-        // ─────────────────────────────────────────────────────────────────────
-
+        /// <summary>
+        /// Builds the FJSSPConfig from JSON content, including stochastic parameter
+        /// calibration based on processing time statistics.
+        /// </summary>
+        /// <param name="json">Raw JSON string of the benchmark instance.</param>
+        /// <param name="name">Benchmark name (derived from filename).</param>
+        /// <param name="seed">Random seed for reproducibility.</param>
+        /// <param name="disruption">The stochastic disruption level.</param>
+        /// <returns>A configured FJSSPConfig, or null on failure.</returns>
         private static FJSSPConfig BuildConfig(string json, string name, int seed,
                                                 StochasticDisruption disruption)
         {
@@ -137,7 +149,7 @@ namespace Assets.Scripts.Simulation.Jobs
             for (int bm = 0; bm < numMachines; bm++)
                 typeLayout[bm] = AllTypes[bm % numTypes];
             int totalOps = 0;
-            // ── Scan processing times ─────────────────────────────────────────
+            // ── Scan processing times to derive statistics ────────────────────
             int minOps = int.MaxValue, maxOps = 0;
             float minProc = float.MaxValue, maxProc = 0f;
             double sumProc = 0.0;
@@ -161,7 +173,7 @@ namespace Assets.Scripts.Simulation.Jobs
 
             float meanProc = countProc > 0 ? (float)(sumProc / countProc) : maxProc;
 
-            // ── Derive stochastic parameters ──────────────────────────────────
+            // ── Derive stochastic parameters from processing statistics ───────
             StochasticConfig stochastic = disruption == StochasticDisruption.None
                 ? null
                 : BuildStochasticConfig(disruption, meanProc, maxProc);
@@ -197,13 +209,14 @@ namespace Assets.Scripts.Simulation.Jobs
             };
         }
 
-        // ─────────────────────────────────────────────────────────────────────
-        //  Stochastic parameter derivation
-        // ─────────────────────────────────────────────────────────────────────
-
         /// <summary>
         /// Derives calibrated stochastic parameters from instance processing statistics.
-        ///
+        /// </summary>
+        /// <param name="disruption">The disruption level (None, Low, or High).</param>
+        /// <param name="meanProc">Mean processing time across all operations.</param>
+        /// <param name="maxProc">Maximum processing time across all operations.</param>
+        /// <returns>A calibrated StochasticConfig, or null if disruption is None.</returns>
+        /// <remarks>
         /// Core constraint: mean TTF must exceed max_cycle_time to prevent infinite
         /// operation restart loops. max_cycle_time = maxProc + AGV_TRAVEL_OVERHEAD.
         ///
@@ -214,7 +227,7 @@ namespace Assets.Scripts.Simulation.Jobs
         ///
         /// Repair duration is proportional to mean processing time so that repairs
         /// are a meaningful disruption but not longer than typical operations.
-        /// </summary>
+        /// </remarks>
         private static StochasticConfig BuildStochasticConfig(
             StochasticDisruption disruption, float meanProc, float maxProc)
         {
@@ -255,10 +268,12 @@ namespace Assets.Scripts.Simulation.Jobs
             };
         }
 
-        // ─────────────────────────────────────────────────────────────────────
-        //  Job builder (unchanged)
-        // ─────────────────────────────────────────────────────────────────────
-
+        /// <summary>
+        /// Builds FJSSPJobDefinition arrays from JSON content and machine type mappings.
+        /// </summary>
+        /// <param name="json">Raw JSON string of the benchmark instance.</param>
+        /// <param name="machinesByType">Mapping of MachineType to runtime machine IDs.</param>
+        /// <returns>An array of configured FJSSPJobDefinition objects.</returns>
         public static FJSSPJobDefinition[] BuildJobs(
             string json,
             Dictionary<MachineType, List<int>> machinesByType)

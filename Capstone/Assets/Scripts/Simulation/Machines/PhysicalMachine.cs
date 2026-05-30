@@ -31,52 +31,87 @@ namespace Assets.Scripts.Simulation.Machines
     {
         // ── Identity ─────────────────────────────────────────────────────────
 
+        /// @brief The unique identifier for this machine instance.
         public int MachineId { get; private set; }
+
+        /// @brief The primary functional type of this machine.
         public MachineType PrimaryType { get; private set; }
+
+        /// @brief The set of machine types this machine is capable of processing.
         public HashSet<MachineType> Capabilities { get; private set; }
+
+        /// @brief Checks whether this machine can process the specified operation type.
+        ///
+        /// @param opType The @c MachineType to check.
+        /// @return True if the machine's @c Capabilities set contains @p opType.
         public bool CanProcess(MachineType opType) => Capabilities.Contains(opType);
 
-        // ── Normal processing state (unchanged) ──────────────────────────────
+        // ── Normal processing state ──────────────────────────────────────────
 
+        /// @brief True when the machine is idle and available to accept new jobs.
         public bool IsIdle { get; private set; } = true;
+
+        /// @brief Set to true when the active job is complete. Polled by @c SimulationBridge.
         public bool FinishedFlag { get; private set; }
+
+        /// @brief The ID of the job currently being processed, or -1 if idle.
         public int ActiveJobId { get; private set; } = -1;
+
+        /// @brief Set to true when the active job is nearing completion (within @c PreDispatchLeadTime).
         public bool AlmostDoneFlag { get; private set; }
+
+        /// @brief The ID of the job that is nearing completion.
         public int AlmostDoneJobId { get; private set; } = -1;
 
+        /// @brief Remaining time to complete the current job.
         private float remainingTime;
+
+        /// @brief Total time required for the current job.
         private float totalDuration;
+
+        /// @brief True if the @c AlmostDoneFlag has already been fired for the current job.
         private bool almostDoneFired;
 
         // ── Health state machine ──────────────────────────────────────────────
 
         /// @brief Current health state of the machine.
-        /// Encoded as a 4th channel in the spatial occupancy tensor:
+        ///
+        /// @details Encoded as a 4th channel in the spatial occupancy tensor:
         ///   Operational = 0.0,  Repairing = 0.5,  Failed = 1.0
         public MachineHealthState HealthState { get; private set; } = MachineHealthState.Operational;
 
-        /// @brief Set when the TTF countdown expires. Polled by @c SimulationBridge,
-        /// which handles job return before calling @c AcknowledgeFailure().
+        /// @brief Set to true when the time-to-failure (TTF) countdown expires.
+        ///
+        /// @details Polled by @c SimulationBridge, which handles job return and AGV
+        /// re-routing before calling @c AcknowledgeFailure() to transition to Repairing.
         public bool FailedFlag { get; private set; }
 
-        /// @brief Set when the repair countdown reaches zero. Polled by @c SimulationBridge,
-        /// which calls @c AcknowledgeRepairComplete() to return to Operational.
+        /// @brief Set to true when the repair countdown reaches zero.
+        ///
+        /// @details Polled by @c SimulationBridge, which calls @c AcknowledgeRepairComplete()
+        /// to transition back to Operational.
         public bool RepairCompleteFlag { get; private set; }
 
-        /// @brief Repair duration sampled at the moment of failure (log-normal).
-        /// Available immediately once @c FailedFlag is raised, so the observation
+        /// @brief Repair duration sampled at the moment of failure using a log-normal distribution.
+        ///
+        /// @details Available immediately once @c FailedFlag is raised, so the observation
         /// builder can read it before @c AcknowledgeFailure() is called.
         public float SampledRepairDuration { get; private set; }
 
-        /// @brief Remaining repair time. Counts down in @c Update while Repairing.
-        /// Normalise against @c SampledRepairDuration for the Global Scalars observation.
+        /// @brief Remaining repair time in seconds. Counts down in @c Update while @c HealthState is Repairing.
+        ///
+        /// @details Normalize against @c SampledRepairDuration for the Global Scalars observation channel.
         public float RemainingRepairTime { get; private set; }
 
         /// @brief True when this machine can accept new work.
-        /// Use this to filter routing candidates and dispatch decisions in SimulationBridge.
+        ///
+        /// @details Use this property to filter routing candidates and dispatch decisions
+        /// in @c SimulationBridge. Returns false when the machine is Failed or Repairing.
         public bool IsAvailableForWork => HealthState == MachineHealthState.Operational;
 
         /// @brief Returns the health state encoded as a float for the spatial occupancy tensor.
+        ///
+        /// @details Operational → 0.0f, Repairing → 0.5f, Failed → 1.0f.
         public float HealthStateEncoded => HealthState switch
         {
             MachineHealthState.Failed => 1.0f,
@@ -84,27 +119,36 @@ namespace Assets.Scripts.Simulation.Machines
             _ => 0.0f,
         };
 
-
-
+        /// @brief Time-to-failure (TTF) countdown in seconds. When at @c float.MaxValue,
+        /// the machine is effectively failure-free.
         private float _ttfCountdown = float.MaxValue;
+
+        /// @brief Accumulated operational time since the last repair completion.
         private float _ageSinceLastRepair = 0f;
 
-        // ── Visual & conveyor references (unchanged) ──────────────────────────
+        // ── Visual & conveyor references ──────────────────────────────────────
 
+        /// @brief Serialized references to connected conveyor belts (used for job visual management).
         [Header("Conveyor Belts (visual only)")]
         [SerializeField] private ConveyorBelt incomingConveyor;
         [SerializeField] private ConveyorBelt outgoingConveyor;
         [SerializeField] private ConveyorBelt secondaryIncomingConveyor;
         [SerializeField] private ConveyorBelt secondaryOutgoingConveyor;
 
+        /// @brief Reference to the paired visual layer component.
         private MachineVisual visualLayer;
 
         // ── Initialisation ────────────────────────────────────────────────────
 
-        /// @brief Sets the machine identity and resets the visual layer.
+        /// @brief Initializes the machine with its identity, capabilities, and visual layer.
         ///
-        /// @param id   Unique identifier for the machine instance.
-        /// @param type The functional @c MachineType (e.g., Mill, Lathe).
+        /// @details Resets all processing and health state flags to their initial values.
+        /// The capabilities set defaults to a single-element set containing @p primary
+        /// if no explicit capabilities are provided.
+        ///
+        /// @param id Unique identifier for the machine instance.
+        /// @param primary The functional @c MachineType (e.g., Mill, Lathe).
+        /// @param capabilities Optional set of additional machine types this machine can process.
         public void Initialize(int id, MachineType primary,
                         IEnumerable<MachineType> capabilities = null)
         {
@@ -128,9 +172,11 @@ namespace Assets.Scripts.Simulation.Machines
             ClearConveyors();
         }
 
-        // Add inside PhysicalMachine.cs, inside #if UNITY_EDITOR guard
 #if UNITY_EDITOR
-        /// @brief Forces an immediate failure. Editor/testing use only.
+        /// @brief Forces an immediate machine failure for editor testing.
+        ///
+        /// @details Sets the TTF countdown to zero so that @c TickTTF fires on the
+        /// next Update. Only operates when the machine is currently Operational.
         public void DEBUG_ForceFailure()
         {
             if (HealthState != MachineHealthState.Operational) return;
@@ -138,15 +184,16 @@ namespace Assets.Scripts.Simulation.Machines
         }
 #endif
 
-        /// @brief Seeds this machine's TTF countdown for the current episode.
+        /// @brief Seeds this machine's time-to-failure (TTF) countdown for the current episode.
         ///
         /// @details Called by @c SimulationBridge.StartEpisode() after the job store
-        /// is initialised. Applies initial age randomisation per the roadmap: each
-        /// machine starts at a random point in its first wear-out cycle rather than
-        /// all failing simultaneously after one full TTF.
+        /// is initialized. Applies initial age randomization: each machine starts at a
+        /// random point in its first wear-out cycle rather than all failing simultaneously
+        /// after one full TTF.
         ///
-        /// When @c MachineFailuresEnabled is false the countdown is set to
-        /// @c float.MaxValue, making the machine effectively immortal for that episode.
+        /// When @c StochasticEventManager.Instance.MachineFailuresEnabled is false, the
+        /// countdown is set to @c float.MaxValue, making the machine effectively immortal
+        /// for that episode.
         public void InitializeStochastic()
         {
             // Reset health to operational in case this is a new episode after a previous
@@ -172,13 +219,17 @@ namespace Assets.Scripts.Simulation.Machines
             _ageSinceLastRepair = fullTtf - _ttfCountdown;
         }
 
-        // ── Processing control (unchanged public API) ─────────────────────────
+        // ── Processing control ────────────────────────────────────────────────
 
-        /// @brief Commences the processing of a specific job for a defined duration.
+        /// @brief Begins processing a specific job for a defined duration.
         ///
-        /// @param jobId    The identifier of the job being processed.
+        /// @details Removes the job from any incoming conveyor, snaps the visual to
+        /// the machine position, and notifies the visual layer. The processing timer
+        /// begins counting down in @c TickProcessing.
+        ///
+        /// @param jobId The identifier of the job being processed.
         /// @param duration The time in simulation seconds to complete the operation.
-        /// @param visual   The 3D representation of the job to be snapped to the machine.
+        /// @param visual The 3D representation of the job to be snapped to the machine.
         public void StartJob(int jobId, float duration, JobVisual visual = null)
         {
             ActiveJobId = jobId;
@@ -200,7 +251,10 @@ namespace Assets.Scripts.Simulation.Machines
             visualLayer.BeginOperation(jobId, Time.time, duration);
         }
 
-        /// @brief Resets the finished status after the orchestrator acknowledges completion.
+        /// @brief Clears the finished flag and resets processing state after the orchestrator acknowledges completion.
+        ///
+        /// @details Called by @c SimulationBridge after a job is removed from the machine.
+        /// Resets @c IsIdle, @c ActiveJobId, and notifies the visual layer.
         public void ClearFinished()
         {
             FinishedFlag = false;
@@ -209,7 +263,9 @@ namespace Assets.Scripts.Simulation.Machines
             visualLayer?.CompleteOperation(-1);
         }
 
-        /// @brief Resets the pre-dispatch signaling flags.
+        /// @brief Clears the pre-dispatch signaling flags after the near-complete job has been handled.
+        ///
+        /// @details Called by @c SimulationBridge after processing the @c AlmostDoneFlag.
         public void ClearAlmostDone()
         {
             AlmostDoneFlag = false;
@@ -218,11 +274,14 @@ namespace Assets.Scripts.Simulation.Machines
 
         // ── Failure acknowledgement (called by SimulationBridge) ─────────────
 
-        /// @brief Transitions from Failed → Repairing.
+        /// @brief Transitions the machine from Failed to Repairing state.
         ///
         /// @details Called by @c SimulationBridge after it has handled job return
-        /// and AGV re-routing. The repair countdown (already sampled) begins here.
-        /// The machine is left idle but unavailable for new work until repair completes.
+        /// and AGV re-routing. The repair countdown (already sampled into @c SampledRepairDuration)
+        /// begins here. The machine is left idle but unavailable for new work until repair completes.
+        ///
+        /// @post @c FailedFlag is cleared, @c HealthState is set to Repairing,
+        /// and @c visualLayer.BeginRepair() is called with the sampled duration.
         public void AcknowledgeFailure()
         {
             FailedFlag = false;
@@ -245,11 +304,14 @@ namespace Assets.Scripts.Simulation.Machines
             SimLogger.Medium($"[PhysicalMachine] Machine [{MachineId}] begin repair");
         }
 
-        /// @brief Transitions from Repairing → Operational and arms the next TTF countdown.
+        /// @brief Transitions the machine from Repairing to Operational and arms the next TTF countdown.
         ///
         /// @details Called by @c SimulationBridge after detecting @c RepairCompleteFlag.
         /// The machine's age is considered zero post-repair, so a fresh Weibull TTF
         /// is sampled rather than resuming accumulated lifetime.
+        ///
+        /// @post @c RepairCompleteFlag is cleared, @c HealthState is set to Operational,
+        /// @c _ageSinceLastRepair is reset to zero, and a new TTF is sampled.
         public void AcknowledgeRepairComplete()
         {
             RepairCompleteFlag = false;
@@ -268,9 +330,15 @@ namespace Assets.Scripts.Simulation.Machines
             visualLayer?.EndRepair();
         }
 
-        // ── Conveyor helpers (unchanged) ──────────────────────────────────────
+        // ── Conveyor helpers ──────────────────────────────────────────────────
 
-        /// @brief Places a job visual onto the most appropriate incoming conveyor belt.
+        /// @brief Places a job visual onto the most appropriate available incoming conveyor belt.
+        ///
+        /// @details Prefers @ref incomingConveyor, falls back to @ref secondaryIncomingConveyor.
+        /// The job visual is flagged as being on a conveyor.
+        ///
+        /// @param jobId The ID of the job to place.
+        /// @param visual The visual component to enqueue.
         public void PlaceOnIncoming(int jobId, JobVisual visual)
         {
             ConveyorBelt belt = PickIncomingBelt();
@@ -281,7 +349,11 @@ namespace Assets.Scripts.Simulation.Machines
             }
         }
 
-        /// @brief Removes a job from the outgoing belt systems.
+        /// @brief Removes a job from the outgoing conveyor belt systems.
+        ///
+        /// @details Checks both @ref outgoingConveyor and @ref secondaryOutgoingConveyor.
+        ///
+        /// @param jobId The ID of the job to remove.
         public void RemoveFromOutgoing(int jobId)
         {
             if (outgoingConveyor != null && outgoingConveyor.Contains(jobId))
@@ -290,7 +362,13 @@ namespace Assets.Scripts.Simulation.Machines
                 secondaryOutgoingConveyor.RemoveJob(jobId);
         }
 
-        /// @brief Transfers a finished job visual from the machine center to an outgoing belt.
+        /// @brief Transfers a finished job visual from the machine center to an outgoing conveyor belt.
+        ///
+        /// @details Prefers @ref outgoingConveyor, falls back to @ref secondaryOutgoingConveyor.
+        /// The job visual is flagged as being on a conveyor.
+        ///
+        /// @param jobId The ID of the job to place.
+        /// @param visual The visual component to enqueue.
         public void PlaceOnOutgoing(int jobId, JobVisual visual)
         {
             ConveyorBelt belt = PickOutgoingBelt();
@@ -302,6 +380,11 @@ namespace Assets.Scripts.Simulation.Machines
         }
 
         /// @brief Returns the world position where AGVs should drop off jobs for this machine.
+        ///
+        /// @details Uses the input conveyor's @c InputEndPosition if available,
+        /// otherwise returns a default position behind the machine.
+        ///
+        /// @return The world-space drop-off position for AGVs.
         public Vector3 GetDropoffPosition()
         {
             ConveyorBelt belt = PickIncomingBelt();
@@ -309,7 +392,12 @@ namespace Assets.Scripts.Simulation.Machines
             return transform.position + transform.TransformDirection(new Vector3(-2.5f, 0.5f, 0f));
         }
 
-        /// @brief Returns the world position where AGVs should pick up jobs from this machine.
+        /// @brief Returns the world position where AGVs should pick up completed jobs from this machine.
+        ///
+        /// @details Uses the outgoing conveyor's @c OutputEndPosition if available,
+        /// otherwise returns a default position in front of the machine.
+        ///
+        /// @return The world-space pickup position for AGVs.
         public Vector3 GetPickupPosition()
         {
             if (outgoingConveyor != null) return outgoingConveyor.OutputEndPosition;
@@ -318,15 +406,21 @@ namespace Assets.Scripts.Simulation.Machines
         }
 
         /// @brief Updates the numerical UI labels for the machine's current queue state.
+        ///
+        /// @param incomingCount The number of jobs waiting to enter this machine.
+        /// @param outgoingCount The number of jobs waiting at the machine's output.
         public void RefreshQueueLabels(int incomingCount, int outgoingCount)
         {
             visualLayer.UpdateIncomingQueueLabel(incomingCount);
             visualLayer.UpdateOutgoingQueueLabel(outgoingCount);
         }
 
-        // ── Forces the machine into an idle state and clears all belt visuals ──
+        // ── Reset ─────────────────────────────────────────────────────────────
 
-        /// @brief Full reset for episode teardown. Resets health state to Operational.
+        /// @brief Performs a full reset of the machine for episode teardown.
+        ///
+        /// @details Resets all processing state, health state, and conveyor belts.
+        /// The machine returns to Operational/Idle with an infinite TTF countdown.
         public void FullReset()
         {
             IsIdle = true;
@@ -344,6 +438,7 @@ namespace Assets.Scripts.Simulation.Machines
 
         // ── Update ────────────────────────────────────────────────────────────
 
+        /// @brief Unity Update loop. Ticks all time-based countdowns each frame.
         private void Update()
         {
             TickTTF();
@@ -351,7 +446,7 @@ namespace Assets.Scripts.Simulation.Machines
             TickRepair();
         }
 
-        /// @brief Decrements the TTF countdown while the machine is Operational.
+        /// @brief Decrements the time-to-failure (TTF) countdown while the machine is Operational.
         ///
         /// @details Runs regardless of whether the machine is idle or processing —
         /// a machine can fail mid-job or while idle. When the countdown expires:
@@ -389,8 +484,10 @@ namespace Assets.Scripts.Simulation.Machines
 
         /// @brief Advances the active job's processing timer when Operational and busy.
         ///
-        /// @details Unchanged from the original implementation; guarded by health state
-        /// so processing halts the frame a failure occurs.
+        /// @details Decrements @c remainingTime, updates the visual progress bar, fires
+        /// the @c AlmostDoneFlag when within @c PreDispatchLeadTime, and sets @c FinishedFlag
+        /// when processing completes. Guarded by health state so processing halts
+        /// the frame a failure occurs.
         private void TickProcessing()
         {
             if (HealthState != MachineHealthState.Operational) return;
@@ -412,7 +509,10 @@ namespace Assets.Scripts.Simulation.Machines
                 FinishedFlag = true;
         }
 
-        /// @brief Decrements the repair countdown while the machine is Repairing.
+        /// @brief Decrements the repair countdown while the machine is in Repairing state.
+        ///
+        /// @details Updates the visual progress bar to show repair progress and sets
+        /// @c RepairCompleteFlag when the countdown reaches zero.
         private void TickRepair()
         {
             if (HealthState != MachineHealthState.Repairing) return;
@@ -431,8 +531,11 @@ namespace Assets.Scripts.Simulation.Machines
             }
         }
 
-        // ── Private helpers (unchanged) ───────────────────────────────────────
+        // ── Private helpers ───────────────────────────────────────────────────
 
+        /// @brief Removes a job from any incoming conveyor belt.
+        ///
+        /// @param jobId The ID of the job to remove.
         private void RemoveFromAnyIncoming(int jobId)
         {
             if (incomingConveyor != null && incomingConveyor.Contains(jobId))
@@ -441,6 +544,12 @@ namespace Assets.Scripts.Simulation.Machines
                 secondaryIncomingConveyor.RemoveJob(jobId);
         }
 
+        /// @brief Picks the most appropriate incoming conveyor belt.
+        ///
+        /// @details Prefers @ref incomingConveyor, falls back to @ref secondaryIncomingConveyor.
+        /// Returns null if neither is assigned.
+        ///
+        /// @return The selected conveyor belt, or null if none available.
         private ConveyorBelt PickIncomingBelt()
         {
             if (incomingConveyor != null && !incomingConveyor.IsFull) return incomingConveyor;
@@ -448,6 +557,12 @@ namespace Assets.Scripts.Simulation.Machines
             return incomingConveyor ?? secondaryIncomingConveyor;
         }
 
+        /// @brief Picks the most appropriate outgoing conveyor belt.
+        ///
+        /// @details Prefers @ref outgoingConveyor, falls back to @ref secondaryOutgoingConveyor.
+        /// Returns null if neither is assigned.
+        ///
+        /// @return The selected conveyor belt, or null if none available.
         private ConveyorBelt PickOutgoingBelt()
         {
             if (outgoingConveyor != null && !outgoingConveyor.IsFull) return outgoingConveyor;
@@ -455,6 +570,7 @@ namespace Assets.Scripts.Simulation.Machines
             return outgoingConveyor ?? secondaryOutgoingConveyor;
         }
 
+        /// @brief Clears all connected conveyor belts.
         private void ClearConveyors()
         {
             incomingConveyor?.Clear();

@@ -7,24 +7,39 @@ using Assets.Scripts.Simulation.Logging;
 namespace Assets.Scripts.Simulation.Stochastic
 {
     /// <summary>
-    /// Headless unit tests for StochasticEventManager distribution correctness.
+    /// Headless unit tests for validating StochasticEventManager distribution correctness.
     ///
-    /// Run from command line:
+    /// This class performs statistical validation by generating N=50,000 samples per
+    /// distribution and comparing empirical statistics (mean, standard deviation) against
+    /// their theoretical values within a configurable tolerance band (default 3%).
+    ///
+    /// <para>Usage — command line:</para>
     ///   ./capstone.exe -batchmode -nographics -validatestochastic
     ///
-    /// Generates N=50,000 samples per distribution, checks mean, std dev, and
-    /// skewness against theoretical values within configurable tolerance bands.
-    /// Exits with code 0 on pass, 1 on any failure.
+    /// <para>Exit codes:</para>
+    ///   0 — all tests passed
+    ///   1 — one or more tests failed (see log for details)
     ///
-    /// Attach to any persistent GameObject. Activate only when -validatestochastic
-    /// CLI flag is present so it does not interfere with normal batch runs.
+    /// <para>Integration notes:</para>
+    /// Attach to any persistent GameObject. The validator activates only when the
+    /// -validatestochastic CLI flag is present, ensuring no interference with normal
+    /// batch simulation runs.
     /// </summary>
     public class StochasticDistributionValidator : MonoBehaviour
     {
+        /// <summary>Number of Monte-Carlo samples per distribution test.</summary>
         private const int N = 50_000;
-        private const float TOLERANCE = 0.03f;   // 3% tolerance on mean/std
+
+        /// <summary>Relative error tolerance (3%) for mean and standard deviation checks.</summary>
+        private const float TOLERANCE = 0.03f;
+
+        /// <summary>Overall test result — true when all individual checks have passed.</summary>
         private bool _passed;
 
+        /// <summary>
+        /// Entry point — checks for the -validatestochastic CLI flag and launches
+        /// the test suite if present.
+        /// </summary>
         private void Start()
         {
             if (!HasCLIFlag("-validatestochastic")) return;
@@ -33,14 +48,18 @@ namespace Assets.Scripts.Simulation.Stochastic
             StartCoroutine(RunAllTests());
         }
 
+        /// <summary>
+        /// Executes the full test suite sequentially. Tests each stochastic distribution
+        /// (Weibull, LogNormal, Exponential) and verifies seed reproducibility.
+        /// </summary>
+        /// <returns>Coroutine that completes when all tests finish.</returns>
         private IEnumerator RunAllTests()
         {
             _passed = true;
 
-            // ── Weibull(k=1.5, λ=900) ────────────────────────────────────────
-            // Theoretical mean = λ × Γ(1 + 1/k) = 900 × Γ(1.667) ≈ 900 × 0.9027 ≈ 812.4
-            // Theoretical std  = λ × sqrt(Γ(1+2/k) − Γ²(1+1/k))
-            //                  = 900 × sqrt(Γ(2.333) − 0.9027²)  ≈ 900 × sqrt(1.190 − 0.815) ≈ 551.6
+            // Test 1: Weibull(k=1.5, λ=900) — machine time-to-failure
+            // Theoretical mean = λ × Γ(1 + 1/k) = 900 × Γ(1.667) ≈ 812.4
+            // Theoretical std  = λ × sqrt(Γ(1+2/k) − Γ²(1+1/k)) ≈ 551.6
             yield return null;
             {
                 var cfg = MakeConfig(machineFailures: true, weibullK: 1.5f, weibullLambda: 900f);
@@ -62,10 +81,9 @@ namespace Assets.Scripts.Simulation.Stochastic
 
             yield return null;
 
-            // ── LogNormal(μ=4.0, σ=0.5) ──────────────────────────────────────
+            // Test 2: LogNormal(μ=4.0, σ=0.5) — machine repair duration
             // Theoretical mean = exp(μ + σ²/2) = exp(4.125) ≈ 61.9
-            // Theoretical std  = sqrt((exp(σ²) − 1) × exp(2μ + σ²))
-            //                  ≈ sqrt(0.284 × 3834)  ≈ 33.0
+            // Theoretical std  = sqrt((exp(σ²) − 1) × exp(2μ + σ²)) ≈ 33.0
             {
                 var cfg = MakeConfig(machineFailures: true);
                 StochasticEventManager.Instance.Initialize(cfg);
@@ -86,8 +104,8 @@ namespace Assets.Scripts.Simulation.Stochastic
 
             yield return null;
 
-            // ── Poisson inter-arrival (λ=0.005) ──────────────────────────────
-            // Exponential(λ=0.005): mean = 1/λ = 200, std = 1/λ = 200
+            // Test 3: Exponential(λ=0.005) — job inter-arrival time
+            // Theoretical mean = 1/λ = 200, std = 1/λ = 200
             {
                 var cfg = MakeConfig(dynamicArrivals: true, arrivalLambda: 0.005f);
                 StochasticEventManager.Instance.Initialize(cfg);
@@ -108,11 +126,11 @@ namespace Assets.Scripts.Simulation.Stochastic
 
             yield return null;
 
-            // ── Seed reproducibility check ────────────────────────────────────
-            // Two managers initialised with the same seed must produce identical streams.
+            // Test 4: Seed reproducibility — two managers with the same seed
+            // must produce identical sample streams.
             {
                 var cfg1 = MakeConfig(machineFailures: true);
-                var cfg2 = MakeConfig(machineFailures: true);  // same seed=99
+                var cfg2 = MakeConfig(machineFailures: true);
 
                 float[] stream1 = new float[100];
                 float[] stream2 = new float[100];
@@ -138,9 +156,9 @@ namespace Assets.Scripts.Simulation.Stochastic
                 }
             }
 
-            // ── Summary ───────────────────────────────────────────────────────
             yield return null;
 
+            // Report final results and exit with appropriate code.
             if (_passed)
             {
                 SimLogger.Low("[DistValidator] All tests PASSED.");
@@ -153,8 +171,14 @@ namespace Assets.Scripts.Simulation.Stochastic
             }
         }
 
-        // ── Helpers ──────────────────────────────────────────────────────────
-
+        /// <summary>
+        /// Evaluates a single statistical metric (mean, std, etc.) by comparing an
+        /// empirical value against its theoretical expectation. Reports PASS or FAIL
+        /// based on relative error within the configured tolerance.
+        /// </summary>
+        /// <param name="label">Descriptive name of the statistic (e.g., "Weibull(1.5,900) mean").</param>
+        /// <param name="actual">The empirically observed value.</param>
+        /// <param name="expected">The theoretical expected value.</param>
         private void CheckStat(string label, double actual, double expected)
         {
             double relErr = Math.Abs(actual - expected) / expected;
@@ -173,6 +197,21 @@ namespace Assets.Scripts.Simulation.Stochastic
             }
         }
 
+        /// <summary>
+        /// Constructs a fully-populated FJSSPConfig for test scenarios with
+        /// configurable stochastic parameters. All parameters default to sensible
+        /// test values so callers need only override what they need.
+        /// </summary>
+        /// <param name="machineFailures">Enable or disable machine failure simulation.</param>
+        /// <param name="weibullK">Weibull shape parameter k (default 1.5).</param>
+        /// <param name="weibullLambda">Weibull scale parameter λ for machines (default 900).</param>
+        /// <param name="repairLogMu">LogNormal μ for machine repair durations (default 4.0).</param>
+        /// <param name="repairLogSigma">LogNormal σ for machine repair durations (default 0.5).</param>
+        /// <param name="agvFailures">Enable or disable AGV failure simulation.</param>
+        /// <param name="dynamicArrivals">Enable or disable dynamic job arrivals.</param>
+        /// <param name="arrivalLambda">Exponential rate λ for inter-arrival times (default 0.005).</param>
+        /// <param name="seed">RNG seed for reproducibility (default 99).</param>
+        /// <returns>A configured FJSSPConfig ready for StochasticEventManager.Initialize().</returns>
         private static FJSSPConfig MakeConfig(
             bool machineFailures = false,
             float weibullK = 1.5f,
@@ -201,6 +240,11 @@ namespace Assets.Scripts.Simulation.Stochastic
             };
         }
 
+        /// <summary>
+        /// Checks whether a specific CLI flag is present in the process command-line arguments.
+        /// </summary>
+        /// <param name="flag">The flag string to search for (case-insensitive).</param>
+        /// <returns>True if the flag is found in the arguments.</returns>
         private static bool HasCLIFlag(string flag)
         {
             foreach (string arg in Environment.GetCommandLineArgs())

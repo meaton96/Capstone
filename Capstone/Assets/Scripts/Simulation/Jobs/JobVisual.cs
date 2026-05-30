@@ -2,9 +2,13 @@ using UnityEngine;
 
 namespace Assets.Scripts.Simulation.Jobs
 {
-    /// @brief Visual token representing a single job on the factory floor.
-    /// @details Smoothly interpolates toward targets set by the JobManager. Movement ownership
+    /// <summary>
+    /// Visual token representing a single job on the factory floor.
+    /// </summary>
+    /// <remarks>
+    /// Smoothly interpolates toward targets set by the JobManager. Movement ownership
     /// switches between self-driven (lerp), carried (parented to AGV), or conveyor-driven.
+    /// </remarks>
     public class JobVisual : MonoBehaviour
     {
         [SerializeField] private float moveSpeed = 2f;
@@ -34,10 +38,15 @@ namespace Assets.Scripts.Simulation.Jobs
 
         //public JobLocation jobLocation;
 
-        /// @brief Initializes the visual token and caches rendering components.
-        /// @param id Zero-based job index.
-        /// @param opCount Total number of operations this job must complete.
-        /// @post State is set to NeedsRouting and targetPosition matches current transform.
+        /// <summary>
+        /// Initializes the visual token and caches rendering components.
+        /// </summary>
+        /// <param name="id">Zero-based job index.</param>
+        /// <param name="opCount">Total number of operations this job must complete.</param>
+        /// <remarks>
+        /// After initialization, the state is set to <see cref="JobState.NeedsRouting"/>
+        /// and the target position matches the current transform position.
+        /// </remarks>
         public void Initialize(int id, int opCount)
         {
             jobId = id;
@@ -50,9 +59,14 @@ namespace Assets.Scripts.Simulation.Jobs
             SetState(JobState.NeedsRouting);
         }
 
-        /// @brief Updates the token's tint to reflect its current lifecycle state.
-        /// @details Uses a MaterialPropertyBlock to update the "_Color" property without creating material instances.
-        /// @param state The target @ref JobState.
+        /// <summary>
+        /// Updates the token's tint to reflect its current lifecycle state.
+        /// </summary>
+        /// <param name="state">The target <see cref="JobState"/>.</param>
+        /// <remarks>
+        /// Uses a <see cref="MaterialPropertyBlock"/> to update the "_Color" property
+        /// without creating material instances, preserving GPU instancing.
+        /// </remarks>
         public void SetState(JobState state)
         {
             currentState = state;
@@ -74,11 +88,13 @@ namespace Assets.Scripts.Simulation.Jobs
             meshRenderer.SetPropertyBlock(propBlock);
         }
 
-        /// @brief Defines a destination for the smooth interpolation logic.
-        /// @details If the job is carried or on a conveyor, this request is ignored.
-        /// @param worldPos The target global coordinates.
-        /// @pre @ref isCarried and @ref isOnConveyor must be false.
-        /// @post @ref travelProgress is reset to 0 to initiate movement.
+        /// <summary>
+        /// Defines a destination for the smooth interpolation logic.
+        /// </summary>
+        /// <param name="worldPos">The target global coordinates.</param>
+        /// <remarks>
+        /// If the job is carried or on a conveyor, this request is ignored.
+        /// </remarks>
         public void SetTargetPosition(Vector3 worldPos)
         {
             if (isCarried || isOnConveyor) return;
@@ -87,9 +103,13 @@ namespace Assets.Scripts.Simulation.Jobs
             travelProgress = 0f;
         }
 
-        /// @brief Instantly teleports the token to a position with no interpolation.
-        /// @param worldPos The destination global coordinates.
-        /// @post @ref travelProgress is set to 1 and interpolation is finalized.
+        /// <summary>
+        /// Instantly teleports the token to a position with no interpolation.
+        /// </summary>
+        /// <param name="worldPos">The destination global coordinates.</param>
+        /// <remarks>
+        /// Resets <see cref="travelProgress"/> to 1 and finalizes interpolation.
+        /// </remarks>
         public void SnapToPosition(Vector3 worldPos)
         {
             transform.position = worldPos;
@@ -98,18 +118,26 @@ namespace Assets.Scripts.Simulation.Jobs
             travelProgress = 1f;
         }
 
-        /// @brief Toggles external movement control by a conveyor belt.
-        /// @details While enabled, the token's internal Update loop will not process movement.
-        /// @param on True if a ConveyorBelt is now driving the transform.
+        /// <summary>
+        /// Toggles external movement control by a conveyor belt.
+        /// </summary>
+        /// <param name="on">True if a conveyor belt is now driving the transform.</param>
+        /// <remarks>
+        /// While enabled, the token's internal <c>Update</c> loop will not process movement.
+        /// </remarks>
         public void SetOnConveyor(bool on)
         {
             isOnConveyor = on;
         }
 
-        /// @brief Parents the token to an AGV carrier for physical transport.
-        /// @details Disables conveyor control and resets interpolation progress.
-        /// @param carrier The transform component of the AGV.
-        /// @post Visual is parented with a fixed local offset (0, 0.5, 0).
+        /// <summary>
+        /// Parents the token to an AGV carrier for physical transport.
+        /// </summary>
+        /// <param name="carrier">The <see cref="Transform"/> component of the AGV.</param>
+        /// <remarks>
+        /// Disables conveyor control and resets interpolation progress. The visual is
+        /// parented with a fixed local offset of (0, 0.5, 0).
+        /// </remarks>
         public void AttachToCarrier(Transform carrier)
         {
             isCarried = true;
@@ -120,9 +148,13 @@ namespace Assets.Scripts.Simulation.Jobs
             transform.localRotation = Quaternion.identity;
         }
 
-        /// @brief Detaches the token from an AGV and returns it to world space.
-        /// @param worldSnapPos The world position to snap to upon release.
-        /// @post @ref isCarried is false and the visual has no parent transform.
+        /// <summary>
+        /// Detaches the token from an AGV and returns it to world space.
+        /// </summary>
+        /// <param name="worldSnapPos">The world position to snap to upon release.</param>
+        /// <remarks>
+        /// Sets <see cref="isCarried"/> to false and removes the parent transform.
+        /// </remarks>
         public void DetachFromCarrier(Vector3 worldSnapPos)
         {
             transform.SetParent(null);
@@ -130,8 +162,13 @@ namespace Assets.Scripts.Simulation.Jobs
             SnapToPosition(worldSnapPos);
         }
 
-        /// @brief Internal Unity update loop driving self-driven lerps.
-        /// @details Interpolates position between startPosition and targetPosition using moveSpeed.
+        /// <summary>
+        /// Internal Unity update loop driving self-driven position interpolation.
+        /// </summary>
+        /// <remarks>
+        /// Interpolates position between <c>startPosition</c> and <c>targetPosition</c>
+        /// using <see cref="moveSpeed"/>. Skips processing if carried or on a conveyor.
+        /// </remarks>
         private void Update()
         {
             if (isCarried || isOnConveyor) return;
