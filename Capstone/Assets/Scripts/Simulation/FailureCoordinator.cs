@@ -10,18 +10,39 @@ using System.Linq;
 
 namespace Assets.Scripts.Simulation
 {
+    /// <summary>
+    /// Coordinates failure events across the simulation, handling machine failures,
+    /// repairs, and the resulting job re-routing decisions.
+    /// </summary>
     public class FailureCoordinator
     {
+        /// <summary>Job store for accessing and managing job data.</summary>
         private JobStore _jobs;
+        /// <summary>Pool of AGVs used for dispatching and transit operations.</summary>
         private AGVPool _agvPool;
+        /// <summary>Factory layout manager for machine access and health state.</summary>
         private FactoryLayoutManager _layout;
+        /// <summary>Episode tracker for recording simulation events.</summary>
         private EpisodeTracker _tracker;
+        /// <summary>Mapping of machine IDs to their processing start times.</summary>
         private Dictionary<int, double> _machineProcessingStartTime;
+        /// <summary>Callback invoked when a machine failure requires invalidating pending decisions.</summary>
         private Action<int> _onMachineFailedInvalidateDecision;
+        /// <summary>Callback invoked to refresh visual labels for a specified machine.</summary>
         private Action<int> _refreshLabels;
+        /// <summary>Current simulation time reference used for event tracking.</summary>
         private double _simTimeRef;
 
-
+        /// <summary>
+        /// Initializes the FailureCoordinator with required dependencies and callbacks.
+        /// </summary>
+        /// <param name="jobs">Job store for accessing and managing job data.</param>
+        /// <param name="agvPool">Pool of AGVs used for dispatching and transit operations.</param>
+        /// <param name="layout">Factory layout manager for machine access and health state.</param>
+        /// <param name="tracker">Episode tracker for recording simulation events.</param>
+        /// <param name="machineProcessingStartTime">Mapping of machine IDs to their processing start times.</param>
+        /// <param name="onMachineFailedInvalidateDecision">Callback invoked when a machine failure requires invalidating pending decisions.</param>
+        /// <param name="refreshLabels">Callback invoked to refresh visual labels for a specified machine.</param>
         public void Initialize(
             JobStore jobs,
             AGVPool agvPool,
@@ -40,11 +61,19 @@ namespace Assets.Scripts.Simulation
             _refreshLabels = refreshLabels;
         }
 
+        /// <summary>
+        /// Sets the current simulation time reference used for event tracking.
+        /// </summary>
+        /// <param name="simTime">The current simulation time.</param>
         public void SetSimTime(double simTime)
         {
             _simTimeRef = simTime;
         }
 
+        /// <summary>
+        /// Checks all machines for failure or repair-complete flags and handles them accordingly.
+        /// Only processes events when stochastic event management is enabled.
+        /// </summary>
         public void HarvestFailureFlags()
         {
             if (StochasticEventManager.Instance == null ||
@@ -63,6 +92,10 @@ namespace Assets.Scripts.Simulation
 
             }
         }
+        /// <summary>
+        /// Re-evaluates deferred jobs and re-queues those whose eligible machines are now operational
+        /// after a repair completion.
+        /// </summary>
         private void RetryDeferredJobs()
         {
             foreach (int jobId in _jobs.DeferredJobIds.ToList())
@@ -83,6 +116,11 @@ namespace Assets.Scripts.Simulation
             }
         }
 
+        /// <summary>
+        /// Handles all consequences of a machine failure, including re-routing active jobs,
+        /// canceling pickups and transits, and redirecting or aborting in-flight AGVs.
+        /// </summary>
+        /// <param name="machine">The physical machine that has failed.</param>
         private void HandleMachineFailure(PhysicalMachine machine)
         {
             int machineId = machine.MachineId;
@@ -91,7 +129,7 @@ namespace Assets.Scripts.Simulation
             _machineProcessingStartTime.Remove(machineId);
             _tracker.RecordMachineFailure(machineId, machine.SampledRepairDuration, _simTimeRef);
 
-            // ── 1. Job actively being processed on this machine ──────────────────────
+            // Step 1: Handle job actively being processed on this machine
             if (machine.ActiveJobId >= 0)
             {
                 JobData processingJob = _jobs.Get(machine.ActiveJobId);
@@ -105,7 +143,7 @@ namespace Assets.Scripts.Simulation
                 }
             }
 
-            // ── 2. Jobs physically queued at this machine ─────────────────────────────
+            // Step 2: Handle jobs physically queued at this machine
             foreach (var job in _jobs.AllJobs)
             {
                 if (job.State != JobState.Queued) continue;
@@ -116,10 +154,7 @@ namespace Assets.Scripts.Simulation
                 SimLogger.Medium($"[Failure] Queued job {job.JobId} re-routed from failed machine {machineId}.");
             }
 
-            // ── 3. WaitingForPickup jobs routed TO this machine ───────────────────────
-            // The routing decision already assigned this machine but the AGV hasn't
-            // picked the job up yet. We cancel the assigned AGV (if any) and
-            // return the job to NeedsRouting so the agent re-routes it.
+            // Step 3: Cancel WaitingForPickup jobs whose target machine failed
             foreach (var agv in _agvPool.AllAGVs)
             {
                 if (agv.State != AGVState.MovingToPickup) continue;
@@ -132,7 +167,7 @@ namespace Assets.Scripts.Simulation
                 if (waitingJob.State != JobState.WaitingForPickup) continue;
                 if (waitingJob.TargetMachineId != machineId) continue;
 
-                agv.CancelPickup(); // AGV returns to parking, job gets re-dispatched later
+                agv.CancelPickup();
                 waitingJob.State = JobState.NeedsRouting;
                 waitingJob.TargetMachineId = -1;
                 waitingJob.AssignedAgvId = -1;
@@ -141,7 +176,7 @@ namespace Assets.Scripts.Simulation
                               $"AGV {agv.AgvId} pickup cancelled, job re-routed.");
             }
 
-            // ── 4. In-transit jobs: redirect the carrying AGV immediately ────────────
+            // Step 4: Redirect or abort in-transit AGVs headed to the failed machine
             foreach (var agv in _agvPool.AllAGVs)
             {
                 if (agv.State != AGVState.MovingToDropoff) continue;
@@ -158,7 +193,7 @@ namespace Assets.Scripts.Simulation
                 if (alternate != null)
                 {
                     transitJob.TargetMachineId = alternate.MachineId;
-                    // AssignedAgvId intentionally preserved — AGV still owns this job
+                    // AssignedAgvId preserved — the AGV still owns this job
                     transitJob.StateEntryTime = _simTimeRef;
 
                     agv.RedirectDropoff(alternate.GetDropoffPosition(), alternate, transitJob.Visual);
@@ -167,7 +202,7 @@ namespace Assets.Scripts.Simulation
                 }
                 else
                 {
-                    // No operational alternate right now — abort transit, job re-enters pool
+                    // No operational alternate available — abort transit and re-enter job pool
                     transitJob.State = JobState.NeedsRouting;
                     transitJob.TargetMachineId = -1;
                     transitJob.AssignedAgvId = -1;
@@ -179,7 +214,7 @@ namespace Assets.Scripts.Simulation
                 }
             }
 
-            // ── 5. Cancel pre-dispatches aimed at this machine ────────────────────────
+            // Step 5: Cancel pre-dispatches aimed at the failed machine
             foreach (var job in _jobs.AllJobs)
             {
                 if (job.PreDispatchedAgvId < 0) continue;
@@ -193,9 +228,16 @@ namespace Assets.Scripts.Simulation
             _refreshLabels?.Invoke(machineId);
             _onMachineFailedInvalidateDecision?.Invoke(machineId);
         }
+        /// <summary>
+        /// Finds the best operational alternate machine for a job, excluding a specified machine.
+        /// Selects the machine with the lowest current load (sum of processing times of
+        /// queued and committed in-transit jobs).
+        /// </summary>
+        /// <param name="job">The job requiring an alternate machine.</param>
+        /// <param name="excludeMachineId">The machine ID to exclude (typically the failed machine).</param>
+        /// <returns>The best alternate PhysicalMachine, or null if none is available.</returns>
         private PhysicalMachine FindBestAlternateMachine(JobData job, int excludeMachineId)
         {
-            // EligibleMachinesPerOp[currentOpIndex] is Dictionary<int machineId, float processingTime>
             if (job.CurrentOpIndex < 0 || job.CurrentOpIndex >= job.EligibleMachinesPerOp.Length)
                 return null;
 

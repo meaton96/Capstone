@@ -7,63 +7,54 @@ using Assets.Scripts.Simulation.Logging;
 namespace Assets.Scripts.Simulation
 {
     /// <summary>
-    /// Accumulates all per-episode and per-machine statistics during a simulation run.
-    /// Owned by SimulationBridge as a field; completely replaces the scattered
-    /// _episode* and _machine* tracking dictionaries that previously lived in the bridge.
-    ///
+    /// Accumulates per-episode and per-machine statistics during a simulation run.
+    /// 
+    /// This class is owned as a field by SimulationBridge and manages all statistical
+    /// tracking including processing times, failure counts, repair durations, and
+    /// machine availability metrics.
+    /// 
     /// Lifecycle:
-    ///   bridge.StartEpisode()  → tracker.Reset(config)
-    ///   bridge.Update()        → tracker.RecordX() calls
-    ///   bridge.FinaliseEpisode() → record = tracker.Build(layoutManager, ...)
-    ///                           → OnEpisodeFinished.Invoke(record)
-    ///
-    /// Adding a new stochastic event (e.g. AGV failures):
-    ///   1. Add per-episode and per-machine fields to this class
-    ///   2. Add a RecordAGVFailure() method
-    ///   3. Add AGV fields to EpisodeRecord / MachineRecord
-    ///   4. Populate them in Build()
-    ///   5. Add columns in ResultsLogger
-    ///   Nothing else changes.
+    ///   - StartEpisode: Reset() clears all accumulated state
+    ///   - Update: RecordX() methods accumulate statistics each frame
+    ///   - FinaliseEpisode: Build() constructs the final EpisodeRecord and fires OnEpisodeFinished
     /// </summary>
     public class EpisodeTracker
     {
         // ── Episode-level accumulators ────────────────────────────────────────
 
+        /// <summary>Total number of machine failures during the current episode.</summary>
         private int _machineFailureCount;
+
+        /// <summary>Total machine repair time (in simulation seconds) during the current episode.</summary>
         private float _machineRepairTime;
-
-        // Phase 3 — uncomment when AGV failures are implemented:
-        // private int   _agvFailureCount;
-        // private float _agvRepairTime;
-
-        // Phase 4 — uncomment when dynamic arrivals are implemented:
-        // private int   _dynamicArrivals;
 
         // ── Per-machine accumulators ──────────────────────────────────────────
 
-        // Processing time: how long each machine was actively processing a job
+        /// <summary>Cumulative processing time per machine ID.</summary>
         private readonly Dictionary<int, double> _processingTime = new();
 
-        // Downtime: cumulative repair time (only > 0 in stochastic runs)
+        /// <summary>Cumulative downtime (repair time) per machine ID.</summary>
         private readonly Dictionary<int, double> _totalDowntime = new();
 
-        // Open downtime interval start (machine is currently repairing)
+        /// <summary>Simulation time when a machine entered a failed state (keyed by machine ID).</summary>
         private readonly Dictionary<int, double> _downtimeStart = new();
 
-        // Per-machine failure counts and repair time totals
+        /// <summary>Number of failures per machine ID.</summary>
         private readonly Dictionary<int, int> _failureCount = new();
+
+        /// <summary>Total repair time per machine ID.</summary>
         private readonly Dictionary<int, float> _repairTime = new();
 
-        // Ops completed per machine
+        /// <summary>Number of operations completed per machine ID.</summary>
         private readonly Dictionary<int, int> _opsCompleted = new();
 
-        // TTF observations — for stochastic validation logging
+        /// <summary>Simulation time of the last completed operation per machine ID (used for TTF validation).</summary>
         private readonly Dictionary<int, double> _lastOpTime = new();
 
         // ── Reset ─────────────────────────────────────────────────────────────
 
         /// <summary>
-        /// Call at the start of every episode to wipe accumulated state.
+        /// Clears all accumulated statistics. Call at the start of every episode.
         /// </summary>
         public void Reset()
         {
@@ -82,19 +73,20 @@ namespace Assets.Scripts.Simulation
         // ── Recording API — called from SimBridge Update/handlers ─────────────
 
         /// <summary>
-        /// Record a machine starting an operation. Call when StartJob fires.
+        /// Records that a machine has started an operation. Called when StartJob fires.
         /// </summary>
+        /// <param name="machineId">The ID of the machine starting the operation.</param>
         public void RecordOperationStart(int machineId)
         {
             // Processing time is measured in TickProcessing — no action needed here.
-            // Provided as a hook if you want to measure scheduling latency.
         }
 
         /// <summary>
-        /// Accumulate processing time each frame a machine is active.
-        /// Call from HarvestMachineFlags or a dedicated update pass.
-        /// dt = Time.deltaTime (already in sim-seconds at current timescale).
+        /// Accumulates processing time for a machine during a frame where it is active.
+        /// Called from HarvestMachineFlags or a dedicated update pass.
         /// </summary>
+        /// <param name="machineId">The ID of the machine.</param>
+        /// <param name="dt">Delta time in simulation seconds (Time.deltaTime at current timescale).</param>
         public void AddProcessingTime(int machineId, double dt)
         {
             _processingTime.TryAdd(machineId, 0.0);
@@ -102,9 +94,10 @@ namespace Assets.Scripts.Simulation
         }
 
         /// <summary>
-        /// Record a completed operation on a machine.
-        /// Call from HarvestMachineFlags when FinishedFlag is detected.
+        /// Records that an operation has completed on a machine.
+        /// Called from HarvestMachineFlags when FinishedFlag is detected.
         /// </summary>
+        /// <param name="machineId">The ID of the machine that completed the operation.</param>
         public void RecordOperationComplete(int machineId)
         {
             _opsCompleted.TryAdd(machineId, 0);
@@ -112,10 +105,11 @@ namespace Assets.Scripts.Simulation
         }
 
         /// <summary>
-        /// Record a machine failure.
-        /// Call from HandleMachineFailure immediately after the flag is detected.
-        /// simTime = SimulationBridge.SimTime at the moment of failure.
+        /// Records a machine failure event. Called immediately after the failure flag is detected.
         /// </summary>
+        /// <param name="machineId">The ID of the failed machine.</param>
+        /// <param name="repairDuration">Estimated repair duration in simulation seconds.</param>
+        /// <param name="simTime">Current simulation time at the moment of failure.</param>
         public void RecordMachineFailure(int machineId, float repairDuration, double simTime)
         {
             // Episode totals
@@ -137,9 +131,11 @@ namespace Assets.Scripts.Simulation
         }
 
         /// <summary>
-        /// Record a machine returning to operational after repair.
-        /// Call from HandleMachineRepairComplete.
+        /// Records that a machine has returned to operational state after repair.
+        /// Called from HandleMachineRepairComplete.
         /// </summary>
+        /// <param name="machineId">The ID of the repaired machine.</param>
+        /// <param name="simTime">Current simulation time when the repair completed.</param>
         public void RecordRepairComplete(int machineId, double simTime)
         {
             if (_downtimeStart.TryGetValue(machineId, out double start))
@@ -152,19 +148,23 @@ namespace Assets.Scripts.Simulation
             _lastOpTime[machineId] = simTime;
         }
 
-        // Phase 3 — AGV failure recording (add when implementing Phase 3):
-        // public void RecordAGVFailure(int agvId, float repairDuration, double simTime) { ... }
-        // public void RecordAGVRepairComplete(int agvId, double simTime) { ... }
-
-        // Phase 4 — dynamic arrival recording:
-        // public void RecordJobArrival(double simTime) { _dynamicArrivals++; }
-
         // ── Build ─────────────────────────────────────────────────────────────
 
         /// <summary>
-        /// Constructs the final EpisodeRecord from all accumulated data.
+        /// Constructs the final EpisodeRecord from all accumulated statistics.
         /// Call once at FinaliseEpisode, after closing any open downtime intervals.
         /// </summary>
+        /// <param name="config">Simulation configuration containing instance parameters.</param>
+        /// <param name="simTime">Total simulation time (makespan) for the episode.</param>
+        /// <param name="ruleName">Name of the dispatching rule used.</param>
+        /// <param name="completedJobs">Number of jobs fully completed during the episode.</param>
+        /// <param name="totalOps">Total number of operations scheduled in the episode.</param>
+        /// <param name="decisionPoints">Number of dispatching decisions made.</param>
+        /// <param name="totalReward">Cumulative reward accumulated during the episode.</param>
+        /// <param name="agvCount">Number of AGVs in the simulation.</param>
+        /// <param name="machines">Collection of all physical machines for per-machine record generation.</param>
+        /// <param name="averageTimeScale">Average simulation timescale used during the episode.</param>
+        /// <returns>Constructed EpisodeRecord containing all accumulated statistics.</returns>
         public EpisodeRecord Build(
             FJSSPConfig config,
             double simTime,
@@ -177,8 +177,7 @@ namespace Assets.Scripts.Simulation
             IEnumerable<PhysicalMachine> machines,
             float averageTimeScale = 100f)
         {
-            // Close any downtime intervals still open (machine failed, episode ended
-            // before repair completed — valid in high-disruption stochastic runs).
+            // Close any downtime intervals still open (episode ended before repair completed).
             foreach (var machine in machines)
             {
                 int mid = machine.MachineId;
@@ -237,19 +236,23 @@ namespace Assets.Scripts.Simulation
         // ── Observation helpers (used by ObservationBuilder) ──────────────────
 
         /// <summary>
-        /// Episode-level failure count — exposed for Global Scalars observation.
+        /// Gets the total machine failure count for the current episode.
+        /// Used by Global Scalars observation.
         /// </summary>
         public int EpisodeMachineFailures => _machineFailureCount;
 
         /// <summary>
-        /// Episode-level repair time — exposed for Global Scalars observation.
+        /// Gets the total machine repair time for the current episode.
+        /// Used by Global Scalars observation.
         /// </summary>
         public float EpisodeMachineRepairTime => _machineRepairTime;
 
         /// <summary>
-        /// Theoretical mean TTF for validation logging.
-        /// k=1.5 Weibull: mean = lambda × Γ(1+1/k) ≈ lambda × 0.9027
+        /// Computes the theoretical mean time-to-failure (TTF) for a Weibull distribution
+        /// with shape parameter k=1.5 and scale parameter lambda.
         /// </summary>
+        /// <param name="lambda">Scale parameter (lambda) of the Weibull distribution.</param>
+        /// <returns>Theoretical mean TTF: lambda × Γ(1 + 1/k) ≈ lambda × 0.9027 for k=1.5.</returns>
         public static float TheoreticalMeanTTF(float lambda) => lambda * 0.9027f;
     }
 }

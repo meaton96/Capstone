@@ -5,8 +5,15 @@ using Assets.Scripts.Simulation.Machines;
 
 namespace Assets.Scripts.Simulation
 {
+    /// <summary>
+    /// Provides factory methods for creating default FJSSP (Flexible Job Shop Scheduling Problem) configurations.
+    /// </summary>
     public static class DefaultConfigFactory
     {
+        /// <summary>
+        /// Builds a default deterministic FJSSP configuration with standard machine types and processing times.
+        /// </summary>
+        /// <returns>A configured FJSSPConfig instance with default deterministic settings.</returns>
         public static FJSSPConfig BuildDefault()
         {
             MachineType[] types = (MachineType[])Enum.GetValues(typeof(MachineType));
@@ -38,6 +45,10 @@ namespace Assets.Scripts.Simulation
             };
         }
 
+        /// <summary>
+        /// Builds a default stochastic FJSSP configuration with machine failure parameters enabled.
+        /// </summary>
+        /// <returns>A configured FJSSPConfig instance with default stochastic settings including failure distributions.</returns>
         public static FJSSPConfig BuildDefaultStochastic()
         {
             MachineType[] types = (MachineType[])Enum.GetValues(typeof(MachineType));

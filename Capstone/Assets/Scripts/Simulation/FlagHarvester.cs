@@ -9,15 +9,34 @@ using Assets.Scripts.Simulation.Logging;
 
 namespace Assets.Scripts.Simulation
 {
+    /// <summary>
+    /// FlagHarvester coordinates the flow of jobs through the factory simulation by harvesting state-change
+    /// flags from machines, AGVs, and the job scheduler. It orchestrates job state transitions, AGV dispatching,
+    /// pre-dispatch logic, and timing statistics collection.
+    /// </summary>
     public class FlagHarvester
     {
+        /// <summary>Reference to the job store managing all job data.</summary>
         private JobStore _jobs;
+        /// <summary>Reference to the AGV pool for vehicle allocation and management.</summary>
         private AGVPool _agvPool;
+        /// <summary>Reference to the factory layout manager for machine and position queries.</summary>
         private FactoryLayoutManager _layout;
+        /// <summary>Reference to the episode tracker for recording timing and operation statistics.</summary>
         private EpisodeTracker _tracker;
+        /// <summary>Maps machine IDs to the simulation time when processing started, used for tracking processing durations.</summary>
         private Dictionary<int, double> _machineProcessingStartTime;
+        /// <summary>The current simulation time reference used for timing calculations.</summary>
         private double _simTimeRef;
 
+        /// <summary>
+        /// Initializes the FlagHarvester with required dependencies. Must be called before any Harvest methods.
+        /// </summary>
+        /// <param name="jobs">The job store containing all job data and state.</param>
+        /// <param name="agvPool">The AGV pool for vehicle allocation and management.</param>
+        /// <param name="layout">The factory layout manager for machine and position queries.</param>
+        /// <param name="tracker">The episode tracker for recording timing and operation statistics.</param>
+        /// <param name="processingStartTimes">Dictionary mapping machine IDs to their job processing start times.</param>
         public void Initialize(
             JobStore jobs,
             AGVPool agvPool,
@@ -32,11 +51,20 @@ namespace Assets.Scripts.Simulation
             _machineProcessingStartTime = processingStartTimes;
         }
 
+        /// <summary>
+        /// Sets the current simulation time reference used for timing calculations throughout the simulation step.
+        /// </summary>
+        /// <param name="simTime">The current simulation time.</param>
         public void SetSimTime(double simTime)
         {
             _simTimeRef = simTime;
         }
 
+        /// <summary>
+        /// Harvests completion flags from all machines. For each machine that has finished processing a job,
+        /// this method updates job state, records processing times, places the job on the outgoing belt,
+        /// and handles pre-dispatched AGV assignments if the job is complete.
+        /// </summary>
         public void HarvestMachineFlags()
         {
             foreach (var machine in _layout.Machines)
@@ -91,6 +119,12 @@ namespace Assets.Scripts.Simulation
             }
         }
 
+        /// <summary>
+        /// Harvests "almost done" flags from machines and initiates AGV pre-dispatch for jobs that are
+        /// nearing completion. Pre-dispatching allows AGVs to be assigned before a job fully finishes,
+        /// reducing wait times. Machines that are not in an operational health state are skipped.
+        /// </summary>
+        /// <param name="preDispatchLeadTime">The lead time threshold for triggering pre-dispatch.</param>
         public void HarvestAlmostDoneFlags(int preDispatchLeadTime)
         {
             foreach (var machine in _layout.Machines)
@@ -104,7 +138,7 @@ namespace Assets.Scripts.Simulation
                 if (job == null || job.State != JobState.Processing || job.PreDispatchedAgvId >= 0) continue;
                 if (job.CompletedOps == job.TotalOperations - 1) continue;
 
-                // Don't pre-dispatch if the source machine isn't going to finish cleanly
+                // Skip pre-dispatch if the source machine is not operational
                 if (machine.HealthState != MachineHealthState.Operational) continue;
 
                 AGVController agv = _agvPool.GetAvailableAGV();
@@ -115,6 +149,11 @@ namespace Assets.Scripts.Simulation
             }
         }
 
+        /// <summary>
+        /// Harvests state-change flags from all AGVs. Handles pickup events (transitioning jobs to InTransit)
+        /// and delivery events (transitioning jobs to Queued or Exited state). Updates job timing statistics
+        /// and places delivered jobs on the target machine's incoming belt or marks them as exited.
+        /// </summary>
         public void HarvestAGVFlags()
         {
             foreach (var agv in _agvPool.AllAGVs)
@@ -139,6 +178,7 @@ namespace Assets.Scripts.Simulation
                     {
                         if (machineId < 0)
                         {
+                            // Job has exited the system entirely
                             job.State = JobState.Exited;
                             job.LocationMachineId = -1;
                             job.StateEntryTime = _simTimeRef;
@@ -146,6 +186,7 @@ namespace Assets.Scripts.Simulation
                         }
                         else
                         {
+                            // Job is delivered to a target machine
                             job.State = JobState.Queued;
                             job.LocationMachineId = machineId;
                             job.StateEntryTime = _simTimeRef;
@@ -164,6 +205,12 @@ namespace Assets.Scripts.Simulation
             }
         }
 
+        /// <summary>
+        /// Assigns available AGVs to jobs that are waiting for pickup and have not yet been assigned one.
+        /// Jobs are matched with available AGVs based on their location and target destination. If a job's
+        /// target machine is non-operational, the job is returned to NeedsRouting state. AGVs are consumed
+        /// in candidate order until none remain available.
+        /// </summary>
         public void AssignAGVs()
         {
             var candidates = new List<JobData>();
@@ -177,8 +224,7 @@ namespace Assets.Scripts.Simulation
 
             foreach (var job in candidates)
             {
-                // If the routed destination is no longer operational, return job to
-                // NeedsRouting rather than dispatching an AGV to a broken machine.
+                // Return job to NeedsRouting if the routed destination machine is non-operational
                 if (job.TargetMachineId >= 0)
                 {
                     PhysicalMachine dst = _layout.GetMachine(job.TargetMachineId);
@@ -212,6 +258,12 @@ namespace Assets.Scripts.Simulation
             }
         }
 
+        /// <summary>
+        /// Refreshes the queue count labels on a specified machine based on current job states.
+        /// Updates both the incoming queue count (dispatchable jobs waiting at the machine)
+        /// and the outgoing queue count (jobs waiting for AGV pickup at the machine).
+        /// </summary>
+        /// <param name="machineId">The ID of the machine whose labels should be refreshed.</param>
         public void RefreshMachineLabels(int machineId)
         {
             PhysicalMachine machine = _layout.GetMachine(machineId);

@@ -8,14 +8,46 @@ using Assets.Scripts.Simulation.Logging;
 
 namespace Assets.Scripts.Simulation
 {
+    /// <summary>
+    /// Central coordinator for making routing and dispatching decisions in the factory simulation.
+    /// Manages the lifecycle of decision requests, including job routing to eligible machines
+    /// and dispatching jobs to available machines.
+    /// </summary>
     public class DecisionCoordinator
     {
+        /// <summary>
+        /// Reference to the job store for retrieving and managing job data.
+        /// </summary>
         private JobStore _jobs;
+
+        /// <summary>
+        /// Reference to the factory layout manager for accessing machine information.
+        /// </summary>
         private FactoryLayoutManager _layout;
+
+        /// <summary>
+        /// Delegate for retrieving the current simulation time.
+        /// </summary>
         private Func<double> _getSimTime;
+
+        /// <summary>
+        /// Delegate for retrieving the current decision count.
+        /// </summary>
         private Func<int> _getDecisionCount;
+
+        /// <summary>
+        /// Delegate for incrementing the decision counter.
+        /// </summary>
         private Action _incrementDecisionCount;
 
+        /// <summary>
+        /// Initializes the coordinator with required dependencies via dependency injection.
+        /// </summary>
+        /// <param name="jobs">The job store providing job data and state information.</param>
+        /// <param name="layout">The factory layout manager providing machine information.</param>
+        /// <param name="getSimTime">Delegate to retrieve the current simulation time.</param>
+        /// <param name="getDecisionCount">Delegate to retrieve the current decision count.</param>
+        /// <param name="incrementDecisionCount">Delegate to increment the decision counter.</param>
         public void Initialize(
             JobStore jobs,
             FactoryLayoutManager layout,
@@ -30,6 +62,15 @@ namespace Assets.Scripts.Simulation
             _incrementDecisionCount = incrementDecisionCount;
         }
 
+        /// <summary>
+        /// Determines the next decision to be made by the simulation. Prioritizes routing decisions
+        /// for jobs needing machine assignment, then checks for dispatch decisions for idle machines
+        /// with dispatchable jobs.
+        /// </summary>
+        /// <returns>
+        /// A DecisionRequest if a decision is needed, or null if no decisions are required
+        /// (e.g., all eligible machines are unavailable and no idle machines have dispatchable jobs).
+        /// </returns>
         public DecisionRequest FindNextDecision()
         {
             JobData routingJob = _jobs.GetNextNeedsRouting();
@@ -64,6 +105,16 @@ namespace Assets.Scripts.Simulation
             return null;
         }
 
+        /// <summary>
+        /// Builds a routing decision request for a job that needs to be assigned to an eligible machine.
+        /// Filters machines based on eligibility and availability, and populates the decision request
+        /// with candidate information including queue lengths and processing times.
+        /// </summary>
+        /// <param name="job">The job data requiring routing decision.</param>
+        /// <returns>
+        /// A DecisionRequest containing routing options with candidate machine IDs, queue lengths,
+        /// and processing times for the specified job.
+        /// </returns>
         public DecisionRequest BuildRoutingDecision(JobData job)
         {
             var eligibleIds = new HashSet<int>(
@@ -93,6 +144,16 @@ namespace Assets.Scripts.Simulation
             };
         }
 
+        /// <summary>
+        /// Builds a dispatch decision request for a machine that has jobs waiting in its queue.
+        /// Retrieves all dispatchable jobs for the specified machine and populates the decision
+        /// request with job IDs and their corresponding processing durations.
+        /// </summary>
+        /// <param name="machineId">The ID of the machine requiring a dispatch decision.</param>
+        /// <returns>
+        /// A DecisionRequest containing the machine ID, queued job IDs, and their processing
+        /// durations for dispatch priority determination.
+        /// </returns>
         public DecisionRequest BuildDispatchDecision(int machineId)
         {
             List<int> queue = _jobs.GetDispatchableJobs(machineId);

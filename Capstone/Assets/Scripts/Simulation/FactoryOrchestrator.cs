@@ -15,74 +15,228 @@ using Unity.MLAgents;
 
 namespace Assets.Scripts.Simulation
 {
+    /// <summary>
+    /// Central orchestrator for the factory simulation. Manages episode lifecycle,
+    /// coordinates machine/AGV/job systems, and interfaces with the learning agent
+    /// for dispatch decision-making.
+    /// </summary>
     public class FactoryOrchestrator : MonoBehaviour
     {
+        /// <summary>
+        /// Singleton instance of the FactoryOrchestrator.
+        /// </summary>
         public static FactoryOrchestrator Instance;
 
+        /// <summary>
+        /// Manager responsible for laying out and manipulating the factory floor.
+        /// </summary>
         [Header("Scene References")]
         [SerializeField] private FactoryLayoutManager layoutManager;
+
+        /// <summary>
+        /// Manager responsible for traffic zones and AGV pathfinding.
+        /// </summary>
         [SerializeField] private TrafficZoneManager trafficZoneManager;
+
+        /// <summary>
+        /// Pool managing all AGV instances in the simulation.
+        /// </summary>
         [SerializeField] private AGVPool agvPool;
+
         private string _configuredRuleName = "unknown";
+
+        /// <summary>
+        /// Scheduling agent that makes dispatch decisions during episodes.
+        /// </summary>
         [SerializeField] private SchedulingAgent agent;
+
+        /// <summary>
+        /// Collection of all job data instances managed during the episode.
+        /// </summary>
         public JobStore Jobs;
 
+        /// <summary>
+        /// Number of seconds before a job's required arrival time to dispatch an AGV in advance.
+        /// </summary>
         [Header("Episode Configuration")]
         public int PreDispatchLeadTime = 15;
+
+        /// <summary>
+        /// Whether to automatically start an episode when the scene plays.
+        /// </summary>
         public bool AutoStartOnPlay = false;
 
+        /// <summary>
+        /// Pre-built job definitions used for benchmark scenarios. Set before SpawnFactory.
+        /// </summary>
         private FJSSPJobDefinition[] prebuiltJobs;
 
+        /// <summary>
+        /// The current simulation configuration loaded for this episode.
+        /// </summary>
         private FJSSPConfig currentConfig;
+
+        /// <summary>
+        /// Cached mapping of machine types to their machine IDs, built during factory setup.
+        /// </summary>
         private Dictionary<MachineType, List<int>> cachedMachinesByType;
+
+        /// <summary>
+        /// Read-only access to the cached machine type mapping.
+        /// </summary>
         public Dictionary<MachineType, List<int>> CachedMachinesByType => cachedMachinesByType;
 
+        /// <summary>
+        /// Whether a simulation episode is currently active.
+        /// </summary>
         private bool episodeActive;
+
+        /// <summary>
+        /// Number of dispatch decisions made during the current episode.
+        /// </summary>
         private int decisionCount;
+
+        /// <summary>
+        /// Total number of dispatch decisions made in the current episode.
+        /// </summary>
         public int DecisionCount => decisionCount;
+
+        /// <summary>
+        /// Cumulative reward accumulated during the current episode.
+        /// </summary>
         private double totalReward;
+
+        /// <summary>
+        /// Makespan value from the previous step, used for reward calculation.
+        /// </summary>
         private double previousMakespan;
+
+        /// <summary>
+        /// Simulation start time, used to compute elapsed simulation time.
+        /// </summary>
         private float startTime;
 
+        /// <summary>
+        /// Whether a simulation episode is currently running.
+        /// </summary>
         public bool IsEpisodeActive => episodeActive;
+
+        /// <summary>
+        /// Whether the factory layout has been spawned and is ready for episode start.
+        /// </summary>
         public bool IsFactoryReady { get; set; }
+
+        /// <summary>
+        /// Elapsed simulation time since episode start.
+        /// </summary>
         public double SimTime => Time.time - startTime;
+
+        /// <summary>
+        /// The current FJSSP configuration for this episode.
+        /// </summary>
         public FJSSPConfig CurrentConfig => currentConfig;
 
+        /// <summary>
+        /// The most recent decision request awaiting an action from the agent.
+        /// </summary>
         public DecisionRequest CurrentDecision { get; private set; }
+
+        /// <summary>
+        /// Whether the orchestrator is currently waiting for the agent to provide an action.
+        /// </summary>
         public bool IsWaitingForAction { get; private set; }
+
+        /// <summary>
+        /// Name of the dispatching rule applied in the last step.
+        /// </summary>
         public string LastAppliedRule { get; private set; } = "Waiting...";
 
+        /// <summary>
+        /// Tracks episode-level statistics including makespan, machine failures, and repair times.
+        /// </summary>
         private readonly EpisodeTracker _tracker = new();
+
+        /// <summary>
+        /// Maps machine IDs to the simulation time when processing started, used for flag harvesting.
+        /// </summary>
         private readonly Dictionary<int, double> _machineProcessingStartTime = new();
 
+        /// <summary>
+        /// Harvests machine and AGV state flags during each simulation step.
+        /// </summary>
         private FlagHarvester _flags;
+
+        /// <summary>
+        /// Coordinates machine failure events and repair scheduling.
+        /// </summary>
         private FailureCoordinator _failures;
+
+        /// <summary>
+        /// Manages decision requests and coordinates dispatch/routing decisions.
+        /// </summary>
         private DecisionCoordinator _decisions;
 
+        /// <summary>
+        /// Fired when a new dispatch or routing decision is required. Passes the DecisionRequest.
+        /// </summary>
         [Header("Events")]
         public UnityEvent<DecisionRequest> OnDecisionRequired;
+
+        /// <summary>
+        /// Fired after each simulation step completes. Passes the StepResult.
+        /// </summary>
         public UnityEvent<StepResult> OnStepCompleted;
+
+        /// <summary>
+        /// Fired when an episode finishes. Passes the final EpisodeRecord.
+        /// </summary>
         public UnityEvent<EpisodeRecord> OnEpisodeFinished;
+
+        /// <summary>
+        /// Fired after the factory layout is spawned.
+        /// </summary>
         public UnityEvent OnFactorySpawned;
 
+        /// <summary>
+        /// Total number of discrete actions available to the decision engine.
+        /// </summary>
         public static int ActionCount => DispatchingEngine.ActionCount;
+
+        /// <summary>
+        /// Converts a DispatchingRule enum value to its corresponding action index.
+        /// </summary>
+        /// <param name="rule">The dispatching rule to convert.</param>
+        /// <returns>The zero-based index for the given rule.</returns>
         public int GetRuleIndex(DispatchingRule rule) => DispatchingEngine.IndexForRule(rule);
 
+        /// <summary>
+        /// Maximum allowed simulation time in seconds before an episode is forcibly terminated.
+        /// </summary>
         private const double MAX_EPISODE_SIM_SECONDS = 500_000.0;
 
+        /// <summary>
+        /// Singleton initialization. Destroys duplicate instances if one already exists.
+        /// </summary>
         private void Awake()
         {
             if (Instance != null) { Destroy(this); return; }
             Instance = this;
         }
 
+        /// <summary>
+        /// Called on startup. Arms the scheduling agent if AutoStartOnPlay is enabled.
+        /// </summary>
         private void Start()
         {
             if (AutoStartOnPlay && agent != null)
                 agent.IsArmed = true;
         }
 
+        /// <summary>
+        /// Loads a simulation configuration and initializes the stochastic event manager.
+        /// Resets factory readiness so SpawnFactory must be called before starting an episode.
+        /// </summary>
+        /// <param name="config">The FJSSP configuration to load.</param>
         public void LoadConfig(FJSSPConfig config)
         {
             currentConfig = config;
@@ -90,11 +244,20 @@ namespace Assets.Scripts.Simulation
             StochasticEventManager.Instance?.Initialize(config);
         }
 
+        /// <summary>
+        /// Stores pre-built job definitions for use during the next episode start.
+        /// Prebuilt jobs override procedural generation.
+        /// </summary>
+        /// <param name="jobs">Array of job definitions to use for benchmark scenarios.</param>
         public void LoadPrebuiltJobs(FJSSPJobDefinition[] jobs)
         {
             prebuiltJobs = jobs;
         }
 
+        /// <summary>
+        /// Spawns the factory layout by building the floor plan, constructing the traffic
+        /// zone graph, and initializing the AGV fleet. Resets any existing episode first.
+        /// </summary>
         public void SpawnFactory()
         {
             if (currentConfig == null) return;
@@ -109,6 +272,11 @@ namespace Assets.Scripts.Simulation
             OnFactorySpawned?.Invoke();
         }
 
+        /// <summary>
+        /// Starts a new simulation episode. Initializes jobs, stochastic events, failure
+        /// coordination, and decision systems. Resets all agents and machines to their
+        /// initial state. If a Python-provided config exists, it overrides the current config.
+        /// </summary>
         public void StartEpisode()
         {
             var pythonConfig = EpisodeConfigChannel.Instance?.ConsumeConfig();
@@ -119,7 +287,7 @@ namespace Assets.Scripts.Simulation
                 SimLogger.Low($"[Bridge] Applied Python config: {currentConfig.Name}");
             }
 
-            currentConfig ??= DefaultConfigFactory.BuildDefault();//DefaultConfigFactory.BuildDefaultStochastic();
+            currentConfig ??= DefaultConfigFactory.BuildDefault();
 
             if (!IsFactoryReady)
                 SpawnFactory();
@@ -127,7 +295,6 @@ namespace Assets.Scripts.Simulation
             trafficZoneManager.ResetEpisodeStats();
             foreach (var agv in agvPool.AllAGVs)
                 agv.ResetEpisodeStats();
-
 
             agent.SetHeuristicRule(currentConfig.dispatchingRule);
             _configuredRuleName = currentConfig.dispatchingRule.ToString();
@@ -196,6 +363,10 @@ namespace Assets.Scripts.Simulation
                           $"stochastic={StochasticEventManager.Instance?.IsActive}");
         }
 
+        /// <summary>
+        /// Stops the current episode and cleans up all simulation state. Clears the factory
+        /// floor, job store, and AGV fleet.
+        /// </summary>
         public void StopEpisode()
         {
             episodeActive = false;
@@ -206,6 +377,10 @@ namespace Assets.Scripts.Simulation
             agvPool.ClearFleet();
         }
 
+        /// <summary>
+        /// Called every frame. Processes simulation flags, checks for new decisions, and
+        /// terminates the episode when all jobs have exited or the time limit is reached.
+        /// </summary>
         private void Update()
         {
             if (!episodeActive) return;
@@ -229,9 +404,9 @@ namespace Assets.Scripts.Simulation
             if (!IsWaitingForAction)
             {
                 var req = _decisions.FindNextDecision();
-                if (req != null) // Standard null check for reference types
+                if (req != null)
                 {
-                    CurrentDecision = req; // No .Value needed
+                    CurrentDecision = req;
                     IsWaitingForAction = true;
                     OnDecisionRequired?.Invoke(CurrentDecision);
                 }
@@ -241,6 +416,12 @@ namespace Assets.Scripts.Simulation
                 FinaliseEpisode();
         }
 
+        /// <summary>
+        /// Executes a single simulation step given an action index from the agent.
+        /// Applies the dispatch or routing decision, calculates reward, and returns the result.
+        /// </summary>
+        /// <param name="actionIndex">The index of the action to execute.</param>
+        /// <returns>A StepResult containing the reward and simulation status.</returns>
         public StepResult Step(int actionIndex)
         {
             IsWaitingForAction = false;
@@ -256,6 +437,11 @@ namespace Assets.Scripts.Simulation
             return new StepResult { Reward = reward, Done = false, CurrentMakespan = SimTime };
         }
 
+        /// <summary>
+        /// Executes a routing decision by assigning the specified job to the selected machine
+        /// and preparing AGV pickup if applicable.
+        /// </summary>
+        /// <param name="actionIndex">The action index encoding the machine selection.</param>
         private void ExecuteRoutingDecision(int actionIndex)
         {
             int chosenMachineId = DispatchingEngine.SelectMachine(actionIndex, CurrentDecision);
@@ -283,6 +469,11 @@ namespace Assets.Scripts.Simulation
             }
         }
 
+        /// <summary>
+        /// Executes a dispatch decision by selecting a job from the specified machine's queue
+        /// and starting its processing on the physical machine.
+        /// </summary>
+        /// <param name="actionIndex">The action index encoding the job selection.</param>
         private void ExecuteDispatchDecision(int actionIndex)
         {
             int machineId = CurrentDecision.MachineId;
@@ -305,6 +496,11 @@ namespace Assets.Scripts.Simulation
             LastAppliedRule = _configuredRuleName;
         }
 
+        /// <summary>
+        /// Finalizes the current episode by collecting telemetry, building the episode record,
+        /// logging results, and firing the OnEpisodeFinished event. Includes AGV performance
+        /// and segment congestion data collection.
+        /// </summary>
         private void FinaliseEpisode()
         {
             episodeActive = false;
@@ -337,11 +533,11 @@ namespace Assets.Scripts.Simulation
                 machines: layoutManager.Machines,
                 averageTimeScale: Time.timeScale
             );
-            // ── Collect AGV performance records ──────────────────────────────────────
+
+            // Collect AGV performance records
             foreach (var agv in agvPool.AllAGVs)
                 record.AGVRecords.Add(agv.GetRecord(record.Makespan));
 
-            // ── Collect segment congestion records ───────────────────────────────────
             // Skip parking alcove (Capacity=64) — it's intentionally unconstrained and
             // would inflate the zone count without diagnostic value.
             foreach (TrafficZone zone in trafficZoneManager.Zones)
@@ -359,14 +555,12 @@ namespace Assets.Scripts.Simulation
                 });
             }
 
-
             if (!Academy.Instance.IsCommunicatorOn)
             {
-                SimLogger.Low($"[Orchestrator] Logging Academy Epiosde");
-                //TODO: uncomment
-                //ResultsLogger.LogAll(record);
+                SimLogger.Low($"[Orchestrator] Logging Academy Episode");
+                // TODO: re-enable when ResultsLogger is ready
+                // ResultsLogger.LogAll(record);
             }
-
 
             if (record.MachineFailureCount > 0)
             {
@@ -381,6 +575,11 @@ namespace Assets.Scripts.Simulation
             OnEpisodeFinished?.Invoke(record);
         }
 
+        /// <summary>
+        /// Calculates the per-step reward as the negative normalized change in makespan.
+        /// Penalizes increases in completion time relative to the number of remaining operations.
+        /// </summary>
+        /// <returns>The computed reward value (typically negative).</returns>
         private float CalculateReward()
         {
             float current = (float)SimTime;
@@ -390,6 +589,10 @@ namespace Assets.Scripts.Simulation
             return -delta / (Mathf.Max(totalOps, 1) * Time.timeScale);
         }
 
+        /// <summary>
+        /// Returns the fraction of machines currently in a failed state.
+        /// </summary>
+        /// <returns>Ratio of failed machines to total machines (0.0 to 1.0).</returns>
         public float GetFractionMachinesFailed()
         {
             int total = layoutManager.MachineCount;
@@ -397,6 +600,10 @@ namespace Assets.Scripts.Simulation
             return (float)layoutManager.Machines.Count(m => m.HealthState == MachineHealthState.Failed) / total;
         }
 
+        /// <summary>
+        /// Returns the fraction of machines currently in a repairing state.
+        /// </summary>
+        /// <returns>Ratio of repairing machines to total machines (0.0 to 1.0).</returns>
         public float GetFractionMachinesRepairing()
         {
             int total = layoutManager.MachineCount;
@@ -404,6 +611,11 @@ namespace Assets.Scripts.Simulation
             return (float)layoutManager.Machines.Count(m => m.HealthState == MachineHealthState.Repairing) / total;
         }
 
+        /// <summary>
+        /// Returns the mean normalized remaining repair time across all repairing machines.
+        /// Normalized as the ratio of remaining time to the originally sampled repair duration.
+        /// </summary>
+        /// <returns>Average normalized repair time (0.0 to 1.0).</returns>
         public float GetMeanNormalisedRepairTime()
         {
             var repairing = layoutManager.Machines
