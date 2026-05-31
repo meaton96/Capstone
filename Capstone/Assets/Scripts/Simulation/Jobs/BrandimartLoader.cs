@@ -76,8 +76,8 @@ namespace Assets.Scripts.Simulation.Jobs
         /// <returns>A tuple of FJSSPConfig and a job builder function.</returns>
         public static (FJSSPConfig config,
                         Func<Dictionary<MachineType, List<int>>, FJSSPJobDefinition[]> buildJobs)
-            LoadDeferred(string jsonPath, int seed = 42)
-            => LoadDeferredInternal(jsonPath, seed, StochasticDisruption.None);
+            LoadDeferred(string jsonPath, int seed = 42, int agvCountOverride = -1)
+            => LoadDeferredInternal(jsonPath, seed, StochasticDisruption.None, agvCountOverride);
 
         /// <summary>
         /// Loads a Brandimarte benchmark instance with calibrated stochastic disruptions.
@@ -92,8 +92,8 @@ namespace Assets.Scripts.Simulation.Jobs
         public static (FJSSPConfig config,
                         Func<Dictionary<MachineType, List<int>>, FJSSPJobDefinition[]> buildJobs)
             LoadDeferredWithStochastic(string jsonPath, StochasticDisruption disruption,
-                                       int seed = 42)
-            => LoadDeferredInternal(jsonPath, seed, disruption);
+                                       int seed = 42, int agvCountOverride = -1)
+            => LoadDeferredInternal(jsonPath, seed, disruption, agvCountOverride);
 
         // ─────────────────────────────────────────────────────────────────────
         //  Internal loader
@@ -108,7 +108,8 @@ namespace Assets.Scripts.Simulation.Jobs
         /// <returns>A tuple of FJSSPConfig and a job builder function.</returns>
         private static (FJSSPConfig config,
                          Func<Dictionary<MachineType, List<int>>, FJSSPJobDefinition[]> buildJobs)
-            LoadDeferredInternal(string jsonPath, int seed, StochasticDisruption disruption)
+            LoadDeferredInternal(string jsonPath, int seed, StochasticDisruption disruption,
+                                 int agvCountOverride = -1)
         {
             if (!File.Exists(jsonPath))
             {
@@ -119,7 +120,7 @@ namespace Assets.Scripts.Simulation.Jobs
             string json = File.ReadAllText(jsonPath);
             string name = Path.GetFileNameWithoutExtension(jsonPath);
 
-            FJSSPConfig config = BuildConfig(json, name, seed, disruption);
+            FJSSPConfig config = BuildConfig(json, name, seed, disruption, agvCountOverride);
             if (config == null) return (null, null);
 
             return (config, machinesByType => BuildJobs(json, machinesByType));
@@ -135,7 +136,8 @@ namespace Assets.Scripts.Simulation.Jobs
         /// <param name="disruption">The stochastic disruption level.</param>
         /// <returns>A configured FJSSPConfig, or null on failure.</returns>
         private static FJSSPConfig BuildConfig(string json, string name, int seed,
-                                                StochasticDisruption disruption)
+                                                StochasticDisruption disruption,
+                                                int agvCountOverride = -1)
         {
             JObject root = JObject.Parse(json);
             int numMachines = root["machines"].Value<int>();
@@ -143,7 +145,9 @@ namespace Assets.Scripts.Simulation.Jobs
 
             int numTypes = AllTypes.Length;
             int machinesPerType = Mathf.CeilToInt((float)numMachines / numTypes);
-            int agvCount = Mathf.CeilToInt(machinesPerType * 1.5f);
+            int agvCount = agvCountOverride > 0
+                ? agvCountOverride
+                : Mathf.CeilToInt(machinesPerType * 1.5f);
 
             var typeLayout = new MachineType[numMachines];
             for (int bm = 0; bm < numMachines; bm++)

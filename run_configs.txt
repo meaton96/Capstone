@@ -61,6 +61,18 @@ updated:
         --timescale  100 \
         --loglevel   None
 
+
+./agv_sweep.sh \
+        --exe         ./capstone.x86_64 \
+        --benchmarks  ./BatchConfigs/Benchmarks \
+        --results     ./Results \
+        --repeats     3 \
+        --timescale   100 \
+        --loglevel    Low \
+        --disruption  none \
+        --agvcounts   5,10,15,20,25,30 \
+        --maxworkers  18
+
 copy:
 
 

@@ -161,6 +161,19 @@ namespace Assets.Scripts.Simulation
                 SimLogger.Low($"[BatchRunner] Results subdirectory: {outputDir}");
             }
 
+            // AGV count override
+            int agvCountOverride = -1;
+            string agvCountStr = GetCLIArg("-agvcount");
+            if (!string.IsNullOrEmpty(agvCountStr) && int.TryParse(agvCountStr, out int parsedAgv))
+            {
+                agvCountOverride = parsedAgv;
+                SimLogger.Low($"[BatchRunner] AGV count override: {agvCountOverride}");
+            }
+            else
+            {
+                SimLogger.Low("[BatchRunner] No -agvcount provided. Using BrandimartLoader formula (1.5× machinesPerType).");
+            }
+
             // Repeats
             int repeats = 1;
             string repeatsStr = GetCLIArg("-repeats");
@@ -184,11 +197,11 @@ namespace Assets.Scripts.Simulation
 
             if (!string.IsNullOrEmpty(benchmarkDirPath))
             {
-                StartCoroutine(RunMultiBenchmarkCoroutine(benchmarkDirPath, repeats, disruption));
+                StartCoroutine(RunMultiBenchmarkCoroutine(benchmarkDirPath, repeats, disruption, agvCountOverride));
             }
             else if (!string.IsNullOrEmpty(benchmarkPath))
             {
-                StartCoroutine(RunBenchmarkCoroutine(benchmarkPath, repeats, disruption));
+                StartCoroutine(RunBenchmarkCoroutine(benchmarkPath, repeats, disruption, agvCountOverride));
             }
             else
             {
@@ -305,7 +318,8 @@ namespace Assets.Scripts.Simulation
         /// calibration via BrandimartLoader.LoadDeferredWithStochastic.
         /// </remarks>
         private IEnumerator RunMultiBenchmarkCoroutine(string dirPath, int repeats,
-                                                        StochasticDisruption disruption = StochasticDisruption.None)
+                                                        StochasticDisruption disruption = StochasticDisruption.None,
+                                                        int agvCountOverride = -1)
         {
             isBatchRunning = true;
             if (activeRules == null || activeRules.Length == 0)
@@ -331,13 +345,13 @@ namespace Assets.Scripts.Simulation
 
             foreach (string file in files)
             {
-                var (config, buildJobs) = LoadBenchmark(file, disruption);
+                var (config, buildJobs) = LoadBenchmark(file, disruption, agvCountOverride);
                 if (config != null)
                 {
                     benchmarks.Add((file, config, buildJobs));
                     SimLogger.Low($"[BatchRunner] Loaded benchmark: {config.Name} " +
-                                  $"({config.JobCount} jobs, {config.MachineTypeLayout.Length} machines) " +
-                                  $"disruption={disruption}");
+                                  $"({config.JobCount} jobs, {config.MachineTypeLayout.Length} machines, " +
+                                  $"{config.AGVCount} AGVs) disruption={disruption}");
                 }
                 else
                 {
@@ -389,13 +403,14 @@ namespace Assets.Scripts.Simulation
         /// RunBenchmarkEpisodes for episode execution.
         /// </remarks>
         private IEnumerator RunBenchmarkCoroutine(string jsonPath, int repeats,
-                                                   StochasticDisruption disruption = StochasticDisruption.None)
+                                                   StochasticDisruption disruption = StochasticDisruption.None,
+                                                   int agvCountOverride = -1)
         {
             isBatchRunning = true;
             if (activeRules == null || activeRules.Length == 0)
                 activeRules = AllRules;
 
-            var (config, buildJobs) = LoadBenchmark(jsonPath, disruption);
+            var (config, buildJobs) = LoadBenchmark(jsonPath, disruption, agvCountOverride);
             if (config == null)
             {
                 QuitWithError($"Failed to load benchmark: {jsonPath}");
@@ -543,11 +558,12 @@ namespace Assets.Scripts.Simulation
         /// </summary>
         private static (FJSSPConfig config,
                          Func<Dictionary<MachineType, List<int>>, FJSSPJobDefinition[]> buildJobs)
-            LoadBenchmark(string jsonPath, StochasticDisruption disruption)
+            LoadBenchmark(string jsonPath, StochasticDisruption disruption, int agvCountOverride = -1)
         {
             return disruption == StochasticDisruption.None
-                ? BrandimartLoader.LoadDeferred(jsonPath)
-                : BrandimartLoader.LoadDeferredWithStochastic(jsonPath, disruption);
+                ? BrandimartLoader.LoadDeferred(jsonPath, agvCountOverride: agvCountOverride)
+                : BrandimartLoader.LoadDeferredWithStochastic(jsonPath, disruption,
+                                                               agvCountOverride: agvCountOverride);
         }
 
         /// <summary>
