@@ -100,7 +100,7 @@ namespace Assets.Scripts.Simulation.Jobs
                 jobs[j] = new FJSSPJobDefinition
                 {
                     JobId = j,
-                    ArrivalTime = UnityEngine.Random.Range(0f, config.MaxArrivalTime),
+                    ArrivalTime = UnityEngine.Random.Range(0f, config.Stochastic.InitialArrivalSpread),
                     OperationSequence = opSequence,
                     EligibleMachinesPerOp = eligible
                 };
@@ -123,51 +123,26 @@ namespace Assets.Scripts.Simulation.Jobs
         /// </remarks>
         private static MachineType[] GenerateOpSequence(int opCount)
         {
-            int typeCount = AllTypes.Length;
-            opCount = Mathf.Max(opCount, typeCount);
+            // opCount comes directly from the configured range — no floor at typeCount.
+            // Draw each operation independently, avoiding consecutive duplicates.
+            var sequence = new MachineType[opCount];
+            const int maxRetries = 8;
 
-            var sequence = new List<MachineType>(opCount);
-
-            foreach (MachineType t in AllTypes)
-                sequence.Add(t);
-
-            int remaining = opCount - typeCount;
-            var secondVisitPool = new List<MachineType>(AllTypes);
-
-            for (int i = 0; i < remaining && secondVisitPool.Count > 0; i++)
+            for (int i = 0; i < opCount; i++)
             {
-                int pick = UnityEngine.Random.Range(0, secondVisitPool.Count);
-                sequence.Add(secondVisitPool[pick]);
-                secondVisitPool.RemoveAt(pick);
-            }
-
-            // Fisher-Yates shuffle
-            for (int i = sequence.Count - 1; i > 0; i--)
-            {
-                int j = UnityEngine.Random.Range(0, i + 1);
-                (sequence[i], sequence[j]) = (sequence[j], sequence[i]);
-            }
-
-            // Repair consecutive duplicates
-            for (int i = 0; i < sequence.Count - 1; i++)
-            {
-                if (sequence[i] == sequence[i + 1])
+                int retries = 0;
+                MachineType picked;
+                do
                 {
-                    bool repaired = false;
-                    for (int k = i + 2; k < sequence.Count; k++)
-                    {
-                        if (sequence[k] != sequence[i])
-                        {
-                            (sequence[i + 1], sequence[k]) = (sequence[k], sequence[i + 1]);
-                            repaired = true;
-                            break;
-                        }
-                    }
-                    if (!repaired) break;
+                    picked = AllTypes[UnityEngine.Random.Range(0, AllTypes.Length)];
+                    retries++;
                 }
+                while (i > 0 && picked == sequence[i - 1] && retries < maxRetries);
+
+                sequence[i] = picked;
             }
 
-            return sequence.ToArray();
+            return sequence;
         }
     }
 }

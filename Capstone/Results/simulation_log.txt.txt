@@ -1,0 +1,33 @@
+--- Log Started: 6/1/2026 4:21:45 PM ---
+2026-06-01 16:21:45.959 [Agent] OnEpisodeBegin skipped — waiting for UI to arm.
+2026-06-01 16:22:10.102 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.005
+2026-06-01 16:22:10.107 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect, Assemble
+  Row1: Mill, Lathe, Weld, Inspect, Assemble
+  Row2: Mill, Lathe, Weld, Inspect, Assemble
+  Row3: Mill, Lathe, Weld, Inspect, Assemble
+  Row4: Mill, Lathe, Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-06-01 16:22:10.155 [FactoryLayout] Distance matrix (25x25):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14    M15    M16    M17    M18    M19    M20    M21    M22    M23    M24  
+2026-06-01 16:22:10.188 [FactoryLayout] Built aisle-based floor: 25 machines.
+2026-06-01 16:22:10.203 [TrafficZones] Built zone graph: 45 zones.
+2026-06-01 16:22:10.224 [AGVPool] Spawned fleet of 30 AGVs.
+2026-06-01 16:24:00.945 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.005
+2026-06-01 16:24:00.946 [Orchestrator] Episode started: 20 jobs, 25 machines, stochastic=True
+2026-06-01 16:24:30.749 [Orchestrator] Machine 2 FAILED. RepairTime=93.1s
+2026-06-01 16:24:30.754 [EpisodeTracker] Machine 2 failed. Episode total failures=1
+2026-06-01 16:24:30.754 [AGV 7] CancelPickup — abandoning pickup for job 11.
+2026-06-01 16:24:30.755 [Failure] WaitingForPickup job 11: AGV 7 pickup cancelled, job re-routed.
+2026-06-01 16:24:30.755 [PhysicalMachine] Machine [2] failure
+2026-06-01 16:24:30.759 [PhysicalMachine] Machine [2] begin repair
+2026-06-01 16:24:50.311 [Orchestrator] Machine 17 FAILED. RepairTime=69.9s
+2026-06-01 16:24:50.311 [EpisodeTracker] Machine 17 failed. Episode total failures=2
+2026-06-01 16:24:50.312 [Failure] AGV 17 carrying job 1 redirected: machine 17 failed → machine 12.
+2026-06-01 16:24:50.312 [PhysicalMachine] Machine [17] failure
+2026-06-01 16:24:50.313 [PhysicalMachine] Machine [17] begin repair
+2026-06-01 16:24:56.827 [Orchestrator] Machine 21 FAILED. RepairTime=50.5s
+2026-06-01 16:24:56.828 [EpisodeTracker] Machine 21 failed. Episode total failures=3
+2026-06-01 16:24:56.828 [PhysicalMachine] Machine [21] failure
+2026-06-01 16:24:56.829 [PhysicalMachine] Machine [21] begin repair

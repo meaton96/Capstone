@@ -1,40 +1,282 @@
---- Log Started: 5/30/2026 8:25:58 PM ---
-2026-05-30 20:25:58.573 [BatchRunner] Loaded benchmark: brandimarte_mk01 (10 jobs, 6 machines, 5 AGVs) disruption=None
-2026-05-30 20:25:58.578 [BatchRunner] Loaded benchmark: brandimarte_mk03 (15 jobs, 8 machines, 5 AGVs) disruption=None
-2026-05-30 20:25:58.579 [BatchRunner] Loaded benchmark: brandimarte_mk04 (15 jobs, 8 machines, 5 AGVs) disruption=None
-2026-05-30 20:25:58.579 [BatchRunner] TimeScale set to 100x via CLI.
-2026-05-30 20:25:58.582 [BatchRunner] Active rules (1): LRT_MMUR
-2026-05-30 20:25:58.583 [BatchRunner] Loaded benchmark: brandimarte_mk06 (10 jobs, 10 machines, 5 AGVs) disruption=None
-2026-05-30 20:25:58.583 [BatchRunner] Loaded benchmark: brandimarte_mk07 (20 jobs, 5 machines, 5 AGVs) disruption=None
-2026-05-30 20:25:58.584 [BatchRunner] Results subdirectory: agv_sweep/agv10/none
-2026-05-30 20:25:58.585 [BatchRunner] AGV count override: 10
-2026-05-30 20:25:58.585 [BatchRunner] Disruption mode: None
-2026-05-30 20:25:58.587 [BatchRunner] Loaded benchmark: brandimarte_mk10 (20 jobs, 15 machines, 5 AGVs) disruption=None
-2026-05-30 20:25:58.590 [BatchRunner] Loaded benchmark: brandimarte_mk11 (30 jobs, 5 machines, 5 AGVs) disruption=None
-2026-05-30 20:25:58.594 [BatchRunner] Loaded benchmark: brandimarte_mk13 (30 jobs, 10 machines, 5 AGVs) disruption=None
-2026-05-30 20:25:58.599 [BatchRunner] Loaded benchmark: brandimarte_mk15 (30 jobs, 15 machines, 5 AGVs) disruption=None
-2026-05-30 20:25:58.599 [BatchRunner] Multi-benchmark: 9 files x 1 rules x 3 repeats = 27 total runs [disruption=None]
-2026-05-30 20:25:58.599 [BatchRunner] ─── brandimarte_mk01 (10j × 6m) ───
-2026-05-30 20:25:58.600 [BatchRunner] Run 1/27: benchmark=brandimarte_mk01 rule=LRT_MMUR seed=42
-2026-05-30 20:25:58.601 [StochasticMgr] Deterministic mode (no stochastic config).
-2026-05-30 20:25:58.610 [BatchRunner] Loaded benchmark: brandimarte_mk01 (10 jobs, 6 machines, 10 AGVs) disruption=None
-2026-05-30 20:25:58.614 [BatchRunner] Loaded benchmark: brandimarte_mk03 (15 jobs, 8 machines, 10 AGVs) disruption=None
-2026-05-30 20:25:58.614 [BatchRunner] Loaded benchmark: brandimarte_mk04 (15 jobs, 8 machines, 10 AGVs) disruption=None
-2026-05-30 20:25:58.618 [BatchRunner] Loaded benchmark: brandimarte_mk06 (10 jobs, 10 machines, 10 AGVs) disruption=None
-2026-05-30 20:25:58.619 [BatchRunner] Loaded benchmark: brandimarte_mk07 (20 jobs, 5 machines, 10 AGVs) disruption=None
-2026-05-30 20:25:58.622 [BatchRunner] Loaded benchmark: brandimarte_mk10 (20 jobs, 15 machines, 10 AGVs) disruption=None
-2026-05-30 20:25:58.624 [BatchRunner] Loaded benchmark: brandimarte_mk11 (30 jobs, 5 machines, 10 AGVs) disruption=None
-2026-05-30 20:25:58.626 [BatchRunner] Loaded benchmark: brandimarte_mk13 (30 jobs, 10 machines, 10 AGVs) disruption=None
-2026-05-30 20:25:58.629 [BrandimartLoader] Loaded 10 jobs from benchmark (6 BM machines → 6 runtime machines across 5 types)
-2026-05-30 20:25:58.630 [BatchRunner] Loaded benchmark: brandimarte_mk15 (30 jobs, 15 machines, 10 AGVs) disruption=None
-2026-05-30 20:25:58.630 [BatchRunner] Multi-benchmark: 9 files x 1 rules x 3 repeats = 27 total runs [disruption=None]
-2026-05-30 20:25:58.630 [BatchRunner] ─── brandimarte_mk01 (10j × 6m) ───
-2026-05-30 20:25:58.631 [BatchRunner] Run 1/27: benchmark=brandimarte_mk01 rule=LRT_MMUR seed=42
-2026-05-30 20:25:58.631 [StochasticMgr] Deterministic mode (no stochastic config).
-2026-05-30 20:25:58.632 [Orchestrator] Using prebuilt benchmark jobs
-2026-05-30 20:25:58.634 [Orchestrator] Episode started: 10 jobs, 6 machines, stochastic=False
-2026-05-30 20:25:58.635 [Agent] OnEpisodeBegin skipped — waiting for UI to arm.
-2026-05-30 20:25:58.665 [BrandimartLoader] Loaded 10 jobs from benchmark (6 BM machines → 6 runtime machines across 5 types)
-2026-05-30 20:25:58.667 [Orchestrator] Using prebuilt benchmark jobs
-2026-05-30 20:25:58.669 [Orchestrator] Episode started: 10 jobs, 6 machines, stochastic=False
-2026-05-30 20:25:58.671 [Agent] OnEpisodeBegin skipped — waiting for UI to arm.
+--- Log Started: 5/31/2026 6:33:08 AM ---
+2026-05-31 06:33:08.032 [BatchRunner] TimeScale set to 100x via CLI.
+2026-05-31 06:33:08.034 [BatchRunner] Active rules (1): LRT_MMUR
+2026-05-31 06:33:08.037 [BatchRunner] Results subdirectory: agv_sweep/agv30/none
+2026-05-31 06:33:08.037 [BatchRunner] AGV count override: 30
+2026-05-31 06:33:08.037 [BatchRunner] Disruption mode: None
+2026-05-31 06:33:08.061 [BatchRunner] Loaded benchmark: brandimarte_mk01 (10 jobs, 6 machines, 30 AGVs) disruption=None
+2026-05-31 06:33:08.067 [BatchRunner] Loaded benchmark: brandimarte_mk03 (15 jobs, 8 machines, 30 AGVs) disruption=None
+2026-05-31 06:33:08.068 [BatchRunner] Loaded benchmark: brandimarte_mk04 (15 jobs, 8 machines, 30 AGVs) disruption=None
+2026-05-31 06:33:08.071 [BatchRunner] Loaded benchmark: brandimarte_mk06 (10 jobs, 10 machines, 30 AGVs) disruption=None
+2026-05-31 06:33:08.073 [BatchRunner] Loaded benchmark: brandimarte_mk07 (20 jobs, 5 machines, 30 AGVs) disruption=None
+2026-05-31 06:33:08.076 [BatchRunner] Loaded benchmark: brandimarte_mk10 (20 jobs, 15 machines, 30 AGVs) disruption=None
+2026-05-31 06:33:08.078 [BatchRunner] Loaded benchmark: brandimarte_mk11 (30 jobs, 5 machines, 30 AGVs) disruption=None
+2026-05-31 06:33:08.082 [BatchRunner] Loaded benchmark: brandimarte_mk13 (30 jobs, 10 machines, 30 AGVs) disruption=None
+2026-05-31 06:33:08.086 [BatchRunner] Loaded benchmark: brandimarte_mk15 (30 jobs, 15 machines, 30 AGVs) disruption=None
+2026-05-31 06:33:08.086 [BatchRunner] Multi-benchmark: 9 files x 1 rules x 3 repeats = 27 total runs [disruption=None]
+2026-05-31 06:33:08.087 [BatchRunner] ─── brandimarte_mk01 (10j × 6m) ───
+2026-05-31 06:33:08.087 [BatchRunner] Run 1/27: benchmark=brandimarte_mk01 rule=LRT_MMUR seed=42
+2026-05-31 06:33:08.088 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-05-31 06:33:08.126 [BrandimartLoader] Loaded 10 jobs from benchmark (6 BM machines → 6 runtime machines across 5 types)
+2026-05-31 06:33:08.129 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-31 06:33:08.131 [Orchestrator] Episode started: 10 jobs, 6 machines, stochastic=False
+2026-05-31 06:33:08.133 [Agent] OnEpisodeBegin skipped — waiting for UI to arm.
+2026-05-31 06:35:41.325 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 06:35:41.326 [Orchestrator] Logging Academy Episode
+2026-05-31 06:35:41.330 [BatchRunner] Progress: 1/27 (153.2s elapsed, ETA 3984.3s)
+2026-05-31 06:35:41.886 [BatchRunner] Run 2/27: benchmark=brandimarte_mk01 rule=LRT_MMUR seed=43
+2026-05-31 06:35:41.886 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-05-31 06:35:41.896 [BrandimartLoader] Loaded 10 jobs from benchmark (6 BM machines → 6 runtime machines across 5 types)
+2026-05-31 06:35:41.896 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-31 06:35:41.897 [Orchestrator] Episode started: 10 jobs, 6 machines, stochastic=False
+2026-05-31 06:38:17.503 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 06:38:17.503 [Orchestrator] Logging Academy Episode
+2026-05-31 06:38:17.504 [BatchRunner] Progress: 2/27 (309.4s elapsed, ETA 3867.7s)
+2026-05-31 06:38:18.062 [BatchRunner] Run 3/27: benchmark=brandimarte_mk01 rule=LRT_MMUR seed=44
+2026-05-31 06:38:18.062 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-05-31 06:38:18.071 [BrandimartLoader] Loaded 10 jobs from benchmark (6 BM machines → 6 runtime machines across 5 types)
+2026-05-31 06:38:18.071 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-31 06:38:18.072 [Orchestrator] Episode started: 10 jobs, 6 machines, stochastic=False
+2026-05-31 06:40:55.900 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 06:40:55.900 [Orchestrator] Logging Academy Episode
+2026-05-31 06:40:55.901 [BatchRunner] Progress: 3/27 (467.8s elapsed, ETA 3742.5s)
+2026-05-31 06:40:56.459 [BatchRunner] ─── brandimarte_mk03 (15j × 8m) ───
+2026-05-31 06:40:56.459 [BatchRunner] Run 4/27: benchmark=brandimarte_mk03 rule=LRT_MMUR seed=42
+2026-05-31 06:40:56.459 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-05-31 06:40:56.472 [BrandimartLoader] Loaded 15 jobs from benchmark (8 BM machines → 8 runtime machines across 5 types)
+2026-05-31 06:40:56.473 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-31 06:40:56.473 [Orchestrator] Episode started: 15 jobs, 8 machines, stochastic=False
+2026-05-31 06:42:18.553 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 06:42:18.553 [Orchestrator] Logging Academy Episode
+2026-05-31 06:42:18.554 [BatchRunner] Progress: 23/27 (11359.1s elapsed, ETA 1975.5s)
+2026-05-31 06:42:19.118 [BatchRunner] Run 24/27: benchmark=brandimarte_mk13 rule=LRT_MMUR seed=44
+2026-05-31 06:42:19.118 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-05-31 06:42:19.133 [BrandimartLoader] Loaded 30 jobs from benchmark (10 BM machines → 10 runtime machines across 5 types)
+2026-05-31 06:42:19.133 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-31 06:42:19.135 [Orchestrator] Episode started: 30 jobs, 10 machines, stochastic=False
+2026-05-31 06:47:35.207 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 06:47:35.208 [Orchestrator] Logging Academy Episode
+2026-05-31 06:47:35.208 [BatchRunner] Progress: 4/27 (867.1s elapsed, ETA 4985.9s)
+2026-05-31 06:47:35.776 [BatchRunner] Run 5/27: benchmark=brandimarte_mk03 rule=LRT_MMUR seed=43
+2026-05-31 06:47:35.776 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-05-31 06:47:35.789 [BrandimartLoader] Loaded 15 jobs from benchmark (8 BM machines → 8 runtime machines across 5 types)
+2026-05-31 06:47:35.789 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-31 06:47:35.790 [Orchestrator] Episode started: 15 jobs, 8 machines, stochastic=False
+2026-05-31 06:54:19.100 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 06:54:19.100 [Orchestrator] Logging Academy Episode
+2026-05-31 06:54:19.101 [BatchRunner] Progress: 5/27 (1271.0s elapsed, ETA 5592.4s)
+2026-05-31 06:54:19.670 [BatchRunner] Run 6/27: benchmark=brandimarte_mk03 rule=LRT_MMUR seed=44
+2026-05-31 06:54:19.670 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-05-31 06:54:19.682 [BrandimartLoader] Loaded 15 jobs from benchmark (8 BM machines → 8 runtime machines across 5 types)
+2026-05-31 06:54:19.683 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-31 06:54:19.683 [Orchestrator] Episode started: 15 jobs, 8 machines, stochastic=False
+2026-05-31 07:01:03.849 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 07:01:03.849 [Orchestrator] Logging Academy Episode
+2026-05-31 07:01:03.850 [BatchRunner] Progress: 6/27 (1675.8s elapsed, ETA 5865.1s)
+2026-05-31 07:01:04.435 [BatchRunner] ─── brandimarte_mk04 (15j × 8m) ───
+2026-05-31 07:01:04.435 [BatchRunner] Run 7/27: benchmark=brandimarte_mk04 rule=LRT_MMUR seed=42
+2026-05-31 07:01:04.435 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-05-31 07:01:04.447 [BrandimartLoader] Loaded 15 jobs from benchmark (8 BM machines → 8 runtime machines across 5 types)
+2026-05-31 07:01:04.448 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-31 07:01:04.448 [Orchestrator] Episode started: 15 jobs, 8 machines, stochastic=False
+2026-05-31 07:04:06.849 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 07:04:06.850 [Orchestrator] Logging Academy Episode
+2026-05-31 07:04:06.850 [BatchRunner] Progress: 24/27 (12667.4s elapsed, ETA 1583.4s)
+2026-05-31 07:04:07.399 [BatchRunner] ─── brandimarte_mk15 (30j × 15m) ───
+2026-05-31 07:04:07.399 [BatchRunner] Run 25/27: benchmark=brandimarte_mk15 rule=LRT_MMUR seed=42
+2026-05-31 07:04:07.399 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-05-31 07:04:07.419 [BrandimartLoader] Loaded 30 jobs from benchmark (15 BM machines → 15 runtime machines across 5 types)
+2026-05-31 07:04:07.419 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-31 07:04:07.419 [Orchestrator] Episode started: 30 jobs, 15 machines, stochastic=False
+2026-05-31 07:04:37.103 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 07:04:37.103 [Orchestrator] Logging Academy Episode
+2026-05-31 07:04:37.104 [BatchRunner] Progress: 7/27 (1889.0s elapsed, ETA 5397.2s)
+2026-05-31 07:04:37.656 [BatchRunner] Run 8/27: benchmark=brandimarte_mk04 rule=LRT_MMUR seed=43
+2026-05-31 07:04:37.656 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-05-31 07:04:37.669 [BrandimartLoader] Loaded 15 jobs from benchmark (8 BM machines → 8 runtime machines across 5 types)
+2026-05-31 07:04:37.669 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-31 07:04:37.669 [Orchestrator] Episode started: 15 jobs, 8 machines, stochastic=False
+2026-05-31 07:08:10.730 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 07:08:10.730 [Orchestrator] Logging Academy Episode
+2026-05-31 07:08:10.731 [BatchRunner] Progress: 8/27 (2102.6s elapsed, ETA 4993.8s)
+2026-05-31 07:08:11.297 [BatchRunner] Run 9/27: benchmark=brandimarte_mk04 rule=LRT_MMUR seed=44
+2026-05-31 07:08:11.297 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-05-31 07:08:11.309 [BrandimartLoader] Loaded 15 jobs from benchmark (8 BM machines → 8 runtime machines across 5 types)
+2026-05-31 07:08:11.309 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-31 07:08:11.309 [Orchestrator] Episode started: 15 jobs, 8 machines, stochastic=False
+2026-05-31 07:11:45.242 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 07:11:45.243 [Orchestrator] Logging Academy Episode
+2026-05-31 07:11:45.243 [BatchRunner] Progress: 9/27 (2317.1s elapsed, ETA 4634.3s)
+2026-05-31 07:11:45.806 [BatchRunner] ─── brandimarte_mk06 (10j × 10m) ───
+2026-05-31 07:11:45.806 [BatchRunner] Run 10/27: benchmark=brandimarte_mk06 rule=LRT_MMUR seed=42
+2026-05-31 07:11:45.806 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-05-31 07:11:45.821 [BrandimartLoader] Loaded 10 jobs from benchmark (10 BM machines → 10 runtime machines across 5 types)
+2026-05-31 07:11:45.822 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-31 07:11:45.822 [Orchestrator] Episode started: 10 jobs, 10 machines, stochastic=False
+2026-05-31 07:17:25.525 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 07:17:25.526 [Orchestrator] Logging Academy Episode
+2026-05-31 07:17:25.526 [BatchRunner] Progress: 10/27 (2657.4s elapsed, ETA 4517.6s)
+2026-05-31 07:17:26.122 [BatchRunner] Run 11/27: benchmark=brandimarte_mk06 rule=LRT_MMUR seed=43
+2026-05-31 07:17:26.122 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-05-31 07:17:26.136 [BrandimartLoader] Loaded 10 jobs from benchmark (10 BM machines → 10 runtime machines across 5 types)
+2026-05-31 07:17:26.136 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-31 07:17:26.137 [Orchestrator] Episode started: 10 jobs, 10 machines, stochastic=False
+2026-05-31 07:20:30.054 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 07:20:30.054 [Orchestrator] Logging Academy Episode
+2026-05-31 07:20:30.055 [BatchRunner] Progress: 25/27 (13650.6s elapsed, ETA 1092.1s)
+2026-05-31 07:20:30.637 [BatchRunner] Run 26/27: benchmark=brandimarte_mk15 rule=LRT_MMUR seed=43
+2026-05-31 07:20:30.637 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-05-31 07:20:30.655 [BrandimartLoader] Loaded 30 jobs from benchmark (15 BM machines → 15 runtime machines across 5 types)
+2026-05-31 07:20:30.655 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-31 07:20:30.656 [Orchestrator] Episode started: 30 jobs, 15 machines, stochastic=False
+2026-05-31 07:23:06.142 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 07:23:06.142 [Orchestrator] Logging Academy Episode
+2026-05-31 07:23:06.143 [BatchRunner] Progress: 11/27 (2998.0s elapsed, ETA 4360.8s)
+2026-05-31 07:23:06.727 [BatchRunner] Run 12/27: benchmark=brandimarte_mk06 rule=LRT_MMUR seed=44
+2026-05-31 07:23:06.728 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-05-31 07:23:06.743 [BrandimartLoader] Loaded 10 jobs from benchmark (10 BM machines → 10 runtime machines across 5 types)
+2026-05-31 07:23:06.745 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-31 07:23:06.745 [Orchestrator] Episode started: 10 jobs, 10 machines, stochastic=False
+2026-05-31 07:28:47.286 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 07:28:47.286 [Orchestrator] Logging Academy Episode
+2026-05-31 07:28:47.287 [BatchRunner] Progress: 12/27 (3339.2s elapsed, ETA 4174.0s)
+2026-05-31 07:28:47.861 [BatchRunner] ─── brandimarte_mk07 (20j × 5m) ───
+2026-05-31 07:28:47.862 [BatchRunner] Run 13/27: benchmark=brandimarte_mk07 rule=LRT_MMUR seed=42
+2026-05-31 07:28:47.862 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-05-31 07:28:47.873 [BrandimartLoader] Loaded 20 jobs from benchmark (5 BM machines → 5 runtime machines across 5 types)
+2026-05-31 07:28:47.873 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-31 07:28:47.873 [Orchestrator] Episode started: 20 jobs, 5 machines, stochastic=False
+2026-05-31 07:35:57.534 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 07:35:57.534 [Orchestrator] Logging Academy Episode
+2026-05-31 07:35:57.534 [BatchRunner] Progress: 13/27 (3769.4s elapsed, ETA 4059.4s)
+2026-05-31 07:35:58.105 [BatchRunner] Run 14/27: benchmark=brandimarte_mk07 rule=LRT_MMUR seed=43
+2026-05-31 07:35:58.106 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-05-31 07:35:58.116 [BrandimartLoader] Loaded 20 jobs from benchmark (5 BM machines → 5 runtime machines across 5 types)
+2026-05-31 07:35:58.116 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-31 07:35:58.117 [Orchestrator] Episode started: 20 jobs, 5 machines, stochastic=False
+2026-05-31 07:36:52.827 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 07:36:52.827 [Orchestrator] Logging Academy Episode
+2026-05-31 07:36:52.828 [BatchRunner] Progress: 26/27 (14633.4s elapsed, ETA 562.8s)
+2026-05-31 07:36:53.402 [BatchRunner] Run 27/27: benchmark=brandimarte_mk15 rule=LRT_MMUR seed=44
+2026-05-31 07:36:53.403 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-05-31 07:36:53.421 [BrandimartLoader] Loaded 30 jobs from benchmark (15 BM machines → 15 runtime machines across 5 types)
+2026-05-31 07:36:53.422 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-31 07:36:53.422 [Orchestrator] Episode started: 30 jobs, 15 machines, stochastic=False
+2026-05-31 07:43:06.644 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 07:43:06.645 [Orchestrator] Logging Academy Episode
+2026-05-31 07:43:06.645 [BatchRunner] Progress: 14/27 (4198.5s elapsed, ETA 3898.6s)
+2026-05-31 07:43:07.197 [BatchRunner] Run 15/27: benchmark=brandimarte_mk07 rule=LRT_MMUR seed=44
+2026-05-31 07:43:07.198 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-05-31 07:43:07.208 [BrandimartLoader] Loaded 20 jobs from benchmark (5 BM machines → 5 runtime machines across 5 types)
+2026-05-31 07:43:07.208 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-31 07:43:07.208 [Orchestrator] Episode started: 20 jobs, 5 machines, stochastic=False
+2026-05-31 07:50:03.521 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 07:50:03.522 [Orchestrator] Logging Academy Episode
+2026-05-31 07:50:03.522 [BatchRunner] Progress: 15/27 (4615.4s elapsed, ETA 3692.3s)
+2026-05-31 07:50:04.075 [BatchRunner] ─── brandimarte_mk10 (20j × 15m) ───
+2026-05-31 07:50:04.075 [BatchRunner] Run 16/27: benchmark=brandimarte_mk10 rule=LRT_MMUR seed=42
+2026-05-31 07:50:04.075 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-05-31 07:50:04.092 [BrandimartLoader] Loaded 20 jobs from benchmark (15 BM machines → 15 runtime machines across 5 types)
+2026-05-31 07:50:04.093 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-31 07:50:04.093 [Orchestrator] Episode started: 20 jobs, 15 machines, stochastic=False
+2026-05-31 07:52:58.521 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 07:52:58.521 [Orchestrator] Logging Academy Episode
+2026-05-31 07:52:58.521 [BatchRunner] Progress: 27/27 (15599.1s elapsed, ETA 0.0s)
+2026-05-31 07:52:59.081 [BatchRunner] All benchmarks complete: 27 runs in 15599.6s
+2026-05-31 07:52:59.082 [BatchRunner] Headless mode — quitting application.
+2026-05-31 08:00:07.965 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 08:00:07.965 [Orchestrator] Logging Academy Episode
+2026-05-31 08:00:07.966 [BatchRunner] Progress: 16/27 (5219.8s elapsed, ETA 3588.6s)
+2026-05-31 08:00:08.512 [BatchRunner] Run 17/27: benchmark=brandimarte_mk10 rule=LRT_MMUR seed=43
+2026-05-31 08:00:08.512 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-05-31 08:00:08.533 [BrandimartLoader] Loaded 20 jobs from benchmark (15 BM machines → 15 runtime machines across 5 types)
+2026-05-31 08:00:08.533 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-31 08:00:08.533 [Orchestrator] Episode started: 20 jobs, 15 machines, stochastic=False
+2026-05-31 08:09:58.098 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 08:09:58.098 [Orchestrator] Logging Academy Episode
+2026-05-31 08:09:58.099 [BatchRunner] Progress: 17/27 (5810.0s elapsed, ETA 3417.6s)
+2026-05-31 08:09:58.630 [BatchRunner] Run 18/27: benchmark=brandimarte_mk10 rule=LRT_MMUR seed=44
+2026-05-31 08:09:58.631 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-05-31 08:09:58.649 [BrandimartLoader] Loaded 20 jobs from benchmark (15 BM machines → 15 runtime machines across 5 types)
+2026-05-31 08:09:58.649 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-31 08:09:58.649 [Orchestrator] Episode started: 20 jobs, 15 machines, stochastic=False
+2026-05-31 08:19:44.717 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 08:19:44.717 [Orchestrator] Logging Academy Episode
+2026-05-31 08:19:44.718 [BatchRunner] Progress: 18/27 (6396.6s elapsed, ETA 3198.3s)
+2026-05-31 08:19:45.239 [BatchRunner] ─── brandimarte_mk11 (30j × 5m) ───
+2026-05-31 08:19:45.239 [BatchRunner] Run 19/27: benchmark=brandimarte_mk11 rule=LRT_MMUR seed=42
+2026-05-31 08:19:45.239 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-05-31 08:19:45.250 [BrandimartLoader] Loaded 30 jobs from benchmark (5 BM machines → 5 runtime machines across 5 types)
+2026-05-31 08:19:45.251 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-31 08:19:45.251 [Orchestrator] Episode started: 30 jobs, 5 machines, stochastic=False
+2026-05-31 08:31:40.580 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 08:31:40.580 [Orchestrator] Logging Academy Episode
+2026-05-31 08:31:40.580 [BatchRunner] Progress: 19/27 (7112.5s elapsed, ETA 2994.7s)
+2026-05-31 08:31:41.090 [BatchRunner] Run 20/27: benchmark=brandimarte_mk11 rule=LRT_MMUR seed=43
+2026-05-31 08:31:41.090 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-05-31 08:31:41.101 [BrandimartLoader] Loaded 30 jobs from benchmark (5 BM machines → 5 runtime machines across 5 types)
+2026-05-31 08:31:41.101 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-31 08:31:41.101 [Orchestrator] Episode started: 30 jobs, 5 machines, stochastic=False
+2026-05-31 08:43:19.288 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 08:43:19.288 [Orchestrator] Logging Academy Episode
+2026-05-31 08:43:19.289 [BatchRunner] Progress: 20/27 (7811.2s elapsed, ETA 2733.9s)
+2026-05-31 08:43:19.784 [BatchRunner] Run 21/27: benchmark=brandimarte_mk11 rule=LRT_MMUR seed=44
+2026-05-31 08:43:19.784 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-05-31 08:43:19.794 [BrandimartLoader] Loaded 30 jobs from benchmark (5 BM machines → 5 runtime machines across 5 types)
+2026-05-31 08:43:19.795 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-31 08:43:19.795 [Orchestrator] Episode started: 30 jobs, 5 machines, stochastic=False
+2026-05-31 08:54:28.515 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 08:54:28.516 [Orchestrator] Logging Academy Episode
+2026-05-31 08:54:28.516 [BatchRunner] Progress: 21/27 (8480.4s elapsed, ETA 2423.0s)
+2026-05-31 08:54:28.995 [BatchRunner] ─── brandimarte_mk13 (30j × 10m) ───
+2026-05-31 08:54:28.995 [BatchRunner] Run 22/27: benchmark=brandimarte_mk13 rule=LRT_MMUR seed=42
+2026-05-31 08:54:28.995 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-05-31 08:54:29.012 [BrandimartLoader] Loaded 30 jobs from benchmark (10 BM machines → 10 runtime machines across 5 types)
+2026-05-31 08:54:29.012 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-31 08:54:29.012 [Orchestrator] Episode started: 30 jobs, 10 machines, stochastic=False
+2026-05-31 09:12:31.371 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 09:12:31.371 [Orchestrator] Logging Academy Episode
+2026-05-31 09:12:31.372 [BatchRunner] Progress: 22/27 (9563.2s elapsed, ETA 2173.5s)
+2026-05-31 09:12:31.846 [BatchRunner] Run 23/27: benchmark=brandimarte_mk13 rule=LRT_MMUR seed=43
+2026-05-31 09:12:31.847 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-05-31 09:12:31.860 [BrandimartLoader] Loaded 30 jobs from benchmark (10 BM machines → 10 runtime machines across 5 types)
+2026-05-31 09:12:31.861 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-31 09:12:31.861 [Orchestrator] Episode started: 30 jobs, 10 machines, stochastic=False
+2026-05-31 09:29:57.030 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 09:29:57.030 [Orchestrator] Logging Academy Episode
+2026-05-31 09:29:57.031 [BatchRunner] Progress: 23/27 (10608.9s elapsed, ETA 1845.0s)
+2026-05-31 09:29:57.492 [BatchRunner] Run 24/27: benchmark=brandimarte_mk13 rule=LRT_MMUR seed=44
+2026-05-31 09:29:57.492 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-05-31 09:29:57.505 [BrandimartLoader] Loaded 30 jobs from benchmark (10 BM machines → 10 runtime machines across 5 types)
+2026-05-31 09:29:57.505 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-31 09:29:57.505 [Orchestrator] Episode started: 30 jobs, 10 machines, stochastic=False
+2026-05-31 09:47:17.721 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 09:47:17.721 [Orchestrator] Logging Academy Episode
+2026-05-31 09:47:17.721 [BatchRunner] Progress: 24/27 (11649.6s elapsed, ETA 1456.2s)
+2026-05-31 09:47:18.164 [BatchRunner] ─── brandimarte_mk15 (30j × 15m) ───
+2026-05-31 09:47:18.164 [BatchRunner] Run 25/27: benchmark=brandimarte_mk15 rule=LRT_MMUR seed=42
+2026-05-31 09:47:18.164 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-05-31 09:47:18.181 [BrandimartLoader] Loaded 30 jobs from benchmark (15 BM machines → 15 runtime machines across 5 types)
+2026-05-31 09:47:18.182 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-31 09:47:18.182 [Orchestrator] Episode started: 30 jobs, 15 machines, stochastic=False
+2026-05-31 09:59:54.898 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 09:59:54.898 [Orchestrator] Logging Academy Episode
+2026-05-31 09:59:54.899 [BatchRunner] Progress: 25/27 (12406.7s elapsed, ETA 992.5s)
+2026-05-31 09:59:55.355 [BatchRunner] Run 26/27: benchmark=brandimarte_mk15 rule=LRT_MMUR seed=43
+2026-05-31 09:59:55.355 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-05-31 09:59:55.372 [BrandimartLoader] Loaded 30 jobs from benchmark (15 BM machines → 15 runtime machines across 5 types)
+2026-05-31 09:59:55.372 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-31 09:59:55.372 [Orchestrator] Episode started: 30 jobs, 15 machines, stochastic=False
+2026-05-31 10:12:34.215 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 10:12:34.215 [Orchestrator] Logging Academy Episode
+2026-05-31 10:12:34.216 [BatchRunner] Progress: 26/27 (13166.1s elapsed, ETA 506.4s)
+2026-05-31 10:12:34.675 [BatchRunner] Run 27/27: benchmark=brandimarte_mk15 rule=LRT_MMUR seed=44
+2026-05-31 10:12:34.675 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-05-31 10:12:34.690 [BrandimartLoader] Loaded 30 jobs from benchmark (15 BM machines → 15 runtime machines across 5 types)
+2026-05-31 10:12:34.690 [Orchestrator] Using prebuilt benchmark jobs
+2026-05-31 10:12:34.691 [Orchestrator] Episode started: 30 jobs, 15 machines, stochastic=False
+2026-05-31 10:25:15.944 [TelemetryChannel] Flushed 0 events to Python.
+2026-05-31 10:25:15.944 [Orchestrator] Logging Academy Episode
+2026-05-31 10:25:15.945 [BatchRunner] Progress: 27/27 (13927.8s elapsed, ETA 0.0s)
+2026-05-31 10:25:16.403 [BatchRunner] All benchmarks complete: 27 runs in 13928.2s
+2026-05-31 10:25:16.403 [BatchRunner] Headless mode — quitting application.

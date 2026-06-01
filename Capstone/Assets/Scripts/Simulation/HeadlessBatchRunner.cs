@@ -607,10 +607,10 @@ namespace Assets.Scripts.Simulation
                 MaxProcTime = source.MaxProcTime,
                 MinOpsPerJob = source.MinOpsPerJob,
                 MaxOpsPerJob = source.MaxOpsPerJob,
-                MaxArrivalTime = source.MaxArrivalTime,
                 AGVCount = source.AGVCount,
                 ProcTimeParams = source.ProcTimeParams,
                 Stochastic = source.Stochastic,
+                dispatchingRule = source.dispatchingRule
             };
         }
 

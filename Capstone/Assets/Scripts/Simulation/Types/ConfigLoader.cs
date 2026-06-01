@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using Assets.Scripts.Simulation.Machines;
 using Assets.Scripts.Simulation.Logging;
+using System.Collections.Generic;
 
 namespace Assets.Scripts.Simulation.Types
 {
@@ -135,6 +136,22 @@ namespace Assets.Scripts.Simulation.Types
             public float maxArrivalTime = 0f;
             public int agvCount = 3;
             public float machineFlexibilityProbability = 0f;
+            public JsonStochasticConfig stochastic = null;
+        }
+        [Serializable]
+        private class JsonStochasticConfig
+        {
+            public bool machineFailuresEnabled = false;
+            public float weibullK = 1.5f;
+            public float weibullLambda = 2700f;
+            public float repairLogMu = 4.0f;
+            public float repairLogSigma = 0.5f;
+            public bool agvFailuresEnabled = false;
+            public float agvWeibullLambda = 700f;
+            public float agvRepairLogMu = 3.4f;
+            public float agvRepairLogSigma = 0.4f;
+            public bool dynamicArrivalsEnabled = false;
+            public float arrivalLambda = 0.003f;
         }
 
         // ── Conversion ──
@@ -170,7 +187,13 @@ namespace Assets.Scripts.Simulation.Types
                 for (int m = 0; m < raw.machinesPerType; m++)
                     layout[t * raw.machinesPerType + m] = baseTypes[t];
 
-            return new FJSSPConfig
+            float mu = (raw.minProcTime + raw.maxProcTime) * 0.5f;
+            float sigma = (raw.maxProcTime - raw.minProcTime) / 6f;
+            var procTimeParams = new Dictionary<MachineType, (float mu, float sigma)>();
+            foreach (MachineType t in baseTypes)
+                procTimeParams[t] = (mu, sigma);
+
+            FJSSPConfig cfg = new FJSSPConfig
             {
                 Name = string.IsNullOrEmpty(raw.name) ? "unnamed" : raw.name,
                 Seed = raw.seed,
@@ -181,10 +204,30 @@ namespace Assets.Scripts.Simulation.Types
                 MaxProcTime = raw.maxProcTime,
                 MinOpsPerJob = raw.minOpsPerJob,
                 MaxOpsPerJob = raw.maxOpsPerJob,
-                MaxArrivalTime = raw.maxArrivalTime,
                 AGVCount = raw.agvCount,
                 MachineFlexibilityProbability = raw.machineFlexibilityProbability,
+                ProcTimeParams = procTimeParams,
             };
+
+            if (raw.stochastic != null)
+            {
+                cfg.Stochastic = new StochasticConfig
+                {
+                    MachineFailuresEnabled = raw.stochastic.machineFailuresEnabled,
+                    WeibullK = raw.stochastic.weibullK,
+                    WeibullLambda = raw.stochastic.weibullLambda,
+                    RepairLogMu = raw.stochastic.repairLogMu,
+                    RepairLogSigma = raw.stochastic.repairLogSigma,
+                    AGVFailuresEnabled = raw.stochastic.agvFailuresEnabled,
+                    AGVWeibullLambda = raw.stochastic.agvWeibullLambda,
+                    AGVRepairLogMu = raw.stochastic.agvRepairLogMu,
+                    AGVRepairLogSigma = raw.stochastic.agvRepairLogSigma,
+                    DynamicArrivalsEnabled = raw.stochastic.dynamicArrivalsEnabled,
+                    ArrivalLambda = raw.stochastic.arrivalLambda,
+                };
+            }
+
+            return cfg;
         }
 
         /// @brief Parses a machine type name string to its corresponding MachineType enum value.

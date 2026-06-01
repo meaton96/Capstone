@@ -266,7 +266,6 @@ namespace Assets.Scripts.UI
                 AGVCount = ParseInt(agvCountInput, 5),
                 MinOpsPerJob = ParseInt(minOpsInput, 3),
                 MaxOpsPerJob = ParseInt(maxOpsInput, 7),
-                MaxArrivalTime = ParseFloat(arrivalWindowInput, 0f),
                 ProcTimeParams = procParams,
                 dispatchingRule = selectedRule,
                 // Fallback uniform bounds — only used for types missing from procParams

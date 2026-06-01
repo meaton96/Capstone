@@ -26,6 +26,11 @@ namespace Assets.Scripts.Simulation.Types
     /// @see StochasticEventManager
     public class StochasticConfig
     {
+        /// @brief Uniform spread window for the initial job batch (sim-seconds).
+        /// @details Jobs in the initial batch are released uniformly in [0, InitialArrivalSpread].
+        /// 0 = all jobs released at t=0 (default). Distinct from DynamicArrivalsEnabled,
+        /// which controls mid-episode Poisson arrivals after the initial batch.
+        public float InitialArrivalSpread = 0f;
         // ── Machine failures ──
 
         /// @brief Enable Weibull-distributed machine time-to-failure sampling.

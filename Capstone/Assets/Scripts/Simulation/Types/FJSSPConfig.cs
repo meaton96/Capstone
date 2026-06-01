@@ -59,7 +59,7 @@ namespace Assets.Scripts.Simulation.Types
 
         /// @brief Maximum arrival time for initial job batch (time window).
         /// @details Controls how spread out initial job releases are.
-        public float MaxArrivalTime;
+       // public float MaxArrivalTime;
 
         // ── AGV fleet ──
 
@@ -126,7 +126,6 @@ namespace Assets.Scripts.Simulation.Types
                 MaxProcTime = MaxProcTime,
                 MinOpsPerJob = MinOpsPerJob,
                 MaxOpsPerJob = MaxOpsPerJob,
-                MaxArrivalTime = MaxArrivalTime,
                 AGVCount = AGVCount,
                 dispatchingRule = dispatchingRule,
                 ProcTimeParams = new Dictionary<MachineType, (float mu, float sigma)>(ProcTimeParams),

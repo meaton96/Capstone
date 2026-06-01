@@ -89,7 +89,6 @@ namespace Assets.Scripts.Simulation.Channels
                 MaxProcTime = root["maxProcTime"]?.Value<float>() ?? 60f,
                 MinOpsPerJob = root["minOpsPerJob"]?.Value<int>() ?? 3,
                 MaxOpsPerJob = root["maxOpsPerJob"]?.Value<int>() ?? 6,
-                MaxArrivalTime = root["maxArrivalTime"]?.Value<float>() ?? 0f,
                 AGVCount = root["agvCount"]?.Value<int>() ?? 5,
                 MachineFlexibilityProbability = root["machineFlexibilityProbability"]?.Value<float>() ?? 0f,
 

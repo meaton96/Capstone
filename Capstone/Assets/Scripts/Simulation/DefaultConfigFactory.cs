@@ -30,7 +30,6 @@ namespace Assets.Scripts.Simulation
                 MaxProcTime = 30f,
                 MinOpsPerJob = 2,
                 MaxOpsPerJob = 4,
-                MaxArrivalTime = 0f,
                 AGVCount = 3,
                 ProcTimeParams = new Dictionary<MachineType, (float mu, float sigma)>
                 {
@@ -65,7 +64,6 @@ namespace Assets.Scripts.Simulation
                 MaxProcTime = 30f,
                 MinOpsPerJob = 2,
                 MaxOpsPerJob = 4,
-                MaxArrivalTime = 0f,
                 AGVCount = 3,
                 ProcTimeParams = new Dictionary<MachineType, (float mu, float sigma)>
                 {
@@ -85,6 +83,7 @@ namespace Assets.Scripts.Simulation
                     RepairLogMu = 2.0f,
                     RepairLogSigma = 0.5f,
                     DynamicArrivalsEnabled = false,
+                    InitialArrivalSpread = 0f,
                 }
             };
         }

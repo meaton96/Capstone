@@ -207,7 +207,6 @@ namespace Assets.Scripts.Simulation.Jobs
                 MaxProcTime = maxProc,
                 MinOpsPerJob = minOps,
                 MaxOpsPerJob = maxOps,
-                MaxArrivalTime = 0f,
                 AGVCount = agvCount,
                 Stochastic = stochastic,
             };
