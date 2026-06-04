@@ -73,6 +73,16 @@ updated:
         --agvcounts   5,10,15,20,25,30 \
         --maxworkers  18
 
+
+
+./run_generated.sh \
+    --exe         ./capstone.x86_64 \
+    --batchconfig ./BatchConfigs/BatchConfigs.json \
+    --results     ./Results \
+    --repeats     3 \
+    --timescale   100 \
+    --loglevel    Low
+
 copy:
 
 

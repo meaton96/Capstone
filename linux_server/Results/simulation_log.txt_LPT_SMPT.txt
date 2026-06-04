@@ -1,0 +1,100 @@
+--- Log Started: 6/1/2026 8:30:13 PM ---
+2026-06-01 20:30:13.414 [BatchRunner] TimeScale set to 100x via CLI.
+2026-06-01 20:30:13.416 [BatchRunner] Active rules (1): LPT_SMPT
+2026-06-01 20:30:13.418 [BatchRunner] Results subdirectory: generated
+2026-06-01 20:30:13.418 [BatchRunner] No -agvcount provided. Using BrandimartLoader formula (1.5× machinesPerType).
+2026-06-01 20:30:13.419 [BatchRunner] Disruption mode: None
+2026-06-01 20:30:13.424 [BatchRunner] Starting batch: 5 configs x 1 rules x 3 repeats = 15 total runs
+2026-06-01 20:30:13.424 [BatchRunner] Run 1/15: config=small_5j_5m rule=LPT_SMPT seed=42
+2026-06-01 20:30:13.425 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-06-01 20:30:13.454 [Orchestrator] Episode started: 5 jobs, 5 machines, stochastic=False
+2026-06-01 20:30:13.455 [Agent] OnEpisodeBegin skipped — waiting for UI to arm.
+2026-06-01 20:30:35.653 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-01 20:30:35.654 [Orchestrator] Logging Academy Episode
+2026-06-01 20:30:36.076 [BatchRunner] Progress: 1/15 (22.7s elapsed, ETA 317.1s)
+2026-06-01 20:30:36.076 [BatchRunner] Run 2/15: config=small_5j_5m rule=LPT_SMPT seed=43
+2026-06-01 20:30:36.076 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-06-01 20:30:36.081 [Orchestrator] Episode started: 5 jobs, 5 machines, stochastic=False
+2026-06-01 20:31:06.585 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-01 20:31:06.585 [Orchestrator] Logging Academy Episode
+2026-06-01 20:31:07.053 [BatchRunner] Progress: 2/15 (53.6s elapsed, ETA 348.6s)
+2026-06-01 20:31:07.053 [BatchRunner] Run 3/15: config=small_5j_5m rule=LPT_SMPT seed=44
+2026-06-01 20:31:07.053 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-06-01 20:31:07.057 [Orchestrator] Episode started: 5 jobs, 5 machines, stochastic=False
+2026-06-01 20:31:33.170 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-01 20:31:33.170 [Orchestrator] Logging Academy Episode
+2026-06-01 20:31:33.618 [BatchRunner] Progress: 3/15 (80.2s elapsed, ETA 320.8s)
+2026-06-01 20:31:33.618 [BatchRunner] Run 4/15: config=medium_20j_15m rule=LPT_SMPT seed=42
+2026-06-01 20:31:33.618 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-06-01 20:31:33.628 [Orchestrator] Episode started: 20 jobs, 15 machines, stochastic=False
+2026-06-01 20:34:53.646 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-01 20:34:53.647 [Orchestrator] Logging Academy Episode
+2026-06-01 20:34:54.097 [BatchRunner] Progress: 4/15 (280.7s elapsed, ETA 771.8s)
+2026-06-01 20:34:54.097 [BatchRunner] Run 5/15: config=medium_20j_15m rule=LPT_SMPT seed=43
+2026-06-01 20:34:54.097 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-06-01 20:34:54.107 [Orchestrator] Episode started: 20 jobs, 15 machines, stochastic=False
+2026-06-01 20:38:03.652 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-01 20:38:03.652 [Orchestrator] Logging Academy Episode
+2026-06-01 20:38:04.082 [BatchRunner] Progress: 5/15 (470.7s elapsed, ETA 941.3s)
+2026-06-01 20:38:04.082 [BatchRunner] Run 6/15: config=medium_20j_15m rule=LPT_SMPT seed=44
+2026-06-01 20:38:04.082 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-06-01 20:38:04.092 [Orchestrator] Episode started: 20 jobs, 15 machines, stochastic=False
+2026-06-01 20:43:26.023 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-01 20:43:26.023 [Orchestrator] Logging Academy Episode
+2026-06-01 20:43:26.500 [BatchRunner] Progress: 6/15 (793.1s elapsed, ETA 1189.6s)
+2026-06-01 20:43:26.500 [BatchRunner] Run 7/15: config=large_50j_15m rule=LPT_SMPT seed=42
+2026-06-01 20:43:26.500 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-06-01 20:43:26.510 [Orchestrator] Episode started: 50 jobs, 15 machines, stochastic=False
+2026-06-01 20:49:54.956 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-01 20:49:54.957 [Orchestrator] Logging Academy Episode
+2026-06-01 20:49:55.399 [BatchRunner] Progress: 7/15 (1182.0s elapsed, ETA 1350.8s)
+2026-06-01 20:49:55.399 [BatchRunner] Run 8/15: config=large_50j_15m rule=LPT_SMPT seed=43
+2026-06-01 20:49:55.399 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-06-01 20:49:55.410 [Orchestrator] Episode started: 50 jobs, 15 machines, stochastic=False
+2026-06-01 20:55:28.605 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-01 20:55:28.605 [Orchestrator] Logging Academy Episode
+2026-06-01 20:55:29.063 [BatchRunner] Progress: 8/15 (1515.6s elapsed, ETA 1326.2s)
+2026-06-01 20:55:29.063 [BatchRunner] Run 9/15: config=large_50j_15m rule=LPT_SMPT seed=44
+2026-06-01 20:55:29.063 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-06-01 20:55:29.073 [Orchestrator] Episode started: 50 jobs, 15 machines, stochastic=False
+2026-06-01 21:03:53.487 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-01 21:03:53.488 [Orchestrator] Logging Academy Episode
+2026-06-01 21:03:53.939 [BatchRunner] Progress: 9/15 (2020.5s elapsed, ETA 1347.0s)
+2026-06-01 21:03:53.939 [BatchRunner] Run 10/15: config=xlarge_100j_20m rule=LPT_SMPT seed=42
+2026-06-01 21:03:53.939 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-06-01 21:03:53.953 [Orchestrator] Episode started: 100 jobs, 20 machines, stochastic=False
+2026-06-01 21:20:58.101 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-01 21:20:58.101 [Orchestrator] Logging Academy Episode
+2026-06-01 21:20:58.561 [BatchRunner] Progress: 10/15 (3045.1s elapsed, ETA 1522.6s)
+2026-06-01 21:20:58.561 [BatchRunner] Run 11/15: config=xlarge_100j_20m rule=LPT_SMPT seed=43
+2026-06-01 21:20:58.561 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-06-01 21:20:58.575 [Orchestrator] Episode started: 100 jobs, 20 machines, stochastic=False
+2026-06-01 21:37:30.720 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-01 21:37:30.720 [Orchestrator] Logging Academy Episode
+2026-06-01 21:37:31.160 [BatchRunner] Progress: 11/15 (4037.7s elapsed, ETA 1468.3s)
+2026-06-01 21:37:31.160 [BatchRunner] Run 12/15: config=xlarge_100j_20m rule=LPT_SMPT seed=44
+2026-06-01 21:37:31.160 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-06-01 21:37:31.172 [Orchestrator] Episode started: 100 jobs, 20 machines, stochastic=False
+2026-06-01 21:56:51.804 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-01 21:56:51.804 [Orchestrator] Logging Academy Episode
+2026-06-01 21:56:52.249 [BatchRunner] Progress: 12/15 (5198.8s elapsed, ETA 1299.7s)
+2026-06-01 21:56:52.249 [BatchRunner] Run 13/15: config=dynamic_30j_15m rule=LPT_SMPT seed=42
+2026-06-01 21:56:52.249 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-06-01 21:56:52.260 [Orchestrator] Episode started: 30 jobs, 15 machines, stochastic=False
+2026-06-01 22:00:11.455 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-01 22:00:11.455 [Orchestrator] Logging Academy Episode
+2026-06-01 22:00:11.894 [BatchRunner] Progress: 13/15 (5398.4s elapsed, ETA 830.5s)
+2026-06-01 22:00:11.895 [BatchRunner] Run 14/15: config=dynamic_30j_15m rule=LPT_SMPT seed=43
+2026-06-01 22:00:11.895 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-06-01 22:00:11.904 [Orchestrator] Episode started: 30 jobs, 15 machines, stochastic=False
+2026-06-01 22:03:50.186 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-01 22:03:50.187 [Orchestrator] Logging Academy Episode
+2026-06-01 22:03:50.619 [BatchRunner] Progress: 14/15 (5617.2s elapsed, ETA 401.2s)
+2026-06-01 22:03:50.619 [BatchRunner] Run 15/15: config=dynamic_30j_15m rule=LPT_SMPT seed=44
+2026-06-01 22:03:50.620 [StochasticMgr] Deterministic mode (no stochastic config).
+2026-06-01 22:03:50.629 [Orchestrator] Episode started: 30 jobs, 15 machines, stochastic=False
+2026-06-01 22:06:53.343 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-01 22:06:53.344 [Orchestrator] Logging Academy Episode
+2026-06-01 22:06:53.718 [BatchRunner] Progress: 15/15 (5800.3s elapsed, ETA 0.0s)
+2026-06-01 22:06:53.718 [BatchRunner] Batch complete: 15 runs in 5800.3s
+2026-06-01 22:06:53.719 [BatchRunner] Headless mode — quitting application.

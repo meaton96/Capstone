@@ -278,7 +278,7 @@ namespace Assets.Scripts.Simulation
                     foreach (var rule in activeRules)
                     {
                         FJSSPConfig runConfig = CloneWithSeed(baseConfig, baseConfig.Seed + rep);
-
+                        runConfig.dispatchingRule = rule;
                         SimLogger.Low($"[BatchRunner] Run {completedRuns + 1}/{totalRuns}: " +
                                       $"config={runConfig.Name} rule={rule} seed={runConfig.Seed}");
 
@@ -524,7 +524,7 @@ namespace Assets.Scripts.Simulation
             EpisodeRecord runResult = null;
             UnityEngine.Events.UnityAction<EpisodeRecord> onFinish = res => runResult = res;
             FactoryOrchestrator.Instance.OnEpisodeFinished.AddListener(onFinish);
-
+            config.dispatchingRule = rule;
             if (agent != null)
                 agent.SetHeuristicRule(rule);
 
