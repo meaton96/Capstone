@@ -12,60 +12,16 @@ using Unity.MLAgents;
 namespace Assets.Scripts.Simulation
 {
     /// @brief Headless batch runner that drives the simulation through multiple configs × rules.
-    ///
-    /// @details Designed for data-collection builds. Reads a batch config JSON from the
-    ///          command line, then runs every (config, heuristicRule) combination in series.
-    ///          Each episode's results append to the existing CSV via ResultsLogger.
-    ///
-    /// Usage (headless build):
-    /// @code
-    ///   # Generated job data sweep (deterministic)
-    ///   ./capstone.exe -batchmode -nographics -timescale 100 \
-    ///      -batchconfig ./BatchConfigs/BatchConfigs.json \
-    ///      -outputdir generated_baseline \
-    ///      -repeats 1
-    ///
-    ///   # Single Brandimarte benchmark (deterministic)
-    ///   ./capstone.exe -batchmode -nographics -timescale 100 \
-    ///      -benchmark ./BatchConfigs/Benchmarks/mk01.json \
-    ///      -outputdir brandimarte \
-    ///      -repeats 3
-    ///
-    ///   # All Brandimarte benchmarks (deterministic)
-    ///   ./capstone.exe -batchmode -nographics -timescale 100 \
-    ///      -benchmarkdir ./BatchConfigs/Benchmarks \
-    ///      -outputdir brandimarte \
-    ///      -repeats 1
-    ///
-    ///   # All Brandimarte benchmarks (low disruption stochastic)
-    ///   ./capstone.exe -batchmode -nographics -timescale 100 \
-    ///      -benchmarkdir ./BatchConfigs/Benchmarks \
-    ///      -outputdir brandimarte_stochastic_low \
-    ///      -disruption low \
-    ///      -repeats 10
-    ///
-    ///   # All Brandimarte benchmarks (high disruption stochastic)
-    ///   ./capstone.exe -batchmode -nographics -timescale 100 \
-    ///      -benchmarkdir ./BatchConfigs/Benchmarks \
-    ///      -outputdir brandimarte_stochastic_high \
-    ///      -disruption high \
-    ///      -repeats 10
-    /// @endcode
-    ///
-    /// Attach this MonoBehaviour to the same GameObject as SimulationBridge.
-    /// In headless mode it takes over episode lifecycle; in editor mode it does nothing
-    /// unless you manually call RunBatch().
     public class HeadlessBatchRunner : MonoBehaviour
     {
         [Header("References")]
-        //[SerializeField] private FactoryOrchestrator orchestrator;
         [SerializeField] private SchedulingAgent agent;
 
         [Header("Fallback Settings (used if no CLI args)")]
         [SerializeField] private TextAsset fallbackBatchJson;
         [SerializeField] private int fallbackRepeats = 1;
 
-        /// @brief All dispatching rules to sweep across. Mirrors SimulationBridge.ActionToRule.
+        /// @brief All dispatching rules to sweep across.
         private static readonly DispatchingRule[] AllRules = new DispatchingRule[]
         {
             DispatchingRule.SPT_SMPT,
@@ -79,29 +35,10 @@ namespace Assets.Scripts.Simulation
             DispatchingRule.Random
         };
 
-        /// <summary>
-        /// Flag indicating whether a batch run is currently in progress.
-        /// </summary>
         private bool isBatchRunning;
-
-        /// <summary>
-        /// Total number of runs scheduled for the current batch.
-        /// </summary>
         private int totalRuns;
-
-        /// <summary>
-        /// Number of runs completed so far in the current batch.
-        /// </summary>
         private int completedRuns;
-
-        /// <summary>
-        /// Active dispatching rules to sweep, filtered by the -rules CLI argument.
-        /// </summary>
         private DispatchingRule[] activeRules;
-
-        /// <summary>
-        /// Wall-clock start time for the current batch, used for ETA calculations.
-        /// </summary>
         private float startWall;
 
         // ─────────────────────────────────────────────────────────
@@ -117,7 +54,9 @@ namespace Assets.Scripts.Simulation
                 return;
             }
 
-            string batchPath = GetCLIArg("-batchconfig");
+            // Look for both the new "-config" and the old "-batchconfig" for backward compatibility
+            string batchPath = GetCLIArg("-config") ?? GetCLIArg("-batchconfig");
+            string configName = GetCLIArg("-configname");
             string benchmarkPath = GetCLIArg("-benchmark");
             string benchmarkDirPath = GetCLIArg("-benchmarkdir");
 
@@ -169,10 +108,6 @@ namespace Assets.Scripts.Simulation
                 agvCountOverride = parsedAgv;
                 SimLogger.Low($"[BatchRunner] AGV count override: {agvCountOverride}");
             }
-            else
-            {
-                SimLogger.Low("[BatchRunner] No -agvcount provided. Using BrandimartLoader formula (1.5× machinesPerType).");
-            }
 
             // Repeats
             int repeats = 1;
@@ -180,7 +115,7 @@ namespace Assets.Scripts.Simulation
             if (!string.IsNullOrEmpty(repeatsStr))
                 int.TryParse(repeatsStr, out repeats);
 
-            // Disruption level — only applies to benchmark modes (not generated batch)
+            // Disruption level
             StochasticDisruption disruption = StochasticDisruption.None;
             string disruptionStr = GetCLIArg("-disruption");
             if (!string.IsNullOrEmpty(disruptionStr))
@@ -188,10 +123,8 @@ namespace Assets.Scripts.Simulation
                 if (Enum.TryParse(disruptionStr, ignoreCase: true, out StochasticDisruption parsed))
                     disruption = parsed;
                 else
-                    SimLogger.LogWarning($"[BatchRunner] Unknown -disruption value '{disruptionStr}'. " +
-                                         "Valid values: none, low, high. Defaulting to none.");
+                    SimLogger.LogWarning($"[BatchRunner] Unknown -disruption '{disruptionStr}'. Defaulting to none.");
             }
-            SimLogger.Low($"[BatchRunner] Disruption mode: {disruption}");
 
             // ── Route to the correct coroutine ──────────────────────
 
@@ -205,14 +138,19 @@ namespace Assets.Scripts.Simulation
             }
             else
             {
-                // Generated job data — disruption flag is ignored here since
-                // stochastic params for generated configs come from FJSSPConfig.Stochastic
-                // set directly in the batch JSON (not calibrated from instance data).
+                // Generated job data — load the whole array from the JSON
                 FJSSPConfig[] configs = LoadConfigs(batchPath);
-                if (configs.Length > 0)
+
+                // If the bash script asked for a specific config name, filter down to just that one
+                if (!string.IsNullOrEmpty(configName) && configs != null)
+                {
+                    configs = Array.FindAll(configs, c => c.Name == configName);
+                }
+
+                if (configs != null && configs.Length > 0)
                     StartCoroutine(RunBatchCoroutine(configs, repeats));
                 else
-                    QuitWithError("No valid configs found.");
+                    QuitWithError($"No valid configs found matching name '{configName}' in {batchPath}");
             }
         }
 
@@ -220,7 +158,6 @@ namespace Assets.Scripts.Simulation
         //  Public API (for editor / UI triggering)
         // ─────────────────────────────────────────────────────────
 
-        /// @brief Starts a batch run from script or a UI button.
         public void RunBatch(FJSSPConfig[] configs, int repeats = 1)
         {
             if (isBatchRunning)
@@ -231,7 +168,6 @@ namespace Assets.Scripts.Simulation
             StartCoroutine(RunBatchCoroutine(configs, repeats));
         }
 
-        /// @brief Starts a batch from a JSON file path.
         public void RunBatchFromFile(string path, int repeats = 1)
         {
             var configs = ConfigLoader.LoadBatch(path);
@@ -247,16 +183,6 @@ namespace Assets.Scripts.Simulation
         //  Core Batch Loop (generated job data)
         // ─────────────────────────────────────────────────────────
 
-        /// <summary>
-        /// Coroutine that executes a batch of simulation runs over generated job data configurations.
-        /// </summary>
-        /// <param name="configs">Array of FJSSPConfig objects defining each simulation scenario.</param>
-        /// <param name="repeats">Number of times to repeat each (config, rule) combination.</param>
-        /// <returns>IEnumerator for coroutine execution.</returns>
-        /// <remarks>
-        /// Iterates over all configs, repeats, and active rules in nested order. Each run is logged
-        /// and its results appended to the results CSV via ResultsLogger.
-        /// </remarks>
         private IEnumerator RunBatchCoroutine(FJSSPConfig[] configs, int repeats)
         {
             isBatchRunning = true;
@@ -305,18 +231,6 @@ namespace Assets.Scripts.Simulation
         //  Multi-Benchmark Loop (all .json files in a directory)
         // ─────────────────────────────────────────────────────────
 
-        /// <summary>
-        /// Coroutine that runs benchmarks from all JSON files in a specified directory.
-        /// </summary>
-        /// <param name="dirPath">Path to the directory containing benchmark JSON files.</param>
-        /// <param name="repeats">Number of times to repeat each (benchmark, rule) combination.</param>
-        /// <param name="disruption">The stochastic disruption level to apply to benchmarks.</param>
-        /// <returns>IEnumerator for coroutine execution.</returns>
-        /// <remarks>
-        /// Loads each .json file in the directory as a benchmark, sorts files alphabetically,
-        /// and runs all (benchmark, rule, repeat) combinations. Supports stochastic disruption
-        /// calibration via BrandimartLoader.LoadDeferredWithStochastic.
-        /// </remarks>
         private IEnumerator RunMultiBenchmarkCoroutine(string dirPath, int repeats,
                                                         StochasticDisruption disruption = StochasticDisruption.None,
                                                         int agvCountOverride = -1)
@@ -391,17 +305,6 @@ namespace Assets.Scripts.Simulation
         //  Single Benchmark File (entry point for -benchmark)
         // ─────────────────────────────────────────────────────────
 
-        /// <summary>
-        /// Coroutine that runs a single benchmark file through all rule and repeat combinations.
-        /// </summary>
-        /// <param name="jsonPath">Path to the benchmark JSON file.</param>
-        /// <param name="repeats">Number of times to repeat each rule application.</param>
-        /// <param name="disruption">The stochastic disruption level to apply.</param>
-        /// <returns>IEnumerator for coroutine execution.</returns>
-        /// <remarks>
-        /// Entry point for the -benchmark CLI flag. Loads the benchmark, then delegates to
-        /// RunBenchmarkEpisodes for episode execution.
-        /// </remarks>
         private IEnumerator RunBenchmarkCoroutine(string jsonPath, int repeats,
                                                    StochasticDisruption disruption = StochasticDisruption.None,
                                                    int agvCountOverride = -1)
@@ -443,18 +346,6 @@ namespace Assets.Scripts.Simulation
         //  Benchmark Episode Runner (shared by single and multi)
         // ─────────────────────────────────────────────────────────
 
-        /// <summary>
-        /// Runs all episode combinations for a single benchmark configuration.
-        /// </summary>
-        /// <param name="config">The benchmark configuration to simulate.</param>
-        /// <param name="buildJobs">Factory function that creates job definitions from machine layout.</param>
-        /// <param name="repeats">Number of repeats per dispatching rule.</param>
-        /// <returns>IEnumerator for coroutine execution.</returns>
-        /// <remarks>
-        /// For each repeat and rule combination: clones the config with an adjusted seed, sets up
-        /// the agent heuristic, loads the factory and prebuilt jobs, runs the episode to completion,
-        /// and logs results. A short delay (0.1s) is yielded between runs for cleanup.
-        /// </remarks>
         private IEnumerator RunBenchmarkEpisodes(
             FJSSPConfig config,
             Func<Dictionary<MachineType, List<int>>, FJSSPJobDefinition[]> buildJobs,
@@ -508,17 +399,6 @@ namespace Assets.Scripts.Simulation
         //  Single Episode Runner (used by generated batch loop)
         // ─────────────────────────────────────────────────────────
 
-        /// <summary>
-        /// Runs a single simulation episode for a generated job data configuration.
-        /// </summary>
-        /// <param name="config">The FJSSPConfig defining the simulation scenario.</param>
-        /// <param name="rule">The dispatching rule to apply during the episode.</param>
-        /// <returns>IEnumerator for coroutine execution.</returns>
-        /// <remarks>
-        /// Loads the config, sets the agent's heuristic rule, starts the episode, waits for
-        /// completion, logs results, and yields a short delay for cleanup. Used by the
-        /// generated batch loop (RunBatchCoroutine).
-        /// </remarks>
         private IEnumerator RunSingleEpisode(FJSSPConfig config, DispatchingRule rule)
         {
             EpisodeRecord runResult = null;
@@ -551,11 +431,6 @@ namespace Assets.Scripts.Simulation
         //  Helpers
         // ─────────────────────────────────────────────────────────
 
-        /// <summary>
-        /// Loads a benchmark file, attaching a calibrated StochasticConfig
-        /// when disruption != None. Single point of truth for the loader call
-        /// so both single and multi benchmark coroutines stay in sync.
-        /// </summary>
         private static (FJSSPConfig config,
                          Func<Dictionary<MachineType, List<int>>, FJSSPJobDefinition[]> buildJobs)
             LoadBenchmark(string jsonPath, StochasticDisruption disruption, int agvCountOverride = -1)
@@ -566,13 +441,6 @@ namespace Assets.Scripts.Simulation
                                                                agvCountOverride: agvCountOverride);
         }
 
-        /// <summary>
-        /// Logs the current batch progress with elapsed time and estimated time of completion.
-        /// </summary>
-        /// <remarks>
-        /// Calculates ETA based on average time per completed run. Logs at the Low priority
-        /// level for verbose batch monitoring.
-        /// </remarks>
         private void LogProgress()
         {
             float elapsed = Time.realtimeSinceStartup - startWall;
@@ -583,17 +451,6 @@ namespace Assets.Scripts.Simulation
                           $"({elapsed:F1}s elapsed, ETA {eta:F1}s)");
         }
 
-        /// <summary>
-        /// Creates a shallow clone of an FJSSPConfig with a modified seed value.
-        /// </summary>
-        /// <param name="source">The source configuration to clone.</param>
-        /// <param name="newSeed">The new seed value for the cloned config.</param>
-        /// <returns>A new FJSSPConfig instance with the updated seed and cloned machine layout.</returns>
-        /// <remarks>
-        /// The Stochastic config is shared across repeats by design, as stochastic parameters
-        /// are defined in the batch JSON and should remain consistent across repeat runs.
-        /// The MachineTypeLayout is deep-cloned via Array.Clone to prevent cross-contamination.
-        /// </remarks>
         private FJSSPConfig CloneWithSeed(FJSSPConfig source, int newSeed)
         {
             return new FJSSPConfig
@@ -614,15 +471,6 @@ namespace Assets.Scripts.Simulation
             };
         }
 
-        /// <summary>
-        /// Loads FJSSPConfig arrays from the CLI-specified path or fallback sources.
-        /// </summary>
-        /// <param name="cliPath">Path to the batch config JSON file from CLI arguments.</param>
-        /// <returns>Array of FJSSPConfig objects, or empty array if no source is available.</returns>
-        /// <remarks>
-        /// Resolution order: 1) CLI -batchconfig path, 2) serialized fallback BatchJson field,
-        /// 3) error and empty array if neither is provided.
-        /// </remarks>
         private FJSSPConfig[] LoadConfigs(string cliPath)
         {
             if (!string.IsNullOrEmpty(cliPath))
@@ -635,15 +483,6 @@ namespace Assets.Scripts.Simulation
             return Array.Empty<FJSSPConfig>();
         }
 
-        /// <summary>
-        /// Parses the -rules CLI argument into an array of DispatchingRule values.
-        /// </summary>
-        /// <param name="arg">Raw string from the -rules CLI flag (comma-separated rule names).</param>
-        /// <returns>Array of parsed DispatchingRule values, or AllRules if arg is empty/invalid.</returns>
-        /// <remarks>
-        /// Parses comma-separated rule names case-insensitively. Invalid rule names are logged
-        /// as warnings and skipped. Returns AllRules if no valid rules are found or if arg is null/empty.
-        /// </remarks>
         private static DispatchingRule[] ParseRulesArg(string arg)
         {
             if (string.IsNullOrEmpty(arg)) return AllRules;
@@ -659,15 +498,6 @@ namespace Assets.Scripts.Simulation
             return result.Count > 0 ? result.ToArray() : AllRules;
         }
 
-        /// <summary>
-        /// Retrieves a value argument from the command line by key name.
-        /// </summary>
-        /// <param name="key">The CLI flag key (e.g., "-batchconfig").</param>
-        /// <returns>The value following the key, or null if not found.</returns>
-        /// <remarks>
-        /// Parses Environment.GetCommandLineArgs() looking for key/value pairs. The value
-        /// returned is the token immediately following the key.
-        /// </remarks>
         private static string GetCLIArg(string key)
         {
             string[] args = Environment.GetCommandLineArgs();
@@ -677,14 +507,6 @@ namespace Assets.Scripts.Simulation
             return null;
         }
 
-        /// <summary>
-        /// Logs an error message and quits the application in batch mode.
-        /// </summary>
-        /// <param name="message">The error message to log.</param>
-        /// <remarks>
-        /// In batch mode, calls Application.Quit(1) after logging. In editor mode, the
-        /// function logs the error but does not quit, allowing manual inspection.
-        /// </remarks>
         private void QuitWithError(string message)
         {
             SimLogger.LogError($"[BatchRunner] {message}");

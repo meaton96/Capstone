@@ -86,9 +86,8 @@ namespace Assets.Scripts.Simulation.Logging
                     "jobs,machines,total_ops,agvCount,decisions,total_reward,timescale," +
                     "stochastic_tag,weibull_k,weibull_lambda,mean_ttf_theoretical," +
                     "repair_log_mu,repair_log_sigma," +
-                    "episode_failures,total_repair_time"
+                    "episode_failures,total_repair_time,dynamic_arrivals"
                 // Phase 3: + ",agv_failures,agv_repair_time"
-                // Phase 4: + ",dynamic_arrivals"
                 );
 
             writer.WriteLine(
@@ -98,7 +97,7 @@ namespace Assets.Scripts.Simulation.Logging
                 $"{r.DecisionPoints},{r.TotalReward:F4},{r.AverageTimeScale:F4}," +
                 $"{r.StochasticTag},{weibullK:F2},{weibullLambda:F1},{meanTtfTheory:F1}," +
                 $"{repairLogMu:F3},{repairLogSig:F3}," +
-                $"{r.MachineFailureCount},{r.MachineRepairTime:F1}"
+                $"{r.MachineFailureCount},{r.MachineRepairTime:F1},{r.DynamicArrivals}"
             );
 
             Debug.Log($"[Results] {r.InstanceName} {r.RuleName} seed={r.Seed} " +

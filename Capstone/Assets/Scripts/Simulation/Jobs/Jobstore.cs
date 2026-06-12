@@ -75,6 +75,51 @@ namespace Assets.Scripts.Simulation.Jobs
         }
 
         /// <summary>
+        /// Inserts a single dynamically-arrived job into the store mid-episode.
+        /// </summary>
+        /// <param name="def">The job definition to instantiate as a live <see cref="JobData"/>.</param>
+        /// <param name="spawnVisuals">Whether to instantiate a 3D visual for the job.</param>
+        /// <returns>The new <see cref="JobData"/> instance, already in <c>NeedsRouting</c> state.</returns>
+        /// <remarks>
+        /// Mirrors the inner loop of <see cref="Initialize"/> for a single entry.
+        /// Called by the orchestrator's Poisson arrival clock each time a new job is injected.
+        /// The job is immediately visible to <see cref="GetNextNeedsRouting"/> and
+        /// <see cref="AreAllExited"/>, so the existing decision and termination logic
+        /// picks it up without any further changes.
+        /// </remarks>
+        public JobData AddDynamicJob(FJSSPJobDefinition def, bool spawnVisuals)
+        {
+            var jobData = new JobData
+            {
+                JobId = def.JobId,
+                ArrivalTime = def.ArrivalTime,
+                OperationTypes = def.OperationSequence,
+                EligibleMachinesPerOp = def.EligibleMachinesPerOp,
+                TotalOperations = def.OperationSequence.Length,
+                State = JobState.NeedsRouting,
+                LocationMachineId = -1,
+                TargetMachineId = -1,
+                AssignedAgvId = -1,
+                CurrentOpIndex = 0,
+                CompletedOps = 0,
+                StateEntryTime = 0,
+                TotalWaitTime = 0,
+                TotalTransitTime = 0,
+            };
+
+            if (spawnVisuals && jobVisualPrefab != null)
+            {
+                JobVisual vis = Instantiate(jobVisualPrefab, jobVisualContainer);
+                vis.gameObject.name = $"JobVisual_{def.JobId}";
+                vis.Initialize(def.JobId, def.OperationSequence.Length);
+                jobData.Visual = vis;
+            }
+
+            allJobs.Add(jobData);
+            return jobData;
+        }
+
+        /// <summary>
         /// Destroys all associated <see cref="JobVisual"/> objects and clears the internal list.
         /// </summary>
         public void Cleanup()

@@ -180,6 +180,7 @@ namespace Assets.Scripts.Simulation
                         {
                             // Job has exited the system entirely
                             job.State = JobState.Exited;
+                            SimLogger.Medium($"Job {job.JobId} exited the system after delivery.");
                             job.LocationMachineId = -1;
                             job.StateEntryTime = _simTimeRef;
                             if (job.Visual != null) job.Visual.gameObject.SetActive(false);

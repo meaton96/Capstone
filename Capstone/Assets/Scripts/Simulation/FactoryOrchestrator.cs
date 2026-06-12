@@ -176,6 +176,26 @@ namespace Assets.Scripts.Simulation
         /// </summary>
         private DecisionCoordinator _decisions;
 
+        // ── Poisson arrival clock ─────────────────────────────────────────────
+
+        /// <summary>
+        /// SimTime at which the next dynamic job should be injected.
+        /// float.MaxValue when the clock is disarmed (deterministic mode or cap reached).
+        /// </summary>
+        private float _nextArrivalSimTime = float.MaxValue;
+
+        /// <summary>
+        /// Next job ID to assign to a dynamically-arrived job.
+        /// Initialised to config.JobCount so IDs never collide with the initial batch.
+        /// </summary>
+        private int _nextDynamicJobId;
+
+        /// <summary>
+        /// Count of dynamic jobs spawned so far in the current episode. Used to enforce
+        /// DynamicJobCap and to populate EpisodeRecord.DynamicArrivals.
+        /// </summary>
+        private int _dynamicJobsSpawned;
+
         /// <summary>
         /// Fired when a new dispatch or routing decision is required. Passes the DecisionRequest.
         /// </summary>
@@ -358,6 +378,25 @@ namespace Assets.Scripts.Simulation
             IsWaitingForAction = false;
             startTime = Time.time;
 
+            // ── Arm Poisson arrival clock ──────────────────────────────────────
+            _dynamicJobsSpawned = 0;
+            _nextDynamicJobId = currentConfig.JobCount; // dynamic IDs start after initial batch
+            bool arrivalsEnabled = StochasticEventManager.Instance?.DynamicArrivalsEnabled ?? false;
+            if (arrivalsEnabled)
+            {
+                // SimTime ≈ 0 here, so first arrival is sampled from t=0
+                _nextArrivalSimTime = StochasticEventManager.Instance.SampleInterArrivalTime();
+                int cap = currentConfig.Stochastic?.DynamicJobCap ?? 0;
+                SimLogger.Low($"[Orchestrator] Poisson clock armed — " +
+                              $"first arrival ≈ t={_nextArrivalSimTime:F1}s " +
+                              $"λ={currentConfig.Stochastic?.ArrivalLambda} " +
+                              $"cap={(cap == 0 ? "∞" : cap.ToString())}");
+            }
+            else
+            {
+                _nextArrivalSimTime = float.MaxValue;
+            }
+
             SimLogger.Low($"[Orchestrator] Episode started: {currentConfig.JobCount} jobs, " +
                           $"{layoutManager.MachineCount} machines, " +
                           $"stochastic={StochasticEventManager.Instance?.IsActive}");
@@ -409,6 +448,29 @@ namespace Assets.Scripts.Simulation
                     CurrentDecision = req;
                     IsWaitingForAction = true;
                     OnDecisionRequired?.Invoke(CurrentDecision);
+                }
+            }
+
+            // ── Tick Poisson arrival clock ─────────────────────────────────────
+            // Runs regardless of IsWaitingForAction — arrivals are asynchronous events.
+            if (SimTime >= _nextArrivalSimTime)
+            {
+                int cap = currentConfig.Stochastic?.DynamicJobCap ?? 0;
+                if (cap == 0 || _dynamicJobsSpawned < cap)
+                {
+                    FJSSPJobDefinition def = FJSSPJobGenerator.GenerateSingle(
+                        _nextDynamicJobId++, currentConfig, cachedMachinesByType);
+                    Jobs.AddDynamicJob(def, spawnVisuals: true);
+                    _dynamicJobsSpawned++;
+
+                    SimLogger.Medium($"[Orchestrator] Dynamic job {def.JobId} arrived at " +
+                                     $"t={SimTime:F1}s — " +
+                                     $"{_dynamicJobsSpawned}/{(cap == 0 ? "∞" : cap.ToString())} dynamic jobs");
+
+                    bool moreExpected = cap == 0 || _dynamicJobsSpawned < cap;
+                    _nextArrivalSimTime = moreExpected
+                        ? (float)SimTime + StochasticEventManager.Instance.SampleInterArrivalTime()
+                        : float.MaxValue; // cap reached — disarm the clock
                 }
             }
 
@@ -533,6 +595,12 @@ namespace Assets.Scripts.Simulation
                 machines: layoutManager.Machines,
                 averageTimeScale: Time.timeScale
             );
+
+            // Patch dynamic-arrival fields — EpisodeTracker.Build() derives JobCount from
+            // config, which only reflects the initial batch. Override if dynamic jobs were spawned.
+            record.DynamicArrivals = _dynamicJobsSpawned;
+            if (_dynamicJobsSpawned > 0)
+                record.JobCount = Jobs.JobCount;  // true total = initial + dynamic
 
             // Collect AGV performance records
             foreach (var agv in agvPool.AllAGVs)

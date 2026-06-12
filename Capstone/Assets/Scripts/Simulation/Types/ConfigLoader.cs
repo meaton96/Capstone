@@ -152,6 +152,7 @@ namespace Assets.Scripts.Simulation.Types
             public float agvRepairLogSigma = 0.4f;
             public bool dynamicArrivalsEnabled = false;
             public float arrivalLambda = 0.003f;
+            public int dynamicJobCap = 0;
         }
 
         // ── Conversion ──
@@ -224,6 +225,7 @@ namespace Assets.Scripts.Simulation.Types
                     AGVRepairLogSigma = raw.stochastic.agvRepairLogSigma,
                     DynamicArrivalsEnabled = raw.stochastic.dynamicArrivalsEnabled,
                     ArrivalLambda = raw.stochastic.arrivalLambda,
+                    DynamicJobCap = raw.stochastic.dynamicJobCap,
                 };
             }
 

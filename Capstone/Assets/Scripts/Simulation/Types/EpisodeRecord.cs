@@ -53,7 +53,7 @@ namespace Assets.Scripts.Simulation.Types
         // public float AGVRepairTime;
 
         // Phase 4: dynamic arrival totals
-        // public int   DynamicArrivals;
+        public int DynamicArrivals;   // total jobs injected by the Poisson clock this episode
 
         // ── Per-machine statistics ────────────────────────────────────────────
         public List<MachineRecord> MachineRecords = new List<MachineRecord>();

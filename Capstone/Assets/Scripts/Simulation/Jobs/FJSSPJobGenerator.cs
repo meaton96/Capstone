@@ -100,7 +100,9 @@ namespace Assets.Scripts.Simulation.Jobs
                 jobs[j] = new FJSSPJobDefinition
                 {
                     JobId = j,
-                    ArrivalTime = UnityEngine.Random.Range(0f, config.Stochastic.InitialArrivalSpread),
+                    ArrivalTime = config.Stochastic != null
+                        ? UnityEngine.Random.Range(0f, config.Stochastic.InitialArrivalSpread)
+                        : 0f,
                     OperationSequence = opSequence,
                     EligibleMachinesPerOp = eligible
                 };
@@ -108,6 +110,45 @@ namespace Assets.Scripts.Simulation.Jobs
 
             Array.Sort(jobs, (a, b) => a.ArrivalTime.CompareTo(b.ArrivalTime));
             return jobs;
+        }
+
+        /// <summary>
+        /// Generates a single job definition for dynamic mid-episode arrival.
+        /// </summary>
+        /// <param name="jobId">Unique ID for the new job. Caller is responsible for uniqueness —
+        ///                     the orchestrator issues IDs sequentially starting at <c>config.JobCount</c>.</param>
+        /// <param name="config">Current episode configuration (operation range, proc-time params).</param>
+        /// <param name="machinesByType">Machine type → machine-ID list for the current floor layout.</param>
+        /// <returns>A <see cref="FJSSPJobDefinition"/> ready to be inserted into the JobStore.</returns>
+        /// <remarks>
+        /// Uses UnityEngine.Random (seeded in SpawnFactory) for job structure — the same stream
+        /// as <see cref="Generate"/>. ArrivalTime is set to 0f because insertion into the JobStore
+        /// IS the arrival; the Poisson clock in the orchestrator controls when this is called.
+        /// </remarks>
+        public static FJSSPJobDefinition GenerateSingle(
+            int jobId,
+            FJSSPConfig config,
+            Dictionary<MachineType, List<int>> machinesByType)
+        {
+            int opCount = UnityEngine.Random.Range(config.MinOpsPerJob, config.MaxOpsPerJob + 1);
+            MachineType[] opSequence = GenerateOpSequence(opCount);
+            opCount = opSequence.Length;
+
+            var eligible = new Dictionary<int, float>[opCount];
+            for (int o = 0; o < opCount; o++)
+            {
+                eligible[o] = new Dictionary<int, float>();
+                foreach (int machineId in machinesByType[opSequence[o]])
+                    eligible[o][machineId] = SampleProcTime(opSequence[o], config);
+            }
+
+            return new FJSSPJobDefinition
+            {
+                JobId = jobId,
+                ArrivalTime = 0f,   // insertion into JobStore is the arrival event
+                OperationSequence = opSequence,
+                EligibleMachinesPerOp = eligible,
+            };
         }
 
         /// <summary>
