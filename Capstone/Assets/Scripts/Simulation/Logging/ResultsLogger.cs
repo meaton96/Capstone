@@ -84,6 +84,8 @@ namespace Assets.Scripts.Simulation.Logging
             bool fileExists = File.Exists(FilePath);
             using var writer = new StreamWriter(FilePath, append: true);
 
+            SimLogger.Low($"[ResultsLogger] Logging episode result to {FilePath}");
+
             if (!fileExists)
                 writer.WriteLine(
                     "timestamp,instance,rule,seed,makespan," +
@@ -108,7 +110,7 @@ namespace Assets.Scripts.Simulation.Logging
                 $"{r.RealisedMeanInterarrival:F1},{r.LastDynamicArrivalTime:F1}"
             );
 
-            Debug.Log($"[Results] {r.InstanceName} {r.RuleName} seed={r.Seed} " +
+            SimLogger.Low($"[Results] {r.InstanceName} {r.RuleName} seed={r.Seed} " +
                       $"makespan={r.Makespan:F1} stochastic={r.StochasticTag} " +
                       $"failures={r.MachineFailureCount}");
         }
@@ -234,6 +236,8 @@ namespace Assets.Scripts.Simulation.Logging
         {
             bool fileExists = File.Exists(JobOpsFilePath);
             using var writer = new StreamWriter(JobOpsFilePath, append: true);
+
+            SimLogger.Low($"[ResultsLogger] Logging {r.JobOperationRecords.Count} job operations to {JobOpsFilePath}");
 
             if (!fileExists)
                 writer.WriteLine(

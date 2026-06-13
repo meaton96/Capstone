@@ -5095,6 +5095,7 @@ GameObject:
   - component: {fileID: 516692882}
   - component: {fileID: 516692885}
   - component: {fileID: 516692884}
+  - component: {fileID: 516692886}
   m_Layer: 0
   m_Name: SchedulingAgent
   m_TagString: Untagged
@@ -5179,6 +5180,22 @@ MonoBehaviour:
   m_UseChildSensors: 1
   m_UseChildActuators: 1
   m_ObservableAttributeHandling: 0
+--- !u!114 &516692886
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 516692881}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 88b6042bc9a5d4aa58d931eae49442e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.ML-Agents::Unity.MLAgents.Agent
+  agentParameters:
+    maxStep: 0
+  hasUpgradedFromAgentParameters: 1
+  MaxStep: 0
 --- !u!1 &534179008
 GameObject:
   m_ObjectHideFlags: 0
