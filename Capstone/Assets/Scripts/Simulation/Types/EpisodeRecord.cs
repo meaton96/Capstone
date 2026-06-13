@@ -53,7 +53,21 @@ namespace Assets.Scripts.Simulation.Types
         // public float AGVRepairTime;
 
         // Phase 4: dynamic arrival totals
-        public int DynamicArrivals;   // total jobs injected by the Poisson clock this episode
+        public int DynamicArrivals;         // total jobs injected by the Poisson clock this episode
+        public float LastDynamicArrivalTime = -1f; // sim-time of final Poisson arrival; -1 if none fired
+
+        // ── Dynamic arrival derived metrics ───────────────────────────────────
+        /// @brief Configured Poisson arrival rate (jobs/sim-second). 0 if arrivals disabled.
+        public float ArrivalLambda => Stochastic is { DynamicArrivalsEnabled: true }
+            ? Stochastic.ArrivalLambda : 0f;
+
+        /// @brief Theoretical mean time between arrivals (sim-seconds). 0 if arrivals disabled.
+        public float MeanInterarrivalTime => ArrivalLambda > 0f ? 1f / ArrivalLambda : 0f;
+
+        /// @brief Realised mean interarrival time this episode (sim-seconds).
+        /// @details Computed as LastDynamicArrivalTime / DynamicArrivals; 0 if no arrivals fired.
+        public float RealisedMeanInterarrival => DynamicArrivals > 0 && LastDynamicArrivalTime > 0f
+            ? LastDynamicArrivalTime / DynamicArrivals : 0f;
 
         // ── Per-machine statistics ────────────────────────────────────────────
         public List<MachineRecord> MachineRecords = new List<MachineRecord>();
