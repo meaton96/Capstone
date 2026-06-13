@@ -84,8 +84,6 @@ namespace Assets.Scripts.Simulation.Logging
             bool fileExists = File.Exists(FilePath);
             using var writer = new StreamWriter(FilePath, append: true);
 
-            SimLogger.Low($"[ResultsLogger] Logging episode result to {FilePath}");
-
             if (!fileExists)
                 writer.WriteLine(
                     "timestamp,instance,rule,seed,makespan," +
@@ -110,7 +108,7 @@ namespace Assets.Scripts.Simulation.Logging
                 $"{r.RealisedMeanInterarrival:F1},{r.LastDynamicArrivalTime:F1}"
             );
 
-            SimLogger.Low($"[Results] {r.InstanceName} {r.RuleName} seed={r.Seed} " +
+            Debug.Log($"[Results] {r.InstanceName} {r.RuleName} seed={r.Seed} " +
                       $"makespan={r.Makespan:F1} stochastic={r.StochasticTag} " +
                       $"failures={r.MachineFailureCount}");
         }
@@ -237,15 +235,14 @@ namespace Assets.Scripts.Simulation.Logging
             bool fileExists = File.Exists(JobOpsFilePath);
             using var writer = new StreamWriter(JobOpsFilePath, append: true);
 
-            SimLogger.Low($"[ResultsLogger] Logging {r.JobOperationRecords.Count} job operations to {JobOpsFilePath}");
-
             if (!fileExists)
                 writer.WriteLine(
                     "timestamp,instance,rule,seed,makespan," +
                     "job_id,is_dynamic,arrival_time," +
                     "op_index,machine_type_required," +
                     "eligible_machine_count," +
-                    "min_proc_time,max_proc_time,mean_proc_time,proc_time_spread"
+                    "min_proc_time,max_proc_time,mean_proc_time,proc_time_spread," +
+                    "travel_time"
                 );
 
             string ts = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
@@ -257,7 +254,8 @@ namespace Assets.Scripts.Simulation.Logging
                     $"{op.JobId},{(op.IsDynamic ? 1 : 0)},{op.ArrivalTime:F1}," +
                     $"{op.OpIndex},{op.MachineTypeRequired}," +
                     $"{op.EligibleMachineCount}," +
-                    $"{op.MinProcTime:F1},{op.MaxProcTime:F1},{op.MeanProcTime:F1},{op.ProcTimeSpread:F1}"
+                    $"{op.MinProcTime:F1},{op.MaxProcTime:F1},{op.MeanProcTime:F1},{op.ProcTimeSpread:F1}," +
+                    $"{op.TravelTime:F1}"
                 );
             }
         }

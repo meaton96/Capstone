@@ -479,12 +479,10 @@ namespace Assets.Scripts.Simulation
 
             FJSSPJobDefinition def = FJSSPJobGenerator.GenerateSingle(
                 _nextDynamicJobId++, currentConfig, cachedMachinesByType);
-
+            def.ArrivalTime = (float)SimTime;   // stamp actual injection time; GenerateSingle leaves this 0f
             Jobs.AddDynamicJob(def, spawnVisuals: true);
             _dynamicJobsSpawned++;
             _lastDynamicArrivalSimTime = (float)SimTime;
-
-            def.ArrivalTime = (float)SimTime;
 
             SimLogger.Medium($"[Orchestrator] Dynamic job {def.JobId} arrived at " +
                              $"t={SimTime:F1}s — " +
@@ -616,8 +614,6 @@ namespace Assets.Scripts.Simulation
 
             // Patch dynamic-arrival fields — EpisodeTracker.Build() derives JobCount from
             // config, which only reflects the initial batch. Override if dynamic jobs were spawned.
-            SimLogger.Low($"[Orchestrator] Finalising episode — dynamic jobs spawned: {_dynamicJobsSpawned}");
-            SimLogger.Low($"[Orchestrator] Last dynamic arrival at t={_lastDynamicArrivalSimTime:F1}s");
             record.DynamicArrivals = _dynamicJobsSpawned;
             record.LastDynamicArrivalTime = _lastDynamicArrivalSimTime;
             if (_dynamicJobsSpawned > 0)
@@ -671,6 +667,7 @@ namespace Assets.Scripts.Simulation
                         MinProcTime = eligible.Count > 0 ? min : 0f,
                         MaxProcTime = eligible.Count > 0 ? max : 0f,
                         MeanProcTime = eligible.Count > 0 ? sum / eligible.Count : 0f,
+                        TravelTime = job.OperationTravelTimes[i],
                     });
                 }
             }
@@ -678,7 +675,7 @@ namespace Assets.Scripts.Simulation
             if (!Academy.Instance.IsCommunicatorOn)
             {
                 SimLogger.Low($"[Orchestrator] Logging episode results");
-                //ResultsLogger.LogAll(record);
+                ResultsLogger.LogAll(record);
             }
 
             if (record.MachineFailureCount > 0)

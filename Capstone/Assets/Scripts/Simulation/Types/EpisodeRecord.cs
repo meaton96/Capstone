@@ -213,6 +213,11 @@ namespace Assets.Scripts.Simulation.Types
         public float MaxProcTime;
         public float MeanProcTime;
 
+        /// @brief Actual AGV transit time (sim-seconds) for this operation.
+        /// @details Stamped by FlagHarvester on delivery: job.OperationTravelTimes[CurrentOpIndex] = agv.LastTripDuration.
+        /// Zero for operations where transit was not completed (e.g. first op from incoming belt).
+        public float TravelTime;
+
         // Derived
         public float ProcTimeSpread => MaxProcTime - MinProcTime;
     }

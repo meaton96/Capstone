@@ -43,7 +43,14 @@ namespace Assets.Scripts.Simulation.Jobs
     /// </remarks>
     public class JobData
     {
-        [Header("Identity")]
+        /// <summary>
+        /// AGV transit duration (sim-seconds) for each operation, indexed by operation position.
+        /// Stamped in FlagHarvester when DeliveredFlag is processed:
+        ///   job.OperationTravelTimes[job.CurrentOpIndex] = agv.LastTripDuration;
+        /// Zero for operations not yet delivered or where transit was not recorded.
+        /// </summary>
+        public float[] OperationTravelTimes;
+
         /// <summary>Unique identifier for this job.</summary>
         public int JobId;
 

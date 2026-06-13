@@ -49,6 +49,7 @@ namespace Assets.Scripts.Simulation.Jobs
                     OperationTypes = def.OperationSequence,
                     EligibleMachinesPerOp = def.EligibleMachinesPerOp,
                     TotalOperations = def.OperationSequence.Length,
+                    OperationTravelTimes = new float[def.OperationSequence.Length],
 
                     State = JobState.NeedsRouting,
                     LocationMachineId = -1,
@@ -96,6 +97,7 @@ namespace Assets.Scripts.Simulation.Jobs
                 OperationTypes = def.OperationSequence,
                 EligibleMachinesPerOp = def.EligibleMachinesPerOp,
                 TotalOperations = def.OperationSequence.Length,
+                OperationTravelTimes = new float[def.OperationSequence.Length],
                 State = JobState.NeedsRouting,
                 LocationMachineId = -1,
                 TargetMachineId = -1,
