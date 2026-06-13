@@ -53,7 +53,7 @@ namespace Assets.Scripts.Simulation.Types
         // public float AGVRepairTime;
 
         // Phase 4: dynamic arrival totals
-        public int DynamicArrivals;         // total jobs injected by the Poisson clock this episode
+        public int DynamicArrivals;           // total jobs injected by the Poisson clock this episode
         public float LastDynamicArrivalTime = -1f; // sim-time of final Poisson arrival; -1 if none fired
 
         // ── Dynamic arrival derived metrics ───────────────────────────────────
@@ -65,7 +65,7 @@ namespace Assets.Scripts.Simulation.Types
         public float MeanInterarrivalTime => ArrivalLambda > 0f ? 1f / ArrivalLambda : 0f;
 
         /// @brief Realised mean interarrival time this episode (sim-seconds).
-        /// @details Computed as LastDynamicArrivalTime / DynamicArrivals; 0 if no arrivals fired.
+        /// @details LastDynamicArrivalTime / DynamicArrivals; 0 if no arrivals fired.
         public float RealisedMeanInterarrival => DynamicArrivals > 0 && LastDynamicArrivalTime > 0f
             ? LastDynamicArrivalTime / DynamicArrivals : 0f;
 
@@ -77,6 +77,11 @@ namespace Assets.Scripts.Simulation.Types
 
         // ── Per-segment congestion (Phase 2 addition) ─────────────────────────
         public List<SegmentRecord> SegmentRecords = new List<SegmentRecord>();
+
+        // ── Per-job operation log ─────────────────────────────────────────────
+        // Populated by EpisodeTracker.RecordJobOperations(jobStore.AllJobs, dynamicJobIds)
+        // at episode end. One JobOperationRecord per (job × operation).
+        public List<JobOperationRecord> JobOperationRecords = new List<JobOperationRecord>();
     }
 
     // ── Per-machine statistics ──
@@ -170,5 +175,45 @@ namespace Assets.Scripts.Simulation.Types
             (TraversalCount + BlockEvents) > 0
                 ? (float)BlockEvents / (TraversalCount + BlockEvents)
                 : 0f;
+    }
+
+    // ── Per-job operation records ──
+
+    /// @brief One record per (job × operation). Logged to job_operations.csv.
+    ///
+    /// @details Captures the full operation plan as generated — eligible machines,
+    ///          processing time spread, and whether the job arrived dynamically.
+    ///          Use this to verify proc-time distributions match config, diagnose
+    ///          flexibility (eligible_count), and compare static vs Poisson jobs.
+    ///
+    /// Populate via EpisodeTracker.RecordJobOperations(jobStore.AllJobs, dynamicJobIds).
+    ///
+    /// Key diagnostic queries:
+    ///   - GROUP BY machine_type → mean_proc_time: verify mu/sigma are landing correctly
+    ///   - GROUP BY is_dynamic: do Poisson jobs have the same op-load distribution?
+    ///   - WHERE eligible_count = 1: fully-typed ops (routing has no choice)
+    public class JobOperationRecord
+    {
+        // ── Job identity ──
+        public int JobId;
+        public bool IsDynamic;         // true if injected by the Poisson clock
+        public float ArrivalTime;       // sim-time the job entered the system
+
+        // ── Operation identity ──
+        public int OpIndex;           // 0-based position in operation sequence
+        public string MachineTypeRequired; // e.g. "Mill", "Weld"
+
+        // ── Eligible machine pool for this op ──
+        public int EligibleMachineCount;  // 1 = fully typed, >1 = flexible routing choice
+
+        // ── Processing time spread across eligible machines ──
+        /// @details Spread comes from per-machine normal sampling in FJSSPJobGenerator.
+        ///          Large (max - min) relative to mean indicates high variance config.
+        public float MinProcTime;
+        public float MaxProcTime;
+        public float MeanProcTime;
+
+        // Derived
+        public float ProcTimeSpread => MaxProcTime - MinProcTime;
     }
 }

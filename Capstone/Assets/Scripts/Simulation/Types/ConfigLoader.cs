@@ -137,6 +137,30 @@ namespace Assets.Scripts.Simulation.Types
             public int agvCount = 3;
             public float machineFlexibilityProbability = 0f;
             public JsonStochasticConfig stochastic = null;
+
+            /// @brief Optional per-type normal distribution parameters for processing time sampling.
+            /// @details If provided, overrides the uniform minProcTime/maxProcTime fallback for
+            ///          each named type. Types not listed here fall back to the uniform derivation.
+            /// JSON example:
+            /// @code
+            /// "procTimeParams": [
+            ///   { "machineType": "Mill",     "mu":  90.0, "sigma": 10.0 },
+            ///   { "machineType": "Lathe",    "mu":  75.0, "sigma": 10.0 },
+            ///   { "machineType": "Weld",     "mu": 150.0, "sigma": 25.0 },
+            ///   { "machineType": "Inspect",  "mu":  60.0, "sigma": 10.0 },
+            ///   { "machineType": "Assemble", "mu": 240.0, "sigma": 40.0 }
+            /// ]
+            /// @endcode
+            public JsonProcTimeParam[] procTimeParams = null;
+        }
+
+        /// @brief Per-machine-type normal distribution override for JSON deserialization.
+        [Serializable]
+        private class JsonProcTimeParam
+        {
+            public string machineType = "";
+            public float mu = 52.5f;    // matches midpoint of default minProcTime=15/maxProcTime=90
+            public float sigma = 12.5f; // matches (90-15)/6
         }
         [Serializable]
         private class JsonStochasticConfig
@@ -191,8 +215,22 @@ namespace Assets.Scripts.Simulation.Types
             float mu = (raw.minProcTime + raw.maxProcTime) * 0.5f;
             float sigma = (raw.maxProcTime - raw.minProcTime) / 6f;
             var procTimeParams = new Dictionary<MachineType, (float mu, float sigma)>();
+
+            // Build a lookup from any explicit per-type overrides in the JSON
+            var explicitParams = new Dictionary<MachineType, (float mu, float sigma)>();
+            if (raw.procTimeParams != null)
+            {
+                foreach (var p in raw.procTimeParams)
+                {
+                    var parsed = ParseMachineType(p.machineType);
+                    if (parsed.HasValue)
+                        explicitParams[parsed.Value] = (p.mu, p.sigma);
+                }
+            }
+
+            // Per type: use explicit override if present, else fall back to uniform derivation
             foreach (MachineType t in baseTypes)
-                procTimeParams[t] = (mu, sigma);
+                procTimeParams[t] = explicitParams.TryGetValue(t, out var ep) ? ep : (mu, sigma);
 
             FJSSPConfig cfg = new FJSSPConfig
             {

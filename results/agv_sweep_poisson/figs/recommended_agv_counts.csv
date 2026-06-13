@@ -1,0 +1,11 @@
+instance,agv_at_min_makespan,elbow_agv,makespan_improvement%,congestion_onset_agv,recommended_agv,curve_shape,note
+30j_5m,10,10,0.0,none,10,flat,at makespan minimum
+30j_10m,10,10,0.0,none,10,flat,at makespan minimum
+30j_15m,2,5,0.1,none,2,monotone-increasing (congestion-dominated),at makespan minimum
+30j_20m,10,10,0.0,none,10,flat,at makespan minimum
+30j_25m,10,10,0.0,none,10,flat,at makespan minimum
+50j_5m,15,15,0.0,none,15,flat,at makespan minimum
+50j_10m,15,15,0.0,none,15,flat,at makespan minimum
+50j_15m,10,10,0.2,none,30,monotone-decreasing (add more AGVs),monotone: use largest tested fleet
+50j_20m,15,15,0.0,none,15,flat,at makespan minimum
+50j_25m,15,15,0.0,none,15,flat,at makespan minimum

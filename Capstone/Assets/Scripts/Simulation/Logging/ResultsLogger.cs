@@ -28,6 +28,7 @@ namespace Assets.Scripts.Simulation.Logging
         private static string _machineFilename = "machine_utilization.csv";
         private static string _agvFilename = "agv_performance.csv";
         private static string _segmentFilename = "segment_congestion.csv";
+        private static string _jobOpsFilename = "job_operations.csv";
 
         public static void SetFilenameSuffix(string suffix)
         {
@@ -36,6 +37,7 @@ namespace Assets.Scripts.Simulation.Logging
             _machineFilename = StripExt(_machineFilename, ext) + suffix + ext;
             _agvFilename = StripExt(_agvFilename, ext) + suffix + ext;
             _segmentFilename = StripExt(_segmentFilename, ext) + suffix + ext;
+            _jobOpsFilename = StripExt(_jobOpsFilename, ext) + suffix + ext;
         }
 
         public static void SetSubdirectory(string subdir)
@@ -49,6 +51,7 @@ namespace Assets.Scripts.Simulation.Logging
         private static string MachineFilePath => BuildPath(_machineFilename);
         private static string AGVFilePath => BuildPath(_agvFilename);
         private static string SegmentFilePath => BuildPath(_segmentFilename);
+        private static string JobOpsFilePath => BuildPath(_jobOpsFilename);
 
         // ── Convenience: write all logs in one call ───────────────────────────
 
@@ -61,6 +64,7 @@ namespace Assets.Scripts.Simulation.Logging
             LogMachineUtilization(r);
             if (r.AGVRecords.Count > 0) LogAGVPerformance(r);
             if (r.SegmentRecords.Count > 0) LogSegmentCongestion(r);
+            if (r.JobOperationRecords.Count > 0) LogJobOperations(r);
         }
 
         // ── Episode log (results.csv) ─────────────────────────────────────────
@@ -215,6 +219,41 @@ namespace Assets.Scripts.Simulation.Logging
                     $"{s.ZoneId},{s.ZoneName},{s.AisleType},{s.FlowDirection}," +
                     $"{s.TraversalCount},{s.BlockEvents},{s.TotalBlockTime:F2}," +
                     $"{s.MeanBlockTime:F2},{s.BlockRate:F4}"
+                );
+            }
+        }
+
+        // ── Job operations log (job_operations.csv) ───────────────────────────
+
+        /// <summary>
+        /// Appends one row per (job × operation) to job_operations.csv.
+        /// Populate EpisodeRecord.JobOperationRecords in EpisodeTracker at episode end
+        /// by iterating jobStore.AllJobs and computing min/max/mean over EligibleMachinesPerOp[i].Values.
+        /// </summary>
+        public static void LogJobOperations(EpisodeRecord r)
+        {
+            bool fileExists = File.Exists(JobOpsFilePath);
+            using var writer = new StreamWriter(JobOpsFilePath, append: true);
+
+            if (!fileExists)
+                writer.WriteLine(
+                    "timestamp,instance,rule,seed,makespan," +
+                    "job_id,is_dynamic,arrival_time," +
+                    "op_index,machine_type_required," +
+                    "eligible_machine_count," +
+                    "min_proc_time,max_proc_time,mean_proc_time,proc_time_spread"
+                );
+
+            string ts = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            foreach (var op in r.JobOperationRecords)
+            {
+                writer.WriteLine(
+                    $"{ts}," +
+                    $"{r.InstanceName},{r.RuleName},{r.Seed},{r.Makespan:F2}," +
+                    $"{op.JobId},{(op.IsDynamic ? 1 : 0)},{op.ArrivalTime:F1}," +
+                    $"{op.OpIndex},{op.MachineTypeRequired}," +
+                    $"{op.EligibleMachineCount}," +
+                    $"{op.MinProcTime:F1},{op.MaxProcTime:F1},{op.MeanProcTime:F1},{op.ProcTimeSpread:F1}"
                 );
             }
         }
