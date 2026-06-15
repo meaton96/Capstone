@@ -56,6 +56,12 @@ namespace Assets.Scripts.Simulation.AGV
         public int DeliveredJobId { get; private set; } = -1;
         public int DeliveredMachineId { get; private set; } = -1;
 
+        /// <summary>
+        /// Transit duration (sim-seconds) of the most recently completed pickup→dropoff trip.
+        /// Read by FlagHarvester when processing DeliveredFlag to stamp JobData.OperationTravelTimes.
+        /// </summary>
+        public float LastTripDuration { get; private set; }
+
         /// @brief Resets all completion flags and delivery metadata.
         public void ClearFlags()
         {
@@ -560,9 +566,10 @@ namespace Assets.Scripts.Simulation.AGV
             pickupZoneId = -1;
             dropoffZoneId = -1;
             atDropoffDock = false;
-            if (_statCurrentTripStart > 0)              // ← NEW
+            if (_statCurrentTripStart > 0)
             {
-                _statTripAccumulator += Time.fixedTime - _statCurrentTripStart;
+                LastTripDuration = (float)(Time.fixedTime - _statCurrentTripStart);
+                _statTripAccumulator += LastTripDuration;
                 _statCurrentTripStart = 0;
             }
 

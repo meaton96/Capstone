@@ -99,6 +99,18 @@ namespace Assets.Scripts.Simulation.Types
         ///          A value of 0.005 gives ~1 arrival per 200 sim-seconds on average.
         public float ArrivalLambda = 0.005f;
 
+        /// @brief Maximum number of jobs the Poisson clock may inject per episode.
+        ///
+        /// @details 0 = unlimited — the clock fires indefinitely and the episode is bounded
+        ///          only by the orchestrator's MAX_EPISODE_SIM_SECONDS timeout. Use 0 during
+        ///          DRL training where episode length is controlled externally.
+        ///
+        ///          Positive values disarm the clock once that many dynamic jobs have arrived,
+        ///          after which the episode ends naturally when all jobs exit. Recommended for
+        ///          headless benchmark sweeps: set to a small multiple of the initial job count
+        ///          (e.g. 2× gives a 3× total workload per episode).
+        public int DynamicJobCap = 0;
+
         // ── Convenience ──
 
         /// @brief True if any disruption source is active.

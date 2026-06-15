@@ -1,100 +1,1386 @@
---- Log Started: 6/1/2026 8:30:13 PM ---
-2026-06-01 20:30:13.413 [BatchRunner] TimeScale set to 100x via CLI.
-2026-06-01 20:30:13.415 [BatchRunner] Active rules (1): SPT_SMPT
-2026-06-01 20:30:13.417 [BatchRunner] Results subdirectory: generated
-2026-06-01 20:30:13.417 [BatchRunner] No -agvcount provided. Using BrandimartLoader formula (1.5× machinesPerType).
-2026-06-01 20:30:13.417 [BatchRunner] Disruption mode: None
-2026-06-01 20:30:13.422 [BatchRunner] Starting batch: 5 configs x 1 rules x 3 repeats = 15 total runs
-2026-06-01 20:30:13.422 [BatchRunner] Run 1/15: config=small_5j_5m rule=SPT_SMPT seed=42
-2026-06-01 20:30:13.423 [StochasticMgr] Deterministic mode (no stochastic config).
-2026-06-01 20:30:13.451 [Orchestrator] Episode started: 5 jobs, 5 machines, stochastic=False
-2026-06-01 20:30:13.452 [Agent] OnEpisodeBegin skipped — waiting for UI to arm.
-2026-06-01 20:30:36.784 [TelemetryChannel] Flushed 0 events to Python.
-2026-06-01 20:30:36.785 [Orchestrator] Logging Academy Episode
-2026-06-01 20:30:37.205 [BatchRunner] Progress: 1/15 (23.8s elapsed, ETA 333.0s)
-2026-06-01 20:30:37.205 [BatchRunner] Run 2/15: config=small_5j_5m rule=SPT_SMPT seed=43
-2026-06-01 20:30:37.205 [StochasticMgr] Deterministic mode (no stochastic config).
-2026-06-01 20:30:37.209 [Orchestrator] Episode started: 5 jobs, 5 machines, stochastic=False
-2026-06-01 20:31:04.505 [TelemetryChannel] Flushed 0 events to Python.
-2026-06-01 20:31:04.506 [Orchestrator] Logging Academy Episode
-2026-06-01 20:31:04.957 [BatchRunner] Progress: 2/15 (51.5s elapsed, ETA 335.0s)
-2026-06-01 20:31:04.957 [BatchRunner] Run 3/15: config=small_5j_5m rule=SPT_SMPT seed=44
-2026-06-01 20:31:04.958 [StochasticMgr] Deterministic mode (no stochastic config).
-2026-06-01 20:31:04.961 [Orchestrator] Episode started: 5 jobs, 5 machines, stochastic=False
-2026-06-01 20:31:33.132 [TelemetryChannel] Flushed 0 events to Python.
-2026-06-01 20:31:33.132 [Orchestrator] Logging Academy Episode
-2026-06-01 20:31:33.579 [BatchRunner] Progress: 3/15 (80.2s elapsed, ETA 320.6s)
-2026-06-01 20:31:33.579 [BatchRunner] Run 4/15: config=medium_20j_15m rule=SPT_SMPT seed=42
-2026-06-01 20:31:33.579 [StochasticMgr] Deterministic mode (no stochastic config).
-2026-06-01 20:31:33.590 [Orchestrator] Episode started: 20 jobs, 15 machines, stochastic=False
-2026-06-01 20:34:52.619 [TelemetryChannel] Flushed 0 events to Python.
-2026-06-01 20:34:52.619 [Orchestrator] Logging Academy Episode
-2026-06-01 20:34:53.072 [BatchRunner] Progress: 4/15 (279.6s elapsed, ETA 769.0s)
-2026-06-01 20:34:53.072 [BatchRunner] Run 5/15: config=medium_20j_15m rule=SPT_SMPT seed=43
-2026-06-01 20:34:53.072 [StochasticMgr] Deterministic mode (no stochastic config).
-2026-06-01 20:34:53.081 [Orchestrator] Episode started: 20 jobs, 15 machines, stochastic=False
-2026-06-01 20:38:05.466 [TelemetryChannel] Flushed 0 events to Python.
-2026-06-01 20:38:05.466 [Orchestrator] Logging Academy Episode
-2026-06-01 20:38:05.900 [BatchRunner] Progress: 5/15 (472.5s elapsed, ETA 945.0s)
-2026-06-01 20:38:05.900 [BatchRunner] Run 6/15: config=medium_20j_15m rule=SPT_SMPT seed=44
-2026-06-01 20:38:05.900 [StochasticMgr] Deterministic mode (no stochastic config).
-2026-06-01 20:38:05.910 [Orchestrator] Episode started: 20 jobs, 15 machines, stochastic=False
-2026-06-01 20:43:22.978 [TelemetryChannel] Flushed 0 events to Python.
-2026-06-01 20:43:22.978 [Orchestrator] Logging Academy Episode
-2026-06-01 20:43:23.432 [BatchRunner] Progress: 6/15 (790.0s elapsed, ETA 1185.0s)
-2026-06-01 20:43:23.432 [BatchRunner] Run 7/15: config=large_50j_15m rule=SPT_SMPT seed=42
-2026-06-01 20:43:23.432 [StochasticMgr] Deterministic mode (no stochastic config).
-2026-06-01 20:43:23.442 [Orchestrator] Episode started: 50 jobs, 15 machines, stochastic=False
-2026-06-01 20:49:51.686 [TelemetryChannel] Flushed 0 events to Python.
-2026-06-01 20:49:51.686 [Orchestrator] Logging Academy Episode
-2026-06-01 20:49:52.140 [BatchRunner] Progress: 7/15 (1178.7s elapsed, ETA 1347.1s)
-2026-06-01 20:49:52.140 [BatchRunner] Run 8/15: config=large_50j_15m rule=SPT_SMPT seed=43
-2026-06-01 20:49:52.140 [StochasticMgr] Deterministic mode (no stochastic config).
-2026-06-01 20:49:52.149 [Orchestrator] Episode started: 50 jobs, 15 machines, stochastic=False
-2026-06-01 20:55:22.735 [TelemetryChannel] Flushed 0 events to Python.
-2026-06-01 20:55:22.735 [Orchestrator] Logging Academy Episode
-2026-06-01 20:55:23.195 [BatchRunner] Progress: 8/15 (1509.8s elapsed, ETA 1321.0s)
-2026-06-01 20:55:23.195 [BatchRunner] Run 9/15: config=large_50j_15m rule=SPT_SMPT seed=44
-2026-06-01 20:55:23.195 [StochasticMgr] Deterministic mode (no stochastic config).
-2026-06-01 20:55:23.205 [Orchestrator] Episode started: 50 jobs, 15 machines, stochastic=False
-2026-06-01 21:03:41.959 [TelemetryChannel] Flushed 0 events to Python.
-2026-06-01 21:03:41.959 [Orchestrator] Logging Academy Episode
-2026-06-01 21:03:42.421 [BatchRunner] Progress: 9/15 (2009.0s elapsed, ETA 1339.3s)
-2026-06-01 21:03:42.421 [BatchRunner] Run 10/15: config=xlarge_100j_20m rule=SPT_SMPT seed=42
-2026-06-01 21:03:42.421 [StochasticMgr] Deterministic mode (no stochastic config).
-2026-06-01 21:03:42.436 [Orchestrator] Episode started: 100 jobs, 20 machines, stochastic=False
-2026-06-01 21:20:48.453 [TelemetryChannel] Flushed 0 events to Python.
-2026-06-01 21:20:48.453 [Orchestrator] Logging Academy Episode
-2026-06-01 21:20:48.902 [BatchRunner] Progress: 10/15 (3035.5s elapsed, ETA 1517.7s)
-2026-06-01 21:20:48.903 [BatchRunner] Run 11/15: config=xlarge_100j_20m rule=SPT_SMPT seed=43
-2026-06-01 21:20:48.903 [StochasticMgr] Deterministic mode (no stochastic config).
-2026-06-01 21:20:48.917 [Orchestrator] Episode started: 100 jobs, 20 machines, stochastic=False
-2026-06-01 21:37:20.787 [TelemetryChannel] Flushed 0 events to Python.
-2026-06-01 21:37:20.788 [Orchestrator] Logging Academy Episode
-2026-06-01 21:37:21.219 [BatchRunner] Progress: 11/15 (4027.8s elapsed, ETA 1464.6s)
-2026-06-01 21:37:21.219 [BatchRunner] Run 12/15: config=xlarge_100j_20m rule=SPT_SMPT seed=44
-2026-06-01 21:37:21.219 [StochasticMgr] Deterministic mode (no stochastic config).
-2026-06-01 21:37:21.233 [Orchestrator] Episode started: 100 jobs, 20 machines, stochastic=False
-2026-06-01 21:56:40.474 [TelemetryChannel] Flushed 0 events to Python.
-2026-06-01 21:56:40.474 [Orchestrator] Logging Academy Episode
-2026-06-01 21:56:40.911 [BatchRunner] Progress: 12/15 (5187.5s elapsed, ETA 1296.9s)
-2026-06-01 21:56:40.911 [BatchRunner] Run 13/15: config=dynamic_30j_15m rule=SPT_SMPT seed=42
-2026-06-01 21:56:40.911 [StochasticMgr] Deterministic mode (no stochastic config).
-2026-06-01 21:56:40.920 [Orchestrator] Episode started: 30 jobs, 15 machines, stochastic=False
-2026-06-01 22:00:01.084 [TelemetryChannel] Flushed 0 events to Python.
-2026-06-01 22:00:01.084 [Orchestrator] Logging Academy Episode
-2026-06-01 22:00:01.506 [BatchRunner] Progress: 13/15 (5388.1s elapsed, ETA 828.9s)
-2026-06-01 22:00:01.506 [BatchRunner] Run 14/15: config=dynamic_30j_15m rule=SPT_SMPT seed=43
-2026-06-01 22:00:01.506 [StochasticMgr] Deterministic mode (no stochastic config).
-2026-06-01 22:00:01.518 [Orchestrator] Episode started: 30 jobs, 15 machines, stochastic=False
-2026-06-01 22:03:37.590 [TelemetryChannel] Flushed 0 events to Python.
-2026-06-01 22:03:37.590 [Orchestrator] Logging Academy Episode
-2026-06-01 22:03:38.022 [BatchRunner] Progress: 14/15 (5604.6s elapsed, ETA 400.3s)
-2026-06-01 22:03:38.022 [BatchRunner] Run 15/15: config=dynamic_30j_15m rule=SPT_SMPT seed=44
-2026-06-01 22:03:38.022 [StochasticMgr] Deterministic mode (no stochastic config).
-2026-06-01 22:03:38.032 [Orchestrator] Episode started: 30 jobs, 15 machines, stochastic=False
-2026-06-01 22:06:44.317 [TelemetryChannel] Flushed 0 events to Python.
-2026-06-01 22:06:44.317 [Orchestrator] Logging Academy Episode
-2026-06-01 22:06:44.704 [BatchRunner] Progress: 15/15 (5791.3s elapsed, ETA 0.0s)
-2026-06-01 22:06:44.704 [BatchRunner] Batch complete: 15 runs in 5791.3s
-2026-06-01 22:06:44.704 [BatchRunner] Headless mode — quitting application.
+--- Log Started: 6/14/2026 8:44:47 PM ---
+2026-06-14 20:44:47.509 [BatchRunner] TimeScale set to 100x via CLI.
+2026-06-14 20:44:47.511 [BatchRunner] Active rules (1): SPT_SMPT
+2026-06-14 20:44:47.513 [BatchRunner] Results subdirectory: generated
+2026-06-14 20:44:47.519 [BatchRunner] Starting batch: 10 configs x 1 rules x 3 repeats = 30 total runs
+2026-06-14 20:44:47.520 [BatchRunner] Run 1/30: config=s10m_lam0p0020 rule=SPT_SMPT seed=42
+2026-06-14 20:44:47.521 [StochasticMgr] Initialized — seed=42 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.002
+2026-06-14 20:44:47.526 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-06-14 20:44:47.538 [FactoryLayout] Distance matrix (10x10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-06-14 20:44:47.547 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-06-14 20:44:47.551 [TrafficZones] Built zone graph: 27 zones.
+2026-06-14 20:44:47.553 [AGVPool] Spawned fleet of 3 AGVs.
+2026-06-14 20:44:47.556 [StochasticMgr] Initialized — seed=42 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.002
+2026-06-14 20:44:47.557 [Orchestrator] Poisson clock armed — first arrival ≈ t=201.7s λ=0.002 cap=15
+2026-06-14 20:44:47.557 [Orchestrator] Episode started: 2 jobs, 10 machines, stochastic=True
+2026-06-14 20:44:47.558 [Agent] OnEpisodeBegin skipped — waiting for UI to arm.
+2026-06-14 20:44:51.419 [Orchestrator] Dynamic job 2 arrived at t=203.1s — 1/15 dynamic jobs
+2026-06-14 20:44:57.117 Job 1 exited the system after delivery.
+2026-06-14 20:45:00.891 Job 0 exited the system after delivery.
+2026-06-14 20:45:04.047 Job 2 exited the system after delivery.
+2026-06-14 20:45:04.096 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-14 20:45:04.503 [BatchRunner] Progress: 1/30 (17.0s elapsed, ETA 492.5s)
+2026-06-14 20:45:04.503 [BatchRunner] Run 2/30: config=s10m_lam0p0020 rule=SPT_SMPT seed=43
+2026-06-14 20:45:04.503 [StochasticMgr] Initialized — seed=43 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.002
+2026-06-14 20:45:04.504 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-06-14 20:45:04.509 [FactoryLayout] Distance matrix (10x10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-06-14 20:45:04.511 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-06-14 20:45:04.511 [TrafficZones] Built zone graph: 27 zones.
+2026-06-14 20:45:04.511 [AGVPool] Spawned fleet of 3 AGVs.
+2026-06-14 20:45:04.511 [StochasticMgr] Initialized — seed=43 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.002
+2026-06-14 20:45:04.511 [Orchestrator] Poisson clock armed — first arrival ≈ t=829.0s λ=0.002 cap=15
+2026-06-14 20:45:04.512 [Orchestrator] Episode started: 2 jobs, 10 machines, stochastic=True
+2026-06-14 20:45:18.975 Job 0 exited the system after delivery.
+2026-06-14 20:45:19.601 Job 1 exited the system after delivery.
+2026-06-14 20:45:19.601 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-14 20:45:20.015 [BatchRunner] Progress: 2/30 (32.5s elapsed, ETA 454.9s)
+2026-06-14 20:45:20.016 [BatchRunner] Run 3/30: config=s10m_lam0p0020 rule=SPT_SMPT seed=44
+2026-06-14 20:45:20.016 [StochasticMgr] Initialized — seed=44 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.002
+2026-06-14 20:45:20.016 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-06-14 20:45:20.020 [FactoryLayout] Distance matrix (10x10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-06-14 20:45:20.022 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-06-14 20:45:20.022 [TrafficZones] Built zone graph: 27 zones.
+2026-06-14 20:45:20.022 [AGVPool] Spawned fleet of 3 AGVs.
+2026-06-14 20:45:20.022 [StochasticMgr] Initialized — seed=44 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.002
+2026-06-14 20:45:20.022 [Orchestrator] Poisson clock armed — first arrival ≈ t=169.2s λ=0.002 cap=15
+2026-06-14 20:45:20.023 [Orchestrator] Episode started: 2 jobs, 10 machines, stochastic=True
+2026-06-14 20:45:23.795 [Orchestrator] Dynamic job 2 arrived at t=200.0s — 1/15 dynamic jobs
+2026-06-14 20:45:26.986 [Orchestrator] Dynamic job 3 arrived at t=366.7s — 2/15 dynamic jobs
+2026-06-14 20:45:33.433 [Orchestrator] Dynamic job 4 arrived at t=700.0s — 3/15 dynamic jobs
+2026-06-14 20:45:34.111 Job 0 exited the system after delivery.
+2026-06-14 20:45:34.111 [Orchestrator] Dynamic job 5 arrived at t=733.3s — 4/15 dynamic jobs
+2026-06-14 20:45:41.196 Job 1 exited the system after delivery.
+2026-06-14 20:45:45.022 Job 2 exited the system after delivery.
+2026-06-14 20:45:52.060 Job 5 exited the system after delivery.
+2026-06-14 20:45:52.675 Job 4 exited the system after delivery.
+2026-06-14 20:45:56.377 Job 3 exited the system after delivery.
+2026-06-14 20:45:56.377 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-14 20:45:56.792 [BatchRunner] Progress: 3/30 (69.3s elapsed, ETA 623.5s)
+2026-06-14 20:45:56.793 [BatchRunner] Run 4/30: config=s10m_lam0p0040 rule=SPT_SMPT seed=42
+2026-06-14 20:45:56.793 [StochasticMgr] Initialized — seed=42 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.004
+2026-06-14 20:45:56.793 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-06-14 20:45:56.796 [FactoryLayout] Distance matrix (10x10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-06-14 20:45:56.798 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-06-14 20:45:56.799 [TrafficZones] Built zone graph: 27 zones.
+2026-06-14 20:45:56.800 [AGVPool] Spawned fleet of 3 AGVs.
+2026-06-14 20:45:56.800 [StochasticMgr] Initialized — seed=42 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.004
+2026-06-14 20:45:56.800 [Orchestrator] Poisson clock armed — first arrival ≈ t=100.8s λ=0.004 cap=15
+2026-06-14 20:45:56.800 [Orchestrator] Episode started: 2 jobs, 10 machines, stochastic=True
+2026-06-14 20:45:59.374 [Orchestrator] Dynamic job 2 arrived at t=133.3s — 1/15 dynamic jobs
+2026-06-14 20:46:08.284 Job 1 exited the system after delivery.
+2026-06-14 20:46:08.935 [Orchestrator] Dynamic job 3 arrived at t=633.3s — 2/15 dynamic jobs
+2026-06-14 20:46:14.158 Job 0 exited the system after delivery.
+2026-06-14 20:46:15.418 Job 2 exited the system after delivery.
+2026-06-14 20:46:18.537 Job 3 exited the system after delivery.
+2026-06-14 20:46:18.542 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-14 20:46:18.967 [BatchRunner] Progress: 4/30 (91.4s elapsed, ETA 594.4s)
+2026-06-14 20:46:18.967 [BatchRunner] Run 5/30: config=s10m_lam0p0040 rule=SPT_SMPT seed=43
+2026-06-14 20:46:18.967 [StochasticMgr] Initialized — seed=43 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.004
+2026-06-14 20:46:18.968 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-06-14 20:46:18.971 [FactoryLayout] Distance matrix (10x10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-06-14 20:46:18.974 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-06-14 20:46:18.974 [TrafficZones] Built zone graph: 27 zones.
+2026-06-14 20:46:18.974 [AGVPool] Spawned fleet of 3 AGVs.
+2026-06-14 20:46:18.975 [StochasticMgr] Initialized — seed=43 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.004
+2026-06-14 20:46:18.975 [Orchestrator] Poisson clock armed — first arrival ≈ t=414.5s λ=0.004 cap=15
+2026-06-14 20:46:18.975 [Orchestrator] Episode started: 2 jobs, 10 machines, stochastic=True
+2026-06-14 20:46:27.124 [Orchestrator] Dynamic job 2 arrived at t=433.3s — 1/15 dynamic jobs
+2026-06-14 20:46:31.558 [Orchestrator] Dynamic job 3 arrived at t=666.7s — 2/15 dynamic jobs
+2026-06-14 20:46:32.836 [Orchestrator] Dynamic job 4 arrived at t=733.3s — 3/15 dynamic jobs
+2026-06-14 20:46:33.517 Job 0 exited the system after delivery.
+2026-06-14 20:46:34.833 Job 1 exited the system after delivery.
+2026-06-14 20:46:34.833 [Orchestrator] Dynamic job 5 arrived at t=833.3s — 4/15 dynamic jobs
+2026-06-14 20:46:37.430 [Orchestrator] Dynamic job 6 arrived at t=966.7s — 5/15 dynamic jobs
+2026-06-14 20:46:47.138 [Orchestrator] Dynamic job 7 arrived at t=1466.7s — 6/15 dynamic jobs
+2026-06-14 20:46:54.313 Job 4 exited the system after delivery.
+2026-06-14 20:46:56.317 [Orchestrator] Dynamic job 8 arrived at t=1933.3s — 7/15 dynamic jobs
+2026-06-14 20:46:57.633 Job 3 exited the system after delivery.
+2026-06-14 20:46:58.307 Job 2 exited the system after delivery.
+2026-06-14 20:47:00.926 Job 6 exited the system after delivery.
+2026-06-14 20:47:00.926 Job 7 exited the system after delivery.
+2026-06-14 20:47:10.545 Job 8 exited the system after delivery.
+2026-06-14 20:47:11.837 Job 5 exited the system after delivery.
+2026-06-14 20:47:11.837 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-14 20:47:12.269 [BatchRunner] Progress: 5/30 (144.7s elapsed, ETA 723.7s)
+2026-06-14 20:47:12.269 [BatchRunner] Run 6/30: config=s10m_lam0p0040 rule=SPT_SMPT seed=44
+2026-06-14 20:47:12.270 [StochasticMgr] Initialized — seed=44 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.004
+2026-06-14 20:47:12.270 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-06-14 20:47:12.273 [FactoryLayout] Distance matrix (10x10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-06-14 20:47:12.275 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-06-14 20:47:12.276 [TrafficZones] Built zone graph: 27 zones.
+2026-06-14 20:47:12.277 [AGVPool] Spawned fleet of 3 AGVs.
+2026-06-14 20:47:12.277 [StochasticMgr] Initialized — seed=44 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.004
+2026-06-14 20:47:12.277 [Orchestrator] Poisson clock armed — first arrival ≈ t=84.6s λ=0.004 cap=15
+2026-06-14 20:47:12.277 [Orchestrator] Episode started: 2 jobs, 10 machines, stochastic=True
+2026-06-14 20:47:14.216 [Orchestrator] Dynamic job 2 arrived at t=100.0s — 1/15 dynamic jobs
+2026-06-14 20:47:16.174 [Orchestrator] Dynamic job 3 arrived at t=200.0s — 2/15 dynamic jobs
+2026-06-14 20:47:19.408 [Orchestrator] Dynamic job 4 arrived at t=366.7s — 3/15 dynamic jobs
+2026-06-14 20:47:20.082 [Orchestrator] Dynamic job 5 arrived at t=400.0s — 4/15 dynamic jobs
+2026-06-14 20:47:33.060 [Orchestrator] Dynamic job 6 arrived at t=1066.7s — 5/15 dynamic jobs
+2026-06-14 20:47:33.715 Job 2 exited the system after delivery.
+2026-06-14 20:47:34.374 Job 0 exited the system after delivery.
+2026-06-14 20:47:40.187 Job 1 exited the system after delivery.
+2026-06-14 20:47:42.112 Job 4 exited the system after delivery.
+2026-06-14 20:47:45.323 Job 5 exited the system after delivery.
+2026-06-14 20:47:51.791 Job 6 exited the system after delivery.
+2026-06-14 20:47:55.680 Job 3 exited the system after delivery.
+2026-06-14 20:47:55.680 [Orchestrator] Dynamic job 7 arrived at t=2233.3s — 6/15 dynamic jobs
+2026-06-14 20:47:58.272 [Orchestrator] Dynamic job 8 arrived at t=2366.7s — 7/15 dynamic jobs
+2026-06-14 20:48:01.543 [Orchestrator] Dynamic job 9 arrived at t=2533.3s — 8/15 dynamic jobs
+2026-06-14 20:48:06.080 [Orchestrator] Dynamic job 10 arrived at t=2766.7s — 9/15 dynamic jobs
+2026-06-14 20:48:06.718 Job 7 exited the system after delivery.
+2026-06-14 20:48:10.044 [Orchestrator] Dynamic job 11 arrived at t=2966.7s — 10/15 dynamic jobs
+2026-06-14 20:48:11.403 Job 8 exited the system after delivery.
+2026-06-14 20:48:12.057 [Orchestrator] Dynamic job 12 arrived at t=3066.7s — 11/15 dynamic jobs
+2026-06-14 20:48:13.368 [Orchestrator] Dynamic job 13 arrived at t=3133.3s — 12/15 dynamic jobs
+2026-06-14 20:48:14.050 Job 9 exited the system after delivery.
+2026-06-14 20:48:14.050 [Orchestrator] Dynamic job 14 arrived at t=3166.7s — 13/15 dynamic jobs
+2026-06-14 20:48:19.355 [Orchestrator] Dynamic job 15 arrived at t=3433.3s — 14/15 dynamic jobs
+2026-06-14 20:48:20.642 [Orchestrator] Dynamic job 16 arrived at t=3500.0s — 15/15 dynamic jobs
+2026-06-14 20:48:24.594 Job 11 exited the system after delivery.
+2026-06-14 20:48:28.507 Job 10 exited the system after delivery.
+2026-06-14 20:48:29.789 Job 12 exited the system after delivery.
+2026-06-14 20:48:34.408 Job 16 exited the system after delivery.
+2026-06-14 20:48:40.314 Job 15 exited the system after delivery.
+2026-06-14 20:48:41.631 Job 13 exited the system after delivery.
+2026-06-14 20:48:46.843 Job 14 exited the system after delivery.
+2026-06-14 20:48:46.843 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-14 20:48:47.274 [BatchRunner] Progress: 6/30 (239.8s elapsed, ETA 959.0s)
+2026-06-14 20:48:47.274 [BatchRunner] Run 7/30: config=s10m_lam0p0060 rule=SPT_SMPT seed=42
+2026-06-14 20:48:47.274 [StochasticMgr] Initialized — seed=42 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.006
+2026-06-14 20:48:47.275 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-06-14 20:48:47.278 [FactoryLayout] Distance matrix (10x10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-06-14 20:48:47.281 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-06-14 20:48:47.282 [TrafficZones] Built zone graph: 27 zones.
+2026-06-14 20:48:47.282 [AGVPool] Spawned fleet of 3 AGVs.
+2026-06-14 20:48:47.282 [StochasticMgr] Initialized — seed=42 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.006
+2026-06-14 20:48:47.282 [Orchestrator] Poisson clock armed — first arrival ≈ t=67.2s λ=0.006 cap=15
+2026-06-14 20:48:47.282 [Orchestrator] Episode started: 2 jobs, 10 machines, stochastic=True
+2026-06-14 20:48:49.177 [Orchestrator] Dynamic job 2 arrived at t=100.0s — 1/15 dynamic jobs
+2026-06-14 20:48:55.645 [Orchestrator] Dynamic job 3 arrived at t=433.3s — 2/15 dynamic jobs
+2026-06-14 20:48:59.522 Job 1 exited the system after delivery.
+2026-06-14 20:49:02.718 [Orchestrator] Dynamic job 4 arrived at t=800.0s — 3/15 dynamic jobs
+2026-06-14 20:49:04.075 Job 0 exited the system after delivery.
+2026-06-14 20:49:05.388 [Orchestrator] Dynamic job 5 arrived at t=933.3s — 4/15 dynamic jobs
+2026-06-14 20:49:07.355 Job 2 exited the system after delivery.
+2026-06-14 20:49:07.355 Job 3 exited the system after delivery.
+2026-06-14 20:49:11.201 [Orchestrator] Dynamic job 6 arrived at t=1233.3s — 5/15 dynamic jobs
+2026-06-14 20:49:15.747 [Orchestrator] Dynamic job 7 arrived at t=1466.7s — 6/15 dynamic jobs
+2026-06-14 20:49:17.085 [Orchestrator] Dynamic job 8 arrived at t=1533.3s — 7/15 dynamic jobs
+2026-06-14 20:49:19.064 Job 5 exited the system after delivery.
+2026-06-14 20:49:19.709 [Orchestrator] Dynamic job 9 arrived at t=1666.7s — 8/15 dynamic jobs
+2026-06-14 20:49:25.600 [Orchestrator] Dynamic job 10 arrived at t=1966.7s — 9/15 dynamic jobs
+2026-06-14 20:49:26.881 [Orchestrator] Dynamic job 11 arrived at t=2033.3s — 10/15 dynamic jobs
+2026-06-14 20:49:32.210 [Orchestrator] Dynamic job 12 arrived at t=2300.0s — 11/15 dynamic jobs
+2026-06-14 20:49:36.750 [Orchestrator] Dynamic job 13 arrived at t=2533.3s — 12/15 dynamic jobs
+2026-06-14 20:49:39.434 [Orchestrator] Dynamic job 14 arrived at t=2666.7s — 13/15 dynamic jobs
+2026-06-14 20:49:43.388 [Orchestrator] Dynamic job 15 arrived at t=2866.7s — 14/15 dynamic jobs
+2026-06-14 20:49:46.709 [Orchestrator] Dynamic job 16 arrived at t=3033.3s — 15/15 dynamic jobs
+2026-06-14 20:49:47.393 Job 11 exited the system after delivery.
+2026-06-14 20:49:56.743 Job 10 exited the system after delivery.
+2026-06-14 20:50:05.283 Job 14 exited the system after delivery.
+2026-06-14 20:50:05.954 Job 15 exited the system after delivery.
+2026-06-14 20:50:06.615 Job 8 exited the system after delivery.
+2026-06-14 20:50:09.911 Job 9 exited the system after delivery.
+2026-06-14 20:50:13.228 Job 13 exited the system after delivery.
+2026-06-14 20:50:14.553 Job 4 exited the system after delivery.
+2026-06-14 20:50:15.890 Job 12 exited the system after delivery.
+2026-06-14 20:50:17.222 Job 16 exited the system after delivery.
+2026-06-14 20:50:17.875 Job 6 exited the system after delivery.
+2026-06-14 20:50:21.114 Job 7 exited the system after delivery.
+2026-06-14 20:50:21.114 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-14 20:50:21.536 [BatchRunner] Progress: 7/30 (334.0s elapsed, ETA 1097.5s)
+2026-06-14 20:50:21.537 [BatchRunner] Run 8/30: config=s10m_lam0p0060 rule=SPT_SMPT seed=43
+2026-06-14 20:50:21.537 [StochasticMgr] Initialized — seed=43 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.006
+2026-06-14 20:50:21.537 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-06-14 20:50:21.540 [FactoryLayout] Distance matrix (10x10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-06-14 20:50:21.542 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-06-14 20:50:21.543 [TrafficZones] Built zone graph: 27 zones.
+2026-06-14 20:50:21.544 [AGVPool] Spawned fleet of 3 AGVs.
+2026-06-14 20:50:21.544 [StochasticMgr] Initialized — seed=43 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.006
+2026-06-14 20:50:21.544 [Orchestrator] Poisson clock armed — first arrival ≈ t=276.3s λ=0.006 cap=15
+2026-06-14 20:50:21.544 [Orchestrator] Episode started: 2 jobs, 10 machines, stochastic=True
+2026-06-14 20:50:27.354 [Orchestrator] Dynamic job 2 arrived at t=300.0s — 1/15 dynamic jobs
+2026-06-14 20:50:30.605 [Orchestrator] Dynamic job 3 arrived at t=466.7s — 2/15 dynamic jobs
+2026-06-14 20:50:31.245 [Orchestrator] Dynamic job 4 arrived at t=500.0s — 3/15 dynamic jobs
+2026-06-14 20:50:32.560 [Orchestrator] Dynamic job 5 arrived at t=566.7s — 4/15 dynamic jobs
+2026-06-14 20:50:34.574 [Orchestrator] Dynamic job 6 arrived at t=666.7s — 5/15 dynamic jobs
+2026-06-14 20:50:41.102 [Orchestrator] Dynamic job 7 arrived at t=1000.0s — 6/15 dynamic jobs
+2026-06-14 20:50:41.760 Job 0 exited the system after delivery.
+2026-06-14 20:50:42.396 Job 1 exited the system after delivery.
+2026-06-14 20:50:46.318 Job 4 exited the system after delivery.
+2026-06-14 20:50:46.926 [Orchestrator] Dynamic job 8 arrived at t=1300.0s — 7/15 dynamic jobs
+2026-06-14 20:51:01.261 Job 2 exited the system after delivery.
+2026-06-14 20:51:01.261 [Orchestrator] Dynamic job 9 arrived at t=2033.3s — 8/15 dynamic jobs
+2026-06-14 20:51:02.590 Job 8 exited the system after delivery.
+2026-06-14 20:51:05.919 Job 3 exited the system after delivery.
+2026-06-14 20:51:05.919 [Orchestrator] Dynamic job 10 arrived at t=2266.7s — 9/15 dynamic jobs
+2026-06-14 20:51:09.880 Job 7 exited the system after delivery.
+2026-06-14 20:51:12.516 Job 6 exited the system after delivery.
+2026-06-14 20:51:13.150 [Orchestrator] Dynamic job 11 arrived at t=2633.3s — 10/15 dynamic jobs
+2026-06-14 20:51:13.781 [Orchestrator] Dynamic job 12 arrived at t=2666.7s — 11/15 dynamic jobs
+2026-06-14 20:51:20.359 Job 9 exited the system after delivery.
+2026-06-14 20:51:24.893 [Orchestrator] Dynamic job 13 arrived at t=3233.3s — 12/15 dynamic jobs
+2026-06-14 20:51:26.881 Job 10 exited the system after delivery.
+2026-06-14 20:51:28.878 Job 11 exited the system after delivery.
+2026-06-14 20:51:30.831 Job 12 exited the system after delivery.
+2026-06-14 20:51:30.831 [Orchestrator] Dynamic job 14 arrived at t=3533.3s — 13/15 dynamic jobs
+2026-06-14 20:51:31.497 [Orchestrator] Dynamic job 15 arrived at t=3566.7s — 14/15 dynamic jobs
+2026-06-14 20:51:40.053 [Orchestrator] Dynamic job 16 arrived at t=4000.0s — 15/15 dynamic jobs
+2026-06-14 20:51:41.364 Job 5 exited the system after delivery.
+2026-06-14 20:51:44.032 Job 13 exited the system after delivery.
+2026-06-14 20:51:51.933 Job 14 exited the system after delivery.
+2026-06-14 20:51:55.222 Job 15 exited the system after delivery.
+2026-06-14 20:51:55.856 Job 16 exited the system after delivery.
+2026-06-14 20:51:55.856 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-14 20:51:56.279 [BatchRunner] Progress: 8/30 (428.8s elapsed, ETA 1179.1s)
+2026-06-14 20:51:56.279 [BatchRunner] Run 9/30: config=s10m_lam0p0060 rule=SPT_SMPT seed=44
+2026-06-14 20:51:56.280 [StochasticMgr] Initialized — seed=44 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.006
+2026-06-14 20:51:56.281 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-06-14 20:51:56.284 [FactoryLayout] Distance matrix (10x10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-06-14 20:51:56.286 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-06-14 20:51:56.286 [TrafficZones] Built zone graph: 27 zones.
+2026-06-14 20:51:56.288 [AGVPool] Spawned fleet of 3 AGVs.
+2026-06-14 20:51:56.288 [StochasticMgr] Initialized — seed=44 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.006
+2026-06-14 20:51:56.288 [Orchestrator] Poisson clock armed — first arrival ≈ t=56.4s λ=0.006 cap=15
+2026-06-14 20:51:56.288 [Orchestrator] Episode started: 2 jobs, 10 machines, stochastic=True
+2026-06-14 20:51:57.551 [Orchestrator] Dynamic job 2 arrived at t=66.7s — 1/15 dynamic jobs
+2026-06-14 20:51:58.856 [Orchestrator] Dynamic job 3 arrived at t=133.3s — 2/15 dynamic jobs
+2026-06-14 20:52:01.505 [Orchestrator] Dynamic job 4 arrived at t=266.7s — 3/15 dynamic jobs
+2026-06-14 20:52:02.136 [Orchestrator] Dynamic job 5 arrived at t=300.0s — 4/15 dynamic jobs
+2026-06-14 20:52:11.216 [Orchestrator] Dynamic job 6 arrived at t=766.7s — 5/15 dynamic jobs
+2026-06-14 20:52:15.124 Job 2 exited the system after delivery.
+2026-06-14 20:52:16.422 Job 0 exited the system after delivery.
+2026-06-14 20:52:23.527 Job 4 exited the system after delivery.
+2026-06-14 20:52:26.122 [Orchestrator] Dynamic job 7 arrived at t=1533.3s — 6/15 dynamic jobs
+2026-06-14 20:52:27.431 Job 5 exited the system after delivery.
+2026-06-14 20:52:28.105 Job 1 exited the system after delivery.
+2026-06-14 20:52:28.105 [Orchestrator] Dynamic job 8 arrived at t=1633.3s — 7/15 dynamic jobs
+2026-06-14 20:52:30.742 [Orchestrator] Dynamic job 9 arrived at t=1766.7s — 8/15 dynamic jobs
+2026-06-14 20:52:34.024 [Orchestrator] Dynamic job 10 arrived at t=1933.3s — 9/15 dynamic jobs
+2026-06-14 20:52:36.677 [Orchestrator] Dynamic job 11 arrived at t=2066.7s — 10/15 dynamic jobs
+2026-06-14 20:52:37.980 Job 6 exited the system after delivery.
+2026-06-14 20:52:37.980 [Orchestrator] Dynamic job 12 arrived at t=2133.3s — 11/15 dynamic jobs
+2026-06-14 20:52:38.646 [Orchestrator] Dynamic job 13 arrived at t=2166.7s — 12/15 dynamic jobs
+2026-06-14 20:52:39.323 [Orchestrator] Dynamic job 14 arrived at t=2200.0s — 13/15 dynamic jobs
+2026-06-14 20:52:43.261 [Orchestrator] Dynamic job 15 arrived at t=2400.0s — 14/15 dynamic jobs
+2026-06-14 20:52:44.561 [Orchestrator] Dynamic job 16 arrived at t=2466.7s — 15/15 dynamic jobs
+2026-06-14 20:52:45.234 Job 3 exited the system after delivery.
+2026-06-14 20:52:56.471 Job 16 exited the system after delivery.
+2026-06-14 20:52:57.793 Job 11 exited the system after delivery.
+2026-06-14 20:52:59.110 Job 9 exited the system after delivery.
+2026-06-14 20:53:03.069 Job 12 exited the system after delivery.
+2026-06-14 20:53:04.380 Job 10 exited the system after delivery.
+2026-06-14 20:53:11.626 Job 15 exited the system after delivery.
+2026-06-14 20:53:16.232 Job 7 exited the system after delivery.
+2026-06-14 20:53:16.884 Job 13 exited the system after delivery.
+2026-06-14 20:53:20.796 Job 14 exited the system after delivery.
+2026-06-14 20:53:22.133 Job 8 exited the system after delivery.
+2026-06-14 20:53:22.134 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-14 20:53:22.567 [BatchRunner] Progress: 9/30 (515.0s elapsed, ETA 1201.8s)
+2026-06-14 20:53:22.567 [BatchRunner] Run 10/30: config=s10m_lam0p0100 rule=SPT_SMPT seed=42
+2026-06-14 20:53:22.567 [StochasticMgr] Initialized — seed=42 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.01
+2026-06-14 20:53:22.568 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-06-14 20:53:22.572 [FactoryLayout] Distance matrix (10x10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-06-14 20:53:22.574 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-06-14 20:53:22.574 [TrafficZones] Built zone graph: 27 zones.
+2026-06-14 20:53:22.575 [AGVPool] Spawned fleet of 3 AGVs.
+2026-06-14 20:53:22.575 [StochasticMgr] Initialized — seed=42 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.01
+2026-06-14 20:53:22.575 [Orchestrator] Poisson clock armed — first arrival ≈ t=40.3s λ=0.01 cap=15
+2026-06-14 20:53:22.575 [Orchestrator] Episode started: 2 jobs, 10 machines, stochastic=True
+2026-06-14 20:53:23.814 [Orchestrator] Dynamic job 2 arrived at t=66.7s — 1/15 dynamic jobs
+2026-06-14 20:53:27.749 [Orchestrator] Dynamic job 3 arrived at t=266.7s — 2/15 dynamic jobs
+2026-06-14 20:53:32.278 [Orchestrator] Dynamic job 4 arrived at t=500.0s — 3/15 dynamic jobs
+2026-06-14 20:53:33.582 [Orchestrator] Dynamic job 5 arrived at t=566.7s — 4/15 dynamic jobs
+2026-06-14 20:53:34.255 Job 1 exited the system after delivery.
+2026-06-14 20:53:37.512 [Orchestrator] Dynamic job 6 arrived at t=766.7s — 5/15 dynamic jobs
+2026-06-14 20:53:40.800 [Orchestrator] Dynamic job 7 arrived at t=933.3s — 6/15 dynamic jobs
+2026-06-14 20:53:41.465 [Orchestrator] Dynamic job 8 arrived at t=966.7s — 7/15 dynamic jobs
+2026-06-14 20:53:43.484 [Orchestrator] Dynamic job 9 arrived at t=1066.7s — 8/15 dynamic jobs
+2026-06-14 20:53:47.407 [Orchestrator] Dynamic job 10 arrived at t=1266.7s — 9/15 dynamic jobs
+2026-06-14 20:53:48.044 [Orchestrator] Dynamic job 11 arrived at t=1300.0s — 10/15 dynamic jobs
+2026-06-14 20:53:51.405 [Orchestrator] Dynamic job 12 arrived at t=1466.7s — 11/15 dynamic jobs
+2026-06-14 20:53:52.057 Job 5 exited the system after delivery.
+2026-06-14 20:53:52.721 Job 3 exited the system after delivery.
+2026-06-14 20:53:54.720 [Orchestrator] Dynamic job 13 arrived at t=1633.3s — 12/15 dynamic jobs
+2026-06-14 20:53:56.754 [Orchestrator] Dynamic job 14 arrived at t=1733.3s — 13/15 dynamic jobs
+2026-06-14 20:53:59.431 [Orchestrator] Dynamic job 15 arrived at t=1866.7s — 14/15 dynamic jobs
+2026-06-14 20:54:01.387 [Orchestrator] Dynamic job 16 arrived at t=1966.7s — 15/15 dynamic jobs
+2026-06-14 20:54:21.396 Job 10 exited the system after delivery.
+2026-06-14 20:54:24.069 Job 11 exited the system after delivery.
+2026-06-14 20:54:28.697 Job 15 exited the system after delivery.
+2026-06-14 20:54:32.660 Job 9 exited the system after delivery.
+2026-06-14 20:54:36.598 Job 13 exited the system after delivery.
+2026-06-14 20:54:37.281 Job 14 exited the system after delivery.
+2026-06-14 20:54:37.930 Job 8 exited the system after delivery.
+2026-06-14 20:54:41.206 Job 12 exited the system after delivery.
+2026-06-14 20:54:42.552 Job 0 exited the system after delivery.
+2026-06-14 20:54:43.880 Job 2 exited the system after delivery.
+2026-06-14 20:54:45.884 Job 16 exited the system after delivery.
+2026-06-14 20:54:47.850 Job 6 exited the system after delivery.
+2026-06-14 20:54:52.415 Job 7 exited the system after delivery.
+2026-06-14 20:54:59.547 Job 4 exited the system after delivery.
+2026-06-14 20:54:59.547 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-14 20:54:59.977 [BatchRunner] Progress: 10/30 (612.5s elapsed, ETA 1224.9s)
+2026-06-14 20:54:59.977 [BatchRunner] Run 11/30: config=s10m_lam0p0100 rule=SPT_SMPT seed=43
+2026-06-14 20:54:59.977 [StochasticMgr] Initialized — seed=43 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.01
+2026-06-14 20:54:59.978 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-06-14 20:54:59.981 [FactoryLayout] Distance matrix (10x10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-06-14 20:54:59.984 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-06-14 20:54:59.984 [TrafficZones] Built zone graph: 27 zones.
+2026-06-14 20:54:59.985 [AGVPool] Spawned fleet of 3 AGVs.
+2026-06-14 20:54:59.985 [StochasticMgr] Initialized — seed=43 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.01
+2026-06-14 20:54:59.985 [Orchestrator] Poisson clock armed — first arrival ≈ t=165.8s λ=0.01 cap=15
+2026-06-14 20:54:59.985 [Orchestrator] Episode started: 2 jobs, 10 machines, stochastic=True
+2026-06-14 20:55:03.240 [Orchestrator] Dynamic job 2 arrived at t=166.7s — 1/15 dynamic jobs
+2026-06-14 20:55:05.198 [Orchestrator] Dynamic job 3 arrived at t=266.7s — 2/15 dynamic jobs
+2026-06-14 20:55:05.829 [Orchestrator] Dynamic job 4 arrived at t=300.0s — 3/15 dynamic jobs
+2026-06-14 20:55:06.466 [Orchestrator] Dynamic job 5 arrived at t=333.3s — 4/15 dynamic jobs
+2026-06-14 20:55:07.808 [Orchestrator] Dynamic job 6 arrived at t=400.0s — 5/15 dynamic jobs
+2026-06-14 20:55:11.733 [Orchestrator] Dynamic job 7 arrived at t=600.0s — 6/15 dynamic jobs
+2026-06-14 20:55:15.691 [Orchestrator] Dynamic job 8 arrived at t=800.0s — 7/15 dynamic jobs
+2026-06-14 20:55:24.174 [Orchestrator] Dynamic job 9 arrived at t=1233.3s — 8/15 dynamic jobs
+2026-06-14 20:55:26.795 [Orchestrator] Dynamic job 10 arrived at t=1366.7s — 9/15 dynamic jobs
+2026-06-14 20:55:28.749 Job 0 exited the system after delivery.
+2026-06-14 20:55:31.377 [Orchestrator] Dynamic job 11 arrived at t=1600.0s — 10/15 dynamic jobs
+2026-06-14 20:55:32.048 [Orchestrator] Dynamic job 12 arrived at t=1633.3s — 11/15 dynamic jobs
+2026-06-14 20:55:38.609 [Orchestrator] Dynamic job 13 arrived at t=1966.7s — 12/15 dynamic jobs
+2026-06-14 20:55:41.898 [Orchestrator] Dynamic job 14 arrived at t=2133.3s — 13/15 dynamic jobs
+2026-06-14 20:55:42.569 [Orchestrator] Dynamic job 15 arrived at t=2166.7s — 14/15 dynamic jobs
+2026-06-14 20:55:47.878 [Orchestrator] Dynamic job 16 arrived at t=2433.3s — 15/15 dynamic jobs
+2026-06-14 20:55:52.574 Job 1 exited the system after delivery.
+2026-06-14 20:56:05.842 Job 9 exited the system after delivery.
+2026-06-14 20:56:06.514 Job 13 exited the system after delivery.
+2026-06-14 20:56:07.186 Job 12 exited the system after delivery.
+2026-06-14 20:56:09.194 Job 11 exited the system after delivery.
+2026-06-14 20:56:09.844 Job 8 exited the system after delivery.
+2026-06-14 20:56:11.158 Job 4 exited the system after delivery.
+2026-06-14 20:56:16.463 Job 2 exited the system after delivery.
+2026-06-14 20:56:17.137 Job 10 exited the system after delivery.
+2026-06-14 20:56:18.449 Job 14 exited the system after delivery.
+2026-06-14 20:56:21.709 Job 3 exited the system after delivery.
+2026-06-14 20:56:23.714 Job 6 exited the system after delivery.
+2026-06-14 20:56:26.312 Job 7 exited the system after delivery.
+2026-06-14 20:56:30.233 Job 16 exited the system after delivery.
+2026-06-14 20:56:33.488 Job 5 exited the system after delivery.
+2026-06-14 20:56:37.381 Job 15 exited the system after delivery.
+2026-06-14 20:56:37.381 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-14 20:56:37.805 [BatchRunner] Progress: 11/30 (710.3s elapsed, ETA 1226.9s)
+2026-06-14 20:56:37.805 [BatchRunner] Run 12/30: config=s10m_lam0p0100 rule=SPT_SMPT seed=44
+2026-06-14 20:56:37.806 [StochasticMgr] Initialized — seed=44 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.01
+2026-06-14 20:56:37.806 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-06-14 20:56:37.809 [FactoryLayout] Distance matrix (10x10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-06-14 20:56:37.812 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-06-14 20:56:37.813 [TrafficZones] Built zone graph: 27 zones.
+2026-06-14 20:56:37.813 [AGVPool] Spawned fleet of 3 AGVs.
+2026-06-14 20:56:37.813 [StochasticMgr] Initialized — seed=44 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.01
+2026-06-14 20:56:37.813 [Orchestrator] Poisson clock armed — first arrival ≈ t=33.8s λ=0.01 cap=15
+2026-06-14 20:56:37.813 [Orchestrator] Episode started: 2 jobs, 10 machines, stochastic=True
+2026-06-14 20:56:39.074 [Orchestrator] Dynamic job 2 arrived at t=66.7s — 1/15 dynamic jobs
+2026-06-14 20:56:39.735 [Orchestrator] Dynamic job 3 arrived at t=100.0s — 2/15 dynamic jobs
+2026-06-14 20:56:41.078 [Orchestrator] Dynamic job 4 arrived at t=166.7s — 3/15 dynamic jobs
+2026-06-14 20:56:41.734 [Orchestrator] Dynamic job 5 arrived at t=200.0s — 4/15 dynamic jobs
+2026-06-14 20:56:46.958 [Orchestrator] Dynamic job 6 arrived at t=466.7s — 5/15 dynamic jobs
+2026-06-14 20:56:56.070 [Orchestrator] Dynamic job 7 arrived at t=933.3s — 6/15 dynamic jobs
+2026-06-14 20:56:56.722 Job 0 exited the system after delivery.
+2026-06-14 20:56:57.365 [Orchestrator] Dynamic job 8 arrived at t=1000.0s — 7/15 dynamic jobs
+2026-06-14 20:56:58.717 Job 2 exited the system after delivery.
+2026-06-14 20:56:58.717 [Orchestrator] Dynamic job 9 arrived at t=1066.7s — 8/15 dynamic jobs
+2026-06-14 20:57:00.718 [Orchestrator] Dynamic job 10 arrived at t=1166.7s — 9/15 dynamic jobs
+2026-06-14 20:57:02.741 [Orchestrator] Dynamic job 11 arrived at t=1266.7s — 10/15 dynamic jobs
+2026-06-14 20:57:04.086 [Orchestrator] Dynamic job 12 arrived at t=1333.3s — 11/15 dynamic jobs
+2026-06-14 20:57:04.737 [Orchestrator] Dynamic job 13 arrived at t=1366.7s — 12/15 dynamic jobs
+2026-06-14 20:57:05.413 [Orchestrator] Dynamic job 14 arrived at t=1400.0s — 13/15 dynamic jobs
+2026-06-14 20:57:08.111 [Orchestrator] Dynamic job 15 arrived at t=1533.3s — 14/15 dynamic jobs
+2026-06-14 20:57:08.756 [Orchestrator] Dynamic job 16 arrived at t=1566.7s — 15/15 dynamic jobs
+2026-06-14 20:57:22.219 Job 16 exited the system after delivery.
+2026-06-14 20:57:22.889 Job 11 exited the system after delivery.
+2026-06-14 20:57:27.598 Job 12 exited the system after delivery.
+2026-06-14 20:57:28.271 Job 9 exited the system after delivery.
+2026-06-14 20:57:28.940 Job 1 exited the system after delivery.
+2026-06-14 20:57:32.252 Job 4 exited the system after delivery.
+2026-06-14 20:57:33.581 Job 10 exited the system after delivery.
+2026-06-14 20:57:40.809 Job 8 exited the system after delivery.
+2026-06-14 20:57:40.809 Job 15 exited the system after delivery.
+2026-06-14 20:57:46.762 Job 13 exited the system after delivery.
+2026-06-14 20:57:48.754 Job 7 exited the system after delivery.
+2026-06-14 20:57:54.671 Job 14 exited the system after delivery.
+2026-06-14 20:57:56.002 Job 5 exited the system after delivery.
+2026-06-14 20:58:02.514 Job 6 exited the system after delivery.
+2026-06-14 20:58:07.045 Job 3 exited the system after delivery.
+2026-06-14 20:58:07.045 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-14 20:58:07.477 [BatchRunner] Progress: 12/30 (800.0s elapsed, ETA 1199.9s)
+2026-06-14 20:58:07.478 [BatchRunner] Run 13/30: config=s10m_lam0p0160 rule=SPT_SMPT seed=42
+2026-06-14 20:58:07.478 [StochasticMgr] Initialized — seed=42 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.016
+2026-06-14 20:58:07.478 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-06-14 20:58:07.481 [FactoryLayout] Distance matrix (10x10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-06-14 20:58:07.484 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-06-14 20:58:07.484 [TrafficZones] Built zone graph: 27 zones.
+2026-06-14 20:58:07.484 [AGVPool] Spawned fleet of 3 AGVs.
+2026-06-14 20:58:07.484 [StochasticMgr] Initialized — seed=42 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.016
+2026-06-14 20:58:07.484 [Orchestrator] Poisson clock armed — first arrival ≈ t=25.2s λ=0.016 cap=15
+2026-06-14 20:58:07.484 [Orchestrator] Episode started: 2 jobs, 10 machines, stochastic=True
+2026-06-14 20:58:08.119 [Orchestrator] Dynamic job 2 arrived at t=33.3s — 1/15 dynamic jobs
+2026-06-14 20:58:10.736 [Orchestrator] Dynamic job 3 arrived at t=166.7s — 2/15 dynamic jobs
+2026-06-14 20:58:13.347 [Orchestrator] Dynamic job 4 arrived at t=300.0s — 3/15 dynamic jobs
+2026-06-14 20:58:14.637 [Orchestrator] Dynamic job 5 arrived at t=366.7s — 4/15 dynamic jobs
+2026-06-14 20:58:17.237 [Orchestrator] Dynamic job 6 arrived at t=500.0s — 5/15 dynamic jobs
+2026-06-14 20:58:17.898 Job 1 exited the system after delivery.
+2026-06-14 20:58:19.172 [Orchestrator] Dynamic job 7 arrived at t=600.0s — 6/15 dynamic jobs
+2026-06-14 20:58:19.830 [Orchestrator] Dynamic job 8 arrived at t=633.3s — 7/15 dynamic jobs
+2026-06-14 20:58:21.154 [Orchestrator] Dynamic job 9 arrived at t=700.0s — 8/15 dynamic jobs
+2026-06-14 20:58:23.795 [Orchestrator] Dynamic job 10 arrived at t=833.3s — 9/15 dynamic jobs
+2026-06-14 20:58:24.447 [Orchestrator] Dynamic job 11 arrived at t=866.7s — 10/15 dynamic jobs
+2026-06-14 20:58:26.415 [Orchestrator] Dynamic job 12 arrived at t=966.7s — 11/15 dynamic jobs
+2026-06-14 20:58:28.432 [Orchestrator] Dynamic job 13 arrived at t=1066.7s — 12/15 dynamic jobs
+2026-06-14 20:58:29.719 [Orchestrator] Dynamic job 14 arrived at t=1133.3s — 13/15 dynamic jobs
+2026-06-14 20:58:31.736 [Orchestrator] Dynamic job 15 arrived at t=1233.3s — 14/15 dynamic jobs
+2026-06-14 20:58:33.077 [Orchestrator] Dynamic job 16 arrived at t=1300.0s — 15/15 dynamic jobs
+2026-06-14 20:59:00.343 Job 15 exited the system after delivery.
+2026-06-14 20:59:01.004 Job 11 exited the system after delivery.
+2026-06-14 20:59:01.652 Job 10 exited the system after delivery.
+2026-06-14 20:59:10.861 Job 3 exited the system after delivery.
+2026-06-14 20:59:12.170 Job 13 exited the system after delivery.
+2026-06-14 20:59:13.511 Job 9 exited the system after delivery.
+2026-06-14 20:59:17.494 Job 14 exited the system after delivery.
+2026-06-14 20:59:19.479 Job 8 exited the system after delivery.
+2026-06-14 20:59:25.388 Job 5 exited the system after delivery.
+2026-06-14 20:59:26.719 Job 12 exited the system after delivery.
+2026-06-14 20:59:28.078 Job 0 exited the system after delivery.
+2026-06-14 20:59:29.394 Job 2 exited the system after delivery.
+2026-06-14 20:59:30.710 Job 6 exited the system after delivery.
+2026-06-14 20:59:31.379 Job 16 exited the system after delivery.
+2026-06-14 20:59:37.869 Job 7 exited the system after delivery.
+2026-06-14 20:59:44.937 Job 4 exited the system after delivery.
+2026-06-14 20:59:44.937 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-14 20:59:45.361 [BatchRunner] Progress: 13/30 (897.8s elapsed, ETA 1174.1s)
+2026-06-14 20:59:45.361 [BatchRunner] Run 14/30: config=s10m_lam0p0160 rule=SPT_SMPT seed=43
+2026-06-14 20:59:45.361 [StochasticMgr] Initialized — seed=43 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.016
+2026-06-14 20:59:45.363 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-06-14 20:59:45.365 [FactoryLayout] Distance matrix (10x10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-06-14 20:59:45.367 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-06-14 20:59:45.368 [TrafficZones] Built zone graph: 27 zones.
+2026-06-14 20:59:45.368 [AGVPool] Spawned fleet of 3 AGVs.
+2026-06-14 20:59:45.368 [StochasticMgr] Initialized — seed=43 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.016
+2026-06-14 20:59:45.369 [Orchestrator] Poisson clock armed — first arrival ≈ t=103.6s λ=0.016 cap=15
+2026-06-14 20:59:45.369 [Orchestrator] Episode started: 2 jobs, 10 machines, stochastic=True
+2026-06-14 20:59:47.936 [Orchestrator] Dynamic job 2 arrived at t=133.3s — 1/15 dynamic jobs
+2026-06-14 20:59:49.226 [Orchestrator] Dynamic job 3 arrived at t=200.0s — 2/15 dynamic jobs
+2026-06-14 20:59:49.884 [Orchestrator] Dynamic job 4 arrived at t=233.3s — 3/15 dynamic jobs
+2026-06-14 20:59:50.554 [Orchestrator] Dynamic job 5 arrived at t=266.7s — 4/15 dynamic jobs
+2026-06-14 20:59:51.224 [Orchestrator] Dynamic job 6 arrived at t=300.0s — 5/15 dynamic jobs
+2026-06-14 20:59:53.894 [Orchestrator] Dynamic job 7 arrived at t=433.3s — 6/15 dynamic jobs
+2026-06-14 20:59:56.505 [Orchestrator] Dynamic job 8 arrived at t=566.7s — 7/15 dynamic jobs
+2026-06-14 21:00:01.796 [Orchestrator] Dynamic job 9 arrived at t=833.3s — 8/15 dynamic jobs
+2026-06-14 21:00:03.751 [Orchestrator] Dynamic job 10 arrived at t=933.3s — 9/15 dynamic jobs
+2026-06-14 21:00:06.451 [Orchestrator] Dynamic job 11 arrived at t=1066.7s — 10/15 dynamic jobs
+2026-06-14 21:00:07.097 [Orchestrator] Dynamic job 12 arrived at t=1100.0s — 11/15 dynamic jobs
+2026-06-14 21:00:11.723 [Orchestrator] Dynamic job 13 arrived at t=1333.3s — 12/15 dynamic jobs
+2026-06-14 21:00:14.427 [Orchestrator] Dynamic job 14 arrived at t=1466.7s — 13/15 dynamic jobs
+2026-06-14 21:00:15.071 [Orchestrator] Dynamic job 15 arrived at t=1500.0s — 14/15 dynamic jobs
+2026-06-14 21:00:18.459 [Orchestrator] Dynamic job 16 arrived at t=1666.7s — 15/15 dynamic jobs
+2026-06-14 21:00:45.106 Job 13 exited the system after delivery.
+2026-06-14 21:00:45.774 Job 9 exited the system after delivery.
+2026-06-14 21:00:47.755 Job 12 exited the system after delivery.
+2026-06-14 21:00:49.748 Job 4 exited the system after delivery.
+2026-06-14 21:00:53.703 Job 0 exited the system after delivery.
+2026-06-14 21:00:55.052 Job 2 exited the system after delivery.
+2026-06-14 21:00:55.701 Job 11 exited the system after delivery.
+2026-06-14 21:00:57.694 Job 8 exited the system after delivery.
+2026-06-14 21:00:59.037 Job 1 exited the system after delivery.
+2026-06-14 21:01:01.696 Job 14 exited the system after delivery.
+2026-06-14 21:01:05.014 Job 10 exited the system after delivery.
+2026-06-14 21:01:06.327 Job 3 exited the system after delivery.
+2026-06-14 21:01:07.673 Job 6 exited the system after delivery.
+2026-06-14 21:01:10.296 Job 7 exited the system after delivery.
+2026-06-14 21:01:14.260 Job 16 exited the system after delivery.
+2026-06-14 21:01:17.503 Job 5 exited the system after delivery.
+2026-06-14 21:01:21.412 Job 15 exited the system after delivery.
+2026-06-14 21:01:21.412 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-14 21:01:21.835 [BatchRunner] Progress: 14/30 (994.3s elapsed, ETA 1136.4s)
+2026-06-14 21:01:21.836 [BatchRunner] Run 15/30: config=s10m_lam0p0160 rule=SPT_SMPT seed=44
+2026-06-14 21:01:21.836 [StochasticMgr] Initialized — seed=44 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.016
+2026-06-14 21:01:21.836 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-06-14 21:01:21.839 [FactoryLayout] Distance matrix (10x10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-06-14 21:01:21.842 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-06-14 21:01:21.842 [TrafficZones] Built zone graph: 27 zones.
+2026-06-14 21:01:21.842 [AGVPool] Spawned fleet of 3 AGVs.
+2026-06-14 21:01:21.843 [StochasticMgr] Initialized — seed=44 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.016
+2026-06-14 21:01:21.843 [Orchestrator] Poisson clock armed — first arrival ≈ t=21.1s λ=0.016 cap=15
+2026-06-14 21:01:21.843 [Orchestrator] Episode started: 2 jobs, 10 machines, stochastic=True
+2026-06-14 21:01:22.466 [Orchestrator] Dynamic job 2 arrived at t=33.3s — 1/15 dynamic jobs
+2026-06-14 21:01:23.095 [Orchestrator] Dynamic job 3 arrived at t=66.7s — 2/15 dynamic jobs
+2026-06-14 21:01:24.400 [Orchestrator] Dynamic job 4 arrived at t=133.3s — 3/15 dynamic jobs
+2026-06-14 21:01:25.075 [Orchestrator] Dynamic job 5 arrived at t=166.7s — 4/15 dynamic jobs
+2026-06-14 21:01:28.322 [Orchestrator] Dynamic job 6 arrived at t=333.3s — 5/15 dynamic jobs
+2026-06-14 21:01:34.193 [Orchestrator] Dynamic job 7 arrived at t=633.3s — 6/15 dynamic jobs
+2026-06-14 21:01:34.844 [Orchestrator] Dynamic job 8 arrived at t=666.7s — 7/15 dynamic jobs
+2026-06-14 21:01:36.188 [Orchestrator] Dynamic job 9 arrived at t=733.3s — 8/15 dynamic jobs
+2026-06-14 21:01:37.503 [Orchestrator] Dynamic job 10 arrived at t=800.0s — 9/15 dynamic jobs
+2026-06-14 21:01:38.849 [Orchestrator] Dynamic job 11 arrived at t=866.7s — 10/15 dynamic jobs
+2026-06-14 21:01:39.509 [Orchestrator] Dynamic job 12 arrived at t=900.0s — 11/15 dynamic jobs
+2026-06-14 21:01:40.170 [Orchestrator] Dynamic job 13 arrived at t=933.3s — 12/15 dynamic jobs
+2026-06-14 21:01:40.839 [Orchestrator] Dynamic job 14 arrived at t=966.7s — 13/15 dynamic jobs
+2026-06-14 21:01:42.215 [Orchestrator] Dynamic job 15 arrived at t=1033.3s — 14/15 dynamic jobs
+2026-06-14 21:01:42.887 [Orchestrator] Dynamic job 16 arrived at t=1066.7s — 15/15 dynamic jobs
+2026-06-14 21:01:56.987 Job 2 exited the system after delivery.
+2026-06-14 21:01:59.012 Job 16 exited the system after delivery.
+2026-06-14 21:02:07.584 Job 11 exited the system after delivery.
+2026-06-14 21:02:08.247 Job 4 exited the system after delivery.
+2026-06-14 21:02:12.171 Job 0 exited the system after delivery.
+2026-06-14 21:02:13.462 Job 9 exited the system after delivery.
+2026-06-14 21:02:14.133 Job 1 exited the system after delivery.
+2026-06-14 21:02:14.801 Job 12 exited the system after delivery.
+2026-06-14 21:02:18.725 Job 10 exited the system after delivery.
+2026-06-14 21:02:22.673 Job 15 exited the system after delivery.
+2026-06-14 21:02:29.222 Job 7 exited the system after delivery.
+2026-06-14 21:02:29.907 Job 13 exited the system after delivery.
+2026-06-14 21:02:36.517 Job 14 exited the system after delivery.
+2026-06-14 21:02:37.845 Job 5 exited the system after delivery.
+2026-06-14 21:02:37.845 Job 8 exited the system after delivery.
+2026-06-14 21:02:48.269 Job 6 exited the system after delivery.
+2026-06-14 21:02:49.522 Job 3 exited the system after delivery.
+2026-06-14 21:02:49.522 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-14 21:02:49.948 [BatchRunner] Progress: 15/30 (1082.4s elapsed, ETA 1082.4s)
+2026-06-14 21:02:49.948 [BatchRunner] Run 16/30: config=s10m_lam0p0250 rule=SPT_SMPT seed=42
+2026-06-14 21:02:49.948 [StochasticMgr] Initialized — seed=42 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.025
+2026-06-14 21:02:49.948 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-06-14 21:02:49.953 [FactoryLayout] Distance matrix (10x10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-06-14 21:02:49.955 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-06-14 21:02:49.955 [TrafficZones] Built zone graph: 27 zones.
+2026-06-14 21:02:49.955 [AGVPool] Spawned fleet of 3 AGVs.
+2026-06-14 21:02:49.956 [StochasticMgr] Initialized — seed=42 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.025
+2026-06-14 21:02:49.956 [Orchestrator] Poisson clock armed — first arrival ≈ t=16.1s λ=0.025 cap=15
+2026-06-14 21:02:49.956 [Orchestrator] Episode started: 2 jobs, 10 machines, stochastic=True
+2026-06-14 21:02:50.591 [Orchestrator] Dynamic job 2 arrived at t=33.3s — 1/15 dynamic jobs
+2026-06-14 21:02:52.533 [Orchestrator] Dynamic job 3 arrived at t=133.3s — 2/15 dynamic jobs
+2026-06-14 21:02:54.511 [Orchestrator] Dynamic job 4 arrived at t=233.3s — 3/15 dynamic jobs
+2026-06-14 21:02:55.176 [Orchestrator] Dynamic job 5 arrived at t=266.7s — 4/15 dynamic jobs
+2026-06-14 21:02:57.134 [Orchestrator] Dynamic job 6 arrived at t=366.7s — 5/15 dynamic jobs
+2026-06-14 21:02:58.442 [Orchestrator] Dynamic job 7 arrived at t=433.3s — 6/15 dynamic jobs
+2026-06-14 21:02:59.110 [Orchestrator] Dynamic job 8 arrived at t=466.7s — 7/15 dynamic jobs
+2026-06-14 21:02:59.790 [Orchestrator] Dynamic job 9 arrived at t=500.0s — 8/15 dynamic jobs
+2026-06-14 21:03:01.815 [Orchestrator] Dynamic job 10 arrived at t=600.0s — 9/15 dynamic jobs
+2026-06-14 21:03:02.482 [Orchestrator] Dynamic job 11 arrived at t=633.3s — 10/15 dynamic jobs
+2026-06-14 21:03:03.783 [Orchestrator] Dynamic job 12 arrived at t=700.0s — 11/15 dynamic jobs
+2026-06-14 21:03:05.139 [Orchestrator] Dynamic job 13 arrived at t=766.7s — 12/15 dynamic jobs
+2026-06-14 21:03:05.833 [Orchestrator] Dynamic job 14 arrived at t=800.0s — 13/15 dynamic jobs
+2026-06-14 21:03:07.232 [Orchestrator] Dynamic job 15 arrived at t=866.7s — 14/15 dynamic jobs
+2026-06-14 21:03:08.604 [Orchestrator] Dynamic job 16 arrived at t=933.3s — 15/15 dynamic jobs
+2026-06-14 21:03:27.894 Job 1 exited the system after delivery.
+2026-06-14 21:03:39.827 Job 10 exited the system after delivery.
+2026-06-14 21:03:42.483 Job 11 exited the system after delivery.
+2026-06-14 21:03:47.145 Job 15 exited the system after delivery.
+2026-06-14 21:03:50.455 Job 3 exited the system after delivery.
+2026-06-14 21:03:51.130 Job 9 exited the system after delivery.
+2026-06-14 21:03:54.431 Job 13 exited the system after delivery.
+2026-06-14 21:04:03.015 Job 5 exited the system after delivery.
+2026-06-14 21:04:04.346 Job 8 exited the system after delivery.
+2026-06-14 21:04:07.646 Job 14 exited the system after delivery.
+2026-06-14 21:04:09.655 Job 12 exited the system after delivery.
+2026-06-14 21:04:10.986 Job 0 exited the system after delivery.
+2026-06-14 21:04:12.988 Job 2 exited the system after delivery.
+2026-06-14 21:04:14.309 Job 16 exited the system after delivery.
+2026-06-14 21:04:15.631 Job 6 exited the system after delivery.
+2026-06-14 21:04:21.515 Job 7 exited the system after delivery.
+2026-06-14 21:04:28.584 Job 4 exited the system after delivery.
+2026-06-14 21:04:28.584 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-14 21:04:29.002 [BatchRunner] Progress: 16/30 (1181.5s elapsed, ETA 1033.8s)
+2026-06-14 21:04:29.002 [BatchRunner] Run 17/30: config=s10m_lam0p0250 rule=SPT_SMPT seed=43
+2026-06-14 21:04:29.003 [StochasticMgr] Initialized — seed=43 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.025
+2026-06-14 21:04:29.003 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-06-14 21:04:29.007 [FactoryLayout] Distance matrix (10x10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-06-14 21:04:29.009 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-06-14 21:04:29.009 [TrafficZones] Built zone graph: 27 zones.
+2026-06-14 21:04:29.009 [AGVPool] Spawned fleet of 3 AGVs.
+2026-06-14 21:04:29.010 [StochasticMgr] Initialized — seed=43 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.025
+2026-06-14 21:04:29.010 [Orchestrator] Poisson clock armed — first arrival ≈ t=66.3s λ=0.025 cap=15
+2026-06-14 21:04:29.010 [Orchestrator] Episode started: 2 jobs, 10 machines, stochastic=True
+2026-06-14 21:04:30.239 [Orchestrator] Dynamic job 2 arrived at t=66.7s — 1/15 dynamic jobs
+2026-06-14 21:04:31.568 [Orchestrator] Dynamic job 3 arrived at t=133.3s — 2/15 dynamic jobs
+2026-06-14 21:04:32.253 [Orchestrator] Dynamic job 4 arrived at t=166.7s — 3/15 dynamic jobs
+2026-06-14 21:04:32.895 [Orchestrator] Dynamic job 5 arrived at t=200.0s — 4/15 dynamic jobs
+2026-06-14 21:04:33.552 [Orchestrator] Dynamic job 6 arrived at t=233.3s — 5/15 dynamic jobs
+2026-06-14 21:04:35.609 [Orchestrator] Dynamic job 7 arrived at t=333.3s — 6/15 dynamic jobs
+2026-06-14 21:04:37.641 [Orchestrator] Dynamic job 8 arrived at t=433.3s — 7/15 dynamic jobs
+2026-06-14 21:04:41.624 [Orchestrator] Dynamic job 9 arrived at t=633.3s — 8/15 dynamic jobs
+2026-06-14 21:04:42.986 [Orchestrator] Dynamic job 10 arrived at t=700.0s — 9/15 dynamic jobs
+2026-06-14 21:04:45.007 [Orchestrator] Dynamic job 11 arrived at t=800.0s — 10/15 dynamic jobs
+2026-06-14 21:04:45.678 [Orchestrator] Dynamic job 12 arrived at t=833.3s — 11/15 dynamic jobs
+2026-06-14 21:04:48.365 [Orchestrator] Dynamic job 13 arrived at t=966.7s — 12/15 dynamic jobs
+2026-06-14 21:04:49.661 [Orchestrator] Dynamic job 14 arrived at t=1033.3s — 13/15 dynamic jobs
+2026-06-14 21:04:50.331 [Orchestrator] Dynamic job 15 arrived at t=1066.7s — 14/15 dynamic jobs
+2026-06-14 21:04:53.057 [Orchestrator] Dynamic job 16 arrived at t=1200.0s — 15/15 dynamic jobs
+2026-06-14 21:05:28.085 Job 12 exited the system after delivery.
+2026-06-14 21:05:28.735 Job 13 exited the system after delivery.
+2026-06-14 21:05:30.736 Job 9 exited the system after delivery.
+2026-06-14 21:05:32.750 Job 4 exited the system after delivery.
+2026-06-14 21:05:36.717 Job 0 exited the system after delivery.
+2026-06-14 21:05:38.045 Job 2 exited the system after delivery.
+2026-06-14 21:05:38.703 Job 11 exited the system after delivery.
+2026-06-14 21:05:40.677 Job 8 exited the system after delivery.
+2026-06-14 21:05:42.006 Job 1 exited the system after delivery.
+2026-06-14 21:05:44.654 Job 14 exited the system after delivery.
+2026-06-14 21:05:47.921 Job 10 exited the system after delivery.
+2026-06-14 21:05:49.238 Job 3 exited the system after delivery.
+2026-06-14 21:05:50.586 Job 6 exited the system after delivery.
+2026-06-14 21:05:53.189 Job 7 exited the system after delivery.
+2026-06-14 21:05:57.110 Job 16 exited the system after delivery.
+2026-06-14 21:06:00.380 Job 5 exited the system after delivery.
+2026-06-14 21:06:04.242 Job 15 exited the system after delivery.
+2026-06-14 21:06:04.242 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-14 21:06:04.660 [BatchRunner] Progress: 17/30 (1277.1s elapsed, ETA 976.6s)
+2026-06-14 21:06:04.660 [BatchRunner] Run 18/30: config=s10m_lam0p0250 rule=SPT_SMPT seed=44
+2026-06-14 21:06:04.660 [StochasticMgr] Initialized — seed=44 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.025
+2026-06-14 21:06:04.660 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-06-14 21:06:04.664 [FactoryLayout] Distance matrix (10x10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-06-14 21:06:04.666 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-06-14 21:06:04.666 [TrafficZones] Built zone graph: 27 zones.
+2026-06-14 21:06:04.666 [AGVPool] Spawned fleet of 3 AGVs.
+2026-06-14 21:06:04.666 [StochasticMgr] Initialized — seed=44 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.025
+2026-06-14 21:06:04.666 [Orchestrator] Poisson clock armed — first arrival ≈ t=13.5s λ=0.025 cap=15
+2026-06-14 21:06:04.667 [Orchestrator] Episode started: 2 jobs, 10 machines, stochastic=True
+2026-06-14 21:06:05.302 [Orchestrator] Dynamic job 2 arrived at t=33.3s — 1/15 dynamic jobs
+2026-06-14 21:06:05.933 [Orchestrator] Dynamic job 3 arrived at t=66.7s — 2/15 dynamic jobs
+2026-06-14 21:06:06.591 [Orchestrator] Dynamic job 4 arrived at t=100.0s — 3/15 dynamic jobs
+2026-06-14 21:06:07.273 [Orchestrator] Dynamic job 5 arrived at t=133.3s — 4/15 dynamic jobs
+2026-06-14 21:06:09.986 [Orchestrator] Dynamic job 6 arrived at t=266.7s — 5/15 dynamic jobs
+2026-06-14 21:06:13.939 [Orchestrator] Dynamic job 7 arrived at t=466.7s — 6/15 dynamic jobs
+2026-06-14 21:06:14.591 [Orchestrator] Dynamic job 8 arrived at t=500.0s — 7/15 dynamic jobs
+2026-06-14 21:06:15.259 [Orchestrator] Dynamic job 9 arrived at t=533.3s — 8/15 dynamic jobs
+2026-06-14 21:06:16.590 [Orchestrator] Dynamic job 10 arrived at t=600.0s — 9/15 dynamic jobs
+2026-06-14 21:06:17.286 [Orchestrator] Dynamic job 11 arrived at t=633.3s — 10/15 dynamic jobs
+2026-06-14 21:06:17.976 [Orchestrator] Dynamic job 12 arrived at t=666.7s — 11/15 dynamic jobs
+2026-06-14 21:06:18.676 [Orchestrator] Dynamic job 13 arrived at t=700.0s — 12/15 dynamic jobs
+2026-06-14 21:06:19.373 [Orchestrator] Dynamic job 14 arrived at t=733.3s — 13/15 dynamic jobs
+2026-06-14 21:06:20.760 [Orchestrator] Dynamic job 15 arrived at t=800.0s — 14/15 dynamic jobs
+2026-06-14 21:06:21.464 [Orchestrator] Dynamic job 16 arrived at t=833.3s — 15/15 dynamic jobs
+2026-06-14 21:06:37.488 Job 16 exited the system after delivery.
+2026-06-14 21:06:39.468 Job 2 exited the system after delivery.
+2026-06-14 21:06:46.099 Job 11 exited the system after delivery.
+2026-06-14 21:06:50.069 Job 0 exited the system after delivery.
+2026-06-14 21:06:52.025 Job 12 exited the system after delivery.
+2026-06-14 21:06:56.678 Job 9 exited the system after delivery.
+2026-06-14 21:06:57.987 Job 1 exited the system after delivery.
+2026-06-14 21:07:00.619 Job 15 exited the system after delivery.
+2026-06-14 21:07:01.955 Job 4 exited the system after delivery.
+2026-06-14 21:07:05.983 Job 10 exited the system after delivery.
+2026-06-14 21:07:13.287 Job 7 exited the system after delivery.
+2026-06-14 21:07:17.254 Job 5 exited the system after delivery.
+2026-06-14 21:07:18.603 Job 14 exited the system after delivery.
+2026-06-14 21:07:20.581 Job 13 exited the system after delivery.
+2026-06-14 21:07:22.575 Job 8 exited the system after delivery.
+2026-06-14 21:07:31.007 Job 6 exited the system after delivery.
+2026-06-14 21:07:32.274 Job 3 exited the system after delivery.
+2026-06-14 21:07:32.274 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-14 21:07:32.699 [BatchRunner] Progress: 18/30 (1365.2s elapsed, ETA 910.1s)
+2026-06-14 21:07:32.699 [BatchRunner] Run 19/30: config=s10m_lam0p0400 rule=SPT_SMPT seed=42
+2026-06-14 21:07:32.699 [StochasticMgr] Initialized — seed=42 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.04
+2026-06-14 21:07:32.699 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-06-14 21:07:32.703 [FactoryLayout] Distance matrix (10x10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-06-14 21:07:32.705 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-06-14 21:07:32.705 [TrafficZones] Built zone graph: 27 zones.
+2026-06-14 21:07:32.706 [AGVPool] Spawned fleet of 3 AGVs.
+2026-06-14 21:07:32.706 [StochasticMgr] Initialized — seed=42 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.04
+2026-06-14 21:07:32.706 [Orchestrator] Poisson clock armed — first arrival ≈ t=10.1s λ=0.04 cap=15
+2026-06-14 21:07:32.706 [Orchestrator] Episode started: 2 jobs, 10 machines, stochastic=True
+2026-06-14 21:07:33.339 [Orchestrator] Dynamic job 2 arrived at t=33.3s — 1/15 dynamic jobs
+2026-06-14 21:07:34.616 [Orchestrator] Dynamic job 3 arrived at t=100.0s — 2/15 dynamic jobs
+2026-06-14 21:07:35.942 [Orchestrator] Dynamic job 4 arrived at t=166.7s — 3/15 dynamic jobs
+2026-06-14 21:07:36.605 [Orchestrator] Dynamic job 5 arrived at t=200.0s — 4/15 dynamic jobs
+2026-06-14 21:07:37.931 [Orchestrator] Dynamic job 6 arrived at t=266.7s — 5/15 dynamic jobs
+2026-06-14 21:07:39.306 [Orchestrator] Dynamic job 7 arrived at t=333.3s — 6/15 dynamic jobs
+2026-06-14 21:07:39.980 [Orchestrator] Dynamic job 8 arrived at t=366.7s — 7/15 dynamic jobs
+2026-06-14 21:07:40.654 [Orchestrator] Dynamic job 9 arrived at t=400.0s — 8/15 dynamic jobs
+2026-06-14 21:07:42.002 [Orchestrator] Dynamic job 10 arrived at t=466.7s — 9/15 dynamic jobs
+2026-06-14 21:07:42.681 [Orchestrator] Dynamic job 11 arrived at t=500.0s — 10/15 dynamic jobs
+2026-06-14 21:07:44.040 [Orchestrator] Dynamic job 12 arrived at t=566.7s — 11/15 dynamic jobs
+2026-06-14 21:07:45.417 [Orchestrator] Dynamic job 13 arrived at t=633.3s — 12/15 dynamic jobs
+2026-06-14 21:07:46.106 [Orchestrator] Dynamic job 14 arrived at t=666.7s — 13/15 dynamic jobs
+2026-06-14 21:07:46.802 [Orchestrator] Dynamic job 15 arrived at t=700.0s — 14/15 dynamic jobs
+2026-06-14 21:07:47.502 [Orchestrator] Dynamic job 16 arrived at t=733.3s — 15/15 dynamic jobs
+2026-06-14 21:08:11.916 Job 1 exited the system after delivery.
+2026-06-14 21:08:20.528 Job 10 exited the system after delivery.
+2026-06-14 21:08:25.192 Job 11 exited the system after delivery.
+2026-06-14 21:08:29.828 Job 15 exited the system after delivery.
+2026-06-14 21:08:33.116 Job 3 exited the system after delivery.
+2026-06-14 21:08:33.775 Job 9 exited the system after delivery.
+2026-06-14 21:08:37.060 Job 13 exited the system after delivery.
+2026-06-14 21:08:45.573 Job 5 exited the system after delivery.
+2026-06-14 21:08:46.875 Job 8 exited the system after delivery.
+2026-06-14 21:08:50.176 Job 14 exited the system after delivery.
+2026-06-14 21:08:52.164 Job 12 exited the system after delivery.
+2026-06-14 21:08:53.483 Job 0 exited the system after delivery.
+2026-06-14 21:08:55.475 Job 2 exited the system after delivery.
+2026-06-14 21:08:56.764 Job 16 exited the system after delivery.
+2026-06-14 21:08:58.084 Job 6 exited the system after delivery.
+2026-06-14 21:09:03.898 Job 7 exited the system after delivery.
+2026-06-14 21:09:11.003 Job 4 exited the system after delivery.
+2026-06-14 21:09:11.003 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-14 21:09:11.424 [BatchRunner] Progress: 19/30 (1463.9s elapsed, ETA 847.5s)
+2026-06-14 21:09:11.424 [BatchRunner] Run 20/30: config=s10m_lam0p0400 rule=SPT_SMPT seed=43
+2026-06-14 21:09:11.425 [StochasticMgr] Initialized — seed=43 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.04
+2026-06-14 21:09:11.425 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-06-14 21:09:11.429 [FactoryLayout] Distance matrix (10x10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-06-14 21:09:11.431 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-06-14 21:09:11.431 [TrafficZones] Built zone graph: 27 zones.
+2026-06-14 21:09:11.431 [AGVPool] Spawned fleet of 3 AGVs.
+2026-06-14 21:09:11.431 [StochasticMgr] Initialized — seed=43 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.04
+2026-06-14 21:09:11.432 [Orchestrator] Poisson clock armed — first arrival ≈ t=41.4s λ=0.04 cap=15
+2026-06-14 21:09:11.432 [Orchestrator] Episode started: 2 jobs, 10 machines, stochastic=True
+2026-06-14 21:09:12.720 [Orchestrator] Dynamic job 2 arrived at t=66.7s — 1/15 dynamic jobs
+2026-06-14 21:09:13.381 [Orchestrator] Dynamic job 3 arrived at t=100.0s — 2/15 dynamic jobs
+2026-06-14 21:09:14.057 [Orchestrator] Dynamic job 4 arrived at t=133.3s — 3/15 dynamic jobs
+2026-06-14 21:09:14.744 [Orchestrator] Dynamic job 5 arrived at t=166.7s — 4/15 dynamic jobs
+2026-06-14 21:09:15.432 [Orchestrator] Dynamic job 6 arrived at t=200.0s — 5/15 dynamic jobs
+2026-06-14 21:09:16.795 [Orchestrator] Dynamic job 7 arrived at t=266.7s — 6/15 dynamic jobs
+2026-06-14 21:09:18.161 [Orchestrator] Dynamic job 8 arrived at t=333.3s — 7/15 dynamic jobs
+2026-06-14 21:09:20.842 [Orchestrator] Dynamic job 9 arrived at t=466.7s — 8/15 dynamic jobs
+2026-06-14 21:09:21.509 [Orchestrator] Dynamic job 10 arrived at t=500.0s — 9/15 dynamic jobs
+2026-06-14 21:09:22.883 [Orchestrator] Dynamic job 11 arrived at t=566.7s — 10/15 dynamic jobs
+2026-06-14 21:09:23.578 [Orchestrator] Dynamic job 12 arrived at t=600.0s — 11/15 dynamic jobs
+2026-06-14 21:09:25.618 [Orchestrator] Dynamic job 13 arrived at t=700.0s — 12/15 dynamic jobs
+2026-06-14 21:09:26.935 [Orchestrator] Dynamic job 14 arrived at t=766.7s — 13/15 dynamic jobs
+2026-06-14 21:09:27.632 [Orchestrator] Dynamic job 15 arrived at t=800.0s — 14/15 dynamic jobs
+2026-06-14 21:09:28.987 [Orchestrator] Dynamic job 16 arrived at t=866.7s — 15/15 dynamic jobs
+2026-06-14 21:10:08.088 Job 9 exited the system after delivery.
+2026-06-14 21:10:08.757 Job 13 exited the system after delivery.
+2026-06-14 21:10:09.444 Job 12 exited the system after delivery.
+2026-06-14 21:10:12.746 Job 11 exited the system after delivery.
+2026-06-14 21:10:14.080 Job 4 exited the system after delivery.
+2026-06-14 21:10:15.433 Job 8 exited the system after delivery.
+2026-06-14 21:10:21.362 Job 2 exited the system after delivery.
+2026-06-14 21:10:22.050 Job 1 exited the system after delivery.
+2026-06-14 21:10:24.057 Job 14 exited the system after delivery.
+2026-06-14 21:10:26.668 Job 10 exited the system after delivery.
+2026-06-14 21:10:27.975 Job 3 exited the system after delivery.
+2026-06-14 21:10:29.353 Job 6 exited the system after delivery.
+2026-06-14 21:10:31.938 Job 7 exited the system after delivery.
+2026-06-14 21:10:40.421 Job 5 exited the system after delivery.
+2026-06-14 21:10:41.768 Job 0 exited the system after delivery.
+2026-06-14 21:10:41.768 Job 16 exited the system after delivery.
+2026-06-14 21:10:48.957 Job 15 exited the system after delivery.
+2026-06-14 21:10:48.957 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-14 21:10:49.390 [BatchRunner] Progress: 20/30 (1561.9s elapsed, ETA 780.9s)
+2026-06-14 21:10:49.390 [BatchRunner] Run 21/30: config=s10m_lam0p0400 rule=SPT_SMPT seed=44
+2026-06-14 21:10:49.391 [StochasticMgr] Initialized — seed=44 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.04
+2026-06-14 21:10:49.391 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-06-14 21:10:49.395 [FactoryLayout] Distance matrix (10x10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-06-14 21:10:49.397 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-06-14 21:10:49.398 [TrafficZones] Built zone graph: 27 zones.
+2026-06-14 21:10:49.398 [AGVPool] Spawned fleet of 3 AGVs.
+2026-06-14 21:10:49.398 [StochasticMgr] Initialized — seed=44 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.04
+2026-06-14 21:10:49.398 [Orchestrator] Poisson clock armed — first arrival ≈ t=8.5s λ=0.04 cap=15
+2026-06-14 21:10:49.398 [Orchestrator] Episode started: 2 jobs, 10 machines, stochastic=True
+2026-06-14 21:10:50.048 [Orchestrator] Dynamic job 2 arrived at t=33.3s — 1/15 dynamic jobs
+2026-06-14 21:10:50.679 [Orchestrator] Dynamic job 3 arrived at t=66.7s — 2/15 dynamic jobs
+2026-06-14 21:10:51.347 [Orchestrator] Dynamic job 4 arrived at t=100.0s — 3/15 dynamic jobs
+2026-06-14 21:10:52.036 [Orchestrator] Dynamic job 5 arrived at t=133.3s — 4/15 dynamic jobs
+2026-06-14 21:10:53.412 [Orchestrator] Dynamic job 6 arrived at t=200.0s — 5/15 dynamic jobs
+2026-06-14 21:10:56.084 [Orchestrator] Dynamic job 7 arrived at t=333.3s — 6/15 dynamic jobs
+2026-06-14 21:10:56.726 [Orchestrator] Dynamic job 8 arrived at t=366.7s — 7/15 dynamic jobs
+2026-06-14 21:10:57.390 [Orchestrator] Dynamic job 9 arrived at t=400.0s — 8/15 dynamic jobs
+2026-06-14 21:10:58.058 [Orchestrator] Dynamic job 10 arrived at t=433.3s — 9/15 dynamic jobs
+2026-06-14 21:10:58.739 [Orchestrator] Dynamic job 11 arrived at t=466.7s — 10/15 dynamic jobs
+2026-06-14 21:10:59.430 [Orchestrator] Dynamic job 12 arrived at t=500.0s — 11/15 dynamic jobs
+2026-06-14 21:11:00.110 [Orchestrator] Dynamic job 13 arrived at t=533.3s — 12/15 dynamic jobs
+2026-06-14 21:11:00.779 [Orchestrator] Dynamic job 14 arrived at t=566.7s — 13/15 dynamic jobs
+2026-06-14 21:11:01.478 [Orchestrator] Dynamic job 15 arrived at t=600.0s — 14/15 dynamic jobs
+2026-06-14 21:11:02.167 [Orchestrator] Dynamic job 16 arrived at t=633.3s — 15/15 dynamic jobs
+2026-06-14 21:11:20.715 Job 16 exited the system after delivery.
+2026-06-14 21:11:22.673 Job 2 exited the system after delivery.
+2026-06-14 21:11:32.544 Job 11 exited the system after delivery.
+2026-06-14 21:11:33.217 Job 9 exited the system after delivery.
+2026-06-14 21:11:37.167 Job 1 exited the system after delivery.
+2026-06-14 21:11:41.109 Job 4 exited the system after delivery.
+2026-06-14 21:11:41.773 Job 0 exited the system after delivery.
+2026-06-14 21:11:42.446 Job 12 exited the system after delivery.
+2026-06-14 21:11:46.375 Job 10 exited the system after delivery.
+2026-06-14 21:11:50.321 Job 15 exited the system after delivery.
+2026-06-14 21:11:56.885 Job 7 exited the system after delivery.
+2026-06-14 21:11:57.573 Job 13 exited the system after delivery.
+2026-06-14 21:12:04.099 Job 14 exited the system after delivery.
+2026-06-14 21:12:05.417 Job 5 exited the system after delivery.
+2026-06-14 21:12:05.417 Job 8 exited the system after delivery.
+2026-06-14 21:12:15.864 Job 6 exited the system after delivery.
+2026-06-14 21:12:17.187 Job 3 exited the system after delivery.
+2026-06-14 21:12:17.188 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-14 21:12:17.619 [BatchRunner] Progress: 21/30 (1650.1s elapsed, ETA 707.2s)
+2026-06-14 21:12:17.619 [BatchRunner] Run 22/30: config=s10m_lam0p0640 rule=SPT_SMPT seed=42
+2026-06-14 21:12:17.619 [StochasticMgr] Initialized — seed=42 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.064
+2026-06-14 21:12:17.620 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-06-14 21:12:17.625 [FactoryLayout] Distance matrix (10x10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-06-14 21:12:17.627 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-06-14 21:12:17.627 [TrafficZones] Built zone graph: 27 zones.
+2026-06-14 21:12:17.628 [AGVPool] Spawned fleet of 3 AGVs.
+2026-06-14 21:12:17.628 [StochasticMgr] Initialized — seed=42 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.064
+2026-06-14 21:12:17.628 [Orchestrator] Poisson clock armed — first arrival ≈ t=6.3s λ=0.064 cap=15
+2026-06-14 21:12:17.628 [Orchestrator] Episode started: 2 jobs, 10 machines, stochastic=True
+2026-06-14 21:12:18.279 [Orchestrator] Dynamic job 2 arrived at t=33.3s — 1/15 dynamic jobs
+2026-06-14 21:12:18.927 [Orchestrator] Dynamic job 3 arrived at t=66.7s — 2/15 dynamic jobs
+2026-06-14 21:12:19.603 [Orchestrator] Dynamic job 4 arrived at t=100.0s — 3/15 dynamic jobs
+2026-06-14 21:12:20.289 [Orchestrator] Dynamic job 5 arrived at t=133.3s — 4/15 dynamic jobs
+2026-06-14 21:12:20.960 [Orchestrator] Dynamic job 6 arrived at t=166.7s — 5/15 dynamic jobs
+2026-06-14 21:12:21.655 [Orchestrator] Dynamic job 7 arrived at t=200.0s — 6/15 dynamic jobs
+2026-06-14 21:12:22.337 [Orchestrator] Dynamic job 8 arrived at t=233.3s — 7/15 dynamic jobs
+2026-06-14 21:12:23.030 [Orchestrator] Dynamic job 9 arrived at t=266.7s — 8/15 dynamic jobs
+2026-06-14 21:12:23.709 [Orchestrator] Dynamic job 10 arrived at t=300.0s — 9/15 dynamic jobs
+2026-06-14 21:12:24.396 [Orchestrator] Dynamic job 11 arrived at t=333.3s — 10/15 dynamic jobs
+2026-06-14 21:12:25.083 [Orchestrator] Dynamic job 12 arrived at t=366.7s — 11/15 dynamic jobs
+2026-06-14 21:12:25.771 [Orchestrator] Dynamic job 13 arrived at t=400.0s — 12/15 dynamic jobs
+2026-06-14 21:12:26.457 [Orchestrator] Dynamic job 14 arrived at t=433.3s — 13/15 dynamic jobs
+2026-06-14 21:12:27.150 [Orchestrator] Dynamic job 15 arrived at t=466.7s — 14/15 dynamic jobs
+2026-06-14 21:12:27.816 [Orchestrator] Dynamic job 16 arrived at t=500.0s — 15/15 dynamic jobs
+2026-06-14 21:12:55.577 Job 1 exited the system after delivery.
+2026-06-14 21:13:07.524 Job 10 exited the system after delivery.
+2026-06-14 21:13:10.170 Job 11 exited the system after delivery.
+2026-06-14 21:13:14.825 Job 15 exited the system after delivery.
+2026-06-14 21:13:18.138 Job 3 exited the system after delivery.
+2026-06-14 21:13:18.804 Job 9 exited the system after delivery.
+2026-06-14 21:13:22.113 Job 13 exited the system after delivery.
+2026-06-14 21:13:30.602 Job 5 exited the system after delivery.
+2026-06-14 21:13:31.947 Job 8 exited the system after delivery.
+2026-06-14 21:13:35.239 Job 14 exited the system after delivery.
+2026-06-14 21:13:37.230 Job 12 exited the system after delivery.
+2026-06-14 21:13:38.534 Job 0 exited the system after delivery.
+2026-06-14 21:13:40.516 Job 2 exited the system after delivery.
+2026-06-14 21:13:41.829 Job 16 exited the system after delivery.
+2026-06-14 21:13:43.147 Job 6 exited the system after delivery.
+2026-06-14 21:13:49.081 Job 7 exited the system after delivery.
+2026-06-14 21:13:56.381 Job 4 exited the system after delivery.
+2026-06-14 21:13:56.381 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-14 21:13:56.821 [BatchRunner] Progress: 22/30 (1749.3s elapsed, ETA 636.1s)
+2026-06-14 21:13:56.821 [BatchRunner] Run 23/30: config=s10m_lam0p0640 rule=SPT_SMPT seed=43
+2026-06-14 21:13:56.821 [StochasticMgr] Initialized — seed=43 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.064
+2026-06-14 21:13:56.821 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-06-14 21:13:56.826 [FactoryLayout] Distance matrix (10x10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-06-14 21:13:56.828 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-06-14 21:13:56.828 [TrafficZones] Built zone graph: 27 zones.
+2026-06-14 21:13:56.828 [AGVPool] Spawned fleet of 3 AGVs.
+2026-06-14 21:13:56.828 [StochasticMgr] Initialized — seed=43 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.064
+2026-06-14 21:13:56.828 [Orchestrator] Poisson clock armed — first arrival ≈ t=25.9s λ=0.064 cap=15
+2026-06-14 21:13:56.828 [Orchestrator] Episode started: 2 jobs, 10 machines, stochastic=True
+2026-06-14 21:13:57.477 [Orchestrator] Dynamic job 2 arrived at t=33.3s — 1/15 dynamic jobs
+2026-06-14 21:13:58.113 [Orchestrator] Dynamic job 3 arrived at t=66.7s — 2/15 dynamic jobs
+2026-06-14 21:13:58.776 [Orchestrator] Dynamic job 4 arrived at t=100.0s — 3/15 dynamic jobs
+2026-06-14 21:13:59.471 [Orchestrator] Dynamic job 5 arrived at t=133.3s — 4/15 dynamic jobs
+2026-06-14 21:14:00.154 [Orchestrator] Dynamic job 6 arrived at t=166.7s — 5/15 dynamic jobs
+2026-06-14 21:14:00.829 [Orchestrator] Dynamic job 7 arrived at t=200.0s — 6/15 dynamic jobs
+2026-06-14 21:14:01.525 [Orchestrator] Dynamic job 8 arrived at t=233.3s — 7/15 dynamic jobs
+2026-06-14 21:14:02.869 [Orchestrator] Dynamic job 9 arrived at t=300.0s — 8/15 dynamic jobs
+2026-06-14 21:14:03.548 [Orchestrator] Dynamic job 10 arrived at t=333.3s — 9/15 dynamic jobs
+2026-06-14 21:14:04.215 [Orchestrator] Dynamic job 11 arrived at t=366.7s — 10/15 dynamic jobs
+2026-06-14 21:14:04.882 [Orchestrator] Dynamic job 12 arrived at t=400.0s — 11/15 dynamic jobs
+2026-06-14 21:14:06.246 [Orchestrator] Dynamic job 13 arrived at t=466.7s — 12/15 dynamic jobs
+2026-06-14 21:14:06.924 [Orchestrator] Dynamic job 14 arrived at t=500.0s — 13/15 dynamic jobs
+2026-06-14 21:14:07.584 [Orchestrator] Dynamic job 15 arrived at t=533.3s — 14/15 dynamic jobs
+2026-06-14 21:14:08.911 [Orchestrator] Dynamic job 16 arrived at t=600.0s — 15/15 dynamic jobs
+2026-06-14 21:14:53.003 Job 9 exited the system after delivery.
+2026-06-14 21:14:53.667 Job 13 exited the system after delivery.
+2026-06-14 21:14:54.322 Job 12 exited the system after delivery.
+2026-06-14 21:14:57.598 Job 11 exited the system after delivery.
+2026-06-14 21:14:58.939 Job 4 exited the system after delivery.
+2026-06-14 21:15:00.280 Job 8 exited the system after delivery.
+2026-06-14 21:15:06.172 Job 2 exited the system after delivery.
+2026-06-14 21:15:06.824 Job 1 exited the system after delivery.
+2026-06-14 21:15:08.819 Job 14 exited the system after delivery.
+2026-06-14 21:15:11.406 Job 10 exited the system after delivery.
+2026-06-14 21:15:12.722 Job 3 exited the system after delivery.
+2026-06-14 21:15:14.087 Job 6 exited the system after delivery.
+2026-06-14 21:15:16.656 Job 7 exited the system after delivery.
+2026-06-14 21:15:25.171 Job 5 exited the system after delivery.
+2026-06-14 21:15:26.523 Job 0 exited the system after delivery.
+2026-06-14 21:15:26.523 Job 16 exited the system after delivery.
+2026-06-14 21:15:33.746 Job 15 exited the system after delivery.
+2026-06-14 21:15:33.746 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-14 21:15:34.167 [BatchRunner] Progress: 23/30 (1846.6s elapsed, ETA 562.0s)
+2026-06-14 21:15:34.167 [BatchRunner] Run 24/30: config=s10m_lam0p0640 rule=SPT_SMPT seed=44
+2026-06-14 21:15:34.167 [StochasticMgr] Initialized — seed=44 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.064
+2026-06-14 21:15:34.167 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-06-14 21:15:34.171 [FactoryLayout] Distance matrix (10x10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-06-14 21:15:34.173 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-06-14 21:15:34.173 [TrafficZones] Built zone graph: 27 zones.
+2026-06-14 21:15:34.173 [AGVPool] Spawned fleet of 3 AGVs.
+2026-06-14 21:15:34.174 [StochasticMgr] Initialized — seed=44 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.064
+2026-06-14 21:15:34.174 [Orchestrator] Poisson clock armed — first arrival ≈ t=5.3s λ=0.064 cap=15
+2026-06-14 21:15:34.174 [Orchestrator] Episode started: 2 jobs, 10 machines, stochastic=True
+2026-06-14 21:15:34.793 [Orchestrator] Dynamic job 2 arrived at t=33.3s — 1/15 dynamic jobs
+2026-06-14 21:15:35.440 [Orchestrator] Dynamic job 3 arrived at t=66.7s — 2/15 dynamic jobs
+2026-06-14 21:15:36.121 [Orchestrator] Dynamic job 4 arrived at t=100.0s — 3/15 dynamic jobs
+2026-06-14 21:15:36.794 [Orchestrator] Dynamic job 5 arrived at t=133.3s — 4/15 dynamic jobs
+2026-06-14 21:15:38.163 [Orchestrator] Dynamic job 6 arrived at t=200.0s — 5/15 dynamic jobs
+2026-06-14 21:15:40.189 [Orchestrator] Dynamic job 7 arrived at t=300.0s — 6/15 dynamic jobs
+2026-06-14 21:15:40.845 [Orchestrator] Dynamic job 8 arrived at t=333.3s — 7/15 dynamic jobs
+2026-06-14 21:15:41.482 [Orchestrator] Dynamic job 9 arrived at t=366.7s — 8/15 dynamic jobs
+2026-06-14 21:15:42.149 [Orchestrator] Dynamic job 10 arrived at t=400.0s — 9/15 dynamic jobs
+2026-06-14 21:15:42.808 [Orchestrator] Dynamic job 11 arrived at t=433.3s — 10/15 dynamic jobs
+2026-06-14 21:15:43.492 [Orchestrator] Dynamic job 12 arrived at t=466.7s — 11/15 dynamic jobs
+2026-06-14 21:15:44.160 [Orchestrator] Dynamic job 13 arrived at t=500.0s — 12/15 dynamic jobs
+2026-06-14 21:15:44.822 [Orchestrator] Dynamic job 14 arrived at t=533.3s — 13/15 dynamic jobs
+2026-06-14 21:15:45.505 [Orchestrator] Dynamic job 15 arrived at t=566.7s — 14/15 dynamic jobs
+2026-06-14 21:15:46.200 [Orchestrator] Dynamic job 16 arrived at t=600.0s — 15/15 dynamic jobs
+2026-06-14 21:16:05.487 Job 16 exited the system after delivery.
+2026-06-14 21:16:07.466 Job 2 exited the system after delivery.
+2026-06-14 21:16:17.382 Job 11 exited the system after delivery.
+2026-06-14 21:16:18.062 Job 9 exited the system after delivery.
+2026-06-14 21:16:22.019 Job 1 exited the system after delivery.
+2026-06-14 21:16:25.977 Job 4 exited the system after delivery.
+2026-06-14 21:16:26.643 Job 0 exited the system after delivery.
+2026-06-14 21:16:27.308 Job 12 exited the system after delivery.
+2026-06-14 21:16:31.283 Job 10 exited the system after delivery.
+2026-06-14 21:16:35.261 Job 15 exited the system after delivery.
+2026-06-14 21:16:41.828 Job 7 exited the system after delivery.
+2026-06-14 21:16:42.521 Job 13 exited the system after delivery.
+2026-06-14 21:16:49.172 Job 14 exited the system after delivery.
+2026-06-14 21:16:50.498 Job 5 exited the system after delivery.
+2026-06-14 21:16:50.498 Job 8 exited the system after delivery.
+2026-06-14 21:17:01.152 Job 6 exited the system after delivery.
+2026-06-14 21:17:02.469 Job 3 exited the system after delivery.
+2026-06-14 21:17:02.469 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-14 21:17:02.897 [BatchRunner] Progress: 24/30 (1935.4s elapsed, ETA 483.8s)
+2026-06-14 21:17:02.897 [BatchRunner] Run 25/30: config=s10m_lam0p1000 rule=SPT_SMPT seed=42
+2026-06-14 21:17:02.897 [StochasticMgr] Initialized — seed=42 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.1
+2026-06-14 21:17:02.898 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-06-14 21:17:02.903 [FactoryLayout] Distance matrix (10x10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-06-14 21:17:02.905 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-06-14 21:17:02.905 [TrafficZones] Built zone graph: 27 zones.
+2026-06-14 21:17:02.905 [AGVPool] Spawned fleet of 3 AGVs.
+2026-06-14 21:17:02.905 [StochasticMgr] Initialized — seed=42 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.1
+2026-06-14 21:17:02.905 [Orchestrator] Poisson clock armed — first arrival ≈ t=4.0s λ=0.1 cap=15
+2026-06-14 21:17:02.905 [Orchestrator] Episode started: 2 jobs, 10 machines, stochastic=True
+2026-06-14 21:17:03.539 [Orchestrator] Dynamic job 2 arrived at t=33.3s — 1/15 dynamic jobs
+2026-06-14 21:17:04.180 [Orchestrator] Dynamic job 3 arrived at t=66.7s — 2/15 dynamic jobs
+2026-06-14 21:17:04.853 [Orchestrator] Dynamic job 4 arrived at t=100.0s — 3/15 dynamic jobs
+2026-06-14 21:17:05.535 [Orchestrator] Dynamic job 5 arrived at t=133.3s — 4/15 dynamic jobs
+2026-06-14 21:17:06.213 [Orchestrator] Dynamic job 6 arrived at t=166.7s — 5/15 dynamic jobs
+2026-06-14 21:17:06.882 [Orchestrator] Dynamic job 7 arrived at t=200.0s — 6/15 dynamic jobs
+2026-06-14 21:17:07.549 [Orchestrator] Dynamic job 8 arrived at t=233.3s — 7/15 dynamic jobs
+2026-06-14 21:17:08.222 [Orchestrator] Dynamic job 9 arrived at t=266.7s — 8/15 dynamic jobs
+2026-06-14 21:17:08.890 [Orchestrator] Dynamic job 10 arrived at t=300.0s — 9/15 dynamic jobs
+2026-06-14 21:17:09.557 [Orchestrator] Dynamic job 11 arrived at t=333.3s — 10/15 dynamic jobs
+2026-06-14 21:17:10.221 [Orchestrator] Dynamic job 12 arrived at t=366.7s — 11/15 dynamic jobs
+2026-06-14 21:17:10.881 [Orchestrator] Dynamic job 13 arrived at t=400.0s — 12/15 dynamic jobs
+2026-06-14 21:17:11.557 [Orchestrator] Dynamic job 14 arrived at t=433.3s — 13/15 dynamic jobs
+2026-06-14 21:17:12.229 [Orchestrator] Dynamic job 15 arrived at t=466.7s — 14/15 dynamic jobs
+2026-06-14 21:17:12.889 [Orchestrator] Dynamic job 16 arrived at t=500.0s — 15/15 dynamic jobs
+2026-06-14 21:17:40.489 Job 1 exited the system after delivery.
+2026-06-14 21:17:52.335 Job 10 exited the system after delivery.
+2026-06-14 21:17:54.962 Job 11 exited the system after delivery.
+2026-06-14 21:17:59.571 Job 15 exited the system after delivery.
+2026-06-14 21:18:02.852 Job 3 exited the system after delivery.
+2026-06-14 21:18:03.502 Job 9 exited the system after delivery.
+2026-06-14 21:18:06.744 Job 13 exited the system after delivery.
+2026-06-14 21:18:15.211 Job 5 exited the system after delivery.
+2026-06-14 21:18:16.505 Job 8 exited the system after delivery.
+2026-06-14 21:18:19.757 Job 14 exited the system after delivery.
+2026-06-14 21:18:21.744 Job 12 exited the system after delivery.
+2026-06-14 21:18:23.069 Job 0 exited the system after delivery.
+2026-06-14 21:18:25.067 Job 2 exited the system after delivery.
+2026-06-14 21:18:26.381 Job 16 exited the system after delivery.
+2026-06-14 21:18:27.706 Job 6 exited the system after delivery.
+2026-06-14 21:18:33.649 Job 7 exited the system after delivery.
+2026-06-14 21:18:40.843 Job 4 exited the system after delivery.
+2026-06-14 21:18:40.843 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-14 21:18:41.275 [BatchRunner] Progress: 25/30 (2033.8s elapsed, ETA 406.8s)
+2026-06-14 21:18:41.275 [BatchRunner] Run 26/30: config=s10m_lam0p1000 rule=SPT_SMPT seed=43
+2026-06-14 21:18:41.275 [StochasticMgr] Initialized — seed=43 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.1
+2026-06-14 21:18:41.276 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-06-14 21:18:41.279 [FactoryLayout] Distance matrix (10x10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-06-14 21:18:41.281 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-06-14 21:18:41.283 [TrafficZones] Built zone graph: 27 zones.
+2026-06-14 21:18:41.283 [AGVPool] Spawned fleet of 3 AGVs.
+2026-06-14 21:18:41.283 [StochasticMgr] Initialized — seed=43 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.1
+2026-06-14 21:18:41.283 [Orchestrator] Poisson clock armed — first arrival ≈ t=16.6s λ=0.1 cap=15
+2026-06-14 21:18:41.283 [Orchestrator] Episode started: 2 jobs, 10 machines, stochastic=True
+2026-06-14 21:18:41.914 [Orchestrator] Dynamic job 2 arrived at t=33.3s — 1/15 dynamic jobs
+2026-06-14 21:18:42.548 [Orchestrator] Dynamic job 3 arrived at t=66.7s — 2/15 dynamic jobs
+2026-06-14 21:18:43.211 [Orchestrator] Dynamic job 4 arrived at t=100.0s — 3/15 dynamic jobs
+2026-06-14 21:18:43.892 [Orchestrator] Dynamic job 5 arrived at t=133.3s — 4/15 dynamic jobs
+2026-06-14 21:18:44.582 [Orchestrator] Dynamic job 6 arrived at t=166.7s — 5/15 dynamic jobs
+2026-06-14 21:18:45.256 [Orchestrator] Dynamic job 7 arrived at t=200.0s — 6/15 dynamic jobs
+2026-06-14 21:18:45.912 [Orchestrator] Dynamic job 8 arrived at t=233.3s — 7/15 dynamic jobs
+2026-06-14 21:18:47.276 [Orchestrator] Dynamic job 9 arrived at t=300.0s — 8/15 dynamic jobs
+2026-06-14 21:18:47.932 [Orchestrator] Dynamic job 10 arrived at t=333.3s — 9/15 dynamic jobs
+2026-06-14 21:18:48.596 [Orchestrator] Dynamic job 11 arrived at t=366.7s — 10/15 dynamic jobs
+2026-06-14 21:18:49.290 [Orchestrator] Dynamic job 12 arrived at t=400.0s — 11/15 dynamic jobs
+2026-06-14 21:18:49.974 [Orchestrator] Dynamic job 13 arrived at t=433.3s — 12/15 dynamic jobs
+2026-06-14 21:18:50.655 [Orchestrator] Dynamic job 14 arrived at t=466.7s — 13/15 dynamic jobs
+2026-06-14 21:18:51.327 [Orchestrator] Dynamic job 15 arrived at t=500.0s — 14/15 dynamic jobs
+2026-06-14 21:18:52.011 [Orchestrator] Dynamic job 16 arrived at t=533.3s — 15/15 dynamic jobs
+2026-06-14 21:19:32.216 Job 13 exited the system after delivery.
+2026-06-14 21:19:38.168 Job 9 exited the system after delivery.
+2026-06-14 21:19:38.835 Job 12 exited the system after delivery.
+2026-06-14 21:19:42.154 Job 11 exited the system after delivery.
+2026-06-14 21:19:43.480 Job 4 exited the system after delivery.
+2026-06-14 21:19:44.822 Job 8 exited the system after delivery.
+2026-06-14 21:19:50.692 Job 2 exited the system after delivery.
+2026-06-14 21:19:51.357 Job 1 exited the system after delivery.
+2026-06-14 21:19:53.352 Job 14 exited the system after delivery.
+2026-06-14 21:19:55.987 Job 10 exited the system after delivery.
+2026-06-14 21:19:57.319 Job 3 exited the system after delivery.
+2026-06-14 21:19:58.677 Job 6 exited the system after delivery.
+2026-06-14 21:20:01.313 Job 7 exited the system after delivery.
+2026-06-14 21:20:09.925 Job 5 exited the system after delivery.
+2026-06-14 21:20:11.304 Job 0 exited the system after delivery.
+2026-06-14 21:20:11.304 Job 16 exited the system after delivery.
+2026-06-14 21:20:18.505 Job 15 exited the system after delivery.
+2026-06-14 21:20:18.505 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-14 21:20:18.929 [BatchRunner] Progress: 26/30 (2131.4s elapsed, ETA 327.9s)
+2026-06-14 21:20:18.929 [BatchRunner] Run 27/30: config=s10m_lam0p1000 rule=SPT_SMPT seed=44
+2026-06-14 21:20:18.929 [StochasticMgr] Initialized — seed=44 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.1
+2026-06-14 21:20:18.930 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-06-14 21:20:18.934 [FactoryLayout] Distance matrix (10x10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-06-14 21:20:18.937 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-06-14 21:20:18.937 [TrafficZones] Built zone graph: 27 zones.
+2026-06-14 21:20:18.937 [AGVPool] Spawned fleet of 3 AGVs.
+2026-06-14 21:20:18.937 [StochasticMgr] Initialized — seed=44 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.1
+2026-06-14 21:20:18.938 [Orchestrator] Poisson clock armed — first arrival ≈ t=3.4s λ=0.1 cap=15
+2026-06-14 21:20:18.938 [Orchestrator] Episode started: 2 jobs, 10 machines, stochastic=True
+2026-06-14 21:20:19.579 [Orchestrator] Dynamic job 2 arrived at t=33.3s — 1/15 dynamic jobs
+2026-06-14 21:20:20.218 [Orchestrator] Dynamic job 3 arrived at t=66.7s — 2/15 dynamic jobs
+2026-06-14 21:20:20.871 [Orchestrator] Dynamic job 4 arrived at t=100.0s — 3/15 dynamic jobs
+2026-06-14 21:20:21.549 [Orchestrator] Dynamic job 5 arrived at t=133.3s — 4/15 dynamic jobs
+2026-06-14 21:20:22.218 [Orchestrator] Dynamic job 6 arrived at t=166.7s — 5/15 dynamic jobs
+2026-06-14 21:20:23.557 [Orchestrator] Dynamic job 7 arrived at t=233.3s — 6/15 dynamic jobs
+2026-06-14 21:20:24.233 [Orchestrator] Dynamic job 8 arrived at t=266.7s — 7/15 dynamic jobs
+2026-06-14 21:20:24.895 [Orchestrator] Dynamic job 9 arrived at t=300.0s — 8/15 dynamic jobs
+2026-06-14 21:20:25.568 [Orchestrator] Dynamic job 10 arrived at t=333.3s — 9/15 dynamic jobs
+2026-06-14 21:20:26.244 [Orchestrator] Dynamic job 11 arrived at t=366.7s — 10/15 dynamic jobs
+2026-06-14 21:20:26.908 [Orchestrator] Dynamic job 12 arrived at t=400.0s — 11/15 dynamic jobs
+2026-06-14 21:20:27.588 [Orchestrator] Dynamic job 13 arrived at t=433.3s — 12/15 dynamic jobs
+2026-06-14 21:20:28.277 [Orchestrator] Dynamic job 14 arrived at t=466.7s — 13/15 dynamic jobs
+2026-06-14 21:20:28.943 [Orchestrator] Dynamic job 15 arrived at t=500.0s — 14/15 dynamic jobs
+2026-06-14 21:20:29.620 [Orchestrator] Dynamic job 16 arrived at t=533.3s — 15/15 dynamic jobs
+2026-06-14 21:20:49.874 Job 16 exited the system after delivery.
+2026-06-14 21:20:51.859 Job 2 exited the system after delivery.
+2026-06-14 21:21:01.721 Job 11 exited the system after delivery.
+2026-06-14 21:21:02.383 Job 9 exited the system after delivery.
+2026-06-14 21:21:06.300 Job 1 exited the system after delivery.
+2026-06-14 21:21:10.228 Job 4 exited the system after delivery.
+2026-06-14 21:21:10.891 Job 0 exited the system after delivery.
+2026-06-14 21:21:11.569 Job 12 exited the system after delivery.
+2026-06-14 21:21:15.477 Job 10 exited the system after delivery.
+2026-06-14 21:21:19.376 Job 15 exited the system after delivery.
+2026-06-14 21:21:25.945 Job 7 exited the system after delivery.
+2026-06-14 21:21:26.622 Job 13 exited the system after delivery.
+2026-06-14 21:21:33.204 Job 14 exited the system after delivery.
+2026-06-14 21:21:34.535 Job 5 exited the system after delivery.
+2026-06-14 21:21:34.535 Job 8 exited the system after delivery.
+2026-06-14 21:21:45.023 Job 6 exited the system after delivery.
+2026-06-14 21:21:46.310 Job 3 exited the system after delivery.
+2026-06-14 21:21:46.310 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-14 21:21:46.735 [BatchRunner] Progress: 27/30 (2219.2s elapsed, ETA 246.6s)
+2026-06-14 21:21:46.735 [BatchRunner] Run 28/30: config=s10m_lam0p1500 rule=SPT_SMPT seed=42
+2026-06-14 21:21:46.735 [StochasticMgr] Initialized — seed=42 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.15
+2026-06-14 21:21:46.736 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-06-14 21:21:46.740 [FactoryLayout] Distance matrix (10x10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-06-14 21:21:46.742 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-06-14 21:21:46.742 [TrafficZones] Built zone graph: 27 zones.
+2026-06-14 21:21:46.743 [AGVPool] Spawned fleet of 3 AGVs.
+2026-06-14 21:21:46.743 [StochasticMgr] Initialized — seed=42 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.15
+2026-06-14 21:21:46.743 [Orchestrator] Poisson clock armed — first arrival ≈ t=2.7s λ=0.15 cap=15
+2026-06-14 21:21:46.743 [Orchestrator] Episode started: 2 jobs, 10 machines, stochastic=True
+2026-06-14 21:21:47.369 [Orchestrator] Dynamic job 2 arrived at t=33.3s — 1/15 dynamic jobs
+2026-06-14 21:21:47.998 [Orchestrator] Dynamic job 3 arrived at t=66.7s — 2/15 dynamic jobs
+2026-06-14 21:21:48.655 [Orchestrator] Dynamic job 4 arrived at t=100.0s — 3/15 dynamic jobs
+2026-06-14 21:21:49.344 [Orchestrator] Dynamic job 5 arrived at t=133.3s — 4/15 dynamic jobs
+2026-06-14 21:21:50.017 [Orchestrator] Dynamic job 6 arrived at t=166.7s — 5/15 dynamic jobs
+2026-06-14 21:21:50.678 [Orchestrator] Dynamic job 7 arrived at t=200.0s — 6/15 dynamic jobs
+2026-06-14 21:21:51.344 [Orchestrator] Dynamic job 8 arrived at t=233.3s — 7/15 dynamic jobs
+2026-06-14 21:21:52.000 [Orchestrator] Dynamic job 9 arrived at t=266.7s — 8/15 dynamic jobs
+2026-06-14 21:21:52.652 [Orchestrator] Dynamic job 10 arrived at t=300.0s — 9/15 dynamic jobs
+2026-06-14 21:21:53.337 [Orchestrator] Dynamic job 11 arrived at t=333.3s — 10/15 dynamic jobs
+2026-06-14 21:21:54.012 [Orchestrator] Dynamic job 12 arrived at t=366.7s — 11/15 dynamic jobs
+2026-06-14 21:21:54.675 [Orchestrator] Dynamic job 13 arrived at t=400.0s — 12/15 dynamic jobs
+2026-06-14 21:21:55.356 [Orchestrator] Dynamic job 14 arrived at t=433.3s — 13/15 dynamic jobs
+2026-06-14 21:21:56.039 [Orchestrator] Dynamic job 15 arrived at t=466.7s — 14/15 dynamic jobs
+2026-06-14 21:21:56.707 [Orchestrator] Dynamic job 16 arrived at t=500.0s — 15/15 dynamic jobs
+2026-06-14 21:22:24.464 Job 1 exited the system after delivery.
+2026-06-14 21:22:36.324 Job 10 exited the system after delivery.
+2026-06-14 21:22:38.926 Job 11 exited the system after delivery.
+2026-06-14 21:22:43.538 Job 15 exited the system after delivery.
+2026-06-14 21:22:46.808 Job 3 exited the system after delivery.
+2026-06-14 21:22:47.490 Job 9 exited the system after delivery.
+2026-06-14 21:22:50.766 Job 13 exited the system after delivery.
+2026-06-14 21:22:59.295 Job 5 exited the system after delivery.
+2026-06-14 21:23:00.630 Job 8 exited the system after delivery.
+2026-06-14 21:23:03.915 Job 14 exited the system after delivery.
+2026-06-14 21:23:05.947 Job 12 exited the system after delivery.
+2026-06-14 21:23:07.284 Job 0 exited the system after delivery.
+2026-06-14 21:23:09.290 Job 2 exited the system after delivery.
+2026-06-14 21:23:10.640 Job 16 exited the system after delivery.
+2026-06-14 21:23:11.990 Job 6 exited the system after delivery.
+2026-06-14 21:23:17.937 Job 7 exited the system after delivery.
+2026-06-14 21:23:25.101 Job 4 exited the system after delivery.
+2026-06-14 21:23:25.101 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-14 21:23:25.523 [BatchRunner] Progress: 28/30 (2318.0s elapsed, ETA 165.6s)
+2026-06-14 21:23:25.523 [BatchRunner] Run 29/30: config=s10m_lam0p1500 rule=SPT_SMPT seed=43
+2026-06-14 21:23:25.523 [StochasticMgr] Initialized — seed=43 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.15
+2026-06-14 21:23:25.524 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-06-14 21:23:25.527 [FactoryLayout] Distance matrix (10x10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-06-14 21:23:25.529 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-06-14 21:23:25.529 [TrafficZones] Built zone graph: 27 zones.
+2026-06-14 21:23:25.530 [AGVPool] Spawned fleet of 3 AGVs.
+2026-06-14 21:23:25.530 [StochasticMgr] Initialized — seed=43 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.15
+2026-06-14 21:23:25.530 [Orchestrator] Poisson clock armed — first arrival ≈ t=11.1s λ=0.15 cap=15
+2026-06-14 21:23:25.530 [Orchestrator] Episode started: 2 jobs, 10 machines, stochastic=True
+2026-06-14 21:23:26.163 [Orchestrator] Dynamic job 2 arrived at t=33.3s — 1/15 dynamic jobs
+2026-06-14 21:23:26.795 [Orchestrator] Dynamic job 3 arrived at t=66.7s — 2/15 dynamic jobs
+2026-06-14 21:23:27.463 [Orchestrator] Dynamic job 4 arrived at t=100.0s — 3/15 dynamic jobs
+2026-06-14 21:23:28.147 [Orchestrator] Dynamic job 5 arrived at t=133.3s — 4/15 dynamic jobs
+2026-06-14 21:23:28.822 [Orchestrator] Dynamic job 6 arrived at t=166.7s — 5/15 dynamic jobs
+2026-06-14 21:23:29.499 [Orchestrator] Dynamic job 7 arrived at t=200.0s — 6/15 dynamic jobs
+2026-06-14 21:23:30.179 [Orchestrator] Dynamic job 8 arrived at t=233.3s — 7/15 dynamic jobs
+2026-06-14 21:23:30.826 [Orchestrator] Dynamic job 9 arrived at t=266.7s — 8/15 dynamic jobs
+2026-06-14 21:23:31.500 [Orchestrator] Dynamic job 10 arrived at t=300.0s — 9/15 dynamic jobs
+2026-06-14 21:23:32.182 [Orchestrator] Dynamic job 11 arrived at t=333.3s — 10/15 dynamic jobs
+2026-06-14 21:23:32.848 [Orchestrator] Dynamic job 12 arrived at t=366.7s — 11/15 dynamic jobs
+2026-06-14 21:23:33.526 [Orchestrator] Dynamic job 13 arrived at t=400.0s — 12/15 dynamic jobs
+2026-06-14 21:23:34.202 [Orchestrator] Dynamic job 14 arrived at t=433.3s — 13/15 dynamic jobs
+2026-06-14 21:23:34.882 [Orchestrator] Dynamic job 15 arrived at t=466.7s — 14/15 dynamic jobs
+2026-06-14 21:23:35.561 [Orchestrator] Dynamic job 16 arrived at t=500.0s — 15/15 dynamic jobs
+2026-06-14 21:24:16.120 Job 13 exited the system after delivery.
+2026-06-14 21:24:22.029 Job 9 exited the system after delivery.
+2026-06-14 21:24:22.679 Job 12 exited the system after delivery.
+2026-06-14 21:24:25.951 Job 11 exited the system after delivery.
+2026-06-14 21:24:27.274 Job 4 exited the system after delivery.
+2026-06-14 21:24:28.630 Job 8 exited the system after delivery.
+2026-06-14 21:24:34.482 Job 2 exited the system after delivery.
+2026-06-14 21:24:35.168 Job 1 exited the system after delivery.
+2026-06-14 21:24:37.156 Job 14 exited the system after delivery.
+2026-06-14 21:24:39.754 Job 10 exited the system after delivery.
+2026-06-14 21:24:41.082 Job 3 exited the system after delivery.
+2026-06-14 21:24:42.454 Job 6 exited the system after delivery.
+2026-06-14 21:24:45.066 Job 7 exited the system after delivery.
+2026-06-14 21:24:53.622 Job 5 exited the system after delivery.
+2026-06-14 21:24:54.983 Job 0 exited the system after delivery.
+2026-06-14 21:24:54.983 Job 16 exited the system after delivery.
+2026-06-14 21:25:02.108 Job 15 exited the system after delivery.
+2026-06-14 21:25:02.109 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-14 21:25:02.529 [BatchRunner] Progress: 29/30 (2415.0s elapsed, ETA 83.3s)
+2026-06-14 21:25:02.529 [BatchRunner] Run 30/30: config=s10m_lam0p1500 rule=SPT_SMPT seed=44
+2026-06-14 21:25:02.530 [StochasticMgr] Initialized — seed=44 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.15
+2026-06-14 21:25:02.530 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-06-14 21:25:02.534 [FactoryLayout] Distance matrix (10x10):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9   
+2026-06-14 21:25:02.536 [FactoryLayout] Built aisle-based floor: 10 machines.
+2026-06-14 21:25:02.536 [TrafficZones] Built zone graph: 27 zones.
+2026-06-14 21:25:02.536 [AGVPool] Spawned fleet of 3 AGVs.
+2026-06-14 21:25:02.536 [StochasticMgr] Initialized — seed=44 mode=[arr] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.15
+2026-06-14 21:25:02.536 [Orchestrator] Poisson clock armed — first arrival ≈ t=2.3s λ=0.15 cap=15
+2026-06-14 21:25:02.536 [Orchestrator] Episode started: 2 jobs, 10 machines, stochastic=True
+2026-06-14 21:25:03.157 [Orchestrator] Dynamic job 2 arrived at t=33.3s — 1/15 dynamic jobs
+2026-06-14 21:25:03.750 [Orchestrator] Dynamic job 3 arrived at t=66.7s — 2/15 dynamic jobs
+2026-06-14 21:25:04.402 [Orchestrator] Dynamic job 4 arrived at t=100.0s — 3/15 dynamic jobs
+2026-06-14 21:25:05.068 [Orchestrator] Dynamic job 5 arrived at t=133.3s — 4/15 dynamic jobs
+2026-06-14 21:25:05.706 [Orchestrator] Dynamic job 6 arrived at t=166.7s — 5/15 dynamic jobs
+2026-06-14 21:25:06.337 [Orchestrator] Dynamic job 7 arrived at t=200.0s — 6/15 dynamic jobs
+2026-06-14 21:25:06.983 [Orchestrator] Dynamic job 8 arrived at t=233.3s — 7/15 dynamic jobs
+2026-06-14 21:25:07.647 [Orchestrator] Dynamic job 9 arrived at t=266.7s — 8/15 dynamic jobs
+2026-06-14 21:25:08.295 [Orchestrator] Dynamic job 10 arrived at t=300.0s — 9/15 dynamic jobs
+2026-06-14 21:25:08.926 [Orchestrator] Dynamic job 11 arrived at t=333.3s — 10/15 dynamic jobs
+2026-06-14 21:25:09.586 [Orchestrator] Dynamic job 12 arrived at t=366.7s — 11/15 dynamic jobs
+2026-06-14 21:25:10.251 [Orchestrator] Dynamic job 13 arrived at t=400.0s — 12/15 dynamic jobs
+2026-06-14 21:25:10.905 [Orchestrator] Dynamic job 14 arrived at t=433.3s — 13/15 dynamic jobs
+2026-06-14 21:25:11.552 [Orchestrator] Dynamic job 15 arrived at t=466.7s — 14/15 dynamic jobs
+2026-06-14 21:25:12.216 [Orchestrator] Dynamic job 16 arrived at t=500.0s — 15/15 dynamic jobs
+2026-06-14 21:25:32.747 Job 16 exited the system after delivery.
+2026-06-14 21:25:34.663 Job 2 exited the system after delivery.
+2026-06-14 21:25:44.260 Job 11 exited the system after delivery.
+2026-06-14 21:25:44.907 Job 9 exited the system after delivery.
+2026-06-14 21:25:48.748 Job 1 exited the system after delivery.
+2026-06-14 21:25:52.569 Job 4 exited the system after delivery.
+2026-06-14 21:25:53.206 Job 0 exited the system after delivery.
+2026-06-14 21:25:53.832 Job 12 exited the system after delivery.
+2026-06-14 21:25:57.571 Job 10 exited the system after delivery.
+2026-06-14 21:26:01.313 Job 15 exited the system after delivery.
+2026-06-14 21:26:07.275 Job 7 exited the system after delivery.
+2026-06-14 21:26:07.887 Job 13 exited the system after delivery.
+2026-06-14 21:26:13.565 Job 14 exited the system after delivery.
+2026-06-14 21:26:14.735 Job 5 exited the system after delivery.
+2026-06-14 21:26:14.735 Job 8 exited the system after delivery.
+2026-06-14 21:26:23.581 Job 6 exited the system after delivery.
+2026-06-14 21:26:24.671 Job 3 exited the system after delivery.
+2026-06-14 21:26:24.671 [TelemetryChannel] Flushed 0 events to Python.
+2026-06-14 21:26:25.039 [BatchRunner] Progress: 30/30 (2497.5s elapsed, ETA 0.0s)
+2026-06-14 21:26:25.039 [BatchRunner] Batch complete: 30 runs in 2497.5s
+2026-06-14 21:26:25.039 [BatchRunner] Headless mode — quitting application.

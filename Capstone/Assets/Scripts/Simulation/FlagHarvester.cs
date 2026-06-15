@@ -176,17 +176,24 @@ namespace Assets.Scripts.Simulation
 
                     if (job != null)
                     {
+                        // Capture transit duration before overwriting StateEntryTime.
+                        // StateEntryTime was set to the InTransit entry point in HarvestAGVFlags (PickedUpFlag branch).
+                        double transitDuration = _simTimeRef - job.StateEntryTime;
+                        job.TotalTransitTime += transitDuration;
+
                         if (machineId < 0)
                         {
                             // Job has exited the system entirely
                             job.State = JobState.Exited;
+                            SimLogger.Medium($"Job {job.JobId} exited the system after delivery.");
                             job.LocationMachineId = -1;
                             job.StateEntryTime = _simTimeRef;
                             if (job.Visual != null) job.Visual.gameObject.SetActive(false);
                         }
                         else
                         {
-                            // Job is delivered to a target machine
+                            // Job is delivered to a target machine — stamp per-op travel time
+                            job.OperationTravelTimes[job.CurrentOpIndex] = agv.LastTripDuration;
                             job.State = JobState.Queued;
                             job.LocationMachineId = machineId;
                             job.StateEntryTime = _simTimeRef;
@@ -195,7 +202,6 @@ namespace Assets.Scripts.Simulation
                             targetMachine.PlaceOnIncoming(jobId, job.Visual);
                             RefreshMachineLabels(machineId);
                         }
-                        job.TotalTransitTime += (_simTimeRef - job.StateEntryTime);
                         job.AssignedAgvId = -1;
                     }
                 }

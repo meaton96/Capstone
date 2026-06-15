@@ -83,6 +83,27 @@ updated:
     --timescale   100 \
     --loglevel    Low
 
+# parallel stochastic config
+
+./run_generated.sh \
+    --exe         ./capstone.x86_64 \
+    --batchconfig ./BatchConfigs/Batch_Stoch.json \
+    --results     ./Results/poisson \
+    --repeats     3 \
+    --timescale   100 \
+    --loglevel    Medium
+
+# single generated with stochastic congif
+
+./capstone.x86_64 \
+    -batchmode \
+    -nographics \
+    -timescale 100 \
+    -batchconfig ./BatchConfigs/Batch_Stoch.json
+    -outputdir poisson \
+    -repeats 3 \
+    -disruption none
+
 copy:
 
 
