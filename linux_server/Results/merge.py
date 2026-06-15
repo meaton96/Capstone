@@ -64,12 +64,13 @@ def main():
 
     args = parser.parse_args()
 
-    # Define the 4 target patterns and their respective output filenames
+    # Define the 5 target patterns and their respective output filenames
     categories = {
         "agv_performance_*.csv": "agv_performance.csv",
         "results_*.csv": "results.csv",
         "segment_congestion_*.csv": "segment_congestion.csv",
         "machine_utilization_*.csv": "machine_utilization.csv",
+        "job_operations_*.csv": "job_operations.csv"
     }
 
     print(f"\n🚀 Starting merge process...")

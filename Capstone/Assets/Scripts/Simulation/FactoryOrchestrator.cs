@@ -672,11 +672,7 @@ namespace Assets.Scripts.Simulation
                 }
             }
 
-            if (!Academy.Instance.IsCommunicatorOn)
-            {
-                SimLogger.Low($"[Orchestrator] Logging episode results");
-                ResultsLogger.LogAll(record);
-            }
+            
 
             if (record.MachineFailureCount > 0)
             {
