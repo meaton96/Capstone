@@ -7,6 +7,7 @@ using TMPro;
 using Assets.Scripts.Simulation.Machines;
 using Assets.Scripts.Simulation.Types;
 using Assets.Scripts.Simulation;
+using Assets.Scripts.Simulation.Logging;
 
 namespace Assets.Scripts.UI
 {
@@ -179,6 +180,12 @@ namespace Assets.Scripts.UI
         {
             if (FactoryOrchestrator.Instance == null) return;
             FJSSPConfig config = BuildConfig();
+            SimLogger.Low($"[SimulationMenu] Spawning factory with config: {config.Name} " +
+                          $"jobs={config.JobCount} machines={config.TotalMachines} " +
+                          $"agvs={config.AGVCount} " +
+                          $"stochastic={config.Stochastic?.Tag ?? "none"} " +
+                          $"parkingMethod={config.parkingMethod} " +
+                          $"preDispatchingMethod={config.preDispatchingMethod}");
             FactoryOrchestrator.Instance.LoadConfig(config);
             FactoryOrchestrator.Instance.SpawnFactory();
         }
@@ -271,7 +278,10 @@ namespace Assets.Scripts.UI
                 // Fallback uniform bounds — only used for types missing from procParams
                 MinProcTime = 1f,
                 MaxProcTime = 30f,
-                Stochastic = BuildStochasticConfig()
+                Stochastic = BuildStochasticConfig(),
+                parkingMethod = "multiple",
+                preDispatchingMethod = "fixed",
+
             };
         }
         private StochasticConfig BuildStochasticConfig()

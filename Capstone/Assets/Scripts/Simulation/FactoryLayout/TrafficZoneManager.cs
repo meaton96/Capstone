@@ -5,6 +5,7 @@ using Assets.Scripts.Simulation.Logging;
 
 namespace Assets.Scripts.Simulation.FactoryLayout
 {
+
     /// @brief Categorises the aisle type a zone belongs to.
     public enum AisleType
     {
@@ -41,6 +42,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         [NonSerialized] public int TraversalCount;   // successful TryReserve entries
         [NonSerialized] public int BlockEvents;       // failed TryReserve calls (zone full)
         [NonSerialized] public float TotalBlockTime;    // cumulative wait time reported by AGVs
+
 
     }
 
@@ -79,7 +81,8 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         /// @brief Retrieves a zone by its unique ID.
         public TrafficZone GetZone(int zoneId) => zoneById.TryGetValue(zoneId, out var z) ? z : null;
 
-
+        private readonly List<int> parkingZoneIds = new List<int>();
+        public IReadOnlyList<int> ParkingZoneIds => parkingZoneIds;
 
 
         void Awake()
@@ -97,6 +100,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             zones.Clear();
             zoneById.Clear();
             machineToZones.Clear();
+            parkingZoneIds.Clear();
             nextZoneId = 0;
 
             if (layoutManager == null || layoutManager.LayoutRows == 0)
@@ -115,8 +119,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             int[] rightVertZones = BuildVerticalZones(false, rows);
 
             ConnectZoneGraph(rowAisleZones, topSpineZones, botSpineZones, leftVertZones, rightVertZones, rows, cols);
-            RegisterDockPoints(rowAisleZones, topSpineZones, botSpineZones, rows, cols, leftVertZones);
-
+            RegisterDockPoints(rowAisleZones, topSpineZones, botSpineZones, rows, cols, leftVertZones, rightVertZones);
             SimLogger.Medium($"[TrafficZones] Built zone graph: {zones.Count} zones.");
         }
 
@@ -284,7 +287,8 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         /// @details Resolves the handshake and approach positions for every physical machine 
         /// and maps them to the nearest reservable traffic zone.
         /// @post TrafficZone.DockPoints dictionaries are populated for relevant zones.
-        private void RegisterDockPoints(int[][] rowAisles, int[] topSpine, int[] botSpine, int rows, int cols, int[] leftVert)
+        private void RegisterDockPoints(int[][] rowAisles, int[] topSpine, int[] botSpine,
+                                int rows, int cols, int[] leftVert, int[] rightVert)
         {
             if (topSpine.Length > 0 && layoutManager.IncomingBelt != null)
             {
@@ -300,37 +304,13 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 outZone.DockPoints[OutgoingBeltId] = new DockPoint { ApproachPosition = handshake + Vector3.forward * 1.5f, HandshakePosition = handshake, FacingDirection = -Vector3.forward, IsPickup = false };
             }
 
-            // 1. Create a brand new zone dedicated exclusively to parking
-            if (botSpine.Length > 0)
+            if (layoutManager.ActiveParkingMethod == ParkingMethod.Single)
             {
-                // 1. Create the Parking_Alcove zone
-                var parkingZone = new TrafficZone
-                {
-                    ZoneId = nextZoneId++,
-                    Name = "Parking_Alcove",
-                    AisleType = AisleType.SpineAisle,
-                    Flow = FlowDirection.West,
-                    Centre = layoutManager.AGVParkingPosition,
-                    Size = new Vector3(layoutManager.FloorSize.x, 0.1f, layoutManager.ParkingAlcoveDepth),
-                    Capacity = 64
-                };
-
-                parkingZone.DockPoints[ParkingAreaId] = new DockPoint
-                {
-                    ApproachPosition = layoutManager.AGVParkingPosition,
-                    HandshakePosition = layoutManager.AGVParkingPosition,
-                    FacingDirection = -Vector3.left,
-                    IsPickup = false
-                };
-
-                RegisterZone(parkingZone);
-
-                // 2. Link the graph using your helper method!
-                int entrySpineZone = botSpine[0];
-                int exitVerticalZone = leftVert[leftVert.Length - 1]; // Bottom of the left aisle
-
-                LinkZones(entrySpineZone, parkingZone.ZoneId); // Let AGVs drive IN
-                LinkZones(parkingZone.ZoneId, exitVerticalZone); // Let AGVs drive OUT
+                BuildSingleParkingZone(botSpine, leftVert);
+            }
+            else
+            {
+                BuildMultipleParkingZones(leftVert, rightVert);
             }
 
 
@@ -363,6 +343,67 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                         machineToZones[i].Add(zId);
                     }
                 }
+            }
+        }
+        private void BuildSingleParkingZone(int[] botSpine, int[] leftVert)
+        {
+            if (botSpine.Length == 0) return;
+
+            var parkingZone = new TrafficZone
+            {
+                ZoneId = nextZoneId++,
+                Name = "Parking_Alcove",
+                AisleType = AisleType.SpineAisle,
+                Flow = FlowDirection.West,
+                Centre = layoutManager.AGVParkingPosition,
+                Size = new Vector3(layoutManager.FloorSize.x, 0.1f, layoutManager.ParkingAlcoveDepth),
+                Capacity = 64
+            };
+            parkingZone.DockPoints[ParkingAreaId] = new DockPoint
+            {
+                ApproachPosition = layoutManager.AGVParkingPosition,
+                HandshakePosition = layoutManager.AGVParkingPosition,
+                FacingDirection = -Vector3.left,
+                IsPickup = false
+            };
+            RegisterZone(parkingZone);
+            parkingZoneIds.Add(parkingZone.ZoneId);
+
+            LinkZones(botSpine[0], parkingZone.ZoneId);                 // drive in
+            LinkZones(parkingZone.ZoneId, leftVert[leftVert.Length - 1]); // drive out
+        }
+
+        private void BuildMultipleParkingZones(int[] leftVert, int[] rightVert)
+        {
+            foreach (var pa in layoutManager.ParkingAreas)
+            {
+                if (pa.RowAisleIndex < 0) continue;   // safety: skip a south-style entry
+
+                var pz = new TrafficZone
+                {
+                    ZoneId = nextZoneId++,
+                    Name = $"Parking_Aisle{pa.RowAisleIndex}_{(pa.IsLeftSide ? "L" : "R")}",
+                    AisleType = AisleType.SpineAisle,  // (could add a dedicated AisleType.Parking for gizmo colour)
+                    Flow = pa.IsLeftSide ? FlowDirection.West : FlowDirection.East,
+                    Centre = pa.Position,
+                    Size = new Vector3(layoutManager.ParkingAlcoveDepth, 0.1f, layoutManager.RowAisleWidth),
+                    Capacity = 8   // tunable; split across alcoves instead of one pool of 64
+                };
+                pz.DockPoints[ParkingAreaId] = new DockPoint
+                {
+                    ApproachPosition = pa.Position,
+                    HandshakePosition = pa.Position,
+                    FacingDirection = pa.IsLeftSide ? Vector3.right : Vector3.left, // face inward
+                    IsPickup = false
+                };
+                RegisterZone(pz);
+                parkingZoneIds.Add(pz.ZoneId);
+
+                // Hang the pocket off the exit-side vertical zone aligned with this aisle.
+                int vIdx = pa.RowAisleIndex + 1;   // vertical seg 0=TopConn, 1..N=row levels, last=BotConn
+                int vZone = pa.IsLeftSide ? leftVert[vIdx] : rightVert[vIdx];
+                LinkZones(vZone, pz.ZoneId);   // pull in
+                LinkZones(pz.ZoneId, vZone);   // pull back out
             }
         }
 

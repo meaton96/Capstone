@@ -10,6 +10,14 @@ using Assets.Scripts.Simulation.Types;
 
 namespace Assets.Scripts.Simulation.FactoryLayout
 {
+    public enum ParkingMethod { Single, Multiple }
+
+    public struct ParkingArea
+    {
+        public Vector3 Position;
+        public int RowAisleIndex;   // -1 for the single south alcove
+        public bool IsLeftSide;     // meaningful only in Multiple mode
+    }
     /// @brief Builds an aisle-based factory floor with one-way traffic lanes, physical wall colliders, and zone markers.
     public class FactoryLayoutManager : MonoBehaviour
     {
@@ -39,6 +47,9 @@ namespace Assets.Scripts.Simulation.FactoryLayout
 
         public ConveyorBelt IncomingBelt { get; private set; }
         public ConveyorBelt OutgoingBelt { get; private set; }
+        public ParkingMethod ActiveParkingMethod { get; private set; }
+        private readonly List<ParkingArea> parkingAreas = new List<ParkingArea>();
+        public IReadOnlyList<ParkingArea> ParkingAreas => parkingAreas;
 
         [SerializeField] private GameObject wallPrefab;
 
@@ -101,6 +112,16 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             Instance = this;
         }
 
+        private ParkingMethod ParseParkingMethod(string method)
+        {
+            return method.ToLower() switch
+            {
+                "single" => ParkingMethod.Single,
+                "multiple" => ParkingMethod.Multiple,
+                _ => throw new ArgumentException($"Invalid parking method: {method}")
+            };
+        }
+
         /// @brief Generates the factory floor, places machines, and builds navigation boundaries.
         /// 
         /// @details Calculates the grid dimensions based on machine count, instantiates the 
@@ -127,13 +148,24 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             float machineAreaWidth = (layoutCols - 1) * machineSpacingX + machineDepth;
             float machineAreaDepth = (layoutRows - 1) * RowPitch + machineDepth;
 
-            totalFloorWidth = verticalAisleWidth + machineAreaWidth + verticalAisleWidth;
-            totalFloorDepth = spineAisleWidth + machineAreaDepth + spineAisleWidth + parkingAlcoveDepth;
+            ActiveParkingMethod = ParseParkingMethod(config.parkingMethod);
 
-            int agvCount = config.AGVCount;
-            float minParkingWidth = (agvCount - 1) * 2f + 4f;
-            if (minParkingWidth > totalFloorWidth)
-                totalFloorWidth = minParkingWidth;
+            totalFloorWidth = verticalAisleWidth + machineAreaWidth + verticalAisleWidth;
+            totalFloorDepth = spineAisleWidth + machineAreaDepth + spineAisleWidth;
+
+            if (ActiveParkingMethod == ParkingMethod.Single)
+            {
+                totalFloorDepth += parkingAlcoveDepth;                 // south alcove band
+
+                int agvCount = config.AGVCount;
+                float minParkingWidth = (agvCount - 1) * 2f + 4f;      // fit AGVs across the south pool
+                if (minParkingWidth > totalFloorWidth)
+                    totalFloorWidth = minParkingWidth;
+            }
+            else // Multiple
+            {
+                totalFloorWidth += parkingAlcoveDepth * 2f;            // side alcoves, both edges
+            }
 
             if (floorTransform != null)
             {
@@ -283,14 +315,50 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 OutgoingBelt = outBelt.GetComponent<ConveyorBelt>();
             }
 
-            float alcoveZ = botZ - (spineAisleWidth / 2f) - (parkingAlcoveDepth / 2f);
+            parkingAreas.Clear();
 
-            // Push the parking position south of the bottom spine into the new alcove
-            AGVParkingPosition = new Vector3(
-                floorCentre.x,
-                0.01f,
-                alcoveZ
-            );
+            int numRowAisles = layoutRows - 1;
+            if (ActiveParkingMethod == ParkingMethod.Multiple && numRowAisles > 0)
+            {
+                BuildMultipleParkingAreas(floorCentre);
+                AGVParkingPosition = parkingAreas[0].Position;   // back-compat default
+            }
+            else
+            {
+                // Single (or degenerate single-row layout): one south alcove.
+                float alcoveZ = botZ - (spineAisleWidth / 2f) - (parkingAlcoveDepth / 2f);
+                AGVParkingPosition = new Vector3(floorCentre.x, 0.01f, alcoveZ);
+                parkingAreas.Add(new ParkingArea
+                {
+                    Position = AGVParkingPosition,
+                    RowAisleIndex = -1,
+                    IsLeftSide = false
+                });
+            }
+        }
+        /// @brief Places one parking alcove per row aisle, on that aisle's exit side
+        ///        (right for eastbound, left for westbound), just beyond the outer wall.
+        private void BuildMultipleParkingAreas(Vector3 floorCentre)
+        {
+            int numRowAisles = layoutRows - 1;
+            float machineAreaHalfW = ((layoutCols - 1) * machineSpacingX + machineDepth) / 2f;
+            float outerEdgeX = machineAreaHalfW + verticalAisleWidth;          // current outer wall x
+            float alcoveOffsetX = outerEdgeX + parkingAlcoveDepth / 2f;        // alcove centre, beyond wall
+
+            for (int a = 0; a < numRowAisles; a++)
+            {
+                bool eastbound = (a % 2 == 0);
+                bool leftSide = !eastbound;                                    // eastbound exits right
+                float x = floorCentre.x + (leftSide ? -alcoveOffsetX : alcoveOffsetX);
+                float z = GetRowAisleCentre(a).z;                             // world z (already offset)
+
+                parkingAreas.Add(new ParkingArea
+                {
+                    Position = new Vector3(x, 0.01f, z),
+                    RowAisleIndex = a,
+                    IsLeftSide = leftSide
+                });
+            }
         }
 
         /// @brief Destroys all spawned factory components and clears memory.
