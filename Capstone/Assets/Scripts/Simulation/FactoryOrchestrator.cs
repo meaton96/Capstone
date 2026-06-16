@@ -292,7 +292,7 @@ namespace Assets.Scripts.Simulation
             UnityEngine.Random.InitState(currentConfig.Seed);
             cachedMachinesByType = layoutManager.BuildFloor(currentConfig);
             trafficZoneManager.BuildZoneGraph();
-            agvPool.InitializeFleet(currentConfig.AGVCount);
+            agvPool.InitializeFleet(currentConfig);
 
             IsFactoryReady = true;
             OnFactorySpawned?.Invoke();
