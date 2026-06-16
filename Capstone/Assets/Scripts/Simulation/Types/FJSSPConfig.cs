@@ -79,6 +79,20 @@ namespace Assets.Scripts.Simulation.Types
         /// @brief Default dispatching rule applied when no agent policy is active.
         public DispatchingRule dispatchingRule = DispatchingRule.SRT_SRWT;
 
+        // ── Parking method ──
+
+        /// @brief Strategy used for AGV parking assignments.
+        /// @details Controls how AGVs are assigned to parking spots when idle.
+        ///          Defaults to "single" (single parking zone per AGV type).
+        public string parkingMethod = "single";
+
+        // ── Pre-dispatching method ──
+
+        /// @brief Strategy used for pre-dispatching decisions.
+        /// @details Controls how jobs are pre-dispatched before execution.
+        ///          Defaults to "fixed" (fixed dispatching schedule).
+        public string preDispatchingMethod = "fixed";
+
         // ── Processing time distributions ──
 
         /// @brief Per-machine-type normal distribution parameters (mu, sigma) for processing time sampling.
@@ -131,6 +145,8 @@ namespace Assets.Scripts.Simulation.Types
                 ProcTimeParams = new Dictionary<MachineType, (float mu, float sigma)>(ProcTimeParams),
                 Stochastic = Stochastic,
                 MachineFlexibilityProbability = MachineFlexibilityProbability,
+                parkingMethod = parkingMethod,
+                preDispatchingMethod = preDispatchingMethod,
             };
         }
     }

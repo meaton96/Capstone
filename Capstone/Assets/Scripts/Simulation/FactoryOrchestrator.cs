@@ -619,6 +619,10 @@ namespace Assets.Scripts.Simulation
             if (_dynamicJobsSpawned > 0)
                 record.JobCount = Jobs.JobCount;  // true total = initial + dynamic
 
+            // Configuration snapshot fields
+            record.ParkingMethod = currentConfig.parkingMethod;
+            record.PreDispatchingMethod = currentConfig.preDispatchingMethod;
+
             // Collect AGV performance records
             foreach (var agv in agvPool.AllAGVs)
                 record.AGVRecords.Add(agv.GetRecord(record.Makespan));
@@ -672,7 +676,7 @@ namespace Assets.Scripts.Simulation
                 }
             }
 
-            
+
 
             if (record.MachineFailureCount > 0)
             {

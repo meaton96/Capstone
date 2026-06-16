@@ -36,6 +36,10 @@ namespace Assets.Scripts.Simulation.Types
         public int DecisionPoints;
         public float AverageTimeScale;
 
+        // ── Configuration snapshot ────────────────────────────────────────────
+        public string ParkingMethod;
+        public string PreDispatchingMethod;
+
         public double OptimalityGap => OptimalMakespan > 0
             ? (Makespan - OptimalMakespan) / OptimalMakespan * 100.0
             : 0;

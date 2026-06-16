@@ -88,12 +88,12 @@ namespace Assets.Scripts.Simulation.Logging
                 writer.WriteLine(
                     "timestamp,instance,rule,seed,makespan," +
                     "jobs,machines,total_ops,agvCount,decisions,total_reward,timescale," +
+                    "parking_method,pre_dispatching_method," +
                     "stochastic_tag,weibull_k,weibull_lambda,mean_ttf_theoretical," +
                     "repair_log_mu,repair_log_sigma," +
                     "episode_failures,total_repair_time," +
                     "dynamic_arrivals,arrival_lambda,mean_interarrival_theoretical," +
                     "mean_interarrival_realised,last_arrival_sim_time"
-                // Phase 3: + ",agv_failures,agv_repair_time"
                 );
 
             writer.WriteLine(
@@ -101,6 +101,7 @@ namespace Assets.Scripts.Simulation.Logging
                 $"{r.InstanceName},{r.RuleName},{r.Seed},{r.Makespan:F2}," +
                 $"{r.JobCount},{r.MachineCount},{r.TotalOperations},{r.AGVCount}," +
                 $"{r.DecisionPoints},{r.TotalReward:F4},{r.AverageTimeScale:F4}," +
+                $"{r.ParkingMethod},{r.PreDispatchingMethod}," +
                 $"{r.StochasticTag},{weibullK:F2},{weibullLambda:F1},{meanTtfTheory:F1}," +
                 $"{repairLogMu:F3},{repairLogSig:F3}," +
                 $"{r.MachineFailureCount},{r.MachineRepairTime:F1}," +
