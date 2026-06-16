@@ -84,9 +84,12 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         private readonly List<int> parkingZoneIds = new List<int>();
         public IReadOnlyList<int> ParkingZoneIds => parkingZoneIds;
 
+        public static TrafficZoneManager Instance;
+
 
         void Awake()
         {
+            Instance = this;
             layoutManager = GetComponent<FactoryLayoutManager>();
         }
 
@@ -405,6 +408,45 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 LinkZones(vZone, pz.ZoneId);   // pull in
                 LinkZones(pz.ZoneId, vZone);   // pull back out
             }
+        }
+        /// @brief Multi-source reverse BFS over one-way flow: the minimum number of zone hops
+        ///        FROM every zone TO the nearest of the given target zones.
+        /// @param targetZoneIds One or more destination zones (e.g. a machine's dock zones).
+        /// @return Map of zoneId → hop count. Zones absent from the map cannot reach any target.
+        /// @details Traverses Upstream so a single pass covers the whole fleet instead of one
+        ///          forward BFS per AGV. Hop count mirrors GetRoute length minus one.
+        public Dictionary<int, int> GetHopDistancesToNearest(IEnumerable<int> targetZoneIds)
+        {
+            var dist = new Dictionary<int, int>();
+            var queue = new Queue<int>();
+
+            foreach (int t in targetZoneIds)
+            {
+                if (!zoneById.ContainsKey(t) || dist.ContainsKey(t)) continue;
+                dist[t] = 0;
+                queue.Enqueue(t);
+            }
+
+            while (queue.Count > 0)
+            {
+                int cur = queue.Dequeue();
+                int d = dist[cur];
+                foreach (int pred in zoneById[cur].Upstream)
+                {
+                    if (dist.ContainsKey(pred)) continue;
+                    dist[pred] = d + 1;
+                    queue.Enqueue(pred);
+                }
+            }
+            return dist;
+        }
+
+        /// @brief Returns the zone hosting a given special dock (e.g. IncomingBeltId), or -1.
+        public int GetZoneIdForDock(int dockKey)
+        {
+            foreach (TrafficZone zone in zones)
+                if (zone.DockPoints.ContainsKey(dockKey)) return zone.ZoneId;
+            return -1;
         }
 
         /// @brief Attempts to secure a spot in a zone for an AGV.

@@ -141,7 +141,7 @@ namespace Assets.Scripts.Simulation
                 // Skip pre-dispatch if the source machine is not operational
                 if (machine.HealthState != MachineHealthState.Operational) continue;
 
-                AGVController agv = _agvPool.GetAvailableAGV();
+                AGVController agv = _agvPool.GetNearestAvailableAGV(machine, machine.GetPickupPosition());
                 if (agv == null) continue;
 
                 agv.PreDispatch(jobId, machine.GetPickupPosition(), machine);
@@ -245,13 +245,13 @@ namespace Assets.Scripts.Simulation
                     }
                 }
 
-                AGVController agv = _agvPool.GetAvailableAGV();
-                if (agv == null) break;
-
                 PhysicalMachine src = job.LocationMachineId >= 0
                     ? _layout.GetMachine(job.LocationMachineId) : null;
                 Vector3 pickupPos = src != null
                     ? src.GetPickupPosition() : _layout.IncomingBeltPosition;
+
+                AGVController agv = _agvPool.GetNearestAvailableAGV(src, pickupPos);
+                if (agv == null) break;
 
                 PhysicalMachine target = job.TargetMachineId >= 0
                     ? _layout.GetMachine(job.TargetMachineId) : null;

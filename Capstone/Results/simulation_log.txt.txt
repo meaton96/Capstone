@@ -1,141 +1,37 @@
---- Log Started: 6/16/2026 6:01:57 PM ---
-2026-06-16 18:01:57.953 [Agent] OnEpisodeBegin skipped — waiting for UI to arm.
-2026-06-16 18:02:00.847 [SimulationMenu] Spawning factory with config: 20j_15m jobs=20 machines=15 agvs=3 stochastic=mf parkingMethod=multiple preDispatchingMethod=fixed
-2026-06-16 18:02:00.847 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.005
-2026-06-16 18:02:00.850 [FactoryLayout] Distributed type layout (row x col):
+--- Log Started: 6/16/2026 6:27:19 PM ---
+2026-06-16 18:27:19.830 [Agent] OnEpisodeBegin skipped — waiting for UI to arm.
+2026-06-16 18:27:29.189 [SimulationMenu] Spawning factory with config: 3j_15m jobs=3 machines=15 agvs=3 stochastic=mf parkingMethod=multiple preDispatchingMethod=fixed
+2026-06-16 18:27:29.189 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.005
+2026-06-16 18:27:29.192 [FactoryLayout] Distributed type layout (row x col):
   Row0: Mill, Lathe, Weld, Inspect
   Row1: Assemble, Mill, Lathe, Weld
   Row2: Inspect, Assemble, Mill, Lathe
   Row3: Weld, Inspect, Assemble
   [OK] No two same-type machines share a row aisle.
 
-2026-06-16 18:02:00.867 [FactoryLayout] Distance matrix (15x15):
+2026-06-16 18:27:29.210 [FactoryLayout] Distance matrix (15x15):
        M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
-2026-06-16 18:02:00.877 [FactoryLayout] Built aisle-based floor: 15 machines.
-2026-06-16 18:02:00.881 [TrafficZones] Built zone graph: 35 zones.
-2026-06-16 18:02:00.882 [AGVPool] AGV 0 -> alcove 0 (aisle 0, R), slot 0/0.
-2026-06-16 18:02:00.882 [AGVPool] AGV 1 -> alcove 1 (aisle 1, L), slot 0/0.
-2026-06-16 18:02:00.882 [AGVPool] AGV 2 -> alcove 2 (aisle 2, R), slot 0/0.
-2026-06-16 18:02:00.884 [AGVPool] Spawned fleet of 3 AGVs (multiple parking).
-2026-06-16 18:02:05.012 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.005
-2026-06-16 18:02:05.012 [Orchestrator] Episode started: 20 jobs, 15 machines, stochastic=True
-2026-06-16 18:02:23.886 [Orchestrator] Machine 14 FAILED. RepairTime=24.2s
-2026-06-16 18:02:23.887 [EpisodeTracker] Machine 14 failed. Episode total failures=1
-2026-06-16 18:02:23.887 [PhysicalMachine] Machine [14] failure
-2026-06-16 18:02:23.888 [PhysicalMachine] Machine [14] begin repair
-2026-06-16 18:02:28.095 [Orchestrator] Machine 14 repair complete — returning to OPERATIONAL.
-2026-06-16 18:02:28.095 Machine [14] repair complete
-2026-06-16 18:02:38.762 [Orchestrator] Machine 5 FAILED. RepairTime=41.1s
-2026-06-16 18:02:38.762 [EpisodeTracker] Machine 5 failed. Episode total failures=2
-2026-06-16 18:02:38.762 [Failure] Job 16 returned to NeedsRouting (was Processing on failed machine 5).
-2026-06-16 18:02:38.762 [PhysicalMachine] Machine [5] failure
-2026-06-16 18:02:38.762 [PhysicalMachine] Machine [5] begin repair
-2026-06-16 18:02:45.925 [Orchestrator] Machine 5 repair complete — returning to OPERATIONAL.
-2026-06-16 18:02:45.925 Machine [5] repair complete
-2026-06-16 18:03:00.675 [Orchestrator] Machine 12 FAILED. RepairTime=123.8s
-2026-06-16 18:03:00.676 [EpisodeTracker] Machine 12 failed. Episode total failures=3
-2026-06-16 18:03:00.676 [Failure] Job 10 returned to NeedsRouting (was Processing on failed machine 12).
-2026-06-16 18:03:00.676 [PhysicalMachine] Machine [12] failure
-2026-06-16 18:03:00.676 [PhysicalMachine] Machine [12] begin repair
-2026-06-16 18:03:12.209 [Orchestrator] Machine 14 FAILED. RepairTime=64.6s
-2026-06-16 18:03:12.209 [EpisodeTracker] Machine 14 failed. Episode total failures=4
-2026-06-16 18:03:12.209 [Failure] Job 8 returned to NeedsRouting (was Processing on failed machine 14).
-2026-06-16 18:03:12.209 [Failure] Queued job 16 re-routed from failed machine 14.
-2026-06-16 18:03:12.209 [PhysicalMachine] Machine [14] failure
-2026-06-16 18:03:12.210 [PhysicalMachine] Machine [14] begin repair
-2026-06-16 18:03:13.510 [Orchestrator] Machine 12 repair complete — returning to OPERATIONAL.
-2026-06-16 18:03:13.510 Machine [12] repair complete
-2026-06-16 18:03:17.236 [Orchestrator] Machine 14 repair complete — returning to OPERATIONAL.
-2026-06-16 18:03:17.236 Machine [14] repair complete
-2026-06-16 18:03:19.449 [Orchestrator] Machine 1 FAILED. RepairTime=69.9s
-2026-06-16 18:03:19.449 [EpisodeTracker] Machine 1 failed. Episode total failures=5
-2026-06-16 18:03:19.449 [PhysicalMachine] Machine [1] failure
-2026-06-16 18:03:19.450 [PhysicalMachine] Machine [1] begin repair
-2026-06-16 18:03:21.851 [Orchestrator] Machine 2 FAILED. RepairTime=50.5s
-2026-06-16 18:03:21.851 [EpisodeTracker] Machine 2 failed. Episode total failures=6
-2026-06-16 18:03:21.851 [PhysicalMachine] Machine [2] failure
-2026-06-16 18:03:21.851 [PhysicalMachine] Machine [2] begin repair
-2026-06-16 18:03:21.852 [FlagHarvester] Job 13 returned to NeedsRouting — target machine 2 is Repairing.
-2026-06-16 18:03:22.767 [Orchestrator] Machine 9 FAILED. RepairTime=68.3s
-2026-06-16 18:03:22.767 [EpisodeTracker] Machine 9 failed. Episode total failures=7
-2026-06-16 18:03:22.767 [Failure] Job 0 returned to NeedsRouting (was Processing on failed machine 9).
-2026-06-16 18:03:22.767 [Failure] Queued job 9 re-routed from failed machine 9.
-2026-06-16 18:03:22.768 [Failure] AGV 0 carrying job 8 redirected: machine 9 failed → machine 14.
-2026-06-16 18:03:22.768 [PhysicalMachine] Machine [9] failure
-2026-06-16 18:03:22.768 [PhysicalMachine] Machine [9] begin repair
-2026-06-16 18:03:24.891 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
-2026-06-16 18:03:24.891 Machine [1] repair complete
-2026-06-16 18:03:25.781 [Orchestrator] Machine 2 repair complete — returning to OPERATIONAL.
-2026-06-16 18:03:25.782 Machine [2] repair complete
-2026-06-16 18:03:26.218 [Orchestrator] Machine 6 FAILED. RepairTime=68.3s
-2026-06-16 18:03:26.218 [EpisodeTracker] Machine 6 failed. Episode total failures=8
-2026-06-16 18:03:26.218 [Failure] Job 4 returned to NeedsRouting (was Processing on failed machine 6).
-2026-06-16 18:03:26.218 [Failure] Queued job 12 re-routed from failed machine 6.
-2026-06-16 18:03:26.218 [PhysicalMachine] Machine [6] failure
-2026-06-16 18:03:26.219 [PhysicalMachine] Machine [6] begin repair
-2026-06-16 18:03:27.963 [Orchestrator] Machine 11 FAILED. RepairTime=10.8s
-2026-06-16 18:03:27.963 [EpisodeTracker] Machine 11 failed. Episode total failures=9
-2026-06-16 18:03:27.963 [PhysicalMachine] Machine [11] failure
-2026-06-16 18:03:27.964 [PhysicalMachine] Machine [11] begin repair
-2026-06-16 18:03:28.084 [Orchestrator] Machine 9 repair complete — returning to OPERATIONAL.
-2026-06-16 18:03:28.085 Machine [9] repair complete
-2026-06-16 18:03:28.804 [Orchestrator] Machine 11 repair complete — returning to OPERATIONAL.
-2026-06-16 18:03:28.804 Machine [11] repair complete
-2026-06-16 18:03:31.534 [Orchestrator] Machine 6 repair complete — returning to OPERATIONAL.
-2026-06-16 18:03:31.534 Machine [6] repair complete
-2026-06-16 18:03:40.061 [Orchestrator] Machine 8 FAILED. RepairTime=142.9s
-2026-06-16 18:03:40.062 [EpisodeTracker] Machine 8 failed. Episode total failures=10
-2026-06-16 18:03:40.062 [PhysicalMachine] Machine [8] failure
-2026-06-16 18:03:40.062 [PhysicalMachine] Machine [8] begin repair
-2026-06-16 18:03:40.278 Job 11 exited the system after delivery.
-2026-06-16 18:03:42.857 Job 13 exited the system after delivery.
-2026-06-16 18:03:43.873 [Orchestrator] Machine 14 FAILED. RepairTime=69.5s
-2026-06-16 18:03:43.873 [EpisodeTracker] Machine 14 failed. Episode total failures=11
-2026-06-16 18:03:43.873 [Failure] Job 9 returned to NeedsRouting (was Processing on failed machine 14).
-2026-06-16 18:03:43.873 [Failure] Queued job 8 re-routed from failed machine 14.
-2026-06-16 18:03:43.873 [Failure] Queued job 1 re-routed from failed machine 14.
-2026-06-16 18:03:43.873 [PhysicalMachine] Machine [14] failure
-2026-06-16 18:03:43.874 [PhysicalMachine] Machine [14] begin repair
-2026-06-16 18:03:44.059 Job 12 exited the system after delivery.
-2026-06-16 18:03:49.281 [Orchestrator] Machine 14 repair complete — returning to OPERATIONAL.
-2026-06-16 18:03:49.282 Machine [14] repair complete
-2026-06-16 18:03:50.442 [Orchestrator] Machine 1 FAILED. RepairTime=54.6s
-2026-06-16 18:03:50.442 [EpisodeTracker] Machine 1 failed. Episode total failures=12
-2026-06-16 18:03:50.442 [PhysicalMachine] Machine [1] failure
-2026-06-16 18:03:50.442 [PhysicalMachine] Machine [1] begin repair
-2026-06-16 18:03:51.184 [Orchestrator] Machine 8 repair complete — returning to OPERATIONAL.
-2026-06-16 18:03:51.185 Machine [8] repair complete
-2026-06-16 18:03:52.031 Job 0 exited the system after delivery.
-2026-06-16 18:03:52.651 [FlagHarvester] Job 3 returned to NeedsRouting — target machine 1 is Repairing.
-2026-06-16 18:03:53.151 [Orchestrator] Machine 4 FAILED. RepairTime=34.1s
-2026-06-16 18:03:53.151 [EpisodeTracker] Machine 4 failed. Episode total failures=13
-2026-06-16 18:03:53.151 [Failure] Job 7 returned to NeedsRouting (was Processing on failed machine 4).
-2026-06-16 18:03:53.151 [Failure] Queued job 16 re-routed from failed machine 4.
-2026-06-16 18:03:53.151 [PhysicalMachine] Machine [4] failure
-2026-06-16 18:03:53.152 [PhysicalMachine] Machine [4] begin repair
-2026-06-16 18:03:54.696 [Orchestrator] Machine 1 repair complete — returning to OPERATIONAL.
-2026-06-16 18:03:54.701 Machine [1] repair complete
-2026-06-16 18:03:55.751 Job 17 exited the system after delivery.
-2026-06-16 18:03:55.813 [Orchestrator] Machine 4 repair complete — returning to OPERATIONAL.
-2026-06-16 18:03:55.813 Machine [4] repair complete
-2026-06-16 18:04:02.596 Job 14 exited the system after delivery.
-2026-06-16 18:04:03.223 [Orchestrator] Machine 13 FAILED. RepairTime=33.1s
-2026-06-16 18:04:03.223 [EpisodeTracker] Machine 13 failed. Episode total failures=14
-2026-06-16 18:04:03.223 [PhysicalMachine] Machine [13] failure
-2026-06-16 18:04:03.224 [PhysicalMachine] Machine [13] begin repair
-2026-06-16 18:04:05.176 Job 10 exited the system after delivery.
-2026-06-16 18:04:05.803 [Orchestrator] Machine 13 repair complete — returning to OPERATIONAL.
-2026-06-16 18:04:05.803 Machine [13] repair complete
-2026-06-16 18:04:06.739 [Orchestrator] Machine 10 FAILED. RepairTime=45.7s
-2026-06-16 18:04:06.740 [EpisodeTracker] Machine 10 failed. Episode total failures=15
-2026-06-16 18:04:06.740 [PhysicalMachine] Machine [10] failure
-2026-06-16 18:04:06.740 [PhysicalMachine] Machine [10] begin repair
-2026-06-16 18:04:08.586 [Orchestrator] Machine 7 FAILED. RepairTime=60.0s
-2026-06-16 18:04:08.586 [EpisodeTracker] Machine 7 failed. Episode total failures=16
-2026-06-16 18:04:08.587 [PhysicalMachine] Machine [7] failure
-2026-06-16 18:04:08.587 [PhysicalMachine] Machine [7] begin repair
-2026-06-16 18:04:10.307 [Orchestrator] Machine 10 repair complete — returning to OPERATIONAL.
-2026-06-16 18:04:10.307 Machine [10] repair complete
-2026-06-16 18:04:13.260 [Orchestrator] Machine 7 repair complete — returning to OPERATIONAL.
-2026-06-16 18:04:13.260 Machine [7] repair complete
-2026-06-16 18:04:15.795 Job 15 exited the system after delivery.
+2026-06-16 18:27:29.219 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-06-16 18:27:29.223 [TrafficZones] Built zone graph: 35 zones.
+2026-06-16 18:27:29.224 [AGVPool] AGV 0 -> alcove 0 (aisle 0, R), slot 0/0.
+2026-06-16 18:27:29.224 [AGVPool] AGV 1 -> alcove 1 (aisle 1, L), slot 0/0.
+2026-06-16 18:27:29.224 [AGVPool] AGV 2 -> alcove 2 (aisle 2, R), slot 0/0.
+2026-06-16 18:27:29.225 [AGVPool] Spawned fleet of 3 AGVs (multiple parking).
+2026-06-16 18:27:30.683 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.005
+2026-06-16 18:27:30.684 [Orchestrator] Episode started: 3 jobs, 15 machines, stochastic=True
+2026-06-16 18:27:45.923 [Orchestrator] Machine 13 FAILED. RepairTime=24.2s
+2026-06-16 18:27:45.924 [EpisodeTracker] Machine 13 failed. Episode total failures=1
+2026-06-16 18:27:45.924 [PhysicalMachine] Machine [13] failure
+2026-06-16 18:27:45.924 [PhysicalMachine] Machine [13] begin repair
+2026-06-16 18:27:55.197 [Orchestrator] Machine 13 repair complete — returning to OPERATIONAL.
+2026-06-16 18:27:55.197 Machine [13] repair complete
+2026-06-16 18:27:58.507 [Orchestrator] Machine 10 FAILED. RepairTime=41.1s
+2026-06-16 18:27:58.507 [EpisodeTracker] Machine 10 failed. Episode total failures=2
+2026-06-16 18:27:58.507 [PhysicalMachine] Machine [10] failure
+2026-06-16 18:27:58.508 [PhysicalMachine] Machine [10] begin repair
+2026-06-16 18:28:02.730 [Orchestrator] Machine 7 FAILED. RepairTime=80.8s
+2026-06-16 18:28:02.730 [EpisodeTracker] Machine 7 failed. Episode total failures=3
+2026-06-16 18:28:02.730 [PhysicalMachine] Machine [7] failure
+2026-06-16 18:28:02.730 [PhysicalMachine] Machine [7] begin repair
+2026-06-16 18:28:20.090 [Orchestrator] Machine 10 repair complete — returning to OPERATIONAL.
+2026-06-16 18:28:20.090 Machine [10] repair complete

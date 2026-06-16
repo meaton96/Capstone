@@ -3,6 +3,7 @@ using UnityEngine;
 using Assets.Scripts.Simulation.FactoryLayout;
 using Assets.Scripts.Simulation.Logging;
 using Assets.Scripts.Simulation.Types;
+using Assets.Scripts.Simulation.Machines;
 
 namespace Assets.Scripts.Simulation.AGV
 {
@@ -164,6 +165,63 @@ namespace Assets.Scripts.Simulation.AGV
                 if (agv.State == AGVState.ReturningToParking) return agv;
 
             return null;
+        }
+        // @brief Selects the available AGV with the fewest one-way zone hops to the pickup.
+        /// @details Prefers Idle units; falls back to the nearest ReturningToParking unit
+        ///          (redirectable mid-route) when none are idle. Uses zone-graph hop count
+        ///          rather than Euclidean distance — one-way aisles and aisle-exit parking
+        ///          make straight-line distance a poor proxy for actual travel cost.
+        /// @param pickupMachine The source machine (null = incoming belt).
+        /// @param pickupPos     Reserved for future tie-breaking; not used for routing.
+        public AGVController GetNearestAvailableAGV(PhysicalMachine pickupMachine, Vector3 pickupPos)
+        {
+            if (TrafficZoneManager.Instance == null) return GetAvailableAGV();   // no zone graph → legacy behaviour
+
+            // A machine can dock from more than one aisle; seed the BFS with all its zones.
+            List<int> pickupZones;
+            if (pickupMachine != null)
+                pickupZones = TrafficZoneManager.Instance.GetZonesForMachine(pickupMachine.MachineId);
+            else
+            {
+                int beltZone = TrafficZoneManager.Instance.GetZoneIdForDock(TrafficZoneManager.IncomingBeltId);
+                pickupZones = beltZone >= 0 ? new List<int> { beltZone } : new List<int>();
+            }
+            if (pickupZones == null || pickupZones.Count == 0) return GetAvailableAGV();
+
+            Dictionary<int, int> hops = TrafficZoneManager.Instance.GetHopDistancesToNearest(pickupZones);
+
+            AGVController bestIdle = null; int bestIdleDist = int.MaxValue;
+            AGVController bestReturn = null; int bestReturnDist = int.MaxValue;
+
+            foreach (var agv in fleet)
+            {
+                bool idle = agv.IsIdle;
+                bool returning = agv.State == AGVState.ReturningToParking;
+                if (!idle && !returning) continue;
+
+                int zone = ResolveZone(agv);
+                int d = (zone >= 0 && hops.TryGetValue(zone, out int hop)) ? hop : int.MaxValue;
+
+                if (idle)
+                {
+                    if (bestIdle == null || d < bestIdleDist) { bestIdle = agv; bestIdleDist = d; }
+                }
+                else
+                {
+                    if (bestReturn == null || d < bestReturnDist) { bestReturn = agv; bestReturnDist = d; }
+                }
+            }
+
+            return bestIdle ?? bestReturn;
+        }
+
+        /// @brief Resolves an AGV's current zone, falling back to a spatial lookup for idle
+        ///        units, which release their zone reservation on arrival at parking.
+        private int ResolveZone(AGVController agv)
+        {
+            if (agv.CurrentZoneId >= 0) return agv.CurrentZoneId;
+            TrafficZone z = TrafficZoneManager.Instance.GetZoneAtPosition(agv.transform.position);
+            return z?.ZoneId ?? -1;
         }
 
         /// @brief Returns the AGV unit assigned to a specific job ID via pre-dispatch.
