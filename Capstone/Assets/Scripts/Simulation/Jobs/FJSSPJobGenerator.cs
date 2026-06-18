@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Assets.Scripts.Simulation.Machines;
 using Assets.Scripts.Simulation.Types;
-using UnityEngine.Assertions.Must;
+using Assets.Scripts.Simulation.Logging;
 
 namespace Assets.Scripts.Simulation.Jobs
 {
@@ -78,6 +78,9 @@ namespace Assets.Scripts.Simulation.Jobs
         public static FJSSPJobDefinition[] Generate(FJSSPConfig config,
                                                     Dictionary<MachineType, List<int>> machinesByType)
         {
+            SimLogger.Medium($"[Job Generator] Generating job definitions with " +
+                    $"config seed = {config.Seed}");
+
             var jobs = new FJSSPJobDefinition[config.JobCount];
 
             for (int j = 0; j < config.JobCount; j++)
@@ -109,6 +112,12 @@ namespace Assets.Scripts.Simulation.Jobs
             }
 
             Array.Sort(jobs, (a, b) => a.ArrivalTime.CompareTo(b.ArrivalTime));
+            foreach (var job in jobs)
+            {
+                SimLogger.Medium($"Generated Job {job.JobId}: arrival={job.ArrivalTime:F2}, ops={job.OperationSequence.Length}");
+                SimLogger.Medium(job.ToString());
+
+            }
             return jobs;
         }
 
