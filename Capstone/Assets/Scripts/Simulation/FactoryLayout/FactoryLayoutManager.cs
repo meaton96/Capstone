@@ -347,7 +347,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
 
             for (int a = 0; a < numRowAisles; a++)
             {
-                bool eastbound = (a % 2 == 0);
+                bool eastbound = GetRowAisleDirection(a).x > 0f;
                 bool leftSide = !eastbound;                                    // eastbound exits right
                 float x = floorCentre.x + (leftSide ? -alcoveOffsetX : alcoveOffsetX);
                 float z = GetRowAisleCentre(a).z;                             // world z (already offset)
@@ -425,10 +425,12 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             return floorCentre + new Vector3(0f, 0.01f, aisleZ);
         }
 
-        /// @brief Returns the restricted flow direction for a specific row aisle.
         public Vector3 GetRowAisleDirection(int aisleIndex)
         {
-            return (aisleIndex % 2 == 0) ? Vector3.right : Vector3.left;
+            // Aisle 0 runs opposite the top spine (East), then alternates. Even aisle counts →
+            // clean alternation across all lanes; odd counts → the one doubled pair lands at the
+            // bottom spine (by the outgoing belt) instead of the top.
+            return (aisleIndex % 2 == 0) ? Vector3.left : Vector3.right;
         }
 
         /// @brief Returns the Z offset for the top peripheral spine.
@@ -514,6 +516,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 if (col < layoutCols) segStart = colX + gapWidth / 2f;
             }
         }
+
 
         /// @brief Spawns a single vertical wall segment.
         private void SpawnWallSegmentVertical(Vector3 position, float length, string name)

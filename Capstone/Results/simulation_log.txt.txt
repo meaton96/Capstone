@@ -1,37 +1,19 @@
---- Log Started: 6/16/2026 6:27:19 PM ---
-2026-06-16 18:27:19.830 [Agent] OnEpisodeBegin skipped — waiting for UI to arm.
-2026-06-16 18:27:29.189 [SimulationMenu] Spawning factory with config: 3j_15m jobs=3 machines=15 agvs=3 stochastic=mf parkingMethod=multiple preDispatchingMethod=fixed
-2026-06-16 18:27:29.189 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.005
-2026-06-16 18:27:29.192 [FactoryLayout] Distributed type layout (row x col):
+--- Log Started: 6/18/2026 1:57:08 PM ---
+2026-06-18 13:57:08.504 [Agent] OnEpisodeBegin skipped — waiting for UI to arm.
+2026-06-18 13:57:10.148 [SimulationMenu] Spawning factory with config: 20j_15m jobs=20 machines=15 agvs=3 stochastic=mf parkingMethod=multiple preDispatchingMethod=fixed
+2026-06-18 13:57:10.148 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.005
+2026-06-18 13:57:10.153 [FactoryLayout] Distributed type layout (row x col):
   Row0: Mill, Lathe, Weld, Inspect
   Row1: Assemble, Mill, Lathe, Weld
   Row2: Inspect, Assemble, Mill, Lathe
   Row3: Weld, Inspect, Assemble
   [OK] No two same-type machines share a row aisle.
 
-2026-06-16 18:27:29.210 [FactoryLayout] Distance matrix (15x15):
+2026-06-18 13:57:10.170 [FactoryLayout] Distance matrix (15x15):
        M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
-2026-06-16 18:27:29.219 [FactoryLayout] Built aisle-based floor: 15 machines.
-2026-06-16 18:27:29.223 [TrafficZones] Built zone graph: 35 zones.
-2026-06-16 18:27:29.224 [AGVPool] AGV 0 -> alcove 0 (aisle 0, R), slot 0/0.
-2026-06-16 18:27:29.224 [AGVPool] AGV 1 -> alcove 1 (aisle 1, L), slot 0/0.
-2026-06-16 18:27:29.224 [AGVPool] AGV 2 -> alcove 2 (aisle 2, R), slot 0/0.
-2026-06-16 18:27:29.225 [AGVPool] Spawned fleet of 3 AGVs (multiple parking).
-2026-06-16 18:27:30.683 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.005
-2026-06-16 18:27:30.684 [Orchestrator] Episode started: 3 jobs, 15 machines, stochastic=True
-2026-06-16 18:27:45.923 [Orchestrator] Machine 13 FAILED. RepairTime=24.2s
-2026-06-16 18:27:45.924 [EpisodeTracker] Machine 13 failed. Episode total failures=1
-2026-06-16 18:27:45.924 [PhysicalMachine] Machine [13] failure
-2026-06-16 18:27:45.924 [PhysicalMachine] Machine [13] begin repair
-2026-06-16 18:27:55.197 [Orchestrator] Machine 13 repair complete — returning to OPERATIONAL.
-2026-06-16 18:27:55.197 Machine [13] repair complete
-2026-06-16 18:27:58.507 [Orchestrator] Machine 10 FAILED. RepairTime=41.1s
-2026-06-16 18:27:58.507 [EpisodeTracker] Machine 10 failed. Episode total failures=2
-2026-06-16 18:27:58.507 [PhysicalMachine] Machine [10] failure
-2026-06-16 18:27:58.508 [PhysicalMachine] Machine [10] begin repair
-2026-06-16 18:28:02.730 [Orchestrator] Machine 7 FAILED. RepairTime=80.8s
-2026-06-16 18:28:02.730 [EpisodeTracker] Machine 7 failed. Episode total failures=3
-2026-06-16 18:28:02.730 [PhysicalMachine] Machine [7] failure
-2026-06-16 18:28:02.730 [PhysicalMachine] Machine [7] begin repair
-2026-06-16 18:28:20.090 [Orchestrator] Machine 10 repair complete — returning to OPERATIONAL.
-2026-06-16 18:28:20.090 Machine [10] repair complete
+2026-06-18 13:57:10.181 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-06-18 13:57:10.185 [TrafficZones] Built zone graph: 35 zones.
+2026-06-18 13:57:10.186 [AGVPool] AGV 0 -> alcove 0 (aisle 0, L), slot 0/0.
+2026-06-18 13:57:10.186 [AGVPool] AGV 1 -> alcove 1 (aisle 1, R), slot 0/0.
+2026-06-18 13:57:10.186 [AGVPool] AGV 2 -> alcove 2 (aisle 2, L), slot 0/0.
+2026-06-18 13:57:10.188 [AGVPool] Spawned fleet of 3 AGVs (multiple parking).

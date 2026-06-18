@@ -253,7 +253,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         {
             for (int a = 0; a < rowAisles.Length; a++)
             {
-                bool eastbound = (a % 2 == 0);
+                bool eastbound = layoutManager.GetRowAisleDirection(a).x > 0f;
                 int[] segs = rowAisles[a];
                 if (eastbound) for (int s = 0; s < segs.Length - 1; s++) LinkZones(segs[s], segs[s + 1]);
                 else for (int s = segs.Length - 1; s > 0; s--) LinkZones(segs[s], segs[s - 1]);
@@ -266,7 +266,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
 
             for (int a = 0; a < rowAisles.Length; a++)
             {
-                bool eastbound = (a % 2 == 0);
+                bool eastbound = layoutManager.GetRowAisleDirection(a).x > 0f;
                 int[] segs = rowAisles[a];
                 int vIdx = a + 1;
                 if (eastbound) { LinkZones(leftVert[vIdx], segs[0]); LinkZones(segs[segs.Length - 1], rightVert[vIdx]); }
