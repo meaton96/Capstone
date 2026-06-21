@@ -249,7 +249,7 @@ namespace Assets.Scripts.Simulation.Types
                 MachineFlexibilityProbability = raw.machineFlexibilityProbability,
                 ProcTimeParams = procTimeParams,
                 parkingMethod = raw.parkingMethod,
-                preDispatchingMethod = raw.preDispatchingMethod,
+                preDispatchingMethod = raw.preDispatchingMethod ?? "fixed",
             };
 
             if (raw.stochastic != null)
