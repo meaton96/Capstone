@@ -8,11 +8,13 @@ namespace Assets.Scripts.Simulation.Logging
     /// <summary>
     /// Serialises EpisodeRecord objects to CSV.
     ///
-    /// Four files:
-    ///   results.csv               — one row per episode            (LogEpisode)
-    ///   machine_utilization.csv   — one row per machine per episode (LogMachineUtilization)
-    ///   agv_performance.csv       — one row per AGV per episode     (LogAGVPerformance)
-    ///   segment_congestion.csv    — one row per zone per episode    (LogSegmentCongestion)
+    /// results.csv               — one row per episode              (LogEpisode)
+    /// machine_utilization.csv   — one row per machine per episode   (LogMachineUtilization)
+    /// agv_performance.csv       — one row per AGV per episode       (LogAGVPerformance)
+    /// segment_congestion.csv    — one row per zone per episode      (LogSegmentCongestion)
+    /// job_operations.csv        — one row per (job × op), static plan + realized timestamps (LogJobOperations)
+    /// throughput.csv            — one row per closed throughput window (LogThroughput)
+    /// job_completions.csv       — one row per job, realized flow time + wait decomposition (LogJobCompletions)
     ///
     /// All four share the same filename suffix set by SetFilenameSuffix so output
     /// from different run configurations lands in clearly named files:
@@ -29,6 +31,8 @@ namespace Assets.Scripts.Simulation.Logging
         private static string _agvFilename = "agv_performance.csv";
         private static string _segmentFilename = "segment_congestion.csv";
         private static string _jobOpsFilename = "job_operations.csv";
+        private static string _throughputFilename = "throughput.csv";
+        private static string _jobCompletionsFilename = "job_completions.csv";
 
         public static void SetFilenameSuffix(string suffix)
         {
@@ -38,6 +42,8 @@ namespace Assets.Scripts.Simulation.Logging
             _agvFilename = StripExt(_agvFilename, ext) + suffix + ext;
             _segmentFilename = StripExt(_segmentFilename, ext) + suffix + ext;
             _jobOpsFilename = StripExt(_jobOpsFilename, ext) + suffix + ext;
+            _throughputFilename = StripExt(_throughputFilename, ext) + suffix + ext;
+            _jobCompletionsFilename = StripExt(_jobCompletionsFilename, ext) + suffix + ext;
         }
 
         public static void SetSubdirectory(string subdir)
@@ -52,6 +58,8 @@ namespace Assets.Scripts.Simulation.Logging
         private static string AGVFilePath => BuildPath(_agvFilename);
         private static string SegmentFilePath => BuildPath(_segmentFilename);
         private static string JobOpsFilePath => BuildPath(_jobOpsFilename);
+        private static string ThroughputFilePath => BuildPath(_throughputFilename);
+        private static string JobCompletionsFilePath => BuildPath(_jobCompletionsFilename);
 
         // ── Convenience: write all logs in one call ───────────────────────────
 
@@ -65,6 +73,42 @@ namespace Assets.Scripts.Simulation.Logging
             if (r.AGVRecords.Count > 0) LogAGVPerformance(r);
             if (r.SegmentRecords.Count > 0) LogSegmentCongestion(r);
             if (r.JobOperationRecords.Count > 0) LogJobOperations(r);
+            if (r.ThroughputRecords.Count > 0) LogThroughput(r);
+            if (r.JobCompletionRecords.Count > 0) LogJobCompletions(r);
+        }
+        // ── Throughput log (throughput.csv) ───────────────────────────────────
+
+        /// <summary>
+        /// Appends one row per closed throughput window. Header written on first call.
+        ///
+        /// Key columns:
+        ///   throughput_per_min — completions normalised to jobs/min (comparable across window sizes)
+        ///   work_in_progress   — jobs in system at window close; pair with throughput for Little's Law
+        /// </summary>
+        public static void LogThroughput(EpisodeRecord r)
+        {
+            bool fileExists = File.Exists(ThroughputFilePath);
+            using var writer = new StreamWriter(ThroughputFilePath, append: true);
+
+            if (!fileExists)
+                writer.WriteLine(
+                    "timestamp,instance,rule,seed,makespan," +
+                    "window_start,window_end,window_seconds," +
+                    "jobs_completed,throughput_per_sec,throughput_per_min," +
+                    "cumulative_completed,work_in_progress"
+                );
+
+            string ts = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            foreach (var w in r.ThroughputRecords)
+            {
+                writer.WriteLine(
+                    $"{ts}," +
+                    $"{r.InstanceName},{r.RuleName},{r.Seed},{r.Makespan:F2}," +
+                    $"{w.WindowStartTime:F1},{w.WindowEndTime:F1},{w.WindowSeconds:F1}," +
+                    $"{w.JobsCompleted},{w.ThroughputPerSec:F5},{w.ThroughputPerMin:F3}," +
+                    $"{w.CumulativeCompleted},{w.WorkInProgress}"
+                );
+            }
         }
 
         // ── Episode log (results.csv) ─────────────────────────────────────────
@@ -93,7 +137,8 @@ namespace Assets.Scripts.Simulation.Logging
                     "repair_log_mu,repair_log_sigma," +
                     "episode_failures,total_repair_time," +
                     "dynamic_arrivals,arrival_lambda,mean_interarrival_theoretical," +
-                    "mean_interarrival_realised,last_arrival_sim_time"
+                    "mean_interarrival_realised,last_arrival_sim_time," +
+                    "mean_flow_time,p95_flow_time,max_flow_time,mean_transport_wait,jobs_censored"
                 );
 
             writer.WriteLine(
@@ -106,7 +151,8 @@ namespace Assets.Scripts.Simulation.Logging
                 $"{repairLogMu:F3},{repairLogSig:F3}," +
                 $"{r.MachineFailureCount},{r.MachineRepairTime:F1}," +
                 $"{r.DynamicArrivals},{r.ArrivalLambda:F5},{r.MeanInterarrivalTime:F1}," +
-                $"{r.RealisedMeanInterarrival:F1},{r.LastDynamicArrivalTime:F1}"
+                $"{r.RealisedMeanInterarrival:F1},{r.LastDynamicArrivalTime:F1}," +
+                $"{r.MeanFlowTime:F2},{r.P95FlowTime:F2},{r.MaxFlowTime:F2},{r.MeanTransportWait:F2},{r.JobsCensored}"
             );
 
             Debug.Log($"[Results] {r.InstanceName} {r.RuleName} seed={r.Seed} " +
@@ -243,7 +289,8 @@ namespace Assets.Scripts.Simulation.Logging
                     "op_index,machine_type_required," +
                     "eligible_machine_count," +
                     "min_proc_time,max_proc_time,mean_proc_time,proc_time_spread," +
-                    "travel_time"
+                    "travel_time," +
+                    "queue_entry_time,proc_start_time,proc_end_time,realized_proc_time,queue_wait_time"
                 );
 
             string ts = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
@@ -256,7 +303,49 @@ namespace Assets.Scripts.Simulation.Logging
                     $"{op.OpIndex},{op.MachineTypeRequired}," +
                     $"{op.EligibleMachineCount}," +
                     $"{op.MinProcTime:F1},{op.MaxProcTime:F1},{op.MeanProcTime:F1},{op.ProcTimeSpread:F1}," +
-                    $"{op.TravelTime:F1}"
+                    $"{op.TravelTime:F1}," +
+                    $"{op.QueueEntryTime:F1},{op.ProcStartTime:F1},{op.ProcEndTime:F1}," +
+                    $"{op.RealizedProcTime:F1},{op.QueueWaitTime:F1}"
+                );
+            }
+        }
+
+        // ── Job completions log (job_completions.csv) ─────────────────────────
+
+        /// <summary>
+        /// Appends one row per job to job_completions.csv — the realized-outcome counterpart
+        /// to job_operations.csv. Includes censored (incomplete) jobs with completed=0 so
+        /// timeout episodes can be analyzed without silently dropping unfinished work.
+        ///
+        /// Key columns:
+        ///   flow_time              — exit_time - arrival_time (-1 if not completed)
+        ///   time_needs_routing/... — wait decomposition across the five job states;
+        ///                            sum of all five ≈ flow_time for completed jobs
+        /// </summary>
+        public static void LogJobCompletions(EpisodeRecord r)
+        {
+            bool fileExists = File.Exists(JobCompletionsFilePath);
+            using var writer = new StreamWriter(JobCompletionsFilePath, append: true);
+
+            if (!fileExists)
+                writer.WriteLine(
+                    "timestamp,instance,rule,seed,makespan," +
+                    "job_id,is_dynamic,completed,arrival_time,exit_time,flow_time," +
+                    "total_operations,completed_ops,work_content," +
+                    "time_needs_routing,time_waiting_pickup,time_in_transit,time_queued,time_processing"
+                );
+
+            string ts = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            foreach (var j in r.JobCompletionRecords)
+            {
+                writer.WriteLine(
+                    $"{ts}," +
+                    $"{r.InstanceName},{r.RuleName},{r.Seed},{r.Makespan:F2}," +
+                    $"{j.JobId},{(j.IsDynamic ? 1 : 0)},{(j.Completed ? 1 : 0)}," +
+                    $"{j.ArrivalTime:F1},{j.ExitTime:F1},{j.FlowTime:F1}," +
+                    $"{j.TotalOperations},{j.CompletedOps},{j.WorkContent:F1}," +
+                    $"{j.TimeNeedsRouting:F1},{j.TimeWaitingPickup:F1},{j.TimeInTransit:F1}," +
+                    $"{j.TimeQueued:F1},{j.TimeProcessingState:F1}"
                 );
             }
         }

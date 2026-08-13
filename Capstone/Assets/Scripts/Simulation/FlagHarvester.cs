@@ -85,6 +85,9 @@ namespace Assets.Scripts.Simulation
                 JobData job = _jobs.Get(jobId);
                 if (job == null) continue;
 
+                // CurrentOpIndex still refers to the op that just finished — stamp before advancing.
+                job.OpProcEndTimes[job.CurrentOpIndex] = (float)_simTimeRef;
+
                 job.CompletedOps++;
                 if (job.CurrentOpIndex < job.TotalOperations)
                     job.CurrentOpIndex++;
@@ -94,10 +97,9 @@ namespace Assets.Scripts.Simulation
 
                 if (job.IsLastOperation)
                 {
-                    job.State = JobState.WaitingForPickup;
+                    job.TransitionTo(JobState.WaitingForPickup, _simTimeRef);
                     job.TargetMachineId = -1;
                     job.LocationMachineId = mid;
-                    job.StateEntryTime = _simTimeRef;
 
                     if (job.PreDispatchedAgvId >= 0)
                     {
@@ -112,9 +114,8 @@ namespace Assets.Scripts.Simulation
                 }
                 else
                 {
-                    job.State = JobState.NeedsRouting;
+                    job.TransitionTo(JobState.NeedsRouting, _simTimeRef);
                     job.LocationMachineId = mid;
-                    job.StateEntryTime = _simTimeRef;
                 }
             }
         }
@@ -163,8 +164,7 @@ namespace Assets.Scripts.Simulation
                     JobData job = _jobs.Get(agv.CurrentJobId);
                     if (job != null && job.State == JobState.WaitingForPickup)
                     {
-                        job.State = JobState.InTransit;
-                        job.StateEntryTime = _simTimeRef;
+                        job.TransitionTo(JobState.InTransit, _simTimeRef);
                     }
                 }
 
@@ -176,27 +176,23 @@ namespace Assets.Scripts.Simulation
 
                     if (job != null)
                     {
-                        // Capture transit duration before overwriting StateEntryTime.
-                        // StateEntryTime was set to the InTransit entry point in HarvestAGVFlags (PickedUpFlag branch).
-                        double transitDuration = _simTimeRef - job.StateEntryTime;
-                        job.TotalTransitTime += transitDuration;
-
                         if (machineId < 0)
                         {
                             // Job has exited the system entirely
-                            job.State = JobState.Exited;
+                            job.TransitionTo(JobState.Exited, _simTimeRef);
+                            job.ExitTime = (float)_simTimeRef;
+                            _tracker.RecordJobExit();
                             SimLogger.Medium($"Job {job.JobId} exited the system after delivery.");
                             job.LocationMachineId = -1;
-                            job.StateEntryTime = _simTimeRef;
                             if (job.Visual != null) job.Visual.gameObject.SetActive(false);
                         }
                         else
                         {
                             // Job is delivered to a target machine — stamp per-op travel time
                             job.OperationTravelTimes[job.CurrentOpIndex] = agv.LastTripDuration;
-                            job.State = JobState.Queued;
+                            job.OpQueueEntryTimes[job.CurrentOpIndex] = (float)_simTimeRef;
+                            job.TransitionTo(JobState.Queued, _simTimeRef);
                             job.LocationMachineId = machineId;
-                            job.StateEntryTime = _simTimeRef;
 
                             PhysicalMachine targetMachine = _layout.GetMachine(machineId);
                             targetMachine.PlaceOnIncoming(jobId, job.Visual);
@@ -236,9 +232,8 @@ namespace Assets.Scripts.Simulation
                     PhysicalMachine dst = _layout.GetMachine(job.TargetMachineId);
                     if (dst != null && dst.HealthState != MachineHealthState.Operational)
                     {
-                        job.State = JobState.NeedsRouting;
+                        job.TransitionTo(JobState.NeedsRouting, _simTimeRef);
                         job.TargetMachineId = -1;
-                        job.StateEntryTime = _simTimeRef;
                         SimLogger.Low($"[FlagHarvester] Job {job.JobId} returned to NeedsRouting — " +
                                       $"target machine {dst.MachineId} is {dst.HealthState}.");
                         continue;

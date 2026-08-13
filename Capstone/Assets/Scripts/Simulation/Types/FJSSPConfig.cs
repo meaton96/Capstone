@@ -74,6 +74,12 @@ namespace Assets.Scripts.Simulation.Types
         ///          1 = fully flexible (every machine processes every operation type).
         public float MachineFlexibilityProbability = 0f;
 
+        // ── Throughput timing ──
+
+        /// @brief Timing window (in simulation time units) used for throughput calculations.
+        /// @details Controls the observation window over which throughput is measured.
+        public float ThroughputTimingWindow;
+
         // ── Scheduling policy ──
 
         /// @brief Default dispatching rule applied when no agent policy is active.
@@ -147,6 +153,7 @@ namespace Assets.Scripts.Simulation.Types
                 MachineFlexibilityProbability = MachineFlexibilityProbability,
                 parkingMethod = parkingMethod,
                 preDispatchingMethod = preDispatchingMethod,
+                ThroughputTimingWindow = ThroughputTimingWindow,
             };
         }
     }

@@ -70,7 +70,9 @@ def main():
         "results_*.csv": "results.csv",
         "segment_congestion_*.csv": "segment_congestion.csv",
         "machine_utilization_*.csv": "machine_utilization.csv",
-        "job_operations_*.csv": "job_operations.csv"
+        "job_operations_*.csv": "job_operations.csv",
+        "throughput_*.csv": "throughput.csv",
+        "job_completions_*.csv": "job_completions.csv"
     }
 
     print(f"\n🚀 Starting merge process...")

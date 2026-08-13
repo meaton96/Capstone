@@ -135,9 +135,8 @@ namespace Assets.Scripts.Simulation
                 JobData processingJob = _jobs.Get(machine.ActiveJobId);
                 if (processingJob != null && processingJob.State == JobState.Processing)
                 {
-                    processingJob.State = JobState.NeedsRouting;
+                    processingJob.TransitionTo(JobState.NeedsRouting, _simTimeRef);
                     processingJob.LocationMachineId = machineId;
-                    processingJob.StateEntryTime = _simTimeRef;
                     SimLogger.Medium($"[Failure] Job {processingJob.JobId} returned to NeedsRouting " +
                                   $"(was Processing on failed machine {machineId}).");
                 }
@@ -149,8 +148,7 @@ namespace Assets.Scripts.Simulation
                 if (job.State != JobState.Queued) continue;
                 if (job.LocationMachineId != machineId) continue;
 
-                job.State = JobState.NeedsRouting;
-                job.StateEntryTime = _simTimeRef;
+                job.TransitionTo(JobState.NeedsRouting, _simTimeRef);
                 SimLogger.Medium($"[Failure] Queued job {job.JobId} re-routed from failed machine {machineId}.");
             }
 
@@ -168,10 +166,9 @@ namespace Assets.Scripts.Simulation
                 if (waitingJob.TargetMachineId != machineId) continue;
 
                 agv.CancelPickup();
-                waitingJob.State = JobState.NeedsRouting;
+                waitingJob.TransitionTo(JobState.NeedsRouting, _simTimeRef);
                 waitingJob.TargetMachineId = -1;
                 waitingJob.AssignedAgvId = -1;
-                waitingJob.StateEntryTime = _simTimeRef;
                 SimLogger.Medium($"[Failure] WaitingForPickup job {waitingJob.JobId}: " +
                               $"AGV {agv.AgvId} pickup cancelled, job re-routed.");
             }
@@ -192,9 +189,10 @@ namespace Assets.Scripts.Simulation
                 PhysicalMachine alternate = FindBestAlternateMachine(transitJob, machineId);
                 if (alternate != null)
                 {
+                    // Job stays InTransit — only the destination changes, so StateEntryTime
+                    // (and the TimeInTransit bucket it feeds) must NOT reset here.
                     transitJob.TargetMachineId = alternate.MachineId;
                     // AssignedAgvId preserved — the AGV still owns this job
-                    transitJob.StateEntryTime = _simTimeRef;
 
                     agv.RedirectDropoff(alternate.GetDropoffPosition(), alternate, transitJob.Visual);
                     SimLogger.Medium($"[Failure] AGV {agv.AgvId} carrying job {agvJobId} " +
@@ -203,10 +201,9 @@ namespace Assets.Scripts.Simulation
                 else
                 {
                     // No operational alternate available — abort transit and re-enter job pool
-                    transitJob.State = JobState.NeedsRouting;
+                    transitJob.TransitionTo(JobState.NeedsRouting, _simTimeRef);
                     transitJob.TargetMachineId = -1;
                     transitJob.AssignedAgvId = -1;
-                    transitJob.StateEntryTime = _simTimeRef;
 
                     agv.AbortTransit();
                     SimLogger.Medium($"[Failure] AGV {agv.AgvId} carrying job {agvJobId}: " +

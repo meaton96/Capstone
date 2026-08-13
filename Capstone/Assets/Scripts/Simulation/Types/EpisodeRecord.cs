@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Assets.Scripts.Simulation.Types;
 
 namespace Assets.Scripts.Simulation.Types
@@ -86,6 +87,78 @@ namespace Assets.Scripts.Simulation.Types
         // Populated by EpisodeTracker.RecordJobOperations(jobStore.AllJobs, dynamicJobIds)
         // at episode end. One JobOperationRecord per (job × operation).
         public List<JobOperationRecord> JobOperationRecords = new List<JobOperationRecord>();
+        // ── Per-window throughput log ─────────────────────────────────────────
+        // Populated by EpisodeTracker.CloseThroughputWindow() each ThroughputTimingWindow.
+        public List<ThroughputWindowRecord> ThroughputRecords = new List<ThroughputWindowRecord>();
+
+        // ── Per-job completion log (Option A) ───────────────────────────────
+        // Populated in FactoryOrchestrator.FinaliseEpisode from jobStore.AllJobs.
+        // One row per job — the realized flow-time / wait-decomposition record that
+        // job_operations.csv (static specs only) cannot provide.
+        public List<JobCompletionRecord> JobCompletionRecords = new List<JobCompletionRecord>();
+
+        // ── Derived flow-time summary (computed over completed jobs only) ────
+        public double MeanFlowTime => JobCompletionRecords.Count == 0 ? 0
+            : Mean(JobCompletionRecords, r => r.Completed, r => r.FlowTime);
+        public double P95FlowTime => Percentile(JobCompletionRecords, 0.95);
+        public double MaxFlowTime => JobCompletionRecords.Count == 0 ? 0
+            : MaxOf(JobCompletionRecords, r => r.Completed, r => r.FlowTime);
+        public double MeanTransportWait => JobCompletionRecords.Count == 0 ? 0
+            : Mean(JobCompletionRecords, r => r.Completed, r => r.TimeWaitingPickup + r.TimeInTransit);
+        public int JobsCensored => JobCompletionRecords.Count(r => !r.Completed);
+
+        private static double Mean(List<JobCompletionRecord> records,
+            System.Func<JobCompletionRecord, bool> filter, System.Func<JobCompletionRecord, double> select)
+        {
+            double sum = 0; int n = 0;
+            foreach (var r in records) { if (!filter(r)) continue; sum += select(r); n++; }
+            return n > 0 ? sum / n : 0;
+        }
+
+        private static double MaxOf(List<JobCompletionRecord> records,
+            System.Func<JobCompletionRecord, bool> filter, System.Func<JobCompletionRecord, double> select)
+        {
+            double best = 0; bool any = false;
+            foreach (var r in records)
+            {
+                if (!filter(r)) continue;
+                double v = select(r);
+                if (!any || v > best) { best = v; any = true; }
+            }
+            return best;
+        }
+
+        private static double Percentile(List<JobCompletionRecord> records, double p)
+        {
+            var flowTimes = new List<double>();
+            foreach (var r in records) if (r.Completed) flowTimes.Add(r.FlowTime);
+            if (flowTimes.Count == 0) return 0;
+            flowTimes.Sort();
+            int idx = (int)System.Math.Ceiling(p * flowTimes.Count) - 1;
+            idx = System.Math.Clamp(idx, 0, flowTimes.Count - 1);
+            return flowTimes[idx];
+        }
+    }
+    // ── Per-window throughput ──
+
+    /// @brief Factory completion throughput over one fixed time window. One row in throughput.csv.
+    ///
+    /// @details A "completion" is a job reaching JobState.Exited. JobsCompleted counts exits
+    ///          inside [WindowStartTime, WindowEndTime); CumulativeCompleted is the running total.
+    ///          WorkInProgress is jobs in the system (not Exited) at window close — pairing it with
+    ///          throughput gives a Little's-Law read on whether the floor is filling or draining.
+    public class ThroughputWindowRecord
+    {
+        public double WindowStartTime;      // sim-seconds, inclusive
+        public double WindowEndTime;        // sim-seconds, exclusive (== SimTime for the trailing partial window)
+        public float WindowSeconds;        // WindowEndTime − WindowStartTime (== window length except trailing)
+        public int JobsCompleted;        // exits during this window
+        public int CumulativeCompleted;  // exits since episode start
+        public int WorkInProgress;       // jobs in system at window close
+
+        // Derived
+        public float ThroughputPerSec => WindowSeconds > 0f ? JobsCompleted / WindowSeconds : 0f;
+        public float ThroughputPerMin => ThroughputPerSec * 60f;
     }
 
     // ── Per-machine statistics ──
@@ -222,7 +295,55 @@ namespace Assets.Scripts.Simulation.Types
         /// Zero for operations where transit was not completed (e.g. first op from incoming belt).
         public float TravelTime;
 
+        // ── Realized timeline (Option A) ────────────────────────────────────
+        /// @brief Sim-time this op's job entered Queued state at its target machine. -1 if never reached.
+        public float QueueEntryTime = -1f;
+        /// @brief Sim-time this op began Processing. -1 if never started.
+        public float ProcStartTime = -1f;
+        /// @brief Sim-time this op finished Processing. -1 if never completed.
+        public float ProcEndTime = -1f;
+
         // Derived
         public float ProcTimeSpread => MaxProcTime - MinProcTime;
+        /// @brief Realized processing duration (ProcEndTime - ProcStartTime). -1 if op never completed.
+        public float RealizedProcTime => (ProcStartTime >= 0 && ProcEndTime >= 0) ? ProcEndTime - ProcStartTime : -1f;
+        /// @brief Time this op's job spent queued at the machine before dispatch. -1 if not applicable.
+        public float QueueWaitTime => (QueueEntryTime >= 0 && ProcStartTime >= 0) ? ProcStartTime - QueueEntryTime : -1f;
+    }
+
+    // ── Per-job completion record ──
+
+    /// @brief One record per job, logged to job_completions.csv. The realized-outcome
+    ///        counterpart to job_operations.csv (which only records the static plan).
+    ///
+    /// @details Captures arrival→exit flow time and its full wait decomposition across the five
+    ///          mutually-exclusive job states, so per-rule differences that don't show up in
+    ///          makespan (e.g. how much of a job's life is spent waiting for transport) become
+    ///          visible. Jobs still in the system at episode end (timeout) are logged with
+    ///          Completed=false — include them for censoring-aware analysis, exclude them from
+    ///          mean/percentile flow-time stats.
+    public class JobCompletionRecord
+    {
+        public int JobId;
+        public bool IsDynamic;
+        public bool Completed;          // false if episode ended (timeout) before this job exited
+        public float ArrivalTime;
+        public float ExitTime;           // -1 if not completed
+        public int TotalOperations;
+        public int CompletedOps;
+
+        /// @brief Sum of realized processing durations for completed ops; for censored jobs,
+        ///        falls back to sum of per-op mean proc time (an estimate, not realized).
+        public float WorkContent;
+
+        // ── Wait decomposition (sim-seconds), mirrors JobData's per-state buckets ──
+        public double TimeNeedsRouting;
+        public double TimeWaitingPickup;
+        public double TimeInTransit;
+        public double TimeQueued;
+        public double TimeProcessingState;
+
+        // Derived
+        public float FlowTime => Completed ? ExitTime - ArrivalTime : -1f;
     }
 }

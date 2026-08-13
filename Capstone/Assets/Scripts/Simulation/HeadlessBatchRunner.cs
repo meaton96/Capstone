@@ -59,6 +59,12 @@ namespace Assets.Scripts.Simulation
             string configName = GetCLIArg("-configname");
             string benchmarkPath = GetCLIArg("-benchmark");
             string benchmarkDirPath = GetCLIArg("-benchmarkdir");
+            // Baseline decision-drain: when set, heuristic decisions drain per-frame instead of
+            // one-per-frame. Valid ONLY for heuristic batch runs (no neural policy in the loop).
+            bool baselineDrain = GetCLIArg("-baselinedrain") != null;
+            if (baselineDrain)
+                SimLogger.Low("[BatchRunner] Baseline drain mode ENABLED — heuristic decisions " +
+                              "drain per frame (removes one-decision-per-frame throttle).");
 
             // Auto-start in batchmode, or if any config source was explicitly passed
             if (!Application.isBatchMode
@@ -125,6 +131,9 @@ namespace Assets.Scripts.Simulation
                 else
                     SimLogger.LogWarning($"[BatchRunner] Unknown -disruption '{disruptionStr}'. Defaulting to none.");
             }
+
+            if (baselineDrain && FactoryOrchestrator.Instance != null)
+                FactoryOrchestrator.Instance.BaselineDrainMode = true;
 
             // ── Route to the correct coroutine ──────────────────────
 
