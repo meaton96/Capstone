@@ -50,13 +50,17 @@ WAIT_BUCKET_LABELS = {
     "time_processing":     "Processing",
 }
 
-# Episodes whose job count falls short of the sweep's modal job count are arrival-
-# starved outliers (e.g. the lowest lambda in a capped sweep may not fill the cap
-# within a reasonable window) — comparing their makespan/flow-time to filled episodes
-# is apples-to-oranges. Excluded from lambda-indexed figures, reported separately.
+# A batch config may legitimately scale dynamicJobCap with lambda (e.g. keep episode
+# length reasonable at low arrival rates) — that's a deliberate per-instance design
+# choice, not a bug, and comparing rules WITHIN an instance is still valid even if
+# the cap differs BETWEEN instances. The real failure mode (a decision-timing race
+# that let some rules race ahead and truncate arrivals before the shared per-instance
+# cap was reached — see FactoryOrchestrator.AllArrivalsExhausted) shows up as job
+# count varying WITHIN the same instance across seeds/rules, which this catches
+# without penalizing intentional between-instance cap scaling.
 def _flag_underfilled(df: pd.DataFrame, job_col: str = "jobs") -> pd.Series:
-    modal = df[job_col].mode().iloc[0]
-    return df[job_col] < modal
+    modal_per_instance = df.groupby("instance")[job_col].transform(lambda s: s.mode().iloc[0])
+    return df[job_col] < modal_per_instance
 
 
 def _rule_color(rules: list[str]) -> dict:
