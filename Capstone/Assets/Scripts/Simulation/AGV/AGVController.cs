@@ -40,6 +40,17 @@ namespace Assets.Scripts.Simulation.AGV
         [SerializeField] private float reservationRetryInterval = 0.05f;
         [SerializeField] private float groundOffset = 0.5f;
 
+        /// <summary>
+        /// If a single zone reservation attempt keeps failing for longer than this (sim-seconds,
+        /// same clock as SimTime — see Time.fixedTime), it's treated as a circular-wait deadlock
+        /// (TrafficZoneManager.TryReserve has no backoff/priority/timeout of its own, so a true
+        /// cycle never self-resolves) rather than ordinary congestion. Set well below
+        /// FactoryOrchestrator.DEADLOCK_STALL_SECONDS (3000s) so per-AGV self-recovery gets many
+        /// chances to break a cycle before the system-wide watchdog would otherwise kill the
+        /// episode outright. See HandleZoneStall.
+        /// </summary>
+        [SerializeField] private float zoneStallTimeoutSeconds = 180f;
+
         [Header("Debug Label")]
         [SerializeField] private TextMeshProUGUI statusLabel;
 
@@ -57,6 +68,15 @@ namespace Assets.Scripts.Simulation.AGV
         public int DeliveredMachineId { get; private set; } = -1;
 
         /// <summary>
+        /// Set when this AGV self-recovers from a suspected traffic-zone deadlock (see
+        /// HandleZoneStall). Read by FlagHarvester.HarvestStalledAGVs, which owns returning
+        /// StalledJobId's JobData to a re-dispatchable state — mirrors the PickedUpFlag/
+        /// DeliveredFlag pattern so AGVController never touches JobData directly.
+        /// </summary>
+        public bool StalledFlag { get; private set; }
+        public int StalledJobId { get; private set; } = -1;
+
+        /// <summary>
         /// Transit duration (sim-seconds) of the most recently completed pickup→dropoff trip.
         /// Read by FlagHarvester when processing DeliveredFlag to stamp JobData.OperationTravelTimes.
         /// </summary>
@@ -69,6 +89,8 @@ namespace Assets.Scripts.Simulation.AGV
             DeliveredFlag = false;
             DeliveredJobId = -1;
             DeliveredMachineId = -1;
+            StalledFlag = false;
+            StalledJobId = -1;
         }
         /// <summary>
         /// Zeros all per-episode statistics. Called from Initialize() and from
@@ -83,6 +105,7 @@ namespace Assets.Scripts.Simulation.AGV
             _statTimeUnloading = 0.0;
             _statTotalPathLength = 0.0;
             _statRerouteCount = 0;
+            _statStallRecoveryCount = 0;
             _statTotalTrips = 0;
             _statTripAccumulator = 0.0;
             _statCurrentTripStart = 0.0;
@@ -111,6 +134,7 @@ namespace Assets.Scripts.Simulation.AGV
                 TimeUnloading = _statTimeUnloading,
                 TotalPathLength = _statTotalPathLength,
                 RerouteCount = _statRerouteCount,
+                StallRecoveryCount = _statStallRecoveryCount,
             };
         }
 
@@ -161,6 +185,7 @@ namespace Assets.Scripts.Simulation.AGV
         private double _statTimeUnloading;     // handshake timer at dropoff dock
         private double _statTotalPathLength;   // cumulative NavMesh distance
         private int _statRerouteCount;      // RedirectDropoff calls
+        private int _statStallRecoveryCount; // HandleZoneStall calls (suspected deadlock self-recoveries)
         private int _statTotalTrips;        // complete pickup→dropoff cycles
         private double _statTripAccumulator;   // sum of completed trip durations
         private double _statCurrentTripStart;  // fixedTime when current trip began (set in DoPickup)
@@ -745,7 +770,108 @@ namespace Assets.Scripts.Simulation.AGV
             else
             {
                 nextRetryTime = Time.fixedTime + reservationRetryInterval;
+                if (_blockStartTime >= 0f && Time.fixedTime - _blockStartTime > zoneStallTimeoutSeconds)
+                    HandleZoneStall();
             }
+        }
+
+        /// @brief Recovery for an AGV that has failed to acquire the same zone for longer than
+        /// zoneStallTimeoutSeconds — TrafficZoneManager.TryReserve has no backoff, priority, or
+        /// timeout, so a genuine circular-wait deadlock never self-resolves; this is the
+        /// signature of one. Releases any job in progress for redispatch (StalledFlag, so
+        /// JobData only ever changes through FlagHarvester, never directly from here), then
+        /// hands off to RetreatFromStall for the physical recovery.
+        ///
+        /// NOTE: this does NOT call CancelPickup/AbortTransit — those clean up job state but
+        /// then immediately call BeginParkingRoute() from the SAME currentZoneId this AGV is
+        /// stuck in, which just re-enters the same jam wanting a different destination. A
+        /// stalled AGV was blocked trying to reserve the NEXT zone; it never lost its CURRENT
+        /// one, so re-planning alone changes nothing. RetreatFromStall is what actually frees
+        /// the zone.
+        private void HandleZoneStall()
+        {
+            SimLogger.Error($"[AGV {AgvId}] Zone {pendingZoneId} reservation stalled past " +
+                             $"{zoneStallTimeoutSeconds:F0}s (state={State}) — likely circular-wait " +
+                             $"deadlock. Releasing job and retreating.");
+            _blockStartTime = -1f;
+            _statStallRecoveryCount++;
+
+            switch (State)
+            {
+                case AGVState.MovingToPickup:
+                    // Not yet attached to the carrier — nothing to detach physically.
+                    StalledFlag = true;
+                    StalledJobId = CurrentJobId;
+                    CurrentJobId = -1;
+                    loadedJobVisual = null;
+                    sourceMachine = null;
+                    targetMachine = null;
+                    break;
+
+                case AGVState.MovingToDropoff:
+                    if (loadedJobVisual != null)
+                        loadedJobVisual.DetachFromCarrier(transform.position);
+                    StalledFlag = true;
+                    StalledJobId = CurrentJobId;
+                    CurrentJobId = -1;
+                    loadedJobVisual = null;
+                    sourceMachine = null;
+                    targetMachine = null;
+                    break;
+
+                case AGVState.MovingToPrePickup:
+                    // Job hasn't been picked up yet — it's still Processing at its source
+                    // machine, untouched by this abandonment. Only the pre-dispatch claim
+                    // needs releasing so a fresh AGV can be pre-dispatched normally later.
+                    StalledFlag = true;
+                    StalledJobId = PreDispatchedJobId;
+                    PreDispatchedJobId = -1;
+                    break;
+
+                case AGVState.ReturningToParking:
+                    break;  // no job at stake — just needs to physically get unstuck
+            }
+
+            RetreatFromStall();
+        }
+
+        /// @brief Physically frees the zone this AGV currently occupies. Backs it up into the
+        /// zone it just came from if that's free — the only thing that actually removes it
+        /// from a wait-for cycle, since it still holds its current reservation throughout the
+        /// whole stall. If the previous zone is ALSO occupied (a bumper-to-bumper queue with no
+        /// free slot in any direction), force-releases every reservation this AGV holds and
+        /// snaps it directly to parking as a last resort — accepting a one-time fidelity
+        /// compromise to guarantee the deadlock actually breaks rather than just relocating.
+        private void RetreatFromStall()
+        {
+            currentRoute.Clear();
+            routeIndex = 0;
+            waitingForZone = false;
+            pendingZoneId = -1;
+            parkingZoneId = -1;
+
+            if (previousZoneId >= 0 && previousZoneId != currentZoneId &&
+                trafficMgr.TryReserve(previousZoneId, AgvId))
+            {
+                trafficMgr.Release(currentZoneId, AgvId);
+                currentZoneId = previousZoneId;
+                previousZoneId = -1;
+                currentWaypoint = FlatY(trafficMgr.GetZone(currentZoneId).Centre);
+
+                State = AGVState.ReturningToParking;
+                BeginParkingRoute();
+                return;
+            }
+
+            SimLogger.Error($"[AGV {AgvId}] Cannot retreat — previous zone also occupied. " +
+                             $"Forcing release and snapping to parking.");
+            trafficMgr.ReleaseAll(AgvId);
+            currentZoneId = -1;
+            previousZoneId = -1;
+            Vector3 parkPos = AGVPool.Instance.GetParkingPosition(AgvId);
+            Vector3 pos = parkPos; pos.y = groundOffset;
+            transform.position = pos;
+            ArriveAtParking();
         }
 
         /// @brief Manages the transition of reservations when crossing zone boundaries.

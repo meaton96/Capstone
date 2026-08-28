@@ -138,7 +138,8 @@ namespace Assets.Scripts.Simulation.Logging
                     "episode_failures,total_repair_time," +
                     "dynamic_arrivals,arrival_lambda,mean_interarrival_theoretical," +
                     "mean_interarrival_realised,last_arrival_sim_time," +
-                    "mean_flow_time,p95_flow_time,max_flow_time,mean_transport_wait,jobs_censored"
+                    "mean_flow_time,p95_flow_time,max_flow_time,mean_transport_wait,jobs_censored," +
+                    "deadlock_detected,deadlock_sim_time"
                 );
 
             writer.WriteLine(
@@ -152,7 +153,8 @@ namespace Assets.Scripts.Simulation.Logging
                 $"{r.MachineFailureCount},{r.MachineRepairTime:F1}," +
                 $"{r.DynamicArrivals},{r.ArrivalLambda:F5},{r.MeanInterarrivalTime:F1}," +
                 $"{r.RealisedMeanInterarrival:F1},{r.LastDynamicArrivalTime:F1}," +
-                $"{r.MeanFlowTime:F2},{r.P95FlowTime:F2},{r.MaxFlowTime:F2},{r.MeanTransportWait:F2},{r.JobsCensored}"
+                $"{r.MeanFlowTime:F2},{r.P95FlowTime:F2},{r.MaxFlowTime:F2},{r.MeanTransportWait:F2},{r.JobsCensored}," +
+                $"{(r.DeadlockDetected ? 1 : 0)},{r.DeadlockSimTime:F1}"
             );
 
             Debug.Log($"[Results] {r.InstanceName} {r.RuleName} seed={r.Seed} " +
@@ -214,7 +216,7 @@ namespace Assets.Scripts.Simulation.Logging
                     "agv_id,total_trips,mean_trip_duration," +
                     "time_idle,time_waiting_route,time_traveling," +
                     "time_loading,time_unloading," +
-                    "total_path_length,reroute_count,congestion_fraction"
+                    "total_path_length,reroute_count,congestion_fraction,stall_recovery_count"
                 );
 
             string ts = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
@@ -226,7 +228,7 @@ namespace Assets.Scripts.Simulation.Logging
                     $"{a.AgvId},{a.TotalTrips},{a.MeanTripDuration:F2}," +
                     $"{a.TimeIdle:F2},{a.TimeWaitingRoute:F2},{a.TimeTraveling:F2}," +
                     $"{a.TimeLoading:F2},{a.TimeUnloading:F2}," +
-                    $"{a.TotalPathLength:F2},{a.RerouteCount},{a.CongestionFraction:F4}"
+                    $"{a.TotalPathLength:F2},{a.RerouteCount},{a.CongestionFraction:F4},{a.StallRecoveryCount}"
                 );
             }
         }

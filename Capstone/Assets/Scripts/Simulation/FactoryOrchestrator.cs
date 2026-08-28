@@ -257,7 +257,24 @@ namespace Assets.Scripts.Simulation
         /// <summary>
         /// Maximum allowed simulation time in seconds before an episode is forcibly terminated.
         /// </summary>
-        private const double MAX_EPISODE_SIM_SECONDS = 500_000.0;
+        private const double MAX_EPISODE_SIM_SECONDS = 100_000.0;
+
+        /// <summary>
+        /// Deadlock watchdog: if zero AGVs anywhere in the traffic-zone network complete a
+        /// zone entry (TrafficZone.TraversalCount, summed across all zones) for this many
+        /// consecutive sim-seconds while jobs remain incomplete, the episode is declared
+        /// deadlocked and terminated immediately instead of running to MAX_EPISODE_SIM_SECONDS.
+        /// A circular-wait deadlock in TrafficZoneManager.TryReserve never self-resolves (no
+        /// AGV in the cycle can ever move), so ANY sustained system-wide stall is conclusive —
+        /// no legitimate congestion (even the heaviest surviving runs) goes this long without
+        /// a traversal completing somewhere in the network.
+        /// </summary>
+        private const double DEADLOCK_STALL_SECONDS = 3_000.0;
+
+        private int _lastZoneTraversalTotal = -1;
+        private double _lastTraversalChangeSimTime;
+        private bool _deadlockDetected;
+        private double _deadlockSimTime = -1.0;
 
         /// <summary>
         /// Singleton initialization. Destroys duplicate instances if one already exists.
@@ -407,6 +424,12 @@ namespace Assets.Scripts.Simulation
             IsWaitingForAction = false;
             startTime = Time.time;
 
+            // ── Arm deadlock watchdog ────────────────────────────────────────────
+            _lastZoneTraversalTotal = -1;
+            _lastTraversalChangeSimTime = 0.0;
+            _deadlockDetected = false;
+            _deadlockSimTime = -1.0;
+
             // ── Arm Poisson arrival clock ──────────────────────────────────────
             _dynamicJobsSpawned = 0;
             _lastDynamicArrivalSimTime = -1f;
@@ -461,12 +484,25 @@ namespace Assets.Scripts.Simulation
                 return;
             }
 
+            if (CheckForDeadlock())
+            {
+                _deadlockDetected = true;
+                _deadlockSimTime = SimTime;
+                SimLogger.Error($"[Orchestrator] Deadlock detected — no AGV completed a traffic-zone " +
+                                 $"entry anywhere in the network for {DEADLOCK_STALL_SECONDS:F0}s " +
+                                 $"(stalled since {_lastTraversalChangeSimTime:F0}s, now {SimTime:F0}s). " +
+                                 $"Terminating early instead of running to timeout.");
+                FinaliseEpisode();
+                return;
+            }
+
             _failures.SetSimTime(SimTime);
             _flags.SetSimTime(SimTime);
 
             _failures.HarvestFailureFlags();
             _flags.HarvestMachineFlags();
             _flags.HarvestAGVFlags();
+            _flags.HarvestStalledAGVs();
             _flags.HarvestAlmostDoneFlags(PreDispatchLeadTime);
             _flags.AssignAGVs();
 
@@ -497,6 +533,30 @@ namespace Assets.Scripts.Simulation
             // this made the realized workload differ across rules for the "same" seed.
             if (Jobs.AreAllExited() && AllArrivalsExhausted())
                 FinaliseEpisode();
+        }
+
+        /// <summary>
+        /// True once the system-wide sum of TrafficZone.TraversalCount has gone unchanged for
+        /// DEADLOCK_STALL_SECONDS while jobs remain incomplete. A summed, network-wide signal
+        /// is used (rather than watching any single zone or AGV) because heavy-but-resolving
+        /// congestion routinely stalls individual zones for a while — only a true circular-wait
+        /// deadlock stops EVERY zone in the network from ever admitting another AGV.
+        /// </summary>
+        private bool CheckForDeadlock()
+        {
+            if (Jobs.AreAllExited()) return false;
+
+            int total = 0;
+            foreach (var zone in trafficZoneManager.Zones) total += zone.TraversalCount;
+
+            if (total != _lastZoneTraversalTotal)
+            {
+                _lastZoneTraversalTotal = total;
+                _lastTraversalChangeSimTime = SimTime;
+                return false;
+            }
+
+            return (SimTime - _lastTraversalChangeSimTime) > DEADLOCK_STALL_SECONDS;
         }
 
         /// <summary>
@@ -722,6 +782,10 @@ namespace Assets.Scripts.Simulation
             // Configuration snapshot fields
             record.ParkingMethod = currentConfig.parkingMethod;
             record.PreDispatchingMethod = currentConfig.preDispatchingMethod;
+
+            // Deadlock watchdog outcome — see CheckForDeadlock
+            record.DeadlockDetected = _deadlockDetected;
+            record.DeadlockSimTime = _deadlockDetected ? _deadlockSimTime : -1.0;
 
             // Collect AGV performance records
             foreach (var agv in agvPool.AllAGVs)

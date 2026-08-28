@@ -50,6 +50,12 @@ WAIT_BUCKET_LABELS = {
     "time_processing":     "Processing",
 }
 
+# FactoryOrchestrator.MAX_EPISODE_SIM_SECONDS = 100_000 (lowered from 500_000 after the
+# agv_congestion_sweep deadlocks). Episodes that hit this timeout log makespan ~100000 as a
+# sentinel (gridlock/deadlock, not a real completion) and must be dropped before averaging —
+# this script had no such guard before, unlike plot_generated.py's CENSORED_MAKESPAN_THRESHOLD.
+CENSORED_MAKESPAN_THRESHOLD = 80_000
+
 # A batch config may legitimately scale dynamicJobCap with lambda (e.g. keep episode
 # length reasonable at low arrival rates) — that's a deliberate per-instance design
 # choice, not a bug, and comparing rules WITHIN an instance is still valid even if
@@ -83,6 +89,13 @@ def load_results(path: str) -> pd.DataFrame:
     df = pd.read_csv(path)
     df.columns = df.columns.str.strip()
     df["rule"] = df["rule"].str.strip()
+
+    censored = df["makespan"] >= CENSORED_MAKESPAN_THRESHOLD
+    if censored.any():
+        print(f"  Dropping {censored.sum()} censored (timeout/deadlock) episode row(s) "
+              f"with makespan >= {CENSORED_MAKESPAN_THRESHOLD:,.0f}")
+        df = df[~censored].copy()
+
     df["underfilled"] = _flag_underfilled(df)
     if df["underfilled"].any():
         lams = sorted(df.loc[df["underfilled"], "arrival_lambda"].unique())
@@ -95,6 +108,11 @@ def load_completions(path: str, results_df: pd.DataFrame) -> pd.DataFrame:
     df = pd.read_csv(path)
     df.columns = df.columns.str.strip()
     df["rule"] = df["rule"].str.strip()
+
+    censored = df["makespan"] >= CENSORED_MAKESPAN_THRESHOLD
+    if censored.any():
+        df = df[~censored].copy()
+
     lam_map = (results_df.drop_duplicates("instance")[["instance", "arrival_lambda"]]
                .set_index("instance")["arrival_lambda"])
     df["arrival_lambda"] = df["instance"].map(lam_map)

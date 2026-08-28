@@ -50,10 +50,13 @@ TAG_LABELS = {
     "mf+agv+arr": "Full disruption",
 }
 
-# FactoryOrchestrator.MAX_EPISODE_SIM_SECONDS = 500_000 — episodes that hit this timeout log
-# makespan ~500000 as a sentinel (gridlock/deadlock, not a real completion time). Threshold set
-# well below that but above any realistic makespan so genuine long-tail runs aren't dropped.
-CENSORED_MAKESPAN_THRESHOLD = 400_000
+# FactoryOrchestrator.MAX_EPISODE_SIM_SECONDS = 100_000 (lowered from 500_000 after the
+# agv_congestion_sweep deadlocks — a stalled episode now fails in ~10-15 min instead of ~4h).
+# Episodes that hit this timeout log makespan ~100000 as a sentinel (gridlock/deadlock, not a
+# real completion time). Threshold set well below that but above any realistic makespan seen
+# so far (~35-52k) so genuine long-tail runs aren't dropped. Bump this if a legitimate config
+# ever produces makespans approaching it.
+CENSORED_MAKESPAN_THRESHOLD = 80_000
 
 # Job-state wait-bucket columns in job_completions.csv, in flow-order.
 WAIT_BUCKET_COLS = [

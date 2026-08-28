@@ -126,10 +126,15 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             SimLogger.Medium($"[TrafficZones] Built zone graph: {zones.Count} zones.");
         }
 
-        /// @brief Segments row aisles into discrete zones based on machine columns.
+        /// @brief Segments row aisles into discrete zones: one dock zone per machine column plus
+        /// one transit zone between each pair, so AGVs can queue along a row at closer spacing
+        /// without raising per-zone Capacity above 1 (AGVController has no inter-AGV avoidance —
+        /// Capacity=1 with a dedicated Centre per zone is what keeps two AGVs from converging on
+        /// the same point).
         /// @param rows Number of machine rows.
         /// @param cols Number of machine columns.
-        /// @return A 2D array mapping [aisleIndex][segmentIndex] to zone IDs.
+        /// @return A 2D array mapping [aisleIndex][segmentIndex] to zone IDs — even indices are
+        /// dock zones (index/2 = machine column), odd indices are the transit zones between them.
         private int[][] BuildRowAisleZones(int rows, int cols)
         {
             int numAisles = rows - 1;
@@ -141,20 +146,26 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 Vector3 flowDir = layoutManager.GetRowAisleDirection(a);
                 FlowDirection flow = flowDir.x > 0 ? FlowDirection.East : FlowDirection.West;
 
-                result[a] = new int[cols];
+                int numSegs = 2 * cols - 1;
+                result[a] = new int[numSegs];
                 float segWidth = layoutManager.MachineSpacingX;
+                float subWidth = segWidth / 2f;
                 float halfTotalWidth = ((cols - 1) * segWidth) / 2f;
 
-                for (int s = 0; s < cols; s++)
+                for (int s = 0; s < numSegs; s++)
                 {
+                    bool isDock = s % 2 == 0;
+                    int machineCol = s / 2;
+                    float centreX = -halfTotalWidth + machineCol * segWidth + (isDock ? 0f : subWidth);
+
                     var zone = new TrafficZone
                     {
                         ZoneId = nextZoneId++,
-                        Name = $"RowAisle{a}_Seg{s}",
+                        Name = isDock ? $"RowAisle{a}_Dock{machineCol}" : $"RowAisle{a}_Transit{machineCol}",
                         AisleType = AisleType.RowAisle,
                         Flow = flow,
-                        Centre = new Vector3(aisleCentre.x + (-halfTotalWidth + s * segWidth), aisleCentre.y, aisleCentre.z),
-                        Size = new Vector3(segWidth, 0.1f, layoutManager.RowAisleWidth),
+                        Centre = new Vector3(aisleCentre.x + centreX, aisleCentre.y, aisleCentre.z),
+                        Size = new Vector3(subWidth, 0.1f, layoutManager.RowAisleWidth),
                         Capacity = 1
                     };
                     RegisterZone(zone);
@@ -325,7 +336,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
 
                 if (row < rowAisles.Length)
                 {
-                    int zId = rowAisles[row][col];
+                    int zId = rowAisles[row][col * 2];   // dock zones sit at even indices — see BuildRowAisleZones
                     Vector3 conveyorEnd = machinePos - Vector3.forward * (layoutManager.MachineDepth / 2f + layoutManager.ConveyorReach);
                     zoneById[zId].DockPoints[i] = new DockPoint { ApproachPosition = conveyorEnd - Vector3.forward * standoff, HandshakePosition = conveyorEnd, FacingDirection = Vector3.forward, IsPickup = false };
                     if (!machineToZones.ContainsKey(i)) machineToZones[i] = new List<int>();
@@ -335,7 +346,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 if (row > 0 || row == 0) // Check north aisles
                 {
                     int zId = -1;
-                    if (row > 0) zId = rowAisles[row - 1][col];
+                    if (row > 0) zId = rowAisles[row - 1][col * 2];   // dock zones sit at even indices
                     else if (row == 0) zId = topSpine[col + 1];
 
                     if (zId != -1)

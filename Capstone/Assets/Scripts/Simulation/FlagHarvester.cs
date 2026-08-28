@@ -208,6 +208,41 @@ namespace Assets.Scripts.Simulation
         }
 
         /// <summary>
+        /// Handles AGVs that self-recovered from a suspected traffic-zone deadlock
+        /// (AGVController.HandleZoneStall). The AGV has already released its own route and
+        /// zone reservations and begun returning to parking; this owns the JobData side —
+        /// clearing the job's link to that AGV and, if the job was physically committed to it
+        /// (WaitingForPickup or InTransit), returning it to NeedsRouting so a fresh AGV can be
+        /// assigned. A job that was only pre-dispatched (still Processing at its source
+        /// machine, never picked up) is left alone — only its PreDispatchedAgvId claim is
+        /// cleared, mirroring how HandleZoneStall itself distinguishes the two cases.
+        /// </summary>
+        public void HarvestStalledAGVs()
+        {
+            foreach (var agv in _agvPool.AllAGVs)
+            {
+                if (!agv.StalledFlag) continue;
+
+                JobData job = _jobs.Get(agv.StalledJobId);
+                if (job != null)
+                {
+                    if (job.PreDispatchedAgvId == agv.AgvId) job.PreDispatchedAgvId = -1;
+
+                    if (job.State == JobState.WaitingForPickup || job.State == JobState.InTransit)
+                    {
+                        job.TransitionTo(JobState.NeedsRouting, _simTimeRef);
+                        job.TargetMachineId = -1;
+                        job.AssignedAgvId = -1;
+                        SimLogger.Medium($"[FlagHarvester] Job {job.JobId} returned to NeedsRouting — " +
+                                          $"AGV {agv.AgvId} stalled on a traffic-zone reservation.");
+                    }
+                }
+
+                agv.ClearFlags();
+            }
+        }
+
+        /// <summary>
         /// Assigns available AGVs to jobs that are waiting for pickup and have not yet been assigned one.
         /// Jobs are matched with available AGVs based on their location and target destination. If a job's
         /// target machine is non-operational, the job is returned to NeedsRouting state. AGVs are consumed

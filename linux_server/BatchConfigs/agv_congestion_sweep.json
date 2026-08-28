@@ -1,0 +1,325 @@
+{
+    "_comment": "AGV fleet-size x parking-method sweep, held at the capacity-bound operating point (lambda=0.044, cap=300) confirmed in job_completions3/load_sweep_medium.json. Tests whether congestion negates the benefit of additional AGVs, and whether the med_agv03/05/08 gridlock seen in the pre-fix agv_sweep_med.json results was real or a decision-loop artifact -- rerun with the FactoryOrchestrator.AllArrivalsExhausted fix and --baselinedrain. AGV range extended past agv_sweep_med.json's 3..20 to 3..30 (2 AGVs/machine at the top end) to look for a turnover, not just a plateau.",
+    "configs": [
+        {
+            "name": "med_agv03_single",
+            "seed": 42,
+            "jobCount": 10,
+            "machinesPerType": 3,
+            "machineTypes": ["Mill", "Lathe", "Weld", "Inspect", "Assemble"],
+            "minProcTime": 15.0,
+            "maxProcTime": 90.0,
+            "minOpsPerJob": 5,
+            "maxOpsPerJob": 8,
+            "agvCount": 3,
+            "throughputTimingWindow": 60.0,
+            "parkingMethod": "single",
+            "preDispatchingMethod": "fixed",
+            "stochastic": {
+                "dynamicArrivalsEnabled": true,
+                "arrivalLambda": 0.044,
+                "dynamicJobCap": 300
+            }
+        },
+        {
+            "name": "med_agv03_multiple",
+            "seed": 42,
+            "jobCount": 10,
+            "machinesPerType": 3,
+            "machineTypes": ["Mill", "Lathe", "Weld", "Inspect", "Assemble"],
+            "minProcTime": 15.0,
+            "maxProcTime": 90.0,
+            "minOpsPerJob": 5,
+            "maxOpsPerJob": 8,
+            "agvCount": 3,
+            "throughputTimingWindow": 60.0,
+            "parkingMethod": "multiple",
+            "preDispatchingMethod": "fixed",
+            "stochastic": {
+                "dynamicArrivalsEnabled": true,
+                "arrivalLambda": 0.044,
+                "dynamicJobCap": 300
+            }
+        },
+        {
+            "name": "med_agv05_single",
+            "seed": 42,
+            "jobCount": 10,
+            "machinesPerType": 3,
+            "machineTypes": ["Mill", "Lathe", "Weld", "Inspect", "Assemble"],
+            "minProcTime": 15.0,
+            "maxProcTime": 90.0,
+            "minOpsPerJob": 5,
+            "maxOpsPerJob": 8,
+            "agvCount": 5,
+            "throughputTimingWindow": 60.0,
+            "parkingMethod": "single",
+            "preDispatchingMethod": "fixed",
+            "stochastic": {
+                "dynamicArrivalsEnabled": true,
+                "arrivalLambda": 0.044,
+                "dynamicJobCap": 300
+            }
+        },
+        {
+            "name": "med_agv05_multiple",
+            "seed": 42,
+            "jobCount": 10,
+            "machinesPerType": 3,
+            "machineTypes": ["Mill", "Lathe", "Weld", "Inspect", "Assemble"],
+            "minProcTime": 15.0,
+            "maxProcTime": 90.0,
+            "minOpsPerJob": 5,
+            "maxOpsPerJob": 8,
+            "agvCount": 5,
+            "throughputTimingWindow": 60.0,
+            "parkingMethod": "multiple",
+            "preDispatchingMethod": "fixed",
+            "stochastic": {
+                "dynamicArrivalsEnabled": true,
+                "arrivalLambda": 0.044,
+                "dynamicJobCap": 300
+            }
+        },
+        {
+            "name": "med_agv08_single",
+            "seed": 42,
+            "jobCount": 10,
+            "machinesPerType": 3,
+            "machineTypes": ["Mill", "Lathe", "Weld", "Inspect", "Assemble"],
+            "minProcTime": 15.0,
+            "maxProcTime": 90.0,
+            "minOpsPerJob": 5,
+            "maxOpsPerJob": 8,
+            "agvCount": 8,
+            "throughputTimingWindow": 60.0,
+            "parkingMethod": "single",
+            "preDispatchingMethod": "fixed",
+            "stochastic": {
+                "dynamicArrivalsEnabled": true,
+                "arrivalLambda": 0.044,
+                "dynamicJobCap": 300
+            }
+        },
+        {
+            "name": "med_agv08_multiple",
+            "seed": 42,
+            "jobCount": 10,
+            "machinesPerType": 3,
+            "machineTypes": ["Mill", "Lathe", "Weld", "Inspect", "Assemble"],
+            "minProcTime": 15.0,
+            "maxProcTime": 90.0,
+            "minOpsPerJob": 5,
+            "maxOpsPerJob": 8,
+            "agvCount": 8,
+            "throughputTimingWindow": 60.0,
+            "parkingMethod": "multiple",
+            "preDispatchingMethod": "fixed",
+            "stochastic": {
+                "dynamicArrivalsEnabled": true,
+                "arrivalLambda": 0.044,
+                "dynamicJobCap": 300
+            }
+        },
+        {
+            "name": "med_agv12_single",
+            "seed": 42,
+            "jobCount": 10,
+            "machinesPerType": 3,
+            "machineTypes": ["Mill", "Lathe", "Weld", "Inspect", "Assemble"],
+            "minProcTime": 15.0,
+            "maxProcTime": 90.0,
+            "minOpsPerJob": 5,
+            "maxOpsPerJob": 8,
+            "agvCount": 12,
+            "throughputTimingWindow": 60.0,
+            "parkingMethod": "single",
+            "preDispatchingMethod": "fixed",
+            "stochastic": {
+                "dynamicArrivalsEnabled": true,
+                "arrivalLambda": 0.044,
+                "dynamicJobCap": 300
+            }
+        },
+        {
+            "name": "med_agv12_multiple",
+            "seed": 42,
+            "jobCount": 10,
+            "machinesPerType": 3,
+            "machineTypes": ["Mill", "Lathe", "Weld", "Inspect", "Assemble"],
+            "minProcTime": 15.0,
+            "maxProcTime": 90.0,
+            "minOpsPerJob": 5,
+            "maxOpsPerJob": 8,
+            "agvCount": 12,
+            "throughputTimingWindow": 60.0,
+            "parkingMethod": "multiple",
+            "preDispatchingMethod": "fixed",
+            "stochastic": {
+                "dynamicArrivalsEnabled": true,
+                "arrivalLambda": 0.044,
+                "dynamicJobCap": 300
+            }
+        },
+        {
+            "name": "med_agv16_single",
+            "seed": 42,
+            "jobCount": 10,
+            "machinesPerType": 3,
+            "machineTypes": ["Mill", "Lathe", "Weld", "Inspect", "Assemble"],
+            "minProcTime": 15.0,
+            "maxProcTime": 90.0,
+            "minOpsPerJob": 5,
+            "maxOpsPerJob": 8,
+            "agvCount": 16,
+            "throughputTimingWindow": 60.0,
+            "parkingMethod": "single",
+            "preDispatchingMethod": "fixed",
+            "stochastic": {
+                "dynamicArrivalsEnabled": true,
+                "arrivalLambda": 0.044,
+                "dynamicJobCap": 300
+            }
+        },
+        {
+            "name": "med_agv16_multiple",
+            "seed": 42,
+            "jobCount": 10,
+            "machinesPerType": 3,
+            "machineTypes": ["Mill", "Lathe", "Weld", "Inspect", "Assemble"],
+            "minProcTime": 15.0,
+            "maxProcTime": 90.0,
+            "minOpsPerJob": 5,
+            "maxOpsPerJob": 8,
+            "agvCount": 16,
+            "throughputTimingWindow": 60.0,
+            "parkingMethod": "multiple",
+            "preDispatchingMethod": "fixed",
+            "stochastic": {
+                "dynamicArrivalsEnabled": true,
+                "arrivalLambda": 0.044,
+                "dynamicJobCap": 300
+            }
+        },
+        {
+            "name": "med_agv20_single",
+            "seed": 42,
+            "jobCount": 10,
+            "machinesPerType": 3,
+            "machineTypes": ["Mill", "Lathe", "Weld", "Inspect", "Assemble"],
+            "minProcTime": 15.0,
+            "maxProcTime": 90.0,
+            "minOpsPerJob": 5,
+            "maxOpsPerJob": 8,
+            "agvCount": 20,
+            "throughputTimingWindow": 60.0,
+            "parkingMethod": "single",
+            "preDispatchingMethod": "fixed",
+            "stochastic": {
+                "dynamicArrivalsEnabled": true,
+                "arrivalLambda": 0.044,
+                "dynamicJobCap": 300
+            }
+        },
+        {
+            "name": "med_agv20_multiple",
+            "seed": 42,
+            "jobCount": 10,
+            "machinesPerType": 3,
+            "machineTypes": ["Mill", "Lathe", "Weld", "Inspect", "Assemble"],
+            "minProcTime": 15.0,
+            "maxProcTime": 90.0,
+            "minOpsPerJob": 5,
+            "maxOpsPerJob": 8,
+            "agvCount": 20,
+            "throughputTimingWindow": 60.0,
+            "parkingMethod": "multiple",
+            "preDispatchingMethod": "fixed",
+            "stochastic": {
+                "dynamicArrivalsEnabled": true,
+                "arrivalLambda": 0.044,
+                "dynamicJobCap": 300
+            }
+        },
+        {
+            "name": "med_agv25_single",
+            "seed": 42,
+            "jobCount": 10,
+            "machinesPerType": 3,
+            "machineTypes": ["Mill", "Lathe", "Weld", "Inspect", "Assemble"],
+            "minProcTime": 15.0,
+            "maxProcTime": 90.0,
+            "minOpsPerJob": 5,
+            "maxOpsPerJob": 8,
+            "agvCount": 25,
+            "throughputTimingWindow": 60.0,
+            "parkingMethod": "single",
+            "preDispatchingMethod": "fixed",
+            "stochastic": {
+                "dynamicArrivalsEnabled": true,
+                "arrivalLambda": 0.044,
+                "dynamicJobCap": 300
+            }
+        },
+        {
+            "name": "med_agv25_multiple",
+            "seed": 42,
+            "jobCount": 10,
+            "machinesPerType": 3,
+            "machineTypes": ["Mill", "Lathe", "Weld", "Inspect", "Assemble"],
+            "minProcTime": 15.0,
+            "maxProcTime": 90.0,
+            "minOpsPerJob": 5,
+            "maxOpsPerJob": 8,
+            "agvCount": 25,
+            "throughputTimingWindow": 60.0,
+            "parkingMethod": "multiple",
+            "preDispatchingMethod": "fixed",
+            "stochastic": {
+                "dynamicArrivalsEnabled": true,
+                "arrivalLambda": 0.044,
+                "dynamicJobCap": 300
+            }
+        },
+        {
+            "name": "med_agv30_single",
+            "seed": 42,
+            "jobCount": 10,
+            "machinesPerType": 3,
+            "machineTypes": ["Mill", "Lathe", "Weld", "Inspect", "Assemble"],
+            "minProcTime": 15.0,
+            "maxProcTime": 90.0,
+            "minOpsPerJob": 5,
+            "maxOpsPerJob": 8,
+            "agvCount": 30,
+            "throughputTimingWindow": 60.0,
+            "parkingMethod": "single",
+            "preDispatchingMethod": "fixed",
+            "stochastic": {
+                "dynamicArrivalsEnabled": true,
+                "arrivalLambda": 0.044,
+                "dynamicJobCap": 300
+            }
+        },
+        {
+            "name": "med_agv30_multiple",
+            "seed": 42,
+            "jobCount": 10,
+            "machinesPerType": 3,
+            "machineTypes": ["Mill", "Lathe", "Weld", "Inspect", "Assemble"],
+            "minProcTime": 15.0,
+            "maxProcTime": 90.0,
+            "minOpsPerJob": 5,
+            "maxOpsPerJob": 8,
+            "agvCount": 30,
+            "throughputTimingWindow": 60.0,
+            "parkingMethod": "multiple",
+            "preDispatchingMethod": "fixed",
+            "stochastic": {
+                "dynamicArrivalsEnabled": true,
+                "arrivalLambda": 0.044,
+                "dynamicJobCap": 300
+            }
+        }
+    ]
+}

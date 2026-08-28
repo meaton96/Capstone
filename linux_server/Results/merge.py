@@ -53,13 +53,15 @@ def main():
     )
     parser.add_argument(
         "-dir",
-        required=True,
+        required=False,
         help="Path to the directory containing the source CSV files.",
+        default=os.path.join(os.getcwd(), "generated")
     )
     parser.add_argument(
         "-out",
-        required=True,
+        required=False,
         help="Path to the directory where merged CSVs should be saved.",
+        default=os.path.join(os.getcwd(), "merged")
     )
 
     args = parser.parse_args()

@@ -41,6 +41,16 @@ namespace Assets.Scripts.Simulation.Types
         public string ParkingMethod;
         public string PreDispatchingMethod;
 
+        // ── Deadlock watchdog outcome ──────────────────────────────────────────
+        // Set by FactoryOrchestrator.CheckForDeadlock. True means the episode was terminated
+        // early because no zone anywhere in the AGV traffic network admitted an entry for
+        // DEADLOCK_STALL_SECONDS — a circular-wait deadlock, not a genuine long-running episode.
+        // Makespan for a deadlocked episode is the sim-time deadlock was DETECTED at (roughly
+        // stall-onset + DEADLOCK_STALL_SECONDS), not a fixed timeout sentinel — check this flag
+        // rather than thresholding makespan to identify deadlocked rows.
+        public bool DeadlockDetected;
+        public double DeadlockSimTime = -1.0;
+
         public double OptimalityGap => OptimalMakespan > 0
             ? (Makespan - OptimalMakespan) / OptimalMakespan * 100.0
             : 0;
@@ -216,6 +226,7 @@ namespace Assets.Scripts.Simulation.Types
 
         public double TotalPathLength;      // cumulative NavMesh distance (sim-units)
         public int RerouteCount;         // RedirectDropoff calls (machine-failure reroutes)
+        public int StallRecoveryCount;   // HandleZoneStall calls (suspected deadlock self-recoveries)
 
         // Derived
         public double ProductiveTime => TimeTraveling + TimeLoading + TimeUnloading;
