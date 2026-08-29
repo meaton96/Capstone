@@ -17,10 +17,12 @@
             "minOpsPerJob": 3,
             "maxOpsPerJob": 5,
             "agvCount": 3,
+            "throughputTimingWindow": 60,
+            
             "stochastic": {
                 "dynamicArrivalsEnabled": true,
                 "arrivalLambda": 0.002,
-                "dynamicJobCap": 15
+                "dynamicJobCap": 150
             }
         },
         {
@@ -43,7 +45,7 @@
             "stochastic": {
                 "dynamicArrivalsEnabled": true,
                 "arrivalLambda": 0.004,
-                "dynamicJobCap": 15
+                "dynamicJobCap": 150
             }
         },
         {
@@ -66,7 +68,7 @@
             "stochastic": {
                 "dynamicArrivalsEnabled": true,
                 "arrivalLambda": 0.006,
-                "dynamicJobCap": 15
+                "dynamicJobCap": 150
             }
         },
         {
@@ -89,7 +91,7 @@
             "stochastic": {
                 "dynamicArrivalsEnabled": true,
                 "arrivalLambda": 0.01,
-                "dynamicJobCap": 15
+                "dynamicJobCap": 150
             }
         },
         {
@@ -112,7 +114,7 @@
             "stochastic": {
                 "dynamicArrivalsEnabled": true,
                 "arrivalLambda": 0.016,
-                "dynamicJobCap": 15
+                "dynamicJobCap": 150
             }
         },
         {
@@ -135,7 +137,7 @@
             "stochastic": {
                 "dynamicArrivalsEnabled": true,
                 "arrivalLambda": 0.025,
-                "dynamicJobCap": 15
+                "dynamicJobCap": 150
             }
         },
         {
@@ -158,7 +160,7 @@
             "stochastic": {
                 "dynamicArrivalsEnabled": true,
                 "arrivalLambda": 0.04,
-                "dynamicJobCap": 15
+                "dynamicJobCap": 150
             }
         },
         {
@@ -181,7 +183,7 @@
             "stochastic": {
                 "dynamicArrivalsEnabled": true,
                 "arrivalLambda": 0.064,
-                "dynamicJobCap": 15
+                "dynamicJobCap": 150
             }
         },
         {
@@ -204,7 +206,7 @@
             "stochastic": {
                 "dynamicArrivalsEnabled": true,
                 "arrivalLambda": 0.1,
-                "dynamicJobCap": 15
+                "dynamicJobCap": 150
             }
         },
         {
@@ -227,7 +229,7 @@
             "stochastic": {
                 "dynamicArrivalsEnabled": true,
                 "arrivalLambda": 0.15,
-                "dynamicJobCap": 15
+                "dynamicJobCap": 150
             }
         }
     ]

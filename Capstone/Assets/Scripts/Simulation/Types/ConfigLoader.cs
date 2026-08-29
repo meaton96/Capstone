@@ -136,6 +136,9 @@ namespace Assets.Scripts.Simulation.Types
             public float maxArrivalTime = 0f;
             public int agvCount = 3;
             public float machineFlexibilityProbability = 0f;
+            public float throughputTimingWindow = 0f;
+            public string parkingMethod = "single";
+            public string preDispatchingMethod = "fixed";
             public JsonStochasticConfig stochastic = null;
 
             /// @brief Optional per-type normal distribution parameters for processing time sampling.
@@ -245,7 +248,10 @@ namespace Assets.Scripts.Simulation.Types
                 MaxOpsPerJob = raw.maxOpsPerJob,
                 AGVCount = raw.agvCount,
                 MachineFlexibilityProbability = raw.machineFlexibilityProbability,
+                ThroughputTimingWindow = raw.throughputTimingWindow,
                 ProcTimeParams = procTimeParams,
+                parkingMethod = raw.parkingMethod,
+                preDispatchingMethod = raw.preDispatchingMethod ?? "fixed",
             };
 
             if (raw.stochastic != null)

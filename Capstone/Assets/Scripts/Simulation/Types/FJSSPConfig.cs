@@ -74,10 +74,30 @@ namespace Assets.Scripts.Simulation.Types
         ///          1 = fully flexible (every machine processes every operation type).
         public float MachineFlexibilityProbability = 0f;
 
+        // ── Throughput timing ──
+
+        /// @brief Timing window (in simulation time units) used for throughput calculations.
+        /// @details Controls the observation window over which throughput is measured.
+        public float ThroughputTimingWindow;
+
         // ── Scheduling policy ──
 
         /// @brief Default dispatching rule applied when no agent policy is active.
         public DispatchingRule dispatchingRule = DispatchingRule.SRT_SRWT;
+
+        // ── Parking method ──
+
+        /// @brief Strategy used for AGV parking assignments.
+        /// @details Controls how AGVs are assigned to parking spots when idle.
+        ///          Defaults to "single" (single parking zone per AGV type).
+        public string parkingMethod = "single";
+
+        // ── Pre-dispatching method ──
+
+        /// @brief Strategy used for pre-dispatching decisions.
+        /// @details Controls how jobs are pre-dispatched before execution.
+        ///          Defaults to "fixed" (fixed dispatching schedule).
+        public string preDispatchingMethod = "fixed";
 
         // ── Processing time distributions ──
 
@@ -131,6 +151,9 @@ namespace Assets.Scripts.Simulation.Types
                 ProcTimeParams = new Dictionary<MachineType, (float mu, float sigma)>(ProcTimeParams),
                 Stochastic = Stochastic,
                 MachineFlexibilityProbability = MachineFlexibilityProbability,
+                parkingMethod = parkingMethod,
+                preDispatchingMethod = preDispatchingMethod,
+                ThroughputTimingWindow = ThroughputTimingWindow,
             };
         }
     }

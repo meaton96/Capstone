@@ -3,24 +3,6 @@ plot_generated.py — Visualizations for randomly-generated FJSSP instance resul
 
 Usage:
     python plot_generated.py <results.csv> [--out <output_dir>] [--regime <tag>]
-
-Arguments:
-    csv             Path to merged_results.csv from the generated job batch run
-    --out           Output directory (default: plots_generated)
-    --regime        Filter to a single stochastic_tag value, e.g. "none", "mf", "arr"
-                    If omitted, deterministic runs (stochastic_tag == "none") are used
-                    for rank/bar plots, and stochastic runs get a separate comparison.
-
-Produces:
-    1. makespan_by_instance_bar.png     — grouped bar: PDR × config (seed-averaged)
-    2. pdr_rank_heatmap.png             — heatmap of PDR rank (1=best) per config
-    3. random_pdr_boxplot.png           — box plot of RANDOM rule variance per config
-    4. pdr_rank_distribution.png        — stacked bar: rank distribution per PDR
-    5. makespan_vs_size.png             — line plot: PDR makespan scaling with problem size
-    6. stochastic_inflation.png         — makespan inflation ratio vs deterministic baseline
-                                          (only produced if stochastic rows are present)
-    7. pdr_stochastic_sensitivity.png   — which PDRs degrade most under disruption
-                                          (only produced if stochastic rows are present)
 """
 
 import argparse
@@ -46,9 +28,8 @@ plt.rcParams.update({
 })
 
 # ── PDR ordering and display labels ──────────────────────────────────────────
-# Import from viz_utils if available, otherwise use inline defaults.
 try:
-    from viz_utils import PDR_ORDER, PDR_LABELS  # type: ignore
+    from results.scripts.old.viz_utils import PDR_ORDER, PDR_LABELS  # type: ignore
 except ImportError:
     PDR_ORDER = [
         "SPT_SMPT", "SPT_SRWT", "SRT_SMPT", "SRT_SRWT",
@@ -59,7 +40,6 @@ except ImportError:
 
 PALETTE = plt.cm.tab10.colors
 
-# Stochastic tag display names for plot labels
 TAG_LABELS = {
     "none":     "Deterministic",
     "mf":       "Machine failures",
@@ -70,39 +50,46 @@ TAG_LABELS = {
     "mf+agv+arr": "Full disruption",
 }
 
+# FactoryOrchestrator.MAX_EPISODE_SIM_SECONDS = 100_000 (lowered from 500_000 after the
+# agv_congestion_sweep deadlocks — a stalled episode now fails in ~10-15 min instead of ~4h).
+# Episodes that hit this timeout log makespan ~100000 as a sentinel (gridlock/deadlock, not a
+# real completion time). Threshold set well below that but above any realistic makespan seen
+# so far (~35-52k) so genuine long-tail runs aren't dropped. Bump this if a legitimate config
+# ever produces makespans approaching it.
+CENSORED_MAKESPAN_THRESHOLD = 80_000
+
+# Job-state wait-bucket columns in job_completions.csv, in flow-order.
+WAIT_BUCKET_COLS = [
+    "time_needs_routing", "time_waiting_pickup", "time_in_transit",
+    "time_queued", "time_processing",
+]
+WAIT_BUCKET_LABELS = {
+    "time_needs_routing":  "Routing decision wait",
+    "time_waiting_pickup": "AGV pickup wait",
+    "time_in_transit":     "AGV transit",
+    "time_queued":         "Machine queue wait",
+    "time_processing":     "Processing",
+}
 
 # ── Data loading ──────────────────────────────────────────────────────────────
 
 def _instance_sort_key(name: str) -> tuple:
-    """
-    Sort config names by job count then machine count, extracted from the name
-    or from the jobs/machines columns. Falls back to alphabetical.
-    Pattern matches: small_5j_5m, medium_20j_15m, large_50j_15m, xlarge_100j_20m
-    """
     m = re.search(r'(\d+)j[_]?(\d+)m', str(name))
     if m:
         return (int(m.group(1)), int(m.group(2)), str(name))
     return (0, 0, str(name))
 
-
-def load_generated(csv_path: str, regime_filter: str | None = None
-                   ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """
-    Load generated results CSV. Returns (det_df, stoch_df, full_df).
-
-    det_df   — rows where stochastic_tag == "none"
-    stoch_df — all other rows
-    full_df  — unfiltered
-
-    If regime_filter is provided, det_df is replaced by rows matching that tag
-    and stoch_df contains everything else.
-    """
+def load_generated(csv_path: str, regime_filter: str | None = None) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     df = pd.read_csv(csv_path)
-
-    # Normalise column names
     df.columns = df.columns.str.strip()
 
-    # Normalise stochastic_tag: treat NaN and empty as "none"
+    if "makespan" in df.columns:
+        censored = df["makespan"] >= CENSORED_MAKESPAN_THRESHOLD
+        if censored.any():
+            print(f"  Dropping {censored.sum()} censored (timeout) episode row(s) "
+                  f"with makespan >= {CENSORED_MAKESPAN_THRESHOLD:,.0f}")
+            df = df[~censored].copy()
+
     if "stochastic_tag" in df.columns:
         df["stochastic_tag"] = (df["stochastic_tag"]
                                 .fillna("none")
@@ -112,15 +99,10 @@ def load_generated(csv_path: str, regime_filter: str | None = None
     else:
         df["stochastic_tag"] = "none"
 
-    # Normalise rule name capitalisation to match PDR_ORDER
     df["rule"] = df["rule"].str.strip()
 
-    # Infer instance sort order from jobs/machines columns if available
     if "jobs" in df.columns and "machines" in df.columns:
-        # Build a stable ordering: (jobs, machines, name)
-        size_map = (df.groupby("instance")[["jobs", "machines"]]
-                    .first()
-                    .reset_index())
+        size_map = (df.groupby("instance")[["jobs", "machines"]].first().reset_index())
         size_map["_sort"] = list(zip(size_map["jobs"], size_map["machines"], size_map["instance"]))
         ordered = size_map.sort_values(["jobs", "machines", "instance"])["instance"].tolist()
     else:
@@ -128,7 +110,6 @@ def load_generated(csv_path: str, regime_filter: str | None = None
 
     df["instance"] = pd.Categorical(df["instance"], categories=ordered, ordered=True)
 
-    # Split
     if regime_filter:
         det_df   = df[df["stochastic_tag"] == regime_filter].copy()
         stoch_df = df[df["stochastic_tag"] != regime_filter].copy()
@@ -138,17 +119,13 @@ def load_generated(csv_path: str, regime_filter: str | None = None
 
     return det_df, stoch_df, df
 
-
 def _sorted_instances(df: pd.DataFrame) -> list[str]:
-    """Return instances in their categorical order."""
     if hasattr(df["instance"], "cat"):
         return [i for i in df["instance"].cat.categories if i in df["instance"].values]
     return sorted(df["instance"].unique(), key=_instance_sort_key)
 
-
 def _rule_color(rules: list[str]) -> dict:
     return {r: PALETTE[i % len(PALETTE)] for i, r in enumerate(rules)}
-
 
 def _save(fig: plt.Figure, out_dir: str, filename: str) -> None:
     path = os.path.join(out_dir, filename)
@@ -156,6 +133,32 @@ def _save(fig: plt.Figure, out_dir: str, filename: str) -> None:
     plt.close(fig)
     print(f"  Saved: {path}")
 
+# ── Data loading — job completions (Option A: flow time / wait decomposition) ─
+
+def load_job_completions(csv_path: str) -> pd.DataFrame:
+    """Loads job_completions.csv, drops censored (timeout) episodes, and adds
+    per-k tardiness columns using TWK due dates: due = arrival + k * work_content.
+    """
+    df = pd.read_csv(csv_path)
+    df.columns = df.columns.str.strip()
+    df["rule"] = df["rule"].str.strip()
+
+    if "makespan" in df.columns:
+        censored = df["makespan"] >= CENSORED_MAKESPAN_THRESHOLD
+        if censored.any():
+            print(f"  Dropping {censored.sum()} job row(s) from censored (timeout) episodes")
+            df = df[~censored].copy()
+
+    if "instance" in df.columns:
+        ordered = sorted(df["instance"].unique(), key=_instance_sort_key)
+        df["instance"] = pd.Categorical(df["instance"], categories=ordered, ordered=True)
+
+    for k in (2, 3, 4):
+        due = df["arrival_time"] + k * df["work_content"]
+        df[f"tardiness_k{k}"] = (df["exit_time"] - due).clip(lower=0)
+        df.loc[df["completed"] != 1, f"tardiness_k{k}"] = np.nan
+
+    return df
 
 # ── Plot 1 — grouped bar: makespan per PDR per config ────────────────────────
 
@@ -185,19 +188,17 @@ def plot_bar_by_instance(det_df: pd.DataFrame, out_dir: str) -> None:
 
     rand_vals = [rand_means.get(inst, np.nan) for inst in instances]
     offset    = (len(rules) - len(rules) / 2 + 0.5) * width
-    ax.bar(x + offset, rand_vals, width, label="Random (mean)",
-           color="gray", alpha=0.6, hatch="//")
+    ax.bar(x + offset, rand_vals, width, label="Random (mean)", color="gray", alpha=0.6, hatch="//")
 
     ax.set_xticks(x)
     ax.set_xticklabels(instances, rotation=30, ha="right")
     ax.set_xlabel("Config")
     ax.set_ylabel("Makespan (sim-time units, seed-averaged)")
-    ax.set_title("Makespan by PDR — Generated Instances (Deterministic)")
+    ax.set_title("Makespan by PDR — Generated Instances")
     ax.legend(title="PDR", bbox_to_anchor=(1.01, 1), loc="upper left", fontsize=8)
     ax.yaxis.set_major_formatter(mticker.FuncFormatter(lambda v, _: f"{v:,.0f}"))
 
     _save(fig, out_dir, "makespan_by_instance_bar.png")
-
 
 # ── Plot 2 — heatmap: PDR rank per config ────────────────────────────────────
 
@@ -220,8 +221,7 @@ def plot_rank_heatmap(det_df: pd.DataFrame, out_dir: str) -> None:
 
     fig, ax = plt.subplots(figsize=(max(8, len(instances) * 1.6), 5))
     sns.heatmap(rank_df, annot=True, fmt=".0f", cmap="RdYlGn_r",
-                linewidths=0.4, ax=ax,
-                cbar_kws={"label": "Rank (1 = best makespan)"})
+                linewidths=0.4, ax=ax, cbar_kws={"label": "Rank (1 = best makespan)"})
     ax.set_title("PDR Rank per Generated Instance\n(1 = shortest makespan, seed-averaged)")
     ax.set_xlabel("Config")
     ax.set_ylabel("PDR")
@@ -229,7 +229,6 @@ def plot_rank_heatmap(det_df: pd.DataFrame, out_dir: str) -> None:
     ax.tick_params(axis="y", rotation=0)
 
     _save(fig, out_dir, "pdr_rank_heatmap.png")
-
 
 # ── Plot 3 — box plot: RANDOM variance per config ────────────────────────────
 
@@ -256,15 +255,12 @@ def plot_random_variance(det_df: pd.DataFrame, out_dir: str) -> None:
 
     ax.set_xlabel("Config")
     ax.set_ylabel("Makespan (sim-time units)")
-    n_note = (f"{min(n_per)}" if min(n_per) == max(n_per)
-              else f"{min(n_per)}–{max(n_per)}")
-    ax.set_title(f"Random PDR Makespan Variance per Generated Instance\n"
-                 f"({n_note} seeds per config)")
+    n_note = (f"{min(n_per)}" if min(n_per) == max(n_per) else f"{min(n_per)}–{max(n_per)}")
+    ax.set_title(f"Random PDR Makespan Variance per Generated Instance\n({n_note} seeds per config)")
     ax.tick_params(axis="x", rotation=30)
     ax.yaxis.set_major_formatter(mticker.FuncFormatter(lambda v, _: f"{v:,.0f}"))
 
     _save(fig, out_dir, "random_pdr_boxplot.png")
-
 
 # ── Plot 4 — PDR rank distribution (stacked bar) ─────────────────────────────
 
@@ -298,29 +294,21 @@ def plot_pdr_rank_distribution(det_df: pd.DataFrame, out_dir: str) -> None:
     for rank_idx in range(n_rules):
         vals = rank_counts[:, rank_idx]
         bars = ax.bar(ordered_rules, vals, bottom=bottoms,
-                      color=rank_colors[rank_idx],
-                      label=f"Rank {rank_idx + 1}",
+                      color=rank_colors[rank_idx], label=f"Rank {rank_idx + 1}",
                       edgecolor="white", linewidth=0.4)
         if rank_idx == 0:
             for bar, val in zip(bars, vals):
                 if val > 0:
                     ax.text(bar.get_x() + bar.get_width() / 2,
-                            bottoms[list(ordered_rules).index(
-                                ordered_rules[list(bars).index(bar)]
-                            )] + val / 2,
-                            str(val),
-                            ha="center", va="center",
-                            fontsize=9, fontweight="bold", color="white")
+                            bottoms[list(ordered_rules).index(ordered_rules[list(bars).index(bar)])] + val / 2,
+                            str(val), ha="center", va="center", fontsize=9, fontweight="bold", color="white")
         bottoms += vals
 
     ax.set_ylim(0, n_instances * 1.05)
     ax.set_yticks(range(0, n_instances + 1, max(1, n_instances // 5)))
     ax.set_ylabel("Number of configs")
     ax.set_xlabel("PDR")
-    ax.set_title(
-        f"PDR Rank Distribution Across Generated Instances (n={n_instances})\n"
-        "White numbers = rank-1 (win) count"
-    )
+    ax.set_title(f"PDR Rank Distribution Across Generated Instances (n={n_instances})\nWhite numbers = rank-1 (win) count")
     ax.tick_params(axis="x", rotation=30)
 
     handles, labels = ax.get_legend_handles_labels()
@@ -330,29 +318,19 @@ def plot_pdr_rank_distribution(det_df: pd.DataFrame, out_dir: str) -> None:
 
     expected = n_instances / n_rules
     ax.axhline(expected, color="gray", linestyle="--", linewidth=0.8, alpha=0.6)
-    ax.text(n_rules - 0.5, expected + 0.1,
-            f"chance baseline ({expected:.1f})",
-            ha="right", va="bottom", fontsize=7, color="gray")
+    ax.text(n_rules - 0.5, expected + 0.1, f"chance baseline ({expected:.1f})", ha="right", va="bottom", fontsize=7, color="gray")
 
     _save(fig, out_dir, "pdr_rank_distribution.png")
-
 
 # ── Plot 5 — makespan scaling with problem size ───────────────────────────────
 
 def plot_makespan_vs_size(det_df: pd.DataFrame, out_dir: str) -> None:
-    """
-    Line plot: x = total_ops (proxy for problem size), y = seed-averaged makespan.
-    One line per PDR. Shows whether PDR relative performance changes as problems scale.
-    Requires jobs/machines/total_ops columns (present in results.csv).
-    """
     if "total_ops" not in det_df.columns:
         print("  Skipping makespan_vs_size: total_ops column not found.")
         return
 
-    # Use mean total_ops per instance as the x-axis value
     size_map = (det_df.groupby("instance", observed=True)["total_ops"]
-                .mean().reset_index()
-                .rename(columns={"total_ops": "mean_total_ops"}))
+                .mean().reset_index().rename(columns={"total_ops": "mean_total_ops"}))
 
     g = (det_df.groupby(["rule", "instance"], observed=True)["makespan"]
          .mean().reset_index())
@@ -365,14 +343,12 @@ def plot_makespan_vs_size(det_df: pd.DataFrame, out_dir: str) -> None:
 
     fig, axes = plt.subplots(1, 2, figsize=(15, 6))
 
-    # Left: absolute makespan
     ax = axes[0]
     for rule in all_rules:
         sub = g[g["rule"] == rule].sort_values("mean_total_ops")
         ls  = "--" if rule.lower() == "random" else "-"
         ax.plot(sub["mean_total_ops"], sub["makespan"], "o" + ls,
-                color=colors[rule], linewidth=1.8, markersize=5,
-                label=rule, alpha=0.85)
+                color=colors[rule], linewidth=1.8, markersize=5, label=rule, alpha=0.85)
 
     ax.set_xlabel("Total operations (proxy for problem size)")
     ax.set_ylabel("Mean makespan (sim-time units)")
@@ -380,12 +356,9 @@ def plot_makespan_vs_size(det_df: pd.DataFrame, out_dir: str) -> None:
     ax.yaxis.set_major_formatter(mticker.FuncFormatter(lambda v, _: f"{v:,.0f}"))
     ax.legend(fontsize=7, bbox_to_anchor=(1.01, 1), loc="upper left")
 
-    # Right: makespan normalised to SPT_SMPT baseline (or first rule)
     ax = axes[1]
     baseline_rule = "SPT_SMPT" if "SPT_SMPT" in all_rules else all_rules[0]
-    baseline = (g[g["rule"] == baseline_rule]
-                .set_index("instance")["makespan"]
-                .rename("baseline"))
+    baseline = (g[g["rule"] == baseline_rule].set_index("instance")["makespan"].rename("baseline"))
     g2 = g.merge(baseline, on="instance")
     g2["relative_makespan"] = g2["makespan"] / g2["baseline"]
 
@@ -393,8 +366,7 @@ def plot_makespan_vs_size(det_df: pd.DataFrame, out_dir: str) -> None:
         sub = g2[g2["rule"] == rule].sort_values("mean_total_ops")
         ls  = "--" if rule.lower() == "random" else "-"
         ax.plot(sub["mean_total_ops"], sub["relative_makespan"], "o" + ls,
-                color=colors[rule], linewidth=1.8, markersize=5,
-                label=rule, alpha=0.85)
+                color=colors[rule], linewidth=1.8, markersize=5, label=rule, alpha=0.85)
 
     ax.axhline(1.0, color="black", linestyle=":", linewidth=0.8, alpha=0.4)
     ax.set_xlabel("Total operations (proxy for problem size)")
@@ -402,26 +374,19 @@ def plot_makespan_vs_size(det_df: pd.DataFrame, out_dir: str) -> None:
     ax.set_title("Relative PDR Performance vs Problem Size")
     ax.legend(fontsize=7, bbox_to_anchor=(1.01, 1), loc="upper left")
 
-    fig.suptitle("Makespan Scaling — Generated Instances (Deterministic)", y=1.02)
+    fig.suptitle("Makespan Scaling — Generated Instances", y=1.02)
     fig.tight_layout()
     _save(fig, out_dir, "makespan_vs_size.png")
 
-
 # ── Plot 6 — stochastic makespan inflation ────────────────────────────────────
 
-def plot_stochastic_inflation(det_df: pd.DataFrame, stoch_df: pd.DataFrame,
-                               out_dir: str) -> None:
-    """
-    Per-(instance, rule) inflation ratio = stochastic makespan / deterministic makespan.
-    One subplot per stochastic tag. Reveals which configs are most disruption-sensitive.
-    """
+def plot_stochastic_inflation(det_df: pd.DataFrame, stoch_df: pd.DataFrame, out_dir: str) -> None:
     if stoch_df.empty:
         print("  Skipping stochastic_inflation: no stochastic rows found.")
         return
 
     det_mean = (det_df.groupby(["instance", "rule"], observed=True)["makespan"]
-                .mean().reset_index()
-                .rename(columns={"makespan": "det_makespan"}))
+                .mean().reset_index().rename(columns={"makespan": "det_makespan"}))
 
     tags = sorted(stoch_df["stochastic_tag"].unique())
     n    = len(tags)
@@ -435,8 +400,7 @@ def plot_stochastic_inflation(det_df: pd.DataFrame, stoch_df: pd.DataFrame,
     for ax, tag in zip(axes[0], tags):
         sub = stoch_df[stoch_df["stochastic_tag"] == tag]
         sto_mean = (sub.groupby(["instance", "rule"], observed=True)["makespan"]
-                    .mean().reset_index()
-                    .rename(columns={"makespan": "sto_makespan"}))
+                    .mean().reset_index().rename(columns={"makespan": "sto_makespan"}))
         merged = sto_mean.merge(det_mean, on=["instance", "rule"])
         merged["inflation"] = merged["sto_makespan"] / merged["det_makespan"]
 
@@ -444,13 +408,10 @@ def plot_stochastic_inflation(det_df: pd.DataFrame, stoch_df: pd.DataFrame,
         width = 0.8 / max(len(rules), 1)
 
         for i, rule in enumerate(rules):
-            vals = [merged.loc[(merged["instance"] == inst) & (merged["rule"] == rule),
-                               "inflation"].values
-                    for inst in instances]
+            vals = [merged.loc[(merged["instance"] == inst) & (merged["rule"] == rule), "inflation"].values for inst in instances]
             vals = [v[0] if len(v) > 0 else np.nan for v in vals]
             offset = (i - len(rules) / 2 + 0.5) * width
-            ax.bar(x + offset, vals, width, label=rule,
-                   color=colors[rule], alpha=0.8)
+            ax.bar(x + offset, vals, width, label=rule, color=colors[rule], alpha=0.8)
 
         ax.axhline(1.0, color="black", linestyle="--", linewidth=1, alpha=0.5)
         ax.set_xticks(x)
@@ -465,34 +426,24 @@ def plot_stochastic_inflation(det_df: pd.DataFrame, stoch_df: pd.DataFrame,
     fig.tight_layout()
     _save(fig, out_dir, "stochastic_inflation.png")
 
-
 # ── Plot 7 — PDR sensitivity to disruption ────────────────────────────────────
 
-def plot_pdr_stochastic_sensitivity(det_df: pd.DataFrame, stoch_df: pd.DataFrame,
-                                     out_dir: str) -> None:
-    """
-    For each PDR: mean inflation across all instances per stochastic tag.
-    Reveals which rules are robust vs brittle under disruption.
-    """
+def plot_pdr_stochastic_sensitivity(det_df: pd.DataFrame, stoch_df: pd.DataFrame, out_dir: str) -> None:
     if stoch_df.empty:
         print("  Skipping pdr_stochastic_sensitivity: no stochastic rows found.")
         return
 
     det_mean = (det_df.groupby(["instance", "rule"], observed=True)["makespan"]
-                .mean().reset_index()
-                .rename(columns={"makespan": "det_makespan"}))
+                .mean().reset_index().rename(columns={"makespan": "det_makespan"}))
 
     records = []
     for tag in stoch_df["stochastic_tag"].unique():
         sub = stoch_df[stoch_df["stochastic_tag"] == tag]
         sto_mean = (sub.groupby(["instance", "rule"], observed=True)["makespan"]
-                    .mean().reset_index()
-                    .rename(columns={"makespan": "sto_makespan"}))
+                    .mean().reset_index().rename(columns={"makespan": "sto_makespan"}))
         merged = sto_mean.merge(det_mean, on=["instance", "rule"])
         merged["inflation"] = merged["sto_makespan"] / merged["det_makespan"]
-        agg = (merged.groupby("rule")["inflation"]
-               .agg(mean_inflation="mean", std_inflation="std")
-               .reset_index())
+        agg = (merged.groupby("rule")["inflation"].agg(mean_inflation="mean", std_inflation="std").reset_index())
         agg["tag"] = tag
         records.append(agg)
 
@@ -514,24 +465,145 @@ def plot_pdr_stochastic_sensitivity(det_df: pd.DataFrame, stoch_df: pd.DataFrame
         means  = [sub.loc[r, "mean_inflation"] if r in sub.index else np.nan for r in rules]
         stds   = [sub.loc[r, "std_inflation"]  if r in sub.index else 0       for r in rules]
         offset = (i - len(tags) / 2 + 0.5) * width
-        ax.bar(x + offset, means, width,
-               label=TAG_LABELS.get(tag, tag),
+        ax.bar(x + offset, means, width, label=TAG_LABELS.get(tag, tag),
                color=tag_colors[tag], alpha=0.85, edgecolor="white")
-        ax.errorbar(x + offset, means, yerr=stds,
-                    fmt="none", color="black", capsize=3, linewidth=1)
+        ax.errorbar(x + offset, means, yerr=stds, fmt="none", color="black", capsize=3, linewidth=1)
 
-    ax.axhline(1.0, color="black", linestyle="--", linewidth=1, alpha=0.4,
-               label="No inflation (= det baseline)")
+    ax.axhline(1.0, color="black", linestyle="--", linewidth=1, alpha=0.4, label="No inflation (= det baseline)")
     ax.set_xticks(x)
     ax.set_xticklabels(rules, rotation=30, ha="right")
     ax.set_xlabel("PDR")
     ax.set_ylabel("Mean makespan inflation (stoch / det)")
-    ax.set_title("PDR Sensitivity to Stochastic Disruption\n"
-                 "Higher bar = more degradation under disruption")
+    ax.set_title("PDR Sensitivity to Stochastic Disruption\nHigher bar = more degradation under disruption")
     ax.legend(fontsize=8, bbox_to_anchor=(1.01, 1), loc="upper left")
 
     _save(fig, out_dir, "pdr_stochastic_sensitivity.png")
 
+# ── Plot 8 — flow time distribution per PDR ───────────────────────────────────
+
+def plot_flow_time_distribution(job_df: pd.DataFrame, out_dir: str) -> None:
+    """Box plot of realized flow time (exit - arrival) per rule, completed jobs only.
+    This is the metric that differentiates PDRs when makespan is saturated/flat.
+    """
+    completed = job_df[job_df["completed"] == 1]
+    if completed.empty:
+        print("  Skipping flow_time_distribution: no completed jobs found.")
+        return
+
+    rules = [r for r in PDR_ORDER if r in completed["rule"].values] + \
+            [r for r in completed["rule"].unique() if r not in PDR_ORDER]
+    data = [completed.loc[completed["rule"] == r, "flow_time"].values for r in rules]
+    data = [(d, r) for d, r in zip(data, rules) if len(d) > 0]
+    if not data:
+        return
+    vals, labels = zip(*data)
+
+    fig, ax = plt.subplots(figsize=(max(9, len(labels) * 1.4), 6))
+    bp = ax.boxplot(vals, tick_labels=labels, patch_artist=True, showfliers=False,
+                    medianprops={"color": "black", "linewidth": 2})
+    colors = _rule_color(list(labels))
+    for patch, label in zip(bp["boxes"], labels):
+        patch.set_facecolor(colors[label])
+        patch.set_alpha(0.7)
+
+    p95 = [np.percentile(d, 95) for d in vals]
+    ax.scatter(range(1, len(labels) + 1), p95, marker="D", color="black", s=25,
+               zorder=5, label="p95")
+
+    ax.set_xlabel("PDR")
+    ax.set_ylabel("Flow time (sim-time units)")
+    ax.set_title("Job Flow Time Distribution by PDR\n(diamond = p95, completed jobs only)")
+    ax.tick_params(axis="x", rotation=30)
+    ax.legend(fontsize=8)
+    ax.yaxis.set_major_formatter(mticker.FuncFormatter(lambda v, _: f"{v:,.0f}"))
+
+    _save(fig, out_dir, "flow_time_distribution.png")
+
+# ── Plot 9 — wait-time decomposition per PDR ──────────────────────────────────
+
+def plot_wait_decomposition(job_df: pd.DataFrame, out_dir: str) -> None:
+    """Stacked bar of mean time-in-state per rule, across the five mutually-exclusive
+    job states. Shows WHERE jobs spend their time even when total flow/makespan is flat —
+    the key figure for the transport-bottleneck story.
+    """
+    completed = job_df[job_df["completed"] == 1]
+    cols = [c for c in WAIT_BUCKET_COLS if c in completed.columns]
+    if completed.empty or not cols:
+        print("  Skipping wait_decomposition: no completed jobs / bucket columns found.")
+        return
+
+    means = completed.groupby("rule", observed=True)[cols].mean()
+    rules = [r for r in PDR_ORDER if r in means.index] + \
+            [r for r in means.index if r not in PDR_ORDER]
+    means = means.loc[rules]
+
+    bucket_colors = plt.cm.Set2.colors
+
+    fig, ax = plt.subplots(figsize=(max(9, len(rules) * 1.4), 6))
+    bottoms = np.zeros(len(rules))
+    for i, col in enumerate(cols):
+        vals = means[col].values
+        ax.bar(rules, vals, bottom=bottoms, label=WAIT_BUCKET_LABELS.get(col, col),
+               color=bucket_colors[i % len(bucket_colors)], edgecolor="white", linewidth=0.5)
+        bottoms += vals
+
+    ax.set_xlabel("PDR")
+    ax.set_ylabel("Mean time per job (sim-time units)")
+    ax.set_title("Job Wait-Time Decomposition by PDR\n(completed jobs only)")
+    ax.tick_params(axis="x", rotation=30)
+    ax.legend(fontsize=8, bbox_to_anchor=(1.01, 1), loc="upper left")
+
+    _save(fig, out_dir, "wait_decomposition.png")
+
+# ── Plot 10 — tardiness vs. due-date tightness ────────────────────────────────
+
+def plot_tardiness(job_df: pd.DataFrame, out_dir: str, k_values=(2, 3, 4)) -> None:
+    """Mean tardiness and %-tardy per rule for each due-date tightness factor k,
+    where due_date = arrival_time + k * work_content (TWK rule).
+    """
+    completed = job_df[job_df["completed"] == 1]
+    tcols = [f"tardiness_k{k}" for k in k_values if f"tardiness_k{k}" in completed.columns]
+    if completed.empty or not tcols:
+        print("  Skipping tardiness: no completed jobs / tardiness columns found.")
+        return
+
+    rules = [r for r in PDR_ORDER if r in completed["rule"].values] + \
+            [r for r in completed["rule"].unique() if r not in PDR_ORDER]
+
+    fig, axes = plt.subplots(1, 2, figsize=(15, 6))
+    x = np.arange(len(rules))
+    width = 0.8 / max(len(tcols), 1)
+    k_colors = dict(zip(k_values, plt.cm.Set2.colors[:len(k_values)]))
+
+    ax = axes[0]
+    for i, (k, tcol) in enumerate(zip(k_values, tcols)):
+        means = completed.groupby("rule", observed=True)[tcol].mean()
+        vals = [means.get(r, np.nan) for r in rules]
+        offset = (i - len(tcols) / 2 + 0.5) * width
+        ax.bar(x + offset, vals, width, label=f"k={k}", color=k_colors[k], alpha=0.85)
+    ax.set_xticks(x)
+    ax.set_xticklabels(rules, rotation=30, ha="right")
+    ax.set_xlabel("PDR")
+    ax.set_ylabel("Mean tardiness (sim-time units)")
+    ax.set_title("Mean Tardiness by PDR\n(due = arrival + k · work_content)")
+    ax.legend(fontsize=8)
+
+    ax = axes[1]
+    for i, (k, tcol) in enumerate(zip(k_values, tcols)):
+        pct_tardy = completed.groupby("rule", observed=True)[tcol].apply(lambda s: (s > 0).mean() * 100)
+        vals = [pct_tardy.get(r, np.nan) for r in rules]
+        offset = (i - len(tcols) / 2 + 0.5) * width
+        ax.bar(x + offset, vals, width, label=f"k={k}", color=k_colors[k], alpha=0.85)
+    ax.set_xticks(x)
+    ax.set_xticklabels(rules, rotation=30, ha="right")
+    ax.set_xlabel("PDR")
+    ax.set_ylabel("% jobs tardy")
+    ax.set_title("Tardy Job Fraction by PDR")
+    ax.legend(fontsize=8)
+
+    fig.suptitle("Tardiness Sensitivity to Due-Date Tightness", y=1.02)
+    fig.tight_layout()
+    _save(fig, out_dir, "tardiness.png")
 
 # ── Main ─────────────────────────────────────────────────────────────────────
 
@@ -539,55 +611,63 @@ def main():
     parser = argparse.ArgumentParser(
         description="Visualise randomly-generated FJSSP instance results."
     )
-    parser.add_argument("csv",
-                        help="Path to merged_results.csv from the generated batch run")
-    parser.add_argument("--out", default="plots_generated",
-                        help="Output directory (default: plots_generated)")
+    parser.add_argument("csv", help="Path to merged_results.csv from the generated batch run")
+    parser.add_argument("--out", default="plots_generated", help="Output directory (default: plots_generated)")
     parser.add_argument("--regime", default=None,
-                        help="Treat this stochastic_tag as the 'deterministic' baseline "
-                             "(default: 'none'). Use if you ran a non-standard baseline tag.")
+                        help="Treat this stochastic_tag as the 'deterministic' baseline (default: 'none').")
+    parser.add_argument("--completions", default=None,
+                        help="Path to merged job_completions.csv — enables flow time, wait "
+                             "decomposition, and tardiness plots (Option A).")
     args = parser.parse_args()
 
     os.makedirs(args.out, exist_ok=True)
     det_df, stoch_df, full_df = load_generated(args.csv, regime_filter=args.regime)
 
-    # ── Sanity summary ────────────────────────────────────────────────────────
     print(f"\nTotal rows          : {len(full_df)}")
     print(f"Deterministic rows  : {len(det_df)}")
     print(f"Stochastic rows     : {len(stoch_df)}")
-    print(f"Instances (det)     : {_sorted_instances(det_df)}")
     print(f"Rules               : {sorted(full_df['rule'].unique())}")
     if not stoch_df.empty:
         print(f"Stochastic tags     : {sorted(stoch_df['stochastic_tag'].unique())}")
 
-    if not det_df.empty:
-        seeds_per = (det_df.groupby(["rule", "instance"], observed=True)
-                    .size().reset_index(name="n_seeds"))
-        n_range = (seeds_per["n_seeds"].min(), seeds_per["n_seeds"].max())
-        print(f"Seeds per (rule, instance): {n_range[0]} – {n_range[1]}")
+    # ── Deterministic / Core Plots ────────────────────────────────────────────
+    # Fallback to the full dataframe if no explicit 'deterministic' baseline exists
+    target_df = det_df if not det_df.empty else full_df
 
-    print()
-
-    # ── Deterministic plots ───────────────────────────────────────────────────
-    if det_df.empty:
-        print("  No deterministic rows found — skipping plots 1–5.")
+    if target_df.empty:
+        print("  No data found at all — skipping plots 1–5.")
     else:
-        plot_bar_by_instance(det_df, args.out)
-        plot_rank_heatmap(det_df, args.out)
-        plot_random_variance(det_df, args.out)
-        plot_pdr_rank_distribution(det_df, args.out)
-        plot_makespan_vs_size(det_df, args.out)
+        if det_df.empty:
+            print("  No explicit deterministic rows found. Using ALL rows for the heatmap and base plots.")
+        
+        plot_bar_by_instance(target_df, args.out)
+        plot_rank_heatmap(target_df, args.out)
+        plot_random_variance(target_df, args.out)
+        plot_pdr_rank_distribution(target_df, args.out)
+        plot_makespan_vs_size(target_df, args.out)
 
     # ── Stochastic comparison plots ───────────────────────────────────────────
     if not stoch_df.empty and not det_df.empty:
         plot_stochastic_inflation(det_df, stoch_df, args.out)
         plot_pdr_stochastic_sensitivity(det_df, stoch_df, args.out)
     elif not stoch_df.empty:
-        print("  Stochastic rows found but no deterministic baseline — "
-              "skipping inflation plots.")
+        print("  Stochastic rows found but no deterministic baseline — skipping inflation plots.")
+
+    # ── Flow time / wait decomposition / tardiness plots (Option A) ──────────
+    if args.completions:
+        print(f"\nJob completions   : {args.completions}")
+        job_df = load_job_completions(args.completions)
+        print(f"Job rows          : {len(job_df)}")
+        print(f"Completed jobs    : {(job_df['completed'] == 1).sum()}")
+
+        if job_df.empty:
+            print("  No job_completions data — skipping flow time / decomposition / tardiness plots.")
+        else:
+            plot_flow_time_distribution(job_df, args.out)
+            plot_wait_decomposition(job_df, args.out)
+            plot_tardiness(job_df, args.out)
 
     print("\nDone.")
-
 
 if __name__ == "__main__":
     main()

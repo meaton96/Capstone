@@ -59,6 +59,12 @@ namespace Assets.Scripts.Simulation
             string configName = GetCLIArg("-configname");
             string benchmarkPath = GetCLIArg("-benchmark");
             string benchmarkDirPath = GetCLIArg("-benchmarkdir");
+            // Baseline decision-drain: when set, heuristic decisions drain per-frame instead of
+            // one-per-frame. Valid ONLY for heuristic batch runs (no neural policy in the loop).
+            bool baselineDrain = GetCLIArg("-baselinedrain") != null;
+            if (baselineDrain)
+                SimLogger.Low("[BatchRunner] Baseline drain mode ENABLED — heuristic decisions " +
+                              "drain per frame (removes one-decision-per-frame throttle).");
 
             // Auto-start in batchmode, or if any config source was explicitly passed
             if (!Application.isBatchMode
@@ -125,6 +131,9 @@ namespace Assets.Scripts.Simulation
                 else
                     SimLogger.LogWarning($"[BatchRunner] Unknown -disruption '{disruptionStr}'. Defaulting to none.");
             }
+
+            if (baselineDrain && FactoryOrchestrator.Instance != null)
+                FactoryOrchestrator.Instance.BaselineDrainMode = true;
 
             // ── Route to the correct coroutine ──────────────────────
 
@@ -203,7 +212,7 @@ namespace Assets.Scripts.Simulation
                 {
                     foreach (var rule in activeRules)
                     {
-                        FJSSPConfig runConfig = CloneWithSeed(baseConfig, baseConfig.Seed + rep);
+                        FJSSPConfig runConfig = baseConfig.CloneWithSeed(baseConfig.Seed + rep);
                         runConfig.dispatchingRule = rule;
                         SimLogger.Low($"[BatchRunner] Run {completedRuns + 1}/{totalRuns}: " +
                                       $"config={runConfig.Name} rule={rule} seed={runConfig.Seed}");
@@ -355,7 +364,7 @@ namespace Assets.Scripts.Simulation
             {
                 foreach (var rule in activeRules)
                 {
-                    FJSSPConfig runConfig = CloneWithSeed(config, config.Seed + rep);
+                    FJSSPConfig runConfig = config.CloneWithSeed(config.Seed + rep);
                     runConfig.dispatchingRule = rule;
                     SimLogger.Low($"[BatchRunner] Run {completedRuns + 1}/{totalRuns}: " +
                                   $"benchmark={runConfig.Name} rule={rule} seed={runConfig.Seed}");
@@ -451,25 +460,28 @@ namespace Assets.Scripts.Simulation
                           $"({elapsed:F1}s elapsed, ETA {eta:F1}s)");
         }
 
-        private FJSSPConfig CloneWithSeed(FJSSPConfig source, int newSeed)
-        {
-            return new FJSSPConfig
-            {
-                Name = source.Name,
-                Seed = newSeed,
-                JobCount = source.JobCount,
-                MachinesPerType = source.MachinesPerType,
-                MachineTypeLayout = (MachineType[])source.MachineTypeLayout.Clone(),
-                MinProcTime = source.MinProcTime,
-                MaxProcTime = source.MaxProcTime,
-                MinOpsPerJob = source.MinOpsPerJob,
-                MaxOpsPerJob = source.MaxOpsPerJob,
-                AGVCount = source.AGVCount,
-                ProcTimeParams = source.ProcTimeParams,
-                Stochastic = source.Stochastic,
-                dispatchingRule = source.dispatchingRule
-            };
-        }
+        // private FJSSPConfig CloneWithSeed(FJSSPConfig source, int newSeed)
+        // {
+        //     return new FJSSPConfig
+        //     {
+        //         Name = source.Name,
+        //         Seed = newSeed,
+        //         JobCount = source.JobCount,
+        //         MachinesPerType = source.MachinesPerType,
+        //         MachineTypeLayout = (MachineType[])source.MachineTypeLayout.Clone(),
+        //         MinProcTime = source.MinProcTime,
+        //         MaxProcTime = source.MaxProcTime,
+        //         MinOpsPerJob = source.MinOpsPerJob,
+        //         MaxOpsPerJob = source.MaxOpsPerJob,
+        //         AGVCount = source.AGVCount,
+        //         ProcTimeParams = source.ProcTimeParams,
+        //         Stochastic = source.Stochastic,
+        //         dispatchingRule = source.dispatchingRule,
+        //         parkingMethod = source.parkingMethod,
+        //         preDispatchingMethod = source.preDispatchingMethod,
+        //         MachineFlexibilityProbability = source.MachineFlexibilityProbability,
+        //     };
+        // }
 
         private FJSSPConfig[] LoadConfigs(string cliPath)
         {

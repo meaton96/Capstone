@@ -91,7 +91,8 @@ namespace Assets.Scripts.Simulation.Channels
                 MaxOpsPerJob = root["maxOpsPerJob"]?.Value<int>() ?? 6,
                 AGVCount = root["agvCount"]?.Value<int>() ?? 5,
                 MachineFlexibilityProbability = root["machineFlexibilityProbability"]?.Value<float>() ?? 0f,
-
+                parkingMethod = root["parkingMethod"]?.Value<string>() ?? "single",
+                preDispatchingMethod = root["preDispatchingMethod"]?.Value<string>() ?? "fixed",
             };
 
             // MachineTypeLayout from machineTypes string array

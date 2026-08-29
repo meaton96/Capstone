@@ -93,6 +93,13 @@ updated:
     --timescale   100 \
     --loglevel    Medium
 
+./run_generated.sh \
+    --batchconfig   ./BatchConfigs/agv_congestion_sweep.json \
+    --baselinedrain \
+    --repeats   3 \
+    --exe       ./capstone.x86_64 \
+    --loglevel Medium
+
 # single generated with stochastic congif
 
 ./capstone.x86_64 \

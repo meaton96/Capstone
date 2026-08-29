@@ -51,6 +51,15 @@ namespace Assets.Scripts.Simulation
         /// <summary>Simulation time of the last completed operation per machine ID (used for TTF validation).</summary>
         private readonly Dictionary<int, double> _lastOpTime = new();
 
+        /// <summary>Job exits within the currently-open throughput window. Reset on each window close.</summary>
+        private int _windowExits;
+
+        /// <summary>Cumulative job exits this episode.</summary>
+        private int _totalExits;
+
+        /// <summary>One record per closed throughput window. Attached to the EpisodeRecord in Build().</summary>
+        private readonly List<ThroughputWindowRecord> _throughputWindows = new();
+
         // ── Reset ─────────────────────────────────────────────────────────────
 
         /// <summary>
@@ -68,9 +77,43 @@ namespace Assets.Scripts.Simulation
             _repairTime.Clear();
             _opsCompleted.Clear();
             _lastOpTime.Clear();
+            _windowExits = 0;
+            _totalExits = 0;
+            _throughputWindows.Clear();
         }
 
         // ── Recording API — called from SimBridge Update/handlers ─────────────
+
+        /// <summary>
+        /// Records that a job has reached JobState.Exited. Called from FlagHarvester.HarvestAGVFlags
+        /// when a delivery completes with machineId &lt; 0.
+        /// </summary>
+        public void RecordJobExit()
+        {
+            _windowExits++;
+            _totalExits++;
+        }
+
+        /// <summary>
+        /// Snapshots throughput for the window [windowStart, windowEnd) and resets the per-window
+        /// exit counter. Driven by FactoryOrchestrator's window clock.
+        /// </summary>
+        /// <param name="windowStart">Sim-time at the start of the window.</param>
+        /// <param name="windowEnd">Sim-time at window close (current SimTime for the trailing partial window).</param>
+        /// <param name="workInProgress">Jobs in the system (not Exited) at close time.</param>
+        public void CloseThroughputWindow(double windowStart, double windowEnd, int workInProgress)
+        {
+            _throughputWindows.Add(new ThroughputWindowRecord
+            {
+                WindowStartTime = windowStart,
+                WindowEndTime = windowEnd,
+                WindowSeconds = (float)(windowEnd - windowStart),
+                JobsCompleted = _windowExits,
+                CumulativeCompleted = _totalExits,
+                WorkInProgress = workInProgress,
+            });
+            _windowExits = 0;
+        }
 
         /// <summary>
         /// Records that a machine has started an operation. Called when StartJob fires.
@@ -229,6 +272,8 @@ namespace Assets.Scripts.Simulation
                     RepairTime = _repairTime.TryGetValue(mid, out float rt) ? rt : 0f,
                 });
             }
+
+            record.ThroughputRecords.AddRange(_throughputWindows);
 
             return record;
         }

@@ -42,14 +42,18 @@ namespace Assets.Scripts.Simulation.Jobs
 
             foreach (var def in definitions)
             {
+                int opCount = def.OperationSequence.Length;
                 var jobData = new JobData
                 {
                     JobId = def.JobId,
                     ArrivalTime = def.ArrivalTime,
                     OperationTypes = def.OperationSequence,
                     EligibleMachinesPerOp = def.EligibleMachinesPerOp,
-                    TotalOperations = def.OperationSequence.Length,
-                    OperationTravelTimes = new float[def.OperationSequence.Length],
+                    TotalOperations = opCount,
+                    OperationTravelTimes = new float[opCount],
+                    OpQueueEntryTimes = NewUnstampedArray(opCount),
+                    OpProcStartTimes = NewUnstampedArray(opCount),
+                    OpProcEndTimes = NewUnstampedArray(opCount),
 
                     State = JobState.NeedsRouting,
                     LocationMachineId = -1,
@@ -57,9 +61,7 @@ namespace Assets.Scripts.Simulation.Jobs
                     AssignedAgvId = -1,
                     CurrentOpIndex = 0,
                     CompletedOps = 0,
-                    StateEntryTime = 0,
-                    TotalWaitTime = 0,
-                    TotalTransitTime = 0
+                    StateEntryTime = def.ArrivalTime,
                 };
 
                 if (spawnVisuals && jobVisualPrefab != null)
@@ -90,23 +92,27 @@ namespace Assets.Scripts.Simulation.Jobs
         /// </remarks>
         public JobData AddDynamicJob(FJSSPJobDefinition def, bool spawnVisuals)
         {
+            int opCount = def.OperationSequence.Length;
             var jobData = new JobData
             {
                 JobId = def.JobId,
                 ArrivalTime = def.ArrivalTime,
                 OperationTypes = def.OperationSequence,
                 EligibleMachinesPerOp = def.EligibleMachinesPerOp,
-                TotalOperations = def.OperationSequence.Length,
-                OperationTravelTimes = new float[def.OperationSequence.Length],
+                TotalOperations = opCount,
+                OperationTravelTimes = new float[opCount],
+                OpQueueEntryTimes = NewUnstampedArray(opCount),
+                OpProcStartTimes = NewUnstampedArray(opCount),
+                OpProcEndTimes = NewUnstampedArray(opCount),
                 State = JobState.NeedsRouting,
                 LocationMachineId = -1,
                 TargetMachineId = -1,
                 AssignedAgvId = -1,
                 CurrentOpIndex = 0,
                 CompletedOps = 0,
-                StateEntryTime = 0,
-                TotalWaitTime = 0,
-                TotalTransitTime = 0,
+                // Dynamic jobs enter mid-episode — anchor the clock at their actual arrival,
+                // not 0, so their first TransitionTo() doesn't backfill time before they existed.
+                StateEntryTime = def.ArrivalTime,
             };
 
             if (spawnVisuals && jobVisualPrefab != null)
@@ -119,6 +125,16 @@ namespace Assets.Scripts.Simulation.Jobs
 
             allJobs.Add(jobData);
             return jobData;
+        }
+
+        /// <summary>
+        /// Allocates a per-operation timestamp array pre-filled with -1 (sentinel for "not yet reached").
+        /// </summary>
+        private static float[] NewUnstampedArray(int length)
+        {
+            var arr = new float[length];
+            for (int i = 0; i < length; i++) arr[i] = -1f;
+            return arr;
         }
 
         /// <summary>

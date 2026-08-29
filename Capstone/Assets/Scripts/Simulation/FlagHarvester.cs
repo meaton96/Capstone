@@ -85,6 +85,9 @@ namespace Assets.Scripts.Simulation
                 JobData job = _jobs.Get(jobId);
                 if (job == null) continue;
 
+                // CurrentOpIndex still refers to the op that just finished — stamp before advancing.
+                job.OpProcEndTimes[job.CurrentOpIndex] = (float)_simTimeRef;
+
                 job.CompletedOps++;
                 if (job.CurrentOpIndex < job.TotalOperations)
                     job.CurrentOpIndex++;
@@ -94,10 +97,9 @@ namespace Assets.Scripts.Simulation
 
                 if (job.IsLastOperation)
                 {
-                    job.State = JobState.WaitingForPickup;
+                    job.TransitionTo(JobState.WaitingForPickup, _simTimeRef);
                     job.TargetMachineId = -1;
                     job.LocationMachineId = mid;
-                    job.StateEntryTime = _simTimeRef;
 
                     if (job.PreDispatchedAgvId >= 0)
                     {
@@ -112,9 +114,8 @@ namespace Assets.Scripts.Simulation
                 }
                 else
                 {
-                    job.State = JobState.NeedsRouting;
+                    job.TransitionTo(JobState.NeedsRouting, _simTimeRef);
                     job.LocationMachineId = mid;
-                    job.StateEntryTime = _simTimeRef;
                 }
             }
         }
@@ -141,7 +142,7 @@ namespace Assets.Scripts.Simulation
                 // Skip pre-dispatch if the source machine is not operational
                 if (machine.HealthState != MachineHealthState.Operational) continue;
 
-                AGVController agv = _agvPool.GetAvailableAGV();
+                AGVController agv = _agvPool.GetNearestAvailableAGV(machine, machine.GetPickupPosition());
                 if (agv == null) continue;
 
                 agv.PreDispatch(jobId, machine.GetPickupPosition(), machine);
@@ -163,8 +164,7 @@ namespace Assets.Scripts.Simulation
                     JobData job = _jobs.Get(agv.CurrentJobId);
                     if (job != null && job.State == JobState.WaitingForPickup)
                     {
-                        job.State = JobState.InTransit;
-                        job.StateEntryTime = _simTimeRef;
+                        job.TransitionTo(JobState.InTransit, _simTimeRef);
                     }
                 }
 
@@ -176,27 +176,23 @@ namespace Assets.Scripts.Simulation
 
                     if (job != null)
                     {
-                        // Capture transit duration before overwriting StateEntryTime.
-                        // StateEntryTime was set to the InTransit entry point in HarvestAGVFlags (PickedUpFlag branch).
-                        double transitDuration = _simTimeRef - job.StateEntryTime;
-                        job.TotalTransitTime += transitDuration;
-
                         if (machineId < 0)
                         {
                             // Job has exited the system entirely
-                            job.State = JobState.Exited;
+                            job.TransitionTo(JobState.Exited, _simTimeRef);
+                            job.ExitTime = (float)_simTimeRef;
+                            _tracker.RecordJobExit();
                             SimLogger.Medium($"Job {job.JobId} exited the system after delivery.");
                             job.LocationMachineId = -1;
-                            job.StateEntryTime = _simTimeRef;
                             if (job.Visual != null) job.Visual.gameObject.SetActive(false);
                         }
                         else
                         {
                             // Job is delivered to a target machine — stamp per-op travel time
                             job.OperationTravelTimes[job.CurrentOpIndex] = agv.LastTripDuration;
-                            job.State = JobState.Queued;
+                            job.OpQueueEntryTimes[job.CurrentOpIndex] = (float)_simTimeRef;
+                            job.TransitionTo(JobState.Queued, _simTimeRef);
                             job.LocationMachineId = machineId;
-                            job.StateEntryTime = _simTimeRef;
 
                             PhysicalMachine targetMachine = _layout.GetMachine(machineId);
                             targetMachine.PlaceOnIncoming(jobId, job.Visual);
@@ -208,6 +204,41 @@ namespace Assets.Scripts.Simulation
 
                 if (agv.PickedUpFlag || agv.DeliveredFlag)
                     agv.ClearFlags();
+            }
+        }
+
+        /// <summary>
+        /// Handles AGVs that self-recovered from a suspected traffic-zone deadlock
+        /// (AGVController.HandleZoneStall). The AGV has already released its own route and
+        /// zone reservations and begun returning to parking; this owns the JobData side —
+        /// clearing the job's link to that AGV and, if the job was physically committed to it
+        /// (WaitingForPickup or InTransit), returning it to NeedsRouting so a fresh AGV can be
+        /// assigned. A job that was only pre-dispatched (still Processing at its source
+        /// machine, never picked up) is left alone — only its PreDispatchedAgvId claim is
+        /// cleared, mirroring how HandleZoneStall itself distinguishes the two cases.
+        /// </summary>
+        public void HarvestStalledAGVs()
+        {
+            foreach (var agv in _agvPool.AllAGVs)
+            {
+                if (!agv.StalledFlag) continue;
+
+                JobData job = _jobs.Get(agv.StalledJobId);
+                if (job != null)
+                {
+                    if (job.PreDispatchedAgvId == agv.AgvId) job.PreDispatchedAgvId = -1;
+
+                    if (job.State == JobState.WaitingForPickup || job.State == JobState.InTransit)
+                    {
+                        job.TransitionTo(JobState.NeedsRouting, _simTimeRef);
+                        job.TargetMachineId = -1;
+                        job.AssignedAgvId = -1;
+                        SimLogger.Medium($"[FlagHarvester] Job {job.JobId} returned to NeedsRouting — " +
+                                          $"AGV {agv.AgvId} stalled on a traffic-zone reservation.");
+                    }
+                }
+
+                agv.ClearFlags();
             }
         }
 
@@ -236,22 +267,21 @@ namespace Assets.Scripts.Simulation
                     PhysicalMachine dst = _layout.GetMachine(job.TargetMachineId);
                     if (dst != null && dst.HealthState != MachineHealthState.Operational)
                     {
-                        job.State = JobState.NeedsRouting;
+                        job.TransitionTo(JobState.NeedsRouting, _simTimeRef);
                         job.TargetMachineId = -1;
-                        job.StateEntryTime = _simTimeRef;
                         SimLogger.Low($"[FlagHarvester] Job {job.JobId} returned to NeedsRouting — " +
                                       $"target machine {dst.MachineId} is {dst.HealthState}.");
                         continue;
                     }
                 }
 
-                AGVController agv = _agvPool.GetAvailableAGV();
-                if (agv == null) break;
-
                 PhysicalMachine src = job.LocationMachineId >= 0
                     ? _layout.GetMachine(job.LocationMachineId) : null;
                 Vector3 pickupPos = src != null
                     ? src.GetPickupPosition() : _layout.IncomingBeltPosition;
+
+                AGVController agv = _agvPool.GetNearestAvailableAGV(src, pickupPos);
+                if (agv == null) break;
 
                 PhysicalMachine target = job.TargetMachineId >= 0
                     ? _layout.GetMachine(job.TargetMachineId) : null;

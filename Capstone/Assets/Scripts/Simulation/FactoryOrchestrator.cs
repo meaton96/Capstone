@@ -22,6 +22,18 @@ namespace Assets.Scripts.Simulation
     /// </summary>
     public class FactoryOrchestrator : MonoBehaviour
     {
+
+        /// <summary>
+        /// When true, heuristic (fixed-PDR) decisions are drained within a single frame
+        /// instead of one-per-frame. ONLY valid for baseline batch runs with no neural
+        /// policy — it bypasses the ml-agents request cycle and applies the configured
+        /// rule directly. MUST stay false for agent training/inference, or the policy
+        /// never sees observations.
+        /// </summary>
+        public bool BaselineDrainMode = false;
+
+        private int _baselineRuleIndex;
+        private bool _baselineRuleIsRandom;
         /// <summary>
         /// Singleton instance of the FactoryOrchestrator.
         /// </summary>
@@ -171,6 +183,13 @@ namespace Assets.Scripts.Simulation
         /// </summary>
         private FailureCoordinator _failures;
 
+        // ── Throughput window clock ───────────────────────────────────────────
+        /// <summary>Length of each throughput window (sim-seconds), from config; 60 default.</summary>
+        private float _throughputWindowLength = 60f;
+
+        /// <summary>SimTime at which the next throughput window closes.</summary>
+        private float _nextThroughputBoundary = 60f;
+
         /// <summary>
         /// Manages decision requests and coordinates dispatch/routing decisions.
         /// </summary>
@@ -238,7 +257,24 @@ namespace Assets.Scripts.Simulation
         /// <summary>
         /// Maximum allowed simulation time in seconds before an episode is forcibly terminated.
         /// </summary>
-        private const double MAX_EPISODE_SIM_SECONDS = 500_000.0;
+        private const double MAX_EPISODE_SIM_SECONDS = 100_000.0;
+
+        /// <summary>
+        /// Deadlock watchdog: if zero AGVs anywhere in the traffic-zone network complete a
+        /// zone entry (TrafficZone.TraversalCount, summed across all zones) for this many
+        /// consecutive sim-seconds while jobs remain incomplete, the episode is declared
+        /// deadlocked and terminated immediately instead of running to MAX_EPISODE_SIM_SECONDS.
+        /// A circular-wait deadlock in TrafficZoneManager.TryReserve never self-resolves (no
+        /// AGV in the cycle can ever move), so ANY sustained system-wide stall is conclusive —
+        /// no legitimate congestion (even the heaviest surviving runs) goes this long without
+        /// a traversal completing somewhere in the network.
+        /// </summary>
+        private const double DEADLOCK_STALL_SECONDS = 3_000.0;
+
+        private int _lastZoneTraversalTotal = -1;
+        private double _lastTraversalChangeSimTime;
+        private bool _deadlockDetected;
+        private double _deadlockSimTime = -1.0;
 
         /// <summary>
         /// Singleton initialization. Destroys duplicate instances if one already exists.
@@ -292,7 +328,7 @@ namespace Assets.Scripts.Simulation
             UnityEngine.Random.InitState(currentConfig.Seed);
             cachedMachinesByType = layoutManager.BuildFloor(currentConfig);
             trafficZoneManager.BuildZoneGraph();
-            agvPool.InitializeFleet(currentConfig.AGVCount);
+            agvPool.InitializeFleet(currentConfig);
 
             IsFactoryReady = true;
             OnFactorySpawned?.Invoke();
@@ -325,6 +361,9 @@ namespace Assets.Scripts.Simulation
             agent.SetHeuristicRule(currentConfig.dispatchingRule);
             _configuredRuleName = currentConfig.dispatchingRule.ToString();
 
+            _baselineRuleIsRandom = currentConfig.dispatchingRule == DispatchingRule.Random;
+            _baselineRuleIndex = GetRuleIndex(currentConfig.dispatchingRule);
+
             FJSSPJobDefinition[] jobDefs;
             if (prebuiltJobs != null)
             {
@@ -345,7 +384,8 @@ namespace Assets.Scripts.Simulation
                 foreach (var machine in layoutManager.Machines)
                     machine.InitializeStochastic();
             }
-
+            _throughputWindowLength = currentConfig.ThroughputTimingWindow <= 0f ? 60f : currentConfig.ThroughputTimingWindow;
+            _nextThroughputBoundary = _throughputWindowLength;   // first window closes at t = windowLength
             _tracker.Reset();
             _machineProcessingStartTime.Clear();
 
@@ -383,6 +423,12 @@ namespace Assets.Scripts.Simulation
             previousMakespan = 0;
             IsWaitingForAction = false;
             startTime = Time.time;
+
+            // ── Arm deadlock watchdog ────────────────────────────────────────────
+            _lastZoneTraversalTotal = -1;
+            _lastTraversalChangeSimTime = 0.0;
+            _deadlockDetected = false;
+            _deadlockSimTime = -1.0;
 
             // ── Arm Poisson arrival clock ──────────────────────────────────────
             _dynamicJobsSpawned = 0;
@@ -438,33 +484,146 @@ namespace Assets.Scripts.Simulation
                 return;
             }
 
+            if (CheckForDeadlock())
+            {
+                _deadlockDetected = true;
+                _deadlockSimTime = SimTime;
+                SimLogger.Error($"[Orchestrator] Deadlock detected — no AGV completed a traffic-zone " +
+                                 $"entry anywhere in the network for {DEADLOCK_STALL_SECONDS:F0}s " +
+                                 $"(stalled since {_lastTraversalChangeSimTime:F0}s, now {SimTime:F0}s). " +
+                                 $"Terminating early instead of running to timeout.");
+                FinaliseEpisode();
+                return;
+            }
+
             _failures.SetSimTime(SimTime);
             _flags.SetSimTime(SimTime);
 
             _failures.HarvestFailureFlags();
             _flags.HarvestMachineFlags();
             _flags.HarvestAGVFlags();
+            _flags.HarvestStalledAGVs();
             _flags.HarvestAlmostDoneFlags(PreDispatchLeadTime);
             _flags.AssignAGVs();
 
             if (!IsWaitingForAction)
             {
-                var req = _decisions.FindNextDecision();
-                if (req != null)
+                if (BaselineDrainMode)
+                    DrainHeuristicDecisions();
+                else
                 {
-                    CurrentDecision = req;
-                    IsWaitingForAction = true;
-                    OnDecisionRequired?.Invoke(CurrentDecision);
+                    var req = _decisions.FindNextDecision();
+                    if (req != null)
+                    {
+                        CurrentDecision = req;
+                        IsWaitingForAction = true;
+                        OnDecisionRequired?.Invoke(CurrentDecision);
+                    }
                 }
             }
 
             // ── Tick Poisson arrival clock ─────────────────────────────────────
             // Runs regardless of IsWaitingForAction — arrivals are asynchronous events.
             TickPoissonClock();
-
-            if (Jobs.AreAllExited())
+            TickThroughputClock();
+            // Guard against ending the episode while arrivals are still pending: if the
+            // currently-spawned job pool drains to zero before the next scheduled Poisson
+            // arrival lands, AreAllExited() alone would end the episode early and silently
+            // drop the remaining arrivals — and since which rule races ahead fastest varies,
+            // this made the realized workload differ across rules for the "same" seed.
+            if (Jobs.AreAllExited() && AllArrivalsExhausted())
                 FinaliseEpisode();
         }
+
+        /// <summary>
+        /// True once the system-wide sum of TrafficZone.TraversalCount has gone unchanged for
+        /// DEADLOCK_STALL_SECONDS while jobs remain incomplete. A summed, network-wide signal
+        /// is used (rather than watching any single zone or AGV) because heavy-but-resolving
+        /// congestion routinely stalls individual zones for a while — only a true circular-wait
+        /// deadlock stops EVERY zone in the network from ever admitting another AGV.
+        /// </summary>
+        private bool CheckForDeadlock()
+        {
+            if (Jobs.AreAllExited()) return false;
+
+            int total = 0;
+            foreach (var zone in trafficZoneManager.Zones) total += zone.TraversalCount;
+
+            if (total != _lastZoneTraversalTotal)
+            {
+                _lastZoneTraversalTotal = total;
+                _lastTraversalChangeSimTime = SimTime;
+                return false;
+            }
+
+            return (SimTime - _lastTraversalChangeSimTime) > DEADLOCK_STALL_SECONDS;
+        }
+
+        /// <summary>
+        /// True if no further Poisson arrivals can occur this episode: arrivals are disabled,
+        /// or a finite cap has already been reached. False if arrivals are enabled and either
+        /// uncapped or the cap hasn't been hit yet — in both cases more jobs may still spawn.
+        /// </summary>
+        private bool AllArrivalsExhausted()
+        {
+            bool arrivalsEnabled = StochasticEventManager.Instance?.DynamicArrivalsEnabled ?? false;
+            if (!arrivalsEnabled) return true;
+
+            int cap = currentConfig.Stochastic?.DynamicJobCap ?? 0;
+            return cap != 0 && _dynamicJobsSpawned >= cap;
+        }
+        /// <summary>
+        /// Drains all CURRENTLY-READY decisions this frame, applying the configured heuristic
+        /// rule directly. Each Step() commits its routing/dispatch state before the next
+        /// FindNextDecision() runs, so dependent decisions resolve in order. The loop terminates
+        /// naturally when no ready decision remains — freshly-routed jobs are NOT re-pickable
+        /// here because they must physically travel before becoming Queued/dispatchable, so the
+        /// ready set is bounded by current floor state, not unbounded.
+        ///
+        /// This removes the engine-imposed one-decision-per-frame serialization that made the
+        /// system appear decision-bound. It models a fast scheduler that clears ready work
+        /// immediately — the correct baseline behaviour. Only runs when BaselineDrainMode is set.
+        /// </summary>
+        private void DrainHeuristicDecisions()
+        {
+            const int guard = 1_000_000;   // paranoia; real count bounded by ready events
+            int n = 0;
+            while (n++ < guard)
+            {
+                DecisionRequest req = _decisions.FindNextDecision();
+                if (req == null) break;
+
+                CurrentDecision = req;
+                IsWaitingForAction = true;   // Step() expects to be clearing a pending decision
+
+                int action = _baselineRuleIsRandom
+                    ? UnityEngine.Random.Range(0, ActionCount)
+                    : _baselineRuleIndex;
+
+                Step(action);                // commits the decision, clears IsWaitingForAction
+            }
+
+            if (n >= guard)
+                SimLogger.Error("[Orchestrator] DrainHeuristicDecisions hit guard — possible " +
+                                "decision that doesn't change state. Investigate FindNextDecision.");
+        }
+        /// <summary>
+        /// Closes every throughput window boundary that SimTime has crossed this frame. The while-loop
+        /// handles a frame whose dt spans more than one window (e.g. high timescale), mirroring how the
+        /// Poisson clock catches up.
+        /// </summary>
+        private void TickThroughputClock()
+        {
+            while (SimTime >= _nextThroughputBoundary)
+            {
+                double start = _nextThroughputBoundary - _throughputWindowLength;
+                _tracker.CloseThroughputWindow(start, _nextThroughputBoundary, WorkInProgress());
+                _nextThroughputBoundary += _throughputWindowLength;
+            }
+        }
+
+        /// <summary>Jobs currently in the system (spawned but not yet Exited).</summary>
+        private int WorkInProgress() => Jobs.JobCount - Jobs.CountInState(JobState.Exited);
 
         /// <summary>
         /// Checks whether the Poisson arrival clock has fired and, if so, injects a new
@@ -472,26 +631,24 @@ namespace Assets.Scripts.Simulation
         /// </summary>
         private void TickPoissonClock()
         {
-            if (SimTime < _nextArrivalSimTime) return;
-
             int cap = currentConfig.Stochastic?.DynamicJobCap ?? 0;
-            if (cap != 0 && _dynamicJobsSpawned >= cap) return;
+            // Spawn ALL arrivals whose scheduled time has passed this frame, not just one.
+            while (SimTime >= _nextArrivalSimTime)
+            {
+                if (cap != 0 && _dynamicJobsSpawned >= cap) { _nextArrivalSimTime = float.MaxValue; break; }
 
-            FJSSPJobDefinition def = FJSSPJobGenerator.GenerateSingle(
-                _nextDynamicJobId++, currentConfig, cachedMachinesByType);
-            def.ArrivalTime = (float)SimTime;   // stamp actual injection time; GenerateSingle leaves this 0f
-            Jobs.AddDynamicJob(def, spawnVisuals: true);
-            _dynamicJobsSpawned++;
-            _lastDynamicArrivalSimTime = (float)SimTime;
+                FJSSPJobDefinition def = FJSSPJobGenerator.GenerateSingle(
+                    _nextDynamicJobId++, currentConfig, cachedMachinesByType);
+                def.ArrivalTime = (float)SimTime;   // note: see caveat below
+                Jobs.AddDynamicJob(def, spawnVisuals: true);
+                _dynamicJobsSpawned++;
+                _lastDynamicArrivalSimTime = (float)SimTime;
 
-            SimLogger.Medium($"[Orchestrator] Dynamic job {def.JobId} arrived at " +
-                             $"t={SimTime:F1}s — " +
-                             $"{_dynamicJobsSpawned}/{(cap == 0 ? "∞" : cap.ToString())} dynamic jobs");
-
-            bool moreExpected = cap == 0 || _dynamicJobsSpawned < cap;
-            _nextArrivalSimTime = moreExpected
-                ? (float)SimTime + StochasticEventManager.Instance.SampleInterArrivalTime()
-                : float.MaxValue;
+                bool moreExpected = cap == 0 || _dynamicJobsSpawned < cap;
+                _nextArrivalSimTime = moreExpected
+                    ? _nextArrivalSimTime + StochasticEventManager.Instance.SampleInterArrivalTime()
+                    : float.MaxValue;
+            }
         }
 
         /// <summary>
@@ -527,8 +684,7 @@ namespace Assets.Scripts.Simulation
             if (job == null) return;
 
             job.TargetMachineId = chosenMachineId;
-            job.State = JobState.WaitingForPickup;
-            job.StateEntryTime = SimTime;
+            job.TransitionTo(JobState.WaitingForPickup, SimTime);
 
             if (job.PreDispatchedAgvId >= 0)
             {
@@ -561,9 +717,8 @@ namespace Assets.Scripts.Simulation
             if (job == null || job.State != JobState.Queued || job.LocationMachineId != machineId) return;
 
             float duration = job.GetProcessingTime(machineId);
-            job.State = JobState.Processing;
-            job.TotalWaitTime += (SimTime - job.StateEntryTime);
-            job.StateEntryTime = SimTime;
+            job.OpProcStartTimes[job.CurrentOpIndex] = (float)SimTime;
+            job.TransitionTo(JobState.Processing, SimTime);
 
             PhysicalMachine machine = layoutManager.GetMachine(machineId);
             machine.StartJob(chosenJobId, duration, job.Visual);
@@ -582,6 +737,11 @@ namespace Assets.Scripts.Simulation
         private void FinaliseEpisode()
         {
             episodeActive = false;
+            // Close the trailing partial window so completions after the last full boundary
+            // still land in throughput.csv. Skipped if SimTime sits exactly on a closed boundary.
+            double lastBoundary = _nextThroughputBoundary - _throughputWindowLength;
+            if (SimTime > lastBoundary)
+                _tracker.CloseThroughputWindow(lastBoundary, SimTime, WorkInProgress());
 
             var telemetry = EpisodeTelemetryChannel.Instance;
             if (telemetry != null)
@@ -618,6 +778,14 @@ namespace Assets.Scripts.Simulation
             record.LastDynamicArrivalTime = _lastDynamicArrivalSimTime;
             if (_dynamicJobsSpawned > 0)
                 record.JobCount = Jobs.JobCount;  // true total = initial + dynamic
+
+            // Configuration snapshot fields
+            record.ParkingMethod = currentConfig.parkingMethod;
+            record.PreDispatchingMethod = currentConfig.preDispatchingMethod;
+
+            // Deadlock watchdog outcome — see CheckForDeadlock
+            record.DeadlockDetected = _deadlockDetected;
+            record.DeadlockSimTime = _deadlockDetected ? _deadlockSimTime : -1.0;
 
             // Collect AGV performance records
             foreach (var agv in agvPool.AllAGVs)
@@ -668,11 +836,49 @@ namespace Assets.Scripts.Simulation
                         MaxProcTime = eligible.Count > 0 ? max : 0f,
                         MeanProcTime = eligible.Count > 0 ? sum / eligible.Count : 0f,
                         TravelTime = job.OperationTravelTimes[i],
+                        QueueEntryTime = job.OpQueueEntryTimes[i],
+                        ProcStartTime = job.OpProcStartTimes[i],
+                        ProcEndTime = job.OpProcEndTimes[i],
                     });
                 }
-            }
 
-            
+                bool completed = job.State == JobState.Exited;
+
+                // Work content: sum of realized proc durations for completed ops; for ops never
+                // finished (censored jobs), fall back to that op's mean estimate across eligible machines.
+                float workContent = 0f;
+                for (int i = 0; i < job.TotalOperations; i++)
+                {
+                    float realized = (job.OpProcStartTimes[i] >= 0 && job.OpProcEndTimes[i] >= 0)
+                        ? job.OpProcEndTimes[i] - job.OpProcStartTimes[i] : -1f;
+                    if (realized >= 0)
+                    {
+                        workContent += realized;
+                    }
+                    else
+                    {
+                        var eligible = job.EligibleMachinesPerOp[i];
+                        workContent += eligible.Count > 0 ? eligible.Values.Average() : 0f;
+                    }
+                }
+
+                record.JobCompletionRecords.Add(new JobCompletionRecord
+                {
+                    JobId = job.JobId,
+                    IsDynamic = isDynamic,
+                    Completed = completed,
+                    ArrivalTime = job.ArrivalTime,
+                    ExitTime = job.ExitTime,
+                    TotalOperations = job.TotalOperations,
+                    CompletedOps = job.CompletedOps,
+                    WorkContent = workContent,
+                    TimeNeedsRouting = job.TimeNeedsRouting,
+                    TimeWaitingPickup = job.TimeWaitingPickup,
+                    TimeInTransit = job.TimeInTransit,
+                    TimeQueued = job.TimeQueued,
+                    TimeProcessingState = job.TimeProcessing,
+                });
+            }
 
             if (record.MachineFailureCount > 0)
             {

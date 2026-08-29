@@ -53,13 +53,15 @@ def main():
     )
     parser.add_argument(
         "-dir",
-        required=True,
+        required=False,
         help="Path to the directory containing the source CSV files.",
+        default=os.path.join(os.getcwd(), "generated")
     )
     parser.add_argument(
         "-out",
-        required=True,
+        required=False,
         help="Path to the directory where merged CSVs should be saved.",
+        default=os.path.join(os.getcwd(), "merged")
     )
 
     args = parser.parse_args()
@@ -70,7 +72,9 @@ def main():
         "results_*.csv": "results.csv",
         "segment_congestion_*.csv": "segment_congestion.csv",
         "machine_utilization_*.csv": "machine_utilization.csv",
-        "job_operations_*.csv": "job_operations.csv"
+        "job_operations_*.csv": "job_operations.csv",
+        "throughput_*.csv": "throughput.csv",
+        "job_completions_*.csv": "job_completions.csv"
     }
 
     print(f"\n🚀 Starting merge process...")
