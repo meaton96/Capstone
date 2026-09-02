@@ -484,6 +484,15 @@ namespace Assets.Scripts.Simulation
                 return;
             }
 
+            double fixedDuration = currentConfig?.Stochastic?.EpisodeDurationSeconds ?? 0.0;
+            if (fixedDuration > 0.0 && SimTime > fixedDuration)
+            {
+                SimLogger.Low($"[Orchestrator] Fixed episode duration reached at {SimTime:F0}s — " +
+                              $"terminating (steady-state mode; in-flight jobs recorded as censored).");
+                FinaliseEpisode();
+                return;
+            }
+
             if (CheckForDeadlock())
             {
                 _deadlockDetected = true;

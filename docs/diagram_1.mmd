@@ -1,0 +1,19 @@
+%%{init: {'flowchart': {'htmlLabels': true, 'wrappingWidth': 180, 'nodeSpacing': 45, 'rankSpacing': 60, 'padding': 12}, 'themeVariables': {'fontSize': '15px'}}}%%
+flowchart TD
+    A["`Shell launcher (run_batch.sh)`"] -->|"`1 process per rule × disruption`"| B["`capstone.x86_64 -batchmode -nographics`"]
+    B --> C["`HeadlessBatchRunner.Start() parses args`"]
+    C --> D{"`config source?`"}
+    D -->|"-benchmarkdir"| E["`RunMultiBenchmarkCoroutine (all *.json in dir)`"]
+    D -->|"-benchmark"| F["`RunBenchmarkCoroutine (one file)`"]
+    D -->|"-config"| G["`RunBatchCoroutine (generated configs)`"]
+    E --> H["`for benchmark × rule × repeat`"]
+    F --> H
+    G --> I["`for config × rule × repeat`"]
+    H --> J(["`run one episode — see 02`"])
+    I --> J
+    J --> K["`OnEpisodeFinished → ResultsLogger.LogAll`"]
+    K --> L[("`7 CSVs per episode: results, machine util, agv perf, segments, job ops, throughput, job completions`")]
+    L --> M{"`more runs queued?`"}
+    M -->|"yes"| J
+    M -->|"no"| N["`Application.Quit()`"]
+    N --> O["`shell merges CSVs → merged_*.csv`"]

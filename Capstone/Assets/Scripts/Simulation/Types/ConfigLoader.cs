@@ -180,6 +180,7 @@ namespace Assets.Scripts.Simulation.Types
             public bool dynamicArrivalsEnabled = false;
             public float arrivalLambda = 0.003f;
             public int dynamicJobCap = 0;
+            public double episodeDurationSeconds = 0.0;
         }
 
         // ── Conversion ──
@@ -270,6 +271,7 @@ namespace Assets.Scripts.Simulation.Types
                     DynamicArrivalsEnabled = raw.stochastic.dynamicArrivalsEnabled,
                     ArrivalLambda = raw.stochastic.arrivalLambda,
                     DynamicJobCap = raw.stochastic.dynamicJobCap,
+                    EpisodeDurationSeconds = raw.stochastic.episodeDurationSeconds,
                 };
             }
 

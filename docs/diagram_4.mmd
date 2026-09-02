@@ -1,0 +1,13 @@
+%%{init: {'state': {'padding': 10}, 'themeVariables': {'fontSize': '15px'}}}%%
+stateDiagram-v2
+    [*] --> NeedsRouting: spawn / dynamic arrival
+    NeedsRouting --> WaitingForPickup: routed to a machine
+    WaitingForPickup --> InTransit: AGV picks up
+    InTransit --> Queued: AGV delivers
+    Queued --> Processing: dispatched from queue
+    Processing --> NeedsRouting: op done, more remain
+    Processing --> WaitingForPickup: final op done
+    WaitingForPickup --> InTransit: AGV → outgoing belt
+    InTransit --> [*]: delivered → Exited
+    WaitingForPickup --> NeedsRouting: AGV stall recovery
+    InTransit --> NeedsRouting: AGV stall recovery

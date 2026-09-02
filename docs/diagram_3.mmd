@@ -1,0 +1,25 @@
+%%{init: {'flowchart': {'htmlLabels': true, 'wrappingWidth': 180, 'nodeSpacing': 45, 'rankSpacing': 60, 'padding': 12}, 'themeVariables': {'fontSize': '15px'}}}%%
+flowchart TD
+    A["`FindNextDecision()`"] --> B{"`job needs routing, machine available?`"}
+    B -->|"yes"| C["`BuildRoutingDecision: candidates, queues, proc times`"]
+    B -->|"no"| D{"`idle machine, job queued?`"}
+    D -->|"yes"| E["`BuildDispatchDecision: queued job ids + durations`"]
+    D -->|"no"| F["`no decision this frame`"]
+    C --> G{"`BaselineDrainMode?`"}
+    E --> G
+    G -->|"true — heuristic batch"| H["`apply rule directly, Step() now, repeat till none left`"]
+    G -->|"false — RL / interactive"| I["`OnDecisionRequired → Agent.RequestDecision()`"]
+    I --> J["`CollectObservations: 5-stream snapshot`"]
+    J --> K{"`Academy communicator on?`"}
+    K -->|"yes"| L["`neural net picks action 0–8`"]
+    K -->|"no"| M["`Agent.Heuristic(): configured PDR (re-rolled if Random)`"]
+    L --> N["`OnActionReceived → Orchestrator.Step()`"]
+    M --> N
+    H --> N
+    N --> O{"`decision type?`"}
+    O -->|"Routing"| P["`SelectMachine (8 PDRs)`"]
+    O -->|"Dispatch"| Q["`SelectJob (same 8 PDRs)`"]
+    P --> R["`job → WaitingForPickup`"]
+    Q --> S["`job → Processing`"]
+    R --> T["`reward = −Δt / ops; StepResult returned`"]
+    S --> T

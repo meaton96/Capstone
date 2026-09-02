@@ -1,0 +1,24 @@
+%%{init: {'flowchart': {'htmlLabels': true, 'wrappingWidth': 180, 'nodeSpacing': 45, 'rankSpacing': 55, 'padding': 12}, 'themeVariables': {'fontSize': '15px'}}}%%
+flowchart TD
+    A["`StartEpisode()`"] --> A1["`load Python config, else keep current`"]
+    A1 --> A2["`SpawnFactory(): floor → zones → AGVs`"]
+    A2 --> A3["`generate jobs (prebuilt, or FJSSPJobGenerator)`"]
+    A3 --> A4["`init JobStore, Stochastic, Tracker, Flag / Failure / Decision coordinators`"]
+    A4 --> A5["`arm deadlock watchdog + Poisson clock`"]
+    A5 --> B[["`Update() every frame`"]]
+    B --> C{"`SimTime > 100,000s?`"}
+    C -->|"yes"| Z1["`Finalise — timeout`"]
+    C -->|"no"| D{"`0 zone traversals for 3,000s?`"}
+    D -->|"yes"| Z2["`Finalise — deadlock`"]
+    D -->|"no"| E["`harvest flags: failures, machines, AGVs, stalls, pre-dispatch, AssignAGVs`"]
+    E --> F{"`decision pending?`"}
+    F -->|"no"| G(["`decision loop — see 03`"])
+    F -->|"yes"| H["`tick Poisson arrival clock`"]
+    G --> H
+    H --> I["`tick throughput window clock`"]
+    I --> J{"`all jobs Exited, no arrivals pending?`"}
+    J -->|"yes"| Z3["`Finalise — complete`"]
+    J -->|"no"| B
+    Z1 --> K["`build EpisodeRecord, fire OnEpisodeFinished`"]
+    Z2 --> K
+    Z3 --> K

@@ -111,6 +111,20 @@ namespace Assets.Scripts.Simulation.Types
         ///          (e.g. 2× gives a 3× total workload per episode).
         public int DynamicJobCap = 0;
 
+        // ── Fixed-duration (steady-state) episodes ──
+
+        /// @brief Sim-seconds after which the episode ends regardless of job completion, 0 = disabled.
+        ///
+        /// @details For steady-state measurement: pair with DynamicJobCap=0 (unlimited arrivals) so
+        ///          the Poisson process runs for the full duration instead of the default
+        ///          "cap-then-drain" shape (arrivals stop, WIP drains to zero, episode ends).
+        ///          Jobs still in-flight when the duration elapses are recorded as censored
+        ///          (JobCompletionRecord.Completed = false), identical to the existing
+        ///          MAX_EPISODE_SIM_SECONDS timeout path. Analysis should exclude jobs arriving
+        ///          near t=0 (warm-up) AND near the episode end (right-censored, incomplete data)
+        ///          when computing steady-state statistics.
+        public double EpisodeDurationSeconds = 0.0;
+
         // ── Convenience ──
 
         /// @brief True if any disruption source is active.
