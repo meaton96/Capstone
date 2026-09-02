@@ -1,0 +1,99 @@
+{
+  "_comment": "Pilot: crosses arrival regime (heavy=current 0901 overload vs moderate=near-capacity) x machine-failure severity (off vs low), fixed at agv07_single (mid-envelope, non-deadlocking per deadlock-fix-verification memory). Tests whether the 7/9-rule convergence seen in results/0901 (arrival-only, heavy load) persists once there's queueing slack and/or disruptions for routing choice to exploit. Launch with run_generated.sh (NOT run_agv_sweep.sh -- its -disruption flag is dead code for -batchconfig-style runs per HeadlessBatchRunner; the inline 'stochastic' block below is the sole source of truth on this path).",
+  "configs": [
+    {
+      "_comment": "Baseline: heavy load (matches results/0901 med_agv07_single), no failures.",
+      "name": "agv07_single_heavy_nofail",
+      "seed": 42,
+      "jobCount": 10,
+      "machinesPerType": 3,
+      "machineTypes": ["Mill", "Lathe", "Weld", "Inspect", "Assemble"],
+      "minProcTime": 15.0,
+      "maxProcTime": 90.0,
+      "minOpsPerJob": 5,
+      "maxOpsPerJob": 8,
+      "agvCount": 7,
+      "throughputTimingWindow": 60.0,
+      "parkingMethod": "single",
+      "preDispatchingMethod": "fixed",
+      "stochastic": {
+        "dynamicArrivalsEnabled": true,
+        "arrivalLambda": 0.044,
+        "dynamicJobCap": 300
+      }
+    },
+    {
+      "_comment": "Heavy load + low-severity machine failures. Mean TTF ~2700s (~3x a typical episode segment).",
+      "name": "agv07_single_heavy_mflow",
+      "seed": 42,
+      "jobCount": 10,
+      "machinesPerType": 3,
+      "machineTypes": ["Mill", "Lathe", "Weld", "Inspect", "Assemble"],
+      "minProcTime": 15.0,
+      "maxProcTime": 90.0,
+      "minOpsPerJob": 5,
+      "maxOpsPerJob": 8,
+      "agvCount": 7,
+      "throughputTimingWindow": 60.0,
+      "parkingMethod": "single",
+      "preDispatchingMethod": "fixed",
+      "stochastic": {
+        "dynamicArrivalsEnabled": true,
+        "arrivalLambda": 0.044,
+        "dynamicJobCap": 300,
+        "machineFailuresEnabled": true,
+        "weibullK": 1.5,
+        "weibullLambda": 2700.0,
+        "repairLogMu": 4.0,
+        "repairLogSigma": 0.5
+      }
+    },
+    {
+      "_comment": "Moderate/near-capacity load, no failures. dynamicJobCap trimmed to 150 to bound episode length -- lower lambda means longer time-to-inject-all-arrivals, so cap is halved rather than left at 300. Not directly comparable in total job count to the heavy-load entries; comparisons are within-regime (rule vs rule, failure vs no-failure), not across regimes.",
+      "name": "agv07_single_moderate_nofail",
+      "seed": 42,
+      "jobCount": 10,
+      "machinesPerType": 3,
+      "machineTypes": ["Mill", "Lathe", "Weld", "Inspect", "Assemble"],
+      "minProcTime": 15.0,
+      "maxProcTime": 90.0,
+      "minOpsPerJob": 5,
+      "maxOpsPerJob": 8,
+      "agvCount": 7,
+      "throughputTimingWindow": 60.0,
+      "parkingMethod": "single",
+      "preDispatchingMethod": "fixed",
+      "stochastic": {
+        "dynamicArrivalsEnabled": true,
+        "arrivalLambda": 0.01,
+        "dynamicJobCap": 150
+      }
+    },
+    {
+      "_comment": "Moderate/near-capacity load + low-severity machine failures.",
+      "name": "agv07_single_moderate_mflow",
+      "seed": 42,
+      "jobCount": 10,
+      "machinesPerType": 3,
+      "machineTypes": ["Mill", "Lathe", "Weld", "Inspect", "Assemble"],
+      "minProcTime": 15.0,
+      "maxProcTime": 90.0,
+      "minOpsPerJob": 5,
+      "maxOpsPerJob": 8,
+      "agvCount": 7,
+      "throughputTimingWindow": 60.0,
+      "parkingMethod": "single",
+      "preDispatchingMethod": "fixed",
+      "stochastic": {
+        "dynamicArrivalsEnabled": true,
+        "arrivalLambda": 0.01,
+        "dynamicJobCap": 150,
+        "machineFailuresEnabled": true,
+        "weibullK": 1.5,
+        "weibullLambda": 2700.0,
+        "repairLogMu": 4.0,
+        "repairLogSigma": 0.5
+      }
+    }
+  ]
+}
