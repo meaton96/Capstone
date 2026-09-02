@@ -106,7 +106,8 @@ namespace Assets.Scripts.Simulation
 
             if (!IsArmed)
             {
-                SimLogger.Low("[Agent] OnEpisodeBegin skipped — waiting for UI to arm.");
+                SimLogger.Low("[Agent] OnEpisodeBegin no-op — episode start is externally managed " +
+                              "(CLI batch runner, or UI arm not yet pressed). Not a stall.");
                 return;
             }
 
