@@ -1,0 +1,99 @@
+{
+    "configs": [
+        {
+            "name": "small_5j_5m",
+            "seed": 42,
+            "jobCount": 5,
+            "machinesPerType": 1,
+            "machineTypes": [
+                "Mill",
+                "Lathe",
+                "Weld",
+                "Inspect",
+                "Assemble"
+            ],
+            "minProcTime": 5.0,
+            "maxProcTime": 15.0,
+            "minOpsPerJob": 3,
+            "maxOpsPerJob": 5,
+            "maxArrivalTime": 0.0,
+            "agvCount": 2
+        },
+        {
+            "name": "medium_20j_15m",
+            "seed": 42,
+            "jobCount": 20,
+            "machinesPerType": 3,
+            "machineTypes": [
+                "Mill",
+                "Lathe",
+                "Weld",
+                "Inspect",
+                "Assemble"
+            ],
+            "minProcTime": 15.0,
+            "maxProcTime": 90.0,
+            "minOpsPerJob": 5,
+            "maxOpsPerJob": 8,
+            "maxArrivalTime": 0.0,
+            "agvCount": 5
+        },
+        {
+            "name": "large_50j_15m",
+            "seed": 42,
+            "jobCount": 50,
+            "machinesPerType": 3,
+            "machineTypes": [
+                "Mill",
+                "Lathe",
+                "Weld",
+                "Inspect",
+                "Assemble"
+            ],
+            "minProcTime": 15.0,
+            "maxProcTime": 90.0,
+            "minOpsPerJob": 3,
+            "maxOpsPerJob": 7,
+            "maxArrivalTime": 0.0,
+            "agvCount": 5
+        },
+        {
+            "name": "xlarge_100j_20m",
+            "seed": 42,
+            "jobCount": 100,
+            "machinesPerType": 4,
+            "machineTypes": [
+                "Mill",
+                "Lathe",
+                "Weld",
+                "Inspect",
+                "Assemble"
+            ],
+            "minProcTime": 10.0,
+            "maxProcTime": 120.0,
+            "minOpsPerJob": 3,
+            "maxOpsPerJob": 10,
+            "maxArrivalTime": 0.0,
+            "agvCount": 7
+        },
+        {
+            "name": "dynamic_30j_15m",
+            "seed": 42,
+            "jobCount": 30,
+            "machinesPerType": 3,
+            "machineTypes": [
+                "Mill",
+                "Lathe",
+                "Weld",
+                "Inspect",
+                "Assemble"
+            ],
+            "minProcTime": 15.0,
+            "maxProcTime": 60.0,
+            "minOpsPerJob": 4,
+            "maxOpsPerJob": 6,
+            "maxArrivalTime": 120.0,
+            "agvCount": 5
+        }
+    ]
+}

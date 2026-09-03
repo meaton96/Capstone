@@ -15,6 +15,7 @@ namespace Assets.Scripts.Simulation.Logging
     /// job_operations.csv        — one row per (job × op), static plan + realized timestamps (LogJobOperations)
     /// throughput.csv            — one row per closed throughput window (LogThroughput)
     /// job_completions.csv       — one row per job, realized flow time + wait decomposition (LogJobCompletions)
+    /// decision_log.csv          — one row per routing/dispatch decision, incl. degenerate cases (LogDecisions)
     ///
     /// All four share the same filename suffix set by SetFilenameSuffix so output
     /// from different run configurations lands in clearly named files:
@@ -33,6 +34,7 @@ namespace Assets.Scripts.Simulation.Logging
         private static string _jobOpsFilename = "job_operations.csv";
         private static string _throughputFilename = "throughput.csv";
         private static string _jobCompletionsFilename = "job_completions.csv";
+        private static string _decisionLogFilename = "decision_log.csv";
 
         public static void SetFilenameSuffix(string suffix)
         {
@@ -44,6 +46,7 @@ namespace Assets.Scripts.Simulation.Logging
             _jobOpsFilename = StripExt(_jobOpsFilename, ext) + suffix + ext;
             _throughputFilename = StripExt(_throughputFilename, ext) + suffix + ext;
             _jobCompletionsFilename = StripExt(_jobCompletionsFilename, ext) + suffix + ext;
+            _decisionLogFilename = StripExt(_decisionLogFilename, ext) + suffix + ext;
         }
 
         public static void SetSubdirectory(string subdir)
@@ -60,6 +63,7 @@ namespace Assets.Scripts.Simulation.Logging
         private static string JobOpsFilePath => BuildPath(_jobOpsFilename);
         private static string ThroughputFilePath => BuildPath(_throughputFilename);
         private static string JobCompletionsFilePath => BuildPath(_jobCompletionsFilename);
+        private static string DecisionLogFilePath => BuildPath(_decisionLogFilename);
 
         // ── Convenience: write all logs in one call ───────────────────────────
 
@@ -75,6 +79,7 @@ namespace Assets.Scripts.Simulation.Logging
             if (r.JobOperationRecords.Count > 0) LogJobOperations(r);
             if (r.ThroughputRecords.Count > 0) LogThroughput(r);
             if (r.JobCompletionRecords.Count > 0) LogJobCompletions(r);
+            if (r.DecisionRecords.Count > 0) LogDecisions(r);
         }
         // ── Throughput log (throughput.csv) ───────────────────────────────────
 
@@ -308,6 +313,44 @@ namespace Assets.Scripts.Simulation.Logging
                     $"{op.TravelTime:F1}," +
                     $"{op.QueueEntryTime:F1},{op.ProcStartTime:F1},{op.ProcEndTime:F1}," +
                     $"{op.RealizedProcTime:F1},{op.QueueWaitTime:F1}"
+                );
+            }
+        }
+
+        // ── Decision log (decision_log.csv) ───────────────────────────────────
+
+        /// <summary>
+        /// Appends one row per routing/dispatch decision to decision_log.csv, including the
+        /// candidate_count &lt;= 1 degenerate cases where DispatchingEngine.SelectMachine/SelectJob
+        /// short-circuit before the active rule ever evaluates a candidate. Candidate_ids and the
+        /// per-candidate stat columns are '|'-joined parallel lists (empty string if no candidates).
+        /// See DecisionRecord for which stat is which for Routing vs Dispatch rows.
+        /// </summary>
+        public static void LogDecisions(EpisodeRecord r)
+        {
+            bool fileExists = File.Exists(DecisionLogFilePath);
+            using var writer = new StreamWriter(DecisionLogFilePath, append: true);
+
+            if (!fileExists)
+                writer.WriteLine(
+                    "timestamp,instance,rule,seed,makespan," +
+                    "sim_time,decision_index,decision_type,subject_id,chosen_id," +
+                    "candidate_count,is_degenerate," +
+                    "candidate_ids,candidate_stat_a,candidate_stat_b,candidate_stat_c," +
+                    "job_candidate_count,is_job_selection_degenerate,job_candidate_ids"
+                );
+
+            string ts = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            foreach (var d in r.DecisionRecords)
+            {
+                writer.WriteLine(
+                    $"{ts}," +
+                    $"{r.InstanceName},{r.RuleName},{r.Seed},{r.Makespan:F2}," +
+                    $"{d.SimTime:F1},{d.DecisionIndex},{(d.IsRouting ? "Routing" : "Dispatch")}," +
+                    $"{d.SubjectId},{d.ChosenId}," +
+                    $"{d.CandidateCount},{(d.IsDegenerate ? 1 : 0)}," +
+                    $"{d.CandidateIds},{d.CandidateStatA},{d.CandidateStatB},{d.CandidateStatC}," +
+                    $"{d.JobCandidateCount},{(d.IsJobSelectionDegenerate ? 1 : 0)},{d.JobCandidateIds}"
                 );
             }
         }

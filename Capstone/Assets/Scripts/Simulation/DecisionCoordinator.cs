@@ -41,6 +41,14 @@ namespace Assets.Scripts.Simulation
         private Action _incrementDecisionCount;
 
         /// <summary>
+        /// Delegate returning the active baseline PDR's action index (0-8), or -1 if no fixed
+        /// rule applies (RL-agent mode, where the agent hasn't acted yet at decision-assembly
+        /// time, so pre-selecting a job by rule wouldn't make sense). Only set by baseline/
+        /// heuristic headless runs (BaselineDrainMode) — null in interactive/RL mode.
+        /// </summary>
+        private Func<int> _getBaselineActionIndex;
+
+        /// <summary>
         /// Initializes the coordinator with required dependencies via dependency injection.
         /// </summary>
         /// <param name="jobs">The job store providing job data and state information.</param>
@@ -48,18 +56,23 @@ namespace Assets.Scripts.Simulation
         /// <param name="getSimTime">Delegate to retrieve the current simulation time.</param>
         /// <param name="getDecisionCount">Delegate to retrieve the current decision count.</param>
         /// <param name="incrementDecisionCount">Delegate to increment the decision counter.</param>
+        /// <param name="getBaselineActionIndex">Delegate returning the active baseline rule's
+        /// action index, or -1/null if none (RL-agent mode) — used to apply job-priority
+        /// selection among simultaneously-ready routing jobs. Optional.</param>
         public void Initialize(
             JobStore jobs,
             FactoryLayoutManager layout,
             Func<double> getSimTime,
             Func<int> getDecisionCount,
-            Action incrementDecisionCount)
+            Action incrementDecisionCount,
+            Func<int> getBaselineActionIndex = null)
         {
             _jobs = jobs;
             _layout = layout;
             _getSimTime = getSimTime;
             _getDecisionCount = getDecisionCount;
             _incrementDecisionCount = incrementDecisionCount;
+            _getBaselineActionIndex = getBaselineActionIndex;
         }
 
         /// <summary>
@@ -73,24 +86,36 @@ namespace Assets.Scripts.Simulation
         /// </returns>
         public DecisionRequest FindNextDecision()
         {
-            JobData routingJob = _jobs.GetNextNeedsRouting();
-            if (routingJob != null)
+            List<int> readyIds = _jobs.GetAllNeedingRouting();
+            if (readyIds.Count > 0)
             {
-                var eligibleIds = new HashSet<int>(
-                    routingJob.EligibleMachinesPerOp[routingJob.CurrentOpIndex].Keys);
-
-                bool anyAvailable = _layout.Machines
-                    .Any(m => eligibleIds.Contains(m.MachineId) && m.IsAvailableForWork);
-
-                if (!anyAvailable)
+                var routableIds = new List<int>();
+                foreach (int jobId in readyIds)
                 {
-                    _jobs.DeferredJobIds.Add(routingJob.JobId);
-                    SimLogger.Low($"[Orchestrator] Job {routingJob.JobId}: all eligible machines " +
-                                  $"are Failed/Repairing. Deferring routing decision.");
+                    JobData job = _jobs.Get(jobId);
+                    var eligibleIds = new HashSet<int>(job.EligibleMachinesPerOp[job.CurrentOpIndex].Keys);
+
+                    bool anyAvailable = _layout.Machines
+                        .Any(m => eligibleIds.Contains(m.MachineId) && m.IsAvailableForWork);
+
+                    if (!anyAvailable)
+                    {
+                        _jobs.DeferredJobIds.Add(jobId);
+                        SimLogger.Low($"[Orchestrator] Job {jobId}: all eligible machines " +
+                                      $"are Failed/Repairing. Deferring routing decision.");
+                    }
+                    else
+                    {
+                        routableIds.Add(jobId);
+                    }
                 }
-                else
+
+                if (routableIds.Count > 0)
                 {
-                    return BuildRoutingDecision(routingJob);
+                    int chosenJobId = SelectRoutingJobId(routableIds);
+                    DecisionRequest decision = BuildRoutingDecision(_jobs.Get(chosenJobId));
+                    decision.JobCandidateIds = routableIds.ToArray();
+                    return decision;
                 }
             }
 
@@ -103,6 +128,22 @@ namespace Assets.Scripts.Simulation
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Picks which of several simultaneously-routable jobs gets this routing decision, using
+        /// job-priority scoring (DispatchingEngine.SelectRoutingJob) when a baseline rule is
+        /// known; falls back to first-in-list (previous FIFO behaviour, unchanged) in RL-agent
+        /// mode or when only one job is routable (no real choice either way).
+        /// </summary>
+        private int SelectRoutingJobId(List<int> routableIds)
+        {
+            if (routableIds.Count == 1) return routableIds[0];
+
+            int actionIndex = _getBaselineActionIndex?.Invoke() ?? -1;
+            if (actionIndex < 0) return routableIds[0];
+
+            return DispatchingEngine.SelectRoutingJob(actionIndex, routableIds, _jobs, _getSimTime());
         }
 
         /// <summary>

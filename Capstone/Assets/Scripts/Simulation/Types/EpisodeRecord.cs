@@ -97,6 +97,14 @@ namespace Assets.Scripts.Simulation.Types
         // Populated by EpisodeTracker.RecordJobOperations(jobStore.AllJobs, dynamicJobIds)
         // at episode end. One JobOperationRecord per (job × operation).
         public List<JobOperationRecord> JobOperationRecords = new List<JobOperationRecord>();
+
+        // ── Per-decision log (routing + dispatch) ─────────────────────────────
+        // Appended live by FactoryOrchestrator.ExecuteRoutingDecision/ExecuteDispatchDecision
+        // as decisions happen, copied onto the record at FinaliseEpisode. One DecisionRecord
+        // per actual decision (does NOT include the queue.Count<=1 / candidates.Length<=1
+        // degenerate cases that DispatchingEngine short-circuits before any rule runs --
+        // IsDegenerate flags those so they're still visible, not silently dropped).
+        public List<DecisionRecord> DecisionRecords = new List<DecisionRecord>();
         // ── Per-window throughput log ─────────────────────────────────────────
         // Populated by EpisodeTracker.CloseThroughputWindow() each ThroughputTimingWindow.
         public List<ThroughputWindowRecord> ThroughputRecords = new List<ThroughputWindowRecord>();
@@ -320,6 +328,48 @@ namespace Assets.Scripts.Simulation.Types
         public float RealizedProcTime => (ProcStartTime >= 0 && ProcEndTime >= 0) ? ProcEndTime - ProcStartTime : -1f;
         /// @brief Time this op's job spent queued at the machine before dispatch. -1 if not applicable.
         public float QueueWaitTime => (QueueEntryTime >= 0 && ProcStartTime >= 0) ? ProcStartTime - QueueEntryTime : -1f;
+    }
+
+    /// @brief One record per routing or dispatch decision, logged to decision_log.csv.
+    ///
+    /// @details Added to directly test whether DispatchingEngine's rule logic ever actually
+    ///          runs (vs. its queue.Count<=1 / candidates.Length<=1 early-exit firing first),
+    ///          and whether different rules pick different candidates given the same options.
+    ///          Candidate arrays are '|'-joined parallel lists -- reconstruct in analysis rather
+    ///          than pre-deciding which stat "mattered" in C#.
+    ///
+    ///          Routing: CandidateIds = eligible machine IDs, ChosenId = the machine picked,
+    ///          SubjectId = the job being routed. CandidateStatA = per-candidate job processing
+    ///          time (CandidateJobTimes), CandidateStatB = per-candidate queue length
+    ///          (CandidateQueueLengths), CandidateStatC unused.
+    ///
+    ///          Dispatch: CandidateIds = queued job IDs, ChosenId = the job picked, SubjectId =
+    ///          the machine making the decision. CandidateStatA = per-candidate processing
+    ///          duration (QueuedDurations), CandidateStatB = per-candidate total remaining work
+    ///          (DispatchingEngine.GetRemainingWork), CandidateStatC = per-candidate arrival time
+    ///          (for reconstructing SDT's wait-time = simTime - arrival).
+    public class DecisionRecord
+    {
+        public double SimTime;
+        public int DecisionIndex;
+        public bool IsRouting;   // true = Routing, false = Dispatch
+        public int SubjectId;    // Routing: job being routed. Dispatch: machine deciding.
+        public int ChosenId;     // Routing: chosen machine ID. Dispatch: chosen job ID.
+        public int CandidateCount;
+        public bool IsDegenerate; // true if CandidateCount <= 1 (DispatchingEngine short-circuited, rule never ran)
+        public string CandidateIds = "";
+        public string CandidateStatA = "";
+        public string CandidateStatB = "";
+        public string CandidateStatC = "";
+
+        // Routing rows only: which jobs were simultaneously competing for THIS routing slot
+        // (DecisionCoordinator.SelectRoutingJobId / DispatchingEngine.SelectRoutingJob).
+        // JobCandidateCount <= 1 means job-priority selection was itself degenerate (only one
+        // job ready) -- separate from CandidateCount/IsDegenerate above, which describe the
+        // MACHINE choice for whichever job SubjectId ended up being.
+        public int JobCandidateCount;
+        public bool IsJobSelectionDegenerate;
+        public string JobCandidateIds = "";
     }
 
     // ── Per-job completion record ──

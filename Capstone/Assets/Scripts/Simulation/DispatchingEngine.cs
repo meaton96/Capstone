@@ -96,6 +96,65 @@ namespace Assets.Scripts.Simulation
         }
 
         /// <summary>
+        /// Selects which job gets the next routing decision, when multiple jobs are simultaneously
+        /// ready (state NeedsRouting) — the job-priority half of a rule (SPT/LPT/SRT/LRT/SDT),
+        /// applied at the point of routing-eligibility rather than only at machine-side dispatch.
+        /// </summary>
+        /// <remarks>
+        /// Machine-agnostic proxies replace SelectJob's per-machine stats, since the target
+        /// machine hasn't been chosen yet at this point: SPT/LPT use the job's minimum processing
+        /// time across its eligible machines for the current op (GetMinEligibleProcTime) in place
+        /// of processing time at one specific machine; SRT/LRT/SDT reuse GetRemainingWork and the
+        /// wait-time formula unchanged, since neither depends on a specific machine.
+        /// </remarks>
+        /// <param name="actionIndex">Index into ActionToRule to determine which dispatching rule to apply.</param>
+        /// <param name="readyJobIds">IDs of jobs currently ready for a routing decision (has &gt;=1 available eligible machine).</param>
+        /// <param name="jobs">Reference to the JobStore containing all job data.</param>
+        /// <param name="simTime">Current simulation time, used for SDT.</param>
+        /// <returns>The selected job ID, or -1 if readyJobIds is empty.</returns>
+        public static int SelectRoutingJob(int actionIndex, List<int> readyJobIds, JobStore jobs, double simTime)
+        {
+            DispatchingRule rule = ActionToRule[actionIndex];
+
+            // Random rule requires re-sampling a specific non-random rule at decision time
+            if (rule == DispatchingRule.Random)
+                rule = ActionToRule[UnityEngine.Random.Range(0, ActionToRule.Length - 1)];
+
+            if (readyJobIds.Count == 0) return -1;
+            if (readyJobIds.Count == 1) return readyJobIds[0];
+
+            return rule switch
+            {
+                DispatchingRule.SPT_SMPT or DispatchingRule.SPT_SRWT
+                    => ArgMin(readyJobIds, id => GetMinEligibleProcTime(id, jobs)),
+                DispatchingRule.LPT_MMUR or DispatchingRule.LPT_SMPT
+                    => ArgMax(readyJobIds, id => GetMinEligibleProcTime(id, jobs)),
+                DispatchingRule.SRT_SRWT or DispatchingRule.SRT_SMPT
+                    => ArgMin(readyJobIds, id => GetRemainingWork(id, jobs)),
+                DispatchingRule.LRT_MMUR
+                    => ArgMax(readyJobIds, id => GetRemainingWork(id, jobs)),
+                DispatchingRule.SDT_SRWT
+                    => ArgMin(readyJobIds, id => (float)(simTime - jobs.Get(id).ArrivalTime)),
+                _ => readyJobIds[UnityEngine.Random.Range(0, readyJobIds.Count)]
+            };
+        }
+
+        /// <summary>
+        /// Minimum processing time for a job's current operation across its eligible machines —
+        /// the best-case cost proxy used by SelectRoutingJob's SPT/LPT scoring, before a specific
+        /// machine has been chosen. Mirrors the per-op convention already used by GetRemainingWork.
+        /// </summary>
+        /// <param name="jobId">ID of the job to evaluate.</param>
+        /// <param name="jobs">Reference to the JobStore containing all job data.</param>
+        /// <returns>Minimum processing time across eligible machines for the current operation.</returns>
+        public static float GetMinEligibleProcTime(int jobId, JobStore jobs)
+        {
+            JobData j = jobs.Get(jobId);
+            if (j == null) return 0f;
+            return j.EligibleMachinesPerOp[j.CurrentOpIndex].Values.Min();
+        }
+
+        /// <summary>
         /// Selects the best machine from candidate machines based on the dispatching rule specified by actionIndex.
         /// Evaluates candidates using metrics from the DecisionRequest (e.g., job times, queue lengths).
         /// </summary>

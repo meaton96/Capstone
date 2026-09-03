@@ -114,6 +114,12 @@ namespace Assets.Scripts.Simulation
         public int DecisionCount => decisionCount;
 
         /// <summary>
+        /// Live per-decision log (routing + dispatch), cleared each episode and copied onto
+        /// the EpisodeRecord at FinaliseEpisode. See DecisionRecord for schema.
+        /// </summary>
+        private readonly List<DecisionRecord> _decisionLog = new List<DecisionRecord>();
+
+        /// <summary>
         /// Cumulative reward accumulated during the current episode.
         /// </summary>
         private double totalReward;
@@ -414,11 +420,20 @@ namespace Assets.Scripts.Simulation
                 Jobs, layoutManager,
                 getSimTime: () => SimTime,
                 getDecisionCount: () => decisionCount,
-                incrementDecisionCount: () => decisionCount++
+                incrementDecisionCount: () => decisionCount++,
+                // -1 in RL-agent/interactive mode (no fixed rule yet at decision-assembly time —
+                // job-priority pre-selection wouldn't make sense before the agent has acted).
+                // Re-resolves "random" per call, matching DrainHeuristicDecisions' own resolution
+                // (line ~615) -- independent draws for job-selection vs. the eventual machine/job
+                // Execute-time choice, an accepted minor inconsistency specific to the Random PDR.
+                getBaselineActionIndex: () => BaselineDrainMode
+                    ? (_baselineRuleIsRandom ? UnityEngine.Random.Range(0, DispatchingEngine.ActionCount) : _baselineRuleIndex)
+                    : -1
             );
 
             episodeActive = true;
             decisionCount = 0;
+            _decisionLog.Clear();
             totalReward = 0;
             previousMakespan = 0;
             IsWaitingForAction = false;
@@ -689,6 +704,7 @@ namespace Assets.Scripts.Simulation
         private void ExecuteRoutingDecision(int actionIndex)
         {
             int chosenMachineId = DispatchingEngine.SelectMachine(actionIndex, CurrentDecision);
+            LogRoutingDecision(chosenMachineId);
             JobData job = Jobs.Get(CurrentDecision.JobId);
             if (job == null) return;
 
@@ -721,6 +737,7 @@ namespace Assets.Scripts.Simulation
         {
             int machineId = CurrentDecision.MachineId;
             int chosenJobId = DispatchingEngine.SelectJob(actionIndex, machineId, Jobs, SimTime);
+            LogDispatchDecision(chosenJobId);
 
             JobData job = Jobs.Get(chosenJobId);
             if (job == null || job.State != JobState.Queued || job.LocationMachineId != machineId) return;
@@ -736,6 +753,67 @@ namespace Assets.Scripts.Simulation
 
             _flags.RefreshMachineLabels(machineId);
             LastAppliedRule = _configuredRuleName;
+        }
+
+        /// <summary>
+        /// Records a routing decision (job -> machine) to _decisionLog. Fires for every routing
+        /// decision including the candidates.Length &lt;= 1 degenerate case DispatchingEngine
+        /// short-circuits on, so the log can directly show how often the rule never actually ran.
+        /// </summary>
+        private void LogRoutingDecision(int chosenMachineId)
+        {
+            var req = CurrentDecision;
+            int count = req.CandidateMachineIds?.Length ?? 0;
+            int jobCandidateCount = req.JobCandidateIds?.Length ?? 0;
+            _decisionLog.Add(new DecisionRecord
+            {
+                SimTime = SimTime,
+                DecisionIndex = decisionCount,
+                IsRouting = true,
+                SubjectId = req.JobId,
+                ChosenId = chosenMachineId,
+                CandidateCount = count,
+                IsDegenerate = count <= 1,
+                CandidateIds = string.Join("|", req.CandidateMachineIds ?? Array.Empty<int>()),
+                CandidateStatA = string.Join("|", req.CandidateJobTimes ?? Array.Empty<float>()),
+                CandidateStatB = string.Join("|", req.CandidateQueueLengths ?? Array.Empty<float>()),
+                JobCandidateCount = jobCandidateCount,
+                IsJobSelectionDegenerate = jobCandidateCount <= 1,
+                JobCandidateIds = string.Join("|", req.JobCandidateIds ?? Array.Empty<int>()),
+            });
+        }
+
+        /// <summary>
+        /// Records a dispatch decision (machine picks a queued job) to _decisionLog. Fires for
+        /// every dispatch decision including the queue.Count &lt;= 1 degenerate case.
+        /// </summary>
+        private void LogDispatchDecision(int chosenJobId)
+        {
+            var req = CurrentDecision;
+            int[] queuedIds = req.QueuedJobIds ?? Array.Empty<int>();
+            int count = queuedIds.Length;
+            var remainingWork = new float[count];
+            var arrivalTimes = new float[count];
+            for (int i = 0; i < count; i++)
+            {
+                JobData qJob = Jobs.Get(queuedIds[i]);
+                remainingWork[i] = DispatchingEngine.GetRemainingWork(queuedIds[i], Jobs);
+                arrivalTimes[i] = qJob?.ArrivalTime ?? -1f;
+            }
+            _decisionLog.Add(new DecisionRecord
+            {
+                SimTime = SimTime,
+                DecisionIndex = decisionCount,
+                IsRouting = false,
+                SubjectId = req.MachineId,
+                ChosenId = chosenJobId,
+                CandidateCount = count,
+                IsDegenerate = count <= 1,
+                CandidateIds = string.Join("|", queuedIds),
+                CandidateStatA = string.Join("|", req.QueuedDurations ?? Array.Empty<double>()),
+                CandidateStatB = string.Join("|", remainingWork),
+                CandidateStatC = string.Join("|", arrivalTimes),
+            });
         }
 
         /// <summary>
@@ -787,6 +865,8 @@ namespace Assets.Scripts.Simulation
             record.LastDynamicArrivalTime = _lastDynamicArrivalSimTime;
             if (_dynamicJobsSpawned > 0)
                 record.JobCount = Jobs.JobCount;  // true total = initial + dynamic
+
+            record.DecisionRecords = new List<DecisionRecord>(_decisionLog);
 
             // Configuration snapshot fields
             record.ParkingMethod = currentConfig.parkingMethod;

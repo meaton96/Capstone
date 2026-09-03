@@ -1,0 +1,96 @@
+{
+    "configs": [
+        {
+            "name": "s_10m_dynamic",
+            "seed": 42,
+            "jobCount": 2,
+            "machinesPerType": 2,
+            "machineTypes": [
+                "Mill",
+                "Lathe",
+                "Weld",
+                "Inspect",
+                "Assemble"
+            ],
+            "minProcTime": 10.0,
+            "maxProcTime": 40.0,
+            "minOpsPerJob": 3,
+            "maxOpsPerJob": 5,
+            "agvCount": 3,
+            "stochastic": {
+                "dynamicArrivalsEnabled": true,
+                "arrivalLambda": 0.004,
+                "dynamicJobCap": 15
+            }
+        },
+        {
+            "name": "m_15m_dynamic",
+            "seed": 42,
+            "jobCount": 3,
+            "machinesPerType": 3,
+            "machineTypes": [
+                "Mill",
+                "Lathe",
+                "Weld",
+                "Inspect",
+                "Assemble"
+            ],
+            "minProcTime": 15.0,
+            "maxProcTime": 60.0,
+            "minOpsPerJob": 3,
+            "maxOpsPerJob": 6,
+            "agvCount": 5,
+            "stochastic": {
+                "dynamicArrivalsEnabled": true,
+                "arrivalLambda": 0.004,
+                "dynamicJobCap": 25
+            }
+        },
+        {
+            "name": "l_20m_dynamic",
+            "seed": 42,
+            "jobCount": 4,
+            "machinesPerType": 4,
+            "machineTypes": [
+                "Mill",
+                "Lathe",
+                "Weld",
+                "Inspect",
+                "Assemble"
+            ],
+            "minProcTime": 20.0,
+            "maxProcTime": 70.0,
+            "minOpsPerJob": 4,
+            "maxOpsPerJob": 7,
+            "agvCount": 6,
+            "stochastic": {
+                "dynamicArrivalsEnabled": true,
+                "arrivalLambda": 0.004,
+                "dynamicJobCap": 35
+            }
+        },
+        {
+            "name": "xl_25m_dynamic",
+            "seed": 42,
+            "jobCount": 5,
+            "machinesPerType": 5,
+            "machineTypes": [
+                "Mill",
+                "Lathe",
+                "Weld",
+                "Inspect",
+                "Assemble"
+            ],
+            "minProcTime": 25.0,
+            "maxProcTime": 90.0,
+            "minOpsPerJob": 4,
+            "maxOpsPerJob": 8,
+            "agvCount": 8,
+            "stochastic": {
+                "dynamicArrivalsEnabled": true,
+                "arrivalLambda": 0.005,
+                "dynamicJobCap": 45
+            }
+        }
+    ]
+}

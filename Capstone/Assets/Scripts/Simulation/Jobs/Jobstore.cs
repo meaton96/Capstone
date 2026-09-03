@@ -173,6 +173,20 @@ namespace Assets.Scripts.Simulation.Jobs
         }
 
         /// <summary>
+        /// Finds every job that currently requires a routing decision, in list (~arrival) order.
+        /// </summary>
+        /// <remarks>
+        /// Used by DecisionCoordinator so job-priority rules (SPT/LPT/SRT/LRT/SDT) can select
+        /// among ALL simultaneously-ready jobs, rather than always taking whichever one happens
+        /// to be first in list order (see GetNextNeedsRouting) — measured at ~47-52% of routing
+        /// decisions having 2+ jobs simultaneously ready (results/0902e decision_log.csv analysis).
+        /// </remarks>
+        public List<int> GetAllNeedingRouting()
+        {
+            return allJobs.Where(j => j.State == JobState.NeedsRouting).Select(j => j.JobId).ToList();
+        }
+
+        /// <summary>
         /// Finds the first job waiting for pickup that has not yet been assigned an AGV.
         /// </summary>
         /// <returns>The first unassigned <see cref="JobData"/> with state <see cref="JobState.WaitingForPickup"/>, or <c>null</c>.</returns>
