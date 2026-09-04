@@ -9,7 +9,7 @@ LOG_LEVEL="Low"
 BASELINE_DRAIN=0          # off by default; --baselinedrain enables per-frame heuristic drain
 RULES=(
 "SPT_SMPT" "SPT_SRWT" "LPT_MMUR" "LPT_SMPT"
-"SRT_SRWT" "SRT_SMPT" "LRT_MMUR" "SDT_SRWT" "random"
+"SRT_SRWT" "SRT_SMPT" "LRT_MMUR" "FIFO_SRWT" "random"
 )
 while [[ $# -gt 0 ]]; do
 case $1 in
@@ -101,11 +101,12 @@ A+=( "${OUT_DIR}/agv_performance_${RULE}.csv" )
 S+=( "${OUT_DIR}/segment_congestion_${RULE}.csv" )
 T+=( "${OUT_DIR}/throughput_${RULE}.csv" )
 done
-merge_csvs "${OUT_DIR}/merged_results.csv"              "results"              "${R[@]}"
-merge_csvs "${OUT_DIR}/merged_machine_utilization.csv"  "machine_utilization"  "${M[@]}"
-merge_csvs "${OUT_DIR}/merged_agv_performance.csv"      "agv_performance"      "${A[@]}"
-merge_csvs "${OUT_DIR}/merged_segment_congestion.csv"   "segment_congestion"   "${S[@]}"
-merge_csvs "${OUT_DIR}/merged_throughput.csv"           "throughput"           "${T[@]}"
+#merge_csvs "${OUT_DIR}/merged_results.csv"              "results"              "${R[@]}"
+#merge_csvs "${OUT_DIR}/merged_machine_utilization.csv"  "machine_utilization"  "${M[@]}"
+#merge_csvs "${OUT_DIR}/merged_agv_performance.csv"      "agv_performance"      "${A[@]}"
+#merge_csvs "${OUT_DIR}/merged_segment_congestion.csv"   "segment_congestion"   "${S[@]}"
+#merge_csvs "${OUT_DIR}/merged_throughput.csv"           "throughput"           "${T[@]}"
+cd Results & python merge.py
 echo ""
 echo "Done in ~$(( (SECONDS - SCRIPT_START) / 60 )) min."
 echo "Output: ${OUT_DIR}/merged_*.csv"

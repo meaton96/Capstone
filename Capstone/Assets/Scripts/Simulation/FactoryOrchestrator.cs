@@ -421,6 +421,8 @@ namespace Assets.Scripts.Simulation
                 getSimTime: () => SimTime,
                 getDecisionCount: () => decisionCount,
                 incrementDecisionCount: () => decisionCount++,
+                tracker: _tracker,
+                machineProcessingStartTime: _machineProcessingStartTime,
                 // -1 in RL-agent/interactive mode (no fixed rule yet at decision-assembly time —
                 // job-priority pre-selection wouldn't make sense before the agent has acted).
                 // Re-resolves "random" per call, matching DrainHeuristicDecisions' own resolution
@@ -777,6 +779,7 @@ namespace Assets.Scripts.Simulation
                 CandidateIds = string.Join("|", req.CandidateMachineIds ?? Array.Empty<int>()),
                 CandidateStatA = string.Join("|", req.CandidateJobTimes ?? Array.Empty<float>()),
                 CandidateStatB = string.Join("|", req.CandidateQueueLengths ?? Array.Empty<float>()),
+                CandidateStatC = string.Join("|", req.CandidateUtilization ?? Array.Empty<float>()),
                 JobCandidateCount = jobCandidateCount,
                 IsJobSelectionDegenerate = jobCandidateCount <= 1,
                 JobCandidateIds = string.Join("|", req.JobCandidateIds ?? Array.Empty<int>()),

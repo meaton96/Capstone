@@ -18,7 +18,7 @@ namespace Assets.Scripts.Simulation
         /// Array mapping action indices to their corresponding dispatching rules.
         /// Each rule defines a specific priority heuristic for job selection.
         /// Supported dispatching rules in order: SPT_SMPT, SPT_SRWT, LPT_MMUR, LPT_SMPT,
-        /// SRT_SRWT, SRT_SMPT, LRT_MMUR, SDT_SRWT, and Random.
+        /// SRT_SRWT, SRT_SMPT, LRT_MMUR, FIFO_SRWT, and Random.
         /// </summary>
         private static readonly DispatchingRule[] ActionToRule = new DispatchingRule[]
         {
@@ -29,8 +29,10 @@ namespace Assets.Scripts.Simulation
             DispatchingRule.SRT_SRWT,   // Shortest Remaining Time - Server
             DispatchingRule.SRT_SMPT,   // Shortest Remaining Time - Machine
             DispatchingRule.LRT_MMUR,   // Longest Remaining Time - Machine
-            DispatchingRule.SDT_SRWT,   // Shortest Delay Time - Server
+            DispatchingRule.FIFO_SRWT,  // FIFO/FCFS (arrival order) - Server
             DispatchingRule.Random
+            // NOTE: Random must stay last -- SelectJob/SelectMachine/SelectRoutingJob resolve it via
+            // Random.Range(0, ActionToRule.Length - 1), which relies on this position to exclude itself.
         };
 
         /// <summary>
@@ -87,9 +89,11 @@ namespace Assets.Scripts.Simulation
                 // Longest Remaining Time rule — maximize total remaining work
                 DispatchingRule.LRT_MMUR
                     => ArgMax(queue, id => GetRemainingWork(id, jobs)),
-                // Shortest Delay Time rule — prioritize jobs that have been waiting the longest
-                DispatchingRule.SDT_SRWT
-                    => ArgMin(queue, id => (float)(simTime - jobs.Get(id).ArrivalTime)),
+                // FIFO/FCFS — prioritize jobs that have been waiting the longest (arrival order).
+                // Was ArgMin here (picked newest arrival, the opposite of "SDT"/FIFO as documented
+                // in Types/DispatchingRule.cs and this method's own original comment) -- fixed.
+                DispatchingRule.FIFO_SRWT
+                    => ArgMax(queue, id => (float)(simTime - jobs.Get(id).ArrivalTime)),
                 // Fallback — select a random job from the queue
                 _ => queue[UnityEngine.Random.Range(0, queue.Count)]
             };
@@ -133,8 +137,8 @@ namespace Assets.Scripts.Simulation
                     => ArgMin(readyJobIds, id => GetRemainingWork(id, jobs)),
                 DispatchingRule.LRT_MMUR
                     => ArgMax(readyJobIds, id => GetRemainingWork(id, jobs)),
-                DispatchingRule.SDT_SRWT
-                    => ArgMin(readyJobIds, id => (float)(simTime - jobs.Get(id).ArrivalTime)),
+                DispatchingRule.FIFO_SRWT
+                    => ArgMax(readyJobIds, id => (float)(simTime - jobs.Get(id).ArrivalTime)),
                 _ => readyJobIds[UnityEngine.Random.Range(0, readyJobIds.Count)]
             };
         }
@@ -177,12 +181,15 @@ namespace Assets.Scripts.Simulation
                 // Machine-focused rules — select machine with minimum job processing time
                 DispatchingRule.SPT_SMPT or DispatchingRule.LPT_SMPT or DispatchingRule.SRT_SMPT
                     => candidates[ArgMinIdx(req.CandidateJobTimes)],
-                // Server-focused rules — select machine with minimum queue length
-                DispatchingRule.SPT_SRWT or DispatchingRule.SRT_SRWT or DispatchingRule.SDT_SRWT
+                // Server-focused rules — select machine with minimum queued workload (SRWT)
+                DispatchingRule.SPT_SRWT or DispatchingRule.SRT_SRWT or DispatchingRule.FIFO_SRWT
                     => candidates[ArgMinIdx(req.CandidateQueueLengths)],
-                // Machine/Server rules for longest — select machine with maximum queue length
+                // Minimum Machine Utilization Rule — select machine with the lowest cumulative
+                // utilization ratio so far (distinct signal from SRWT's instantaneous queued
+                // workload: a machine can be idle right now yet have run hot all episode, or
+                // vice versa).
                 DispatchingRule.LPT_MMUR or DispatchingRule.LRT_MMUR
-                    => candidates[ArgMaxIdx(req.CandidateQueueLengths)],
+                    => candidates[ArgMinIdx(req.CandidateUtilization)],
                 // Fallback — select a random machine from candidates
                 _ => candidates[UnityEngine.Random.Range(0, candidates.Length)]
             };

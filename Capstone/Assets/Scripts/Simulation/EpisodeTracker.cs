@@ -278,6 +278,29 @@ namespace Assets.Scripts.Simulation
             return record;
         }
 
+        // ── Live per-machine queries (used by DecisionCoordinator for MMUR routing) ─
+
+        /// <summary>
+        /// Cumulative processing time recorded for a machine so far this episode, from
+        /// completed operations only — does not include an operation currently in progress.
+        /// Callers needing the fully live figure should add the elapsed time of any
+        /// in-progress operation separately (see FactoryOrchestrator._machineProcessingStartTime).
+        /// </summary>
+        public double ProcessingTimeSoFar(int machineId) =>
+            _processingTime.TryGetValue(machineId, out double tp) ? tp : 0.0;
+
+        /// <summary>
+        /// Cumulative downtime recorded for a machine so far, evaluated as of simTime —
+        /// includes any currently-open repair interval, not just closed ones.
+        /// </summary>
+        public double DowntimeSoFar(int machineId, double simTime)
+        {
+            double downtime = _totalDowntime.TryGetValue(machineId, out double td) ? td : 0.0;
+            if (_downtimeStart.TryGetValue(machineId, out double start))
+                downtime += simTime - start;
+            return downtime;
+        }
+
         // ── Observation helpers (used by ObservationBuilder) ──────────────────
 
         /// <summary>

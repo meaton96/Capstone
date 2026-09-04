@@ -52,7 +52,7 @@ RULES=(
     "SRT_SRWT"
     "SRT_SMPT"
     "LRT_MMUR"
-    "SDT_SRWT"
+    "FIFO_SRWT"
     "random"
 )
 

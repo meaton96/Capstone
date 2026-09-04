@@ -54,7 +54,7 @@ RULES = [
     "shortest_processing_time",  ##< Maps to C# DispatchingRule.SPT_SMPT.
     "largest_processing_time",  ##< Maps to C# DispatchingRule.LPT_MMUR / LPT_SMPT.
     "most_work_remaining",  ##< Maps to C# DispatchingRule.LRT_MMUR.
-    "first_come_first_served",  ##< Maps to C# DispatchingRule.SDT_SRWT (FIFO fallback).
+    "first_come_first_served",  ##< Maps to C# DispatchingRule.FIFO_SRWT (FIFO fallback).
     "most_operations_remaining",  ##< Maps to C# DispatchingRule.MOR.
 ]
 

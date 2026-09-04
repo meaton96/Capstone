@@ -340,14 +340,15 @@ namespace Assets.Scripts.Simulation.Types
     ///
     ///          Routing: CandidateIds = eligible machine IDs, ChosenId = the machine picked,
     ///          SubjectId = the job being routed. CandidateStatA = per-candidate job processing
-    ///          time (CandidateJobTimes), CandidateStatB = per-candidate queue length
-    ///          (CandidateQueueLengths), CandidateStatC unused.
+    ///          time (CandidateJobTimes), CandidateStatB = per-candidate queued workload
+    ///          (CandidateQueueLengths), CandidateStatC = per-candidate live utilization ratio
+    ///          (CandidateUtilization, for the MMUR routing rule).
     ///
     ///          Dispatch: CandidateIds = queued job IDs, ChosenId = the job picked, SubjectId =
     ///          the machine making the decision. CandidateStatA = per-candidate processing
     ///          duration (QueuedDurations), CandidateStatB = per-candidate total remaining work
     ///          (DispatchingEngine.GetRemainingWork), CandidateStatC = per-candidate arrival time
-    ///          (for reconstructing SDT's wait-time = simTime - arrival).
+    ///          (for reconstructing FIFO's wait-time = simTime - arrival).
     public class DecisionRecord
     {
         public double SimTime;

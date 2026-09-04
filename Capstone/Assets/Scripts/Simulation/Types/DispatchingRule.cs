@@ -8,7 +8,10 @@ namespace Assets.Scripts.Simulation.Types
     ///          - SPT (Shortest Processing Time): favours quick completions, reducing WIP.
     ///          - LPT (Longest Processing Time): defers long operations, useful for throughput.
     ///          - SRT/LRT (Shortest/Longest Remaining Time): uses cumulative remaining work.
-    ///          - SDT (Smallest Due Time): arrival-order FIFO, equivalent to FCFS.
+    ///          - FIFO_SRWT: FIFO/FCFS — arrival order, oldest job first.
+    ///          - MMUR (Minimum Machine Utilization): routes to the candidate machine with the
+    ///            lowest cumulative utilization ratio so far this episode — a longer-horizon,
+    ///            workload-history signal, distinct from SRWT's instantaneous queued workload.
     ///          - Random: unweighted random selection (useful for exploration).
     public enum DispatchingRule
     {
@@ -40,9 +43,11 @@ namespace Assets.Scripts.Simulation.Types
         /// @details Equivalent to @c most_work_remaining in job_shop_lib. Favors heavy jobs.
         LRT_MMUR,
 
-        /// @brief Smallest Due Time — FIFO based on arrival order.
-        /// @details Equivalent to @c first_come_first_served in job_shop_lib.
-        SDT_SRWT,
+        /// @brief FIFO/FCFS — arrival order, oldest job first.
+        /// @details Equivalent to @c first_come_first_served in job_shop_lib. Was previously
+        ///          implemented backwards (picked newest arrival) despite this doc comment and
+        ///          the DispatchingEngine inline comment both saying "longest waiting" -- fixed.
+        FIFO_SRWT,
 
         /// @brief Random — unweighted random selection of queued jobs.
         /// @details Useful for exploration or baseline comparison.

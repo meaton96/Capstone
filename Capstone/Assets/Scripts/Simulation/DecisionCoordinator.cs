@@ -49,6 +49,20 @@ namespace Assets.Scripts.Simulation
         private Func<int> _getBaselineActionIndex;
 
         /// <summary>
+        /// Reference to the episode's live per-machine statistics (processing time, downtime),
+        /// used to compute CandidateUtilization for the MMUR routing rule.
+        /// </summary>
+        private EpisodeTracker _tracker;
+
+        /// <summary>
+        /// Machine ID -> sim time its current operation started, for machines mid-operation
+        /// right now. Needed alongside _tracker because EpisodeTracker only accumulates
+        /// processing time when an operation finishes, so a machine's in-flight time isn't in
+        /// _tracker yet.
+        /// </summary>
+        private Dictionary<int, double> _machineProcessingStartTime;
+
+        /// <summary>
         /// Initializes the coordinator with required dependencies via dependency injection.
         /// </summary>
         /// <param name="jobs">The job store providing job data and state information.</param>
@@ -56,6 +70,9 @@ namespace Assets.Scripts.Simulation
         /// <param name="getSimTime">Delegate to retrieve the current simulation time.</param>
         /// <param name="getDecisionCount">Delegate to retrieve the current decision count.</param>
         /// <param name="incrementDecisionCount">Delegate to increment the decision counter.</param>
+        /// <param name="tracker">Episode's live per-machine stats, for CandidateUtilization.</param>
+        /// <param name="machineProcessingStartTime">Machine ID -> sim time current op started,
+        /// for machines mid-operation right now (shared with FlagHarvester/FailureCoordinator).</param>
         /// <param name="getBaselineActionIndex">Delegate returning the active baseline rule's
         /// action index, or -1/null if none (RL-agent mode) — used to apply job-priority
         /// selection among simultaneously-ready routing jobs. Optional.</param>
@@ -65,6 +82,8 @@ namespace Assets.Scripts.Simulation
             Func<double> getSimTime,
             Func<int> getDecisionCount,
             Action incrementDecisionCount,
+            EpisodeTracker tracker,
+            Dictionary<int, double> machineProcessingStartTime,
             Func<int> getBaselineActionIndex = null)
         {
             _jobs = jobs;
@@ -72,7 +91,25 @@ namespace Assets.Scripts.Simulation
             _getSimTime = getSimTime;
             _getDecisionCount = getDecisionCount;
             _incrementDecisionCount = incrementDecisionCount;
+            _tracker = tracker;
+            _machineProcessingStartTime = machineProcessingStartTime;
             _getBaselineActionIndex = getBaselineActionIndex;
+        }
+
+        /// <summary>
+        /// Live utilization ratio (busy time / operational time so far, in [0, 1]) for a
+        /// machine, as of simTime. Adds the in-progress operation's elapsed time (not yet in
+        /// _tracker, which only accumulates on operation completion) on top of the tracker's
+        /// closed-operation total.
+        /// </summary>
+        private float MachineUtilization(int machineId, double simTime)
+        {
+            double busy = _tracker.ProcessingTimeSoFar(machineId);
+            if (_machineProcessingStartTime.TryGetValue(machineId, out double opStart))
+                busy += simTime - opStart;
+
+            double operational = simTime - _tracker.DowntimeSoFar(machineId, simTime);
+            return operational > 0 ? (float)(busy / operational) : 0f;
         }
 
         /// <summary>
@@ -168,11 +205,12 @@ namespace Assets.Scripts.Simulation
 
             int currentDecisionCount = _getDecisionCount();
             _incrementDecisionCount();
+            double simTime = _getSimTime();
 
             return new DecisionRequest
             {
                 Type = DecisionType.Routing,
-                SimTime = _getSimTime(),
+                SimTime = simTime,
                 DecisionIndex = currentDecisionCount,
                 TotalJobs = _jobs.JobCount,
                 CompletedJobs = _jobs.CountInState(JobState.Exited),
@@ -182,6 +220,7 @@ namespace Assets.Scripts.Simulation
                 CandidateMachineIds = candidates.ToArray(),
                 CandidateQueueLengths = candidates.Select(id => _jobs.GetMachineLoad(id)).ToArray(),
                 CandidateJobTimes = candidates.Select(id => job.GetProcessingTime(id)).ToArray(),
+                CandidateUtilization = candidates.Select(id => MachineUtilization(id, simTime)).ToArray(),
             };
         }
 

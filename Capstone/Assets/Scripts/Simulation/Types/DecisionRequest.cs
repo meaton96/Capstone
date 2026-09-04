@@ -69,5 +69,10 @@ namespace Assets.Scripts.Simulation.Types
 
         /// @brief Processing time of @c JobId at each candidate machine (parallel to @c CandidateMachineIds).
         public float[] CandidateJobTimes;
+
+        /// @brief Live cumulative utilization ratio (busy time / operational time so far, in
+        ///        [0, 1]) at each candidate machine (parallel to @c CandidateMachineIds). Used by
+        ///        the MMUR (Minimum Machine Utilization) routing rule.
+        public float[] CandidateUtilization;
     }
 }

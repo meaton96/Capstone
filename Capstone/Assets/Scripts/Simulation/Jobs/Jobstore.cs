@@ -176,7 +176,7 @@ namespace Assets.Scripts.Simulation.Jobs
         /// Finds every job that currently requires a routing decision, in list (~arrival) order.
         /// </summary>
         /// <remarks>
-        /// Used by DecisionCoordinator so job-priority rules (SPT/LPT/SRT/LRT/SDT) can select
+        /// Used by DecisionCoordinator so job-priority rules (SPT/LPT/SRT/LRT/FIFO) can select
         /// among ALL simultaneously-ready jobs, rather than always taking whichever one happens
         /// to be first in list order (see GetNextNeedsRouting) — measured at ~47-52% of routing
         /// decisions having 2+ jobs simultaneously ready (results/0902e decision_log.csv analysis).

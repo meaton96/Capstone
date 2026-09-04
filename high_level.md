@@ -21,7 +21,7 @@ where $\Delta M_t$ is the increase in makespan estimate and $N_{ops}$ is the num
 * **Action Space (Composite PDRs):** The agent selects from **8 composite Priority Dispatching Rules (PDRs)** to manage combinatorial complexity:
     * **Throughput Focused:** SPT (Shortest Processing Time) paired with SMPT (Shortest Machine Processing Time).
     * **Load Balancing:** LPT (Longest Processing Time) or LRT (Longest Remaining Time) paired with MMUR (Minimum Machine Utilization).
-    * **Urgency Focused:** SDT (Shortest Due Time) paired with SRWT (Shortest Remaining Work).
+    * **Fairness Focused:** FIFO (First-Come-First-Served, oldest arrival first) paired with SRWT (Shortest Remaining Work).
 
 ## 3. Multimodal Neural Architecture
 

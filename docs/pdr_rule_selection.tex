@@ -1,0 +1,226 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{hyperref}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{enumitem}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\title{Composite Priority Dispatching Rules for the\\
+Dynamic Flexible Job-Shop Scheduling Action Space:\\
+Selection Rationale and Literature Grounding}
+\author{}
+\date{\today}
+
+\newcommand{\argmin}{\operatorname*{arg\,min}}
+\newcommand{\argmax}{\operatorname*{arg\,max}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This note documents the priority dispatching rule (PDR) action space used by the
+deep reinforcement learning (DRL) agent in our dynamic flexible job-shop scheduling
+(DFJSP) simulator, and the literature basis for each rule. Rather than have the agent
+choose directly among all eligible (job, machine) assignments, the agent selects at
+each decision point among a small set of \emph{composite} PDRs, each pairing a
+job-selection heuristic with a machine-selection (routing) heuristic. We define each
+component rule formally, situate it against the classical dispatching-rule literature,
+and give the design rationale for the eight-rule set actually used. A short
+implementation note at the end records two corrections made to the rule set during a
+code audit, for reproducibility. This is an abbreviated working draft, intended as a
+basis for the corresponding section of the thesis/paper.
+\end{abstract}
+
+\section{Background: Composite Priority Dispatching Rules}
+\label{sec:background}
+
+A priority dispatching rule (PDR) is a heuristic scoring function used to rank
+candidates at a scheduling decision point, so that the highest (or lowest) scoring
+candidate is selected without exhaustive search. PDRs are among the oldest and most
+widely deployed scheduling heuristics precisely because they are $O(n)$ per decision
+and require no lookahead; \cite{panwalkar1977} catalog and classify over one hundred
+such rules for the classical job shop, and \cite{blackstone1982} give a complementary
+survey specifically for manufacturing job-shop dispatch. \cite{holthaus1997} and
+\cite{rajendran1999} extend the classical PDR literature to the \emph{dynamic} job
+shop -- jobs arrive stochastically over time rather than all being known up front,
+which is also the setting of our simulator -- and show that combining a job's own
+processing-time/work-content information with a measure of downstream congestion
+outperforms either signal alone on mean flow time and tardiness.
+
+The flexible job-shop scheduling problem (FJSP) adds a second decision dimension on
+top of the classical job shop: each operation may be processed on more than one
+eligible machine, so a \emph{routing} (machine-assignment) decision must be made in
+addition to the classical \emph{sequencing} (job-priority) decision
+\citep{chaudhry2016, xie2019}. Consequently, a PDR for FJSP is naturally expressed as a
+pair: a job-selection rule that decides \emph{which} ready job goes next, and a
+machine-selection rule that decides \emph{which} eligible machine it goes to. We refer
+to such a pair as a \emph{composite} PDR, following the same design pattern used for
+the DRL action space in \cite{luo2020}, where a DQN agent selects among six such
+composite rules at each decision point rather than acting on raw state directly.
+
+\subsection{Notation}
+\label{sec:notation}
+
+Let $\mathcal{J}$ be the set of jobs and $\mathcal{M}$ the set of machines. At
+decision time $t$:
+\begin{itemize}[leftmargin=*]
+  \item For job $j$ and machine $m$, $p_{j,m}$ is the processing time of $j$'s
+        current operation on $m$.
+  \item $r_j = \sum_{o \geq o_j} \min_{m \in E_o} p_{o,m}$ is job $j$'s estimated
+        remaining work: the sum, over $j$'s current and remaining operations, of the
+        minimum processing time across each operation's eligible machines.
+  \item $a_j$ is job $j$'s arrival time into the system.
+  \item $Q_m(t)$ is machine $m$'s queued workload: the sum of processing times of
+        all jobs currently queued at $m$ or already committed to it (in transit or
+        awaiting pickup), evaluated at $t$.
+  \item $U_m(t) = B_m(t) \big/ \big(t - D_m(t)\big)$ is machine $m$'s cumulative
+        utilization ratio, where $B_m(t)$ is total busy time accumulated on $m$ up to
+        $t$ and $D_m(t)$ is total downtime accumulated on $m$ up to $t$.
+\end{itemize}
+$Q_m(t)$ and $U_m(t)$ are both congestion signals but operate on different
+timescales: $Q_m(t)$ is an instantaneous snapshot of work already committed to $m$,
+while $U_m(t)$ is a running average over the whole episode so far. A machine can be
+idle right now ($Q_m(t) = 0$) while having run hot all episode ($U_m(t)$ high), or
+vice versa.
+
+\section{Job-Selection Rules}
+\label{sec:job-rules}
+
+Given the set of jobs $\mathcal{Q}$ ready for a dispatch or routing decision, each
+job-selection rule below defines a score to optimize over $\mathcal{Q}$.
+
+\begin{description}[style=nextline, leftmargin=1em]
+  \item[SPT (Shortest Processing Time)] $j^\ast = \argmin_{j \in \mathcal{Q}} p_{j,m}$.
+    The canonical PDR for minimizing work-in-process and mean flow time
+    \citep{panwalkar1977, blackstone1982}; its known weakness is starving long jobs.
+  \item[LPT (Longest Processing Time)] $j^\ast = \argmax_{j \in \mathcal{Q}} p_{j,m}$.
+    The complementary rule: prioritizing long operations reduces machine-idle
+    fragmentation and front-loads throughput risk instead of pushing it to the tail
+    \citep{panwalkar1977}.
+  \item[SRT (Shortest Remaining Time, i.e., least work remaining)]
+    $j^\ast = \argmin_{j \in \mathcal{Q}} r_j$. Prioritizes jobs closest to
+    completion, clearing them out of the system quickly; a global (whole-job) analog
+    of SPT's local (single-operation) view \citep{holthaus1997}.
+  \item[LRT (Longest Remaining Time, i.e., most work remaining)]
+    $j^\ast = \argmax_{j \in \mathcal{Q}} r_j$. Front-loads jobs with the most work
+    left so they are not squeezed into an increasingly congested tail as the episode
+    progresses \citep{holthaus1997, rajendran1999}.
+  \item[FIFO (First-Come-First-Served)]
+    $j^\ast = \argmax_{j \in \mathcal{Q}} (t - a_j)$, i.e., oldest arrival first. The
+    classical fairness/starvation-avoidance rule \citep{panwalkar1977}; unlike the
+    other four, its score is based on arrival order rather than work content, making
+    it the one job-selection rule in this set that is orthogonal to processing time
+    entirely.
+\end{description}
+
+\section{Machine-Selection (Routing) Rules}
+\label{sec:machine-rules}
+
+Given the set of eligible, available candidate machines $\mathcal{C}$ for a job being
+routed, each machine-selection rule below defines a score to optimize over
+$\mathcal{C}$.
+
+\begin{description}[style=nextline, leftmargin=1em]
+  \item[SMPT (Shortest Machine Processing Time)]
+    $m^\ast = \argmin_{m \in \mathcal{C}} p_{j,m}$. The greedy local rule: send the
+    job to whichever eligible machine would finish it fastest, ignoring that
+    machine's congestion state entirely.
+  \item[SRWT (Shortest Remaining Work Time, i.e., minimum queued workload)]
+    $m^\ast = \argmin_{m \in \mathcal{C}} Q_m(t)$. A congestion-avoidance rule in the
+    work-in-next-queue (WINQ) family: \cite{holthaus1997} and
+    \cite{rajendran1999} show that combining a job's own processing time with the
+    downstream queue's work content (rather than its head-count) consistently beats
+    plain SPT/LPT on mean flow time and tardiness.
+  \item[MMUR (Minimum Machine Utilization)]
+    $m^\ast = \argmin_{m \in \mathcal{C}} U_m(t)$. A workload-balancing routing rule
+    from the same family as ``least-utilized-machine'' assignment rules surveyed for
+    FJSP by \cite{xie2019} and \cite{chaudhry2016}, but using the whole-episode
+    utilization history rather than the instantaneous queue -- a longer-horizon
+    congestion signal, deliberately distinct from SRWT.
+\end{description}
+
+\section{The Composite Rule Set}
+\label{sec:rule-set}
+
+Rather than take the full cross product of five job-selection and three
+machine-selection rules, we use a curated subset of eight composite rules, chosen so
+that (a) every job-selection rule and every machine-selection rule above is exercised
+at least once, and (b) the pairings are not redundant with one another under the
+formal definitions in Sections~\ref{sec:job-rules}--\ref{sec:machine-rules}.
+Table~\ref{tab:rules} lists the set as implemented.
+
+\begin{table*}[t]
+\centering
+\small
+\caption{The eight composite PDRs in the action space. A ninth action, \textsc{Random},
+uniformly re-samples one of the eight above at every decision; it is included for
+baseline/exploration sweeps only and is excluded from the trained agent's action
+space (fixed at 8 discrete actions).}
+\label{tab:rules}
+\begin{tabular}{@{}lllp{11cm}@{}}
+\toprule
+\textbf{Rule} & \textbf{Job selection} & \textbf{Machine selection} & \textbf{Rationale} \\
+\midrule
+SPT\_SMPT & SPT & SMPT & Pure local-greedy throughput baseline. \\
+SPT\_SRWT & SPT & SRWT & Throughput-oriented job choice with congestion-aware routing. \\
+LPT\_MMUR & LPT & MMUR & Long-operation priority balanced against long-horizon machine load. \\
+LPT\_SMPT & LPT & SMPT & Long-operation priority with purely local machine choice. \\
+SRT\_SRWT & SRT & SRWT & Clear near-complete jobs quickly, avoid congested machines. \\
+SRT\_SMPT & SRT & SMPT & Clear near-complete jobs quickly, purely local machine choice. \\
+LRT\_MMUR & LRT & MMUR & Front-load heavy jobs, balanced against long-horizon machine load. \\
+FIFO\_SRWT & FIFO & SRWT & Fairness/arrival-order priority with congestion-aware routing. \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+By construction, every rule in Table~\ref{tab:rules} has a distinct
+(job-selection, machine-selection) pair, so no two rules make identical decisions
+given identical inputs -- a property that did not hold for an earlier revision of
+this rule set (see Section~\ref{sec:implementation}).
+
+\section{Implementation Note (for reproducibility)}
+\label{sec:implementation}
+
+Two corrections were made to the rule set described above during a code audit, after
+an earlier revision's results showed the MMUR-paired rules behaving in a way
+inconsistent with their intended definition:
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{MMUR routing direction.} The machine-selection half of MMUR was
+        originally implemented as $\argmax_{m \in \mathcal{C}} Q_m(t)$ -- routing
+        each job to the \emph{most} congested candidate machine -- rather than the
+        $\argmin$ given in Section~\ref{sec:machine-rules}. This produced a
+        positive-feedback overload effect (busy machines were preferentially made
+        busier), consistent with the near-total non-completion of
+        LPT\_MMUR/LRT\_MMUR jobs observed at higher load in earlier sweeps. The rule
+        now implements the $\argmin$ form above. Additionally, MMUR's
+        machine-selection signal was changed from an instantaneous queue-length
+        reading to the cumulative utilization ratio $U_m(t)$ defined in
+        Section~\ref{sec:notation}, to give it a genuinely distinct basis from SRWT
+        (which already used the instantaneous queued-workload signal).
+  \item \textbf{Removal of a redundant rule.} An intermediate revision also included
+        a ninth rule, \textsc{MRT\_SRWT} (job selection: LRT's $\argmax_j r_j$;
+        machine selection: SRWT), added specifically as an unconfounded baseline
+        while MMUR's machine-selection logic was still defective. Once MMUR was
+        corrected per item 1, \textsc{MRT\_SRWT} and \textsc{LRT\_MMUR} shared an
+        identical job-selection function and differed only in machine-selection
+        signal (instantaneous queued workload vs.\ cumulative utilization) -- too
+        narrow a distinction to justify two dedicated action-space slots. It was
+        removed; \textsc{LRT\_MMUR} is retained as the intended pairing.
+\end{enumerate}
+
+All results generated prior to these corrections used the pre-correction (reversed)
+MMUR definition and/or included \textsc{MRT\_SRWT}, and should not be interpreted
+against the rule definitions given in Sections~\ref{sec:job-rules}--\ref{sec:machine-rules}.
+
+\bibliographystyle{unsrtnat}
+\bibliography{references}
+
+\end{document}

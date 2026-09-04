@@ -34,7 +34,7 @@ plt.rcParams.update({
 
 PDR_ORDER = [
     "SPT_SMPT", "SPT_SRWT", "SRT_SMPT", "SRT_SRWT",
-    "LPT_SMPT", "LPT_MMUR", "LRT_MMUR", "SDT_SRWT",
+    "LPT_SMPT", "LPT_MMUR", "LRT_MMUR", "FIFO_SRWT",
     "random",
 ]
 PALETTE = plt.cm.tab10.colors
@@ -78,7 +78,7 @@ def load_and_filter(csv_path: str, trim_frac: float) -> tuple[pd.DataFrame, pd.D
     return df, coverage
 
 
-def plot_time_in_system_by_instance(df: pd.DataFrame, out_dir: str) -> None:
+def plot_time_in_system_by_instance(df: pd.DataFrame, out_dir: str, trim_frac: float = 0.10) -> None:
     """Box plot of time-in-system (flow_time) per rule, one panel per instance."""
     instances = sorted(df["instance"].unique())
     n = len(instances)
@@ -106,7 +106,8 @@ def plot_time_in_system_by_instance(df: pd.DataFrame, out_dir: str) -> None:
     for idx in range(n, nrows * ncols):
         axes[idx // ncols][idx % ncols].axis("off")
 
-    fig.suptitle("Time in System by Rule, per Config\n(warm-up + head/tail trimmed, completed jobs only)", y=1.01)
+    trim_note = f"warm-up + head/tail trimmed {trim_frac:.0%}" if trim_frac > 0 else "no head/tail trim, flat-duration run"
+    fig.suptitle(f"Time in System by Rule, per Config\n({trim_note}, completed jobs only)", y=1.01)
     fig.tight_layout()
     fig.savefig(os.path.join(out_dir, "time_in_system_by_instance.png"), bbox_inches="tight")
     plt.close(fig)
@@ -207,7 +208,7 @@ def main():
     print(f"Censored instances (excluded, reported separately): {sorted(censored)}")
     print(f"Rows after filtering — validated: {len(validated)}, censored: {len(censored_df)}")
 
-    plot_time_in_system_by_instance(validated, out_dir)
+    plot_time_in_system_by_instance(validated, out_dir, trim_frac=args.trim)
 
     summary = summary_table(validated)
     summary_path = os.path.join(out_dir, "time_in_system_summary.csv")

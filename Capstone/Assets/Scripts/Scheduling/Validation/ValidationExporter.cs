@@ -49,7 +49,7 @@ namespace Assets.Scripts.Scheduling.Validation
             (DispatchingRule.SPT_SMPT,  "SPT",  "shortest_processing_time"),
             (DispatchingRule.LPT_MMUR,  "LPT",  "largest_processing_time"),
             (DispatchingRule.LRT_MMUR,  "MWR",  "most_work_remaining"),
-            (DispatchingRule.SDT_SRWT,  "FCFS", "first_come_first_served"),
+            (DispatchingRule.FIFO_SRWT,  "FCFS", "first_come_first_served"),
             (DispatchingRule.MOR,       "MOR",  "most_operations_remaining"),
         };
 

@@ -18,7 +18,7 @@ namespace Assets.Scripts.Scheduling.Core
         SRT_SRWT,   ///< Shortest Remaining Time — primary sort by total remaining work ascending.
         SRT_SMPT,   ///< Shortest Remaining Time with Smallest Most Urgent Remaining Time secondary metric.
         LRT_MMUR,   ///< Longest Remaining Time — primary sort by total remaining work descending. Equivalent to @c most_work_remaining in job_shop_lib.
-        SDT_SRWT,   ///< Smallest Due Time — FIFO based on arrival order. Equivalent to @c first_come_first_served in job_shop_lib.
+        FIFO_SRWT,   ///< First-Come-First-Served — arrival order, oldest job first. Equivalent to @c first_come_first_served in job_shop_lib.
         MOR,        ///< Most Operations Remaining — primary sort by count of unprocessed operations descending. Equivalent to @c most_operations_remaining in job_shop_lib.
     }
 
@@ -76,7 +76,7 @@ namespace Assets.Scripts.Scheduling.Core
                                         })
                                         .ThenBy(op => op.JobId)
                                         .First(),
-                DispatchingRule.SDT_SRWT => waitingOps[0],
+                DispatchingRule.FIFO_SRWT => waitingOps[0],
                 _ => waitingOps[0],
             };
         }

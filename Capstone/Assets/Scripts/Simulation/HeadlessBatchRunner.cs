@@ -31,7 +31,7 @@ namespace Assets.Scripts.Simulation
             DispatchingRule.SRT_SRWT,
             DispatchingRule.SRT_SMPT,
             DispatchingRule.LRT_MMUR,
-            DispatchingRule.SDT_SRWT,
+            DispatchingRule.FIFO_SRWT,
             DispatchingRule.Random
         };
 

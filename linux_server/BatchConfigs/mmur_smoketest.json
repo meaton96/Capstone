@@ -1,0 +1,26 @@
+{
+  "_comment": "Small, fast smoke test for the MMUR fix (2026-09-03): MMUR machine-selection now uses live cumulative utilization (DecisionCoordinator.MachineUtilization) instead of max/min queue length. MRT_SRWT was removed entirely (2026-09-03) -- it only ever existed as a workaround for the buggy MMUR and isn't in the paper's rule set; LPT_MMUR/LRT_MMUR are now the paper's actual, correctly-implemented Load-Balancing pair. Run with -rules LPT_MMUR,LRT_MMUR,FIFO_SRWT,SPT_SMPT --repeats 1 --baselinedrain true. Same proc-time/lambda profile as proctime_multiplier_dial.json's proc2x point (moderate load -- enough utilization spread to see MMUR differentiate without full deadlock/censoring), but a short 2000s episode and smaller machinesPerType so decision_log.csv's CandidateStatB (queued workload) vs CandidateStatC (utilization, newly populated) columns are easy to eyeball by hand. What to check: (1) it runs without errors/exceptions -- confirms the new DecisionRequest.CandidateUtilization plumbing is wired correctly, and that removing MRT_SRWT didn't break Enum.GetNames-based UI/CLI rule parsing; (2) decision_log.csv IsRouting=true rows for LPT_MMUR/LRT_MMUR show CandidateStatC populated with non-degenerate values and ChosenId tracking the lowest CandidateStatC rather than the lowest/highest CandidateStatB; (3) FIFO_SRWT rows still order by arrival time as before (unaffected by this change); (4) -rules MRT_SRWT should now log an 'Unknown rule' warning and be skipped, confirming the removal took effect end-to-end.",
+  "configs": [
+    {
+      "name": "mmur_smoketest",
+      "seed": 42,
+      "jobCount": 10,
+      "machinesPerType": 2,
+      "machineTypes": ["Mill", "Lathe", "Weld", "Inspect", "Assemble"],
+      "minProcTime": 30.0,
+      "maxProcTime": 180.0,
+      "minOpsPerJob": 5,
+      "maxOpsPerJob": 8,
+      "agvCount": 7,
+      "throughputTimingWindow": 60.0,
+      "parkingMethod": "single",
+      "preDispatchingMethod": "fixed",
+      "stochastic": {
+        "dynamicArrivalsEnabled": true,
+        "arrivalLambda": 0.008,
+        "dynamicJobCap": 0,
+        "episodeDurationSeconds": 2000.0
+      }
+    }
+  ]
+}

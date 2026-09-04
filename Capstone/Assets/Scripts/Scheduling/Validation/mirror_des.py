@@ -222,7 +222,7 @@ def rule_mor(waiting: list[Operation], jobs: list[Job]) -> Operation:
 
 ## @brief First Come First Served — returns the first operation in the queue.
 #  @details No sorting is applied; insertion order is preserved, matching
-#  C# @c DispatchingRule.SDT_SRWT which returns @c waitingOps[0].
+#  C# @c DispatchingRule.FIFO_SRWT which returns @c waitingOps[0].
 #  @param waiting Non-empty list of queued operations.
 #  @param jobs Full job list (unused by this rule).
 #  @returns The first element of @p waiting.

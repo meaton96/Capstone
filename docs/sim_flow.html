@@ -617,7 +617,7 @@
     <div class="note">
       The 8 PDRs are <code>SPT_SMPT</code>, <code>SPT_SRWT</code>, <code>LPT_MMUR</code>,
       <code>LPT_SMPT</code>, <code>SRT_SRWT</code>, <code>SRT_SMPT</code>, <code>LRT_MMUR</code>,
-      and <code>SDT_SRWT</code> — the same table drives both <code>SelectMachine</code> and
+      and <code>FIFO_SRWT</code> — the same table drives both <code>SelectMachine</code> and
       <code>SelectJob</code>. <b>Random</b> isn't sampled once per episode: <code>DispatchingEngine</code>
       re-rolls one of the other 8 at every single decision when the configured rule is
       <code>Random</code>.
@@ -648,7 +648,7 @@
             <td>2</td>
             <td>LPT_MMUR</td>
             <td>Longest Processing Time</td>
-            <td>Minimum Machine Utilization</td>
+            <td>Minimum Machine Utilization (cumulative)</td>
           </tr>
           <tr>
             <td>3</td>
@@ -672,12 +672,12 @@
             <td>6</td>
             <td>LRT_MMUR</td>
             <td>Longest Remaining Time</td>
-            <td>Minimum Machine Utilization</td>
+            <td>Minimum Machine Utilization (cumulative)</td>
           </tr>
           <tr>
             <td>7</td>
-            <td>SDT_SRWT</td>
-            <td>Shortest Due Time</td>
+            <td>FIFO_SRWT</td>
+            <td>FIFO (oldest arrival first)</td>
             <td>Shortest Remaining Work</td>
           </tr>
         </tbody>
