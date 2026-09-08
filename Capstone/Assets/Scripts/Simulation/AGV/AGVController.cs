@@ -278,12 +278,18 @@ namespace Assets.Scripts.Simulation.AGV
         /// @brief Redirects an AGV that is already carrying a job to a new dropoff machine.
         /// Called when the original destination machine fails mid-transit.
         /// Safe to call from MovingToDropoff state only.
-        public void RedirectDropoff(Vector3 newDropoffPos, PhysicalMachine newTarget, JobVisual visual)
+        /// @returns True if the redirect succeeded and the AGV is now routed to the new
+        /// target. False if it failed (wrong state, or no route to the new target) — the AGV
+        /// has already been reset (FullReset) and no longer owns the job in that case, so the
+        /// caller (FailureCoordinator) is responsible for returning the job's own state to
+        /// NeedsRouting; otherwise it would be left stranded InTransit with a stale
+        /// TargetMachineId and no owning AGV forever.
+        public bool RedirectDropoff(Vector3 newDropoffPos, PhysicalMachine newTarget, JobVisual visual)
         {
             if (State != AGVState.MovingToDropoff)
             {
                 SimLogger.Error($"[AGV {AgvId}] RedirectDropoff called in wrong state ({State}).");
-                return;
+                return false;
             }
 
             // Cancel the current route and any pending zone reservation
@@ -305,11 +311,12 @@ namespace Assets.Scripts.Simulation.AGV
             {
                 SimLogger.Error($"[AGV {AgvId}] RedirectDropoff: no route to new target for job {CurrentJobId}. FullReset.");
                 FullReset();
-                return;
+                return false;
             }
 
             BeginNextWaypoint();
             SimLogger.High($"[AGV {AgvId}] Redirected job {CurrentJobId} dropoff → machine {newTarget?.MachineId ?? -1}.");
+            return true;
         }
 
         /// @brief Commands the AGV to move to a pickup zone before a job is finished.

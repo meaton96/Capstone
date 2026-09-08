@@ -653,22 +653,31 @@ namespace Assets.Scripts.Simulation
 
         /// <summary>
         /// Checks whether the Poisson arrival clock has fired and, if so, injects a new
-        /// dynamic job and schedules the next arrival. Called every frame from Update.
+        /// arrival event's jobs (a single job, or a burst cluster when BurstArrivalsEnabled)
+        /// and schedules the next arrival. Called every frame from Update.
         /// </summary>
         private void TickPoissonClock()
         {
             int cap = currentConfig.Stochastic?.DynamicJobCap ?? 0;
-            // Spawn ALL arrivals whose scheduled time has passed this frame, not just one.
+            // Spawn ALL arrival EVENTS whose scheduled time has passed this frame, not just one.
             while (SimTime >= _nextArrivalSimTime)
             {
                 if (cap != 0 && _dynamicJobsSpawned >= cap) { _nextArrivalSimTime = float.MaxValue; break; }
 
-                FJSSPJobDefinition def = FJSSPJobGenerator.GenerateSingle(
-                    _nextDynamicJobId++, currentConfig, cachedMachinesByType);
-                def.ArrivalTime = (float)SimTime;   // note: see caveat below
-                Jobs.AddDynamicJob(def, spawnVisuals: true);
-                _dynamicJobsSpawned++;
-                _lastDynamicArrivalSimTime = (float)SimTime;
+                // A single event injects a burst of jobs at once (size 1 unless configured
+                // otherwise) — all sharing this event's arrival timestamp.
+                int burstSize = StochasticEventManager.Instance.SampleBurstSize();
+                for (int i = 0; i < burstSize; i++)
+                {
+                    if (cap != 0 && _dynamicJobsSpawned >= cap) break;
+
+                    FJSSPJobDefinition def = FJSSPJobGenerator.GenerateSingle(
+                        _nextDynamicJobId++, currentConfig, cachedMachinesByType);
+                    def.ArrivalTime = (float)SimTime;   // note: see caveat below
+                    Jobs.AddDynamicJob(def, spawnVisuals: true);
+                    _dynamicJobsSpawned++;
+                    _lastDynamicArrivalSimTime = (float)SimTime;
+                }
 
                 bool moreExpected = cap == 0 || _dynamicJobsSpawned < cap;
                 _nextArrivalSimTime = moreExpected

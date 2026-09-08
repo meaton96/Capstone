@@ -6,10 +6,12 @@ using Assets.Scripts.Simulation.Logging;
 namespace Assets.Scripts.Simulation.Stochastic
 {
     /// <summary>
-    /// Singleton MonoBehaviour that owns the seeded random number generator (RNG) for all
+    /// Singleton MonoBehaviour that owns the seeded random number generators (RNGs) for all
     /// stochastic disruption events in the simulation. All failure and arrival systems draw
-    /// exclusively from this manager, ensuring a single deterministic stochastic stream per
-    /// episode given a fixed seed.
+    /// exclusively from this manager, which keeps failure/repair sampling and arrival/burst
+    /// sampling on two INDEPENDENT streams (see <see cref="_rng"/> / <see cref="_arrivalRng"/>)
+    /// so the dynamic-arrival sequence for a given seed is identical regardless of which
+    /// dispatching rule is running, even when machine failures are enabled.
     ///
     /// <para>Responsibilities:</para>
     ///   <list type="bullet">
@@ -55,10 +57,32 @@ namespace Assets.Scripts.Simulation.Stochastic
         // ── State ────────────────────────────────────────────────────────────
 
         /// <summary>
-        /// Seeded pseudo-random number generator. All stochastic samples flow through this instance
-        /// to guarantee deterministic, reproducible simulation runs.
+        /// Seeded pseudo-random number generator for machine/AGV failure and repair sampling.
+        /// Deliberately kept SEPARATE from <see cref="_arrivalRng"/> — see that field's remarks.
         /// </summary>
         private System.Random _rng;
+
+        /// <summary>
+        /// Seeded pseudo-random number generator for the dynamic-arrival Poisson clock
+        /// (inter-arrival times and burst sizes) — independent of <see cref="_rng"/>.
+        /// </summary>
+        /// <remarks>
+        /// Failure/repair sampling is triggered by simulation events (a machine going idle
+        /// or finishing repair) whose timing depends on the dispatching rule in effect. If
+        /// arrivals drew from the SAME stream, the number of failure-sampling draws consumed
+        /// before each arrival draw would vary by rule, desyncing the arrival sequence
+        /// per-rule even under an identical seed — silently breaking "same seed → same
+        /// environment" comparisons across rules whenever machine failures are enabled.
+        /// Splitting the streams keeps the arrival process reproducible and rule-independent.
+        /// </remarks>
+        private System.Random _arrivalRng;
+
+        /// <summary>
+        /// Fixed offset XORed into the episode seed to derive <see cref="_arrivalRng"/>'s seed.
+        /// Any distinct constant works — this just needs to reliably decorrelate the arrival
+        /// stream's seed from the failure stream's seed (which uses the raw episode seed).
+        /// </summary>
+        private const int ArrivalStreamSeedOffset = unchecked((int)0x9E3779B9); // golden-ratio constant, arbitrary but fixed
 
         /// <summary>
         /// Cached stochastic configuration. Null when no config has been loaded or when the
@@ -93,7 +117,9 @@ namespace Assets.Scripts.Simulation.Stochastic
         public void Initialize(FJSSPConfig config)
         {
             _cfg = config?.Stochastic;
-            _rng = new System.Random(config?.Seed ?? 0);
+            int seed = config?.Seed ?? 0;
+            _rng = new System.Random(seed);
+            _arrivalRng = new System.Random(seed ^ ArrivalStreamSeedOffset);
 
             if (IsActive)
                 SimLogger.Low($"[StochasticMgr] Initialized — seed={config.Seed} " +
@@ -167,6 +193,22 @@ namespace Assets.Scripts.Simulation.Stochastic
             return SampleExponential(_cfg.ArrivalLambda);
         }
 
+        /// <summary>
+        /// Samples the number of jobs to inject for a single arrival event. When
+        /// BurstArrivalsEnabled is false (the default), always returns 1 — every arrival
+        /// event injects exactly one job, matching the original single-job Poisson process.
+        /// When enabled, returns 1 + Poisson(BurstSizeMean - 1), so at least one job always
+        /// arrives and any additional jobs on top are Poisson-distributed with mean
+        /// (BurstSizeMean - 1).
+        /// </summary>
+        /// <returns>The number of jobs to spawn for this arrival event (always >= 1).</returns>
+        public int SampleBurstSize()
+        {
+            if (!DynamicArrivalsEnabled || !_cfg.BurstArrivalsEnabled) return 1;
+            double poissonMean = Math.Max(0.0, _cfg.BurstSizeMean - 1.0);
+            return 1 + SamplePoisson(poissonMean);
+        }
+
         // ── Distribution implementations ─────────────────────────────────────
 
         /// <summary>
@@ -189,7 +231,7 @@ namespace Assets.Scripts.Simulation.Stochastic
                 return float.MaxValue;
             }
 
-            double u = NextNonZeroUniform();
+            double u = NextNonZeroUniform(_rng);
             double x = lambda * Math.Pow(-Math.Log(1.0 - u), 1.0 / k);
             return (float)x;
         }
@@ -213,7 +255,7 @@ namespace Assets.Scripts.Simulation.Stochastic
                 sigma = 0f;
             }
 
-            double z = SampleStandardNormal();
+            double z = SampleStandardNormal(_rng);
             double x = Math.Exp(mu + sigma * z);
             return (float)x;
         }
@@ -238,8 +280,34 @@ namespace Assets.Scripts.Simulation.Stochastic
                 return float.MaxValue;
             }
 
-            double u = NextNonZeroUniform();
+            double u = NextNonZeroUniform(_arrivalRng);
             return (float)(-Math.Log(u) / lambda);
+        }
+
+        /// <summary>
+        /// Generates a sample from a Poisson distribution using Knuth's algorithm:
+        /// multiply successive Uniform(0,1) draws until the running product drops below
+        /// e^(-mean), counting the number of draws needed.
+        /// </summary>
+        /// <param name="mean">Mean of the distribution (mean >= 0). 0 always returns 0.</param>
+        /// <returns>A non-negative integer sample from Poisson(mean).</returns>
+        /// <remarks>
+        /// Adequate for the small means (a handful of extra jobs per burst) this simulation
+        /// uses it for; not intended for large-mean, high-throughput sampling.
+        /// </remarks>
+        private int SamplePoisson(double mean)
+        {
+            if (mean <= 0.0) return 0;
+
+            double l = Math.Exp(-mean);
+            int k = 0;
+            double p = 1.0;
+            do
+            {
+                k++;
+                p *= NextNonZeroUniform(_arrivalRng);
+            } while (p > l);
+            return k - 1;
         }
 
         /// <summary>
@@ -255,17 +323,21 @@ namespace Assets.Scripts.Simulation.Stochastic
         /// For production use with high throughput, a method that caches and returns both
         /// samples would be more efficient.
         /// </remarks>
-        private double SampleStandardNormal()
+        private double SampleStandardNormal(System.Random rng)
         {
-            double u1 = NextNonZeroUniform();
-            double u2 = NextNonZeroUniform();
+            double u1 = NextNonZeroUniform(rng);
+            double u2 = NextNonZeroUniform(rng);
             return Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Cos(2.0 * Math.PI * u2);
         }
 
         /// <summary>
-        /// Returns a Uniform(0,1) draw from the seeded RNG, guaranteed to be strictly greater than 0.
+        /// Returns a Uniform(0,1) draw from the given RNG, guaranteed to be strictly greater than 0.
         /// If the RNG returns exactly 0, it is discarded and a new sample is drawn.
         /// </summary>
+        /// <param name="rng">Which stream to draw from — <see cref="_rng"/> for failure/repair
+        /// sampling, <see cref="_arrivalRng"/> for arrival/burst sampling. Callers must pass the
+        /// stream matching their sample's purpose; mixing them reintroduces the cross-rule
+        /// arrival desync this split exists to prevent.</param>
         /// <returns>A double in the open interval (0, 1).</returns>
         /// <remarks>
         /// This guard prevents log(0) in inverse-CDF methods (Weibull, Exponential) and
@@ -273,10 +345,10 @@ namespace Assets.Scripts.Simulation.Stochastic
         /// The probability of NextDouble() returning exactly 0 is negligible in practice,
         /// but the guard is retained for robustness.
         /// </remarks>
-        private double NextNonZeroUniform()
+        private double NextNonZeroUniform(System.Random rng)
         {
             double u;
-            do { u = _rng.NextDouble(); } while (u <= 0.0);
+            do { u = rng.NextDouble(); } while (u <= 0.0);
             return u;
         }
     }

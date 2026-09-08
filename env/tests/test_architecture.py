@@ -61,7 +61,7 @@ def make_dummy_obs(batch_size: int = BATCH) -> dict:
     """
     return {
         "factory_grid": torch.randn(batch_size, 3, 64, 64),
-        "sched_matrix": torch.randn(batch_size, 3, 100, 40),
+        "sched_matrix": torch.randn(batch_size, 3, 20, 16),
         "global_scalars": torch.randn(batch_size, 10),
         "distance_matrix": torch.randn(batch_size, 64),
         "event_flags": torch.randn(batch_size, 6),
@@ -101,9 +101,9 @@ class TestCNNSPPFEncoder:
         assert out.shape == (BATCH, 256), f"Factory encoder: {out.shape}"
 
     def test_sched_encoder_shape(self):
-        """@brief Scheduling-matrix image (3, 100, 40) → 128-D embedding."""
+        """@brief Scheduling-matrix image (3, 20, 16) → 128-D embedding."""
         enc = CNNSPPFEncoder(in_channels=3, out_dim=128)
-        x = torch.randn(BATCH, 3, 100, 40)
+        x = torch.randn(BATCH, 3, 20, 16)
         out = enc(x)
         assert out.shape == (BATCH, 128), f"Sched encoder: {out.shape}"
 
@@ -323,7 +323,7 @@ class TestRolloutBuffer:
         """
         obs_shapes = {
             "factory_grid": (3, 64, 64),
-            "sched_matrix": (3, 100, 40),
+            "sched_matrix": (3, 20, 16),
             "global_scalars": (10,),
             "distance_matrix": (64,),
             "event_flags": (6,),

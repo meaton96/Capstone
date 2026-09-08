@@ -106,7 +106,7 @@ done
 #merge_csvs "${OUT_DIR}/merged_agv_performance.csv"      "agv_performance"      "${A[@]}"
 #merge_csvs "${OUT_DIR}/merged_segment_congestion.csv"   "segment_congestion"   "${S[@]}"
 #merge_csvs "${OUT_DIR}/merged_throughput.csv"           "throughput"           "${T[@]}"
-cd Results & python merge.py
+cd Results && python merge.py
 echo ""
 echo "Done in ~$(( (SECONDS - SCRIPT_START) / 60 )) min."
 echo "Output: ${OUT_DIR}/merged_*.csv"

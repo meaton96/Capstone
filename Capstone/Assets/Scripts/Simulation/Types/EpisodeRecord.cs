@@ -118,12 +118,25 @@ namespace Assets.Scripts.Simulation.Types
         // ── Derived flow-time summary (computed over completed jobs only) ────
         public double MeanFlowTime => JobCompletionRecords.Count == 0 ? 0
             : Mean(JobCompletionRecords, r => r.Completed, r => r.FlowTime);
-        public double P95FlowTime => Percentile(JobCompletionRecords, 0.95);
+        public double P95FlowTime => Percentile(JobCompletionRecords, 0.95, penalized: false);
         public double MaxFlowTime => JobCompletionRecords.Count == 0 ? 0
             : MaxOf(JobCompletionRecords, r => r.Completed, r => r.FlowTime);
         public double MeanTransportWait => JobCompletionRecords.Count == 0 ? 0
             : Mean(JobCompletionRecords, r => r.Completed, r => r.TimeWaitingPickup + r.TimeInTransit);
         public int JobsCensored => JobCompletionRecords.Count(r => !r.Completed);
+
+        // ── Penalized flow-time summary (computed over ALL jobs; censored jobs
+        // score FlowTime = Makespan, i.e. "never finished in the time given") ──
+        // The completed-only metrics above go misleadingly LOW on runs where most
+        // jobs are censored, since only the lucky fast-finishing survivors count
+        // toward the mean. These give a true picture of scheduler performance
+        // (or lack thereof) that's comparable across runs with different
+        // completion rates.
+        public double MeanFlowTimePenalized => JobCompletionRecords.Count == 0 ? 0
+            : JobCompletionRecords.Average(r => r.Completed ? r.FlowTime : (float)Makespan);
+        public double P95FlowTimePenalized => Percentile(JobCompletionRecords, 0.95, penalized: true);
+        public double MaxFlowTimePenalized => JobCompletionRecords.Count == 0 ? 0
+            : JobCompletionRecords.Max(r => r.Completed ? r.FlowTime : (float)Makespan);
 
         private static double Mean(List<JobCompletionRecord> records,
             System.Func<JobCompletionRecord, bool> filter, System.Func<JobCompletionRecord, double> select)
@@ -146,10 +159,14 @@ namespace Assets.Scripts.Simulation.Types
             return best;
         }
 
-        private static double Percentile(List<JobCompletionRecord> records, double p)
+        private double Percentile(List<JobCompletionRecord> records, double p, bool penalized)
         {
             var flowTimes = new List<double>();
-            foreach (var r in records) if (r.Completed) flowTimes.Add(r.FlowTime);
+            foreach (var r in records)
+            {
+                if (r.Completed) flowTimes.Add(r.FlowTime);
+                else if (penalized) flowTimes.Add(Makespan);
+            }
             if (flowTimes.Count == 0) return 0;
             flowTimes.Sort();
             int idx = (int)System.Math.Ceiling(p * flowTimes.Count) - 1;

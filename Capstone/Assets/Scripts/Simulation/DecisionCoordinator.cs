@@ -130,6 +130,22 @@ namespace Assets.Scripts.Simulation
                 foreach (int jobId in readyIds)
                 {
                     JobData job = _jobs.Get(jobId);
+
+                    // Defensive: a job past its last operation has no EligibleMachinesPerOp
+                    // entry to route to. It should never reach NeedsRouting in that state (see
+                    // FlagHarvester.HarvestStalledAGVs' IsLastOperation branch), but if some
+                    // other path ever does the same thing, skip-and-log beats an
+                    // IndexOutOfRangeException that would otherwise recur every frame for the
+                    // rest of the episode (nothing clears NeedsRouting on its own).
+                    if (job.CurrentOpIndex >= job.EligibleMachinesPerOp.Length)
+                    {
+                        SimLogger.LogWarning($"[DecisionCoordinator] Job {jobId} is NeedsRouting with " +
+                                              $"CurrentOpIndex={job.CurrentOpIndex} >= " +
+                                              $"{job.EligibleMachinesPerOp.Length} operations — skipping " +
+                                              "(should have exited or gone to WaitingForPickup instead).");
+                        continue;
+                    }
+
                     var eligibleIds = new HashSet<int>(job.EligibleMachinesPerOp[job.CurrentOpIndex].Keys);
 
                     bool anyAvailable = _layout.Machines

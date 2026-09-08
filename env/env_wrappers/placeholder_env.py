@@ -11,7 +11,7 @@ All observations are dicts of tensors:
 | Key              | Shape          | Description                       |
 |------------------|----------------|-----------------------------------|
 | factory_grid     | (3, 64, 64)    | Spatial occupancy grid            |
-| sched_matrix     | (3, 100, 40)   | Scheduling matrix image           |
+| sched_matrix     | (3, 20, 16)    | Scheduling matrix image           |
 | global_scalars   | (10,)          | Normalized scalar features        |
 | distance_matrix  | (64,)          | Flattened pairwise distances      |
 | event_flags      | (6,)           | Binary event indicators           |

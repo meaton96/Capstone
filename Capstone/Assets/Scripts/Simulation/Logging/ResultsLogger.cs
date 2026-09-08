@@ -144,6 +144,7 @@ namespace Assets.Scripts.Simulation.Logging
                     "dynamic_arrivals,arrival_lambda,mean_interarrival_theoretical," +
                     "mean_interarrival_realised,last_arrival_sim_time," +
                     "mean_flow_time,p95_flow_time,max_flow_time,mean_transport_wait,jobs_censored," +
+                    "mean_flow_time_penalized,p95_flow_time_penalized,max_flow_time_penalized," +
                     "deadlock_detected,deadlock_sim_time"
                 );
 
@@ -159,6 +160,7 @@ namespace Assets.Scripts.Simulation.Logging
                 $"{r.DynamicArrivals},{r.ArrivalLambda:F5},{r.MeanInterarrivalTime:F1}," +
                 $"{r.RealisedMeanInterarrival:F1},{r.LastDynamicArrivalTime:F1}," +
                 $"{r.MeanFlowTime:F2},{r.P95FlowTime:F2},{r.MaxFlowTime:F2},{r.MeanTransportWait:F2},{r.JobsCensored}," +
+                $"{r.MeanFlowTimePenalized:F2},{r.P95FlowTimePenalized:F2},{r.MaxFlowTimePenalized:F2}," +
                 $"{(r.DeadlockDetected ? 1 : 0)},{r.DeadlockSimTime:F1}"
             );
 

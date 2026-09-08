@@ -1,0 +1,135 @@
+{
+  "_comment": "Scenario-coverage matrix on top of the steady_state_l008 baseline (results/0903b): same factory (agv07, jobCount=10, agvCount=7, minProcTime=15/maxProcTime=90, minOpsPerJob=5/maxOpsPerJob=8, parkingMethod=single, preDispatchingMethod=fixed, episodeDurationSeconds=30000, arrivalLambda=0.008). Each config adds exactly one or two new stressors on top of that baseline so results are directly comparable to results/0903b (the 'baseline' entry below IS 0903b, included for a same-file reference point). Requires --baselinedrain true on the launch command, same as steady_state_l008.json.\n\nMachine-failure lambdas retuned for this run's 30000s episode (steady_state_l008.json's episode length), not the shorter default used in StochasticBatchConfigs.json: mean TTF ~= WeibullLambda * Gamma(1+1/k), at k=1.5 that factor is ~0.903. low target mean TTF ~= 3x episode (90000) -> WeibullLambda~=100000; high target mean TTF ~= 1x episode (30000) -> WeibullLambda~=33000.\n\nAGV failures are deliberately excluded from this matrix. StochasticConfig.AGVFailuresEnabled / StochasticEventManager.SampleAGVTTF()+SampleAGVRepair() exist, but nothing in AGVController.cs (or anywhere else) actually consumes them -- there is no AGV breakdown/repair state machine, EpisodeRecord.cs even has AGVFailureCount/AGVRepairTime commented out ('Phase 3', never finished). Setting agvFailuresEnabled=true today would silently no-op (sampled TTFs go nowhere) rather than fail loudly, so it would masquerade as a tested disruption while actually being identical to no-AGV-failure. Do not add an AGV-failure config until that feature is actually implemented and unit-tested in isolation.\n\nIMPORTANT: burstArrivalsEnabled/burstSizeMean require the new burst-arrival feature added to StochasticEventManager/FactoryOrchestrator/StochasticConfig/ConfigLoader (uncommitted as of this file's creation) -- mf_low/mf_high need no code change and can run against the current linux_server build; l008_burst/l008_mf_high_burst need that build recompiled first, or they will silently run as if burstArrivalsEnabled were absent (defaults to false, single-job arrivals) rather than fail loudly.",
+
+  "configs": [
+    {
+      "_comment": "Reference point -- identical to steady_state_l008.json / results/0903b. No new stressor.",
+      "name": "l008_baseline",
+      "seed": 42,
+      "jobCount": 10,
+      "machinesPerType": 3,
+      "machineTypes": ["Mill", "Lathe", "Weld", "Inspect", "Assemble"],
+      "minProcTime": 15.0,
+      "maxProcTime": 90.0,
+      "minOpsPerJob": 5,
+      "maxOpsPerJob": 8,
+      "agvCount": 7,
+      "throughputTimingWindow": 60.0,
+      "parkingMethod": "single",
+      "preDispatchingMethod": "fixed",
+      "stochastic": {
+        "dynamicArrivalsEnabled": true,
+        "arrivalLambda": 0.008,
+        "dynamicJobCap": 0,
+        "episodeDurationSeconds": 30000.0
+      }
+    },
+    {
+      "_comment": "Machine failures, low disruption -- mean TTF ~3x episode length (~1 failure per 3 episodes per machine).",
+      "name": "l008_mf_low",
+      "seed": 42,
+      "jobCount": 10,
+      "machinesPerType": 3,
+      "machineTypes": ["Mill", "Lathe", "Weld", "Inspect", "Assemble"],
+      "minProcTime": 15.0,
+      "maxProcTime": 90.0,
+      "minOpsPerJob": 5,
+      "maxOpsPerJob": 8,
+      "agvCount": 7,
+      "throughputTimingWindow": 60.0,
+      "parkingMethod": "single",
+      "preDispatchingMethod": "fixed",
+      "stochastic": {
+        "dynamicArrivalsEnabled": true,
+        "arrivalLambda": 0.008,
+        "dynamicJobCap": 0,
+        "episodeDurationSeconds": 30000.0,
+        "machineFailuresEnabled": true,
+        "weibullK": 1.5,
+        "weibullLambda": 100000.0,
+        "repairLogMu": 4.0,
+        "repairLogSigma": 0.5
+      }
+    },
+    {
+      "_comment": "Machine failures, high disruption -- mean TTF ~1x episode length (roughly 1 failure per machine per episode).",
+      "name": "l008_mf_high",
+      "seed": 42,
+      "jobCount": 10,
+      "machinesPerType": 3,
+      "machineTypes": ["Mill", "Lathe", "Weld", "Inspect", "Assemble"],
+      "minProcTime": 15.0,
+      "maxProcTime": 90.0,
+      "minOpsPerJob": 5,
+      "maxOpsPerJob": 8,
+      "agvCount": 7,
+      "throughputTimingWindow": 60.0,
+      "parkingMethod": "single",
+      "preDispatchingMethod": "fixed",
+      "stochastic": {
+        "dynamicArrivalsEnabled": true,
+        "arrivalLambda": 0.008,
+        "dynamicJobCap": 0,
+        "episodeDurationSeconds": 30000.0,
+        "machineFailuresEnabled": true,
+        "weibullK": 1.5,
+        "weibullLambda": 33000.0,
+        "repairLogMu": 4.0,
+        "repairLogSigma": 0.5
+      }
+    },
+    {
+      "_comment": "Burst arrivals -- 'many jobs at once'. Same event rate (arrivalLambda=0.008) as baseline, but each arrival event now injects a compound-Poisson cluster averaging 3 jobs (1 + Poisson(2)) instead of exactly 1, so realized job throughput is roughly 3x baseline while the event cadence is unchanged. REQUIRES rebuilt linux_server binary (new StochasticEventManager.SampleBurstSize code path).",
+      "name": "l008_burst",
+      "seed": 42,
+      "jobCount": 10,
+      "machinesPerType": 3,
+      "machineTypes": ["Mill", "Lathe", "Weld", "Inspect", "Assemble"],
+      "minProcTime": 15.0,
+      "maxProcTime": 90.0,
+      "minOpsPerJob": 5,
+      "maxOpsPerJob": 8,
+      "agvCount": 7,
+      "throughputTimingWindow": 60.0,
+      "parkingMethod": "single",
+      "preDispatchingMethod": "fixed",
+      "stochastic": {
+        "dynamicArrivalsEnabled": true,
+        "arrivalLambda": 0.008,
+        "dynamicJobCap": 0,
+        "episodeDurationSeconds": 30000.0,
+        "burstArrivalsEnabled": true,
+        "burstSizeMean": 3.0
+      }
+    },
+    {
+      "_comment": "Compound stressor -- high machine failures + bursty arrivals together. REQUIRES rebuilt linux_server binary.",
+      "name": "l008_mf_high_burst",
+      "seed": 42,
+      "jobCount": 10,
+      "machinesPerType": 3,
+      "machineTypes": ["Mill", "Lathe", "Weld", "Inspect", "Assemble"],
+      "minProcTime": 15.0,
+      "maxProcTime": 90.0,
+      "minOpsPerJob": 5,
+      "maxOpsPerJob": 8,
+      "agvCount": 7,
+      "throughputTimingWindow": 60.0,
+      "parkingMethod": "single",
+      "preDispatchingMethod": "fixed",
+      "stochastic": {
+        "dynamicArrivalsEnabled": true,
+        "arrivalLambda": 0.008,
+        "dynamicJobCap": 0,
+        "episodeDurationSeconds": 30000.0,
+        "machineFailuresEnabled": true,
+        "weibullK": 1.5,
+        "weibullLambda": 33000.0,
+        "repairLogMu": 4.0,
+        "repairLogSigma": 0.5,
+        "burstArrivalsEnabled": true,
+        "burstSizeMean": 3.0
+      }
+    }
+  ]
+}

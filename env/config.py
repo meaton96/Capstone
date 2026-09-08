@@ -143,5 +143,5 @@ PDR_ACTIONS = [
     "SRT-SRWT",
     "SRT-SMPT",
     "LRT-MMUR",
-    "SDT-SRWT",
+    "FIFO-SRWT",
 ]
