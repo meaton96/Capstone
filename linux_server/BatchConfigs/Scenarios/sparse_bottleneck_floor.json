@@ -1,0 +1,338 @@
+{
+  "_comment": "15 jobs arrive at t=0, each needs any Mill -> the single Weld machine (SPARSE_FLOOR has only 1, vs 3 on DEFAULT_FLOOR) -> any Assemble, all eligibility is \"any\" -- nothing pinned or scripted. The Weld step is a bottleneck purely because the floor only has one such machine. Compare against single_bottleneck (same job shape, scripted pin, DEFAULT_FLOOR) to see whether a real floor-topology bottleneck reproduces the same rule tiering as a scripted one.",
+  "name": "sparse_bottleneck_floor",
+  "seed": 42,
+  "agvCount": 6,
+  "machineTypeLayout": [
+    "Mill",
+    "Mill",
+    "Mill",
+    "Lathe",
+    "Lathe",
+    "Lathe",
+    "Weld",
+    "Inspect",
+    "Inspect",
+    "Inspect",
+    "Assemble",
+    "Assemble",
+    "Assemble"
+  ],
+  "jobs": [
+    {
+      "id": 0,
+      "arrivalTime": 0.0,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 30.99
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": "any",
+          "duration": 16.13
+        },
+        {
+          "machineType": "Assemble",
+          "machineIndex": "any",
+          "duration": 21.88
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "arrivalTime": 0.0,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 20.58
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": "any",
+          "duration": 48.14
+        },
+        {
+          "machineType": "Assemble",
+          "machineIndex": "any",
+          "duration": 31.92
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "arrivalTime": 0.0,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 37.3
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": "any",
+          "duration": 18.91
+        },
+        {
+          "machineType": "Assemble",
+          "machineIndex": "any",
+          "duration": 25.55
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "arrivalTime": 0.0,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 15.74
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": "any",
+          "duration": 24.84
+        },
+        {
+          "machineType": "Assemble",
+          "machineIndex": "any",
+          "duration": 27.63
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "arrivalTime": 0.0,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 15.66
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": "any",
+          "duration": 23.95
+        },
+        {
+          "machineType": "Assemble",
+          "machineIndex": "any",
+          "duration": 31.25
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "arrivalTime": 0.0,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 28.62
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": "any",
+          "duration": 24.92
+        },
+        {
+          "machineType": "Assemble",
+          "machineIndex": "any",
+          "duration": 29.73
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "arrivalTime": 0.0,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 35.24
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": "any",
+          "duration": 15.29
+        },
+        {
+          "machineType": "Assemble",
+          "machineIndex": "any",
+          "duration": 35.15
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "arrivalTime": 0.0,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 32.45
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": "any",
+          "duration": 30.31
+        },
+        {
+          "machineType": "Assemble",
+          "machineIndex": "any",
+          "duration": 18.89
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "arrivalTime": 0.0,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 38.93
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": "any",
+          "duration": 30.15
+        },
+        {
+          "machineType": "Assemble",
+          "machineIndex": "any",
+          "duration": 17.32
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "arrivalTime": 0.0,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 17.42
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": "any",
+          "duration": 53.14
+        },
+        {
+          "machineType": "Assemble",
+          "machineIndex": "any",
+          "duration": 30.09
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "arrivalTime": 0.0,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 35.18
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": "any",
+          "duration": 47.84
+        },
+        {
+          "machineType": "Assemble",
+          "machineIndex": "any",
+          "duration": 28.41
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "arrivalTime": 0.0,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 39.33
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": "any",
+          "duration": 32.03
+        },
+        {
+          "machineType": "Assemble",
+          "machineIndex": "any",
+          "duration": 28.8
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "arrivalTime": 0.0,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 35.74
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": "any",
+          "duration": 42.83
+        },
+        {
+          "machineType": "Assemble",
+          "machineIndex": "any",
+          "duration": 36.54
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "arrivalTime": 0.0,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 29.43
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": "any",
+          "duration": 46.71
+        },
+        {
+          "machineType": "Assemble",
+          "machineIndex": "any",
+          "duration": 16.15
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "arrivalTime": 0.0,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 20.7
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": "any",
+          "duration": 28.02
+        },
+        {
+          "machineType": "Assemble",
+          "machineIndex": "any",
+          "duration": 16.99
+        }
+      ]
+    }
+  ]
+}

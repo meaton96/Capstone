@@ -59,6 +59,11 @@ namespace Assets.Scripts.Simulation
             string configName = GetCLIArg("-configname");
             string benchmarkPath = GetCLIArg("-benchmark");
             string benchmarkDirPath = GetCLIArg("-benchmarkdir");
+            // Hand-crafted scenario instances (ScenarioLoader) -- explicit job sets built to
+            // force a specific contention structure (a bottleneck machine, two jobs pinned to
+            // the same machine, an identical-job batch, ...) rather than i.i.d. random jobs.
+            string scenarioPath = GetCLIArg("-scenario");
+            string scenarioDirPath = GetCLIArg("-scenariodir");
             // Baseline decision-drain: when set, heuristic decisions drain per-frame instead of
             // one-per-frame. Valid ONLY for heuristic batch runs (no neural policy in the loop).
             bool baselineDrain = GetCLIArg("-baselinedrain") != null;
@@ -70,7 +75,9 @@ namespace Assets.Scripts.Simulation
             if (!Application.isBatchMode
                 && string.IsNullOrEmpty(batchPath)
                 && string.IsNullOrEmpty(benchmarkPath)
-                && string.IsNullOrEmpty(benchmarkDirPath))
+                && string.IsNullOrEmpty(benchmarkDirPath)
+                && string.IsNullOrEmpty(scenarioPath)
+                && string.IsNullOrEmpty(scenarioDirPath))
                 return;
 
             // ── Shared setup ─────────────────────────────────────────
@@ -144,6 +151,14 @@ namespace Assets.Scripts.Simulation
             else if (!string.IsNullOrEmpty(benchmarkPath))
             {
                 StartCoroutine(RunBenchmarkCoroutine(benchmarkPath, repeats, disruption, agvCountOverride));
+            }
+            else if (!string.IsNullOrEmpty(scenarioDirPath))
+            {
+                StartCoroutine(RunMultiScenarioCoroutine(scenarioDirPath, repeats, agvCountOverride));
+            }
+            else if (!string.IsNullOrEmpty(scenarioPath))
+            {
+                StartCoroutine(RunScenarioCoroutine(scenarioPath, repeats, agvCountOverride));
             }
             else
             {
@@ -342,6 +357,115 @@ namespace Assets.Scripts.Simulation
 
             float totalTime = Time.realtimeSinceStartup - startWall;
             SimLogger.Low($"[BatchRunner] Benchmark complete: {totalRuns} runs in {totalTime:F1}s");
+            isBatchRunning = false;
+
+            if (Application.isBatchMode)
+            {
+                SimLogger.Low("[BatchRunner] Headless mode — quitting application.");
+                Application.Quit();
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────
+        //  Hand-Crafted Scenario Loop (single file, via -scenario)
+        // ─────────────────────────────────────────────────────────
+
+        private IEnumerator RunScenarioCoroutine(string jsonPath, int repeats, int agvCountOverride = -1)
+        {
+            isBatchRunning = true;
+            if (activeRules == null || activeRules.Length == 0)
+                activeRules = AllRules;
+
+            var (config, buildJobs) = ScenarioLoader.LoadDeferred(jsonPath, agvCountOverride: agvCountOverride);
+            if (config == null)
+            {
+                QuitWithError($"Failed to load scenario: {jsonPath}");
+                yield break;
+            }
+
+            totalRuns = activeRules.Length * repeats;
+            completedRuns = 0;
+
+            SimLogger.Low($"[BatchRunner] Scenario: {config.Name}, " +
+                          $"{activeRules.Length} rules x {repeats} repeats = {totalRuns} runs");
+
+            startWall = Time.realtimeSinceStartup;
+
+            yield return RunBenchmarkEpisodes(config, buildJobs, repeats);
+
+            float totalTime = Time.realtimeSinceStartup - startWall;
+            SimLogger.Low($"[BatchRunner] Scenario complete: {totalRuns} runs in {totalTime:F1}s");
+            isBatchRunning = false;
+
+            if (Application.isBatchMode)
+            {
+                SimLogger.Low("[BatchRunner] Headless mode — quitting application.");
+                Application.Quit();
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────
+        //  Hand-Crafted Scenario Loop (all .json files in a directory, via -scenariodir)
+        // ─────────────────────────────────────────────────────────
+
+        private IEnumerator RunMultiScenarioCoroutine(string dirPath, int repeats, int agvCountOverride = -1)
+        {
+            isBatchRunning = true;
+            if (activeRules == null || activeRules.Length == 0)
+                activeRules = AllRules;
+
+            if (!Directory.Exists(dirPath))
+            {
+                QuitWithError($"Scenario directory not found: {dirPath}");
+                yield break;
+            }
+
+            string[] files = Directory.GetFiles(dirPath, "*.json");
+            Array.Sort(files, StringComparer.OrdinalIgnoreCase);
+
+            if (files.Length == 0)
+            {
+                QuitWithError($"No .json files found in {dirPath}");
+                yield break;
+            }
+
+            var scenarios = new List<(string path, FJSSPConfig config,
+                Func<Dictionary<MachineType, List<int>>, FJSSPJobDefinition[]> buildJobs)>();
+
+            foreach (string file in files)
+            {
+                var (config, buildJobs) = ScenarioLoader.LoadDeferred(file, agvCountOverride: agvCountOverride);
+                if (config != null)
+                {
+                    scenarios.Add((file, config, buildJobs));
+                    SimLogger.Low($"[BatchRunner] Loaded scenario: {config.Name} " +
+                                  $"({config.JobCount} jobs, {config.MachineTypeLayout.Length} machines, " +
+                                  $"{config.AGVCount} AGVs)");
+                }
+                else
+                {
+                    SimLogger.LogWarning($"[BatchRunner] Skipping invalid scenario: {file}");
+                }
+            }
+
+            totalRuns = scenarios.Count * activeRules.Length * repeats;
+            completedRuns = 0;
+
+            SimLogger.Low($"[BatchRunner] Multi-scenario: {scenarios.Count} files x " +
+                          $"{activeRules.Length} rules x {repeats} repeats = {totalRuns} total runs");
+
+            startWall = Time.realtimeSinceStartup;
+
+            foreach (var (path, config, buildJobs) in scenarios)
+            {
+                SimLogger.Low($"[BatchRunner] ─── {config.Name} " +
+                              $"({config.JobCount}j × {config.MachineTypeLayout.Length}m) ───");
+
+                yield return RunBenchmarkEpisodes(config, buildJobs, repeats);
+            }
+
+            float totalTime = Time.realtimeSinceStartup - startWall;
+            SimLogger.Low($"[BatchRunner] All scenarios complete: {totalRuns} runs in {totalTime:F1}s");
             isBatchRunning = false;
 
             if (Application.isBatchMode)

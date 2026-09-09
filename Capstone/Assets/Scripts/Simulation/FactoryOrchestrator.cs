@@ -207,6 +207,17 @@ namespace Assets.Scripts.Simulation
         /// </summary>
         private DecisionCoordinator _decisions;
 
+        // ── Scripted arrivals (jobs with an explicit ArrivalTime > 0 in the initial batch,
+        //    from a hand-crafted scenario or a jittered generated batch) ───────────────────
+
+        /// <summary>
+        /// Jobs from the initial batch (prebuilt or generated) with ArrivalTime > 0, held
+        /// back from JobStore.Initialize and injected individually as SimTime reaches each
+        /// one's arrival time. Sorted ascending by ArrivalTime; TickScriptedArrivals only
+        /// ever needs to look at the front of the list.
+        /// </summary>
+        private readonly List<FJSSPJobDefinition> _pendingScriptedArrivals = new List<FJSSPJobDefinition>();
+
         // ── Poisson arrival clock ─────────────────────────────────────────────
 
         /// <summary>
@@ -388,7 +399,25 @@ namespace Assets.Scripts.Simulation
                 jobDefs = FJSSPJobGenerator.Generate(currentConfig, cachedMachinesByType);
             }
 
-            Jobs.Initialize(jobDefs, spawnVisuals: true);
+            // JobStore.Initialize marks every job it's given as immediately routable — it
+            // treats ArrivalTime as metadata, not a gate. That's fine for every existing
+            // caller (Brandimarte instances and the un-jittered generated batch both use
+            // ArrivalTime=0 throughout), but a hand-crafted scenario (or a generated batch
+            // with InitialArrivalSpread>0) can specify jobs due later in the episode, which
+            // Initialize would silently make available at t=0 anyway. Split the batch here:
+            // anything due now loads normally; anything due later is held and injected via
+            // AddDynamicJob (the same call the Poisson clock already uses correctly) once
+            // SimTime reaches its arrival time.
+            var immediateJobs = new List<FJSSPJobDefinition>();
+            _pendingScriptedArrivals.Clear();
+            foreach (var def in jobDefs)
+            {
+                if (def.ArrivalTime > 0f) _pendingScriptedArrivals.Add(def);
+                else immediateJobs.Add(def);
+            }
+            _pendingScriptedArrivals.Sort((a, b) => a.ArrivalTime.CompareTo(b.ArrivalTime));
+
+            Jobs.Initialize(immediateJobs, spawnVisuals: true);
 
             if (currentConfig.Stochastic != null && currentConfig.Stochastic.AnyEnabled)
             {
@@ -565,14 +594,32 @@ namespace Assets.Scripts.Simulation
             // ── Tick Poisson arrival clock ─────────────────────────────────────
             // Runs regardless of IsWaitingForAction — arrivals are asynchronous events.
             TickPoissonClock();
+            TickScriptedArrivals();
             TickThroughputClock();
             // Guard against ending the episode while arrivals are still pending: if the
             // currently-spawned job pool drains to zero before the next scheduled Poisson
             // arrival lands, AreAllExited() alone would end the episode early and silently
             // drop the remaining arrivals — and since which rule races ahead fastest varies,
-            // this made the realized workload differ across rules for the "same" seed.
-            if (Jobs.AreAllExited() && AllArrivalsExhausted())
+            // this made the realized workload differ across rules for the "same" seed. Same
+            // reasoning applies to scripted arrivals still waiting in _pendingScriptedArrivals.
+            if (Jobs.AreAllExited() && AllArrivalsExhausted() && _pendingScriptedArrivals.Count == 0)
                 FinaliseEpisode();
+        }
+
+        /// <summary>
+        /// Injects any scripted-arrival job (explicit ArrivalTime > 0 from the initial batch)
+        /// whose time has come. Mirrors TickPoissonClock's structure but walks a pre-sorted
+        /// list instead of sampling from a distribution — see _pendingScriptedArrivals.
+        /// </summary>
+        private void TickScriptedArrivals()
+        {
+            while (_pendingScriptedArrivals.Count > 0
+                   && SimTime >= _pendingScriptedArrivals[0].ArrivalTime)
+            {
+                FJSSPJobDefinition def = _pendingScriptedArrivals[0];
+                _pendingScriptedArrivals.RemoveAt(0);
+                Jobs.AddDynamicJob(def, spawnVisuals: true);
+            }
         }
 
         /// <summary>
