@@ -1,0 +1,4 @@
+timestamp,instance,rule,seed,makespan,jobs,machines,total_ops,agvCount,decisions,total_reward,timescale,stochastic_tag,weibull_k,weibull_lambda,mean_ttf_theoretical,repair_log_mu,repair_log_sigma,episode_failures,total_repair_time,dynamic_arrivals
+2026-06-12 21:50:09,50j_5m_agv15,Random,42,18663.39,50,5,254,15,508,-0.7295,100.0000,none,0.00,0.0,0.0,0.000,0.000,0,0.0,0
+2026-06-12 21:59:06,50j_5m_agv15,Random,43,18733.34,50,5,244,15,488,-0.7623,100.0000,none,0.00,0.0,0.0,0.000,0.000,0,0.0,0
+2026-06-12 22:07:22,50j_5m_agv15,Random,44,17300.00,50,5,242,15,484,-0.7094,100.0000,none,0.00,0.0,0.0,0.000,0.000,0,0.0,0

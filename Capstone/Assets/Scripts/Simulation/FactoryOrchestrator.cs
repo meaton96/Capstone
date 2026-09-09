@@ -130,9 +130,15 @@ namespace Assets.Scripts.Simulation
         private double previousMakespan;
 
         /// <summary>
-        /// Simulation start time, used to compute elapsed simulation time.
+        /// Elapsed simulation time, accumulated once per FixedUpdate tick by a constant
+        /// Time.fixedDeltaTime instead of read from Time.time. Time.time is real wall-clock
+        /// time scaled by Time.timeScale — under headless batch runs (multiple rule processes
+        /// competing for CPU, see run_generated.sh) its per-frame granularity is at the mercy
+        /// of OS scheduling and isn't reproducible run-to-run even for an identical seed.
+        /// Accumulating a fixed per-tick increment instead makes SimTime a pure function of
+        /// tick count, independent of how long each tick actually took in wall-clock terms.
         /// </summary>
-        private float startTime;
+        private double _simTime;
 
         /// <summary>
         /// Whether a simulation episode is currently running.
@@ -147,7 +153,7 @@ namespace Assets.Scripts.Simulation
         /// <summary>
         /// Elapsed simulation time since episode start.
         /// </summary>
-        public double SimTime => Time.time - startTime;
+        public double SimTime => _simTime;
 
         /// <summary>
         /// The current FJSSP configuration for this episode.
@@ -439,7 +445,7 @@ namespace Assets.Scripts.Simulation
             totalReward = 0;
             previousMakespan = 0;
             IsWaitingForAction = false;
-            startTime = Time.time;
+            _simTime = 0.0;
 
             // ── Arm deadlock watchdog ────────────────────────────────────────────
             _lastZoneTraversalTotal = -1;
@@ -487,12 +493,20 @@ namespace Assets.Scripts.Simulation
         }
 
         /// <summary>
-        /// Called every frame. Processes simulation flags, checks for new decisions, and
-        /// terminates the episode when all jobs have exited or the time limit is reached.
+        /// Called every fixed-timestep tick. Advances the deterministic simulation clock,
+        /// processes simulation flags, checks for new decisions, and terminates the episode
+        /// when all jobs have exited or the time limit is reached.
+        ///
+        /// Runs on FixedUpdate (constant Time.fixedDeltaTime per call) rather than Update
+        /// (variable, real-wall-clock-dependent per call) so the sequence and timing of
+        /// simulated events is a pure function of tick count — reproducible for a given
+        /// seed regardless of real-world CPU scheduling/contention during the tick.
         /// </summary>
-        private void Update()
+        private void FixedUpdate()
         {
             if (!episodeActive) return;
+
+            _simTime += Time.fixedDeltaTime;
 
             if (SimTime > MAX_EPISODE_SIM_SECONDS)
             {
@@ -673,10 +687,15 @@ namespace Assets.Scripts.Simulation
 
                     FJSSPJobDefinition def = FJSSPJobGenerator.GenerateSingle(
                         _nextDynamicJobId++, currentConfig, cachedMachinesByType);
-                    def.ArrivalTime = (float)SimTime;   // note: see caveat below
+                    // Stamp the exact scheduled Poisson instant, not SimTime as observed by
+                    // this tick — SimTime only overshoots _nextArrivalSimTime by up to one
+                    // fixed tick, and using the scheduled time keeps ArrivalTime a pure
+                    // function of the seeded arrival stream (deterministic, tick-count-
+                    // independent) instead of tick-granularity-dependent.
+                    def.ArrivalTime = _nextArrivalSimTime;
                     Jobs.AddDynamicJob(def, spawnVisuals: true);
                     _dynamicJobsSpawned++;
-                    _lastDynamicArrivalSimTime = (float)SimTime;
+                    _lastDynamicArrivalSimTime = _nextArrivalSimTime;
                 }
 
                 bool moreExpected = cap == 0 || _dynamicJobsSpawned < cap;
