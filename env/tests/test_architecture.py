@@ -572,7 +572,7 @@ class TestUnitySchedulingEnv:
     — all without requiring a running Unity process.
     """
 
-    def _make_env(self, get_steps_sequence, reward_fn=None, with_metrics=False):
+    def _make_env(self, get_steps_sequence, reward_fn=None, with_metrics=False, seed_rng=None):
         """@brief Construct a UnitySchedulingEnv with a fully mocked backend.
 
         @param get_steps_sequence  List of (decision_steps, terminal_steps)
@@ -609,7 +609,8 @@ class TestUnitySchedulingEnv:
 
             MockUnity.return_value = mock_env_instance
 
-            env = UnitySchedulingEnv(file_name=None, time_scale=1.0, reward_fn=reward_fn)
+            env = UnitySchedulingEnv(file_name=None, time_scale=1.0, reward_fn=reward_fn,
+                                     seed_rng=seed_rng)
             return env, mock_env_instance
 
     def test_step_returns_on_decision(self):
@@ -738,6 +739,64 @@ class TestUnitySchedulingEnv:
 
         # Measured from the new episode's first snapshot (t=0), not the old terminal (t=9).
         assert abs(env.step(0)[1] - (-2.5)) < 1e-6
+
+    def test_seed_rng_keeps_unity_seed_queue_filled(self):
+        """@brief With a seed RNG, reset() replaces Unity's seed queue with a buffer of
+        training seeds and every finished episode tops it up by one; summaries report the
+        seed each episode actually used."""
+        from rewards import MetricsSnapshot
+        from env_wrappers.unity_env import SEED_BUFFER, TRAIN_SEED_LOW
+
+        def steps_with_seed(seed, index):
+            obs = np.zeros(TOTAL_OBS_SIZE, dtype=np.float32)
+            metrics = MetricsSnapshot.from_dict(
+                {"episode_seed": seed, "episode_seed_index": index}).to_array().astype(np.float32)
+            steps = _make_mock_steps(obs)
+            steps.obs = [obs.reshape(1, -1), metrics.reshape(1, -1)]
+            return steps
+
+        env, _ = self._make_env([
+            (steps_with_seed(-1, -1), _empty_steps()),                # reset: unseeded episode already running
+            (steps_with_seed(12345, 0), steps_with_seed(-1, -1)),     # it ends; first seeded episode begins
+        ], with_metrics=True, seed_rng=np.random.default_rng(0))
+        env.seed_channel = MagicMock()
+
+        env.reset()
+        first = env.seed_channel.queue_seeds.call_args_list[0]
+        assert len(first.args[0]) == SEED_BUFFER
+        assert first.kwargs["clear"] is True
+        assert all(s >= TRAIN_SEED_LOW for s in first.args[0])
+
+        _, _, done, info = env.step(0)
+        assert done
+        assert info["episode"]["seed"] == -1
+        top_up = env.seed_channel.queue_seeds.call_args_list[1]
+        assert len(top_up.args[0]) == 1
+        assert top_up.kwargs["clear"] is False
+        assert env.current_metrics.episode_seed == 12345
+
+    def test_log_file_passed_as_absolute_path(self):
+        """@brief A relative log path must reach Unity as an absolute path: the player exits
+        at startup if it cannot open the log file."""
+        from env_wrappers.unity_env import UnitySchedulingEnv
+
+        with patch("env_wrappers.unity_env.UnityEnvironment") as MockUnity, \
+             patch("env_wrappers.unity_env.EngineConfigurationChannel"):
+            mock_env_instance = MagicMock()
+            mock_spec = MagicMock()
+            mock_obs_spec = MagicMock()
+            mock_obs_spec.shape = (TOTAL_OBS_SIZE,)
+            mock_obs_spec.name = f"VectorSensor_size{TOTAL_OBS_SIZE}"
+            mock_spec.observation_specs = [mock_obs_spec]
+            mock_env_instance.behavior_specs = {"SchedulingBehavior?team=0": mock_spec}
+            MockUnity.return_value = mock_env_instance
+
+            UnitySchedulingEnv(file_name=None, log_file=os.path.join("relative", "dir", "Player.log"))
+
+        args = MockUnity.call_args.kwargs["additional_args"]
+        log_path = args[args.index("-logFile") + 1]
+        assert os.path.isabs(log_path)
+        assert log_path.endswith(os.path.join("relative", "dir", "Player.log"))
 
 
 class TestVectorizedUnityEnv:

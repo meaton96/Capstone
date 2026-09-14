@@ -5,6 +5,7 @@
 Matches the C# GUIDs exactly:
   EpisodeConfigChannel:    b1e2c3d4-f5a6-7890-bcde-f01234567891
   EpisodeTelemetryChannel: c2f3d4e5-a6b7-8901-cdef-012345678902
+  EpisodeSeedChannel:      d3a4b5c6-e7f8-9012-def0-123456789013
 
 Usage in UnitySchedulingEnv:
   self.config_channel = EpisodeConfigChannel()
@@ -157,3 +158,36 @@ class EpisodeTelemetryChannel(SideChannel):
             return []
         return [e["interArrivalTime"] for e in payload.get("events", [])
                 if e["type"] == "job_arrival"]
+
+
+class EpisodeSeedChannel(SideChannel):
+    """
+    Queues per-episode instance seeds in Unity. Each episode Unity starts consumes one
+    seed; Unity reports the seed and its queue index back in the reward metrics
+    (episode_seed / episode_seed_index), both -1 when the queue was empty.
+
+    Message JSON: {"seeds": [int, ...], "clear": bool}. "clear" empties Unity's queue and
+    restarts the index at 0 before appending.
+    """
+
+    CHANNEL_ID = uuid.UUID("d3a4b5c6-e7f8-9012-def0-123456789013")
+
+    ## Seeds travel back as float32 metrics, exact only for integers below 2^24.
+    MAX_SEED = 1 << 24
+
+    def __init__(self):
+        super().__init__(self.CHANNEL_ID)
+
+    def on_message_received(self, msg: IncomingMessage):
+        # Seed channel is send-only from Python.
+        pass
+
+    def queue_seeds(self, seeds, clear: bool = False):
+        """Queue seeds for upcoming episodes; delivered with the next reset/step."""
+        seeds = [int(s) for s in seeds]
+        bad = [s for s in seeds if not 0 <= s < self.MAX_SEED]
+        if bad:
+            raise ValueError(f"Seeds must be in [0, {self.MAX_SEED}): {bad[:5]}")
+        msg = OutgoingMessage()
+        msg.write_string(json.dumps({"seeds": seeds, "clear": bool(clear)}))
+        super().queue_message_to_send(msg)

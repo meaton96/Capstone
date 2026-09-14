@@ -12,13 +12,19 @@ Episodes restart automatically inside Unity (AutoStartOnPlay under ML-Agents): w
 step ends an episode, the returned observation is already the first observation of
 the next episode. Callers must not call reset() between episodes.
 
+Instances are reproducible through per-episode seeds queued in Unity (EpisodeSeedChannel).
+Each episode Unity starts consumes one queued seed and reports it back in its metrics
+(episode_seed / episode_seed_index, -1 when the queue was empty). Seeds below
+@ref TRAIN_SEED_LOW are reserved for evaluation.
+
 Side channel usage:
   env.send_config(config_dict)   # applied on the next reset()
+  env.queue_seeds([3, 4, 5])     # instance seeds for upcoming episodes
   info["telemetry"]              # per-episode events, attached when done=True
 """
 
 from pathlib import Path
-from typing import Dict, Optional, Tuple
+from typing import Dict, Iterable, Optional, Tuple
 
 import numpy as np
 from mlagents_envs.base_env import ActionTuple
@@ -32,10 +38,18 @@ from config import (
     TOTAL_OBS_SIZE, SLICE_SPATIAL_END, SLICE_SCHED_END, SLICE_SCALARS_END,
     SLICE_DIST_END, SLICE_FLAGS_END,
 )
-from channels.channels import EpisodeConfigChannel, EpisodeTelemetryChannel
+from channels.channels import EpisodeConfigChannel, EpisodeSeedChannel, EpisodeTelemetryChannel
 from rewards import (
     SENSOR_NAME, LoadedReward, MetricsSnapshot, RewardContext, RewardFunction, load_reward,
 )
+
+## @brief Training seeds are drawn from [TRAIN_SEED_LOW, EpisodeSeedChannel.MAX_SEED);
+##        seeds below it are reserved for evaluation so the two never overlap.
+TRAIN_SEED_LOW = 10_000
+
+## @brief Seeds kept queued in Unity ahead of the running episode. Unity starts the next
+##        episode before Python sees the previous one end, so the queue must never run dry.
+SEED_BUFFER = 4
 
 
 def slice_obs(raw: np.ndarray) -> Dict[str, np.ndarray]:
@@ -75,28 +89,34 @@ class UnitySchedulingEnv:
                  time_scale: float = 100.0, worker_id: int = 0,
                  timeout_wait: int = 300, no_graphics: bool = False,
                  decision_drain: bool = True, log_file: Optional[str] = None,
-                 env_id: int = 0):
+                 env_id: int = 0, seed_rng: Optional[np.random.Generator] = None):
         """
         @param reward_fn       Python reward function; None passes Unity's reward through.
         @param decision_drain  Launch the player with -rldecisiondrain (one Python step per decision).
         @param log_file        Player log path; without it Unity logs to stdout.
         @param env_id          Index within a vectorized wrapper (passed to the reward context).
+        @param seed_rng        If set, every episode gets a training seed drawn from this RNG
+                               (reproducible instances); None leaves seeding to Unity.
         """
         self.engine_channel = EngineConfigurationChannel()
         self.config_channel = EpisodeConfigChannel()
+        self.seed_channel = EpisodeSeedChannel()
         self.telemetry = EpisodeTelemetryChannel()
 
         additional_args = []
         if decision_drain:
             additional_args += ["-rldecisiondrain", "true"]
         if log_file is not None:
-            additional_args += ["-logFile", str(log_file)]
+            # Must be absolute: the player does not resolve relative paths against Python's
+            # working directory, and exits at startup ("Unable to open log file") if it can't open it.
+            additional_args += ["-logFile", str(Path(log_file).resolve())]
 
         self.env = UnityEnvironment(
             file_name=file_name,
             side_channels=[
                 self.engine_channel,
                 self.config_channel,
+                self.seed_channel,
                 self.telemetry,
             ],
             worker_id=worker_id,
@@ -118,6 +138,7 @@ class UnitySchedulingEnv:
 
         self.reward_fn = reward_fn
         self.env_id = env_id
+        self.seed_rng = seed_rng
         ## @brief Total env steps across all envs; set by VectorizedUnityEnv for reward schedules.
         self.global_step = 0
         self.episodes_completed = 0
@@ -155,15 +176,34 @@ class UnitySchedulingEnv:
         """
         self._pending_config = config
 
+    def queue_seeds(self, seeds: Iterable[int], clear: bool = False):
+        """@brief Queue instance seeds in Unity; each episode Unity starts consumes one.
+
+        @details Messages reach Unity with the next reset() or step(). Because Unity starts
+        the next episode as soon as one ends, a seed must already be queued before the
+        preceding episode finishes in order to apply to it.
+
+        @param clear  Empty Unity's queue and restart its seed index at 0 first.
+        """
+        self.seed_channel.queue_seeds(list(seeds), clear=clear)
+
+    @property
+    def current_metrics(self) -> Optional[MetricsSnapshot]:
+        """@brief Latest snapshot of the running episode (after a rollover: the new episode's first)."""
+        return self._prev_metrics
+
     def reset(self) -> Dict[str, np.ndarray]:
         """@brief Reset Unity and return the first observation of a fresh episode.
 
         @details Only needed at startup (or to apply a new config immediately); episodes
-        roll over on their own inside @ref step.
+        roll over on their own inside @ref step. The episode already running when Python
+        connects keeps going through reset and has no queued seed.
         """
         if self._pending_config is not None:
             self.config_channel.send_config(self._pending_config)
             self._pending_config = None
+        if self.seed_rng is not None:
+            self.queue_seeds(self._draw_training_seeds(SEED_BUFFER), clear=True)
 
         self.env.reset()
         decision, _ = self.env.get_steps(self.behavior_name)
@@ -206,8 +246,14 @@ class UnitySchedulingEnv:
         info["episode"] = self._episode_summary(curr, interrupted=bool(terminal.interrupted[0]))
         info["telemetry"] = self.telemetry.pop_payload()
         self.episodes_completed += 1
+        if self.seed_rng is not None:
+            # Unity already consumed a seed for the episode that just started; replace it.
+            self.queue_seeds(self._draw_training_seeds(1))
         next_obs = self._begin_episode(self._wait_for_decision(decision))
         return next_obs, reward, True, info
+
+    def _draw_training_seeds(self, count: int) -> list:
+        return self.seed_rng.integers(TRAIN_SEED_LOW, EpisodeSeedChannel.MAX_SEED, size=count).tolist()
 
     def _compute_reward(self, curr: Optional[MetricsSnapshot], unity_reward: float,
                         done: bool) -> Tuple[float, Dict[str, float]]:
@@ -243,9 +289,12 @@ class UnitySchedulingEnv:
         if final is not None:
             exited = final.jobs_exited
             summary.update(
+                seed=int(final.episode_seed),
+                seed_index=int(final.episode_seed_index),
                 makespan=final.sim_time,
                 jobs_exited=exited,
                 jobs_total=final.jobs_total,
+                total_flow_time=final.flow_time_exited_sum,
                 mean_flow_time=final.flow_time_exited_sum / exited if exited else float("nan"),
                 deadlock=bool(final.deadlock),
                 timed_out=bool(final.timed_out),
@@ -271,11 +320,13 @@ class VectorizedUnityEnv:
                  reward_spec=None, time_scale: float = 100.0,
                  base_worker_id: int = 0, timeout_wait: int = 300,
                  no_graphics: bool = False, decision_drain: bool = True,
-                 log_dir: Optional[str] = None):
+                 log_dir: Optional[str] = None, train_seed: Optional[int] = None):
         """
         @param reward_spec  Reward spec path or dict, or a @ref rewards.LoadedReward. Each env
                             gets its own reward instance. None passes Unity's reward through.
         @param log_dir      If set, instance i writes its player log to log_dir/Player-i.log.
+        @param train_seed   If set, instance seeds come from per-env RNGs derived from it, so a
+                            run's training instances are reproducible. None leaves seeding to Unity.
         """
         loaded = None
         if reward_spec is not None:
@@ -292,6 +343,7 @@ class VectorizedUnityEnv:
                 decision_drain=decision_drain,
                 log_file=None if log_dir is None else Path(log_dir) / f"Player-{i}.log",
                 env_id=i,
+                seed_rng=None if train_seed is None else np.random.default_rng([train_seed, i]),
             )
             for i in range(num_envs)
         ]

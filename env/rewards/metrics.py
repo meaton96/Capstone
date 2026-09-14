@@ -19,7 +19,7 @@ import numpy as np
 SENSOR_NAME = "Z_RewardMetrics"
 
 ## @brief Must equal RewardMetrics.SchemaVersion in C#.
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 METRIC_NAMES = (
     "schema_version",
@@ -65,6 +65,10 @@ METRIC_NAMES = (
     "deadlock",
     "timed_out",
     "all_jobs_exited",
+
+    # v2
+    "episode_seed",
+    "episode_seed_index",
 )
 
 _INDEX = {name: i for i, name in enumerate(METRIC_NAMES)}

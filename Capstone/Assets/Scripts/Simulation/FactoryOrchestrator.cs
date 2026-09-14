@@ -64,6 +64,10 @@ namespace Assets.Scripts.Simulation
         private int _episodeEnvSteps;
         private int _episodeGcStart;
         private readonly System.Diagnostics.Stopwatch _envStepWatch = new System.Diagnostics.Stopwatch();
+
+        // ── Per-episode instance seed from EpisodeSeedChannel; -1 when none was queued ─────
+        private int _episodeSeed = -1;
+        private int _episodeSeedIndex = -1;
         /// <summary>
         /// Singleton instance of the FactoryOrchestrator.
         /// </summary>
@@ -456,6 +460,18 @@ namespace Assets.Scripts.Simulation
             _baselineRuleIsRandom = currentConfig.dispatchingRule == DispatchingRule.Random;
             _baselineRuleIndex = GetRuleIndex(currentConfig.dispatchingRule);
 
+            // A seed queued by Python makes this episode's instance (generated jobs, and the
+            // stochastic streams below) a pure function of that seed. Without one, generation
+            // continues the UnityEngine.Random stream seeded once in SpawnFactory, so the instance
+            // depends on everything drawn during earlier episodes.
+            _episodeSeed = -1;
+            _episodeSeedIndex = -1;
+            if (EpisodeSeedChannel.Instance != null &&
+                EpisodeSeedChannel.Instance.TryDequeue(out _episodeSeed, out _episodeSeedIndex))
+            {
+                UnityEngine.Random.InitState(_episodeSeed);
+            }
+
             FJSSPJobDefinition[] jobDefs;
             if (prebuiltJobs != null)
             {
@@ -490,7 +506,8 @@ namespace Assets.Scripts.Simulation
 
             if (currentConfig.Stochastic != null && currentConfig.Stochastic.AnyEnabled)
             {
-                StochasticEventManager.Instance?.Initialize(currentConfig);
+                StochasticEventManager.Instance?.Initialize(
+                    currentConfig, _episodeSeed >= 0 ? _episodeSeed : currentConfig.Seed);
                 foreach (var machine in layoutManager.Machines)
                     machine.InitializeStochastic();
             }
@@ -571,7 +588,8 @@ namespace Assets.Scripts.Simulation
 
             SimLogger.Low($"[Orchestrator] Episode started: {currentConfig.JobCount} jobs, " +
                           $"{layoutManager.MachineCount} machines, " +
-                          $"stochastic={StochasticEventManager.Instance?.IsActive}");
+                          $"stochastic={StochasticEventManager.Instance?.IsActive}, " +
+                          $"seed={_episodeSeed} (queue index {_episodeSeedIndex})");
         }
 
         /// <summary>
@@ -1237,7 +1255,8 @@ namespace Assets.Scripts.Simulation
                                layoutManager != null ? layoutManager.Machines : null,
                                agvPool != null ? agvPool.AllAGVs : null,
                                trafficZoneManager != null ? trafficZoneManager.Zones : null,
-                               _tracker, _deadlockDetected, SimTime > MAX_EPISODE_SIM_SECONDS);
+                               _tracker, _deadlockDetected, SimTime > MAX_EPISODE_SIM_SECONDS,
+                               _episodeSeed, _episodeSeedIndex);
         }
 
         /// <summary>

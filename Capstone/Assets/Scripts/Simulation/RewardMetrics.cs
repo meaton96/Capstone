@@ -24,7 +24,7 @@ namespace Assets.Scripts.Simulation
     /// </summary>
     public static class RewardMetrics
     {
-        public const int SchemaVersion = 1;
+        public const int SchemaVersion = 2;
 
         public static readonly string[] Names =
         {
@@ -71,6 +71,10 @@ namespace Assets.Scripts.Simulation
             "deadlock",
             "timed_out",
             "all_jobs_exited",
+
+            // v2
+            "episode_seed",               // instance seed from EpisodeSeedChannel, -1 if none was queued
+            "episode_seed_index",         // that seed's position in the queue since the last clear, -1 if none
         };
 
         public static int Count => Names.Length;
@@ -82,7 +86,8 @@ namespace Assets.Scripts.Simulation
         public static void Fill(float[] buffer, double simTime, bool episodeActive, int decisionCount,
                                 JobStore jobs, IReadOnlyList<PhysicalMachine> machines,
                                 IReadOnlyList<AGVController> agvs, IReadOnlyList<TrafficZone> zones,
-                                EpisodeTracker tracker, bool deadlock, bool timedOut)
+                                EpisodeTracker tracker, bool deadlock, bool timedOut,
+                                int episodeSeed, int episodeSeedIndex)
         {
             int jobsTotal = 0, exited = 0, opsTotal = 0, opsDone = 0;
             int nRouting = 0, nWaiting = 0, nTransit = 0, nQueued = 0, nProcessing = 0;
@@ -206,6 +211,9 @@ namespace Assets.Scripts.Simulation
             buffer[i++] = deadlock ? 1f : 0f;
             buffer[i++] = timedOut ? 1f : 0f;
             buffer[i++] = jobsTotal > 0 && exited == jobsTotal ? 1f : 0f;
+
+            buffer[i++] = episodeSeed;
+            buffer[i++] = episodeSeedIndex;
 
             if (i != Count)
                 SimLogger.Error($"[RewardMetrics] Fill wrote {i} values but Names has {Count} — they are out of sync.");

@@ -30,6 +30,7 @@ tensorboard --logdir results
 """
 
 import argparse
+import csv
 import math
 import os
 import sys
@@ -91,6 +92,7 @@ def build_env(args, ppo_cfg, run_dir: Path, reward):
             no_graphics=args.no_graphics,
             decision_drain=not args.no_decision_drain,
             log_dir=run_dir,
+            train_seed=None if args.train_seed < 0 else args.train_seed,
         )
     else:
         from env_wrappers.placeholder_env import VectorizedPlaceholderEnv
@@ -99,18 +101,28 @@ def build_env(args, ppo_cfg, run_dir: Path, reward):
     return vec_env, obs_shapes
 
 
-def log_episodes(writer: SummaryWriter, infos, global_step: int, recent: deque) -> int:
-    """@brief Write every episode that finished this step to TensorBoard.
+EPISODE_CSV_FIELDS = [
+    "global_step", "env", "seed", "seed_index", "return", "length", "makespan",
+    "mean_flow_time", "total_flow_time", "jobs_exited", "deadlock", "timed_out",
+]
+
+
+def log_episodes(writer: SummaryWriter, infos, global_step: int, recent: deque,
+                 episode_csv: csv.DictWriter = None) -> int:
+    """@brief Write every episode that finished this step to TensorBoard (and episodes.csv).
 
     @return Number of episodes that finished.
     """
     finished = 0
-    for info in infos:
+    for env_index, info in enumerate(infos):
         episode = info.get("episode") if isinstance(info, dict) else None
         if not episode:
             continue
         finished += 1
         recent.append(episode)
+        if episode_csv is not None:
+            episode_csv.writerow({"global_step": global_step, "env": env_index,
+                                  **{k: episode.get(k) for k in EPISODE_CSV_FIELDS[2:]}})
         for key in ("return", "length", "makespan", "mean_flow_time", "jobs_exited"):
             value = episode.get(key)
             if value is not None and not math.isnan(value):
@@ -210,6 +222,10 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
     print(f"  Device: {device}")
     print()
 
+    episode_file = open(run_dir / "episodes.csv", "w", newline="")
+    episode_csv = csv.DictWriter(episode_file, fieldnames=EPISODE_CSV_FIELDS)
+    episode_csv.writeheader()
+
     try:
         for update in range(1, num_updates + 1):
             update_start = time.time()
@@ -236,7 +252,7 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
 
                 buffer.add(obs, actions_np, log_probs_np, rewards, values_np, dones)
                 obs = next_obs
-                episodes_done += log_episodes(writer, infos, global_step, recent_episodes)
+                episodes_done += log_episodes(writer, infos, global_step, recent_episodes, episode_csv)
 
             # Bootstrap value for GAE
             with torch.no_grad():
@@ -334,6 +350,7 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
         # Save and shut Unity down even on Ctrl-C, so long runs keep their progress.
         save_checkpoint(ckpt_path, net, optimizer, global_step, ppo_cfg, reward_name)
         writer.close()
+        episode_file.close()
         if args.unity and hasattr(vec_env, 'close'):
             vec_env.close()
 
@@ -373,6 +390,9 @@ if __name__ == "__main__":
                         help="Run the Unity player without rendering")
     parser.add_argument("--no-decision-drain", action="store_true",
                         help="Use ML-Agents' per-FixedUpdate stepping instead of one step per decision")
+    parser.add_argument("--train-seed", type=int, default=0,
+                        help="Seed for per-episode instance seeds, making training instances "
+                             "reproducible; -1 lets Unity continue its own random stream")
     parser.add_argument("--base-worker-id", type=int, default=0,
                         help="Unity port offset (5005 + id); change to run several trainings at once")
 

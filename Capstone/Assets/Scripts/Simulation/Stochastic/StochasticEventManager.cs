@@ -114,15 +114,17 @@ namespace Assets.Scripts.Simulation.Stochastic
         /// </summary>
         /// <param name="config">The full FJSSP config containing the Stochastic sub-config and seed.
         ///                       If null, the manager becomes inactive (deterministic mode).</param>
-        public void Initialize(FJSSPConfig config)
+        /// <param name="seedOverride">Per-episode instance seed (see EpisodeSeedChannel); when null
+        ///                            the config's seed is used, so every episode repeats the same streams.</param>
+        public void Initialize(FJSSPConfig config, int? seedOverride = null)
         {
             _cfg = config?.Stochastic;
-            int seed = config?.Seed ?? 0;
+            int seed = seedOverride ?? config?.Seed ?? 0;
             _rng = new System.Random(seed);
             _arrivalRng = new System.Random(seed ^ ArrivalStreamSeedOffset);
 
             if (IsActive)
-                SimLogger.Low($"[StochasticMgr] Initialized — seed={config.Seed} " +
+                SimLogger.Low($"[StochasticMgr] Initialized — seed={seed} " +
                               $"mode=[{_cfg.Tag}] " +
                               $"WeibullK={_cfg.WeibullK} λ_machine={_cfg.WeibullLambda} " +
                               $"λ_agv={_cfg.AGVWeibullLambda} " +
