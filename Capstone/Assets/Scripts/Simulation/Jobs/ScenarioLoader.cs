@@ -145,9 +145,24 @@ namespace Assets.Scripts.Simulation.Jobs
                 maxOps = Mathf.Max(maxOps, ops.Count);
                 foreach (JObject op in ops)
                 {
-                    float d = op["duration"].Value<float>();
-                    minDur = Mathf.Min(minDur, d);
-                    maxDur = Mathf.Max(maxDur, d);
+                    // "duration" is a scalar, or (when machineIndex is an array) may itself
+                    // be an array of per-machine costs — scan every value in either case.
+                    JToken durToken = op["duration"];
+                    if (durToken.Type == JTokenType.Array)
+                    {
+                        foreach (JToken dt in (JArray)durToken)
+                        {
+                            float d = dt.Value<float>();
+                            minDur = Mathf.Min(minDur, d);
+                            maxDur = Mathf.Max(maxDur, d);
+                        }
+                    }
+                    else
+                    {
+                        float d = durToken.Value<float>();
+                        minDur = Mathf.Min(minDur, d);
+                        maxDur = Mathf.Max(maxDur, d);
+                    }
                 }
             }
 

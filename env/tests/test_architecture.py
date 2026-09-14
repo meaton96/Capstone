@@ -343,10 +343,7 @@ class TestRolloutBuffer:
                 values=np.array([0.5, 0.3], dtype=np.float32),
                 dones=np.array([0.0, 0.0], dtype=np.float32),
             )
-        buf.compute_gae(
-            last_values=np.array([0.4, 0.2], dtype=np.float32),
-            last_dones=np.array([0.0, 0.0], dtype=np.float32),
-        )
+        buf.compute_gae(last_values=np.array([0.4, 0.2], dtype=np.float32))
         # Advantages should be non-trivial
         assert not np.allclose(buf.advantages, 0)
         # Returns = advantages + values
@@ -372,10 +369,31 @@ class TestRolloutBuffer:
                 np.array([0.0, 0.0], dtype=np.float32),
                 np.array([0.0, 0.0], dtype=np.float32),
             )
-        buf.compute_gae(np.zeros(2, dtype=np.float32),
-                        np.zeros(2, dtype=np.float32))
+        buf.compute_gae(np.zeros(2, dtype=np.float32))
         batches = list(buf.get_batches(batch_size=4))
         assert len(batches) == 2  # 8 total / 4 batch
+
+    def test_gae_stops_at_episode_boundary(self):
+        """@brief A step whose done flag is set must not bootstrap from the next observation.
+
+        @details
+        dones[t] is the done flag returned by the step taken from obs t, so step 0 ending
+        its episode means obs 1 starts a new one: advantage[0] = r0 - V0, while the final
+        step still bootstraps from last_values.
+        """
+        buf = RolloutBuffer(2, 1, {"global_scalars": (10,)}, gamma=0.99, gae_lambda=0.95)
+        for done in (1.0, 0.0):
+            buf.add(
+                {"global_scalars": np.zeros((1, 10), dtype=np.float32)},
+                np.array([0]),
+                np.array([0.0], dtype=np.float32),
+                np.array([1.0], dtype=np.float32),
+                np.array([0.5], dtype=np.float32),
+                np.array([done], dtype=np.float32),
+            )
+        buf.compute_gae(last_values=np.array([10.0], dtype=np.float32))
+        np.testing.assert_allclose(buf.advantages[1], [1.0 + 0.99 * 10.0 - 0.5], atol=1e-5)
+        np.testing.assert_allclose(buf.advantages[0], [0.5], atol=1e-5)
 
 
 # ============================================================
@@ -533,6 +551,7 @@ def _make_mock_steps(obs_array, reward=0.0, n_agents=1):
     steps = MagicMock()
     steps.obs = [obs_array.reshape(1, -1)]  # (1, TOTAL_OBS_SIZE)
     steps.reward = np.array([reward], dtype=np.float32)
+    steps.interrupted = np.array([False] * n_agents)
     steps.__len__ = lambda self: n_agents
     return steps
 
@@ -548,19 +567,22 @@ class TestUnitySchedulingEnv:
     """@brief Tests for @ref UnitySchedulingEnv using a mocked UnityEnvironment.
 
     @details
-    These tests verify the decision-loop logic (_step_until_decision),
-    reward accumulation across silent frames, and episode termination
-    handling — all without requiring a running Unity process.
+    These tests verify the decision loop, looping through silent frames,
+    episode termination and rollover, and Python-side reward computation
+    — all without requiring a running Unity process.
     """
 
-    def _make_env(self, get_steps_sequence):
+    def _make_env(self, get_steps_sequence, reward_fn=None, with_metrics=False):
         """@brief Construct a UnitySchedulingEnv with a fully mocked backend.
 
         @param get_steps_sequence  List of (decision_steps, terminal_steps)
                                    tuples returned by successive get_steps calls.
+        @param reward_fn           Optional Python reward function.
+        @param with_metrics        Also advertise the reward-metrics sensor spec.
         @return A patched UnitySchedulingEnv instance.
         """
         from env_wrappers.unity_env import UnitySchedulingEnv
+        from rewards import METRIC_NAMES, SENSOR_NAME
 
         with patch("env_wrappers.unity_env.UnityEnvironment") as MockUnity, \
              patch("env_wrappers.unity_env.EngineConfigurationChannel"):
@@ -571,7 +593,13 @@ class TestUnitySchedulingEnv:
             mock_spec = MagicMock()
             mock_obs_spec = MagicMock()
             mock_obs_spec.shape = (TOTAL_OBS_SIZE,)
+            mock_obs_spec.name = f"VectorSensor_size{TOTAL_OBS_SIZE}"
             mock_spec.observation_specs = [mock_obs_spec]
+            if with_metrics:
+                metrics_spec = MagicMock()
+                metrics_spec.shape = (len(METRIC_NAMES),)
+                metrics_spec.name = SENSOR_NAME
+                mock_spec.observation_specs.append(metrics_spec)
 
             mock_env_instance.behavior_specs = {"SchedulingBehavior?team=0": mock_spec}
 
@@ -581,7 +609,7 @@ class TestUnitySchedulingEnv:
 
             MockUnity.return_value = mock_env_instance
 
-            env = UnitySchedulingEnv(file_name=None, time_scale=1.0)
+            env = UnitySchedulingEnv(file_name=None, time_scale=1.0, reward_fn=reward_fn)
             return env, mock_env_instance
 
     def test_step_returns_on_decision(self):
@@ -602,16 +630,25 @@ class TestUnitySchedulingEnv:
         }
 
     def test_step_returns_on_terminal(self):
-        """@brief When Unity returns a terminal step, done must be True."""
+        """@brief On a terminal step done must be True, and the returned obs must already
+        be the next episode's first observation (Unity restarts episodes on its own)."""
         obs_vec = np.random.rand(TOTAL_OBS_SIZE).astype(np.float32)
-        decision = _empty_steps()
+        next_vec = np.full(TOTAL_OBS_SIZE, 0.25, dtype=np.float32)
         terminal = _make_mock_steps(obs_vec, reward=10.0, n_agents=1)
+        next_decision = _make_mock_steps(next_vec, n_agents=1)
 
-        env, _ = self._make_env([(decision, terminal)])
+        env, mock_unity = self._make_env([
+            (_empty_steps(), terminal),
+            (next_decision, _empty_steps()),
+        ])
         obs, reward, done, info = env.step(0)
 
         assert done
         assert abs(reward - 10.0) < 1e-6
+        assert info["episode"]["length"] == 1
+        np.testing.assert_allclose(obs["global_scalars"], 0.25)
+        # Only __init__'s reset: episodes must roll over without a Python-side reset.
+        mock_unity.reset.assert_called_once()
 
     def test_accumulates_reward_across_silent_frames(self):
         """@brief Rewards from silent frames must be accumulated.
@@ -664,13 +701,51 @@ class TestUnitySchedulingEnv:
         env.close()
         mock_unity.close.assert_called_once()
 
+    def test_python_reward_from_metrics(self):
+        """@brief With a reward function, the reward comes from consecutive metric
+        snapshots and Unity's own reward is ignored — including when a terminal step and
+        the next episode's first decision arrive in the same batch."""
+        from rewards import MetricsSnapshot, load_reward
+
+        reward_fn = load_reward({
+            "entry": "rewards/functions/time_penalty.py:TimePenaltyReward",
+            "params": {"time_scale": 1.0},
+        }).build()
+
+        def steps_at(sim_time):
+            obs = np.zeros(TOTAL_OBS_SIZE, dtype=np.float32)
+            metrics = MetricsSnapshot.from_dict({"sim_time": sim_time}).to_array().astype(np.float32)
+            steps = _make_mock_steps(obs, reward=99.0)
+            steps.obs = [obs.reshape(1, -1), metrics.reshape(1, -1)]
+            return steps
+
+        env, _ = self._make_env([
+            (steps_at(0.0), _empty_steps()),   # reset -> first decision
+            (steps_at(4.0), _empty_steps()),   # step 1
+            (steps_at(0.0), steps_at(9.0)),    # step 2: episode ends at t=9; next episode starts
+            (steps_at(2.5), _empty_steps()),   # step 3, in the new episode
+        ], reward_fn=reward_fn, with_metrics=True)
+
+        env.reset()
+        assert abs(env.step(0)[1] - (-4.0)) < 1e-6
+
+        _, reward, done, info = env.step(0)
+        assert done
+        assert abs(reward - (-5.0)) < 1e-6
+        assert info["episode"]["makespan"] == 9.0
+        assert abs(info["episode"]["return"] - (-9.0)) < 1e-6
+        assert abs(info["episode"]["reward_terms"]["time"] - (-9.0)) < 1e-6
+
+        # Measured from the new episode's first snapshot (t=0), not the old terminal (t=9).
+        assert abs(env.step(0)[1] - (-2.5)) < 1e-6
+
 
 class TestVectorizedUnityEnv:
     """@brief Tests for @ref VectorizedUnityEnv using mocked sub-environments.
 
     @details
     Patches UnitySchedulingEnv entirely to avoid any Unity dependency.
-    Verifies stacking, auto-reset on done, and shape correctness.
+    Verifies stacking, episode rollover pass-through, and shape correctness.
     """
 
     def _make_dummy_obs_dict(self):
@@ -731,22 +806,21 @@ class TestVectorizedUnityEnv:
         assert truncs.shape == (num_envs,)
         assert obs["factory_grid"].shape == (num_envs, GRID_CHANNELS, GRID_SIZE, GRID_SIZE)
 
-    def test_auto_reset_on_done(self):
-        """@brief When a sub-env signals done, VectorizedUnityEnv must
-        auto-reset it and return the fresh observation."""
+    def test_done_env_not_reset_from_python(self):
+        """@brief Episodes roll over inside each sub-env, so VectorizedUnityEnv must pass
+        the sub-env's returned obs straight through and never reset() on done."""
         from env_wrappers.unity_env import VectorizedUnityEnv
 
         num_envs = 2
         step_obs = [self._make_dummy_obs_dict() for _ in range(num_envs)]
-        reset_obs = self._make_dummy_obs_dict()
-        # Tag the reset obs so we can identify it
-        reset_obs["global_scalars"][:] = 99.0
+        # Tag env 0's returned obs (its next episode's first obs) so we can identify it
+        step_obs[0]["global_scalars"][:] = 99.0
 
         with patch("env_wrappers.unity_env.UnitySchedulingEnv") as MockSingle:
             mock_instances = []
             for i in range(num_envs):
                 m = MagicMock()
-                m.reset.return_value = reset_obs if i == 0 else step_obs[i]
+                m.reset.return_value = self._make_dummy_obs_dict()
                 # Env 0 is done, env 1 is not
                 m.step.return_value = (
                     step_obs[i],
@@ -763,8 +837,10 @@ class TestVectorizedUnityEnv:
 
         assert dones[0] == True
         assert dones[1] == False
-        # Env 0 should have been auto-reset, so its obs is the reset obs
         np.testing.assert_allclose(obs["global_scalars"][0], 99.0)
+        for m in mock_instances:
+            m.reset.assert_called_once()
+            assert m.global_step == num_envs
 
     def test_close_all_sub_envs(self):
         """@brief close() must call close() on every sub-environment."""

@@ -65,10 +65,25 @@ namespace Assets.Scripts.Simulation
             }
         }
 
-        /// @brief Subscribes to simulation events when the component is enabled.
-        protected override void OnEnable()
+        /// @brief Attaches the reward-metrics sensor before Agent.OnEnable collects sensor components.
+        private void Awake()
         {
-            base.OnEnable();
+            if (GetComponent<RewardMetricsSensorComponent>() == null)
+                gameObject.AddComponent<RewardMetricsSensorComponent>();
+        }
+
+        /// @brief Subscribes to simulation events once every scene object has finished Awake.
+        ///
+        /// @details Deliberately NOT done in OnEnable/Awake: FactoryOrchestrator.Instance is
+        /// only guaranteed set once FactoryOrchestrator's own Awake() has run, and Unity does
+        /// not guarantee Awake/OnEnable ordering *between* different components. Start() runs
+        /// only after every object's Awake() has completed scene-wide, so it's the earliest
+        /// point this singleton read is actually safe. A silent miss here (subscribing to a
+        /// null/stale orchestrator) doesn't throw -- it just leaves OnEpisodeFinished's
+        /// listener never attached, so episodes never advance past the first one, without any
+        /// visible error. That exact failure mode is what motivated moving this out of OnEnable.
+        private void Start()
+        {
             if (FactoryOrchestrator.Instance != null)
             {
                 FactoryOrchestrator.Instance.OnDecisionRequired.AddListener(HandleDecisionRequired);
@@ -76,10 +91,9 @@ namespace Assets.Scripts.Simulation
             }
         }
 
-        /// @brief Unsubscribes from simulation events when the component is disabled.
-        protected override void OnDisable()
+        /// @brief Unsubscribes from simulation events when the component is destroyed.
+        private void OnDestroy()
         {
-            base.OnDisable();
             if (FactoryOrchestrator.Instance != null)
             {
                 FactoryOrchestrator.Instance.OnDecisionRequired.RemoveListener(HandleDecisionRequired);
@@ -186,14 +200,13 @@ namespace Assets.Scripts.Simulation
         /// @param actions The buffer containing the predicted actions.
         ///
         /// @details Maps the action to a dispatching rule, steps the simulation via 
-        /// @c bridge.Step, and applies the resulting reward to the agent.
+        /// @c bridge.Step. No reward is assigned here: it is computed in Python (env/rewards)
+        /// from consecutive RewardMetricsSensor snapshots.
         public override void OnActionReceived(ActionBuffers actions)
         {
             if (!FactoryOrchestrator.Instance.IsWaitingForAction) return;
 
-            int pdrIndex = actions.DiscreteActions[0];
-            StepResult result = FactoryOrchestrator.Instance.Step(pdrIndex);
-            AddReward(result.Reward);
+            FactoryOrchestrator.Instance.Step(actions.DiscreteActions[0]);
         }
     }
 }

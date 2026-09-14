@@ -17,7 +17,7 @@ config_channel = EpisodeConfigChannel()
 telemetry_channel = EpisodeTelemetryChannel()
 
 env = UnityEnvironment(
-    file_name="/code/linux_server/capstone.x86_64",
+    file_name="linux_server/capstone.x86_64",
     side_channels=[engine_channel, config_channel, telemetry_channel],
     worker_id=0,
     no_graphics=True,

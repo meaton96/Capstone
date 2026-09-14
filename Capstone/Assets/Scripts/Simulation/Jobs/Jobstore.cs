@@ -38,7 +38,12 @@ namespace Assets.Scripts.Simulation.Jobs
         /// </remarks>
         public void Initialize(IEnumerable<FJSSPJobDefinition> definitions, bool spawnVisuals)
         {
+            // Episode restarts (ML-Agents OnEpisodeBegin -> StartEpisode) come straight here
+            // without Cleanup(). Exited jobs only deactivate their visual, so without this the
+            // previous episode's visuals are orphaned and accumulate for the life of the process.
+            DestroyVisuals();
             allJobs.Clear();
+            DeferredJobIds.Clear();
 
             foreach (var def in definitions)
             {
@@ -142,6 +147,14 @@ namespace Assets.Scripts.Simulation.Jobs
         /// </summary>
         public void Cleanup()
         {
+            DestroyVisuals();
+            allJobs.Clear();
+            DeferredJobIds.Clear();
+            IsInitialized = false;
+        }
+
+        private void DestroyVisuals()
+        {
             foreach (var job in allJobs)
             {
                 if (job.Visual != null)
@@ -149,8 +162,6 @@ namespace Assets.Scripts.Simulation.Jobs
                     Destroy(job.Visual.gameObject);
                 }
             }
-            allJobs.Clear();
-            IsInitialized = false;
         }
 
         /// <summary>

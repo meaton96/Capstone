@@ -32,8 +32,38 @@ namespace Assets.Scripts.Simulation
         /// </summary>
         public bool BaselineDrainMode = false;
 
+        /// <summary>
+        /// When true, RL decisions are drained within a single FixedUpdate tick by manually
+        /// forcing one <see cref="Academy.EnvironmentStep"/> call per ready decision, instead
+        /// of relying on ML-Agents' default one-step-per-FixedUpdate automatic cadence. This
+        /// is the neural-policy analogue of <see cref="BaselineDrainMode"/> -- it removes the
+        /// same engine-imposed decision-per-tick throttle, but for a live agent instead of a
+        /// fixed heuristic, so each drained decision pays a real policy round-trip (forward
+        /// pass, and a full RPC hop while training) rather than an instant lookup.
+        ///
+        /// Toggle this off if it destabilizes training/inference or blows the per-tick time
+        /// budget -- it's a config flag specifically so it can be A/B'd without a code change.
+        /// Also settable via the "-rldecisiondrain" CLI flag (read in Awake, since
+        /// HeadlessBatchRunner -- and its own CLI parsing -- disables itself whenever the
+        /// ML-Agents communicator is on, i.e. exactly when this flag matters).
+        /// Mutually exclusive with BaselineDrainMode; if both are set, BaselineDrainMode wins.
+        /// </summary>
+        public bool RLDecisionDrainMode = false;
+
+        /// <summary>Last value applied to Academy.AutomaticSteppingEnabled, so
+        /// SyncAcademyManualStepping only touches it when RLDecisionDrainMode actually changes.</summary>
+        private bool? _lastSyncedAutomaticStepping;
+
         private int _baselineRuleIndex;
         private bool _baselineRuleIsRandom;
+
+        // ── Per-episode wall-clock profiling (see LogEpisodeTiming) ─────────────
+        private int _episodeIndex;
+        private double _episodeWallStart;
+        private int _episodeTicks;
+        private int _episodeEnvSteps;
+        private int _episodeGcStart;
+        private readonly System.Diagnostics.Stopwatch _envStepWatch = new System.Diagnostics.Stopwatch();
         /// <summary>
         /// Singleton instance of the FactoryOrchestrator.
         /// </summary>
@@ -118,16 +148,6 @@ namespace Assets.Scripts.Simulation
         /// the EpisodeRecord at FinaliseEpisode. See DecisionRecord for schema.
         /// </summary>
         private readonly List<DecisionRecord> _decisionLog = new List<DecisionRecord>();
-
-        /// <summary>
-        /// Cumulative reward accumulated during the current episode.
-        /// </summary>
-        private double totalReward;
-
-        /// <summary>
-        /// Makespan value from the previous step, used for reward calculation.
-        /// </summary>
-        private double previousMakespan;
 
         /// <summary>
         /// Elapsed simulation time, accumulated once per FixedUpdate tick by a constant
@@ -306,13 +326,55 @@ namespace Assets.Scripts.Simulation
         {
             if (Instance != null) { Destroy(this); return; }
             Instance = this;
+
+            if (GetCLIArg("-rldecisiondrain") != null)
+            {
+                RLDecisionDrainMode = true;
+                SimLogger.Low("[Orchestrator] RLDecisionDrainMode ENABLED via CLI flag.");
+            }
+            if (RLDecisionDrainMode && BaselineDrainMode)
+                SimLogger.LogWarning("[Orchestrator] Both RLDecisionDrainMode and BaselineDrainMode " +
+                                      "are set -- BaselineDrainMode takes priority and RL drain will " +
+                                      "be ignored this run.");
+        }
+
+        /// <summary>
+        /// Minimal CLI flag lookup, mirroring HeadlessBatchRunner.GetCLIArg. Duplicated rather
+        /// than shared because HeadlessBatchRunner disables itself whenever the ML-Agents
+        /// communicator is on -- exactly the case RLDecisionDrainMode needs to be read in.
+        /// </summary>
+        private static string GetCLIArg(string key)
+        {
+            string[] args = Environment.GetCommandLineArgs();
+            for (int i = 0; i < args.Length - 1; i++)
+                if (args[i] == key)
+                    return args[i + 1];
+            return null;
         }
 
         /// <summary>
         /// Called on startup. Arms the scheduling agent if AutoStartOnPlay is enabled.
         /// </summary>
+        /// <remarks>
+        /// A live ML-Agents communicator (mlagents-learn, or any external trainer) means
+        /// there's no human present to click "Start Sim" -- HeadlessBatchRunner, the other
+        /// thing that can arm an episode, disables itself in exactly that situation (see
+        /// its own IsCommunicatorOn check). Without this, episodes never start under a real
+        /// trainer: Academy still ticks and reports steps, but FixedUpdate's episodeActive
+        /// gate means nothing in the simulation ever runs and no episode ever completes.
+        /// So a connected communicator forces AutoStartOnPlay regardless of the Inspector
+        /// checkbox, which also keeps SchedulingAgent looping episodes for the whole run
+        /// (see the AutoStartOnPlay checks in OnEpisodeBegin/HandleEpisodeFinished).
+        /// </remarks>
         private void Start()
         {
+            if (Academy.Instance.IsCommunicatorOn && !AutoStartOnPlay)
+            {
+                AutoStartOnPlay = true;
+                SimLogger.Low("[Orchestrator] ML-Agents communicator detected — forcing " +
+                              "AutoStartOnPlay so episodes start and loop without manual arming.");
+            }
+
             if (AutoStartOnPlay && agent != null)
                 agent.IsArmed = true;
         }
@@ -364,6 +426,13 @@ namespace Assets.Scripts.Simulation
         /// </summary>
         public void StartEpisode()
         {
+            _episodeIndex++;
+            _episodeWallStart = Time.realtimeSinceStartupAsDouble;
+            _episodeTicks = 0;
+            _episodeEnvSteps = 0;
+            _envStepWatch.Reset();
+            _episodeGcStart = GC.CollectionCount(0);
+
             var pythonConfig = EpisodeConfigChannel.Instance?.ConsumeConfig();
             if (pythonConfig != null)
             {
@@ -471,8 +540,6 @@ namespace Assets.Scripts.Simulation
             episodeActive = true;
             decisionCount = 0;
             _decisionLog.Clear();
-            totalReward = 0;
-            previousMakespan = 0;
             IsWaitingForAction = false;
             _simTime = 0.0;
 
@@ -535,7 +602,10 @@ namespace Assets.Scripts.Simulation
         {
             if (!episodeActive) return;
 
+            SyncAcademyManualStepping();
+
             _simTime += Time.fixedDeltaTime;
+            _episodeTicks++;
 
             if (SimTime > MAX_EPISODE_SIM_SECONDS)
             {
@@ -579,6 +649,8 @@ namespace Assets.Scripts.Simulation
             {
                 if (BaselineDrainMode)
                     DrainHeuristicDecisions();
+                else if (RLDecisionDrainMode)
+                    DrainRLDecisions();
                 else
                 {
                     var req = _decisions.FindNextDecision();
@@ -694,6 +766,74 @@ namespace Assets.Scripts.Simulation
                 SimLogger.Error("[Orchestrator] DrainHeuristicDecisions hit guard — possible " +
                                 "decision that doesn't change state. Investigate FindNextDecision.");
         }
+
+        /// <summary>
+        /// Keeps Academy.AutomaticSteppingEnabled in sync with RLDecisionDrainMode. ML-Agents
+        /// normally steps once per FixedUpdate via a hidden stepper object; DrainRLDecisions
+        /// needs to be the only thing calling Academy.EnvironmentStep() while it's draining a
+        /// tick's ready decisions, so automatic stepping must be off for that entire duration
+        /// -- not just during the drain call -- or the hidden stepper could fire mid-drain and
+        /// double-resolve a decision. Only touches Academy when the desired state actually
+        /// changes, so this is cheap to call unconditionally every tick.
+        /// </summary>
+        private void SyncAcademyManualStepping()
+        {
+            bool desiredAutomatic = !RLDecisionDrainMode || BaselineDrainMode;
+            if (_lastSyncedAutomaticStepping == desiredAutomatic) return;
+
+            Academy.Instance.AutomaticSteppingEnabled = desiredAutomatic;
+            _lastSyncedAutomaticStepping = desiredAutomatic;
+            SimLogger.Low($"[Orchestrator] Academy.AutomaticSteppingEnabled -> {desiredAutomatic} " +
+                          $"(RLDecisionDrainMode={RLDecisionDrainMode}).");
+        }
+
+        /// <summary>
+        /// Drains all CURRENTLY-READY decisions this tick through the live ML-Agents policy,
+        /// manually forcing one Academy.EnvironmentStep() per decision instead of relying on
+        /// the engine's automatic one-step-per-FixedUpdate cadence. This is the RL-path
+        /// analogue of DrainHeuristicDecisions: same ready-set-bounded loop, but each
+        /// iteration pays a real policy round-trip (CollectObservations -> policy ->
+        /// OnActionReceived, synchronously, via EnvironmentStep) instead of an instant
+        /// heuristic lookup. Requires automatic stepping to be off (see
+        /// SyncAcademyManualStepping) so this loop is the only thing driving Academy.
+        /// </summary>
+        private void DrainRLDecisions()
+        {
+            const int guard = 1_000_000;   // paranoia; real count bounded by ready events
+            int n = 0;
+            while (n++ < guard)
+            {
+                DecisionRequest req = _decisions.FindNextDecision();
+                if (req == null) break;
+
+                CurrentDecision = req;
+                IsWaitingForAction = true;   // Step() (via OnActionReceived) clears this
+                OnDecisionRequired?.Invoke(CurrentDecision);   // flags the agent's pending request
+
+                _envStepWatch.Start();
+                Academy.Instance.EnvironmentStep();   // synchronous: send obs -> policy -> act
+                _envStepWatch.Stop();
+                _episodeEnvSteps++;
+
+                if (IsWaitingForAction)
+                {
+                    // EnvironmentStep() returned without resolving the pending decision (e.g.
+                    // no agent listening, or the communicator stalled). Fall back to the
+                    // standard one-decision-per-tick path instead of spinning forever --
+                    // the already-pending request is left in place and will resolve normally
+                    // once automatic stepping comes back on next tick.
+                    SimLogger.Error("[Orchestrator] DrainRLDecisions: EnvironmentStep() did not " +
+                                     "resolve the pending decision. Disabling RLDecisionDrainMode " +
+                                     "for the rest of this run.");
+                    RLDecisionDrainMode = false;
+                    break;
+                }
+            }
+
+            if (n >= guard)
+                SimLogger.Error("[Orchestrator] DrainRLDecisions hit guard — possible decision " +
+                                "that doesn't change state. Investigate FindNextDecision.");
+        }
         /// <summary>
         /// Closes every throughput window boundary that SimTime has crossed this frame. The while-loop
         /// handles a frame whose dt spans more than one window (e.g. high timescale), mirroring how the
@@ -754,10 +894,11 @@ namespace Assets.Scripts.Simulation
 
         /// <summary>
         /// Executes a single simulation step given an action index from the agent.
-        /// Applies the dispatch or routing decision, calculates reward, and returns the result.
+        /// Applies the dispatch or routing decision and returns the result. No reward is computed
+        /// here — see <see cref="WriteRewardMetrics"/>.
         /// </summary>
         /// <param name="actionIndex">The index of the action to execute.</param>
-        /// <returns>A StepResult containing the reward and simulation status.</returns>
+        /// <returns>A StepResult containing the simulation status.</returns>
         public StepResult Step(int actionIndex)
         {
             IsWaitingForAction = false;
@@ -767,10 +908,7 @@ namespace Assets.Scripts.Simulation
             else if (CurrentDecision.Type == DecisionType.Dispatch)
                 ExecuteDispatchDecision(actionIndex);
 
-            float reward = CalculateReward();
-            totalReward += reward;
-
-            return new StepResult { Reward = reward, Done = false, CurrentMakespan = SimTime };
+            return new StepResult { Done = false, CurrentMakespan = SimTime };
         }
 
         /// <summary>
@@ -901,7 +1039,10 @@ namespace Assets.Scripts.Simulation
         /// </summary>
         private void FinaliseEpisode()
         {
+          try
+          {
             episodeActive = false;
+            LogEpisodeTiming();
             // Close the trailing partial window so completions after the last full boundary
             // still land in throughput.csv. Skipped if SimTime sits exactly on a closed boundary.
             double lastBoundary = _nextThroughputBoundary - _throughputWindowLength;
@@ -917,7 +1058,7 @@ namespace Assets.Scripts.Simulation
                     machineCount: layoutManager.MachineCount,
                     totalOps: Jobs.AllJobs.Sum(j => j.TotalOperations),
                     decisions: decisionCount,
-                    totalReward: totalReward,
+                    totalReward: 0.0,
                     ruleName: LastAppliedRule,
                     stochasticTag: currentConfig.Stochastic?.Tag ?? "none"
                 );
@@ -931,7 +1072,7 @@ namespace Assets.Scripts.Simulation
                 completedJobs: Jobs.CountInState(JobState.Exited),
                 totalOps: Jobs.AllJobs.Sum(j => j.TotalOperations),
                 decisionPoints: decisionCount,
-                totalReward: totalReward,
+                totalReward: 0.0,
                 agvCount: agvPool.AllAGVs.Count,
                 machines: layoutManager.Machines,
                 averageTimeScale: Time.timeScale
@@ -1058,20 +1199,45 @@ namespace Assets.Scripts.Simulation
             }
 
             OnEpisodeFinished?.Invoke(record);
+          }
+          catch (Exception ex)
+          {
+            SimLogger.Error($"[Orchestrator] FinaliseEpisode threw: {ex}");
+          }
         }
 
         /// <summary>
-        /// Calculates the per-step reward as the negative normalized change in makespan.
-        /// Penalizes increases in completion time relative to the number of remaining operations.
+        /// Logs one [EpisodeTiming] line per episode: wall-clock duration split into time inside
+        /// Academy.EnvironmentStep (observations + policy round-trip + action; drain mode only)
+        /// versus everything else (simulation ticks), plus GC and live-object counts. Anything
+        /// that trends upward across episodes while sim time and decisions stay flat is a leak.
         /// </summary>
-        /// <returns>The computed reward value (typically negative).</returns>
-        private float CalculateReward()
+        private void LogEpisodeTiming()
         {
-            float current = (float)SimTime;
-            float delta = current - (float)previousMakespan;
-            previousMakespan = current;
-            int totalOps = Jobs.AllJobs.Sum(j => j.TotalOperations);
-            return -delta / (Mathf.Max(totalOps, 1) * Time.timeScale);
+            double wall = Time.realtimeSinceStartupAsDouble - _episodeWallStart;
+            double envStep = _envStepWatch.Elapsed.TotalSeconds;
+            int gameObjects = FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length;
+            int jobVisuals = FindObjectsByType<JobVisual>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length;
+            SimLogger.Low($"[EpisodeTiming] ep={_episodeIndex} wall={wall:F3}s envStep={envStep:F3}s " +
+                          $"other={wall - envStep:F3}s ticks={_episodeTicks} envSteps={_episodeEnvSteps} " +
+                          $"sim={SimTime:F0}s decisions={decisionCount} " +
+                          $"gc0={GC.CollectionCount(0) - _episodeGcStart} " +
+                          $"heapMB={GC.GetTotalMemory(false) / 1048576.0:F1} " +
+                          $"gameObjects={gameObjects} jobVisuals={jobVisuals}");
+        }
+
+        /// <summary>
+        /// Writes the current <see cref="RewardMetrics"/> snapshot for <see cref="RewardMetricsSensor"/>.
+        /// The reward itself is computed in Python (env/rewards) from consecutive snapshots, so the
+        /// total_reward reported in telemetry and results CSVs is always 0.
+        /// </summary>
+        public void WriteRewardMetrics(float[] buffer)
+        {
+            RewardMetrics.Fill(buffer, SimTime, episodeActive, decisionCount, Jobs,
+                               layoutManager != null ? layoutManager.Machines : null,
+                               agvPool != null ? agvPool.AllAGVs : null,
+                               trafficZoneManager != null ? trafficZoneManager.Zones : null,
+                               _tracker, _deadlockDetected, SimTime > MAX_EPISODE_SIM_SECONDS);
         }
 
         /// <summary>

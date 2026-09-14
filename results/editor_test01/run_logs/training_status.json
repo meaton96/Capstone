@@ -1,0 +1,29 @@
+{
+    "SchedulingAgent": {
+        "checkpoints": [
+            {
+                "steps": 45051,
+                "file_path": "results/editor_test01/SchedulingAgent/SchedulingAgent-45051.onnx",
+                "reward": null,
+                "creation_time": 1789159744.1425354,
+                "auxillary_file_paths": [
+                    "results/editor_test01/SchedulingAgent/SchedulingAgent-45051.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 45051,
+            "file_path": "results/editor_test01/SchedulingAgent.onnx",
+            "reward": null,
+            "creation_time": 1789159744.1425354,
+            "auxillary_file_paths": [
+                "results/editor_test01/SchedulingAgent/SchedulingAgent-45051.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.1.0",
+        "torch_version": "2.1.1+cu121"
+    }
+}

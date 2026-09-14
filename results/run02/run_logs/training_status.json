@@ -1,0 +1,38 @@
+{
+    "SchedulingAgent": {
+        "checkpoints": [
+            {
+                "steps": 499997,
+                "file_path": "results/run02/SchedulingAgent/SchedulingAgent-499997.onnx",
+                "reward": -0.11283700464462693,
+                "creation_time": 1789344709.4037037,
+                "auxillary_file_paths": [
+                    "results/run02/SchedulingAgent/SchedulingAgent-499997.pt"
+                ]
+            },
+            {
+                "steps": 500061,
+                "file_path": "results/run02/SchedulingAgent/SchedulingAgent-500061.onnx",
+                "reward": -0.11283700464462693,
+                "creation_time": 1789344709.4835885,
+                "auxillary_file_paths": [
+                    "results/run02/SchedulingAgent/SchedulingAgent-500061.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 500061,
+            "file_path": "results/run02/SchedulingAgent.onnx",
+            "reward": -0.11283700464462693,
+            "creation_time": 1789344709.4835885,
+            "auxillary_file_paths": [
+                "results/run02/SchedulingAgent/SchedulingAgent-500061.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.1.0",
+        "torch_version": "2.1.1+cu121"
+    }
+}

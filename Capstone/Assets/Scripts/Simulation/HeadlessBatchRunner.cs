@@ -376,7 +376,20 @@ namespace Assets.Scripts.Simulation
             if (activeRules == null || activeRules.Length == 0)
                 activeRules = AllRules;
 
-            var (config, buildJobs) = ScenarioLoader.LoadDeferred(jsonPath, agvCountOverride: agvCountOverride);
+            FJSSPConfig config = null;
+            Func<Dictionary<MachineType, List<int>>, FJSSPJobDefinition[]> buildJobs = null;
+            try
+            {
+                (config, buildJobs) = ScenarioLoader.LoadDeferred(jsonPath, agvCountOverride: agvCountOverride);
+            }
+            catch (Exception e)
+            {
+                // An uncaught exception here kills this coroutine silently — Unity logs it
+                // but nothing calls Application.Quit(), so a batch-mode process spins on
+                // empty frames at ~100% CPU forever with zero output, looking like a hang
+                // rather than a crash. Catch and fail loudly instead.
+                SimLogger.LogError($"[BatchRunner] Exception loading scenario {jsonPath}: {e}");
+            }
             if (config == null)
             {
                 QuitWithError($"Failed to load scenario: {jsonPath}");
@@ -434,7 +447,20 @@ namespace Assets.Scripts.Simulation
 
             foreach (string file in files)
             {
-                var (config, buildJobs) = ScenarioLoader.LoadDeferred(file, agvCountOverride: agvCountOverride);
+                FJSSPConfig config = null;
+                Func<Dictionary<MachineType, List<int>>, FJSSPJobDefinition[]> buildJobs = null;
+                try
+                {
+                    (config, buildJobs) = ScenarioLoader.LoadDeferred(file, agvCountOverride: agvCountOverride);
+                }
+                catch (Exception e)
+                {
+                    // Same reasoning as RunScenarioCoroutine -- an uncaught exception here
+                    // would silently kill this coroutine, and with it the whole directory
+                    // sweep, leaving the batch-mode process spinning at ~100% CPU forever
+                    // with zero output. Log and skip just this file instead.
+                    SimLogger.LogError($"[BatchRunner] Exception loading scenario {file}: {e}");
+                }
                 if (config != null)
                 {
                     scenarios.Add((file, config, buildJobs));
@@ -500,11 +526,33 @@ namespace Assets.Scripts.Simulation
                     if (agent != null)
                         agent.SetHeuristicRule(rule);
 
-                    FactoryOrchestrator.Instance.LoadConfig(runConfig);
-                    FactoryOrchestrator.Instance.SpawnFactory();
+                    bool loadFailed = false;
+                    try
+                    {
+                        FactoryOrchestrator.Instance.LoadConfig(runConfig);
+                        FactoryOrchestrator.Instance.SpawnFactory();
 
-                    var jobs = buildJobs(FactoryOrchestrator.Instance.CachedMachinesByType);
-                    FactoryOrchestrator.Instance.LoadPrebuiltJobs(jobs);
+                        var jobs = buildJobs(FactoryOrchestrator.Instance.CachedMachinesByType);
+                        FactoryOrchestrator.Instance.LoadPrebuiltJobs(jobs);
+                    }
+                    catch (Exception e)
+                    {
+                        // An uncaught exception here would kill this coroutine silently --
+                        // Unity logs it but nothing calls Application.Quit(), so the batch
+                        // process spins on empty frames at ~100% CPU forever with zero
+                        // output. Log, skip this one run, and keep going instead.
+                        SimLogger.LogError($"[BatchRunner] Exception building run " +
+                                            $"{runConfig.Name}/{rule}: {e}");
+                        loadFailed = true;
+                    }
+
+                    if (loadFailed)
+                    {
+                        FactoryOrchestrator.Instance.OnEpisodeFinished.RemoveListener(onFinish);
+                        completedRuns++;
+                        LogProgress();
+                        continue;
+                    }
 
                     if (agent != null)
                         agent.ArmAndStart();

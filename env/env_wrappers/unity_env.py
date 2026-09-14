@@ -1,40 +1,41 @@
 """
 @file unity_env.py
-@brief Gymnasium-compatible wrapper around the ML-Agents Unity environment.
+@brief Wrapper around the ML-Agents Unity environment for the custom PPO loop.
 
-Updated to include:
-  - EpisodeConfigChannel: push full FJSSPConfig JSON to Unity before each reset
-  - EpisodeTelemetryChannel: receive per-episode events/results from Unity
+Each Python step sends one scheduling action and advances Unity to the next decision
+(or episode end). The reward is computed here in Python from the reward-metrics
+snapshots Unity attaches to every agent step (see env/rewards), so reward functions
+can change without a rebuild. Without a reward function, Unity's own reward is passed
+through (always 0 in current builds).
+
+Episodes restart automatically inside Unity (AutoStartOnPlay under ML-Agents): when a
+step ends an episode, the returned observation is already the first observation of
+the next episode. Callers must not call reset() between episodes.
 
 Side channel usage:
-  env.send_config(config_dict)   # call before reset() to set next episode config
-  obs = env.reset()
-  ...episode loop...
-  payload = env.telemetry.pop_payload()  # call after done=True
-
-For curriculum training, the outer training loop manages which config to send:
-  for episode in curriculum:
-      env.send_config(curriculum.current_config())
-      obs = env.reset()
-      ...
+  env.send_config(config_dict)   # applied on the next reset()
+  info["telemetry"]              # per-episode events, attached when done=True
 """
 
-import numpy as np
-from typing import Optional, Tuple, Dict
+from pathlib import Path
+from typing import Dict, Optional, Tuple
 
+import numpy as np
+from mlagents_envs.base_env import ActionTuple
 from mlagents_envs.environment import UnityEnvironment
 from mlagents_envs.side_channel.engine_configuration_channel import (
     EngineConfigurationChannel,
 )
-from mlagents_envs.base_env import ActionTuple
 
 from config import (
     GRID_SIZE, GRID_CHANNELS, MAX_JOBS, MAX_MACHINES, SCHED_CHANNELS,
-    GLOBAL_SCALARS, DISTANCE_DIM, EVENT_FLAGS, TOTAL_OBS_SIZE,
-    SLICE_SPATIAL_END, SLICE_SCHED_END, SLICE_SCALARS_END,
+    TOTAL_OBS_SIZE, SLICE_SPATIAL_END, SLICE_SCHED_END, SLICE_SCALARS_END,
     SLICE_DIST_END, SLICE_FLAGS_END,
 )
-from env.channels import EpisodeConfigChannel, EpisodeTelemetryChannel
+from channels.channels import EpisodeConfigChannel, EpisodeTelemetryChannel
+from rewards import (
+    SENSOR_NAME, LoadedReward, MetricsSnapshot, RewardContext, RewardFunction, load_reward,
+)
 
 
 def slice_obs(raw: np.ndarray) -> Dict[str, np.ndarray]:
@@ -70,12 +71,26 @@ class UnitySchedulingEnv:
     """@brief Single-agent wrapper around the ML-Agents Unity environment."""
 
     def __init__(self, file_name: Optional[str] = None,
-                 time_scale: float = 20.0, worker_id: int = 0,
-                 timeout_wait: int = 300, no_graphics: bool = False):
-
+                 reward_fn: Optional[RewardFunction] = None,
+                 time_scale: float = 100.0, worker_id: int = 0,
+                 timeout_wait: int = 300, no_graphics: bool = False,
+                 decision_drain: bool = True, log_file: Optional[str] = None,
+                 env_id: int = 0):
+        """
+        @param reward_fn       Python reward function; None passes Unity's reward through.
+        @param decision_drain  Launch the player with -rldecisiondrain (one Python step per decision).
+        @param log_file        Player log path; without it Unity logs to stdout.
+        @param env_id          Index within a vectorized wrapper (passed to the reward context).
+        """
         self.engine_channel = EngineConfigurationChannel()
         self.config_channel = EpisodeConfigChannel()
         self.telemetry = EpisodeTelemetryChannel()
+
+        additional_args = []
+        if decision_drain:
+            additional_args += ["-rldecisiondrain", "true"]
+        if log_file is not None:
+            additional_args += ["-logFile", str(log_file)]
 
         self.env = UnityEnvironment(
             file_name=file_name,
@@ -87,108 +102,201 @@ class UnitySchedulingEnv:
             worker_id=worker_id,
             timeout_wait=timeout_wait,
             no_graphics=no_graphics,
+            additional_args=additional_args,
         )
         self.engine_channel.set_configuration_parameters(time_scale=time_scale)
 
         self.env.reset()
         self.behavior_name = list(self.env.behavior_specs.keys())[0]
         self.spec = self.env.behavior_specs[self.behavior_name]
+        self._policy_index, self._metrics_index = self._find_observation_indices(self.spec)
+        if reward_fn is not None and self._metrics_index is None:
+            raise RuntimeError(
+                f"A reward function was given but the Unity build has no '{SENSOR_NAME}' "
+                "sensor. Rebuild the player with RewardMetricsSensor."
+            )
 
-        obs_shape = self.spec.observation_specs[0].shape
-        assert obs_shape == (TOTAL_OBS_SIZE,), (
-            f"Unity VectorSensor size {obs_shape} does not match "
+        self.reward_fn = reward_fn
+        self.env_id = env_id
+        ## @brief Total env steps across all envs; set by VectorizedUnityEnv for reward schedules.
+        self.global_step = 0
+        self.episodes_completed = 0
+
+        self._pending_config = None
+        self._prev_metrics: Optional[MetricsSnapshot] = None
+        self._episode_return = 0.0
+        self._episode_length = 0
+        self._episode_terms: Dict[str, float] = {}
+
+    @staticmethod
+    def _find_observation_indices(spec) -> Tuple[int, Optional[int]]:
+        """@brief Locate the policy observation and the reward-metrics sensor by name."""
+        policy_index, metrics_index = None, None
+        for i, obs_spec in enumerate(spec.observation_specs):
+            if obs_spec.name == SENSOR_NAME:
+                metrics_index = i
+            elif policy_index is None:
+                policy_index = i
+
+        shape = None if policy_index is None else tuple(spec.observation_specs[policy_index].shape)
+        assert shape == (TOTAL_OBS_SIZE,), (
+            f"Unity VectorSensor size {shape} does not match "
             f"expected ({TOTAL_OBS_SIZE},). Update BehaviorParameters "
             f"Space Size in the Inspector to {TOTAL_OBS_SIZE}."
         )
-
-        self._last_obs = None
-        self._pending_config = None
+        return policy_index, metrics_index
 
     def send_config(self, config: dict):
         """
         Queue a config to be sent on the next reset().
-        Call this before reset() to control the next episode's parameters.
 
         In deterministic mode (no stochastic block), Unity uses its default
         config (whatever is set in the Inspector / HeadlessBatchRunner).
-        In curriculum training, call this every episode with the current
-        curriculum stage's config dict.
         """
         self._pending_config = config
 
     def reset(self) -> Dict[str, np.ndarray]:
-        """Reset the Unity episode and return the first observation."""
-        # Send config before reset so Unity receives it in OnEpisodeBegin
+        """@brief Reset Unity and return the first observation of a fresh episode.
+
+        @details Only needed at startup (or to apply a new config immediately); episodes
+        roll over on their own inside @ref step.
+        """
         if self._pending_config is not None:
             self.config_channel.send_config(self._pending_config)
             self._pending_config = None
 
         self.env.reset()
-        obs, _, _, _ = self._step_until_decision(action=0)
-        return obs
+        decision, _ = self.env.get_steps(self.behavior_name)
+        return self._begin_episode(self._wait_for_decision(decision))
 
     def step(self, action: int) -> Tuple[Dict[str, np.ndarray], float, bool, dict]:
-        """Send a scheduling action and wait for the next decision point."""
-        obs, reward, done, info = self._step_until_decision(action)
+        """@brief Apply one scheduling action and advance to the next decision.
 
-        # Attach telemetry payload to info when episode ends
-        if done:
-            info["telemetry"] = self.telemetry.pop_payload()
-
-        return obs, reward, done, info
-
-    def _step_until_decision(self, action: int):
-        accumulated_reward = 0.0
-        info = {}
-
-        while True:
-            action_tuple = ActionTuple(
-                discrete=np.array([[action]], dtype=np.int32)
-            )
-            self.env.set_actions(self.behavior_name, action_tuple)
+        @return (obs, reward, done, info). @c info["reward_terms"] holds this step's named
+                reward terms. When @c done is True the episode just ended: @c reward is its
+                final reward, @c info["episode"] summarizes it, and @c obs is already the
+                first observation of the next episode.
+        """
+        self.env.set_actions(
+            self.behavior_name,
+            ActionTuple(discrete=np.array([[action]], dtype=np.int32)),
+        )
+        self.env.step()
+        decision, terminal = self.env.get_steps(self.behavior_name)
+        while len(decision) == 0 and len(terminal) == 0:
             self.env.step()
+            decision, terminal = self.env.get_steps(self.behavior_name)
 
-            decision_steps, terminal_steps = self.env.get_steps(
-                self.behavior_name
+        # A terminal step and the next episode's first decision can arrive in the same batch.
+        done = len(terminal) > 0
+        steps = terminal if done else decision
+        curr = self._extract_metrics(steps)
+        reward, terms = self._compute_reward(curr, float(steps.reward[0]), done)
+
+        self._episode_return += reward
+        self._episode_length += 1
+        for name, value in terms.items():
+            self._episode_terms[name] = self._episode_terms.get(name, 0.0) + value
+
+        info = {"reward_terms": terms}
+        if not done:
+            self._prev_metrics = curr
+            return self._extract_obs(decision), reward, False, info
+
+        info["episode"] = self._episode_summary(curr, interrupted=bool(terminal.interrupted[0]))
+        info["telemetry"] = self.telemetry.pop_payload()
+        self.episodes_completed += 1
+        next_obs = self._begin_episode(self._wait_for_decision(decision))
+        return next_obs, reward, True, info
+
+    def _compute_reward(self, curr: Optional[MetricsSnapshot], unity_reward: float,
+                        done: bool) -> Tuple[float, Dict[str, float]]:
+        if self.reward_fn is None or curr is None or self._prev_metrics is None:
+            return unity_reward, {}
+        ctx = RewardContext(global_step=self.global_step, episode=self.episodes_completed,
+                            env_id=self.env_id, done=done)
+        return self.reward_fn(self._prev_metrics, curr, ctx)
+
+    def _wait_for_decision(self, decision):
+        """@brief Advance Unity (no actions pending) until the agent requests a decision."""
+        while len(decision) == 0:
+            self.env.step()
+            decision, _ = self.env.get_steps(self.behavior_name)
+        return decision
+
+    def _begin_episode(self, decision) -> Dict[str, np.ndarray]:
+        self._prev_metrics = self._extract_metrics(decision)
+        if self.reward_fn is not None and self._prev_metrics is not None:
+            self.reward_fn.reset(self._prev_metrics)
+        self._episode_return = 0.0
+        self._episode_length = 0
+        self._episode_terms = {}
+        return self._extract_obs(decision)
+
+    def _episode_summary(self, final: Optional[MetricsSnapshot], interrupted: bool) -> dict:
+        summary = {
+            "return": self._episode_return,
+            "length": self._episode_length,
+            "interrupted": interrupted,
+            "reward_terms": dict(self._episode_terms),
+        }
+        if final is not None:
+            exited = final.jobs_exited
+            summary.update(
+                makespan=final.sim_time,
+                jobs_exited=exited,
+                jobs_total=final.jobs_total,
+                mean_flow_time=final.flow_time_exited_sum / exited if exited else float("nan"),
+                deadlock=bool(final.deadlock),
+                timed_out=bool(final.timed_out),
             )
-
-            if len(terminal_steps) > 0:
-                obs = self._extract_obs(terminal_steps)
-                accumulated_reward += float(terminal_steps.reward[0])
-                self._last_obs = obs
-                return obs, accumulated_reward, True, info
-
-            if len(decision_steps) > 0:
-                obs = self._extract_obs(decision_steps)
-                accumulated_reward += float(decision_steps.reward[0])
-                self._last_obs = obs
-                return obs, accumulated_reward, False, info
+        return summary
 
     def _extract_obs(self, steps) -> Dict[str, np.ndarray]:
-        raw = steps.obs[0][0]
-        return slice_obs(raw)
+        return slice_obs(steps.obs[self._policy_index][0])
+
+    def _extract_metrics(self, steps) -> Optional[MetricsSnapshot]:
+        if self._metrics_index is None:
+            return None
+        return MetricsSnapshot(steps.obs[self._metrics_index][0])
 
     def close(self):
         self.env.close()
 
 
 class VectorizedUnityEnv:
-    """Manages multiple Unity instances for parallel data collection."""
+    """Manages multiple Unity instances for parallel data collection (stepped sequentially)."""
 
     def __init__(self, num_envs: int, file_name: Optional[str] = None,
-                 time_scale: float = 20.0, base_worker_id: int = 0,
-                 timeout_wait: int = 300, no_graphics: bool = False):
+                 reward_spec=None, time_scale: float = 100.0,
+                 base_worker_id: int = 0, timeout_wait: int = 300,
+                 no_graphics: bool = False, decision_drain: bool = True,
+                 log_dir: Optional[str] = None):
+        """
+        @param reward_spec  Reward spec path or dict, or a @ref rewards.LoadedReward. Each env
+                            gets its own reward instance. None passes Unity's reward through.
+        @param log_dir      If set, instance i writes its player log to log_dir/Player-i.log.
+        """
+        loaded = None
+        if reward_spec is not None:
+            loaded = reward_spec if isinstance(reward_spec, LoadedReward) else load_reward(reward_spec)
+
         self.envs = [
             UnitySchedulingEnv(
                 file_name=file_name,
+                reward_fn=loaded.build() if loaded is not None else None,
                 time_scale=time_scale,
                 worker_id=base_worker_id + i,
                 timeout_wait=timeout_wait,
                 no_graphics=no_graphics,
+                decision_drain=decision_drain,
+                log_file=None if log_dir is None else Path(log_dir) / f"Player-{i}.log",
+                env_id=i,
             )
             for i in range(num_envs)
         ]
         self.num_envs = num_envs
+        self.global_step = 0
 
     def send_configs(self, configs: list):
         """Push one config per env. configs[i] applies to envs[i]."""
@@ -206,18 +314,20 @@ class VectorizedUnityEnv:
         return self._stack_obs(results), [{}] * self.num_envs
 
     def step(self, actions):
-        results = [
-            env.step(int(a)) for env, a in zip(self.envs, actions)
-        ]
+        """@brief Step every env once.
+
+        @details Episode rollover happens inside each env, so a done env's returned
+        observation already belongs to its next episode.
+        """
+        self.global_step += self.num_envs
+        results = []
+        for env, action in zip(self.envs, actions):
+            env.global_step = self.global_step
+            results.append(env.step(int(action)))
         obs_list, rewards, dones, infos = zip(*results)
 
-        new_obs = list(obs_list)
-        for i, done in enumerate(dones):
-            if done:
-                new_obs[i] = self.envs[i].reset()
-
         return (
-            self._stack_obs(new_obs),
+            self._stack_obs(obs_list),
             np.array(rewards, dtype=np.float32),
             np.array(dones),
             np.zeros(self.num_envs, dtype=bool),

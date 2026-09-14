@@ -102,7 +102,7 @@ class RolloutBuffer:
         self.dones[self.pos] = dones
         self.pos += 1
 
-    def compute_gae(self, last_values: np.ndarray, last_dones: np.ndarray):
+    def compute_gae(self, last_values: np.ndarray):
         """@brief Compute GAE advantages and discounted returns.
 
         @details
@@ -111,17 +111,17 @@ class RolloutBuffer:
         weighted advantage estimates.  After completion, @ref returns
         is set to @ref advantages + @ref values.
 
-        @param last_values  Bootstrap values V(s_{T+1}), shape (num_envs,).
-        @param last_dones   Done flags at T+1, shape (num_envs,).
+        @c dones[t] is the done flag returned by the step taken from
+        observation t, so when it is set the next stored observation
+        already belongs to a new episode and must not be bootstrapped from.
+
+        @param last_values  Bootstrap values V(s_T) for the observation that
+                            follows the final stored step, shape (num_envs,).
         """
         gae = np.zeros(self.num_envs, dtype=np.float32)
         for t in reversed(range(self.rollout_length)):
-            if t == self.rollout_length - 1:
-                next_values = last_values
-                next_nonterminal = 1.0 - last_dones
-            else:
-                next_values = self.values[t + 1]
-                next_nonterminal = 1.0 - self.dones[t + 1]
+            next_values = last_values if t == self.rollout_length - 1 else self.values[t + 1]
+            next_nonterminal = 1.0 - self.dones[t]
 
             delta = (
                 self.rewards[t]
