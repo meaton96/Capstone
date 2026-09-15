@@ -791,12 +791,28 @@ class TestUnitySchedulingEnv:
             mock_env_instance.behavior_specs = {"SchedulingBehavior?team=0": mock_spec}
             MockUnity.return_value = mock_env_instance
 
-            UnitySchedulingEnv(file_name=None, log_file=os.path.join("relative", "dir", "Player.log"))
+            UnitySchedulingEnv(file_name=None, log_file=os.path.join("relative", "dir", "Player.log"),
+                               extra_args=["-decisionlogdir", "/tmp/decisions"])
 
         args = MockUnity.call_args.kwargs["additional_args"]
         log_path = args[args.index("-logFile") + 1]
         assert os.path.isabs(log_path)
         assert log_path.endswith(os.path.join("relative", "dir", "Player.log"))
+        assert args[args.index("-decisionlogdir") + 1] == "/tmp/decisions"
+
+    def test_load_scenario_sends_absolute_path_with_reset(self):
+        """@brief load_scenario() must reach Unity on the next reset as an absolute scenarioPath."""
+        obs_vec = np.random.rand(TOTAL_OBS_SIZE).astype(np.float32)
+        env, _ = self._make_env([(_make_mock_steps(obs_vec), _empty_steps())])
+        env.config_channel = MagicMock()
+
+        env.load_scenario(os.path.join("relative", "single_bottleneck.json"))
+        env.config_channel.send_config.assert_not_called()   # deferred until reset
+        env.reset()
+
+        sent = env.config_channel.send_config.call_args.args[0]
+        assert os.path.isabs(sent["scenarioPath"])
+        assert sent["scenarioPath"].endswith(os.path.join("relative", "single_bottleneck.json"))
 
 
 class TestVectorizedUnityEnv:
@@ -900,6 +916,64 @@ class TestVectorizedUnityEnv:
         for m in mock_instances:
             m.reset.assert_called_once()
             assert m.global_step == num_envs
+
+    def test_parallel_step_overlaps_envs_and_keeps_order(self):
+        """@brief Parallel stepping must run sub-env steps concurrently yet return results in env order."""
+        import time
+        from env_wrappers.unity_env import VectorizedUnityEnv
+
+        num_envs, delay = 4, 0.2
+        obs_dicts = [self._make_dummy_obs_dict() for _ in range(num_envs)]
+        for i, obs in enumerate(obs_dicts):
+            obs["global_scalars"][:] = i
+
+        def slow_step(i):
+            def step(action):
+                time.sleep(delay)
+                return obs_dicts[i], float(action), False, {}
+            return step
+
+        with patch("env_wrappers.unity_env.UnitySchedulingEnv") as MockSingle:
+            mock_instances = []
+            for i in range(num_envs):
+                m = MagicMock()
+                m.reset.return_value = obs_dicts[i]
+                m.step.side_effect = slow_step(i)
+                mock_instances.append(m)
+            MockSingle.side_effect = mock_instances
+
+            vec = VectorizedUnityEnv(num_envs=num_envs, file_name=None)
+            start = time.perf_counter()
+            obs, rewards, dones, truncs, infos = vec.step(np.array([10, 11, 12, 13]))
+            elapsed = time.perf_counter() - start
+            vec.close()
+
+        assert elapsed < delay * num_envs * 0.75, f"sub-env steps did not overlap ({elapsed:.2f}s)"
+        np.testing.assert_allclose(rewards, [10, 11, 12, 13])
+        np.testing.assert_allclose(obs["global_scalars"][:, 0], [0, 1, 2, 3])
+
+    def test_sequential_mode_uses_no_pool(self):
+        """@brief parallel=False must keep the plain one-by-one stepping path."""
+        from env_wrappers.unity_env import VectorizedUnityEnv
+
+        with patch("env_wrappers.unity_env.UnitySchedulingEnv") as MockSingle:
+            MockSingle.side_effect = [MagicMock() for _ in range(2)]
+            vec = VectorizedUnityEnv(num_envs=2, file_name=None, parallel=False)
+        assert vec._pool is None
+
+    def test_failed_construction_closes_started_envs(self):
+        """@brief If a later Unity instance fails to start, already-launched players must be closed."""
+        from env_wrappers.unity_env import VectorizedUnityEnv
+
+        started = MagicMock()
+        with patch("env_wrappers.unity_env.UnitySchedulingEnv") as MockSingle:
+            MockSingle.side_effect = [started, RuntimeError("port in use")]
+            try:
+                VectorizedUnityEnv(num_envs=2, file_name=None)
+                raise AssertionError("construction should have failed")
+            except RuntimeError as exc:
+                assert "port in use" in str(exc)
+        started.close.assert_called_once()
 
     def test_close_all_sub_envs(self):
         """@brief close() must call close() on every sub-environment."""

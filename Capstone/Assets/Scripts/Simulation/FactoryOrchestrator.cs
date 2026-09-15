@@ -68,6 +68,9 @@ namespace Assets.Scripts.Simulation
         // ── Per-episode instance seed from EpisodeSeedChannel; -1 when none was queued ─────
         private int _episodeSeed = -1;
         private int _episodeSeedIndex = -1;
+
+        // ── Optional decision_log.csv in RL mode (-decisionlogdir <dir>); null when off ─────
+        private string _decisionLogDir;
         /// <summary>
         /// Singleton instance of the FactoryOrchestrator.
         /// </summary>
@@ -113,9 +116,26 @@ namespace Assets.Scripts.Simulation
         public bool AutoStartOnPlay = false;
 
         /// <summary>
+        /// Rebuild the factory (floor, traffic zones, AGV fleet) at the start of every episode, as
+        /// HeadlessBatchRunner does before each run. Without it, consecutive episodes share AGV
+        /// positions/state and machine state, so the same instance plays out differently depending
+        /// on the previous episode. Forced on when an ML-Agents communicator is connected.
+        /// SpawnFactory re-seeds UnityEngine.Random with the config seed, so episodes without a
+        /// Python-queued seed (EpisodeSeedChannel) all replay that seed's instance.
+        /// </summary>
+        public bool RespawnFactoryEachEpisode = false;
+
+        /// <summary>
         /// Pre-built job definitions used for benchmark scenarios. Set before SpawnFactory.
         /// </summary>
         private FJSSPJobDefinition[] prebuiltJobs;
+
+        /// <summary>
+        /// Job builder for a scripted scenario sent by Python (EpisodeConfigChannel). Unlike
+        /// prebuiltJobs, which applies to a single episode, this re-runs every episode until
+        /// Python sends a different config, so training can replay the scenario.
+        /// </summary>
+        private Func<Dictionary<MachineType, List<int>>, FJSSPJobDefinition[]> _scenarioJobBuilder;
 
         /// <summary>
         /// The current simulation configuration loaded for this episode.
@@ -336,6 +356,15 @@ namespace Assets.Scripts.Simulation
                 RLDecisionDrainMode = true;
                 SimLogger.Low("[Orchestrator] RLDecisionDrainMode ENABLED via CLI flag.");
             }
+
+            // HeadlessBatchRunner (which normally writes decision logs) disables itself under
+            // ML-Agents, so RL evaluation opts in here to get the same per-decision CSV.
+            _decisionLogDir = GetCLIArg("-decisionlogdir");
+            if (!string.IsNullOrEmpty(_decisionLogDir))
+            {
+                ResultsLogger.SetSubdirectory(_decisionLogDir);
+                SimLogger.Low($"[Orchestrator] Writing decision_log.csv to {ResultsLogger.OutputDirectory}.");
+            }
             if (RLDecisionDrainMode && BaselineDrainMode)
                 SimLogger.LogWarning("[Orchestrator] Both RLDecisionDrainMode and BaselineDrainMode " +
                                       "are set -- BaselineDrainMode takes priority and RL drain will " +
@@ -372,6 +401,13 @@ namespace Assets.Scripts.Simulation
         /// </remarks>
         private void Start()
         {
+            if (Academy.Instance.IsCommunicatorOn && !RespawnFactoryEachEpisode)
+            {
+                RespawnFactoryEachEpisode = true;
+                SimLogger.Low("[Orchestrator] ML-Agents communicator detected — rebuilding the factory " +
+                              "at every episode start so episodes are independent.");
+            }
+
             if (Academy.Instance.IsCommunicatorOn && !AutoStartOnPlay)
             {
                 AutoStartOnPlay = true;
@@ -391,6 +427,7 @@ namespace Assets.Scripts.Simulation
         public void LoadConfig(FJSSPConfig config)
         {
             currentConfig = config;
+            _scenarioJobBuilder = null;
             IsFactoryReady = false;
             StochasticEventManager.Instance?.Initialize(config);
         }
@@ -437,15 +474,39 @@ namespace Assets.Scripts.Simulation
             _envStepWatch.Reset();
             _episodeGcStart = GC.CollectionCount(0);
 
+            var pythonScenario = EpisodeConfigChannel.Instance?.ConsumeScenario();
+            if (pythonScenario != null)
+            {
+                var (scenarioConfig, buildJobs) =
+                    ScenarioLoader.LoadDeferredFromJson(pythonScenario.Json, pythonScenario.Name);
+                if (scenarioConfig != null)
+                {
+                    currentConfig = scenarioConfig;
+                    _scenarioJobBuilder = buildJobs;
+                    IsFactoryReady = false;
+                    SimLogger.Low($"[Bridge] Applied Python scenario: {scenarioConfig.Name} " +
+                                  $"({scenarioConfig.JobCount} jobs, {scenarioConfig.AGVCount} AGVs)");
+                }
+                else
+                {
+                    SimLogger.LogError($"[Bridge] Python scenario '{pythonScenario.Name}' failed to load; " +
+                                        "keeping the previous config.");
+                }
+            }
+
             var pythonConfig = EpisodeConfigChannel.Instance?.ConsumeConfig();
             if (pythonConfig != null)
             {
                 currentConfig = pythonConfig;
+                _scenarioJobBuilder = null;
                 IsFactoryReady = false;
                 SimLogger.Low($"[Bridge] Applied Python config: {currentConfig.Name}");
             }
 
             currentConfig ??= DefaultConfigFactory.BuildDefault();
+
+            if (RespawnFactoryEachEpisode)
+                IsFactoryReady = false;
 
             if (!IsFactoryReady)
                 SpawnFactory();
@@ -478,6 +539,10 @@ namespace Assets.Scripts.Simulation
                 jobDefs = prebuiltJobs;
                 prebuiltJobs = null;
                 SimLogger.Low("[Orchestrator] Using prebuilt benchmark jobs");
+            }
+            else if (_scenarioJobBuilder != null)
+            {
+                jobDefs = _scenarioJobBuilder(cachedMachinesByType);
             }
             else
             {
@@ -1214,6 +1279,17 @@ namespace Assets.Scripts.Simulation
                 SimLogger.Low($"[StochasticSummary] Failures={record.MachineFailureCount} " +
                               $"TotalRepairTime={record.MachineRepairTime:F1}s " +
                               $"MeanTTF_theory={theoreticalMeanTtf:F1}s");
+            }
+
+            if (!string.IsNullOrEmpty(_decisionLogDir))
+            {
+                // Tag rows so they join to Python's decisions.csv (instance seed + seed-queue
+                // position). Must run before OnEpisodeFinished: the agent's listener starts the
+                // next episode synchronously, which overwrites the seed fields.
+                record.Seed = _episodeSeed;
+                record.InstanceName = $"{record.InstanceName}|seed_index={_episodeSeedIndex}";
+                if (RLDecisionDrainMode) record.RuleName = "rl_policy";
+                ResultsLogger.LogDecisions(record);
             }
 
             OnEpisodeFinished?.Invoke(record);

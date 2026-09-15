@@ -80,10 +80,37 @@ def resolve_pdr_names(spec: str) -> list:
     return names
 
 
+DECISION_FIELDS = (
+    ["policy", "kind", "seed", "seed_index", "step", "sim_time", "decision_count", "wip",
+     "jobs_exited", "action", "rule", "entropy", "chosen_prob"]
+    + [f"p_{name}" for name in PDR_ACTIONS]
+)
+
+
+def decision_row(policy, seed: int, seed_index: int, step: int, metrics, action: int) -> dict:
+    """@brief One decisions.csv row: the rule chosen at a decision and, for checkpoints, the
+    policy's full action distribution (entropy, probability of the chosen rule, p_<rule>)."""
+    row = {
+        "policy": policy.name, "kind": policy.kind, "seed": seed, "seed_index": seed_index,
+        "step": step, "sim_time": round(metrics.sim_time, 3),
+        "decision_count": int(metrics.decision_count), "wip": int(metrics.wip),
+        "jobs_exited": int(metrics.jobs_exited), "action": action,
+        "rule": PDR_ACTIONS[action] if 0 <= action < len(PDR_ACTIONS) else str(action),
+    }
+    probs = getattr(policy, "last_probs", None)
+    if probs is not None:
+        p = np.clip(probs, 1e-12, 1.0)
+        row["entropy"] = round(float(-(p * np.log(p)).sum()), 5)
+        row["chosen_prob"] = round(float(probs[action]), 5)
+        row.update({f"p_{name}": round(float(v), 5) for name, v in zip(PDR_ACTIONS, probs)})
+    return row
+
+
 class ConstantPolicy:
     """@brief A fixed dispatching rule: always the same action index."""
 
     kind = "pdr"
+    last_probs = None
 
     def __init__(self, action: int, name: str):
         self.action = action
@@ -109,12 +136,18 @@ class CheckpointPolicy:
         self.device = device
         self.deterministic = deterministic
         self.name = f"ckpt:{path.parent.name}/{path.stem}"
+        ## @brief Action probabilities from the latest call (for decision logging).
+        self.last_probs = None
 
     def __call__(self, obs) -> int:
         obs_t = {k: torch.tensor(v[None], dtype=torch.float32, device=self.device) for k, v in obs.items()}
         with torch.no_grad():
-            action, _, _ = self.net.act(obs_t, deterministic=self.deterministic)
-        return int(action.item())
+            # Same path as SchedulingNetwork.act, but keeps the full distribution for logging.
+            logits = self.net.actor_critic.actor(self.net.fusion(self.net.encoder(obs_t)))
+            probs = torch.softmax(logits, dim=-1)[0]
+            action = int(probs.argmax()) if self.deterministic else int(torch.multinomial(probs, 1))
+        self.last_probs = probs.cpu().numpy()
+        return action
 
 
 def build_policies(pdr_spec: str, checkpoints, device: str, deterministic: bool) -> list:
@@ -129,12 +162,14 @@ def build_policies(pdr_spec: str, checkpoints, device: str, deterministic: bool)
     return policies
 
 
-def run_evaluation(env, policies: list, schedule: list, log=print) -> list:
+def run_evaluation(env, policies: list, schedule: list, log=print, decision_writer=None) -> list:
     """@brief Play one episode per (policy index, seed) in @p schedule, in order.
 
-    @param env       A @ref UnitySchedulingEnv (or anything with queue_seeds / reset / step /
-                     current_metrics).
-    @param schedule  List of (policy index, seed); position i is queue index i in Unity.
+    @param env              A @ref UnitySchedulingEnv (or anything with queue_seeds / reset /
+                            step / current_metrics).
+    @param schedule         List of (policy index, seed); position i is queue index i in Unity.
+    @param decision_writer  Optional csv.DictWriter (fields @ref DECISION_FIELDS) receiving one
+                            row per decision of every scheduled episode.
     @return One row dict per completed episode, in schedule order.
     """
     total = len(schedule)
@@ -143,15 +178,21 @@ def run_evaluation(env, policies: list, schedule: list, log=print) -> list:
     if env.current_metrics is None:
         raise RuntimeError("This Unity build has no reward-metrics sensor; rebuild the player.")
 
-    rows, discarded, start = [], 0, time.time()
+    rows, discarded, start, episode_step = [], 0, time.time(), 0
     while len(rows) < total:
-        index = int(env.current_metrics.episode_seed_index)
+        metrics = env.current_metrics
+        index = int(metrics.episode_seed_index)
         # The episode that was already running before our seeds were queued (index -1) is
         # played out with action 0 and discarded.
         policy = policies[schedule[index][0]] if 0 <= index < total else None
-        obs, _, done, info = env.step(policy(obs) if policy is not None else 0)
+        action = policy(obs) if policy is not None else 0
+        if decision_writer is not None and policy is not None:
+            decision_writer.writerow(decision_row(policy, schedule[index][1], index, episode_step, metrics, action))
+        episode_step += 1
+        obs, _, done, info = env.step(action)
         if not done:
             continue
+        episode_step = 0
 
         episode = info["episode"]
         index = episode["seed_index"]
@@ -263,6 +304,15 @@ def main(argv=None):
                         help="PDR baselines: 'all', 'none', or a comma list of rule names")
     parser.add_argument("--checkpoint", action="append", default=[],
                         help="train.py checkpoint to evaluate (repeatable)")
+    parser.add_argument("--scenario", type=str, default=None,
+                        help="Scripted scenario JSON (ScenarioLoader schema) to evaluate on instead of "
+                             "the generated default config; seeds then only label repeats")
+    parser.add_argument("--decision-log", action="store_true",
+                        help="Also write decisions.csv: every decision's chosen rule, plus the "
+                             "action probabilities for checkpoints")
+    parser.add_argument("--unity-decision-log", action="store_true",
+                        help="Have Unity also write decision_log.csv (candidate counts, degenerate "
+                             "flags) into --out; needs a player built with -decisionlogdir support")
     parser.add_argument("--stochastic-policy", action="store_true",
                         help="Sample checkpoint actions instead of taking the argmax")
     parser.add_argument("--reward-spec", type=str, default=None,
@@ -303,14 +353,26 @@ def main(argv=None):
         no_graphics=args.no_graphics,
         decision_drain=not args.no_decision_drain,
         log_file=out / "Player.log",
+        extra_args=["-decisionlogdir", str(out.resolve())] if args.unity_decision_log else None,
     )
+    if args.scenario:
+        env.load_scenario(args.scenario)
+
     rows = []
+    decision_file = open(out / "decisions.csv", "w", newline="") if args.decision_log else None
+    decision_writer = None
+    if decision_file is not None:
+        decision_writer = csv.DictWriter(decision_file, fieldnames=DECISION_FIELDS)
+        decision_writer.writeheader()
     try:
         # Flush each progress line so it still shows up when stdout is piped or redirected.
-        rows = run_evaluation(env, policies, schedule, log=lambda line: print(line, flush=True))
+        rows = run_evaluation(env, policies, schedule, log=lambda line: print(line, flush=True),
+                              decision_writer=decision_writer)
     finally:
         env.close()
         write_csv(out / "episodes.csv", rows)
+        if decision_file is not None:
+            decision_file.close()
 
     summary = summarize(rows)
     write_csv(out / "summary.csv", summary)

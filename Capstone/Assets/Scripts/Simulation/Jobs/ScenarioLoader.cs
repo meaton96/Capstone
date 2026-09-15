@@ -92,6 +92,31 @@ namespace Assets.Scripts.Simulation.Jobs
             return (config, machinesByType => BuildJobs(json, machinesByType));
         }
 
+        /// <summary>
+        /// Same contract as <see cref="LoadDeferred"/>, from scenario JSON text rather than a file
+        /// (e.g. a scenario or generated variant sent by Python over EpisodeConfigChannel).
+        /// Parse errors are logged and return (null, null) instead of throwing, so a bad scenario
+        /// cannot abort an episode start.
+        /// </summary>
+        /// <param name="json">Scenario JSON (see class remarks for the schema).</param>
+        /// <param name="name">Fallback name, used for logging and when the JSON has no "name".</param>
+        public static (FJSSPConfig config,
+                        Func<Dictionary<MachineType, List<int>>, FJSSPJobDefinition[]> buildJobs)
+            LoadDeferredFromJson(string json, string name, int seedOverride = -1, int agvCountOverride = -1)
+        {
+            try
+            {
+                FJSSPConfig config = BuildConfig(json, name, seedOverride, agvCountOverride);
+                if (config == null) return (null, null);
+                return (config, machinesByType => BuildJobs(json, machinesByType));
+            }
+            catch (Exception ex)
+            {
+                SimLogger.LogError($"[ScenarioLoader] '{name}': invalid scenario JSON: {ex.Message}");
+                return (null, null);
+            }
+        }
+
         // ─────────────────────────────────────────────────────────────────────
         //  Phase 1: config (runs before SpawnFactory, no runtime machine IDs yet)
         // ─────────────────────────────────────────────────────────────────────

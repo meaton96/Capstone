@@ -33,6 +33,7 @@ import argparse
 import csv
 import math
 import os
+import shutil
 import sys
 import time
 from collections import deque
@@ -93,6 +94,7 @@ def build_env(args, ppo_cfg, run_dir: Path, reward):
             decision_drain=not args.no_decision_drain,
             log_dir=run_dir,
             train_seed=None if args.train_seed < 0 else args.train_seed,
+            parallel=not args.sequential_envs,
         )
     else:
         from env_wrappers.placeholder_env import VectorizedPlaceholderEnv
@@ -174,6 +176,12 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
         reward.archive(run_dir)
         print(f"\nReward: {reward.name} ({reward.spec['entry']})")
 
+    if args.train_seed >= 0:
+        # Same seed -> same initial weights and minibatch order, so runs that differ only in
+        # their reward start from an identical policy (GPU kernels can still add small noise).
+        torch.manual_seed(args.train_seed)
+        np.random.seed(args.train_seed)
+
     # ---- Initialize network ----
     net = SchedulingNetwork(
         encoder_cfg=EncoderConfig(),
@@ -190,6 +198,10 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
 
     # ---- Initialize environments ----
     vec_env, obs_shapes = build_env(args, ppo_cfg, run_dir, reward)
+    if args.unity and args.scenario:
+        vec_env.load_scenario_all(args.scenario)
+        shutil.copy2(args.scenario, run_dir / "scenario.json")
+        print(f"Scenario: {args.scenario}")
     obs, infos = vec_env.reset()
 
     buffer = RolloutBuffer(
@@ -212,6 +224,8 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
     start_time = time.time()
     reward_name = reward.name if reward is not None else None
     ckpt_path = run_dir / "checkpoint.pt"
+    # Untrained starting policy, as a reference point for evaluation.
+    save_checkpoint(run_dir / "checkpoint_init.pt", net, optimizer, 0, ppo_cfg, reward_name)
 
     backend = "Unity" if args.unity else "Placeholder"
     print(f"\nBackend: {backend}")
@@ -345,7 +359,8 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
                 )
 
             if args.save_every > 0 and update % args.save_every == 0:
-                save_checkpoint(ckpt_path, net, optimizer, global_step, ppo_cfg, reward_name)
+                save_checkpoint(run_dir / f"checkpoint_step{global_step}.pt", net, optimizer,
+                                global_step, ppo_cfg, reward_name)
     finally:
         # Save and shut Unity down even on Ctrl-C, so long runs keep their progress.
         save_checkpoint(ckpt_path, net, optimizer, global_step, ppo_cfg, reward_name)
@@ -363,6 +378,9 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
 
 
 if __name__ == "__main__":
+    # Line-buffer stdout so progress lines still appear when output is redirected to a file.
+    sys.stdout.reconfigure(line_buffering=True)
+
     parser = argparse.ArgumentParser(description="Train DRL Scheduling Agent")
     parser.add_argument("--total-timesteps", type=int, default=50_000)
     parser.add_argument("--num-envs", type=int, default=4)
@@ -392,7 +410,12 @@ if __name__ == "__main__":
                         help="Use ML-Agents' per-FixedUpdate stepping instead of one step per decision")
     parser.add_argument("--train-seed", type=int, default=0,
                         help="Seed for per-episode instance seeds, making training instances "
-                             "reproducible; -1 lets Unity continue its own random stream")
+                             "reproducible; -1 sends no seeds, so every episode replays the config's "
+                             "own seed (Unity rebuilds the factory each episode)")
+    parser.add_argument("--scenario", type=str, default=None,
+                        help="Scripted scenario JSON (ScenarioLoader schema) to replay every episode")
+    parser.add_argument("--sequential-envs", action="store_true",
+                        help="Step Unity envs one after another instead of concurrently")
     parser.add_argument("--base-worker-id", type=int, default=0,
                         help="Unity port offset (5005 + id); change to run several trainings at once")
 

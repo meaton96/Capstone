@@ -23,6 +23,7 @@ Side channel usage:
   info["telemetry"]              # per-episode events, attached when done=True
 """
 
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Dict, Iterable, Optional, Tuple
 
@@ -89,14 +90,23 @@ class UnitySchedulingEnv:
                  time_scale: float = 100.0, worker_id: int = 0,
                  timeout_wait: int = 300, no_graphics: bool = False,
                  decision_drain: bool = True, log_file: Optional[str] = None,
-                 env_id: int = 0, seed_rng: Optional[np.random.Generator] = None):
+                 env_id: int = 0, seed_rng: Optional[np.random.Generator] = None,
+                 capture_frame_rate: Optional[int] = 60,
+                 target_frame_rate: Optional[int] = -1,
+                 extra_args: Optional[list] = None):
         """
         @param reward_fn       Python reward function; None passes Unity's reward through.
+        @param capture_frame_rate  Engine capture frame rate, as mlagents-learn sends. Without it Unity
+                                   paces frames by wall-clock time and episodes simulated 2.9x slower
+                                   (A/B 2026-09-14, identical results). None leaves Unity's default.
+        @param target_frame_rate   Engine target frame rate (-1 = unlimited, as mlagents-learn sends).
+        @param extra_args          Additional player command-line arguments, e.g. ["-decisionlogdir", dir].
         @param decision_drain  Launch the player with -rldecisiondrain (one Python step per decision).
         @param log_file        Player log path; without it Unity logs to stdout.
         @param env_id          Index within a vectorized wrapper (passed to the reward context).
         @param seed_rng        If set, every episode gets a training seed drawn from this RNG
-                               (reproducible instances); None leaves seeding to Unity.
+                               (reproducible instances). None sends no seeds: Unity rebuilds the
+                               factory each episode, so every episode replays the config's seed.
         """
         self.engine_channel = EngineConfigurationChannel()
         self.config_channel = EpisodeConfigChannel()
@@ -110,6 +120,7 @@ class UnitySchedulingEnv:
             # Must be absolute: the player does not resolve relative paths against Python's
             # working directory, and exits at startup ("Unable to open log file") if it can't open it.
             additional_args += ["-logFile", str(Path(log_file).resolve())]
+        additional_args += [str(arg) for arg in (extra_args or [])]
 
         self.env = UnityEnvironment(
             file_name=file_name,
@@ -124,7 +135,11 @@ class UnitySchedulingEnv:
             no_graphics=no_graphics,
             additional_args=additional_args,
         )
-        self.engine_channel.set_configuration_parameters(time_scale=time_scale)
+        self.engine_channel.set_configuration_parameters(
+            time_scale=time_scale,
+            capture_frame_rate=capture_frame_rate,
+            target_frame_rate=target_frame_rate,
+        )
 
         self.env.reset()
         self.behavior_name = list(self.env.behavior_specs.keys())[0]
@@ -175,6 +190,15 @@ class UnitySchedulingEnv:
         config (whatever is set in the Inspector / HeadlessBatchRunner).
         """
         self._pending_config = config
+
+    def load_scenario(self, path):
+        """@brief Replay a scripted scenario JSON (ScenarioLoader schema) every episode.
+
+        @details Sent with the next reset(); Unity applies it from the next episode it starts
+        and keeps replaying it until another config or scenario is sent. The episode already
+        running when Python connects still uses the previous config.
+        """
+        self.send_config({"scenarioPath": str(Path(path).resolve())})
 
     def queue_seeds(self, seeds: Iterable[int], clear: bool = False):
         """@brief Queue instance seeds in Unity; each episode Unity starts consumes one.
@@ -314,41 +338,59 @@ class UnitySchedulingEnv:
 
 
 class VectorizedUnityEnv:
-    """Manages multiple Unity instances for parallel data collection (stepped sequentially)."""
+    """@brief Manages multiple Unity instances for parallel data collection.
+
+    @details Each Unity player is its own process, so envs are stepped concurrently from a
+    thread pool: the Python side of a step mostly waits on the player (the ML-Agents
+    communicator blocks on a pipe, releasing the GIL). Each env is only ever driven by one
+    thread at a time, and results keep env order. Construction stays sequential so env i
+    always gets worker_id base + i.
+    """
 
     def __init__(self, num_envs: int, file_name: Optional[str] = None,
                  reward_spec=None, time_scale: float = 100.0,
                  base_worker_id: int = 0, timeout_wait: int = 300,
                  no_graphics: bool = False, decision_drain: bool = True,
-                 log_dir: Optional[str] = None, train_seed: Optional[int] = None):
+                 log_dir: Optional[str] = None, train_seed: Optional[int] = None,
+                 parallel: bool = True):
         """
         @param reward_spec  Reward spec path or dict, or a @ref rewards.LoadedReward. Each env
                             gets its own reward instance. None passes Unity's reward through.
         @param log_dir      If set, instance i writes its player log to log_dir/Player-i.log.
         @param train_seed   If set, instance seeds come from per-env RNGs derived from it, so a
-                            run's training instances are reproducible. None leaves seeding to Unity.
+                            run's training instances are reproducible. None sends no seeds, so
+                            every episode replays the config's own seed.
+        @param parallel     Step and reset envs concurrently (default); False runs them one by one.
         """
         loaded = None
         if reward_spec is not None:
             loaded = reward_spec if isinstance(reward_spec, LoadedReward) else load_reward(reward_spec)
 
-        self.envs = [
-            UnitySchedulingEnv(
-                file_name=file_name,
-                reward_fn=loaded.build() if loaded is not None else None,
-                time_scale=time_scale,
-                worker_id=base_worker_id + i,
-                timeout_wait=timeout_wait,
-                no_graphics=no_graphics,
-                decision_drain=decision_drain,
-                log_file=None if log_dir is None else Path(log_dir) / f"Player-{i}.log",
-                env_id=i,
-                seed_rng=None if train_seed is None else np.random.default_rng([train_seed, i]),
-            )
-            for i in range(num_envs)
-        ]
+        self.envs = []
+        try:
+            for i in range(num_envs):
+                self.envs.append(UnitySchedulingEnv(
+                    file_name=file_name,
+                    reward_fn=loaded.build() if loaded is not None else None,
+                    time_scale=time_scale,
+                    worker_id=base_worker_id + i,
+                    timeout_wait=timeout_wait,
+                    no_graphics=no_graphics,
+                    decision_drain=decision_drain,
+                    log_file=None if log_dir is None else Path(log_dir) / f"Player-{i}.log",
+                    env_id=i,
+                    seed_rng=None if train_seed is None else np.random.default_rng([train_seed, i]),
+                ))
+        except BaseException:
+            # Don't leave already-launched players running when a later one fails to start.
+            for env in self.envs:
+                env.close()
+            raise
+
         self.num_envs = num_envs
         self.global_step = 0
+        self._pool = (ThreadPoolExecutor(max_workers=num_envs, thread_name_prefix="unity-env")
+                      if parallel and num_envs > 1 else None)
 
     def send_configs(self, configs: list):
         """Push one config per env. configs[i] applies to envs[i]."""
@@ -361,8 +403,13 @@ class VectorizedUnityEnv:
         for env in self.envs:
             env.send_config(config)
 
+    def load_scenario_all(self, path):
+        """Replay the same scripted scenario in every env (see UnitySchedulingEnv.load_scenario)."""
+        for env in self.envs:
+            env.load_scenario(path)
+
     def reset(self):
-        results = [env.reset() for env in self.envs]
+        results = self._map(lambda env: env.reset(), self.envs)
         return self._stack_obs(results), [{}] * self.num_envs
 
     def step(self, actions):
@@ -372,10 +419,9 @@ class VectorizedUnityEnv:
         observation already belongs to its next episode.
         """
         self.global_step += self.num_envs
-        results = []
-        for env, action in zip(self.envs, actions):
+        for env in self.envs:
             env.global_step = self.global_step
-            results.append(env.step(int(action)))
+        results = self._map(lambda env, action: env.step(int(action)), self.envs, actions)
         obs_list, rewards, dones, infos = zip(*results)
 
         return (
@@ -387,8 +433,16 @@ class VectorizedUnityEnv:
         )
 
     def close(self):
+        if self._pool is not None:
+            self._pool.shutdown(wait=True)
         for env in self.envs:
             env.close()
+
+    def _map(self, fn, *iterables) -> list:
+        """@brief Apply @p fn per env, concurrently when a pool exists, preserving env order."""
+        if self._pool is None:
+            return list(map(fn, *iterables))
+        return list(self._pool.map(fn, *iterables))
 
     @staticmethod
     def _stack_obs(obs_list):

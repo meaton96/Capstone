@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Unity.MLAgents.SideChannels;
 using Assets.Scripts.Simulation.Logging;
 using Assets.Scripts.Simulation.Types;
@@ -19,6 +20,10 @@ namespace Assets.Scripts.Simulation.Channels
     ///   var cfg = EpisodeConfigChannel.Instance.ConsumeConfig();
     ///   if (cfg != null) ApplyConfig(cfg);  // override current config
     ///   else             UseDefaultConfig(); // no Python override this episode
+    ///
+    /// A message with "scenarioPath" (a scenario JSON file) or "scenario" (the scenario JSON
+    /// object itself) instead carries a scripted ScenarioLoader scenario; FactoryOrchestrator
+    /// picks it up via ConsumeScenario() and replays it every episode.
     /// </summary>
     public class EpisodeConfigChannel : SideChannel
     {
@@ -27,7 +32,15 @@ namespace Assets.Scripts.Simulation.Channels
 
         public static EpisodeConfigChannel Instance { get; private set; }
 
+        /// <summary>A scripted scenario received from Python, parsed at the next episode start.</summary>
+        public class PendingScenario
+        {
+            public string Name;
+            public string Json;
+        }
+
         private FJSSPConfig _pendingConfig = null;
+        private PendingScenario _pendingScenario = null;
         private readonly object _lock = new object();
 
         public EpisodeConfigChannel()
@@ -46,6 +59,15 @@ namespace Assets.Scripts.Simulation.Channels
             string json = msg.ReadString();
             try
             {
+                JObject root = JObject.Parse(json);
+                if (root["scenarioPath"] != null || root["scenario"] != null)
+                {
+                    PendingScenario scenario = ReadScenario(root);
+                    lock (_lock) { _pendingScenario = scenario; }
+                    SimLogger.Low($"[ConfigChannel] Received scenario: {scenario.Name} ({scenario.Json.Length} chars)");
+                    return;
+                }
+
                 FJSSPConfig cfg = DeserialiseConfig(json);
                 lock (_lock) { _pendingConfig = cfg; }
                 SimLogger.Low($"[ConfigChannel] Received config: {cfg.Name} " +
@@ -71,6 +93,40 @@ namespace Assets.Scripts.Simulation.Channels
                 _pendingConfig = null;
                 return cfg;
             }
+        }
+
+        /// <summary>
+        /// Returns and clears the pending scripted scenario, or null if none was sent.
+        /// </summary>
+        public PendingScenario ConsumeScenario()
+        {
+            lock (_lock)
+            {
+                var scenario = _pendingScenario;
+                _pendingScenario = null;
+                return scenario;
+            }
+        }
+
+        private static PendingScenario ReadScenario(JObject root)
+        {
+            if (root["scenario"] is JObject inline)
+            {
+                return new PendingScenario
+                {
+                    Name = inline["name"]?.Value<string>() ?? "python_scenario",
+                    Json = inline.ToString(Formatting.None),
+                };
+            }
+
+            string path = root["scenarioPath"].Value<string>();
+            if (!File.Exists(path))
+                throw new FileNotFoundException($"Scenario file not found: {path}");
+            return new PendingScenario
+            {
+                Name = Path.GetFileNameWithoutExtension(path),
+                Json = File.ReadAllText(path),
+            };
         }
 
         // ── JSON deserialisation ─────────────────────────────────────────────

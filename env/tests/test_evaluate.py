@@ -8,15 +8,20 @@ cd env && python -m pytest tests/test_evaluate.py -v
 @endcode
 """
 
+import csv
+import io
 import os
 import sys
 
+import numpy as np
 import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config import PDR_ACTIONS
-from evaluate import ConstantPolicy, parse_seeds, resolve_pdr_names, run_evaluation, summarize
+from evaluate import (
+    DECISION_FIELDS, ConstantPolicy, decision_row, parse_seeds, resolve_pdr_names, run_evaluation, summarize,
+)
 from rewards import MetricsSnapshot
 
 
@@ -94,6 +99,38 @@ def test_run_evaluation_attributes_episodes_to_policies():
         ("A", 7, 73), ("B", 7, 75), ("A", 8, 83), ("B", 8, 85),
     ]
     assert [r["seed_index"] for r in rows] == [0, 1, 2, 3]
+
+
+def test_decision_log_records_every_decision_of_scheduled_episodes():
+    """@brief Each scored decision gets one row (step numbering restarts per episode); the
+    discarded startup episode is not logged."""
+    policies = [ConstantPolicy(3, "A"), ConstantPolicy(5, "B")]
+    buffer = io.StringIO()
+    writer = csv.DictWriter(buffer, fieldnames=DECISION_FIELDS)
+    writer.writeheader()
+
+    run_evaluation(FakeEnv(length=3), policies, [(0, 7), (1, 7)], log=lambda *_: None,
+                   decision_writer=writer)
+
+    rows = list(csv.DictReader(io.StringIO(buffer.getvalue())))
+    assert [(r["policy"], r["step"], r["action"], r["rule"]) for r in rows] == [
+        ("A", str(step), "3", PDR_ACTIONS[3]) for step in range(3)
+    ] + [("B", str(step), "5", PDR_ACTIONS[5]) for step in range(3)]
+    assert all(r["entropy"] == "" for r in rows)   # constant rules have no action distribution
+
+
+def test_decision_row_includes_checkpoint_probabilities():
+    class ProbabilisticPolicy:
+        kind, name = "checkpoint", "P"
+        last_probs = np.array([0.7, 0.3] + [0.0] * (len(PDR_ACTIONS) - 2))
+
+    metrics = MetricsSnapshot.from_dict({"sim_time": 12.5, "wip": 3})
+    row = decision_row(ProbabilisticPolicy(), seed=1, seed_index=0, step=4, metrics=metrics, action=0)
+
+    assert row["chosen_prob"] == 0.7
+    assert row[f"p_{PDR_ACTIONS[1]}"] == 0.3
+    assert row["wip"] == 3 and row["rule"] == PDR_ACTIONS[0]
+    assert row["entropy"] == pytest.approx(-(0.7 * np.log(0.7) + 0.3 * np.log(0.3)), abs=1e-4)
 
 
 def test_summarize_gaps_against_best_pdr_per_seed():

@@ -38,7 +38,14 @@ namespace Assets.Scripts.Simulation.AGV
         public void InitializeFleet(FJSSPConfig config)
         {
             int fleetSize = config.AGVCount;
-            foreach (var agv in fleet) Destroy(agv.gameObject);
+            // Deactivate before Destroy (which only lands at the end of the frame) so old units
+            // can't tick or touch the rebuilt traffic graph when respawned mid-FixedUpdate.
+            foreach (var agv in fleet)
+            {
+                if (agv == null) continue;
+                agv.gameObject.SetActive(false);
+                Destroy(agv.gameObject);
+            }
             fleet.Clear();
 
             parkingPositions = new Vector3[fleetSize];
@@ -124,8 +131,9 @@ namespace Assets.Scripts.Simulation.AGV
         {
             foreach (var agv in fleet)
             {
-                if (agv != null)
-                    Destroy(agv.gameObject);
+                if (agv == null) continue;
+                agv.gameObject.SetActive(false);   // stop ticking now; Destroy lands at frame end
+                Destroy(agv.gameObject);
             }
             fleet.Clear();
         }
