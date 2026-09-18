@@ -1,0 +1,153 @@
+{
+  "_comment": "8 jobs arrive at t=0, quick feeder op on any Mill, then ALL converge on the single Weld[1] machine with durations spread over (10.0, 90.0). Isolates dispatch-order effects (SelectJob) -- no routing choice exists here.",
+  "name": "single_bottleneck",
+  "seed": 42,
+  "agvCount": 7,
+  "machineTypeLayout": [
+    "Mill",
+    "Mill",
+    "Mill",
+    "Lathe",
+    "Lathe",
+    "Lathe",
+    "Weld",
+    "Weld",
+    "Weld",
+    "Inspect",
+    "Inspect",
+    "Inspect",
+    "Assemble",
+    "Assemble",
+    "Assemble"
+  ],
+  "jobs": [
+    {
+      "id": 0,
+      "arrivalTime": 0.0,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 20.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 61.15
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "arrivalTime": 0.0,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 20.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 12.0
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "arrivalTime": 0.0,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 20.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 32.0
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "arrivalTime": 0.0,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 20.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 27.86
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "arrivalTime": 0.0,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 20.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 68.92
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "arrivalTime": 0.0,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 20.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 64.14
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "arrivalTime": 0.0,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 20.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 81.37
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "arrivalTime": 0.0,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 20.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 16.96
+        }
+      ]
+    }
+  ]
+}

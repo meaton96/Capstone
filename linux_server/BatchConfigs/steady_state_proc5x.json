@@ -1,0 +1,26 @@
+{
+  "_comment": "5x proc-time multiplier at the locked slack lambda (0.008, agv07_single) -- interpolates between the proctime_multiplier_dial.json 4x (27-33% conventional-rule spread, MMUR censoring 75%/100%) and 6x (30-41% spread, MMUR censoring 94%/100%) results, aiming for a point with strong differentiation while LRT_MMUR doesn't hit total 100% collapse. minProcTime/maxProcTime scaled 5x from the 1x baseline (15/90 -> 75/450, mean ~262.5s, same min/max ratio preserved). Same 15000s duration as the rest of the proctime dial sweep for direct comparability. Run with --repeats 3 for real statistics (this is a locked config, not a fast dial-in pass). REQUIRES --baselinedrain true.",
+  "configs": [
+    {
+      "name": "agv07_l008_proc5x",
+      "seed": 42,
+      "jobCount": 10,
+      "machinesPerType": 3,
+      "machineTypes": ["Mill", "Lathe", "Weld", "Inspect", "Assemble"],
+      "minProcTime": 75.0,
+      "maxProcTime": 450.0,
+      "minOpsPerJob": 5,
+      "maxOpsPerJob": 8,
+      "agvCount": 7,
+      "throughputTimingWindow": 60.0,
+      "parkingMethod": "single",
+      "preDispatchingMethod": "fixed",
+      "stochastic": {
+        "dynamicArrivalsEnabled": true,
+        "arrivalLambda": 0.008,
+        "dynamicJobCap": 0,
+        "episodeDurationSeconds": 15000.0
+      }
+    }
+  ]
+}

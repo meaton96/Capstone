@@ -192,11 +192,27 @@ namespace Assets.Scripts.Simulation
                     // Job stays InTransit — only the destination changes, so StateEntryTime
                     // (and the TimeInTransit bucket it feeds) must NOT reset here.
                     transitJob.TargetMachineId = alternate.MachineId;
-                    // AssignedAgvId preserved — the AGV still owns this job
-
-                    agv.RedirectDropoff(alternate.GetDropoffPosition(), alternate, transitJob.Visual);
-                    SimLogger.Medium($"[Failure] AGV {agv.AgvId} carrying job {agvJobId} " +
-                                  $"redirected: machine {machineId} failed → machine {alternate.MachineId}.");
+                    // AssignedAgvId preserved — the AGV still owns this job, UNLESS the
+                    // redirect itself fails below (no route to the new target), in which case
+                    // RedirectDropoff has already reset the AGV and it no longer owns this
+                    // job — leaving TargetMachineId pointed at an alternate machine nobody is
+                    // delivering to and the job stuck InTransit forever (it inflates that
+                    // machine's GetMachineLoad() for the rest of the episode too). Handle that
+                    // failure the same way the "no alternate" branch below does.
+                    bool redirected = agv.RedirectDropoff(alternate.GetDropoffPosition(), alternate, transitJob.Visual);
+                    if (redirected)
+                    {
+                        SimLogger.Medium($"[Failure] AGV {agv.AgvId} carrying job {agvJobId} " +
+                                      $"redirected: machine {machineId} failed → machine {alternate.MachineId}.");
+                    }
+                    else
+                    {
+                        transitJob.TransitionTo(JobState.NeedsRouting, _simTimeRef);
+                        transitJob.TargetMachineId = -1;
+                        transitJob.AssignedAgvId = -1;
+                        SimLogger.Medium($"[Failure] AGV {agv.AgvId} carrying job {agvJobId}: " +
+                                      $"redirect to machine {alternate.MachineId} failed (no route), job re-routed.");
+                    }
                 }
                 else
                 {

@@ -438,8 +438,14 @@ namespace Assets.Scripts.Simulation.Machines
 
         // ── Update ────────────────────────────────────────────────────────────
 
-        /// @brief Unity Update loop. Ticks all time-based countdowns each frame.
-        private void Update()
+        /// @brief Unity FixedUpdate loop. Ticks all time-based countdowns each fixed step.
+        ///
+        /// @details Runs on FixedUpdate (constant Time.fixedDeltaTime) rather than Update
+        /// (variable, real-wall-clock-dependent Time.deltaTime) so processing/failure/repair
+        /// timing is a pure function of tick count — reproducible for a given seed regardless
+        /// of real-world CPU scheduling during any one tick. Mirrors FactoryOrchestrator's
+        /// own SimTime clock, which ticks on the same schedule.
+        private void FixedUpdate()
         {
             TickTTF();
             TickProcessing();
@@ -457,12 +463,12 @@ namespace Assets.Scripts.Simulation.Machines
         {
             if (HealthState != MachineHealthState.Operational) return;
 
-            _ttfCountdown -= Time.deltaTime;
+            _ttfCountdown -= Time.fixedDeltaTime;
             if (_ttfCountdown > 0f) return;
 
             // Clamp to prevent multiple triggers if SimulationBridge is slow to poll.
             _ttfCountdown = float.MaxValue;
-            _ageSinceLastRepair += Time.deltaTime;
+            _ageSinceLastRepair += Time.fixedDeltaTime;
 
             // Sample repair duration now so the observation can read it in the same frame.
             SampledRepairDuration = StochasticEventManager.Instance != null
@@ -493,7 +499,7 @@ namespace Assets.Scripts.Simulation.Machines
             if (HealthState != MachineHealthState.Operational) return;
             if (IsIdle || FinishedFlag) return;
 
-            remainingTime -= Time.deltaTime;
+            remainingTime -= Time.fixedDeltaTime;
 
             if (visualLayer != null && remainingTime > 0f)
                 visualLayer.UpdateProgress(1f - (remainingTime / Mathf.Max(totalDuration, 0.001f)));
@@ -517,7 +523,7 @@ namespace Assets.Scripts.Simulation.Machines
         {
             if (HealthState != MachineHealthState.Repairing) return;
 
-            RemainingRepairTime -= Time.deltaTime;
+            RemainingRepairTime -= Time.fixedDeltaTime;
 
             if (visualLayer != null && SampledRepairDuration > 0f)
             {

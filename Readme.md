@@ -115,6 +115,23 @@ The simplest method to verify the system is by downloading the standalone build.
 
 ### B. Python Environment Testing
 To verify the ML-Agents environment and the Python-side logic:
+
+**On Linux (native, no Docker):**
+1. Clone the repository.
+2. Create a virtualenv with **Python 3.10.1–3.10.12** — `mlagents==1.1.0` pins this exact range, anything newer (including later 3.10.x patches) will fail to resolve. `pyenv install 3.10.12` if you don't have a matching interpreter.
+   ```bash
+   python3.10 -m venv .venv
+   source .venv/bin/activate
+   pip install --upgrade pip
+   pip install -e ./env
+   ```
+3. Execute the test suite:
+   ```bash
+   pytest env
+   ```
+   *Note: as of this writing `env/tests/test_architecture.py` and `env/tests/test_channels.py` have pre-existing issues unrelated to Docker vs. native (a stale `env.channels` import, and a module-level Unity-launch script masquerading as a pytest test) — see the connectivity smoke test below for the actually-verified round-trip check.*
+
+**On Windows/macOS (or Linux via Docker):**
 1. Clone the repository.
 2. Navigate to the environment folder.
 3. Build and start the containers: `docker-compose up --build` (this will take several minutes)
@@ -127,7 +144,15 @@ To verify the ML-Agents environment and the Python-side logic:
 
 This confirms the "Round Trip" data flow: Python starts the Unity engine, observations are received, actions are sent back, and rewards are processed.
 
-Run the following commands:
+**On Linux (native, no Docker):**
+```bash
+chmod +x linux_server/capstone.x86_64
+source .venv/bin/activate
+
+mlagents-learn smoke_test.yaml --env=linux_server/capstone.x86_64 --run-id=smoke01 --no-graphics
+```
+
+**On Windows/macOS (or Linux via Docker):**
 ```bash
     docker exec -it unity-ml-agents-test chmod +x linux_server/capstone.x86_64
 
@@ -138,5 +163,7 @@ Success Criteria: The test is successful if the terminal displays the Unity logo
 Control+C once satisfied (entire training loop takes ~1.5hours)
 
 (might be longer on slower cpu)
+
+TensorBoard (either setup): `tensorboard --logdir results` then open `http://localhost:6006`.
 
 

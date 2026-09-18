@@ -111,6 +111,24 @@ namespace Assets.Scripts.Simulation.Types
         ///          (e.g. 2× gives a 3× total workload per episode).
         public int DynamicJobCap = 0;
 
+        /// @brief Enable burst (compound-Poisson) arrivals: each arrival event injects a
+        ///        cluster of jobs simultaneously instead of exactly one.
+        ///
+        /// @details Models e.g. a truck dropping off a multi-item order at the same
+        ///          sim-time. Independent of the event RATE (still governed by
+        ///          ArrivalLambda) — this only controls how many jobs land per event.
+        ///          When false, every arrival event injects exactly 1 job (unchanged
+        ///          behavior).
+        public bool BurstArrivalsEnabled = false;
+
+        /// @brief Mean number of jobs injected per arrival event when BurstArrivalsEnabled.
+        ///
+        /// @details Must be >= 1.0. Burst size B = 1 + Poisson(BurstSizeMean - 1), so at
+        ///          least one job always arrives and any additional jobs on top are
+        ///          Poisson-distributed. BurstSizeMean=1.0 degenerates to exactly 1 job
+        ///          per event, identical to BurstArrivalsEnabled=false.
+        public float BurstSizeMean = 1.0f;
+
         // ── Fixed-duration (steady-state) episodes ──
 
         /// @brief Sim-seconds after which the episode ends regardless of job completion, 0 = disabled.
@@ -124,6 +142,22 @@ namespace Assets.Scripts.Simulation.Types
         ///          near t=0 (warm-up) AND near the episode end (right-censored, incomplete data)
         ///          when computing steady-state statistics.
         public double EpisodeDurationSeconds = 0.0;
+
+        // ── Warm-start (mid-cycle) episodes ──
+
+        /// @brief Sim-seconds run under the config's dispatchingRule before the RL agent takes
+        ///        over, 0 = disabled (agent controls from t=0, the default).
+        ///
+        /// @details Lets an episode "start" mid-scenario with realistic WIP already built up
+        ///          (machines busy, AGVs in transit, queues populated) instead of an empty
+        ///          floor, without any extra Python round-trips during the warm-up window —
+        ///          decisions in [0, WarmupSeconds) are resolved the same way BaselineDrainMode
+        ///          resolves them (see FactoryOrchestrator.InWarmup). The agent's first real
+        ///          decision, first observation, and first reward baseline all originate at
+        ///          SimTime=WarmupSeconds, so no reward-accounting changes are needed on the
+        ///          Python side — env/env_wrappers/unity_env.py seeds its reward baseline from
+        ///          whatever the first decision observation actually is.
+        public double WarmupSeconds = 0.0;
 
         // ── Convenience ──
 
@@ -145,6 +179,7 @@ namespace Assets.Scripts.Simulation.Types
                 if (MachineFailuresEnabled) parts.Add("mf");
                 if (AGVFailuresEnabled) parts.Add("agv");
                 if (DynamicArrivalsEnabled) parts.Add("arr");
+                if (DynamicArrivalsEnabled && BurstArrivalsEnabled) parts.Add("burst");
                 return string.Join("+", parts);
             }
         }

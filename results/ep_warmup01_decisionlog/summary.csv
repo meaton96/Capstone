@@ -1,0 +1,2 @@
+policy,kind,episodes,makespan_mean,makespan_std,total_flow_mean,mean_flow_time_mean,deadlocks,timeouts
+ckpt:ep_warmup01/checkpoint,checkpoint,1,11337.5556640625,0.0,213042.71875,556.2473074412533,0,0

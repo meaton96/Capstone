@@ -213,7 +213,9 @@ namespace Assets.Scripts.Simulation
         /// zone reservations and begun returning to parking; this owns the JobData side —
         /// clearing the job's link to that AGV and, if the job was physically committed to it
         /// (WaitingForPickup or InTransit), returning it to NeedsRouting so a fresh AGV can be
-        /// assigned. A job that was only pre-dispatched (still Processing at its source
+        /// assigned — unless the job was on its final exit trip (IsLastOperation), which has no
+        /// next machine to route to, so it goes back to WaitingForPickup to retry the exit
+        /// pickup instead. A job that was only pre-dispatched (still Processing at its source
         /// machine, never picked up) is left alone — only its PreDispatchedAgvId claim is
         /// cleared, mirroring how HandleZoneStall itself distinguishes the two cases.
         /// </summary>
@@ -230,11 +232,29 @@ namespace Assets.Scripts.Simulation
 
                     if (job.State == JobState.WaitingForPickup || job.State == JobState.InTransit)
                     {
-                        job.TransitionTo(JobState.NeedsRouting, _simTimeRef);
-                        job.TargetMachineId = -1;
-                        job.AssignedAgvId = -1;
-                        SimLogger.Medium($"[FlagHarvester] Job {job.JobId} returned to NeedsRouting — " +
-                                          $"AGV {agv.AgvId} stalled on a traffic-zone reservation.");
+                        if (job.IsLastOperation)
+                        {
+                            // Final exit trip (TargetMachineId already -1, same convention as
+                            // HarvestMachineFlags' completion path above) -- there is no next
+                            // operation to route to. Sending this to NeedsRouting would make
+                            // DecisionCoordinator.FindNextDecision index
+                            // EligibleMachinesPerOp[CurrentOpIndex] past its last entry
+                            // (IndexOutOfRangeException, thrown every frame thereafter since
+                            // the job never leaves this state on its own). Retry the exit
+                            // pickup instead.
+                            job.TransitionTo(JobState.WaitingForPickup, _simTimeRef);
+                            job.AssignedAgvId = -1;
+                            SimLogger.Medium($"[FlagHarvester] Job {job.JobId} returned to WaitingForPickup " +
+                                              $"(exit trip) — AGV {agv.AgvId} stalled on a traffic-zone reservation.");
+                        }
+                        else
+                        {
+                            job.TransitionTo(JobState.NeedsRouting, _simTimeRef);
+                            job.TargetMachineId = -1;
+                            job.AssignedAgvId = -1;
+                            SimLogger.Medium($"[FlagHarvester] Job {job.JobId} returned to NeedsRouting — " +
+                                              $"AGV {agv.AgvId} stalled on a traffic-zone reservation.");
+                        }
                     }
                 }
 

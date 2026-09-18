@@ -72,8 +72,12 @@ class RolloutBuffer:
         self.rewards = np.zeros((rollout_length, num_envs), dtype=np.float32)
         ## @brief State-value estimates V(s) at collection time.
         self.values = np.zeros((rollout_length, num_envs), dtype=np.float32)
-        ## @brief Done flags (1.0 = episode ended at this step).
+        ## @brief Done flags (1.0 = episode ended at this step, terminated or truncated).
         self.dones = np.zeros((rollout_length, num_envs), dtype=np.float32)
+        ## @brief Value-bootstrap correction for a step whose episode ended by truncation (a
+        ##        deliberate time-limit cutoff) rather than a real terminal — see compute_gae.
+        ##        0 everywhere else.
+        self.bootstrap_values = np.zeros((rollout_length, num_envs), dtype=np.float32)
 
         # ---- Computed after rollout ----
 
@@ -83,7 +87,7 @@ class RolloutBuffer:
         ##        @ref compute_gae.
         self.returns = np.zeros((rollout_length, num_envs), dtype=np.float32)
 
-    def add(self, obs: dict, actions, log_probs, rewards, values, dones):
+    def add(self, obs: dict, actions, log_probs, rewards, values, dones, bootstrap_values=None):
         """@brief Store one timestep of data from all parallel environments.
 
         @param obs        Observation dict with arrays of shape (num_envs, ...).
@@ -91,7 +95,13 @@ class RolloutBuffer:
         @param log_probs  Log-probabilities, shape (num_envs,).
         @param rewards    Rewards, shape (num_envs,).
         @param values     Value estimates, shape (num_envs,).
-        @param dones      Done flags, shape (num_envs,).
+        @param dones      Done flags, shape (num_envs,) — set for both terminated and truncated
+                          episode ends (either way the next stored observation is a new episode).
+        @param bootstrap_values  Per-env value estimate V(terminal_obs) (shape (num_envs,)),
+                                 meaningful only where this step's episode just ended by
+                                 truncation (see train.py); compute_gae discounts and applies it
+                                 there and ignores it everywhere else, including real terminations,
+                                 so 0 (the default) is a safe filler for every other case.
         """
         for key in self.obs_buffers:
             self.obs_buffers[key][self.pos] = obs[key]
@@ -100,9 +110,10 @@ class RolloutBuffer:
         self.rewards[self.pos] = rewards
         self.values[self.pos] = values
         self.dones[self.pos] = dones
+        self.bootstrap_values[self.pos] = 0.0 if bootstrap_values is None else bootstrap_values
         self.pos += 1
 
-    def compute_gae(self, last_values: np.ndarray, last_dones: np.ndarray):
+    def compute_gae(self, last_values: np.ndarray):
         """@brief Compute GAE advantages and discounted returns.
 
         @details
@@ -111,21 +122,30 @@ class RolloutBuffer:
         weighted advantage estimates.  After completion, @ref returns
         is set to @ref advantages + @ref values.
 
-        @param last_values  Bootstrap values V(s_{T+1}), shape (num_envs,).
-        @param last_dones   Done flags at T+1, shape (num_envs,).
+        @c dones[t] is the done flag returned by the step taken from
+        observation t, so when it is set the next stored observation
+        already belongs to a new episode and must not be bootstrapped from.
+
+        A step whose episode ended by truncation (a deliberate time-limit cutoff, not a real
+        terminal) still needs a bootstrap value, but @c self.values[t+1] would be the value of
+        the wrong state — the *next* episode's first observation, since Unity has already
+        auto-reset by the time the wrapper returns. @ref bootstrap_values[t] carries V(terminal_obs)
+        for exactly those steps (0 elsewhere, including real terminations) and substitutes for the
+        zeroed-out @c next_values term there, the standard TimeLimit-bootstrap correction (as in
+        SB3/CleanRL) generalized to an auto-resetting env.
+
+        @param last_values  Bootstrap values V(s_T) for the observation that
+                            follows the final stored step, shape (num_envs,).
         """
         gae = np.zeros(self.num_envs, dtype=np.float32)
         for t in reversed(range(self.rollout_length)):
-            if t == self.rollout_length - 1:
-                next_values = last_values
-                next_nonterminal = 1.0 - last_dones
-            else:
-                next_values = self.values[t + 1]
-                next_nonterminal = 1.0 - self.dones[t + 1]
+            next_values = last_values if t == self.rollout_length - 1 else self.values[t + 1]
+            next_nonterminal = 1.0 - self.dones[t]
 
             delta = (
                 self.rewards[t]
                 + self.gamma * next_values * next_nonterminal
+                + self.gamma * self.bootstrap_values[t]
                 - self.values[t]
             )
             gae = delta + self.gamma * self.gae_lambda * next_nonterminal * gae

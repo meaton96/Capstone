@@ -32,8 +32,45 @@ namespace Assets.Scripts.Simulation
         /// </summary>
         public bool BaselineDrainMode = false;
 
+        /// <summary>
+        /// When true, RL decisions are drained within a single FixedUpdate tick by manually
+        /// forcing one <see cref="Academy.EnvironmentStep"/> call per ready decision, instead
+        /// of relying on ML-Agents' default one-step-per-FixedUpdate automatic cadence. This
+        /// is the neural-policy analogue of <see cref="BaselineDrainMode"/> -- it removes the
+        /// same engine-imposed decision-per-tick throttle, but for a live agent instead of a
+        /// fixed heuristic, so each drained decision pays a real policy round-trip (forward
+        /// pass, and a full RPC hop while training) rather than an instant lookup.
+        ///
+        /// Toggle this off if it destabilizes training/inference or blows the per-tick time
+        /// budget -- it's a config flag specifically so it can be A/B'd without a code change.
+        /// Also settable via the "-rldecisiondrain" CLI flag (read in Awake, since
+        /// HeadlessBatchRunner -- and its own CLI parsing -- disables itself whenever the
+        /// ML-Agents communicator is on, i.e. exactly when this flag matters).
+        /// Mutually exclusive with BaselineDrainMode; if both are set, BaselineDrainMode wins.
+        /// </summary>
+        public bool RLDecisionDrainMode = false;
+
+        /// <summary>Last value applied to Academy.AutomaticSteppingEnabled, so
+        /// SyncAcademyManualStepping only touches it when RLDecisionDrainMode actually changes.</summary>
+        private bool? _lastSyncedAutomaticStepping;
+
         private int _baselineRuleIndex;
         private bool _baselineRuleIsRandom;
+
+        // ── Per-episode wall-clock profiling (see LogEpisodeTiming) ─────────────
+        private int _episodeIndex;
+        private double _episodeWallStart;
+        private int _episodeTicks;
+        private int _episodeEnvSteps;
+        private int _episodeGcStart;
+        private readonly System.Diagnostics.Stopwatch _envStepWatch = new System.Diagnostics.Stopwatch();
+
+        // ── Per-episode instance seed from EpisodeSeedChannel; -1 when none was queued ─────
+        private int _episodeSeed = -1;
+        private int _episodeSeedIndex = -1;
+
+        // ── Optional decision_log.csv in RL mode (-decisionlogdir <dir>); null when off ─────
+        private string _decisionLogDir;
         /// <summary>
         /// Singleton instance of the FactoryOrchestrator.
         /// </summary>
@@ -79,9 +116,26 @@ namespace Assets.Scripts.Simulation
         public bool AutoStartOnPlay = false;
 
         /// <summary>
+        /// Rebuild the factory (floor, traffic zones, AGV fleet) at the start of every episode, as
+        /// HeadlessBatchRunner does before each run. Without it, consecutive episodes share AGV
+        /// positions/state and machine state, so the same instance plays out differently depending
+        /// on the previous episode. Forced on when an ML-Agents communicator is connected.
+        /// SpawnFactory re-seeds UnityEngine.Random with the config seed, so episodes without a
+        /// Python-queued seed (EpisodeSeedChannel) all replay that seed's instance.
+        /// </summary>
+        public bool RespawnFactoryEachEpisode = false;
+
+        /// <summary>
         /// Pre-built job definitions used for benchmark scenarios. Set before SpawnFactory.
         /// </summary>
         private FJSSPJobDefinition[] prebuiltJobs;
+
+        /// <summary>
+        /// Job builder for a scripted scenario sent by Python (EpisodeConfigChannel). Unlike
+        /// prebuiltJobs, which applies to a single episode, this re-runs every episode until
+        /// Python sends a different config, so training can replay the scenario.
+        /// </summary>
+        private Func<Dictionary<MachineType, List<int>>, FJSSPJobDefinition[]> _scenarioJobBuilder;
 
         /// <summary>
         /// The current simulation configuration loaded for this episode.
@@ -114,19 +168,21 @@ namespace Assets.Scripts.Simulation
         public int DecisionCount => decisionCount;
 
         /// <summary>
-        /// Cumulative reward accumulated during the current episode.
+        /// Live per-decision log (routing + dispatch), cleared each episode and copied onto
+        /// the EpisodeRecord at FinaliseEpisode. See DecisionRecord for schema.
         /// </summary>
-        private double totalReward;
+        private readonly List<DecisionRecord> _decisionLog = new List<DecisionRecord>();
 
         /// <summary>
-        /// Makespan value from the previous step, used for reward calculation.
+        /// Elapsed simulation time, accumulated once per FixedUpdate tick by a constant
+        /// Time.fixedDeltaTime instead of read from Time.time. Time.time is real wall-clock
+        /// time scaled by Time.timeScale — under headless batch runs (multiple rule processes
+        /// competing for CPU, see run_generated.sh) its per-frame granularity is at the mercy
+        /// of OS scheduling and isn't reproducible run-to-run even for an identical seed.
+        /// Accumulating a fixed per-tick increment instead makes SimTime a pure function of
+        /// tick count, independent of how long each tick actually took in wall-clock terms.
         /// </summary>
-        private double previousMakespan;
-
-        /// <summary>
-        /// Simulation start time, used to compute elapsed simulation time.
-        /// </summary>
-        private float startTime;
+        private double _simTime;
 
         /// <summary>
         /// Whether a simulation episode is currently running.
@@ -141,7 +197,7 @@ namespace Assets.Scripts.Simulation
         /// <summary>
         /// Elapsed simulation time since episode start.
         /// </summary>
-        public double SimTime => Time.time - startTime;
+        public double SimTime => _simTime;
 
         /// <summary>
         /// The current FJSSP configuration for this episode.
@@ -194,6 +250,17 @@ namespace Assets.Scripts.Simulation
         /// Manages decision requests and coordinates dispatch/routing decisions.
         /// </summary>
         private DecisionCoordinator _decisions;
+
+        // ── Scripted arrivals (jobs with an explicit ArrivalTime > 0 in the initial batch,
+        //    from a hand-crafted scenario or a jittered generated batch) ───────────────────
+
+        /// <summary>
+        /// Jobs from the initial batch (prebuilt or generated) with ArrivalTime > 0, held
+        /// back from JobStore.Initialize and injected individually as SimTime reaches each
+        /// one's arrival time. Sorted ascending by ArrivalTime; TickScriptedArrivals only
+        /// ever needs to look at the front of the list.
+        /// </summary>
+        private readonly List<FJSSPJobDefinition> _pendingScriptedArrivals = new List<FJSSPJobDefinition>();
 
         // ── Poisson arrival clock ─────────────────────────────────────────────
 
@@ -277,19 +344,109 @@ namespace Assets.Scripts.Simulation
         private double _deadlockSimTime = -1.0;
 
         /// <summary>
+        /// Set when the episode ends because it hit its deliberate steady-state time cap
+        /// (Stochastic.EpisodeDurationSeconds) with jobs still in flight — a cutoff, not a real
+        /// failure. Reported to Python via RewardMetrics so RL training bootstraps the value
+        /// function past it instead of treating it like a real terminal.
+        /// </summary>
+        private bool _truncatedByTimeLimit;
+
+        /// <summary>
+        /// SimTime at which the warm-up window (Stochastic.WarmupSeconds) ends and the RL agent
+        /// takes over. 0 (the default) means no warm-up -- the agent controls from t=0, unchanged
+        /// from every episode before this field existed.
+        /// </summary>
+        private double _warmupEndSimTime;
+
+        /// <summary>
+        /// True while SimTime is still inside the warm-up window. Decisions in this window are
+        /// resolved by <see cref="DrainHeuristicDecisions"/> exactly like BaselineDrainMode --
+        /// the fixed rule already resolved into _baselineRuleIndex/_baselineRuleIsRandom every
+        /// episode (see StartEpisode) drives the floor to a realistic mid-scenario state (busy
+        /// machines, in-transit AGVs, populated queues) with no Python round-trips, before the
+        /// agent's first real decision hands off from that state.
+        /// </summary>
+        private bool InWarmup => SimTime < _warmupEndSimTime;
+
+        /// <summary>
+        /// True from StartEpisode() until the tick FixedUpdate observes InWarmup go false --
+        /// a one-shot latch so the decisionCount/_decisionLog reset at hand-off fires exactly
+        /// once per episode instead of every tick after warm-up ends.
+        /// </summary>
+        private bool _warmupActive;
+
+        /// <summary>
         /// Singleton initialization. Destroys duplicate instances if one already exists.
         /// </summary>
         private void Awake()
         {
             if (Instance != null) { Destroy(this); return; }
             Instance = this;
+
+            if (GetCLIArg("-rldecisiondrain") != null)
+            {
+                RLDecisionDrainMode = true;
+                SimLogger.Low("[Orchestrator] RLDecisionDrainMode ENABLED via CLI flag.");
+            }
+
+            // HeadlessBatchRunner (which normally writes decision logs) disables itself under
+            // ML-Agents, so RL evaluation opts in here to get the same per-decision CSV.
+            _decisionLogDir = GetCLIArg("-decisionlogdir");
+            if (!string.IsNullOrEmpty(_decisionLogDir))
+            {
+                ResultsLogger.SetSubdirectory(_decisionLogDir);
+                SimLogger.Low($"[Orchestrator] Writing decision_log.csv to {ResultsLogger.OutputDirectory}.");
+            }
+            if (RLDecisionDrainMode && BaselineDrainMode)
+                SimLogger.LogWarning("[Orchestrator] Both RLDecisionDrainMode and BaselineDrainMode " +
+                                      "are set -- BaselineDrainMode takes priority and RL drain will " +
+                                      "be ignored this run.");
+        }
+
+        /// <summary>
+        /// Minimal CLI flag lookup, mirroring HeadlessBatchRunner.GetCLIArg. Duplicated rather
+        /// than shared because HeadlessBatchRunner disables itself whenever the ML-Agents
+        /// communicator is on -- exactly the case RLDecisionDrainMode needs to be read in.
+        /// </summary>
+        private static string GetCLIArg(string key)
+        {
+            string[] args = Environment.GetCommandLineArgs();
+            for (int i = 0; i < args.Length - 1; i++)
+                if (args[i] == key)
+                    return args[i + 1];
+            return null;
         }
 
         /// <summary>
         /// Called on startup. Arms the scheduling agent if AutoStartOnPlay is enabled.
         /// </summary>
+        /// <remarks>
+        /// A live ML-Agents communicator (mlagents-learn, or any external trainer) means
+        /// there's no human present to click "Start Sim" -- HeadlessBatchRunner, the other
+        /// thing that can arm an episode, disables itself in exactly that situation (see
+        /// its own IsCommunicatorOn check). Without this, episodes never start under a real
+        /// trainer: Academy still ticks and reports steps, but FixedUpdate's episodeActive
+        /// gate means nothing in the simulation ever runs and no episode ever completes.
+        /// So a connected communicator forces AutoStartOnPlay regardless of the Inspector
+        /// checkbox, which also keeps SchedulingAgent looping episodes for the whole run
+        /// (see the AutoStartOnPlay checks in OnEpisodeBegin/HandleEpisodeFinished).
+        /// </remarks>
         private void Start()
         {
+            if (Academy.Instance.IsCommunicatorOn && !RespawnFactoryEachEpisode)
+            {
+                RespawnFactoryEachEpisode = true;
+                SimLogger.Low("[Orchestrator] ML-Agents communicator detected — rebuilding the factory " +
+                              "at every episode start so episodes are independent.");
+            }
+
+            if (Academy.Instance.IsCommunicatorOn && !AutoStartOnPlay)
+            {
+                AutoStartOnPlay = true;
+                SimLogger.Low("[Orchestrator] ML-Agents communicator detected — forcing " +
+                              "AutoStartOnPlay so episodes start and loop without manual arming.");
+            }
+
             if (AutoStartOnPlay && agent != null)
                 agent.IsArmed = true;
         }
@@ -302,6 +459,7 @@ namespace Assets.Scripts.Simulation
         public void LoadConfig(FJSSPConfig config)
         {
             currentConfig = config;
+            _scenarioJobBuilder = null;
             IsFactoryReady = false;
             StochasticEventManager.Instance?.Initialize(config);
         }
@@ -341,15 +499,46 @@ namespace Assets.Scripts.Simulation
         /// </summary>
         public void StartEpisode()
         {
+            _episodeIndex++;
+            _episodeWallStart = Time.realtimeSinceStartupAsDouble;
+            _episodeTicks = 0;
+            _episodeEnvSteps = 0;
+            _envStepWatch.Reset();
+            _episodeGcStart = GC.CollectionCount(0);
+
+            var pythonScenario = EpisodeConfigChannel.Instance?.ConsumeScenario();
+            if (pythonScenario != null)
+            {
+                var (scenarioConfig, buildJobs) =
+                    ScenarioLoader.LoadDeferredFromJson(pythonScenario.Json, pythonScenario.Name);
+                if (scenarioConfig != null)
+                {
+                    currentConfig = scenarioConfig;
+                    _scenarioJobBuilder = buildJobs;
+                    IsFactoryReady = false;
+                    SimLogger.Low($"[Bridge] Applied Python scenario: {scenarioConfig.Name} " +
+                                  $"({scenarioConfig.JobCount} jobs, {scenarioConfig.AGVCount} AGVs)");
+                }
+                else
+                {
+                    SimLogger.LogError($"[Bridge] Python scenario '{pythonScenario.Name}' failed to load; " +
+                                        "keeping the previous config.");
+                }
+            }
+
             var pythonConfig = EpisodeConfigChannel.Instance?.ConsumeConfig();
             if (pythonConfig != null)
             {
                 currentConfig = pythonConfig;
+                _scenarioJobBuilder = null;
                 IsFactoryReady = false;
                 SimLogger.Low($"[Bridge] Applied Python config: {currentConfig.Name}");
             }
 
             currentConfig ??= DefaultConfigFactory.BuildDefault();
+
+            if (RespawnFactoryEachEpisode)
+                IsFactoryReady = false;
 
             if (!IsFactoryReady)
                 SpawnFactory();
@@ -364,6 +553,18 @@ namespace Assets.Scripts.Simulation
             _baselineRuleIsRandom = currentConfig.dispatchingRule == DispatchingRule.Random;
             _baselineRuleIndex = GetRuleIndex(currentConfig.dispatchingRule);
 
+            // A seed queued by Python makes this episode's instance (generated jobs, and the
+            // stochastic streams below) a pure function of that seed. Without one, generation
+            // continues the UnityEngine.Random stream seeded once in SpawnFactory, so the instance
+            // depends on everything drawn during earlier episodes.
+            _episodeSeed = -1;
+            _episodeSeedIndex = -1;
+            if (EpisodeSeedChannel.Instance != null &&
+                EpisodeSeedChannel.Instance.TryDequeue(out _episodeSeed, out _episodeSeedIndex))
+            {
+                UnityEngine.Random.InitState(_episodeSeed);
+            }
+
             FJSSPJobDefinition[] jobDefs;
             if (prebuiltJobs != null)
             {
@@ -371,16 +572,39 @@ namespace Assets.Scripts.Simulation
                 prebuiltJobs = null;
                 SimLogger.Low("[Orchestrator] Using prebuilt benchmark jobs");
             }
+            else if (_scenarioJobBuilder != null)
+            {
+                jobDefs = _scenarioJobBuilder(cachedMachinesByType);
+            }
             else
             {
                 jobDefs = FJSSPJobGenerator.Generate(currentConfig, cachedMachinesByType);
             }
 
-            Jobs.Initialize(jobDefs, spawnVisuals: true);
+            // JobStore.Initialize marks every job it's given as immediately routable — it
+            // treats ArrivalTime as metadata, not a gate. That's fine for every existing
+            // caller (Brandimarte instances and the un-jittered generated batch both use
+            // ArrivalTime=0 throughout), but a hand-crafted scenario (or a generated batch
+            // with InitialArrivalSpread>0) can specify jobs due later in the episode, which
+            // Initialize would silently make available at t=0 anyway. Split the batch here:
+            // anything due now loads normally; anything due later is held and injected via
+            // AddDynamicJob (the same call the Poisson clock already uses correctly) once
+            // SimTime reaches its arrival time.
+            var immediateJobs = new List<FJSSPJobDefinition>();
+            _pendingScriptedArrivals.Clear();
+            foreach (var def in jobDefs)
+            {
+                if (def.ArrivalTime > 0f) _pendingScriptedArrivals.Add(def);
+                else immediateJobs.Add(def);
+            }
+            _pendingScriptedArrivals.Sort((a, b) => a.ArrivalTime.CompareTo(b.ArrivalTime));
+
+            Jobs.Initialize(immediateJobs, spawnVisuals: true);
 
             if (currentConfig.Stochastic != null && currentConfig.Stochastic.AnyEnabled)
             {
-                StochasticEventManager.Instance?.Initialize(currentConfig);
+                StochasticEventManager.Instance?.Initialize(
+                    currentConfig, _episodeSeed >= 0 ? _episodeSeed : currentConfig.Seed);
                 foreach (var machine in layoutManager.Machines)
                     machine.InitializeStochastic();
             }
@@ -414,21 +638,36 @@ namespace Assets.Scripts.Simulation
                 Jobs, layoutManager,
                 getSimTime: () => SimTime,
                 getDecisionCount: () => decisionCount,
-                incrementDecisionCount: () => decisionCount++
+                incrementDecisionCount: () => decisionCount++,
+                tracker: _tracker,
+                machineProcessingStartTime: _machineProcessingStartTime,
+                // -1 in RL-agent/interactive mode (no fixed rule yet at decision-assembly time —
+                // job-priority pre-selection wouldn't make sense before the agent has acted).
+                // Re-resolves "random" per call, matching DrainHeuristicDecisions' own resolution
+                // (line ~615) -- independent draws for job-selection vs. the eventual machine/job
+                // Execute-time choice, an accepted minor inconsistency specific to the Random PDR.
+                getBaselineActionIndex: () => (BaselineDrainMode || InWarmup)
+                    ? (_baselineRuleIsRandom ? UnityEngine.Random.Range(0, DispatchingEngine.ActionCount) : _baselineRuleIndex)
+                    : -1
             );
 
             episodeActive = true;
             decisionCount = 0;
-            totalReward = 0;
-            previousMakespan = 0;
+            _decisionLog.Clear();
             IsWaitingForAction = false;
-            startTime = Time.time;
+            _simTime = 0.0;
+            _warmupEndSimTime = currentConfig.Stochastic?.WarmupSeconds ?? 0.0;
+            _warmupActive = _warmupEndSimTime > 0.0;
+            if (_warmupActive)
+                SimLogger.Low($"[Orchestrator] Warm-up armed: {_warmupEndSimTime:F0}s under " +
+                              $"{currentConfig.dispatchingRule} before the agent takes over.");
 
             // ── Arm deadlock watchdog ────────────────────────────────────────────
             _lastZoneTraversalTotal = -1;
             _lastTraversalChangeSimTime = 0.0;
             _deadlockDetected = false;
             _deadlockSimTime = -1.0;
+            _truncatedByTimeLimit = false;
 
             // ── Arm Poisson arrival clock ──────────────────────────────────────
             _dynamicJobsSpawned = 0;
@@ -452,7 +691,8 @@ namespace Assets.Scripts.Simulation
 
             SimLogger.Low($"[Orchestrator] Episode started: {currentConfig.JobCount} jobs, " +
                           $"{layoutManager.MachineCount} machines, " +
-                          $"stochastic={StochasticEventManager.Instance?.IsActive}");
+                          $"stochastic={StochasticEventManager.Instance?.IsActive}, " +
+                          $"seed={_episodeSeed} (queue index {_episodeSeedIndex})");
         }
 
         /// <summary>
@@ -470,12 +710,23 @@ namespace Assets.Scripts.Simulation
         }
 
         /// <summary>
-        /// Called every frame. Processes simulation flags, checks for new decisions, and
-        /// terminates the episode when all jobs have exited or the time limit is reached.
+        /// Called every fixed-timestep tick. Advances the deterministic simulation clock,
+        /// processes simulation flags, checks for new decisions, and terminates the episode
+        /// when all jobs have exited or the time limit is reached.
+        ///
+        /// Runs on FixedUpdate (constant Time.fixedDeltaTime per call) rather than Update
+        /// (variable, real-wall-clock-dependent per call) so the sequence and timing of
+        /// simulated events is a pure function of tick count — reproducible for a given
+        /// seed regardless of real-world CPU scheduling/contention during the tick.
         /// </summary>
-        private void Update()
+        private void FixedUpdate()
         {
             if (!episodeActive) return;
+
+            SyncAcademyManualStepping();
+
+            _simTime += Time.fixedDeltaTime;
+            _episodeTicks++;
 
             if (SimTime > MAX_EPISODE_SIM_SECONDS)
             {
@@ -484,11 +735,19 @@ namespace Assets.Scripts.Simulation
                 return;
             }
 
+            // Relative to _warmupEndSimTime (0 when WarmupSeconds is unset, so this is exactly
+            // "SimTime > fixedDuration" for every episode before WarmupSeconds existed) --
+            // EpisodeDurationSeconds caps the agent's counted window, not absolute SimTime.
+            // Without the offset, a warm-up cutoff past the cap (e.g. an 8555s random-phase
+            // offset with a 1800s cap) truncates the episode while still inside warm-up: zero
+            // decisions ever reach the agent, Academy.EnvironmentStep() never fires, and Python's
+            // step() blocks with no response until its own RPC timeout kills the run.
             double fixedDuration = currentConfig?.Stochastic?.EpisodeDurationSeconds ?? 0.0;
-            if (fixedDuration > 0.0 && SimTime > fixedDuration)
+            if (fixedDuration > 0.0 && SimTime > _warmupEndSimTime + fixedDuration)
             {
                 SimLogger.Low($"[Orchestrator] Fixed episode duration reached at {SimTime:F0}s — " +
                               $"terminating (steady-state mode; in-flight jobs recorded as censored).");
+                _truncatedByTimeLimit = true;
                 FinaliseEpisode();
                 return;
             }
@@ -515,10 +774,25 @@ namespace Assets.Scripts.Simulation
             _flags.HarvestAlmostDoneFlags(PreDispatchLeadTime);
             _flags.AssignAGVs();
 
+            if (_warmupActive && !InWarmup)
+            {
+                // Warm-up just ended this tick -- hand off to the RL agent with a clean slate.
+                // decisionCount/_decisionLog are episode-scoped counters consumed by CSV/decision-
+                // log output; without this reset they'd carry the warm-up's fixed-rule decisions,
+                // which aren't the agent's and would pollute both.
+                _warmupActive = false;
+                decisionCount = 0;
+                _decisionLog.Clear();
+                SimLogger.Low($"[Orchestrator] Warm-up complete at {SimTime:F0}s — RL agent now in " +
+                              "control (decisionCount and decision log reset).");
+            }
+
             if (!IsWaitingForAction)
             {
-                if (BaselineDrainMode)
+                if (BaselineDrainMode || InWarmup)
                     DrainHeuristicDecisions();
+                else if (RLDecisionDrainMode)
+                    DrainRLDecisions();
                 else
                 {
                     var req = _decisions.FindNextDecision();
@@ -534,14 +808,32 @@ namespace Assets.Scripts.Simulation
             // ── Tick Poisson arrival clock ─────────────────────────────────────
             // Runs regardless of IsWaitingForAction — arrivals are asynchronous events.
             TickPoissonClock();
+            TickScriptedArrivals();
             TickThroughputClock();
             // Guard against ending the episode while arrivals are still pending: if the
             // currently-spawned job pool drains to zero before the next scheduled Poisson
             // arrival lands, AreAllExited() alone would end the episode early and silently
             // drop the remaining arrivals — and since which rule races ahead fastest varies,
-            // this made the realized workload differ across rules for the "same" seed.
-            if (Jobs.AreAllExited() && AllArrivalsExhausted())
+            // this made the realized workload differ across rules for the "same" seed. Same
+            // reasoning applies to scripted arrivals still waiting in _pendingScriptedArrivals.
+            if (Jobs.AreAllExited() && AllArrivalsExhausted() && _pendingScriptedArrivals.Count == 0)
                 FinaliseEpisode();
+        }
+
+        /// <summary>
+        /// Injects any scripted-arrival job (explicit ArrivalTime > 0 from the initial batch)
+        /// whose time has come. Mirrors TickPoissonClock's structure but walks a pre-sorted
+        /// list instead of sampling from a distribution — see _pendingScriptedArrivals.
+        /// </summary>
+        private void TickScriptedArrivals()
+        {
+            while (_pendingScriptedArrivals.Count > 0
+                   && SimTime >= _pendingScriptedArrivals[0].ArrivalTime)
+            {
+                FJSSPJobDefinition def = _pendingScriptedArrivals[0];
+                _pendingScriptedArrivals.RemoveAt(0);
+                Jobs.AddDynamicJob(def, spawnVisuals: true);
+            }
         }
 
         /// <summary>
@@ -616,6 +908,74 @@ namespace Assets.Scripts.Simulation
                 SimLogger.Error("[Orchestrator] DrainHeuristicDecisions hit guard — possible " +
                                 "decision that doesn't change state. Investigate FindNextDecision.");
         }
+
+        /// <summary>
+        /// Keeps Academy.AutomaticSteppingEnabled in sync with RLDecisionDrainMode. ML-Agents
+        /// normally steps once per FixedUpdate via a hidden stepper object; DrainRLDecisions
+        /// needs to be the only thing calling Academy.EnvironmentStep() while it's draining a
+        /// tick's ready decisions, so automatic stepping must be off for that entire duration
+        /// -- not just during the drain call -- or the hidden stepper could fire mid-drain and
+        /// double-resolve a decision. Only touches Academy when the desired state actually
+        /// changes, so this is cheap to call unconditionally every tick.
+        /// </summary>
+        private void SyncAcademyManualStepping()
+        {
+            bool desiredAutomatic = !RLDecisionDrainMode || BaselineDrainMode;
+            if (_lastSyncedAutomaticStepping == desiredAutomatic) return;
+
+            Academy.Instance.AutomaticSteppingEnabled = desiredAutomatic;
+            _lastSyncedAutomaticStepping = desiredAutomatic;
+            SimLogger.Low($"[Orchestrator] Academy.AutomaticSteppingEnabled -> {desiredAutomatic} " +
+                          $"(RLDecisionDrainMode={RLDecisionDrainMode}).");
+        }
+
+        /// <summary>
+        /// Drains all CURRENTLY-READY decisions this tick through the live ML-Agents policy,
+        /// manually forcing one Academy.EnvironmentStep() per decision instead of relying on
+        /// the engine's automatic one-step-per-FixedUpdate cadence. This is the RL-path
+        /// analogue of DrainHeuristicDecisions: same ready-set-bounded loop, but each
+        /// iteration pays a real policy round-trip (CollectObservations -> policy ->
+        /// OnActionReceived, synchronously, via EnvironmentStep) instead of an instant
+        /// heuristic lookup. Requires automatic stepping to be off (see
+        /// SyncAcademyManualStepping) so this loop is the only thing driving Academy.
+        /// </summary>
+        private void DrainRLDecisions()
+        {
+            const int guard = 1_000_000;   // paranoia; real count bounded by ready events
+            int n = 0;
+            while (n++ < guard)
+            {
+                DecisionRequest req = _decisions.FindNextDecision();
+                if (req == null) break;
+
+                CurrentDecision = req;
+                IsWaitingForAction = true;   // Step() (via OnActionReceived) clears this
+                OnDecisionRequired?.Invoke(CurrentDecision);   // flags the agent's pending request
+
+                _envStepWatch.Start();
+                Academy.Instance.EnvironmentStep();   // synchronous: send obs -> policy -> act
+                _envStepWatch.Stop();
+                _episodeEnvSteps++;
+
+                if (IsWaitingForAction)
+                {
+                    // EnvironmentStep() returned without resolving the pending decision (e.g.
+                    // no agent listening, or the communicator stalled). Fall back to the
+                    // standard one-decision-per-tick path instead of spinning forever --
+                    // the already-pending request is left in place and will resolve normally
+                    // once automatic stepping comes back on next tick.
+                    SimLogger.Error("[Orchestrator] DrainRLDecisions: EnvironmentStep() did not " +
+                                     "resolve the pending decision. Disabling RLDecisionDrainMode " +
+                                     "for the rest of this run.");
+                    RLDecisionDrainMode = false;
+                    break;
+                }
+            }
+
+            if (n >= guard)
+                SimLogger.Error("[Orchestrator] DrainRLDecisions hit guard — possible decision " +
+                                "that doesn't change state. Investigate FindNextDecision.");
+        }
         /// <summary>
         /// Closes every throughput window boundary that SimTime has crossed this frame. The while-loop
         /// handles a frame whose dt spans more than one window (e.g. high timescale), mirroring how the
@@ -636,22 +996,36 @@ namespace Assets.Scripts.Simulation
 
         /// <summary>
         /// Checks whether the Poisson arrival clock has fired and, if so, injects a new
-        /// dynamic job and schedules the next arrival. Called every frame from Update.
+        /// arrival event's jobs (a single job, or a burst cluster when BurstArrivalsEnabled)
+        /// and schedules the next arrival. Called every frame from Update.
         /// </summary>
         private void TickPoissonClock()
         {
             int cap = currentConfig.Stochastic?.DynamicJobCap ?? 0;
-            // Spawn ALL arrivals whose scheduled time has passed this frame, not just one.
+            // Spawn ALL arrival EVENTS whose scheduled time has passed this frame, not just one.
             while (SimTime >= _nextArrivalSimTime)
             {
                 if (cap != 0 && _dynamicJobsSpawned >= cap) { _nextArrivalSimTime = float.MaxValue; break; }
 
-                FJSSPJobDefinition def = FJSSPJobGenerator.GenerateSingle(
-                    _nextDynamicJobId++, currentConfig, cachedMachinesByType);
-                def.ArrivalTime = (float)SimTime;   // note: see caveat below
-                Jobs.AddDynamicJob(def, spawnVisuals: true);
-                _dynamicJobsSpawned++;
-                _lastDynamicArrivalSimTime = (float)SimTime;
+                // A single event injects a burst of jobs at once (size 1 unless configured
+                // otherwise) — all sharing this event's arrival timestamp.
+                int burstSize = StochasticEventManager.Instance.SampleBurstSize();
+                for (int i = 0; i < burstSize; i++)
+                {
+                    if (cap != 0 && _dynamicJobsSpawned >= cap) break;
+
+                    FJSSPJobDefinition def = FJSSPJobGenerator.GenerateSingle(
+                        _nextDynamicJobId++, currentConfig, cachedMachinesByType);
+                    // Stamp the exact scheduled Poisson instant, not SimTime as observed by
+                    // this tick — SimTime only overshoots _nextArrivalSimTime by up to one
+                    // fixed tick, and using the scheduled time keeps ArrivalTime a pure
+                    // function of the seeded arrival stream (deterministic, tick-count-
+                    // independent) instead of tick-granularity-dependent.
+                    def.ArrivalTime = _nextArrivalSimTime;
+                    Jobs.AddDynamicJob(def, spawnVisuals: true);
+                    _dynamicJobsSpawned++;
+                    _lastDynamicArrivalSimTime = _nextArrivalSimTime;
+                }
 
                 bool moreExpected = cap == 0 || _dynamicJobsSpawned < cap;
                 _nextArrivalSimTime = moreExpected
@@ -662,10 +1036,11 @@ namespace Assets.Scripts.Simulation
 
         /// <summary>
         /// Executes a single simulation step given an action index from the agent.
-        /// Applies the dispatch or routing decision, calculates reward, and returns the result.
+        /// Applies the dispatch or routing decision and returns the result. No reward is computed
+        /// here — see <see cref="WriteRewardMetrics"/>.
         /// </summary>
         /// <param name="actionIndex">The index of the action to execute.</param>
-        /// <returns>A StepResult containing the reward and simulation status.</returns>
+        /// <returns>A StepResult containing the simulation status.</returns>
         public StepResult Step(int actionIndex)
         {
             IsWaitingForAction = false;
@@ -675,10 +1050,7 @@ namespace Assets.Scripts.Simulation
             else if (CurrentDecision.Type == DecisionType.Dispatch)
                 ExecuteDispatchDecision(actionIndex);
 
-            float reward = CalculateReward();
-            totalReward += reward;
-
-            return new StepResult { Reward = reward, Done = false, CurrentMakespan = SimTime };
+            return new StepResult { Done = false, CurrentMakespan = SimTime };
         }
 
         /// <summary>
@@ -689,6 +1061,7 @@ namespace Assets.Scripts.Simulation
         private void ExecuteRoutingDecision(int actionIndex)
         {
             int chosenMachineId = DispatchingEngine.SelectMachine(actionIndex, CurrentDecision);
+            LogRoutingDecision(chosenMachineId);
             JobData job = Jobs.Get(CurrentDecision.JobId);
             if (job == null) return;
 
@@ -721,6 +1094,7 @@ namespace Assets.Scripts.Simulation
         {
             int machineId = CurrentDecision.MachineId;
             int chosenJobId = DispatchingEngine.SelectJob(actionIndex, machineId, Jobs, SimTime);
+            LogDispatchDecision(chosenJobId);
 
             JobData job = Jobs.Get(chosenJobId);
             if (job == null || job.State != JobState.Queued || job.LocationMachineId != machineId) return;
@@ -739,13 +1113,78 @@ namespace Assets.Scripts.Simulation
         }
 
         /// <summary>
+        /// Records a routing decision (job -> machine) to _decisionLog. Fires for every routing
+        /// decision including the candidates.Length &lt;= 1 degenerate case DispatchingEngine
+        /// short-circuits on, so the log can directly show how often the rule never actually ran.
+        /// </summary>
+        private void LogRoutingDecision(int chosenMachineId)
+        {
+            var req = CurrentDecision;
+            int count = req.CandidateMachineIds?.Length ?? 0;
+            int jobCandidateCount = req.JobCandidateIds?.Length ?? 0;
+            _decisionLog.Add(new DecisionRecord
+            {
+                SimTime = SimTime,
+                DecisionIndex = decisionCount,
+                IsRouting = true,
+                SubjectId = req.JobId,
+                ChosenId = chosenMachineId,
+                CandidateCount = count,
+                IsDegenerate = count <= 1,
+                CandidateIds = string.Join("|", req.CandidateMachineIds ?? Array.Empty<int>()),
+                CandidateStatA = string.Join("|", req.CandidateJobTimes ?? Array.Empty<float>()),
+                CandidateStatB = string.Join("|", req.CandidateQueueLengths ?? Array.Empty<float>()),
+                CandidateStatC = string.Join("|", req.CandidateUtilization ?? Array.Empty<float>()),
+                JobCandidateCount = jobCandidateCount,
+                IsJobSelectionDegenerate = jobCandidateCount <= 1,
+                JobCandidateIds = string.Join("|", req.JobCandidateIds ?? Array.Empty<int>()),
+            });
+        }
+
+        /// <summary>
+        /// Records a dispatch decision (machine picks a queued job) to _decisionLog. Fires for
+        /// every dispatch decision including the queue.Count &lt;= 1 degenerate case.
+        /// </summary>
+        private void LogDispatchDecision(int chosenJobId)
+        {
+            var req = CurrentDecision;
+            int[] queuedIds = req.QueuedJobIds ?? Array.Empty<int>();
+            int count = queuedIds.Length;
+            var remainingWork = new float[count];
+            var arrivalTimes = new float[count];
+            for (int i = 0; i < count; i++)
+            {
+                JobData qJob = Jobs.Get(queuedIds[i]);
+                remainingWork[i] = DispatchingEngine.GetRemainingWork(queuedIds[i], Jobs);
+                arrivalTimes[i] = qJob?.ArrivalTime ?? -1f;
+            }
+            _decisionLog.Add(new DecisionRecord
+            {
+                SimTime = SimTime,
+                DecisionIndex = decisionCount,
+                IsRouting = false,
+                SubjectId = req.MachineId,
+                ChosenId = chosenJobId,
+                CandidateCount = count,
+                IsDegenerate = count <= 1,
+                CandidateIds = string.Join("|", queuedIds),
+                CandidateStatA = string.Join("|", req.QueuedDurations ?? Array.Empty<double>()),
+                CandidateStatB = string.Join("|", remainingWork),
+                CandidateStatC = string.Join("|", arrivalTimes),
+            });
+        }
+
+        /// <summary>
         /// Finalizes the current episode by collecting telemetry, building the episode record,
         /// logging results, and firing the OnEpisodeFinished event. Includes AGV performance
         /// and segment congestion data collection.
         /// </summary>
         private void FinaliseEpisode()
         {
+          try
+          {
             episodeActive = false;
+            LogEpisodeTiming();
             // Close the trailing partial window so completions after the last full boundary
             // still land in throughput.csv. Skipped if SimTime sits exactly on a closed boundary.
             double lastBoundary = _nextThroughputBoundary - _throughputWindowLength;
@@ -761,7 +1200,7 @@ namespace Assets.Scripts.Simulation
                     machineCount: layoutManager.MachineCount,
                     totalOps: Jobs.AllJobs.Sum(j => j.TotalOperations),
                     decisions: decisionCount,
-                    totalReward: totalReward,
+                    totalReward: 0.0,
                     ruleName: LastAppliedRule,
                     stochasticTag: currentConfig.Stochastic?.Tag ?? "none"
                 );
@@ -775,7 +1214,7 @@ namespace Assets.Scripts.Simulation
                 completedJobs: Jobs.CountInState(JobState.Exited),
                 totalOps: Jobs.AllJobs.Sum(j => j.TotalOperations),
                 decisionPoints: decisionCount,
-                totalReward: totalReward,
+                totalReward: 0.0,
                 agvCount: agvPool.AllAGVs.Count,
                 machines: layoutManager.Machines,
                 averageTimeScale: Time.timeScale
@@ -787,6 +1226,8 @@ namespace Assets.Scripts.Simulation
             record.LastDynamicArrivalTime = _lastDynamicArrivalSimTime;
             if (_dynamicJobsSpawned > 0)
                 record.JobCount = Jobs.JobCount;  // true total = initial + dynamic
+
+            record.DecisionRecords = new List<DecisionRecord>(_decisionLog);
 
             // Configuration snapshot fields
             record.ParkingMethod = currentConfig.parkingMethod;
@@ -899,21 +1340,58 @@ namespace Assets.Scripts.Simulation
                               $"MeanTTF_theory={theoreticalMeanTtf:F1}s");
             }
 
+            if (!string.IsNullOrEmpty(_decisionLogDir))
+            {
+                // Tag rows so they join to Python's decisions.csv (instance seed + seed-queue
+                // position). Must run before OnEpisodeFinished: the agent's listener starts the
+                // next episode synchronously, which overwrites the seed fields.
+                record.Seed = _episodeSeed;
+                record.InstanceName = $"{record.InstanceName}|seed_index={_episodeSeedIndex}";
+                if (RLDecisionDrainMode) record.RuleName = "rl_policy";
+                ResultsLogger.LogDecisions(record);
+            }
+
             OnEpisodeFinished?.Invoke(record);
+          }
+          catch (Exception ex)
+          {
+            SimLogger.Error($"[Orchestrator] FinaliseEpisode threw: {ex}");
+          }
         }
 
         /// <summary>
-        /// Calculates the per-step reward as the negative normalized change in makespan.
-        /// Penalizes increases in completion time relative to the number of remaining operations.
+        /// Logs one [EpisodeTiming] line per episode: wall-clock duration split into time inside
+        /// Academy.EnvironmentStep (observations + policy round-trip + action; drain mode only)
+        /// versus everything else (simulation ticks), plus GC and live-object counts. Anything
+        /// that trends upward across episodes while sim time and decisions stay flat is a leak.
         /// </summary>
-        /// <returns>The computed reward value (typically negative).</returns>
-        private float CalculateReward()
+        private void LogEpisodeTiming()
         {
-            float current = (float)SimTime;
-            float delta = current - (float)previousMakespan;
-            previousMakespan = current;
-            int totalOps = Jobs.AllJobs.Sum(j => j.TotalOperations);
-            return -delta / (Mathf.Max(totalOps, 1) * Time.timeScale);
+            double wall = Time.realtimeSinceStartupAsDouble - _episodeWallStart;
+            double envStep = _envStepWatch.Elapsed.TotalSeconds;
+            int gameObjects = FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length;
+            int jobVisuals = FindObjectsByType<JobVisual>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length;
+            SimLogger.Low($"[EpisodeTiming] ep={_episodeIndex} wall={wall:F3}s envStep={envStep:F3}s " +
+                          $"other={wall - envStep:F3}s ticks={_episodeTicks} envSteps={_episodeEnvSteps} " +
+                          $"sim={SimTime:F0}s decisions={decisionCount} " +
+                          $"gc0={GC.CollectionCount(0) - _episodeGcStart} " +
+                          $"heapMB={GC.GetTotalMemory(false) / 1048576.0:F1} " +
+                          $"gameObjects={gameObjects} jobVisuals={jobVisuals}");
+        }
+
+        /// <summary>
+        /// Writes the current <see cref="RewardMetrics"/> snapshot for <see cref="RewardMetricsSensor"/>.
+        /// The reward itself is computed in Python (env/rewards) from consecutive snapshots, so the
+        /// total_reward reported in telemetry and results CSVs is always 0.
+        /// </summary>
+        public void WriteRewardMetrics(float[] buffer)
+        {
+            RewardMetrics.Fill(buffer, SimTime, episodeActive, decisionCount, Jobs,
+                               layoutManager != null ? layoutManager.Machines : null,
+                               agvPool != null ? agvPool.AllAGVs : null,
+                               trafficZoneManager != null ? trafficZoneManager.Zones : null,
+                               _tracker, _deadlockDetected, SimTime > MAX_EPISODE_SIM_SECONDS,
+                               _episodeSeed, _episodeSeedIndex, _truncatedByTimeLimit);
         }
 
         /// <summary>

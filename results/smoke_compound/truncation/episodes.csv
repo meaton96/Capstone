@@ -1,0 +1,5 @@
+policy,kind,seed,seed_index,makespan,mean_flow_time,total_flow_time,return,decisions,jobs_exited,deadlock,timed_out,truncated
+SPT-SRWT,pdr,0,0,1500.0194091796875,158.98903111049108,4451.69287109375,0.0,93,28.0,False,False,True
+SPT-SRWT,pdr,1,1,1500.0194091796875,160.33046177455358,4489.2529296875,0.0,93,28.0,False,False,True
+SPT-SRWT,pdr,2,2,1500.0194091796875,158.54490503771552,4597.80224609375,0.0,93,29.0,False,False,True
+SPT-SRWT,pdr,3,3,1500.0194091796875,159.62831333705358,4469.5927734375,0.0,93,28.0,False,False,True

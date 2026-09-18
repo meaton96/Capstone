@@ -41,6 +41,28 @@ namespace Assets.Scripts.Simulation
         private Action _incrementDecisionCount;
 
         /// <summary>
+        /// Delegate returning the active baseline PDR's action index (0-8), or -1 if no fixed
+        /// rule applies (RL-agent mode, where the agent hasn't acted yet at decision-assembly
+        /// time, so pre-selecting a job by rule wouldn't make sense). Only set by baseline/
+        /// heuristic headless runs (BaselineDrainMode) — null in interactive/RL mode.
+        /// </summary>
+        private Func<int> _getBaselineActionIndex;
+
+        /// <summary>
+        /// Reference to the episode's live per-machine statistics (processing time, downtime),
+        /// used to compute CandidateUtilization for the MMUR routing rule.
+        /// </summary>
+        private EpisodeTracker _tracker;
+
+        /// <summary>
+        /// Machine ID -> sim time its current operation started, for machines mid-operation
+        /// right now. Needed alongside _tracker because EpisodeTracker only accumulates
+        /// processing time when an operation finishes, so a machine's in-flight time isn't in
+        /// _tracker yet.
+        /// </summary>
+        private Dictionary<int, double> _machineProcessingStartTime;
+
+        /// <summary>
         /// Initializes the coordinator with required dependencies via dependency injection.
         /// </summary>
         /// <param name="jobs">The job store providing job data and state information.</param>
@@ -48,18 +70,46 @@ namespace Assets.Scripts.Simulation
         /// <param name="getSimTime">Delegate to retrieve the current simulation time.</param>
         /// <param name="getDecisionCount">Delegate to retrieve the current decision count.</param>
         /// <param name="incrementDecisionCount">Delegate to increment the decision counter.</param>
+        /// <param name="tracker">Episode's live per-machine stats, for CandidateUtilization.</param>
+        /// <param name="machineProcessingStartTime">Machine ID -> sim time current op started,
+        /// for machines mid-operation right now (shared with FlagHarvester/FailureCoordinator).</param>
+        /// <param name="getBaselineActionIndex">Delegate returning the active baseline rule's
+        /// action index, or -1/null if none (RL-agent mode) — used to apply job-priority
+        /// selection among simultaneously-ready routing jobs. Optional.</param>
         public void Initialize(
             JobStore jobs,
             FactoryLayoutManager layout,
             Func<double> getSimTime,
             Func<int> getDecisionCount,
-            Action incrementDecisionCount)
+            Action incrementDecisionCount,
+            EpisodeTracker tracker,
+            Dictionary<int, double> machineProcessingStartTime,
+            Func<int> getBaselineActionIndex = null)
         {
             _jobs = jobs;
             _layout = layout;
             _getSimTime = getSimTime;
             _getDecisionCount = getDecisionCount;
             _incrementDecisionCount = incrementDecisionCount;
+            _tracker = tracker;
+            _machineProcessingStartTime = machineProcessingStartTime;
+            _getBaselineActionIndex = getBaselineActionIndex;
+        }
+
+        /// <summary>
+        /// Live utilization ratio (busy time / operational time so far, in [0, 1]) for a
+        /// machine, as of simTime. Adds the in-progress operation's elapsed time (not yet in
+        /// _tracker, which only accumulates on operation completion) on top of the tracker's
+        /// closed-operation total.
+        /// </summary>
+        private float MachineUtilization(int machineId, double simTime)
+        {
+            double busy = _tracker.ProcessingTimeSoFar(machineId);
+            if (_machineProcessingStartTime.TryGetValue(machineId, out double opStart))
+                busy += simTime - opStart;
+
+            double operational = simTime - _tracker.DowntimeSoFar(machineId, simTime);
+            return operational > 0 ? (float)(busy / operational) : 0f;
         }
 
         /// <summary>
@@ -73,24 +123,52 @@ namespace Assets.Scripts.Simulation
         /// </returns>
         public DecisionRequest FindNextDecision()
         {
-            JobData routingJob = _jobs.GetNextNeedsRouting();
-            if (routingJob != null)
+            List<int> readyIds = _jobs.GetAllNeedingRouting();
+            if (readyIds.Count > 0)
             {
-                var eligibleIds = new HashSet<int>(
-                    routingJob.EligibleMachinesPerOp[routingJob.CurrentOpIndex].Keys);
-
-                bool anyAvailable = _layout.Machines
-                    .Any(m => eligibleIds.Contains(m.MachineId) && m.IsAvailableForWork);
-
-                if (!anyAvailable)
+                var routableIds = new List<int>();
+                foreach (int jobId in readyIds)
                 {
-                    _jobs.DeferredJobIds.Add(routingJob.JobId);
-                    SimLogger.Low($"[Orchestrator] Job {routingJob.JobId}: all eligible machines " +
-                                  $"are Failed/Repairing. Deferring routing decision.");
+                    JobData job = _jobs.Get(jobId);
+
+                    // Defensive: a job past its last operation has no EligibleMachinesPerOp
+                    // entry to route to. It should never reach NeedsRouting in that state (see
+                    // FlagHarvester.HarvestStalledAGVs' IsLastOperation branch), but if some
+                    // other path ever does the same thing, skip-and-log beats an
+                    // IndexOutOfRangeException that would otherwise recur every frame for the
+                    // rest of the episode (nothing clears NeedsRouting on its own).
+                    if (job.CurrentOpIndex >= job.EligibleMachinesPerOp.Length)
+                    {
+                        SimLogger.LogWarning($"[DecisionCoordinator] Job {jobId} is NeedsRouting with " +
+                                              $"CurrentOpIndex={job.CurrentOpIndex} >= " +
+                                              $"{job.EligibleMachinesPerOp.Length} operations — skipping " +
+                                              "(should have exited or gone to WaitingForPickup instead).");
+                        continue;
+                    }
+
+                    var eligibleIds = new HashSet<int>(job.EligibleMachinesPerOp[job.CurrentOpIndex].Keys);
+
+                    bool anyAvailable = _layout.Machines
+                        .Any(m => eligibleIds.Contains(m.MachineId) && m.IsAvailableForWork);
+
+                    if (!anyAvailable)
+                    {
+                        _jobs.DeferredJobIds.Add(jobId);
+                        SimLogger.Low($"[Orchestrator] Job {jobId}: all eligible machines " +
+                                      $"are Failed/Repairing. Deferring routing decision.");
+                    }
+                    else
+                    {
+                        routableIds.Add(jobId);
+                    }
                 }
-                else
+
+                if (routableIds.Count > 0)
                 {
-                    return BuildRoutingDecision(routingJob);
+                    int chosenJobId = SelectRoutingJobId(routableIds);
+                    DecisionRequest decision = BuildRoutingDecision(_jobs.Get(chosenJobId));
+                    decision.JobCandidateIds = routableIds.ToArray();
+                    return decision;
                 }
             }
 
@@ -103,6 +181,22 @@ namespace Assets.Scripts.Simulation
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Picks which of several simultaneously-routable jobs gets this routing decision, using
+        /// job-priority scoring (DispatchingEngine.SelectRoutingJob) when a baseline rule is
+        /// known; falls back to first-in-list (previous FIFO behaviour, unchanged) in RL-agent
+        /// mode or when only one job is routable (no real choice either way).
+        /// </summary>
+        private int SelectRoutingJobId(List<int> routableIds)
+        {
+            if (routableIds.Count == 1) return routableIds[0];
+
+            int actionIndex = _getBaselineActionIndex?.Invoke() ?? -1;
+            if (actionIndex < 0) return routableIds[0];
+
+            return DispatchingEngine.SelectRoutingJob(actionIndex, routableIds, _jobs, _getSimTime());
         }
 
         /// <summary>
@@ -127,11 +221,12 @@ namespace Assets.Scripts.Simulation
 
             int currentDecisionCount = _getDecisionCount();
             _incrementDecisionCount();
+            double simTime = _getSimTime();
 
             return new DecisionRequest
             {
                 Type = DecisionType.Routing,
-                SimTime = _getSimTime(),
+                SimTime = simTime,
                 DecisionIndex = currentDecisionCount,
                 TotalJobs = _jobs.JobCount,
                 CompletedJobs = _jobs.CountInState(JobState.Exited),
@@ -141,6 +236,7 @@ namespace Assets.Scripts.Simulation
                 CandidateMachineIds = candidates.ToArray(),
                 CandidateQueueLengths = candidates.Select(id => _jobs.GetMachineLoad(id)).ToArray(),
                 CandidateJobTimes = candidates.Select(id => job.GetProcessingTime(id)).ToArray(),
+                CandidateUtilization = candidates.Select(id => MachineUtilization(id, simTime)).ToArray(),
             };
         }
 

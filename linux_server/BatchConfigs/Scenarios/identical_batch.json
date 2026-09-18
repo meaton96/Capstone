@@ -1,0 +1,121 @@
+{
+  "_comment": "6 IDENTICAL jobs (same feeder + same 40.0s op on Weld[1]) all arrive at t=0. Every score-based rule ties on every candidate -- outcome is determined entirely by tie-break behavior (currently lowest job ID / de facto FIFO).",
+  "name": "identical_batch",
+  "seed": 42,
+  "agvCount": 7,
+  "machineTypeLayout": [
+    "Mill",
+    "Mill",
+    "Mill",
+    "Lathe",
+    "Lathe",
+    "Lathe",
+    "Weld",
+    "Weld",
+    "Weld",
+    "Inspect",
+    "Inspect",
+    "Inspect",
+    "Assemble",
+    "Assemble",
+    "Assemble"
+  ],
+  "jobs": [
+    {
+      "id": 0,
+      "arrivalTime": 0.0,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 20.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 40.0
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "arrivalTime": 0.0,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 20.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 40.0
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "arrivalTime": 0.0,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 20.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 40.0
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "arrivalTime": 0.0,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 20.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 40.0
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "arrivalTime": 0.0,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 20.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 40.0
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "arrivalTime": 0.0,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 20.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 40.0
+        }
+      ]
+    }
+  ]
+}

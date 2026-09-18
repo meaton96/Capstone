@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-run_all_analyses.py — Orchestrator for FJSSP/AGV log analysis.
+run_all.py — Orchestrator for FJSSP/AGV log analysis.
 
 Usage:
-    python run_all_analyses.py <folder_with_csvs> [--out <custom_output_dir>]
+    python run_all.py <folder_with_csvs> [--out <custom_output_dir>]
     
 Example:
-    python run_all_analyses.py cap_control_unbound
+    python run_all.py cap_control_unbound
     (Will output all figures to cap_control_unbound/figs)
 """
 
@@ -77,7 +77,23 @@ def main():
             "csv": "results.csv",
             # This script expects a file path for output, not a directory
             "args": lambda csv, out: ["--results", str(csv), "--out", str(out / "lambda_plateau.png")]
-        }
+        },
+        {
+            "script": "analyze_time_in_system.py",
+            "csv": "job_completions.csv",
+            "args": lambda csv, out: [str(csv), "--out", str(out)]
+        },
+        {
+            "script": "analyze_rule_variability_by_config.py",
+            "csv": "job_completions.csv",
+            "args": lambda csv, out: [str(csv), "--out", str(out)]
+        },
+        {
+            "script": "plot_steady_state_dial.py",
+            "csv": "results.csv",
+            # Needs the whole results dir (throughput/machine_utilization/agv_performance/results.csv), not one file
+            "args": lambda csv, out: [str(csv.parent), "--out", str(out)]
+        },
     ]
 
     for task in tasks:

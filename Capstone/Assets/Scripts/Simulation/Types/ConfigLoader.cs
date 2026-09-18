@@ -180,6 +180,8 @@ namespace Assets.Scripts.Simulation.Types
             public bool dynamicArrivalsEnabled = false;
             public float arrivalLambda = 0.003f;
             public int dynamicJobCap = 0;
+            public bool burstArrivalsEnabled = false;
+            public float burstSizeMean = 1.0f;
             public double episodeDurationSeconds = 0.0;
         }
 
@@ -271,6 +273,8 @@ namespace Assets.Scripts.Simulation.Types
                     DynamicArrivalsEnabled = raw.stochastic.dynamicArrivalsEnabled,
                     ArrivalLambda = raw.stochastic.arrivalLambda,
                     DynamicJobCap = raw.stochastic.dynamicJobCap,
+                    BurstArrivalsEnabled = raw.stochastic.burstArrivalsEnabled,
+                    BurstSizeMean = raw.stochastic.burstSizeMean,
                     EpisodeDurationSeconds = raw.stochastic.episodeDurationSeconds,
                 };
             }

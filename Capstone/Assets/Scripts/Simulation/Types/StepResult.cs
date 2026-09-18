@@ -2,7 +2,7 @@ namespace Assets.Scripts.Simulation.Types
 {
     /// @brief Result returned by @c SimulationBridge.Step() after applying a dispatching rule.
     ///
-    /// @details Encapsulates the reward signal, episode termination flag, and the next
+    /// @details Encapsulates the episode termination flag and the next
     ///          decision context for the agent. Populated by the simulation after each
     ///          discrete event (machine completion or AGV delivery).
     ///
@@ -10,10 +10,6 @@ namespace Assets.Scripts.Simulation.Types
     /// @see DecisionRequest
     public struct StepResult
     {
-        /// @brief Reward signal for the agent, computed from the elapsed makespan delta
-        ///        since the previous step. Negative or zero values are typical (penalty for elapsed time).
-        public float Reward;
-
         /// @brief True when the episode has ended (all jobs completed or no valid moves remain).
         public bool Done;
 

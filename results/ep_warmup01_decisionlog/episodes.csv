@@ -1,0 +1,2 @@
+policy,kind,seed,seed_index,makespan,mean_flow_time,total_flow_time,return,decisions,jobs_exited,deadlock,timed_out,truncated
+ckpt:ep_warmup01/checkpoint,checkpoint,0,0,11337.5556640625,556.2473074412533,213042.71875,0.0,1186,383.0,False,False,False

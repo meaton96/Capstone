@@ -197,7 +197,7 @@ class MultiModalEncoder(nn.Module):
     | Sub-encoder          | Observation key     | Input shape       | Output dim |
     |----------------------|---------------------|-------------------|------------|
     | @ref factory_encoder | @c factory_grid     | (B, 3, 64, 64)    | 256        |
-    | @ref sched_encoder   | @c sched_matrix     | (B, 3, 100, 40)   | 128        |
+    | @ref sched_encoder   | @c sched_matrix     | (B, 3, 20, 16)    | 128        |
     | @ref global_mlp      | @c global_scalars   | (B, 10)           | 32         |
     | @ref distance_mlp    | @c distance_matrix  | (B, 64)           | 32         |
     | @ref event_embed     | @c event_flags      | (B, 6)            | 16         |

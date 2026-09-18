@@ -1,0 +1,487 @@
+{
+  "_comment": "2 long jobs (single 150.0s op) arrive at t=0 on Weld[1]; starting at t=5.0, 40 short jobs (~12.0s) stream in every 5.0s on the SAME machine -- arrival rate (1/5.0) exceeds single-machine service rate for short jobs alone (1/12.0), so the queue never empties for the whole 200s stream. Under SPT the long jobs never look shortest and starve for the whole stream; under FIFO they ran first at t=0 and never starve. Look at job IDs 0..1's individual flow-time, not the mean/p95 -- they're outnumbered 40:2 so aggregate stats can dilute the effect.",
+  "name": "bimodal_mix",
+  "seed": 42,
+  "agvCount": 7,
+  "machineTypeLayout": [
+    "Mill",
+    "Mill",
+    "Mill",
+    "Lathe",
+    "Lathe",
+    "Lathe",
+    "Weld",
+    "Weld",
+    "Weld",
+    "Inspect",
+    "Inspect",
+    "Inspect",
+    "Assemble",
+    "Assemble",
+    "Assemble"
+  ],
+  "jobs": [
+    {
+      "id": 0,
+      "arrivalTime": 0.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 150.0
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "arrivalTime": 0.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 150.0
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "arrivalTime": 5.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 12.33
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "arrivalTime": 10.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 10.86
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "arrivalTime": 15.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 11.46
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "arrivalTime": 20.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 11.34
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "arrivalTime": 25.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 12.57
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "arrivalTime": 30.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 12.42
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "arrivalTime": 35.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 12.94
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "arrivalTime": 40.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 11.01
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "arrivalTime": 45.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 11.81
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "arrivalTime": 50.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 10.87
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "arrivalTime": 55.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 11.32
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "arrivalTime": 60.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 12.01
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "arrivalTime": 65.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 10.86
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "arrivalTime": 70.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 11.28
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "arrivalTime": 75.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 12.36
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "arrivalTime": 80.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 12.11
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "arrivalTime": 85.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 11.33
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "arrivalTime": 90.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 12.21
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "arrivalTime": 95.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 12.74
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "arrivalTime": 100.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 10.82
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "arrivalTime": 105.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 12.73
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "arrivalTime": 110.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 12.48
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "arrivalTime": 115.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 11.62
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "arrivalTime": 120.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 11.17
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "arrivalTime": 125.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 13.1
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "arrivalTime": 130.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 11.61
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "arrivalTime": 135.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 11.02
+        }
+      ]
+    },
+    {
+      "id": 29,
+      "arrivalTime": 140.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 11.03
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "arrivalTime": 145.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 12.83
+        }
+      ]
+    },
+    {
+      "id": 31,
+      "arrivalTime": 150.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 12.25
+        }
+      ]
+    },
+    {
+      "id": 32,
+      "arrivalTime": 155.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 12.74
+        }
+      ]
+    },
+    {
+      "id": 33,
+      "arrivalTime": 160.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 12.55
+        }
+      ]
+    },
+    {
+      "id": 34,
+      "arrivalTime": 165.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 12.09
+        }
+      ]
+    },
+    {
+      "id": 35,
+      "arrivalTime": 170.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 13.14
+        }
+      ]
+    },
+    {
+      "id": 36,
+      "arrivalTime": 175.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 11.71
+        }
+      ]
+    },
+    {
+      "id": 37,
+      "arrivalTime": 180.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 12.12
+        }
+      ]
+    },
+    {
+      "id": 38,
+      "arrivalTime": 185.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 12.79
+        }
+      ]
+    },
+    {
+      "id": 39,
+      "arrivalTime": 190.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 12.28
+        }
+      ]
+    },
+    {
+      "id": 40,
+      "arrivalTime": 195.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 12.87
+        }
+      ]
+    },
+    {
+      "id": 41,
+      "arrivalTime": 200.0,
+      "operations": [
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 12.19
+        }
+      ]
+    }
+  ]
+}

@@ -368,12 +368,22 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         {
             if (machines != null)
             {
+                // Deactivate first: Destroy only lands at the end of the frame, and a respawn can
+                // happen mid-FixedUpdate (episode rollover), where old machines would still tick.
                 foreach (PhysicalMachine pm in machines)
-                    if (pm != null) Destroy(pm.gameObject);
+                {
+                    if (pm == null) continue;
+                    pm.gameObject.SetActive(false);
+                    Destroy(pm.gameObject);
+                }
             }
 
             foreach (GameObject obj in spawnedObjects)
-                if (obj != null) Destroy(obj);
+            {
+                if (obj == null) continue;
+                obj.SetActive(false);
+                Destroy(obj);
+            }
 
             spawnedObjects.Clear();
             machines = null;

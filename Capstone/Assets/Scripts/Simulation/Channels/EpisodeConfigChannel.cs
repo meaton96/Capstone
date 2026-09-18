@@ -1,11 +1,12 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
 using Unity.MLAgents.SideChannels;
 using Assets.Scripts.Simulation.Logging;
 using Assets.Scripts.Simulation.Types;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Assets.Scripts.Simulation.Machines;
-using System.Collections.Generic;
 
 namespace Assets.Scripts.Simulation.Channels
 {
@@ -19,6 +20,13 @@ namespace Assets.Scripts.Simulation.Channels
     ///   var cfg = EpisodeConfigChannel.Instance.ConsumeConfig();
     ///   if (cfg != null) ApplyConfig(cfg);  // override current config
     ///   else             UseDefaultConfig(); // no Python override this episode
+    ///
+    /// A message with "scenarios" instead carries scripted ScenarioLoader scenarios to queue
+    /// (one item consumed per StartEpisode, same buffered-queue pattern as EpisodeSeedChannel —
+    /// Python stays ahead of episodes that auto-restart inside Unity). Each item is either a
+    /// JSON object (an inline scenario) or a string (a path to a scenario file). "clear" empties
+    /// the queue first. When the queue runs dry, FactoryOrchestrator keeps replaying the last
+    /// scenario it consumed, so a single one-shot item behaves like the old sticky single-slot API.
     /// </summary>
     public class EpisodeConfigChannel : SideChannel
     {
@@ -27,7 +35,15 @@ namespace Assets.Scripts.Simulation.Channels
 
         public static EpisodeConfigChannel Instance { get; private set; }
 
+        /// <summary>A scripted scenario received from Python, parsed at the next episode start.</summary>
+        public class PendingScenario
+        {
+            public string Name;
+            public string Json;
+        }
+
         private FJSSPConfig _pendingConfig = null;
+        private readonly Queue<PendingScenario> _scenarioQueue = new Queue<PendingScenario>();
         private readonly object _lock = new object();
 
         public EpisodeConfigChannel()
@@ -46,6 +62,13 @@ namespace Assets.Scripts.Simulation.Channels
             string json = msg.ReadString();
             try
             {
+                JObject root = JObject.Parse(json);
+                if (root["scenarios"] is JArray scenarios)
+                {
+                    ReadScenarioQueue(scenarios, root["clear"]?.Value<bool>() ?? false);
+                    return;
+                }
+
                 FJSSPConfig cfg = DeserialiseConfig(json);
                 lock (_lock) { _pendingConfig = cfg; }
                 SimLogger.Low($"[ConfigChannel] Received config: {cfg.Name} " +
@@ -71,6 +94,61 @@ namespace Assets.Scripts.Simulation.Channels
                 _pendingConfig = null;
                 return cfg;
             }
+        }
+
+        /// <summary>
+        /// Pops the next queued scenario, or null if the queue is empty (FactoryOrchestrator then
+        /// keeps replaying whichever scenario it last consumed).
+        /// </summary>
+        public PendingScenario ConsumeScenario()
+        {
+            lock (_lock)
+            {
+                return _scenarioQueue.Count > 0 ? _scenarioQueue.Dequeue() : null;
+            }
+        }
+
+        private void ReadScenarioQueue(JArray items, bool clear)
+        {
+            var incoming = new List<PendingScenario>();
+            foreach (JToken item in items)
+            {
+                try
+                {
+                    incoming.Add(item.Type == JTokenType.String
+                        ? ReadScenarioFromPath((string)item)
+                        : ReadScenarioInline((JObject)item));
+                }
+                catch (Exception ex)
+                {
+                    SimLogger.LogError($"[ConfigChannel] Skipping one queued scenario: {ex.Message}");
+                }
+            }
+
+            lock (_lock)
+            {
+                if (clear) _scenarioQueue.Clear();
+                foreach (PendingScenario scenario in incoming)
+                    _scenarioQueue.Enqueue(scenario);
+            }
+            SimLogger.Low($"[ConfigChannel] Queued {incoming.Count} scenario(s) (clear={clear}).");
+        }
+
+        private static PendingScenario ReadScenarioInline(JObject scenario) => new PendingScenario
+        {
+            Name = scenario["name"]?.Value<string>() ?? "python_scenario",
+            Json = scenario.ToString(Formatting.None),
+        };
+
+        private static PendingScenario ReadScenarioFromPath(string path)
+        {
+            if (!File.Exists(path))
+                throw new FileNotFoundException($"Scenario file not found: {path}");
+            return new PendingScenario
+            {
+                Name = Path.GetFileNameWithoutExtension(path),
+                Json = File.ReadAllText(path),
+            };
         }
 
         // ── JSON deserialisation ─────────────────────────────────────────────

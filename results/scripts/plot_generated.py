@@ -33,7 +33,7 @@ try:
 except ImportError:
     PDR_ORDER = [
         "SPT_SMPT", "SPT_SRWT", "SRT_SMPT", "SRT_SRWT",
-        "LPT_SMPT", "LPT_MMUR", "LRT_MMUR", "SDT_SRWT",
+        "LPT_SMPT", "LPT_MMUR", "LRT_MMUR", "FIFO_SRWT",
         "Random",
     ]
     PDR_LABELS = {r: r for r in PDR_ORDER}

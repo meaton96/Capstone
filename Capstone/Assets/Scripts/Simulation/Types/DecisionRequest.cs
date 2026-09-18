@@ -57,10 +57,22 @@ namespace Assets.Scripts.Simulation.Types
         /// @brief IDs of candidate machines of the required type that are available for routing.
         public int[] CandidateMachineIds;
 
+        /// @brief IDs of all jobs that were simultaneously ready for a routing decision (had
+        ///        >=1 available eligible machine) when this one was selected via job-priority
+        ///        scoring (DispatchingEngine.SelectRoutingJob). Length 1 = JobId was the only
+        ///        ready job (degenerate case, no rule ran). Diagnostic-only, not consumed by
+        ///        SelectMachine.
+        public int[] JobCandidateIds;
+
         /// @brief Current queue lengths at each candidate machine (parallel to @c CandidateMachineIds).
         public float[] CandidateQueueLengths;
 
         /// @brief Processing time of @c JobId at each candidate machine (parallel to @c CandidateMachineIds).
         public float[] CandidateJobTimes;
+
+        /// @brief Live cumulative utilization ratio (busy time / operational time so far, in
+        ///        [0, 1]) at each candidate machine (parallel to @c CandidateMachineIds). Used by
+        ///        the MMUR (Minimum Machine Utilization) routing rule.
+        public float[] CandidateUtilization;
     }
 }

@@ -85,7 +85,14 @@ Capstone/[Aa]ssets/[Ss]treamingAssets/aa/*
 /linux
 
 /results/.venv
+/.venv
 run_agent.sh
 
 results/old
+results/pre_time_fix
 linux_server/Results/
+
+docs
+
+__pycache__/
+*/__pycache__/
