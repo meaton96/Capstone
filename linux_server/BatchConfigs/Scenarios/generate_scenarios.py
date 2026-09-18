@@ -201,6 +201,48 @@ def two_machine_standoff(n_jobs=10, contested_type="Weld", indices=(0, 1),
     )
 
 
+def speed_trap_standoff(n_jobs=63, contested_type="Weld", indices=(0, 1),
+                         feeder_type="Mill", feeder_duration=20.0,
+                         mean_duration=40.0, cost_gap=1.5, seed=42):
+    """Same 2-machine-standoff shape as two_machine_standoff, but the cost
+    asymmetry is CONSISTENT across every job (index 0 is always cheaper) --
+    not two_machine_standoff v2's per-job-randomized 50/50 gap, and not v1's
+    degenerate identical-cost tie. Both of those designs accidentally let
+    -SMPT rules off the hook: v1's tie-break artifact isn't a real greedy
+    mistake, and v2's random 50/50 cheap-machine assignment self-balances
+    load across both machines even if SMPT always "correctly" picks the
+    cheaper one for that job. Here, SMPT's greedy per-job choice is
+    genuinely correct every single time (index 0 truly is cheaper for every
+    job) -- and that's exactly the trap: it funnels every job onto machine 0
+    while machine 1 sits idle, never noticing machine 0's queue is
+    saturating. n_jobs is sized so that funneled onto ONE machine alone,
+    utilization is ~1.4 (guaranteed unbounded backlog growth); balanced
+    across both, it's ~0.7 (comfortable) -- SRWT/MMUR rules should balance
+    load and stay near the comfortable number, -SMPT rules should not.
+    """
+    rng = random.Random(seed)
+    jobs = []
+    for i in range(n_jobs):
+        d = mean_duration * rng.uniform(0.85, 1.15)
+        ops = [
+            op(feeder_type, "any", feeder_duration),
+            op(contested_type, list(indices), [d, d * cost_gap]),
+        ]
+        jobs.append(job(i, 0.0, ops))
+    return scenario(
+        "speed_trap_standoff", jobs, seed=seed,
+        comment=(f"{n_jobs} jobs arrive at t=0, quick feeder op, then every job is "
+                 f"eligible for EXACTLY {contested_type}{list(indices)}, with index "
+                 f"{indices[0]} CONSISTENTLY {cost_gap}x cheaper than index "
+                 f"{indices[1]} for every job (not two_machine_standoff's per-job-"
+                 f"randomized gap). Tests whether a routing rule that greedily always "
+                 f"picks the genuinely-faster machine (SMPT) loses to one that balances "
+                 f"queue depth or utilization (SRWT/MMUR) once the faster machine "
+                 f"saturates -- a 'locally correct, globally wrong' trap, distinct from "
+                 f"two_machine_standoff's per-job speed-gap test."),
+    )
+
+
 def sparse_bottleneck_floor(n_jobs=15, seed=42):
     """Same shape of job as single_bottleneck/two_machine_standoff -- a batch
     that arrives together and needs Mill, then Weld, then Assemble -- but run
@@ -418,6 +460,34 @@ def _standoff_phase_jobs(rng, id_start, t0, duration, mean_duration=40.0,
     return jobs, n_jobs
 
 
+def _speed_trap_phase_jobs(rng, id_start, t0, duration, mean_duration=40.0,
+                            contested_type="Weld", indices=(0, 1), cost_gap=1.5,
+                            funneled_utilization=1.4):
+    """Streamed version of speed_trap_standoff() (see that function's docstring for the
+    mechanism) -- same 2-machine contest as _standoff_phase_jobs, but index[0] is
+    CONSISTENTLY cost_gap x cheaper for every job, never randomized/swapped. A routing rule
+    that greedily always picks the genuinely-cheaper machine (SMPT) is making the locally
+    correct choice every time, and that's the trap: it funnels the whole stream onto one
+    machine while the other sits idle, never noticing the queue it's building.
+
+    n_jobs is sized against funneled_utilization (>1.0 = if concentrated onto machine 0
+    alone, that machine is oversaturated for the whole phase -- guaranteed unbounded
+    backlog under -SMPT rules) rather than the balanced-capacity utilization
+    _standoff_phase_jobs uses, since here the two candidate machines are not
+    interchangeable by design -- one is unambiguously the "attractive" one.
+    """
+    n_jobs = max(1, int(funneled_utilization * duration / mean_duration))
+    jobs = []
+    interval = duration / n_jobs
+    for i in range(n_jobs):
+        t = t0 + i * interval
+        d = mean_duration * rng.uniform(0.85, 1.15)
+        jobs.append(job(id_start + i, t,
+                         [op("Mill", "any", 15.0),
+                          op(contested_type, list(indices), [d, d * cost_gap])]))
+    return jobs, n_jobs
+
+
 def _burst_phase_jobs(rng, id_start, t0, n_jobs=30, mean_duration=40.0,
                        bottleneck_type="Weld", index=1):
     """A deliberate shock -- every job lands in the same few seconds, unlike
@@ -551,6 +621,101 @@ def compound_scenario(seed=42):
     return s
 
 
+def compound_scenario_v2(seed=42):
+    """compound_scenario plus a new regime: speed_trap (see
+    speed_trap_standoff()/_speed_trap_phase_jobs docstrings). Every phase compound_scenario
+    had is unchanged and in the same order -- this is additive, not a replacement, so
+    compound_scenario stays available as-is for anything that already depends on it
+    (existing PDR baselines, prior training runs). speed_trap is inserted right after each
+    standoff (thematically closest: both are 2-machine routing contests, but standoff's
+    per-job-randomized cost gap happens to self-balance load under greedy-SMPT routing,
+    while speed_trap's consistent gap does not -- see speed_trap_standoff's docstring for
+    why that distinction turned out to matter empirically: SPT_SMPT loses to SRWT-family
+    rules by ~30-40% mean flow time here, the first tested regime in this scenario family
+    where it isn't at or near the top).
+
+    Timeline additions vs. compound_scenario (~15,855s total, 533 jobs):
+      ... quiet_3a, standoff_1, quiet_3b, speed_trap_1 ~1800s, quiet_3c, burst_1 ...
+      ... quiet_6a, standoff_2, quiet_6b, speed_trap_2 ~1800s, quiet_6c, quiet_7_cooldown
+
+    "_phases" metadata unchanged in shape/meaning from compound_scenario.
+    """
+    rng = random.Random(seed)
+    jobs = []
+    phases = []
+    jid = 0
+    t = 0.0
+
+    def record(name, t0, span, n):
+        phases.append({"name": name, "start": t0, "end": t0 + span, "n_jobs": n})
+
+    js, n = _quiet_phase_jobs(rng, jid, t, 400.0, n_jobs=15); jobs += js; jid += n
+    record("quiet_1", t, 400.0, n); t += 400.0 + 50.0
+
+    js, n = _bottleneck_phase_jobs(rng, jid, t, 1800.0); jobs += js; jid += n
+    record("bottleneck_1", t, 1800.0, n); t += 1800.0 + 50.0
+
+    js, n = _quiet_phase_jobs(rng, jid, t, 400.0, n_jobs=12); jobs += js; jid += n
+    record("quiet_2", t, 400.0, n); t += 400.0 + 50.0
+
+    js, n = _standoff_phase_jobs(rng, jid, t, 1800.0); jobs += js; jid += n
+    record("standoff_1", t, 1800.0, n); t += 1800.0 + 50.0
+
+    js, n = _quiet_phase_jobs(rng, jid, t, 400.0, n_jobs=12); jobs += js; jid += n
+    record("quiet_2b", t, 400.0, n); t += 400.0 + 50.0
+
+    js, n = _speed_trap_phase_jobs(rng, jid, t, 1800.0); jobs += js; jid += n
+    record("speed_trap_1", t, 1800.0, n); t += 1800.0 + 50.0
+
+    js, n = _quiet_phase_jobs(rng, jid, t, 400.0, n_jobs=12); jobs += js; jid += n
+    record("quiet_3", t, 400.0, n); t += 400.0 + 50.0
+
+    js, n = _burst_phase_jobs(rng, jid, t, n_jobs=30); jobs += js; jid += n
+    record("burst_1", t, 5.0, n); t += 300.0  # extra gap -- this one is meant to overflow
+
+    js, n = _quiet_phase_jobs(rng, jid, t, 400.0, n_jobs=12); jobs += js; jid += n
+    record("quiet_4", t, 400.0, n); t += 400.0 + 50.0
+
+    js, n, span = _starvation_phase_jobs(rng, jid, t, n_short=80); jobs += js; jid += n
+    record("starvation_1", t, span, n); t += span + 50.0
+
+    js, n = _quiet_phase_jobs(rng, jid, t, 400.0, n_jobs=12); jobs += js; jid += n
+    record("quiet_5", t, 400.0, n); t += 400.0 + 50.0
+
+    js, n = _bottleneck_phase_jobs(rng, jid, t, 1800.0); jobs += js; jid += n
+    record("bottleneck_2", t, 1800.0, n); t += 1800.0 + 50.0
+
+    js, n = _quiet_phase_jobs(rng, jid, t, 400.0, n_jobs=12); jobs += js; jid += n
+    record("quiet_6", t, 400.0, n); t += 400.0 + 50.0
+
+    js, n = _standoff_phase_jobs(rng, jid, t, 1800.0); jobs += js; jid += n
+    record("standoff_2", t, 1800.0, n); t += 1800.0 + 50.0
+
+    js, n = _quiet_phase_jobs(rng, jid, t, 400.0, n_jobs=12); jobs += js; jid += n
+    record("quiet_6b", t, 400.0, n); t += 400.0 + 50.0
+
+    js, n = _speed_trap_phase_jobs(rng, jid, t, 1800.0); jobs += js; jid += n
+    record("speed_trap_2", t, 1800.0, n); t += 1800.0 + 50.0
+
+    js, n = _quiet_phase_jobs(rng, jid, t, 400.0, n_jobs=15); jobs += js; jid += n
+    record("quiet_7_cooldown", t, 400.0, n); t += 400.0
+
+    s = scenario(
+        "compound_scenario_v2", jobs, seed=seed,
+        comment=(f"compound_scenario plus a new regime -- {len(jobs)} jobs across "
+                 f"{len(phases)} phases, ~{t:.0f}s total: quiet -> bottleneck -> quiet -> "
+                 f"standoff -> quiet -> speed_trap -> quiet -> burst -> quiet -> "
+                 f"starvation -> quiet -> bottleneck (repeat) -> quiet -> standoff "
+                 f"(repeat) -> quiet -> speed_trap (repeat) -> quiet_cooldown. speed_trap "
+                 f"is the first tested regime where SPT_SMPT (the rule that otherwise wins "
+                 f"or ties almost everywhere in compound_scenario) loses decisively to "
+                 f"SRWT-family routing -- see speed_trap_standoff()/_speed_trap_phase_jobs "
+                 f"for the mechanism. See _phases for exact start/end/n_jobs per phase."),
+    )
+    s["_phases"] = phases
+    return s
+
+
 # ─────────────────────────────────────────────────────────────────────────
 
 def main():
@@ -558,11 +723,13 @@ def main():
         zero_contention(),
         single_bottleneck(),
         two_machine_standoff(),
+        speed_trap_standoff(),
         sparse_bottleneck_floor(),
         identical_batch(),
         bimodal_mix(),
         convoy_waves(),
         compound_scenario(),
+        compound_scenario_v2(),
     ]
     for s in generators:
         write(os.path.join(OUT_DIR, f"{s['name']}.json"), s)
