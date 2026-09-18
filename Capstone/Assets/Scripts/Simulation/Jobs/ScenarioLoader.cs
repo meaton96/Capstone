@@ -203,8 +203,48 @@ namespace Assets.Scripts.Simulation.Jobs
                 MinOpsPerJob = minOps,
                 MaxOpsPerJob = maxOps,
                 AGVCount = agvCount,
-                Stochastic = null,   // deterministic — episode ends once every job exits
+                Stochastic = ReadStochastic(root),
+                dispatchingRule = ReadDispatchingRule(root),
             };
+        }
+
+        /// <summary>
+        /// Scripted scenarios are deterministic by default — Stochastic stays null and the episode
+        /// ends once every scripted job exits. A scenario JSON may still opt into a steady-state
+        /// time cap by including "stochastic": {"episodeDurationSeconds": N}, cutting the episode
+        /// short (in-flight jobs recorded as censored) while every other stochastic feature (machine
+        /// failures, Poisson arrivals, etc.) stays off — those need the full field set ConfigLoader
+        /// parses for generated configs, not yet supported here since no scenario has needed them.
+        /// </summary>
+        private static StochasticConfig ReadStochastic(JObject root)
+        {
+            var s = root["stochastic"] as JObject;
+            double duration = s?["episodeDurationSeconds"]?.Value<double>() ?? 0.0;
+            double warmup = s?["warmupSeconds"]?.Value<double>() ?? 0.0;
+            return (duration > 0.0 || warmup > 0.0)
+                ? new StochasticConfig { EpisodeDurationSeconds = duration, WarmupSeconds = warmup }
+                : null;
+        }
+
+        /// <summary>
+        /// The dispatching rule used to drive decisions before the RL agent is in control:
+        /// BaselineDrainMode batch runs (the rule under comparison) and, when WarmupSeconds &gt; 0,
+        /// the warm-up window of an RL episode. Defaults to FJSSPConfig's own default
+        /// (DispatchingRule.SRT_SRWT) when the scenario JSON doesn't specify one, matching every
+        /// existing scenario that predates this field.
+        /// </summary>
+        private static DispatchingRule ReadDispatchingRule(JObject root)
+        {
+            string name = root["dispatchingRule"]?.Value<string>();
+            if (name == null) return new FJSSPConfig().dispatchingRule;
+
+            if (!Enum.TryParse(name, ignoreCase: true, out DispatchingRule rule))
+            {
+                SimLogger.LogError($"[ScenarioLoader] Unknown dispatchingRule '{name}' — " +
+                                    "falling back to the default.");
+                return new FJSSPConfig().dispatchingRule;
+            }
+            return rule;
         }
 
         // ─────────────────────────────────────────────────────────────────────

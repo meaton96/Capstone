@@ -93,3 +93,6 @@ results/pre_time_fix
 linux_server/Results/
 
 docs
+
+__pycache__/
+*/__pycache__/

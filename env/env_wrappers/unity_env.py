@@ -17,15 +17,26 @@ Each episode Unity starts consumes one queued seed and reports it back in its me
 (episode_seed / episode_seed_index, -1 when the queue was empty). Seeds below
 @ref TRAIN_SEED_LOW are reserved for evaluation.
 
+Scripted scenarios (ScenarioLoader JSON) can replay a fixed instance (load_scenario) or, with
+a scenario_generator + seed_rng, a fresh seeded variant every episode — queued in lockstep with
+the seed above, one item per episode, buffered the same way. Long scenarios can opt into a
+steady-state time cap (a scenario's "stochastic": {"episodeDurationSeconds": N}); an episode cut
+short that way is truncated, not terminated: info["episode"]["truncated"] is set, and the info
+dict carries the truncated episode's own final observation as "terminal_obs" (Unity has already
+auto-reset by the time step() returns, so obs/next_obs is the new episode's first frame — the
+value network still needs terminal_obs to bootstrap the truncated one correctly; see
+rollout_buffer.RolloutBuffer.add).
+
 Side channel usage:
-  env.send_config(config_dict)   # applied on the next reset()
-  env.queue_seeds([3, 4, 5])     # instance seeds for upcoming episodes
-  info["telemetry"]              # per-episode events, attached when done=True
+  env.send_config(config_dict)      # applied on the next reset()
+  env.queue_seeds([3, 4, 5])        # instance seeds for upcoming episodes
+  env.queue_scenarios([path_or_dict, ...])  # scripted scenarios for upcoming episodes
+  info["telemetry"]                 # per-episode events, attached when done=True
 """
 
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from typing import Dict, Iterable, Optional, Tuple
+from typing import Callable, Dict, Iterable, Optional, Tuple, Union
 
 import numpy as np
 from mlagents_envs.base_env import ActionTuple
@@ -93,7 +104,8 @@ class UnitySchedulingEnv:
                  env_id: int = 0, seed_rng: Optional[np.random.Generator] = None,
                  capture_frame_rate: Optional[int] = 60,
                  target_frame_rate: Optional[int] = -1,
-                 extra_args: Optional[list] = None):
+                 extra_args: Optional[list] = None,
+                 scenario_generator: Optional[Callable[[int], dict]] = None):
         """
         @param reward_fn       Python reward function; None passes Unity's reward through.
         @param capture_frame_rate  Engine capture frame rate, as mlagents-learn sends. Without it Unity
@@ -107,7 +119,14 @@ class UnitySchedulingEnv:
         @param seed_rng        If set, every episode gets a training seed drawn from this RNG
                                (reproducible instances). None sends no seeds: Unity rebuilds the
                                factory each episode, so every episode replays the config's seed.
+        @param scenario_generator  If set, called with each drawn seed to build that episode's
+                                   scripted scenario (dict, ScenarioLoader schema); queued in
+                                   lockstep with the same seed. Requires seed_rng. None (with a
+                                   scenario separately queued via load_scenario/queue_scenarios)
+                                   replays whatever scenario was last queued, every episode.
         """
+        if scenario_generator is not None and seed_rng is None:
+            raise ValueError("scenario_generator needs seed_rng, to draw the seed each variant is built from")
         self.engine_channel = EngineConfigurationChannel()
         self.config_channel = EpisodeConfigChannel()
         self.seed_channel = EpisodeSeedChannel()
@@ -154,6 +173,7 @@ class UnitySchedulingEnv:
         self.reward_fn = reward_fn
         self.env_id = env_id
         self.seed_rng = seed_rng
+        self.scenario_generator = scenario_generator
         ## @brief Total env steps across all envs; set by VectorizedUnityEnv for reward schedules.
         self.global_step = 0
         self.episodes_completed = 0
@@ -194,11 +214,21 @@ class UnitySchedulingEnv:
     def load_scenario(self, path):
         """@brief Replay a scripted scenario JSON (ScenarioLoader schema) every episode.
 
-        @details Sent with the next reset(); Unity applies it from the next episode it starts
-        and keeps replaying it until another config or scenario is sent. The episode already
-        running when Python connects still uses the previous config.
+        @details Queues it once, cleared; Unity applies it from the next episode it starts and
+        keeps replaying it (the queue runs dry after one item) until another scenario is queued.
+        The episode already running when Python connects still uses the previous config.
         """
-        self.send_config({"scenarioPath": str(Path(path).resolve())})
+        self.queue_scenarios([str(Path(path).resolve())], clear=True)
+
+    def queue_scenarios(self, items: Iterable[Union[str, dict]], clear: bool = False):
+        """@brief Queue scripted scenarios; each episode Unity starts consumes one.
+
+        @param items  Each element a dict (inline scenario) or a path string, resolved to
+                      absolute here (see queue_seeds for why queueing ahead matters).
+        @param clear  Empty Unity's scenario queue first.
+        """
+        resolved = [item if isinstance(item, dict) else str(Path(item).resolve()) for item in items]
+        self.config_channel.queue_scenarios(resolved, clear=clear)
 
     def queue_seeds(self, seeds: Iterable[int], clear: bool = False):
         """@brief Queue instance seeds in Unity; each episode Unity starts consumes one.
@@ -227,7 +257,7 @@ class UnitySchedulingEnv:
             self.config_channel.send_config(self._pending_config)
             self._pending_config = None
         if self.seed_rng is not None:
-            self.queue_seeds(self._draw_training_seeds(SEED_BUFFER), clear=True)
+            self._refill_seeds_and_scenarios(SEED_BUFFER, clear=True)
 
         self.env.reset()
         decision, _ = self.env.get_steps(self.behavior_name)
@@ -238,8 +268,10 @@ class UnitySchedulingEnv:
 
         @return (obs, reward, done, info). @c info["reward_terms"] holds this step's named
                 reward terms. When @c done is True the episode just ended: @c reward is its
-                final reward, @c info["episode"] summarizes it, and @c obs is already the
-                first observation of the next episode.
+                final reward, @c info["episode"] summarizes it (including "truncated" — a
+                deliberate time-cap cutoff, not a real terminal), @c info["terminal_obs"] is
+                that ended episode's own last observation, and @c obs is already the first
+                observation of the next episode.
         """
         self.env.set_actions(
             self.behavior_name,
@@ -267,17 +299,31 @@ class UnitySchedulingEnv:
             self._prev_metrics = curr
             return self._extract_obs(decision), reward, False, info
 
+        # Unity has already auto-reset by now: decision (if present) is the NEW episode's first
+        # frame, not a continuation of the one that just ended. terminal_obs is that ended
+        # episode's own last observation — needed to bootstrap a truncated (not terminated)
+        # episode's value estimate, since there is no real "next state" to bootstrap from.
         info["episode"] = self._episode_summary(curr, interrupted=bool(terminal.interrupted[0]))
+        info["terminal_obs"] = self._extract_obs(terminal)
         info["telemetry"] = self.telemetry.pop_payload()
         self.episodes_completed += 1
         if self.seed_rng is not None:
-            # Unity already consumed a seed for the episode that just started; replace it.
-            self.queue_seeds(self._draw_training_seeds(1))
+            # Unity already consumed a seed (and scenario, if any) for the episode that just
+            # started; replace it so the buffer stays full ahead of the next one.
+            self._refill_seeds_and_scenarios(1, clear=False)
         next_obs = self._begin_episode(self._wait_for_decision(decision))
         return next_obs, reward, True, info
 
     def _draw_training_seeds(self, count: int) -> list:
         return self.seed_rng.integers(TRAIN_SEED_LOW, EpisodeSeedChannel.MAX_SEED, size=count).tolist()
+
+    def _refill_seeds_and_scenarios(self, count: int, clear: bool):
+        """@brief Queue @p count more training seeds, and — with scenario_generator set — the
+        matching scenario variants, so both queues advance together one item per episode."""
+        seeds = self._draw_training_seeds(count)
+        self.queue_seeds(seeds, clear=clear)
+        if self.scenario_generator is not None:
+            self.queue_scenarios([self.scenario_generator(seed) for seed in seeds], clear=clear)
 
     def _compute_reward(self, curr: Optional[MetricsSnapshot], unity_reward: float,
                         done: bool) -> Tuple[float, Dict[str, float]]:
@@ -322,6 +368,7 @@ class UnitySchedulingEnv:
                 mean_flow_time=final.flow_time_exited_sum / exited if exited else float("nan"),
                 deadlock=bool(final.deadlock),
                 timed_out=bool(final.timed_out),
+                truncated=bool(final.truncated),
             )
         return summary
 
@@ -352,7 +399,8 @@ class VectorizedUnityEnv:
                  base_worker_id: int = 0, timeout_wait: int = 300,
                  no_graphics: bool = False, decision_drain: bool = True,
                  log_dir: Optional[str] = None, train_seed: Optional[int] = None,
-                 parallel: bool = True):
+                 parallel: bool = True,
+                 scenario_generator: Optional[Callable[[int], dict]] = None):
         """
         @param reward_spec  Reward spec path or dict, or a @ref rewards.LoadedReward. Each env
                             gets its own reward instance. None passes Unity's reward through.
@@ -361,7 +409,14 @@ class VectorizedUnityEnv:
                             run's training instances are reproducible. None sends no seeds, so
                             every episode replays the config's own seed.
         @param parallel     Step and reset envs concurrently (default); False runs them one by one.
+        @param scenario_generator  If set, each env gets a fresh scripted-scenario variant every
+                                   episode, built by calling this with that episode's drawn seed
+                                   (each env draws from its own per-env RNG, so envs see different
+                                   variants). Requires train_seed.
         """
+        if scenario_generator is not None and train_seed is None:
+            raise ValueError("scenario_generator needs --train-seed, to draw the seed each variant is built from")
+
         loaded = None
         if reward_spec is not None:
             loaded = reward_spec if isinstance(reward_spec, LoadedReward) else load_reward(reward_spec)
@@ -380,6 +435,7 @@ class VectorizedUnityEnv:
                     log_file=None if log_dir is None else Path(log_dir) / f"Player-{i}.log",
                     env_id=i,
                     seed_rng=None if train_seed is None else np.random.default_rng([train_seed, i]),
+                    scenario_generator=scenario_generator,
                 ))
         except BaseException:
             # Don't leave already-launched players running when a later one fails to start.
@@ -423,12 +479,14 @@ class VectorizedUnityEnv:
             env.global_step = self.global_step
         results = self._map(lambda env, action: env.step(int(action)), self.envs, actions)
         obs_list, rewards, dones, infos = zip(*results)
+        truncateds = [bool(info["episode"]["truncated"]) if done else False
+                     for done, info in zip(dones, infos)]
 
         return (
             self._stack_obs(obs_list),
             np.array(rewards, dtype=np.float32),
             np.array(dones),
-            np.zeros(self.num_envs, dtype=bool),
+            np.array(truncateds, dtype=bool),
             list(infos),
         )
 

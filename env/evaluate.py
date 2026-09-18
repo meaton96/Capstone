@@ -162,18 +162,25 @@ def build_policies(pdr_spec: str, checkpoints, device: str, deterministic: bool)
     return policies
 
 
-def run_evaluation(env, policies: list, schedule: list, log=print, decision_writer=None) -> list:
+def run_evaluation(env, policies: list, schedule: list, log=print, decision_writer=None,
+                   scenario_generator=None) -> list:
     """@brief Play one episode per (policy index, seed) in @p schedule, in order.
 
-    @param env              A @ref UnitySchedulingEnv (or anything with queue_seeds / reset /
-                            step / current_metrics).
+    @param env              A @ref UnitySchedulingEnv (or anything with queue_seeds /
+                            queue_scenarios / reset / step / current_metrics).
     @param schedule         List of (policy index, seed); position i is queue index i in Unity.
     @param decision_writer  Optional csv.DictWriter (fields @ref DECISION_FIELDS) receiving one
                             row per decision of every scheduled episode.
+    @param scenario_generator  Optional seed -> scenario dict (see scenarios/); when set, each
+                               seed in @p schedule also queues that seed's scripted-scenario
+                               variant, in lockstep with the seed queue.
     @return One row dict per completed episode, in schedule order.
     """
     total = len(schedule)
-    env.queue_seeds([seed for _, seed in schedule], clear=True)
+    seeds = [seed for _, seed in schedule]
+    env.queue_seeds(seeds, clear=True)
+    if scenario_generator is not None:
+        env.queue_scenarios([scenario_generator(seed) for seed in seeds], clear=True)
     obs = env.reset()
     if env.current_metrics is None:
         raise RuntimeError("This Unity build has no reward-metrics sensor; rebuild the player.")
@@ -219,6 +226,7 @@ def run_evaluation(env, policies: list, schedule: list, log=print, decision_writ
             "jobs_exited": episode["jobs_exited"],
             "deadlock": episode["deadlock"],
             "timed_out": episode["timed_out"],
+            "truncated": episode["truncated"],
         })
         log(f"[{len(rows):4d}/{total}] seed {seed:5d}  {policy.name:28s} "
             f"makespan {episode['makespan']:7.1f}  total flow {episode['total_flow_time']:8.1f}  "
@@ -306,7 +314,15 @@ def main(argv=None):
                         help="train.py checkpoint to evaluate (repeatable)")
     parser.add_argument("--scenario", type=str, default=None,
                         help="Scripted scenario JSON (ScenarioLoader schema) to evaluate on instead of "
-                             "the generated default config; seeds then only label repeats")
+                             "the generated default config; seeds then only label repeats "
+                             "(mutually exclusive with --scenario-generator)")
+    parser.add_argument("--scenario-generator", type=str, default=None,
+                        choices=["compound"],
+                        help="Evaluate each seed on its own generated scripted-scenario variant "
+                             "instead of a fixed instance (see env/scenarios)")
+    parser.add_argument("--episode-duration-seconds", type=float, default=0.0,
+                        help="With --scenario-generator, cap each episode at this many sim-seconds "
+                             "(steady-state mode); 0 runs the scenario to its natural length")
     parser.add_argument("--decision-log", action="store_true",
                         help="Also write decisions.csv: every decision's chosen rule, plus the "
                              "action probabilities for checkpoints")
@@ -325,6 +341,15 @@ def main(argv=None):
     parser.add_argument("--no-decision-drain", action="store_true")
     parser.add_argument("--base-worker-id", type=int, default=0)
     args = parser.parse_args(argv)
+
+    if args.scenario and args.scenario_generator:
+        parser.error("--scenario and --scenario-generator are mutually exclusive")
+
+    scenario_generator = None
+    if args.scenario_generator:
+        from scenarios import REGISTRY
+        duration = args.episode_duration_seconds if args.episode_duration_seconds > 0 else None
+        scenario_generator = REGISTRY[args.scenario_generator](duration)
 
     seeds = parse_seeds(args.seeds)
     if max(seeds) >= TRAIN_SEED_LOW:
@@ -367,7 +392,7 @@ def main(argv=None):
     try:
         # Flush each progress line so it still shows up when stdout is piped or redirected.
         rows = run_evaluation(env, policies, schedule, log=lambda line: print(line, flush=True),
-                              decision_writer=decision_writer)
+                              decision_writer=decision_writer, scenario_generator=scenario_generator)
     finally:
         env.close()
         write_csv(out / "episodes.csv", rows)

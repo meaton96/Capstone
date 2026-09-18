@@ -1,0 +1,2 @@
+policy,kind,episodes,makespan_mean,makespan_std,total_flow_mean,mean_flow_time_mean,deadlocks,timeouts,makespan_gap_pct,flow_gap_pct
+SPT-SRWT,pdr,4,11343.945556640625,7.316308109991848,226372.39453125,591.0506384627937,0,0,0.0,0.0

@@ -143,6 +143,22 @@ namespace Assets.Scripts.Simulation.Types
         ///          when computing steady-state statistics.
         public double EpisodeDurationSeconds = 0.0;
 
+        // ── Warm-start (mid-cycle) episodes ──
+
+        /// @brief Sim-seconds run under the config's dispatchingRule before the RL agent takes
+        ///        over, 0 = disabled (agent controls from t=0, the default).
+        ///
+        /// @details Lets an episode "start" mid-scenario with realistic WIP already built up
+        ///          (machines busy, AGVs in transit, queues populated) instead of an empty
+        ///          floor, without any extra Python round-trips during the warm-up window —
+        ///          decisions in [0, WarmupSeconds) are resolved the same way BaselineDrainMode
+        ///          resolves them (see FactoryOrchestrator.InWarmup). The agent's first real
+        ///          decision, first observation, and first reward baseline all originate at
+        ///          SimTime=WarmupSeconds, so no reward-accounting changes are needed on the
+        ///          Python side — env/env_wrappers/unity_env.py seeds its reward baseline from
+        ///          whatever the first decision observation actually is.
+        public double WarmupSeconds = 0.0;
+
         // ── Convenience ──
 
         /// @brief True if any disruption source is active.

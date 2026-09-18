@@ -344,6 +344,38 @@ namespace Assets.Scripts.Simulation
         private double _deadlockSimTime = -1.0;
 
         /// <summary>
+        /// Set when the episode ends because it hit its deliberate steady-state time cap
+        /// (Stochastic.EpisodeDurationSeconds) with jobs still in flight — a cutoff, not a real
+        /// failure. Reported to Python via RewardMetrics so RL training bootstraps the value
+        /// function past it instead of treating it like a real terminal.
+        /// </summary>
+        private bool _truncatedByTimeLimit;
+
+        /// <summary>
+        /// SimTime at which the warm-up window (Stochastic.WarmupSeconds) ends and the RL agent
+        /// takes over. 0 (the default) means no warm-up -- the agent controls from t=0, unchanged
+        /// from every episode before this field existed.
+        /// </summary>
+        private double _warmupEndSimTime;
+
+        /// <summary>
+        /// True while SimTime is still inside the warm-up window. Decisions in this window are
+        /// resolved by <see cref="DrainHeuristicDecisions"/> exactly like BaselineDrainMode --
+        /// the fixed rule already resolved into _baselineRuleIndex/_baselineRuleIsRandom every
+        /// episode (see StartEpisode) drives the floor to a realistic mid-scenario state (busy
+        /// machines, in-transit AGVs, populated queues) with no Python round-trips, before the
+        /// agent's first real decision hands off from that state.
+        /// </summary>
+        private bool InWarmup => SimTime < _warmupEndSimTime;
+
+        /// <summary>
+        /// True from StartEpisode() until the tick FixedUpdate observes InWarmup go false --
+        /// a one-shot latch so the decisionCount/_decisionLog reset at hand-off fires exactly
+        /// once per episode instead of every tick after warm-up ends.
+        /// </summary>
+        private bool _warmupActive;
+
+        /// <summary>
         /// Singleton initialization. Destroys duplicate instances if one already exists.
         /// </summary>
         private void Awake()
@@ -614,7 +646,7 @@ namespace Assets.Scripts.Simulation
                 // Re-resolves "random" per call, matching DrainHeuristicDecisions' own resolution
                 // (line ~615) -- independent draws for job-selection vs. the eventual machine/job
                 // Execute-time choice, an accepted minor inconsistency specific to the Random PDR.
-                getBaselineActionIndex: () => BaselineDrainMode
+                getBaselineActionIndex: () => (BaselineDrainMode || InWarmup)
                     ? (_baselineRuleIsRandom ? UnityEngine.Random.Range(0, DispatchingEngine.ActionCount) : _baselineRuleIndex)
                     : -1
             );
@@ -624,12 +656,18 @@ namespace Assets.Scripts.Simulation
             _decisionLog.Clear();
             IsWaitingForAction = false;
             _simTime = 0.0;
+            _warmupEndSimTime = currentConfig.Stochastic?.WarmupSeconds ?? 0.0;
+            _warmupActive = _warmupEndSimTime > 0.0;
+            if (_warmupActive)
+                SimLogger.Low($"[Orchestrator] Warm-up armed: {_warmupEndSimTime:F0}s under " +
+                              $"{currentConfig.dispatchingRule} before the agent takes over.");
 
             // ── Arm deadlock watchdog ────────────────────────────────────────────
             _lastZoneTraversalTotal = -1;
             _lastTraversalChangeSimTime = 0.0;
             _deadlockDetected = false;
             _deadlockSimTime = -1.0;
+            _truncatedByTimeLimit = false;
 
             // ── Arm Poisson arrival clock ──────────────────────────────────────
             _dynamicJobsSpawned = 0;
@@ -697,11 +735,19 @@ namespace Assets.Scripts.Simulation
                 return;
             }
 
+            // Relative to _warmupEndSimTime (0 when WarmupSeconds is unset, so this is exactly
+            // "SimTime > fixedDuration" for every episode before WarmupSeconds existed) --
+            // EpisodeDurationSeconds caps the agent's counted window, not absolute SimTime.
+            // Without the offset, a warm-up cutoff past the cap (e.g. an 8555s random-phase
+            // offset with a 1800s cap) truncates the episode while still inside warm-up: zero
+            // decisions ever reach the agent, Academy.EnvironmentStep() never fires, and Python's
+            // step() blocks with no response until its own RPC timeout kills the run.
             double fixedDuration = currentConfig?.Stochastic?.EpisodeDurationSeconds ?? 0.0;
-            if (fixedDuration > 0.0 && SimTime > fixedDuration)
+            if (fixedDuration > 0.0 && SimTime > _warmupEndSimTime + fixedDuration)
             {
                 SimLogger.Low($"[Orchestrator] Fixed episode duration reached at {SimTime:F0}s — " +
                               $"terminating (steady-state mode; in-flight jobs recorded as censored).");
+                _truncatedByTimeLimit = true;
                 FinaliseEpisode();
                 return;
             }
@@ -728,9 +774,22 @@ namespace Assets.Scripts.Simulation
             _flags.HarvestAlmostDoneFlags(PreDispatchLeadTime);
             _flags.AssignAGVs();
 
+            if (_warmupActive && !InWarmup)
+            {
+                // Warm-up just ended this tick -- hand off to the RL agent with a clean slate.
+                // decisionCount/_decisionLog are episode-scoped counters consumed by CSV/decision-
+                // log output; without this reset they'd carry the warm-up's fixed-rule decisions,
+                // which aren't the agent's and would pollute both.
+                _warmupActive = false;
+                decisionCount = 0;
+                _decisionLog.Clear();
+                SimLogger.Low($"[Orchestrator] Warm-up complete at {SimTime:F0}s — RL agent now in " +
+                              "control (decisionCount and decision log reset).");
+            }
+
             if (!IsWaitingForAction)
             {
-                if (BaselineDrainMode)
+                if (BaselineDrainMode || InWarmup)
                     DrainHeuristicDecisions();
                 else if (RLDecisionDrainMode)
                     DrainRLDecisions();
@@ -1332,7 +1391,7 @@ namespace Assets.Scripts.Simulation
                                agvPool != null ? agvPool.AllAGVs : null,
                                trafficZoneManager != null ? trafficZoneManager.Zones : null,
                                _tracker, _deadlockDetected, SimTime > MAX_EPISODE_SIM_SECONDS,
-                               _episodeSeed, _episodeSeedIndex);
+                               _episodeSeed, _episodeSeedIndex, _truncatedByTimeLimit);
         }
 
         /// <summary>

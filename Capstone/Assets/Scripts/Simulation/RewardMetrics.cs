@@ -24,7 +24,7 @@ namespace Assets.Scripts.Simulation
     /// </summary>
     public static class RewardMetrics
     {
-        public const int SchemaVersion = 2;
+        public const int SchemaVersion = 3;
 
         public static readonly string[] Names =
         {
@@ -75,6 +75,13 @@ namespace Assets.Scripts.Simulation
             // v2
             "episode_seed",               // instance seed from EpisodeSeedChannel, -1 if none was queued
             "episode_seed_index",         // that seed's position in the queue since the last clear, -1 if none
+
+            // v3
+            "truncated",                  // hit a deliberate steady-state time cap (Stochastic.EpisodeDurationSeconds)
+                                           // with jobs still in flight — a cutoff, not a real failure. Distinct from
+                                           // "timed_out" (the MAX_EPISODE_SIM_SECONDS absolute safety net) and from
+                                           // "deadlock"/"all_jobs_exited". RL training should still bootstrap the
+                                           // value function past a truncated episode end; see env/rollout_buffer.py.
         };
 
         public static int Count => Names.Length;
@@ -87,7 +94,7 @@ namespace Assets.Scripts.Simulation
                                 JobStore jobs, IReadOnlyList<PhysicalMachine> machines,
                                 IReadOnlyList<AGVController> agvs, IReadOnlyList<TrafficZone> zones,
                                 EpisodeTracker tracker, bool deadlock, bool timedOut,
-                                int episodeSeed, int episodeSeedIndex)
+                                int episodeSeed, int episodeSeedIndex, bool truncated)
         {
             int jobsTotal = 0, exited = 0, opsTotal = 0, opsDone = 0;
             int nRouting = 0, nWaiting = 0, nTransit = 0, nQueued = 0, nProcessing = 0;
@@ -214,6 +221,8 @@ namespace Assets.Scripts.Simulation
 
             buffer[i++] = episodeSeed;
             buffer[i++] = episodeSeedIndex;
+
+            buffer[i++] = truncated ? 1f : 0f;
 
             if (i != Count)
                 SimLogger.Error($"[RewardMetrics] Fill wrote {i} values but Names has {Count} — they are out of sync.");

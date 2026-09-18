@@ -65,13 +65,15 @@ def obs_to_torch(obs: dict, device: str) -> dict:
     }
 
 
-def build_env(args, ppo_cfg, run_dir: Path, reward):
+def build_env(args, ppo_cfg, run_dir: Path, reward, scenario_generator=None):
     """@brief Factory function to create the appropriate vectorized env.
 
     @param args     Parsed CLI arguments (checked for --unity flag).
     @param ppo_cfg  PPO config with num_envs.
     @param run_dir  Run output directory (Unity player logs go here).
     @param reward   Loaded reward spec for the Unity backend.
+    @param scenario_generator  Optional seed -> scenario callable (see scenarios/); each env
+                               then gets a fresh scripted-scenario variant every episode.
     @return Tuple of (vec_env, obs_shapes_dict).
     """
     obs_shapes = {
@@ -95,6 +97,7 @@ def build_env(args, ppo_cfg, run_dir: Path, reward):
             log_dir=run_dir,
             train_seed=None if args.train_seed < 0 else args.train_seed,
             parallel=not args.sequential_envs,
+            scenario_generator=scenario_generator,
         )
     else:
         from env_wrappers.placeholder_env import VectorizedPlaceholderEnv
@@ -105,7 +108,7 @@ def build_env(args, ppo_cfg, run_dir: Path, reward):
 
 EPISODE_CSV_FIELDS = [
     "global_step", "env", "seed", "seed_index", "return", "length", "makespan",
-    "mean_flow_time", "total_flow_time", "jobs_exited", "deadlock", "timed_out",
+    "mean_flow_time", "total_flow_time", "jobs_exited", "deadlock", "timed_out", "truncated",
 ]
 
 
@@ -129,12 +132,40 @@ def log_episodes(writer: SummaryWriter, infos, global_step: int, recent: deque,
             value = episode.get(key)
             if value is not None and not math.isnan(value):
                 writer.add_scalar(f"episode/{key}", value, global_step)
-        for key in ("deadlock", "timed_out", "interrupted"):
+        for key in ("deadlock", "timed_out", "truncated", "interrupted"):
             if key in episode:
                 writer.add_scalar(f"episode/{key}", float(episode[key]), global_step)
         for name, total in episode.get("reward_terms", {}).items():
             writer.add_scalar(f"reward_terms/{name}", total, global_step)
     return finished
+
+
+def compute_truncation_bootstrap(net, truncateds: np.ndarray, infos, device: str) -> np.ndarray:
+    """@brief V(terminal_obs) for each truncated env this step, 0 for every other env.
+
+    @details Unity has already auto-reset a done env by the time step() returns, so obs/next_obs
+    is the new episode's first frame — not the state to bootstrap the ended (truncated) one from.
+    info["terminal_obs"] (Unity backend only) carries that ended episode's own last observation
+    instead; this is the only place it's used (see rollout_buffer.RolloutBuffer.add /
+    compute_gae). The placeholder backend has no "terminal_obs", so its truncations get no
+    correction (0, the same as before this existed) — a reasonable fallback, not the backend this
+    was built for. A per-env loop is fine here: truncation is rare (only at a scenario's
+    time-limit cutoff), typically 0-1 envs per step, not the hot path a batched call would be
+    worth optimizing.
+    """
+    bootstrap = np.zeros(len(truncateds), dtype=np.float32)
+    if not truncateds.any():
+        return bootstrap
+    with torch.no_grad():
+        for i in np.flatnonzero(truncateds):
+            term_obs = infos[i].get("terminal_obs")
+            if term_obs is None:
+                continue
+            term_obs_t = {k: torch.tensor(v[None], dtype=torch.float32, device=device)
+                         for k, v in term_obs.items()}
+            _, _, value = net.act(term_obs_t)
+            bootstrap[i] = value.item()
+    return bootstrap
 
 
 def save_checkpoint(path: Path, net, optimizer, global_step: int, ppo_cfg: PPOConfig,
@@ -196,8 +227,40 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
 
     optimizer = torch.optim.Adam(net.parameters(), lr=ppo_cfg.lr, eps=1e-5)
 
+    resumed_global_step = 0
+    if args.resume_from:
+        ckpt = torch.load(args.resume_from, map_location=device)
+        net.load_state_dict(ckpt["model_state_dict"])
+        optimizer.load_state_dict(ckpt["optimizer_state_dict"])
+        resumed_global_step = ckpt["global_step"]
+        ckpt_reward = ckpt.get("reward")
+        print(f"\nResumed from {args.resume_from} at step {resumed_global_step:,} "
+              f"(checkpoint reward: {ckpt_reward})")
+        if args.unity and ckpt_reward is not None and ckpt_reward != reward.name:
+            print(f"[WARNING] --reward-spec is '{reward.name}' but the checkpoint was trained "
+                  f"with '{ckpt_reward}' -- continuing anyway, but this changes the objective "
+                  "mid-training.")
+
+    # ---- Scripted scenario: a fixed file, a generator of fresh seeded variants, or neither ----
+    scenario_generator = None
+    if args.unity and args.scenario_generator:
+        if args.scenario:
+            raise ValueError("--scenario and --scenario-generator are mutually exclusive")
+        if args.train_seed < 0:
+            raise ValueError("--scenario-generator needs --train-seed >= 0, to draw variant seeds")
+        from scenarios import REGISTRY
+        duration = args.episode_duration_seconds if args.episode_duration_seconds > 0 else None
+        scenario_generator = REGISTRY[args.scenario_generator](
+            duration, random_warmup=args.random_warmup,
+            warmup_dispatching_rule=args.warmup_dispatching_rule)
+        print(f"\nScenario generator: {args.scenario_generator}"
+              + (f" (episode_duration_seconds={args.episode_duration_seconds})"
+                 if args.episode_duration_seconds else "")
+              + (f" (random_warmup, rule={args.warmup_dispatching_rule or 'default'})"
+                 if args.random_warmup else ""))
+
     # ---- Initialize environments ----
-    vec_env, obs_shapes = build_env(args, ppo_cfg, run_dir, reward)
+    vec_env, obs_shapes = build_env(args, ppo_cfg, run_dir, reward, scenario_generator)
     if args.unity and args.scenario:
         vec_env.load_scenario_all(args.scenario)
         shutil.copy2(args.scenario, run_dir / "scenario.json")
@@ -215,30 +278,49 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
     writer = SummaryWriter(log_dir=str(run_dir))
 
     # ---- Training loop ----
-    num_updates = max(1, ppo_cfg.total_timesteps // (
-        ppo_cfg.rollout_length * ppo_cfg.num_envs
-    ))
-    global_step = 0
+    # total_timesteps is always the target CUMULATIVE step count, resumed or not -- resuming at
+    # step 300k with --total-timesteps 500k trains 200k more, not 500k more.
+    steps_per_update = ppo_cfg.rollout_length * ppo_cfg.num_envs
+    remaining_steps = max(0, ppo_cfg.total_timesteps - resumed_global_step)
+    num_updates = remaining_steps // steps_per_update
+    if not args.resume_from:
+        num_updates = max(1, num_updates)   # unresumed runs always do at least one update
+    global_step = resumed_global_step
     episodes_done = 0
     recent_episodes = deque(maxlen=20)
     start_time = time.time()
     reward_name = reward.name if reward is not None else None
     ckpt_path = run_dir / "checkpoint.pt"
-    # Untrained starting policy, as a reference point for evaluation.
-    save_checkpoint(run_dir / "checkpoint_init.pt", net, optimizer, 0, ppo_cfg, reward_name)
+    if not args.resume_from:
+        # Untrained starting policy, as a reference point for evaluation. Skipped when resuming
+        # -- that file already exists from the original run and still means "untrained".
+        save_checkpoint(run_dir / "checkpoint_init.pt", net, optimizer, 0, ppo_cfg, reward_name)
 
     backend = "Unity" if args.unity else "Placeholder"
     print(f"\nBackend: {backend}")
     print(f"Run directory: {run_dir}")
-    print(f"Training for {ppo_cfg.total_timesteps:,} timesteps")
+    if args.resume_from:
+        print(f"Resuming at step {global_step:,} — {remaining_steps:,} more of "
+              f"{ppo_cfg.total_timesteps:,} target timesteps")
+    else:
+        print(f"Training for {ppo_cfg.total_timesteps:,} timesteps")
     print(f"  {num_updates} updates × {ppo_cfg.rollout_length} steps "
           f"× {ppo_cfg.num_envs} envs")
     print(f"  Device: {device}")
     print()
+    if num_updates == 0:
+        print("Already at or past --total-timesteps -- nothing to do. Pass a larger "
+              "--total-timesteps to train further.\n")
 
-    episode_file = open(run_dir / "episodes.csv", "w", newline="")
+    # Append when resuming into the same run_dir (keeps prior episode history); write mode
+    # otherwise. Header only if the file is new/empty either way.
+    episode_file_path = run_dir / "episodes.csv"
+    resuming_existing_log = bool(args.resume_from) and episode_file_path.exists() \
+        and episode_file_path.stat().st_size > 0
+    episode_file = open(episode_file_path, "a" if args.resume_from else "w", newline="")
     episode_csv = csv.DictWriter(episode_file, fieldnames=EPISODE_CSV_FIELDS)
-    episode_csv.writeheader()
+    if not resuming_existing_log:
+        episode_csv.writeheader()
 
     try:
         for update in range(1, num_updates + 1):
@@ -263,8 +345,9 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
                     actions_np
                 )
                 dones = np.logical_or(terminateds, truncateds).astype(np.float32)
+                bootstrap_values = compute_truncation_bootstrap(net, truncateds, infos, device)
 
-                buffer.add(obs, actions_np, log_probs_np, rewards, values_np, dones)
+                buffer.add(obs, actions_np, log_probs_np, rewards, values_np, dones, bootstrap_values)
                 obs = next_obs
                 episodes_done += log_episodes(writer, infos, global_step, recent_episodes, episode_csv)
 
@@ -324,7 +407,10 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
 
             # ---- Logging ----
             elapsed = time.time() - start_time
-            sps = global_step / elapsed
+            # global_step - resumed_global_step, not global_step: SPS is this invocation's
+            # throughput, and global_step alone (absolute, including a resumed run's prior
+            # steps) divided by only this invocation's elapsed time would be inflated.
+            sps = (global_step - resumed_global_step) / elapsed
             update_time = time.time() - update_start
 
             avg_reward = buffer.rewards.mean()
@@ -372,7 +458,7 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
     elapsed = time.time() - start_time
     print(f"\nCheckpoint saved to {ckpt_path}")
     print(f"Total training time: {elapsed:.1f}s")
-    print(f"Average SPS: {global_step / elapsed:.0f}")
+    print(f"Average SPS: {(global_step - resumed_global_step) / elapsed:.0f}")
 
     return net
 
@@ -393,6 +479,13 @@ if __name__ == "__main__":
     parser.add_argument("--results-dir", type=str, default=str(REPO_ROOT / "results"))
     parser.add_argument("--save-every", type=int, default=0,
                         help="Also checkpoint every N updates (0 = only at the end)")
+    parser.add_argument("--resume-from", type=str, default=None,
+                        help="Path to a checkpoint .pt (e.g. results/<run>/checkpoint.pt) to "
+                             "resume from: loads model/optimizer state and continues global_step "
+                             "from where it left off, training up to --total-timesteps total "
+                             "(not +total-timesteps more). RNG state isn't saved/restored, so the "
+                             "resumed run's minibatch order isn't a bitwise continuation of the "
+                             "original -- only the learned weights and optimizer state are.")
 
     # Unity-specific flags
     parser.add_argument("--unity", action="store_true",
@@ -413,7 +506,26 @@ if __name__ == "__main__":
                              "reproducible; -1 sends no seeds, so every episode replays the config's "
                              "own seed (Unity rebuilds the factory each episode)")
     parser.add_argument("--scenario", type=str, default=None,
-                        help="Scripted scenario JSON (ScenarioLoader schema) to replay every episode")
+                        help="Scripted scenario JSON (ScenarioLoader schema) to replay every episode "
+                             "(mutually exclusive with --scenario-generator)")
+    parser.add_argument("--scenario-generator", type=str, default=None,
+                        choices=["compound"],
+                        help="Generate a fresh seeded scripted-scenario variant every episode "
+                             "(see env/scenarios); needs --train-seed >= 0")
+    parser.add_argument("--episode-duration-seconds", type=float, default=0.0,
+                        help="With --scenario-generator, cap each episode at this many sim-seconds "
+                             "(steady-state mode: in-flight jobs censored, episode truncated not "
+                             "terminated); 0 runs the scenario to its natural length")
+    parser.add_argument("--random-warmup", action="store_true",
+                        help="With --scenario-generator, run each episode's floor forward under "
+                             "--warmup-dispatching-rule to a random phase-boundary offset (drawn "
+                             "from the episode's own seed) before the RL agent takes over, instead "
+                             "of always starting at t=0 -- gives phase-diverse exposure at cheap "
+                             "episode length; combine with --episode-duration-seconds for a random "
+                             "phase-aligned window instead of always phases 1-3")
+    parser.add_argument("--warmup-dispatching-rule", type=str, default=None,
+                        help="DispatchingRule name (e.g. SPT_SMPT) driving the --random-warmup "
+                             "window; defaults to the scenario's own default rule (SRT_SRWT) if unset")
     parser.add_argument("--sequential-envs", action="store_true",
                         help="Step Unity envs one after another instead of concurrently")
     parser.add_argument("--base-worker-id", type=int, default=0,

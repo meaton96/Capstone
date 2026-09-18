@@ -36,11 +36,15 @@ class FakeEnv:
     def __init__(self, length=2):
         self.length = length
         self.queue, self.consumed = [], 0
+        self.queued_scenarios = []   # every queue_scenarios(items, clear) call, for assertions
 
     def queue_seeds(self, seeds, clear=False):
         if clear:
             self.queue, self.consumed = [], 0
         self.queue += list(seeds)
+
+    def queue_scenarios(self, items, clear=False):
+        self.queued_scenarios.append((list(items), clear))
 
     def reset(self):
         self._start(-1, -1)
@@ -60,7 +64,7 @@ class FakeEnv:
         episode = {
             "seed": self.seed, "seed_index": self.index, "makespan": self.seed * 10 + action,
             "mean_flow_time": 1.0, "total_flow_time": 2.0, "return": -1.0, "length": self.length,
-            "jobs_exited": 15, "deadlock": False, "timed_out": False,
+            "jobs_exited": 15, "deadlock": False, "timed_out": False, "truncated": False,
         }
         if self.queue:
             self._start(self.queue.pop(0), self.consumed)
@@ -99,6 +103,28 @@ def test_run_evaluation_attributes_episodes_to_policies():
         ("A", 7, 73), ("B", 7, 75), ("A", 8, 83), ("B", 8, 85),
     ]
     assert [r["seed_index"] for r in rows] == [0, 1, 2, 3]
+
+
+def test_run_evaluation_queues_matching_scenarios_when_generator_given():
+    """@brief With a scenario_generator, each queued seed's scenario variant must be queued too,
+    in the same order, cleared together with the seed queue."""
+    policies = [ConstantPolicy(3, "A")]
+    schedule = [(0, seed) for seed in (11, 22, 33)]
+    generator = lambda seed: {"name": f"variant-{seed}", "seed": seed}  # noqa: E731
+    env = FakeEnv()
+    run_evaluation(env, policies, schedule, log=lambda *_: None, scenario_generator=generator)
+    assert len(env.queued_scenarios) == 1
+    items, clear = env.queued_scenarios[0]
+    assert items == [generator(seed) for _, seed in schedule]
+    assert clear is True
+
+
+def test_run_evaluation_queues_no_scenarios_without_generator():
+    """@brief Without a scenario_generator (the default: evaluate on the generated config or a
+    fixed --scenario), queue_scenarios must not be called at all."""
+    env = FakeEnv()
+    run_evaluation(env, [ConstantPolicy(3, "A")], [(0, 1)], log=lambda *_: None)
+    assert env.queued_scenarios == []
 
 
 def test_decision_log_records_every_decision_of_scheduled_episodes():

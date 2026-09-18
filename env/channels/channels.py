@@ -35,6 +35,10 @@ class EpisodeConfigChannel(SideChannel):
     Sends a full FJSSPConfig JSON blob to Unity before each episode reset.
     Unity's EpisodeConfigChannel.OnMessageReceived() deserialises it into
     a FJSSPConfig and makes it available via ConsumeConfig().
+
+    Also carries scripted ScenarioLoader scenarios (see queue_scenarios): a queue, one item
+    consumed per episode Unity starts, buffered ahead the same way EpisodeSeedChannel buffers
+    seeds — Unity starts the next episode before Python sees the previous one end.
     """
 
     CHANNEL_ID = uuid.UUID("b1e2c3d4-f5a6-7890-bcde-f01234567891")
@@ -80,6 +84,22 @@ class EpisodeConfigChannel(SideChannel):
         """
         msg = OutgoingMessage()
         msg.write_string(json.dumps(config))
+        super().queue_message_to_send(msg)
+
+    def queue_scenarios(self, items, clear: bool = False):
+        """
+        Queue scripted scenarios; each episode Unity starts consumes one. Delivered with the
+        next reset()/step(). When the queue runs dry, Unity keeps replaying whichever scenario
+        it last consumed — so a single one-shot item behaves like the old sticky single-slot API.
+
+        Args:
+            items: list, each element either a dict (an inline scenario, ScenarioLoader JSON
+                   schema) or a str (an absolute path to a scenario file).
+            clear: empty Unity's queue first.
+        """
+        encoded = [item if isinstance(item, str) else dict(item) for item in items]
+        msg = OutgoingMessage()
+        msg.write_string(json.dumps({"scenarios": encoded, "clear": bool(clear)}))
         super().queue_message_to_send(msg)
 
 
