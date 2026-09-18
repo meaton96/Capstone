@@ -72,4 +72,13 @@ def test_compound_generator_is_a_seed_to_scenario_callable():
 
 
 def test_registry_has_compound():
-    assert REGISTRY["compound"] is compound_generator
+    # REGISTRY["compound"] is a variant-bound wrapper around compound_generator (not
+    # compound_generator itself, now that it takes a `variant` param) -- check behavior:
+    # it must produce the same scenario compound_generator(variant="compound") would.
+    assert REGISTRY["compound"]()(7) == compound_generator(variant="compound")(7)
+
+
+def test_registry_has_compound_v2():
+    scenario = REGISTRY["compound_v2"]()(7)
+    assert scenario["name"] == "compound_scenario_v2"
+    assert scenario != REGISTRY["compound"]()(7)

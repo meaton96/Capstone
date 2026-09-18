@@ -66,6 +66,18 @@ namespace Assets.Scripts.Simulation.Types
         /// @brief Number of AGVs in the fleet for material transport.
         public int AGVCount;
 
+        /// @brief AGV travel speed (units/sim-second), overriding the AGV prefab's own
+        ///        serialized default (3.5) when set. Null = use the prefab's value.
+        /// @details Lets a config raise/lower physical transit time relative to job processing
+        ///          time — e.g. faster AGVs shrink inter-arrival gaps at a machine without
+        ///          changing the scripted job-generation rate, so decisions are less often
+        ///          degenerate (0-1 real candidates) purely because AGV transit spaced jobs out.
+        public float? AGVMoveSpeed = null;
+
+        /// @brief AGV pickup/dropoff handshake duration (sim-seconds), overriding the AGV
+        ///        prefab's own serialized default (1.5) when set. Null = use the prefab's value.
+        public float? AGVHandshakeDuration = null;
+
         // ── Flexibility ──
 
         /// @brief Probability [0,1] that a machine gains each non-primary type as a
@@ -147,6 +159,8 @@ namespace Assets.Scripts.Simulation.Types
                 MinOpsPerJob = MinOpsPerJob,
                 MaxOpsPerJob = MaxOpsPerJob,
                 AGVCount = AGVCount,
+                AGVMoveSpeed = AGVMoveSpeed,
+                AGVHandshakeDuration = AGVHandshakeDuration,
                 dispatchingRule = dispatchingRule,
                 ProcTimeParams = new Dictionary<MachineType, (float mu, float sigma)>(ProcTimeParams),
                 Stochastic = Stochastic,

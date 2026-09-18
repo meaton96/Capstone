@@ -203,6 +203,8 @@ namespace Assets.Scripts.Simulation.Jobs
                 MinOpsPerJob = minOps,
                 MaxOpsPerJob = maxOps,
                 AGVCount = agvCount,
+                AGVMoveSpeed = root["agvMoveSpeed"]?.Value<float>(),
+                AGVHandshakeDuration = root["agvHandshakeDuration"]?.Value<float>(),
                 Stochastic = ReadStochastic(root),
                 dispatchingRule = ReadDispatchingRule(root),
             };
@@ -210,20 +212,48 @@ namespace Assets.Scripts.Simulation.Jobs
 
         /// <summary>
         /// Scripted scenarios are deterministic by default — Stochastic stays null and the episode
-        /// ends once every scripted job exits. A scenario JSON may still opt into a steady-state
-        /// time cap by including "stochastic": {"episodeDurationSeconds": N}, cutting the episode
-        /// short (in-flight jobs recorded as censored) while every other stochastic feature (machine
-        /// failures, Poisson arrivals, etc.) stays off — those need the full field set ConfigLoader
-        /// parses for generated configs, not yet supported here since no scenario has needed them.
+        /// ends once every scripted job exits. A scenario JSON may opt into any of the same
+        /// disruption features ConfigLoader/EpisodeConfigChannel already support for generated
+        /// configs (machine/AGV failures, Poisson arrivals, the steady-state time cap, warm-up) via
+        /// a "stochastic" block with the same field names as those two — see StochasticConfig for
+        /// what each one does and its default. Absent entirely (or every field at its
+        /// StochasticConfig default), Stochastic stays null, identical to every scenario predating
+        /// this field.
         /// </summary>
         private static StochasticConfig ReadStochastic(JObject root)
         {
             var s = root["stochastic"] as JObject;
-            double duration = s?["episodeDurationSeconds"]?.Value<double>() ?? 0.0;
-            double warmup = s?["warmupSeconds"]?.Value<double>() ?? 0.0;
-            return (duration > 0.0 || warmup > 0.0)
-                ? new StochasticConfig { EpisodeDurationSeconds = duration, WarmupSeconds = warmup }
-                : null;
+            if (s == null) return null;
+
+            var defaults = new StochasticConfig();
+            var cfg = new StochasticConfig
+            {
+                MachineFailuresEnabled = s["machineFailuresEnabled"]?.Value<bool>() ?? defaults.MachineFailuresEnabled,
+                WeibullK = s["weibullK"]?.Value<float>() ?? defaults.WeibullK,
+                WeibullLambda = s["weibullLambda"]?.Value<float>() ?? defaults.WeibullLambda,
+                RepairLogMu = s["repairLogMu"]?.Value<float>() ?? defaults.RepairLogMu,
+                RepairLogSigma = s["repairLogSigma"]?.Value<float>() ?? defaults.RepairLogSigma,
+                AGVFailuresEnabled = s["agvFailuresEnabled"]?.Value<bool>() ?? defaults.AGVFailuresEnabled,
+                AGVWeibullLambda = s["agvWeibullLambda"]?.Value<float>() ?? defaults.AGVWeibullLambda,
+                AGVRepairLogMu = s["agvRepairLogMu"]?.Value<float>() ?? defaults.AGVRepairLogMu,
+                AGVRepairLogSigma = s["agvRepairLogSigma"]?.Value<float>() ?? defaults.AGVRepairLogSigma,
+                DynamicArrivalsEnabled = s["dynamicArrivalsEnabled"]?.Value<bool>() ?? defaults.DynamicArrivalsEnabled,
+                ArrivalLambda = s["arrivalLambda"]?.Value<float>() ?? defaults.ArrivalLambda,
+                DynamicJobCap = s["dynamicJobCap"]?.Value<int>() ?? defaults.DynamicJobCap,
+                BurstArrivalsEnabled = s["burstArrivalsEnabled"]?.Value<bool>() ?? defaults.BurstArrivalsEnabled,
+                BurstSizeMean = s["burstSizeMean"]?.Value<float>() ?? defaults.BurstSizeMean,
+                EpisodeDurationSeconds = s["episodeDurationSeconds"]?.Value<double>() ?? defaults.EpisodeDurationSeconds,
+                WarmupSeconds = s["warmupSeconds"]?.Value<double>() ?? defaults.WarmupSeconds,
+            };
+
+            // A "stochastic" block containing only defaults (e.g. {} or a stale/no-op block) is
+            // equivalent to no block at all -- keep returning null in that case, matching every
+            // scenario written before this field existed and avoiding pointlessly allocating a
+            // Stochastic config that does nothing.
+            bool anyNonDefault =
+                cfg.MachineFailuresEnabled || cfg.AGVFailuresEnabled || cfg.DynamicArrivalsEnabled
+                || cfg.BurstArrivalsEnabled || cfg.EpisodeDurationSeconds > 0.0 || cfg.WarmupSeconds > 0.0;
+            return anyNonDefault ? cfg : null;
         }
 
         /// <summary>

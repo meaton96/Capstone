@@ -317,7 +317,7 @@ def main(argv=None):
                              "the generated default config; seeds then only label repeats "
                              "(mutually exclusive with --scenario-generator)")
     parser.add_argument("--scenario-generator", type=str, default=None,
-                        choices=["compound"],
+                        choices=["compound", "compound_v2"],
                         help="Evaluate each seed on its own generated scripted-scenario variant "
                              "instead of a fixed instance (see env/scenarios)")
     parser.add_argument("--episode-duration-seconds", type=float, default=0.0,

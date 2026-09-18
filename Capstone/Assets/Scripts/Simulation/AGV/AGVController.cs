@@ -193,8 +193,16 @@ namespace Assets.Scripts.Simulation.AGV
 
 
         /// @brief Sets up the AGV identity and initializes navigation components.
-        public void Initialize(int id)
+        /// @param moveSpeed  Overrides the prefab's serialized moveSpeed when set (see
+        ///                   FJSSPConfig.AGVMoveSpeed). Null keeps the prefab's own value.
+        /// @param handshakeDuration  Overrides the prefab's serialized handshakeDuration when
+        ///                   set (see FJSSPConfig.AGVHandshakeDuration). Null keeps the
+        ///                   prefab's own value.
+        public void Initialize(int id, float? moveSpeed = null, float? handshakeDuration = null)
         {
+            if (moveSpeed.HasValue) this.moveSpeed = moveSpeed.Value;
+            if (handshakeDuration.HasValue) this.handshakeDuration = handshakeDuration.Value;
+
             AgvId = id;
             navAgent = GetComponent<NavMeshAgent>();
             navAgent.updatePosition = false;

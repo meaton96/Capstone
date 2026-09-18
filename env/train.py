@@ -252,12 +252,16 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
         duration = args.episode_duration_seconds if args.episode_duration_seconds > 0 else None
         scenario_generator = REGISTRY[args.scenario_generator](
             duration, random_warmup=args.random_warmup,
-            warmup_dispatching_rule=args.warmup_dispatching_rule)
+            warmup_dispatching_rule=args.warmup_dispatching_rule,
+            agv_move_speed=args.agv_move_speed, agv_handshake_duration=args.agv_handshake_duration)
         print(f"\nScenario generator: {args.scenario_generator}"
               + (f" (episode_duration_seconds={args.episode_duration_seconds})"
                  if args.episode_duration_seconds else "")
               + (f" (random_warmup, rule={args.warmup_dispatching_rule or 'default'})"
-                 if args.random_warmup else ""))
+                 if args.random_warmup else "")
+              + (f" (agv_move_speed={args.agv_move_speed})" if args.agv_move_speed else "")
+              + (f" (agv_handshake_duration={args.agv_handshake_duration})"
+                 if args.agv_handshake_duration else ""))
 
     # ---- Initialize environments ----
     vec_env, obs_shapes = build_env(args, ppo_cfg, run_dir, reward, scenario_generator)
@@ -509,7 +513,7 @@ if __name__ == "__main__":
                         help="Scripted scenario JSON (ScenarioLoader schema) to replay every episode "
                              "(mutually exclusive with --scenario-generator)")
     parser.add_argument("--scenario-generator", type=str, default=None,
-                        choices=["compound"],
+                        choices=["compound", "compound_v2"],
                         help="Generate a fresh seeded scripted-scenario variant every episode "
                              "(see env/scenarios); needs --train-seed >= 0")
     parser.add_argument("--episode-duration-seconds", type=float, default=0.0,
@@ -526,6 +530,16 @@ if __name__ == "__main__":
     parser.add_argument("--warmup-dispatching-rule", type=str, default=None,
                         help="DispatchingRule name (e.g. SPT_SMPT) driving the --random-warmup "
                              "window; defaults to the scenario's own default rule (SRT_SRWT) if unset")
+    parser.add_argument("--agv-move-speed", type=float, default=None,
+                        help="With --scenario-generator, overrides AGV travel speed (units/sim-"
+                             "second; prefab default 3.5). Faster AGVs shrink physical transit "
+                             "time relative to job processing time without changing the scripted "
+                             "arrival rate, so dispatch decisions are less often degenerate (<=1 "
+                             "real candidate) purely from AGV transit spacing jobs out -- see "
+                             "dispatch-degeneracy-regime-dependence")
+    parser.add_argument("--agv-handshake-duration", type=float, default=None,
+                        help="With --scenario-generator, overrides AGV pickup/dropoff handshake "
+                             "time (sim-seconds; prefab default 1.5)")
     parser.add_argument("--sequential-envs", action="store_true",
                         help="Step Unity envs one after another instead of concurrently")
     parser.add_argument("--base-worker-id", type=int, default=0,

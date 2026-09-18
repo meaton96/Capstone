@@ -67,7 +67,7 @@ namespace Assets.Scripts.Simulation.AGV
             {
                 AGVController newAgv = Instantiate(agvPrefab, parkingPositions[i], Quaternion.identity, this.transform);
                 newAgv.gameObject.name = $"AGV_{i}";
-                newAgv.Initialize(i);
+                newAgv.Initialize(i, config.AGVMoveSpeed, config.AGVHandshakeDuration);
                 fleet.Add(newAgv);
             }
 

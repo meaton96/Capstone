@@ -135,6 +135,11 @@ namespace Assets.Scripts.Simulation.Types
             public int maxOpsPerJob = 7;
             public float maxArrivalTime = 0f;
             public int agvCount = 3;
+            // 0 = unset (use the AGV prefab's own default) -- JsonUtility can't deserialize
+            // nullable value types, so this mirrors maxArrivalTime's 0-means-unset convention
+            // rather than FJSSPConfig.AGVMoveSpeed's float? directly.
+            public float agvMoveSpeed = 0f;
+            public float agvHandshakeDuration = 0f;
             public float machineFlexibilityProbability = 0f;
             public float throughputTimingWindow = 0f;
             public string parkingMethod = "single";
@@ -250,6 +255,8 @@ namespace Assets.Scripts.Simulation.Types
                 MinOpsPerJob = raw.minOpsPerJob,
                 MaxOpsPerJob = raw.maxOpsPerJob,
                 AGVCount = raw.agvCount,
+                AGVMoveSpeed = raw.agvMoveSpeed > 0f ? raw.agvMoveSpeed : (float?)null,
+                AGVHandshakeDuration = raw.agvHandshakeDuration > 0f ? raw.agvHandshakeDuration : (float?)null,
                 MachineFlexibilityProbability = raw.machineFlexibilityProbability,
                 ThroughputTimingWindow = raw.throughputTimingWindow,
                 ProcTimeParams = procTimeParams,

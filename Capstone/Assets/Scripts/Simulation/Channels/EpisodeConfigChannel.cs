@@ -168,6 +168,8 @@ namespace Assets.Scripts.Simulation.Channels
                 MinOpsPerJob = root["minOpsPerJob"]?.Value<int>() ?? 3,
                 MaxOpsPerJob = root["maxOpsPerJob"]?.Value<int>() ?? 6,
                 AGVCount = root["agvCount"]?.Value<int>() ?? 5,
+                AGVMoveSpeed = root["agvMoveSpeed"]?.Value<float>(),
+                AGVHandshakeDuration = root["agvHandshakeDuration"]?.Value<float>(),
                 MachineFlexibilityProbability = root["machineFlexibilityProbability"]?.Value<float>() ?? 0f,
                 parkingMethod = root["parkingMethod"]?.Value<string>() ?? "single",
                 preDispatchingMethod = root["preDispatchingMethod"]?.Value<string>() ?? "fixed",
