@@ -51,6 +51,30 @@ namespace Assets.Scripts.Simulation.Types
         public bool DeadlockDetected;
         public double DeadlockSimTime = -1.0;
 
+        // Sim-time of the first AGV zone-stall recovery this episode (gridlock ONSET; the
+        // watchdog only fires DEADLOCK_STALL_SECONDS later). -1 when no AGV ever stalled.
+        public double FirstStallSimTime = -1.0;
+
+        // AGV-AGV physical overlap (AGVCollisionMonitor). Headline numbers exclude pairs where both
+        // AGVs are Idle (parked). See that class for the body-overlap vs clearance distinction.
+        public int AgvCollisionEvents;
+        public double AgvCollisionPairSeconds;
+        public int AgvClearanceEvents;
+        public double AgvClearancePairSeconds;
+        public int AgvStaticOverlapEvents;
+        public float AgvMinCentreDistance = -1f;
+        public List<CollisionRecord> CollisionRecords = new List<CollisionRecord>();
+
+        // Traffic-protocol / layout switches active for this run (all default to the original
+        // behaviour). Part of scenario identity: never compare rows with different values.
+        public bool ReleasePreviousZone;
+        public bool SplitSpines;
+        public bool OrphanReaper = true;
+        // Pre-dispatched AGVs found orphaned (job no longer claims them, e.g. its source machine
+        // failed) and released by FlagHarvester.ReleaseOrphanedPreDispatches. Always 0 when the
+        // legacy switch -legacyorphanpredispatch is set (reaper disabled).
+        public int OrphanPreDispatchesReleased;
+
         public double OptimalityGap => OptimalMakespan > 0
             ? (Makespan - OptimalMakespan) / OptimalMakespan * 100.0
             : 0;
@@ -424,5 +448,18 @@ namespace Assets.Scripts.Simulation.Types
 
         // Derived
         public float FlowTime => Completed ? ExitTime - ArrivalTime : -1f;
+    }
+
+    /// <summary>One contiguous body overlap between a pair of AGVs (see AGVCollisionMonitor).</summary>
+    [System.Serializable]
+    public class CollisionRecord
+    {
+        public int EventId;
+        public double StartTime;
+        public double Duration;
+        public int AgvA, AgvB;
+        public float MinCentreDistance;
+        public string ZoneA, ZoneB;
+        public string StateA, StateB;
     }
 }

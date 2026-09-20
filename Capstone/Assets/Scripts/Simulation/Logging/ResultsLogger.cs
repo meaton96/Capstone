@@ -35,6 +35,7 @@ namespace Assets.Scripts.Simulation.Logging
         private static string _throughputFilename = "throughput.csv";
         private static string _jobCompletionsFilename = "job_completions.csv";
         private static string _decisionLogFilename = "decision_log.csv";
+        private static string _collisionsFilename = "agv_collisions.csv";
 
         public static void SetFilenameSuffix(string suffix)
         {
@@ -47,6 +48,7 @@ namespace Assets.Scripts.Simulation.Logging
             _throughputFilename = StripExt(_throughputFilename, ext) + suffix + ext;
             _jobCompletionsFilename = StripExt(_jobCompletionsFilename, ext) + suffix + ext;
             _decisionLogFilename = StripExt(_decisionLogFilename, ext) + suffix + ext;
+            _collisionsFilename = StripExt(_collisionsFilename, ext) + suffix + ext;
         }
 
         public static void SetSubdirectory(string subdir)
@@ -64,6 +66,7 @@ namespace Assets.Scripts.Simulation.Logging
         private static string ThroughputFilePath => BuildPath(_throughputFilename);
         private static string JobCompletionsFilePath => BuildPath(_jobCompletionsFilename);
         private static string DecisionLogFilePath => BuildPath(_decisionLogFilename);
+        private static string CollisionsFilePath => BuildPath(_collisionsFilename);
 
         // ── Convenience: write all logs in one call ───────────────────────────
 
@@ -80,6 +83,27 @@ namespace Assets.Scripts.Simulation.Logging
             if (r.ThroughputRecords.Count > 0) LogThroughput(r);
             if (r.JobCompletionRecords.Count > 0) LogJobCompletions(r);
             if (r.DecisionRecords.Count > 0) LogDecisions(r);
+            if (r.CollisionRecords.Count > 0) LogCollisions(r);
+        }
+
+        /// <summary>
+        /// agv_collisions.csv - one row per contiguous AGV-AGV body overlap (AGVCollisionMonitor).
+        /// zone_a/zone_b are the traffic zones each AGV was in when the overlap began.
+        /// </summary>
+        public static void LogCollisions(EpisodeRecord r)
+        {
+            bool fileExists = File.Exists(CollisionsFilePath);
+            using var writer = new StreamWriter(CollisionsFilePath, append: true);
+            if (!fileExists)
+                writer.WriteLine(
+                    "timestamp,instance,rule,seed,agv_count,event_id,start_time,duration," +
+                    "agv_a,agv_b,min_centre_distance,zone_a,zone_b,state_a,state_b");
+            string ts = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            foreach (var c in r.CollisionRecords)
+                writer.WriteLine(
+                    $"{ts},{r.InstanceName},{r.RuleName},{r.Seed},{r.AGVCount},{c.EventId}," +
+                    $"{c.StartTime:F2},{c.Duration:F2},{c.AgvA},{c.AgvB},{c.MinCentreDistance:F3}," +
+                    $"{c.ZoneA},{c.ZoneB},{c.StateA},{c.StateB}");
         }
         // ── Throughput log (throughput.csv) ───────────────────────────────────
 
@@ -145,7 +169,11 @@ namespace Assets.Scripts.Simulation.Logging
                     "mean_interarrival_realised,last_arrival_sim_time," +
                     "mean_flow_time,p95_flow_time,max_flow_time,mean_transport_wait,jobs_censored," +
                     "mean_flow_time_penalized,p95_flow_time_penalized,max_flow_time_penalized," +
-                    "deadlock_detected,deadlock_sim_time"
+                    "deadlock_detected,deadlock_sim_time," +
+                    "first_stall_sim_time,orphan_predispatch_released," +
+                    "agv_collision_events,agv_collision_pair_seconds,agv_clearance_events," +
+                    "agv_clearance_pair_seconds,agv_static_overlap_events,agv_min_centre_distance," +
+                    "release_previous_zone,split_spines,orphan_reaper"
                 );
 
             writer.WriteLine(
@@ -161,7 +189,11 @@ namespace Assets.Scripts.Simulation.Logging
                 $"{r.RealisedMeanInterarrival:F1},{r.LastDynamicArrivalTime:F1}," +
                 $"{r.MeanFlowTime:F2},{r.P95FlowTime:F2},{r.MaxFlowTime:F2},{r.MeanTransportWait:F2},{r.JobsCensored}," +
                 $"{r.MeanFlowTimePenalized:F2},{r.P95FlowTimePenalized:F2},{r.MaxFlowTimePenalized:F2}," +
-                $"{(r.DeadlockDetected ? 1 : 0)},{r.DeadlockSimTime:F1}"
+                $"{(r.DeadlockDetected ? 1 : 0)},{r.DeadlockSimTime:F1}," +
+                $"{r.FirstStallSimTime:F1},{r.OrphanPreDispatchesReleased}," +
+                $"{r.AgvCollisionEvents},{r.AgvCollisionPairSeconds:F2},{r.AgvClearanceEvents}," +
+                $"{r.AgvClearancePairSeconds:F2},{r.AgvStaticOverlapEvents},{r.AgvMinCentreDistance:F3}," +
+                $"{(r.ReleasePreviousZone ? 1 : 0)},{(r.SplitSpines ? 1 : 0)},{(r.OrphanReaper ? 1 : 0)}"
             );
 
             Debug.Log($"[Results] {r.InstanceName} {r.RuleName} seed={r.Seed} " +

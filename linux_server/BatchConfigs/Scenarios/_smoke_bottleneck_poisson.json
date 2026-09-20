@@ -1,0 +1,457 @@
+{
+  "_comment": "Same job stream as smoke_bottleneck_regular (n=27, mean_duration=55, Weld[1] pinned, same average arrival rate) but with exponential (Poisson-process) inter-arrival gaps instead of even spacing -- isolates arrival-timing regularity as the only variable.",
+  "name": "smoke_bottleneck_poisson",
+  "seed": 42,
+  "agvCount": 7,
+  "machineTypeLayout": [
+    "Mill",
+    "Mill",
+    "Mill",
+    "Lathe",
+    "Lathe",
+    "Lathe",
+    "Weld",
+    "Weld",
+    "Weld",
+    "Inspect",
+    "Inspect",
+    "Inspect",
+    "Assemble",
+    "Assemble",
+    "Assemble"
+  ],
+  "jobs": [
+    {
+      "id": 0,
+      "arrivalTime": 68.0,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 15.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 39.33
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "arrivalTime": 89.45,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 15.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 45.87
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "arrivalTime": 178.35,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 15.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 60.83
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "arrivalTime": 326.84,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 15.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 41.37
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "arrivalTime": 363.37,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 15.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 39.48
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "arrivalTime": 379.82,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 15.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 55.18
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "arrivalTime": 381.61,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 15.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 45.06
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "arrivalTime": 451.58,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 15.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 56.48
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "arrivalTime": 468.18,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 15.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 57.95
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "arrivalTime": 578.7,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 15.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 38.71
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "arrivalTime": 687.96,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 15.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 61.54
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "arrivalTime": 715.69,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 15.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 43.63
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "arrivalTime": 925.79,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 15.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 49.61
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "arrivalTime": 932.28,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 15.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 41.69
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "arrivalTime": 1057.65,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 15.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 58.42
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "arrivalTime": 1167.37,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 15.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 62.58
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "arrivalTime": 1218.59,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 15.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 70.61
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "arrivalTime": 1250.3,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 15.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 56.72
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "arrivalTime": 1368.2,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 15.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 58.91
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "arrivalTime": 1500.09,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 15.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 57.55
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "arrivalTime": 1581.38,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 15.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 40.01
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "arrivalTime": 1598.62,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 15.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 48.05
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "arrivalTime": 1604.17,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 15.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 46.18
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "arrivalTime": 1611.26,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 15.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 47.67
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "arrivalTime": 1678.58,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 15.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 50.54
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "arrivalTime": 1709.4,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 15.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 45.41
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "arrivalTime": 1730.11,
+      "operations": [
+        {
+          "machineType": "Mill",
+          "machineIndex": "any",
+          "duration": 15.0
+        },
+        {
+          "machineType": "Weld",
+          "machineIndex": 1,
+          "duration": 69.41
+        }
+      ]
+    }
+  ]
+}

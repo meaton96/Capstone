@@ -267,6 +267,75 @@ namespace Assets.Scripts.Simulation.AGV
             BeginParkingRoute();
         }
 
+        /// @brief Abandons a pre-dispatch whose job no longer claims this AGV.
+        /// @details A pre-dispatched AGV parks at its source machine's pickup dock holding that
+        /// dock zone (plus the zone behind it) until FinalizePreDispatch. If the job's claim is
+        /// cleared without telling the AGV (FailureCoordinator step 5 on a source-machine
+        /// failure), nothing ever finalizes it, and because it is not waiting for a zone it never
+        /// reaches HandleZoneStall either: it sits in the one-way lane forever and every AGV
+        /// queued behind it gridlocks. See FlagHarvester.ReleaseOrphanedPreDispatches.
+        /// @returns True if the AGV was released and is now heading to parking.
+        public bool ReleaseOrphanedPrePickup()
+        {
+            if (State != AGVState.MovingToPrePickup) return false;
+
+            SimLogger.Medium($"[AGV {AgvId}] Pre-dispatch for job {PreDispatchedJobId} orphaned — " +
+                             $"releasing dock and returning to parking.");
+
+            PreDispatchedJobId = -1;
+            sourceMachine = null;
+            targetMachine = null;
+            atPickupDock = false;
+            pickupZoneId = -1;
+            _blockStartTime = -1f;
+
+            CancelCurrentRoute();
+            State = AGVState.ReturningToParking;
+            BeginParkingRoute();
+            return true;
+        }
+
+        /// @brief Navigation clearance radius (NavMeshAgent.radius, 1.18 on the prefab). Zone sizes
+        ///        were designed around 2x this figure; it is NOT the physical body (see GetFootprint).
+        public float ClearanceRadius => navAgent != null ? navAgent.radius : 1.18f;
+
+        /// @brief Top-down oriented footprint of the AGV body for AGVCollisionMonitor: centre, unit
+        ///        right/forward axes projected onto the floor plane, and half extents taken from the
+        ///        root BoxCollider (size x lossyScale). The prefab body is ~1 x 1 units.
+        public void GetFootprint(out Vector2 centre, out Vector2 axisRight, out Vector2 axisForward, out Vector2 half)
+        {
+            Vector3 p = transform.position;
+            centre = new Vector2(p.x, p.z);
+            Vector3 r = transform.right; Vector3 f = transform.forward;
+            axisRight = new Vector2(r.x, r.z).normalized;
+            axisForward = new Vector2(f.x, f.z).normalized;
+            if (_bodyHalf.x <= 0f)
+            {
+                var box = GetComponent<BoxCollider>();
+                Vector3 s = transform.lossyScale;
+                _bodyHalf = box != null
+                    ? new Vector2(box.size.x * s.x * 0.5f, box.size.z * s.z * 0.5f)
+                    : new Vector2(0.5f, 0.5f);
+            }
+            half = _bodyHalf;
+        }
+        private Vector2 _bodyHalf;
+
+        /// @brief Number of HandleZoneStall self-recoveries so far this episode.
+        public int StallRecoveryCount => _statStallRecoveryCount;
+
+        /// @brief One-line state dump for FactoryOrchestrator's gridlock snapshot.
+        public string DebugSummary()
+        {
+            string Z(int id) => id < 0 ? "-" : (trafficMgr?.GetZone(id)?.Name ?? id.ToString());
+            float blockedFor = _blockStartTime >= 0f ? Time.fixedTime - _blockStartTime : 0f;
+            return $"AGV{AgvId} state={State} job={CurrentJobId} preJob={PreDispatchedJobId} " +
+                   $"cur={Z(currentZoneId)} prev={Z(previousZoneId)} " +
+                   $"wantsZone={(waitingForZone ? Z(pendingZoneId) : "-")} blockedFor={blockedFor:F0}s " +
+                   $"atPickupDock={atPickupDock} atDropoffDock={atDropoffDock} " +
+                   $"stalls={_statStallRecoveryCount}";
+        }
+
         /// @brief Terminates the active route and releases future traffic zone reservations.
         private void CancelCurrentRoute()
         {
@@ -889,11 +958,31 @@ namespace Assets.Scripts.Simulation.AGV
             ArriveAtParking();
         }
 
+        /// <summary>
+        /// Experiment switch <c>-releasepreviouszone</c>: on reaching a zone's centre, release the
+        /// zone just left immediately instead of holding it until the NEXT zone is reached. By
+        /// default an AGV holds current + previous, i.e. two slots, which halves effective capacity
+        /// of a ring (see docs/GRIDLOCK_INVESTIGATION_2026-09-19.md, §8). Off by default so every
+        /// existing result is unchanged.
+        ///
+        /// Physical basis: the AGV drives to the new zone's centre before this fires, and the
+        /// smallest zone is 3 units long against a ~2.36 unit footprint, so its body is inside the
+        /// new zone and the old one is clear. previousZoneId is still tracked (unreserved) so
+        /// RetreatFromStall can back into it if it is free.
+        /// </summary>
+        private static readonly bool ReleaseZoneBehindEarly =
+            System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "-releasepreviouszone") >= 0;
+        /// <summary>True when -releasepreviouszone is active (recorded in results.csv).</summary>
+        public static bool ReleasePreviousZoneEnabled => ReleaseZoneBehindEarly;
+
         /// @brief Manages the transition of reservations when crossing zone boundaries.
         private void OnEnteredZone(int newZoneId)
         {
             if (previousZoneId >= 0 && previousZoneId != newZoneId)
                 trafficMgr.Release(previousZoneId, AgvId);
+
+            if (ReleaseZoneBehindEarly && currentZoneId >= 0 && currentZoneId != newZoneId)
+                trafficMgr.Release(currentZoneId, AgvId);
 
             previousZoneId = currentZoneId;
             currentZoneId = newZoneId;

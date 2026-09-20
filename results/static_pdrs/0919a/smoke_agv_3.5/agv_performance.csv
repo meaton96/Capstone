@@ -1,0 +1,8 @@
+timestamp,instance,rule,seed,makespan,agv_id,total_trips,mean_trip_duration,time_idle,time_waiting_route,time_traveling,time_loading,time_unloading,total_path_length,reroute_count,congestion_fraction,stall_recovery_count
+2026-09-18 16:10:55,compound_scenario_agv3.5,SPT_SMPT,42,11334.88,0,151,35.97,607.12,3362.84,6799.92,279.26,285.72,20117.50,0,0.2967,0
+2026-09-18 16:10:55,compound_scenario_agv3.5,SPT_SMPT,42,11334.88,1,153,34.85,953.82,3371.00,6433.86,279.62,296.56,18938.00,0,0.2974,0
+2026-09-18 16:10:55,compound_scenario_agv3.5,SPT_SMPT,42,11334.88,2,155,35.58,827.30,3376.22,6545.86,287.42,298.06,19275.89,0,0.2979,0
+2026-09-18 16:10:55,compound_scenario_agv3.5,SPT_SMPT,42,11334.88,3,143,37.34,1240.18,3344.44,6213.34,266.80,270.10,18339.99,0,0.2951,0
+2026-09-18 16:10:55,compound_scenario_agv3.5,SPT_SMPT,42,11334.88,4,131,38.07,2462.00,3401.48,4979.42,240.44,251.52,14681.72,0,0.3001,0
+2026-09-18 16:10:55,compound_scenario_agv3.5,SPT_SMPT,42,11334.88,5,122,39.23,3001.80,3348.88,4524.74,226.22,233.22,13322.81,0,0.2954,0
+2026-09-18 16:10:55,compound_scenario_agv3.5,SPT_SMPT,42,11334.88,6,121,39.17,3487.08,3312.60,4083.30,212.14,239.74,12005.27,0,0.2922,0

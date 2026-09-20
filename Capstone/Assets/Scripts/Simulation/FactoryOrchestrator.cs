@@ -327,21 +327,25 @@ namespace Assets.Scripts.Simulation
         private const double MAX_EPISODE_SIM_SECONDS = 100_000.0;
 
         /// <summary>
-        /// Deadlock watchdog: if zero AGVs anywhere in the traffic-zone network complete a
-        /// zone entry (TrafficZone.TraversalCount, summed across all zones) for this many
-        /// consecutive sim-seconds while jobs remain incomplete, the episode is declared
-        /// deadlocked and terminated immediately instead of running to MAX_EPISODE_SIM_SECONDS.
-        /// A circular-wait deadlock in TrafficZoneManager.TryReserve never self-resolves (no
-        /// AGV in the cycle can ever move), so ANY sustained system-wide stall is conclusive —
-        /// no legitimate congestion (even the heaviest surviving runs) goes this long without
-        /// a traversal completing somewhere in the network.
+        /// Gridlock watchdog: if the plant makes no PRODUCTIVE progress for this many consecutive
+        /// sim-seconds while jobs remain incomplete, the episode is declared deadlocked and
+        /// terminated instead of running to MAX_EPISODE_SIM_SECONDS. Productive progress is an AGV
+        /// delivery or a machine finishing an operation (FlagHarvester.ProgressCount).
+        ///
+        /// This deliberately does NOT watch zone entries (TrafficZone.TraversalCount). Stall
+        /// recovery (AGVController.RetreatFromStall) re-reserves the previous zone every
+        /// zoneStallTimeoutSeconds, and each successful reservation bumps that counter, so a fully
+        /// gridlocked fleet kept the old watchdog fed forever: 0 of 120 gridlocked runs in the
+        /// 2026-09-19 sweep ever tripped it, 61 of them sat idle to the 20,000 s cap.
         /// </summary>
         private const double DEADLOCK_STALL_SECONDS = 3_000.0;
 
-        private int _lastZoneTraversalTotal = -1;
-        private double _lastTraversalChangeSimTime;
+        private int _lastProgressCount = -1;
+        private double _lastProgressChangeSimTime;
         private bool _deadlockDetected;
         private double _deadlockSimTime = -1.0;
+        private double _firstStallSimTime = -1.0;
+        private AGVCollisionMonitor _collisions = new AGVCollisionMonitor();
 
         /// <summary>
         /// Set when the episode ends because it hit its deliberate steady-state time cap
@@ -663,10 +667,12 @@ namespace Assets.Scripts.Simulation
                               $"{currentConfig.dispatchingRule} before the agent takes over.");
 
             // ── Arm deadlock watchdog ────────────────────────────────────────────
-            _lastZoneTraversalTotal = -1;
-            _lastTraversalChangeSimTime = 0.0;
+            _lastProgressCount = -1;
+            _lastProgressChangeSimTime = 0.0;
             _deadlockDetected = false;
             _deadlockSimTime = -1.0;
+            _firstStallSimTime = -1.0;
+            _collisions = new AGVCollisionMonitor();
             _truncatedByTimeLimit = false;
 
             // ── Arm Poisson arrival clock ──────────────────────────────────────
@@ -752,14 +758,19 @@ namespace Assets.Scripts.Simulation
                 return;
             }
 
+            CheckFirstStall();
+            _collisions.Tick(agvPool.AllAGVs, SimTime, Time.fixedDeltaTime,
+                             pos => trafficZoneManager.GetZoneAtPosition(pos)?.Name);
+
             if (CheckForDeadlock())
             {
                 _deadlockDetected = true;
                 _deadlockSimTime = SimTime;
-                SimLogger.Error($"[Orchestrator] Deadlock detected — no AGV completed a traffic-zone " +
-                                 $"entry anywhere in the network for {DEADLOCK_STALL_SECONDS:F0}s " +
-                                 $"(stalled since {_lastTraversalChangeSimTime:F0}s, now {SimTime:F0}s). " +
+                SimLogger.Error($"[Orchestrator] Deadlock detected — no delivery or operation completion " +
+                                 $"for {DEADLOCK_STALL_SECONDS:F0}s " +
+                                 $"(last progress at {_lastProgressChangeSimTime:F0}s, now {SimTime:F0}s). " +
                                  $"Terminating early instead of running to timeout.");
+                DumpTrafficSnapshot("watchdog fired");
                 FinaliseEpisode();
                 return;
             }
@@ -771,6 +782,7 @@ namespace Assets.Scripts.Simulation
             _flags.HarvestMachineFlags();
             _flags.HarvestAGVFlags();
             _flags.HarvestStalledAGVs();
+            _flags.ReleaseOrphanedPreDispatches();
             _flags.HarvestAlmostDoneFlags(PreDispatchLeadTime);
             _flags.AssignAGVs();
 
@@ -837,27 +849,93 @@ namespace Assets.Scripts.Simulation
         }
 
         /// <summary>
-        /// True once the system-wide sum of TrafficZone.TraversalCount has gone unchanged for
-        /// DEADLOCK_STALL_SECONDS while jobs remain incomplete. A summed, network-wide signal
-        /// is used (rather than watching any single zone or AGV) because heavy-but-resolving
-        /// congestion routinely stalls individual zones for a while — only a true circular-wait
-        /// deadlock stops EVERY zone in the network from ever admitting another AGV.
+        /// True once FlagHarvester.ProgressCount (deliveries + operation completions) has gone
+        /// unchanged for DEADLOCK_STALL_SECONDS while jobs remain incomplete. A network-wide
+        /// productive-output signal is used (rather than watching any zone or AGV) because
+        /// heavy-but-resolving congestion routinely stalls individual zones for a while, and
+        /// because movement counters are fed by stall recovery itself — see DEADLOCK_STALL_SECONDS.
+        /// While every known job has exited (arrivals still pending) the clock is held at "now",
+        /// so a long arrival gap cannot trip the watchdog the moment the next job appears.
         /// </summary>
         private bool CheckForDeadlock()
         {
-            if (Jobs.AreAllExited()) return false;
+            if (_flags == null) return false;
 
-            int total = 0;
-            foreach (var zone in trafficZoneManager.Zones) total += zone.TraversalCount;
-
-            if (total != _lastZoneTraversalTotal)
+            if (Jobs.AreAllExited())
             {
-                _lastZoneTraversalTotal = total;
-                _lastTraversalChangeSimTime = SimTime;
+                _lastProgressChangeSimTime = SimTime;
                 return false;
             }
 
-            return (SimTime - _lastTraversalChangeSimTime) > DEADLOCK_STALL_SECONDS;
+            int progress = _flags.ProgressCount;
+            if (progress != _lastProgressCount)
+            {
+                _lastProgressCount = progress;
+                _lastProgressChangeSimTime = SimTime;
+                return false;
+            }
+
+            return (SimTime - _lastProgressChangeSimTime) > DEADLOCK_STALL_SECONDS;
+        }
+
+        /// <summary>
+        /// Records the sim-time of the first AGV zone-stall recovery (gridlock onset) and dumps a
+        /// snapshot of who holds what at that moment, which is the cleanest picture of the jam:
+        /// by the time the watchdog fires the fleet has been shuffled by hundreds of recoveries.
+        /// </summary>
+        private void CheckFirstStall()
+        {
+            if (_firstStallSimTime >= 0.0) return;
+            foreach (var agv in agvPool.AllAGVs)
+            {
+                if (agv.StallRecoveryCount <= 0) continue;
+                _firstStallSimTime = SimTime;
+                DumpTrafficSnapshot("first stall recovery");
+                return;
+            }
+        }
+
+        /// <summary>
+        /// Logs every AGV's state and every occupied traffic zone. Grep the sim log for
+        /// "[GridlockSnapshot]". Pre-dispatched AGVs are cross-checked against their job so an
+        /// orphaned claim (job no longer names the AGV) is called out explicitly.
+        /// </summary>
+        private void DumpTrafficSnapshot(string reason)
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine($"[GridlockSnapshot] {reason} at sim={SimTime:F0}s seed={_episodeSeed}");
+
+            foreach (var agv in agvPool.AllAGVs)
+            {
+                sb.Append("  ").Append(agv.DebugSummary());
+                if (agv.IsPreDispatched)
+                {
+                    JobData pj = Jobs.Get(agv.PreDispatchedJobId);
+                    if (pj == null) sb.Append(" [preJob missing]");
+                    else
+                    {
+                        PhysicalMachine src = layoutManager.GetMachine(pj.LocationMachineId >= 0 ? pj.LocationMachineId : pj.TargetMachineId);
+                        sb.Append($" [preJob state={pj.State} jobClaimsAgv={pj.PreDispatchedAgvId}" +
+                                  $"{(pj.PreDispatchedAgvId != agv.AgvId ? " ORPHANED" : "")}" +
+                                  $" srcMachine={(src != null ? src.MachineId : -1)}" +
+                                  $" srcHealth={(src != null ? src.HealthState.ToString() : "?")}]");
+                    }
+                }
+                sb.AppendLine();
+            }
+
+            sb.Append("  occupied zones:");
+            foreach (var zone in trafficZoneManager.Zones)
+                if (!zone.IsEmpty)
+                    sb.Append($" {zone.Name}[{string.Join(",", zone.OccupantAgvIds)}]");
+            sb.AppendLine();
+
+            sb.Append("  non-operational machines:");
+            foreach (var m in layoutManager.Machines)
+                if (m.HealthState != MachineHealthState.Operational)
+                    sb.Append($" M{m.MachineId}={m.HealthState}");
+
+            SimLogger.Error(sb.ToString());
         }
 
         /// <summary>
@@ -1236,6 +1314,19 @@ namespace Assets.Scripts.Simulation
             // Deadlock watchdog outcome — see CheckForDeadlock
             record.DeadlockDetected = _deadlockDetected;
             record.DeadlockSimTime = _deadlockDetected ? _deadlockSimTime : -1.0;
+            record.FirstStallSimTime = _firstStallSimTime;
+            _collisions.Finish(SimTime);
+            record.AgvCollisionEvents = _collisions.OverlapEvents;
+            record.AgvCollisionPairSeconds = _collisions.OverlapPairSeconds;
+            record.AgvClearanceEvents = _collisions.ClearanceEvents;
+            record.AgvClearancePairSeconds = _collisions.ClearancePairSeconds;
+            record.AgvStaticOverlapEvents = _collisions.StaticOverlapEvents;
+            record.AgvMinCentreDistance = _collisions.MinCentreDistance == float.MaxValue ? -1f : _collisions.MinCentreDistance;
+            record.CollisionRecords = _collisions.Events;
+            record.ReleasePreviousZone = AGVController.ReleasePreviousZoneEnabled;
+            record.SplitSpines = TrafficZoneManager.SplitSpinesEnabled;
+            record.OrphanReaper = FlagHarvester.OrphanReaperEnabled;
+            record.OrphanPreDispatchesReleased = _flags != null ? _flags.OrphanPreDispatchesReleased : 0;
 
             // Collect AGV performance records
             foreach (var agv in agvPool.AllAGVs)

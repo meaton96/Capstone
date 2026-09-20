@@ -30,6 +30,26 @@ namespace Assets.Scripts.Simulation
         private double _simTimeRef;
 
         /// <summary>
+        /// Monotonic count of productive events this episode: an AGV delivery (to a machine or the
+        /// outgoing belt) or a machine finishing an operation. FactoryOrchestrator.CheckForDeadlock
+        /// watches this instead of zone-entry counts, which stall recovery inflates forever.
+        /// </summary>
+        public int ProgressCount { get; private set; }
+
+        /// <summary>Pre-dispatched AGVs released by ReleaseOrphanedPreDispatches this episode.</summary>
+        public int OrphanPreDispatchesReleased { get; private set; }
+
+        /// <summary>
+        /// Command-line switch <c>-legacyorphanpredispatch</c> disables ReleaseOrphanedPreDispatches,
+        /// reproducing the pre-fix behaviour (orphaned pre-dispatch AGVs sit in the lane forever).
+        /// Exists so the gridlock can be reproduced and the fix A/B-tested on a single build.
+        /// </summary>
+        private static readonly bool LegacyOrphanPreDispatch =
+            System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "-legacyorphanpredispatch") >= 0;
+        /// <summary>True unless -legacyorphanpredispatch is set (recorded in results.csv).</summary>
+        public static bool OrphanReaperEnabled => !LegacyOrphanPreDispatch;
+
+        /// <summary>
         /// Initializes the FlagHarvester with required dependencies. Must be called before any Harvest methods.
         /// </summary>
         /// <param name="jobs">The job store containing all job data and state.</param>
@@ -74,6 +94,7 @@ namespace Assets.Scripts.Simulation
                 int jobId = machine.ActiveJobId;
                 int mid = machine.MachineId;
                 machine.ClearFinished();
+                ProgressCount++;
 
                 if (_machineProcessingStartTime.TryGetValue(mid, out double procStart))
                 {
@@ -170,6 +191,7 @@ namespace Assets.Scripts.Simulation
 
                 if (agv.DeliveredFlag)
                 {
+                    ProgressCount++;
                     int jobId = agv.DeliveredJobId;
                     int machineId = agv.DeliveredMachineId;
                     JobData job = _jobs.Get(jobId);
@@ -204,6 +226,33 @@ namespace Assets.Scripts.Simulation
 
                 if (agv.PickedUpFlag || agv.DeliveredFlag)
                     agv.ClearFlags();
+            }
+        }
+
+        /// <summary>
+        /// Releases pre-dispatched AGVs whose job no longer claims them. A pre-dispatched AGV waits
+        /// at its source machine's pickup dock, holding that dock zone, until FinalizePreDispatch.
+        /// When the source machine fails, FailureCoordinator (step 5) clears the JOB's claim
+        /// (PreDispatchedAgvId) but never tells the AGV, so nothing ever finalizes it: it is not
+        /// waiting on a zone either, so HandleZoneStall never fires. In the single-lane layout that
+        /// AGV then blocks its aisle permanently and the rest of the fleet queues up behind it
+        /// (every gridlocked run in the 2026-09-19 sweep had exactly one such AGV). This is a
+        /// reconciliation rather than a patch at the one known leak, so any other path that drops
+        /// the job's claim is covered too.
+        /// </summary>
+        public void ReleaseOrphanedPreDispatches()
+        {
+            if (LegacyOrphanPreDispatch) return;
+
+            foreach (var agv in _agvPool.AllAGVs)
+            {
+                if (!agv.IsPreDispatched) continue;
+
+                JobData job = _jobs.Get(agv.PreDispatchedJobId);
+                bool orphaned = job == null || job.PreDispatchedAgvId != agv.AgvId;
+                if (!orphaned) continue;
+
+                if (agv.ReleaseOrphanedPrePickup()) OrphanPreDispatchesReleased++;
             }
         }
 
