@@ -104,6 +104,10 @@ namespace Assets.Scripts.Simulation.Types
         ///          Defaults to "single" (single parking zone per AGV type).
         public string parkingMethod = "single";
 
+        /// @brief AGV zone-reservation protocol: "holdPrevious" (default) or "releasePrevious".
+        ///        See ReservationProtocol. Validated at load by ReservationProtocolParser.
+        public string reservationProtocol = "holdPrevious";
+
         // ── Pre-dispatching method ──
 
         /// @brief Strategy used for pre-dispatching decisions.
@@ -166,6 +170,7 @@ namespace Assets.Scripts.Simulation.Types
                 Stochastic = Stochastic,
                 MachineFlexibilityProbability = MachineFlexibilityProbability,
                 parkingMethod = parkingMethod,
+                reservationProtocol = reservationProtocol,
                 preDispatchingMethod = preDispatchingMethod,
                 ThroughputTimingWindow = ThroughputTimingWindow,
             };

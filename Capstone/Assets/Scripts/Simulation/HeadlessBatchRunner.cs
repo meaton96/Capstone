@@ -122,6 +122,16 @@ namespace Assets.Scripts.Simulation
                 SimLogger.Low($"[BatchRunner] AGV count override: {agvCountOverride}");
             }
 
+            // Reservation protocol override (applied to every config by FactoryOrchestrator.ApplyConfigOverrides).
+            // Validated here so a typo aborts before any run instead of silently using the default.
+            string reservationStr = GetCLIArg("-reservation");
+            if (!string.IsNullOrEmpty(reservationStr))
+            {
+                ReservationProtocolParser.Parse(reservationStr);
+                ConfigOverrides.ReservationProtocol = reservationStr;
+                SimLogger.Low($"[BatchRunner] Reservation protocol override: {reservationStr}");
+            }
+
             // Repeats
             int repeats = 1;
             string repeatsStr = GetCLIArg("-repeats");

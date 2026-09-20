@@ -175,27 +175,13 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             return result;
         }
 
-        /// <summary>
-        /// Experiment switch <c>-splitspines</c>: build the spines the way the row aisles are built
-        /// (3-unit Capacity=1 dock/transit zones aligned to the machine columns) instead of the
-        /// original 5 wide Capacity=2 zones. Off by default so every existing result is unchanged.
-        /// It changes the zone graph, hop counts and the last column's pickup dock, so it is part of
-        /// scenario identity: results must record it. Proper config plumbing (layoutMode) is still
-        /// needed before RL training can select it; a CLI flag only reaches batch runs.
-        /// </summary>
-        private static readonly bool SplitSpines =
-            Array.IndexOf(Environment.GetCommandLineArgs(), "-splitspines") >= 0;
-
         /// <summary>Index of the spine zone that hosts machine column <paramref name="col"/>'s pickup dock.</summary>
-        /// <summary>True when -splitspines is active (recorded in results.csv).</summary>
-        public static bool SplitSpinesEnabled => SplitSpines;
+        private static int SpineDockIndex(int col) => 1 + 2 * col;
 
-        private static int SpineDockIndex(int col) => SplitSpines ? 1 + 2 * col : col + 1;
-
-        /// @brief Split spine (see SplitSpines): [cornerL, Dock0, Transit0, ..., DockN-1, cornerR].
+        /// @brief Builds a spine as [cornerL, Dock0, Transit0, ..., DockN-1, cornerR].
         /// Dock/transit zones sit at exactly the row aisles' x positions; every zone is Capacity=1
         /// so each has its own centre and adjacent centres are >= 3 units apart.
-        private int[] BuildSplitSpineZones(bool isTop, int cols)
+        private int[] BuildSpineZones(bool isTop, int cols)
         {
             int numDockTransit = 2 * cols - 1;
             int[] result = new int[numDockTransit + 2];
@@ -231,45 +217,6 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                     Centre = new Vector3(floorCentre.x + centreX, 0.01f, floorCentre.z + z),
                     Size = new Vector3(width, 0.1f, layoutManager.SpineAisleWidth),
                     Capacity = 1
-                };
-                RegisterZone(zone);
-                result[s] = zone.ZoneId;
-            }
-            return result;
-        }
-
-        /// @brief Segments spine aisles (top/bottom peripheral) into zones.
-        /// @param isTop True if building the top spine, false for bottom.
-        /// @param cols Number of machine columns.
-        /// @return An array of zone IDs for the spine.
-        private int[] BuildSpineZones(bool isTop, int cols)
-        {
-            if (SplitSpines) return BuildSplitSpineZones(isTop, cols);
-            int numSegments = cols + 1;
-            int[] result = new int[numSegments];
-            float z = isTop ? layoutManager.GetTopSpineZ() : layoutManager.GetBottomSpineZ();
-            Vector3 floorCentre = layoutManager.transform.position;
-            FlowDirection flow = isTop ? FlowDirection.East : FlowDirection.West;
-            float segWidth = layoutManager.MachineSpacingX;
-            float halfTotalWidth = ((cols - 1) * segWidth) / 2f;
-            float leftEdge = -halfTotalWidth - layoutManager.MachineDepth / 2f - layoutManager.VerticalAisleWidth / 2f;
-
-            for (int s = 0; s < numSegments; s++)
-            {
-                float segCentreX, width;
-                if (s == 0) { segCentreX = leftEdge; width = layoutManager.VerticalAisleWidth; }
-                else if (s == numSegments - 1) { segCentreX = -leftEdge; width = layoutManager.VerticalAisleWidth; }
-                else { segCentreX = -halfTotalWidth + (s - 1) * segWidth; width = segWidth; }
-
-                var zone = new TrafficZone
-                {
-                    ZoneId = nextZoneId++,
-                    Name = $"{(isTop ? "TopSpine" : "BotSpine")}_Seg{s}",
-                    AisleType = AisleType.SpineAisle,
-                    Flow = flow,
-                    Centre = new Vector3(floorCentre.x + segCentreX, 0.01f, floorCentre.z + z),
-                    Size = new Vector3(width, 0.1f, layoutManager.SpineAisleWidth),
-                    Capacity = 2
                 };
                 RegisterZone(zone);
                 result[s] = zone.ZoneId;

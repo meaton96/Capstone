@@ -7,6 +7,7 @@ using Unity.AI.Navigation;
 using Assets.Scripts.Simulation.Machines;
 using Assets.Scripts.Simulation.Jobs;
 using Assets.Scripts.Simulation.Types;
+using Assets.Scripts.Simulation.Visuals;
 
 namespace Assets.Scripts.Simulation.FactoryLayout
 {
@@ -24,14 +25,11 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         public static FactoryLayoutManager Instance;
         [SerializeField] private NavMeshSurface navMeshSurface;
 
-        [Header("Prefabs")]
-        [SerializeField] private PhysicalMachine machinePrefab;
-        [SerializeField] private PhysicalMachine doubleSidedMachinePrefab;
+        // Machine, conveyor and wall prefabs (and the incoming belt material) come from VisualController.
+        private static VisualController Visuals => VisualController.Instance;
 
         [Header("I/O & AGV Infrastructure")]
-        [SerializeField] private GameObject conveyorPrefab;
         [SerializeField] private Vector3 ioConveyorScale = new Vector3(.05f, .2f, .30f);
-        [SerializeField] private Material incomingBeltMaterial;
         [SerializeField] private Vector3 incomingBeltOffset = new Vector3(-2f, 0.01f, 1.5f);
         [SerializeField] private Vector3 outgoingBeltOffset = new Vector3(-2f, 0.01f, 1.5f);
 
@@ -50,8 +48,6 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         public ParkingMethod ActiveParkingMethod { get; private set; }
         private readonly List<ParkingArea> parkingAreas = new List<ParkingArea>();
         public IReadOnlyList<ParkingArea> ParkingAreas => parkingAreas;
-
-        [SerializeField] private GameObject wallPrefab;
 
         [Header("Floor")]
         [SerializeField] private Transform floorTransform;
@@ -204,17 +200,17 @@ namespace Assets.Scripts.Simulation.FactoryLayout
 
                 if (row == 0)
                 {
-                    prefabToSpawn = machinePrefab;
+                    prefabToSpawn = Visuals.MachinePrefab;
                     rotation = Quaternion.Euler(0f, 180f, 0f);
                 }
                 else if (row == layoutRows - 1)
                 {
-                    prefabToSpawn = machinePrefab;
+                    prefabToSpawn = Visuals.MachinePrefab;
                     rotation = Quaternion.identity;
                 }
                 else
                 {
-                    prefabToSpawn = doubleSidedMachinePrefab != null ? doubleSidedMachinePrefab : machinePrefab;
+                    prefabToSpawn = Visuals.DoubleSidedMachinePrefab != null ? Visuals.DoubleSidedMachinePrefab : Visuals.MachinePrefab;
                     rotation = Quaternion.identity;
                 }
                 MachineType primary = distributedLayout[i];
@@ -285,6 +281,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 incomingBeltOffset.y,
                 topZ + incomingBeltOffset.z);
 
+            GameObject conveyorPrefab = Visuals.ConveyorPrefab;
             if (conveyorPrefab != null)
             {
                 GameObject inBelt = Instantiate(conveyorPrefab, IncomingBeltPosition, Quaternion.Euler(0, 0, 0), transform);
@@ -292,6 +289,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 inBelt.transform.localScale = ioConveyorScale;
                 IncomingBelt = inBelt.GetComponent<ConveyorBelt>();
                 IncomingBelt.Capacity = 8;
+                Material incomingBeltMaterial = Visuals.IncomingBeltMaterial;
                 if (incomingBeltMaterial != null)
                 {
                     foreach (var rend in inBelt.GetComponentsInChildren<Renderer>())
@@ -543,6 +541,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         /// @return The instantiated GameObject.
         private GameObject CreateWallPrimitive(Vector3 size)
         {
+            GameObject wallPrefab = Visuals.WallPrefab;
             if (wallPrefab != null)
             {
                 GameObject wall = Instantiate(wallPrefab);

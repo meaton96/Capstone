@@ -4,6 +4,7 @@ using Assets.Scripts.Simulation.FactoryLayout;
 using Assets.Scripts.Simulation.Logging;
 using Assets.Scripts.Simulation.Types;
 using Assets.Scripts.Simulation.Machines;
+using Assets.Scripts.Simulation.Visuals;
 
 namespace Assets.Scripts.Simulation.AGV
 {
@@ -16,7 +17,8 @@ namespace Assets.Scripts.Simulation.AGV
     {
         public static AGVPool Instance;
         private Vector3[] parkingPositions;
-        [SerializeField] private AGVController agvPrefab;
+        // Prefab comes from VisualController (primitive or Kenney variant).
+        private static AGVController AgvPrefab => VisualController.Instance.AgvPrefab;
         [SerializeField] private FactoryLayoutManager layoutManager;
 
         private List<AGVController> fleet = new List<AGVController>();
@@ -65,9 +67,10 @@ namespace Assets.Scripts.Simulation.AGV
 
             for (int i = 0; i < fleetSize; i++)
             {
-                AGVController newAgv = Instantiate(agvPrefab, parkingPositions[i], Quaternion.identity, this.transform);
+                AGVController newAgv = Instantiate(AgvPrefab, parkingPositions[i], Quaternion.identity, this.transform);
                 newAgv.gameObject.name = $"AGV_{i}";
-                newAgv.Initialize(i, config.AGVMoveSpeed, config.AGVHandshakeDuration);
+                newAgv.Initialize(i, config.AGVMoveSpeed, config.AGVHandshakeDuration,
+                                  ReservationProtocolParser.Parse(config.reservationProtocol));
                 fleet.Add(newAgv);
             }
 

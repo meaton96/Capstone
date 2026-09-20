@@ -205,6 +205,7 @@ namespace Assets.Scripts.Simulation.Jobs
                 AGVCount = agvCount,
                 AGVMoveSpeed = root["agvMoveSpeed"]?.Value<float>(),
                 AGVHandshakeDuration = root["agvHandshakeDuration"]?.Value<float>(),
+                reservationProtocol = ReservationProtocolParser.Validated(root["reservationProtocol"]?.Value<string>()),
                 Stochastic = ReadStochastic(root),
                 dispatchingRule = ReadDispatchingRule(root),
             };

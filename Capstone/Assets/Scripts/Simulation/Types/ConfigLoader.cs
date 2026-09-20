@@ -143,6 +143,7 @@ namespace Assets.Scripts.Simulation.Types
             public float machineFlexibilityProbability = 0f;
             public float throughputTimingWindow = 0f;
             public string parkingMethod = "single";
+            public string reservationProtocol = "holdPrevious";
             public string preDispatchingMethod = "fixed";
             public JsonStochasticConfig stochastic = null;
 
@@ -261,6 +262,7 @@ namespace Assets.Scripts.Simulation.Types
                 ThroughputTimingWindow = raw.throughputTimingWindow,
                 ProcTimeParams = procTimeParams,
                 parkingMethod = raw.parkingMethod,
+                reservationProtocol = ReservationProtocolParser.Validated(raw.reservationProtocol),
                 preDispatchingMethod = raw.preDispatchingMethod ?? "fixed",
             };
 

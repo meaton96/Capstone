@@ -33,6 +33,7 @@ namespace Assets.Scripts.Simulation.AGV
             public double Start;
             public float MinDistance;
             public string ZoneA, ZoneB, StateA, StateB;
+            public Vector2 PosA, PosB;
         }
 
         private readonly Dictionary<long, OpenEvent> _open = new Dictionary<long, OpenEvent>();
@@ -110,6 +111,7 @@ namespace Assets.Scripts.Simulation.AGV
                                 ZoneA = zoneNameAt(a.transform.position) ?? "-",
                                 ZoneB = zoneNameAt(b.transform.position) ?? "-",
                                 StateA = a.State.ToString(), StateB = b.State.ToString(),
+                                PosA = ca, PosB = cb,
                             };
                         }
                     }
@@ -142,6 +144,7 @@ namespace Assets.Scripts.Simulation.AGV
                 MinCentreDistance = ev.MinDistance,
                 ZoneA = ev.ZoneA, ZoneB = ev.ZoneB,
                 StateA = ev.StateA, StateB = ev.StateB,
+                PosAx = ev.PosA.x, PosAz = ev.PosA.y, PosBx = ev.PosB.x, PosBz = ev.PosB.y,
             });
         }
 

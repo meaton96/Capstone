@@ -456,13 +456,24 @@ namespace Assets.Scripts.Simulation
         }
 
         /// <summary>
+        /// The single point where command-line overrides (ConfigOverrides) are applied to a config,
+        /// so no batch / scenario / Python entry path can miss one. Mutates and returns the config.
+        /// </summary>
+        private static FJSSPConfig ApplyConfigOverrides(FJSSPConfig config)
+        {
+            if (config != null && ConfigOverrides.ReservationProtocol != null)
+                config.reservationProtocol = ConfigOverrides.ReservationProtocol;
+            return config;
+        }
+
+        /// <summary>
         /// Loads a simulation configuration and initializes the stochastic event manager.
         /// Resets factory readiness so SpawnFactory must be called before starting an episode.
         /// </summary>
         /// <param name="config">The FJSSP configuration to load.</param>
         public void LoadConfig(FJSSPConfig config)
         {
-            currentConfig = config;
+            currentConfig = ApplyConfigOverrides(config);
             _scenarioJobBuilder = null;
             IsFactoryReady = false;
             StochasticEventManager.Instance?.Initialize(config);
@@ -517,7 +528,7 @@ namespace Assets.Scripts.Simulation
                     ScenarioLoader.LoadDeferredFromJson(pythonScenario.Json, pythonScenario.Name);
                 if (scenarioConfig != null)
                 {
-                    currentConfig = scenarioConfig;
+                    currentConfig = ApplyConfigOverrides(scenarioConfig);
                     _scenarioJobBuilder = buildJobs;
                     IsFactoryReady = false;
                     SimLogger.Low($"[Bridge] Applied Python scenario: {scenarioConfig.Name} " +
@@ -533,7 +544,7 @@ namespace Assets.Scripts.Simulation
             var pythonConfig = EpisodeConfigChannel.Instance?.ConsumeConfig();
             if (pythonConfig != null)
             {
-                currentConfig = pythonConfig;
+                currentConfig = ApplyConfigOverrides(pythonConfig);
                 _scenarioJobBuilder = null;
                 IsFactoryReady = false;
                 SimLogger.Low($"[Bridge] Applied Python config: {currentConfig.Name}");
@@ -616,6 +627,7 @@ namespace Assets.Scripts.Simulation
             _nextThroughputBoundary = _throughputWindowLength;   // first window closes at t = windowLength
             _tracker.Reset();
             _machineProcessingStartTime.Clear();
+            foreach (var machine in layoutManager.Machines) machine.ResetHandoffStats();
 
             _flags = new FlagHarvester();
             _flags.Initialize(Jobs, agvPool, layoutManager, _tracker, _machineProcessingStartTime);
@@ -1323,9 +1335,7 @@ namespace Assets.Scripts.Simulation
             record.AgvStaticOverlapEvents = _collisions.StaticOverlapEvents;
             record.AgvMinCentreDistance = _collisions.MinCentreDistance == float.MaxValue ? -1f : _collisions.MinCentreDistance;
             record.CollisionRecords = _collisions.Events;
-            record.ReleasePreviousZone = AGVController.ReleasePreviousZoneEnabled;
-            record.SplitSpines = TrafficZoneManager.SplitSpinesEnabled;
-            record.OrphanReaper = FlagHarvester.OrphanReaperEnabled;
+            record.ReservationProtocol = currentConfig.reservationProtocol;
             record.OrphanPreDispatchesReleased = _flags != null ? _flags.OrphanPreDispatchesReleased : 0;
 
             // Collect AGV performance records

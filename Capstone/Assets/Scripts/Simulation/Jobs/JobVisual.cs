@@ -13,6 +13,9 @@ namespace Assets.Scripts.Simulation.Jobs
     {
         [SerializeField] private float moveSpeed = 2f;
 
+        [Tooltip("Renderer that receives the state tint. Leave empty to use the first Renderer found (the root mesh).")]
+        [SerializeField] private Renderer visualRenderer;
+
         [Header("State Colors")]
         [SerializeField] private Color notStartedColor = new Color(0.5f, 0.5f, 0.5f, 0.6f);
         [SerializeField] private Color queuedColor = new Color(1.0f, 0.85f, 0.2f, 1f);
@@ -53,7 +56,7 @@ namespace Assets.Scripts.Simulation.Jobs
             totalOperations = opCount;
             targetPosition = transform.position;
 
-            meshRenderer = GetComponentInChildren<Renderer>();
+            meshRenderer = visualRenderer != null ? visualRenderer : GetComponentInChildren<Renderer>();
             propBlock = new MaterialPropertyBlock();
 
             SetState(JobState.NeedsRouting);
@@ -64,8 +67,8 @@ namespace Assets.Scripts.Simulation.Jobs
         /// </summary>
         /// <param name="state">The target <see cref="JobState"/>.</param>
         /// <remarks>
-        /// Uses a <see cref="MaterialPropertyBlock"/> to update the "_Color" property
-        /// without creating material instances, preserving GPU instancing.
+        /// Uses a <see cref="MaterialPropertyBlock"/> to update the "_BaseColor" (URP) and
+        /// "_Color" (built-in) properties without creating material instances.
         /// </remarks>
         public void SetState(JobState state)
         {
@@ -84,6 +87,7 @@ namespace Assets.Scripts.Simulation.Jobs
             };
 
             meshRenderer.GetPropertyBlock(propBlock);
+            propBlock.SetColor("_BaseColor", c);
             propBlock.SetColor("_Color", c);
             meshRenderer.SetPropertyBlock(propBlock);
         }

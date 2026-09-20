@@ -29,6 +29,7 @@ namespace Assets.Scripts.Simulation.Logging
 
         private static string _filename = "results.csv";
         private static string _machineFilename = "machine_utilization.csv";
+        private static string _machineHandoffFilename = "machine_handoffs.csv";
         private static string _agvFilename = "agv_performance.csv";
         private static string _segmentFilename = "segment_congestion.csv";
         private static string _jobOpsFilename = "job_operations.csv";
@@ -42,6 +43,7 @@ namespace Assets.Scripts.Simulation.Logging
             const string ext = ".csv";
             _filename = StripExt(_filename, ext) + suffix + ext;
             _machineFilename = StripExt(_machineFilename, ext) + suffix + ext;
+            _machineHandoffFilename = StripExt(_machineHandoffFilename, ext) + suffix + ext;
             _agvFilename = StripExt(_agvFilename, ext) + suffix + ext;
             _segmentFilename = StripExt(_segmentFilename, ext) + suffix + ext;
             _jobOpsFilename = StripExt(_jobOpsFilename, ext) + suffix + ext;
@@ -60,6 +62,7 @@ namespace Assets.Scripts.Simulation.Logging
 
         private static string FilePath => BuildPath(_filename);
         private static string MachineFilePath => BuildPath(_machineFilename);
+        private static string MachineHandoffFilePath => BuildPath(_machineHandoffFilename);
         private static string AGVFilePath => BuildPath(_agvFilename);
         private static string SegmentFilePath => BuildPath(_segmentFilename);
         private static string JobOpsFilePath => BuildPath(_jobOpsFilename);
@@ -77,6 +80,7 @@ namespace Assets.Scripts.Simulation.Logging
         {
             LogEpisode(r);
             LogMachineUtilization(r);
+            if (r.MachineHandoffRecords.Count > 0) LogMachineHandoffs(r);
             if (r.AGVRecords.Count > 0) LogAGVPerformance(r);
             if (r.SegmentRecords.Count > 0) LogSegmentCongestion(r);
             if (r.JobOperationRecords.Count > 0) LogJobOperations(r);
@@ -97,13 +101,15 @@ namespace Assets.Scripts.Simulation.Logging
             if (!fileExists)
                 writer.WriteLine(
                     "timestamp,instance,rule,seed,agv_count,event_id,start_time,duration," +
-                    "agv_a,agv_b,min_centre_distance,zone_a,zone_b,state_a,state_b");
+                    "agv_a,agv_b,min_centre_distance,zone_a,zone_b,state_a,state_b," +
+                    "a_x,a_z,b_x,b_z");
             string ts = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             foreach (var c in r.CollisionRecords)
                 writer.WriteLine(
                     $"{ts},{r.InstanceName},{r.RuleName},{r.Seed},{r.AGVCount},{c.EventId}," +
                     $"{c.StartTime:F2},{c.Duration:F2},{c.AgvA},{c.AgvB},{c.MinCentreDistance:F3}," +
-                    $"{c.ZoneA},{c.ZoneB},{c.StateA},{c.StateB}");
+                    $"{c.ZoneA},{c.ZoneB},{c.StateA},{c.StateB}," +
+                    $"{c.PosAx:F2},{c.PosAz:F2},{c.PosBx:F2},{c.PosBz:F2}");
         }
         // ── Throughput log (throughput.csv) ───────────────────────────────────
 
@@ -173,7 +179,7 @@ namespace Assets.Scripts.Simulation.Logging
                     "first_stall_sim_time,orphan_predispatch_released," +
                     "agv_collision_events,agv_collision_pair_seconds,agv_clearance_events," +
                     "agv_clearance_pair_seconds,agv_static_overlap_events,agv_min_centre_distance," +
-                    "release_previous_zone,split_spines,orphan_reaper"
+                    "reservation_protocol"
                 );
 
             writer.WriteLine(
@@ -193,7 +199,7 @@ namespace Assets.Scripts.Simulation.Logging
                 $"{r.FirstStallSimTime:F1},{r.OrphanPreDispatchesReleased}," +
                 $"{r.AgvCollisionEvents},{r.AgvCollisionPairSeconds:F2},{r.AgvClearanceEvents}," +
                 $"{r.AgvClearancePairSeconds:F2},{r.AgvStaticOverlapEvents},{r.AgvMinCentreDistance:F3}," +
-                $"{(r.ReleasePreviousZone ? 1 : 0)},{(r.SplitSpines ? 1 : 0)},{(r.OrphanReaper ? 1 : 0)}"
+                $"{r.ReservationProtocol}"
             );
 
             Debug.Log($"[Results] {r.InstanceName} {r.RuleName} seed={r.Seed} " +
@@ -230,6 +236,41 @@ namespace Assets.Scripts.Simulation.Logging
                     $"{m.TimeProcessing:F2},{m.TimeOperational:F2}," +
                     $"{m.UtilizationRate:F4},{m.IdleTime:F2},{m.IdleRate:F4},{m.AvailabilityRate:F4}," +
                     $"{m.FailureCount},{m.RepairTime:F1}"
+                );
+            }
+        }
+
+        /// <summary>
+        /// Appends one row per machine per episode to machine_handoffs.csv: which belt (primary/secondary)
+        /// and which dock side (north = +z) AGV handoffs used. Answers whether the second belt pair of
+        /// interior machines is ever exercised.
+        /// </summary>
+        public static void LogMachineHandoffs(EpisodeRecord r)
+        {
+            bool fileExists = File.Exists(MachineHandoffFilePath);
+            using var writer = new StreamWriter(MachineHandoffFilePath, append: true);
+
+            if (!fileExists)
+                writer.WriteLine(
+                    "timestamp,instance,rule,seed,makespan," +
+                    "machine_id,machine_type,has_secondary_belts,primary_side," +
+                    "pickup_belt_primary,pickup_belt_secondary," +
+                    "dropoff_belt_primary,dropoff_belt_secondary,dropoff_belt_full,dropoff_redundant,dropoff_double_placed," +
+                    "out_placed_primary,out_placed_secondary,out_belt_full," +
+                    "pickup_dock_north,pickup_dock_south,dropoff_dock_north,dropoff_dock_south"
+                );
+
+            string ts = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            foreach (var m in r.MachineHandoffRecords)
+            {
+                writer.WriteLine(
+                    $"{ts}," +
+                    $"{r.InstanceName},{r.RuleName},{r.Seed},{r.Makespan:F2}," +
+                    $"{m.MachineId},{m.MachineType},{(m.HasSecondaryBelts ? 1 : 0)},{(m.PrimaryBeltsNorth ? "N" : "S")}," +
+                    $"{m.PickupBeltPrimary},{m.PickupBeltSecondary}," +
+                    $"{m.DropoffBeltPrimary},{m.DropoffBeltSecondary},{m.DropoffBeltFull},{m.DropoffRedundant},{m.DropoffDoublePlaced}," +
+                    $"{m.OutPlacedPrimary},{m.OutPlacedSecondary},{m.OutBeltFull}," +
+                    $"{m.PickupDockNorth},{m.PickupDockSouth},{m.DropoffDockNorth},{m.DropoffDockSouth}"
                 );
             }
         }

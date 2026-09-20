@@ -65,11 +65,9 @@ namespace Assets.Scripts.Simulation.Types
         public float AgvMinCentreDistance = -1f;
         public List<CollisionRecord> CollisionRecords = new List<CollisionRecord>();
 
-        // Traffic-protocol / layout switches active for this run (all default to the original
-        // behaviour). Part of scenario identity: never compare rows with different values.
-        public bool ReleasePreviousZone;
-        public bool SplitSpines;
-        public bool OrphanReaper = true;
+        // AGV zone-reservation protocol for this run (FJSSPConfig.reservationProtocol). Part of
+        // scenario identity: never compare rows with different values.
+        public string ReservationProtocol = "holdPrevious";
         // Pre-dispatched AGVs found orphaned (job no longer claims them, e.g. its source machine
         // failed) and released by FlagHarvester.ReleaseOrphanedPreDispatches. Always 0 when the
         // legacy switch -legacyorphanpredispatch is set (reaper disabled).
@@ -110,6 +108,9 @@ namespace Assets.Scripts.Simulation.Types
 
         // ── Per-machine statistics ────────────────────────────────────────────
         public List<MachineRecord> MachineRecords = new List<MachineRecord>();
+
+        // ── Per-machine belt/dock handoff usage (machine_handoffs.csv) ──────────
+        public List<MachineHandoffRecord> MachineHandoffRecords = new List<MachineHandoffRecord>();
 
         // ── Per-AGV statistics  (Phase 2 addition) ────────────────────────────
         public List<AGVRecord> AGVRecords = new List<AGVRecord>();
@@ -245,6 +246,25 @@ namespace Assets.Scripts.Simulation.Types
         public float RepairTime;
 
         // Phase 3: AGV-stranded time per machine, etc.
+    }
+
+    /// @brief Which belt and dock side AGV handoffs used, per machine per episode. One row in machine_handoffs.csv.
+    ///
+    /// @details Survey record for the dual-conveyor question: if the secondary belt / non-primary dock
+    ///          counts are ~0 on interior machines, the second belt pair is not doing anything.
+    public class MachineHandoffRecord
+    {
+        public int MachineId;
+        public string MachineType;
+        public bool HasSecondaryBelts;
+        public bool PrimaryBeltsNorth;
+
+        public int PickupBeltPrimary, PickupBeltSecondary;
+        public int DropoffBeltPrimary, DropoffBeltSecondary, DropoffBeltFull;
+        public int DropoffRedundant, DropoffDoublePlaced;
+        public int OutPlacedPrimary, OutPlacedSecondary, OutBeltFull;
+        public int PickupDockNorth, PickupDockSouth;
+        public int DropoffDockNorth, DropoffDockSouth;
     }
 
     // ── Per-AGV statistics (Phase 2) ──
@@ -461,5 +481,7 @@ namespace Assets.Scripts.Simulation.Types
         public float MinCentreDistance;
         public string ZoneA, ZoneB;
         public string StateA, StateB;
+        // World XZ of each AGV when the overlap began.
+        public float PosAx, PosAz, PosBx, PosBz;
     }
 }

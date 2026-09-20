@@ -1,4 +1,5 @@
 using UnityEngine;
+using Assets.Scripts.Simulation.Types;
 using UnityEngine.AI;
 using System.Collections.Generic;
 using Assets.Scripts.Simulation.Machines;
@@ -198,11 +199,13 @@ namespace Assets.Scripts.Simulation.AGV
         /// @param handshakeDuration  Overrides the prefab's serialized handshakeDuration when
         ///                   set (see FJSSPConfig.AGVHandshakeDuration). Null keeps the
         ///                   prefab's own value.
-        public void Initialize(int id, float? moveSpeed = null, float? handshakeDuration = null)
+        public void Initialize(int id, float? moveSpeed = null, float? handshakeDuration = null,
+                               ReservationProtocol protocol = ReservationProtocol.HoldPrevious)
         {
             if (moveSpeed.HasValue) this.moveSpeed = moveSpeed.Value;
             if (handshakeDuration.HasValue) this.handshakeDuration = handshakeDuration.Value;
 
+            _protocol = protocol;
             AgvId = id;
             navAgent = GetComponent<NavMeshAgent>();
             navAgent.updatePosition = false;
@@ -624,7 +627,10 @@ namespace Assets.Scripts.Simulation.AGV
         private void DoPickup()
         {
             if (sourceMachine != null)
+            {
                 sourceMachine.RemoveFromOutgoing(CurrentJobId);
+                sourceMachine.RecordDockHandoff(true, pickupDock.HandshakePosition);
+            }
             else
                 FactoryLayoutManager.Instance.IncomingBelt?.RemoveJob(CurrentJobId);
 
@@ -660,7 +666,10 @@ namespace Assets.Scripts.Simulation.AGV
                 loadedJobVisual.DetachFromCarrier(dropoffDock.HandshakePosition);
 
             if (targetMachine != null)
+            {
                 targetMachine.PlaceOnIncoming(CurrentJobId, loadedJobVisual);
+                targetMachine.RecordDockHandoff(false, dropoffDock.HandshakePosition);
+            }
             else
                 FactoryLayoutManager.Instance.OutgoingBelt?.TryEnqueue(CurrentJobId, loadedJobVisual);
 
@@ -959,21 +968,12 @@ namespace Assets.Scripts.Simulation.AGV
         }
 
         /// <summary>
-        /// Experiment switch <c>-releasepreviouszone</c>: on reaching a zone's centre, release the
-        /// zone just left immediately instead of holding it until the NEXT zone is reached. By
-        /// default an AGV holds current + previous, i.e. two slots, which halves effective capacity
-        /// of a ring (see docs/GRIDLOCK_INVESTIGATION_2026-09-19.md, §8). Off by default so every
-        /// existing result is unchanged.
-        ///
-        /// Physical basis: the AGV drives to the new zone's centre before this fires, and the
-        /// smallest zone is 3 units long against a ~2.36 unit footprint, so its body is inside the
-        /// new zone and the old one is clear. previousZoneId is still tracked (unreserved) so
-        /// RetreatFromStall can back into it if it is free.
+        /// See ReservationProtocol. Set per fleet from FJSSPConfig.reservationProtocol (AGVPool).
+        /// ReleasePrevious releases the zone just left as soon as the next zone's centre is reached
+        /// instead of one zone later; previousZoneId is still tracked (unreserved) so
+        /// RetreatFromStall can back into it if free.
         /// </summary>
-        private static readonly bool ReleaseZoneBehindEarly =
-            System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "-releasepreviouszone") >= 0;
-        /// <summary>True when -releasepreviouszone is active (recorded in results.csv).</summary>
-        public static bool ReleasePreviousZoneEnabled => ReleaseZoneBehindEarly;
+        private ReservationProtocol _protocol = ReservationProtocol.HoldPrevious;
 
         /// @brief Manages the transition of reservations when crossing zone boundaries.
         private void OnEnteredZone(int newZoneId)
@@ -981,7 +981,7 @@ namespace Assets.Scripts.Simulation.AGV
             if (previousZoneId >= 0 && previousZoneId != newZoneId)
                 trafficMgr.Release(previousZoneId, AgvId);
 
-            if (ReleaseZoneBehindEarly && currentZoneId >= 0 && currentZoneId != newZoneId)
+            if (_protocol == ReservationProtocol.ReleasePrevious && currentZoneId >= 0 && currentZoneId != newZoneId)
                 trafficMgr.Release(currentZoneId, AgvId);
 
             previousZoneId = currentZoneId;

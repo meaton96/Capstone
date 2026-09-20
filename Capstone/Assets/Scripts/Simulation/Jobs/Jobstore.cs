@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Assets.Scripts.Simulation.Visuals;
 
 namespace Assets.Scripts.Simulation.Jobs
 {
@@ -15,7 +16,8 @@ namespace Assets.Scripts.Simulation.Jobs
     public class JobStore : MonoBehaviour
     {
         [Header("Visuals")]
-        [SerializeField] private JobVisual jobVisualPrefab;
+        // Prefab comes from VisualController (primitive or Kenney variant).
+        private static JobVisual JobVisualPrefab => VisualController.Instance.JobPrefab;
         [SerializeField] private Transform jobVisualContainer;
 
         private readonly List<JobData> allJobs = new List<JobData>();
@@ -69,9 +71,9 @@ namespace Assets.Scripts.Simulation.Jobs
                     StateEntryTime = def.ArrivalTime,
                 };
 
-                if (spawnVisuals && jobVisualPrefab != null)
+                if (spawnVisuals && JobVisualPrefab != null)
                 {
-                    JobVisual vis = Instantiate(jobVisualPrefab, jobVisualContainer);
+                    JobVisual vis = Instantiate(JobVisualPrefab, jobVisualContainer);
                     vis.gameObject.name = $"JobVisual_{def.JobId}";
                     vis.Initialize(def.JobId, def.OperationSequence.Length);
                     jobData.Visual = vis;
@@ -120,9 +122,9 @@ namespace Assets.Scripts.Simulation.Jobs
                 StateEntryTime = def.ArrivalTime,
             };
 
-            if (spawnVisuals && jobVisualPrefab != null)
+            if (spawnVisuals && JobVisualPrefab != null)
             {
-                JobVisual vis = Instantiate(jobVisualPrefab, jobVisualContainer);
+                JobVisual vis = Instantiate(JobVisualPrefab, jobVisualContainer);
                 vis.gameObject.name = $"JobVisual_{def.JobId}";
                 vis.Initialize(def.JobId, def.OperationSequence.Length);
                 jobData.Visual = vis;

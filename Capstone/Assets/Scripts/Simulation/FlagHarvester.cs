@@ -40,16 +40,6 @@ namespace Assets.Scripts.Simulation
         public int OrphanPreDispatchesReleased { get; private set; }
 
         /// <summary>
-        /// Command-line switch <c>-legacyorphanpredispatch</c> disables ReleaseOrphanedPreDispatches,
-        /// reproducing the pre-fix behaviour (orphaned pre-dispatch AGVs sit in the lane forever).
-        /// Exists so the gridlock can be reproduced and the fix A/B-tested on a single build.
-        /// </summary>
-        private static readonly bool LegacyOrphanPreDispatch =
-            System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "-legacyorphanpredispatch") >= 0;
-        /// <summary>True unless -legacyorphanpredispatch is set (recorded in results.csv).</summary>
-        public static bool OrphanReaperEnabled => !LegacyOrphanPreDispatch;
-
-        /// <summary>
         /// Initializes the FlagHarvester with required dependencies. Must be called before any Harvest methods.
         /// </summary>
         /// <param name="jobs">The job store containing all job data and state.</param>
@@ -242,8 +232,6 @@ namespace Assets.Scripts.Simulation
         /// </summary>
         public void ReleaseOrphanedPreDispatches()
         {
-            if (LegacyOrphanPreDispatch) return;
-
             foreach (var agv in _agvPool.AllAGVs)
             {
                 if (!agv.IsPreDispatched) continue;

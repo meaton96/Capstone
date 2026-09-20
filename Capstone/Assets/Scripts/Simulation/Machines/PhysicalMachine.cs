@@ -135,6 +135,55 @@ namespace Assets.Scripts.Simulation.Machines
         [SerializeField] private ConveyorBelt secondaryIncomingConveyor;
         [SerializeField] private ConveyorBelt secondaryOutgoingConveyor;
 
+        // ── Handoff statistics (belt / dock usage survey) ─────────────────────
+
+        /// @brief Per-episode counts of which belt and which dock side AGV handoffs actually used.
+        ///
+        /// @details Count-only; nothing here feeds back into the simulation. "Belt" counters record where
+        /// the job physically went/came from, "dock" counters record which side of the machine the AGV
+        /// handshook on (north = +z). Reset each episode via @c ResetHandoffStats.
+        public struct HandoffStats
+        {
+            public int PickupBeltPrimary, PickupBeltSecondary;
+            public int DropoffBeltPrimary, DropoffBeltSecondary, DropoffBeltFull;
+            /// A delivery is placed twice (AGVController.DoDropoff, then FlagHarvester). Redundant = the second
+            /// call, rejected as a duplicate. DoublePlaced = the second call landed on the OTHER belt (job on both).
+            public int DropoffRedundant, DropoffDoublePlaced;
+            public int OutPlacedPrimary, OutPlacedSecondary, OutBeltFull;
+            public int PickupDockNorth, PickupDockSouth;
+            public int DropoffDockNorth, DropoffDockSouth;
+        }
+
+        private HandoffStats handoffs;
+
+        public HandoffStats Handoffs => handoffs;
+
+        /// @brief True when this prefab carries a second in/out belt pair (interior, double-sided machines).
+        public bool HasSecondaryBelts => secondaryIncomingConveyor != null || secondaryOutgoingConveyor != null;
+
+        /// @brief True when the primary belts sit on the +z (north) side of the machine.
+        public bool PrimaryBeltsNorth
+        {
+            get
+            {
+                ConveyorBelt b = incomingConveyor != null ? incomingConveyor : outgoingConveyor;
+                return b != null && b.InputEndPosition.z > transform.position.z;
+            }
+        }
+
+        /// @brief Clears the handoff counters. Called at the start of each episode.
+        public void ResetHandoffStats() => handoffs = default;
+
+        /// @brief Records which side of the machine an AGV handshook on.
+        /// @param isPickup True for a pickup from this machine, false for a dropoff to it.
+        /// @param dockHandshakePosition World position of the dock's handshake point.
+        public void RecordDockHandoff(bool isPickup, Vector3 dockHandshakePosition)
+        {
+            bool north = dockHandshakePosition.z > transform.position.z;
+            if (isPickup) { if (north) handoffs.PickupDockNorth++; else handoffs.PickupDockSouth++; }
+            else          { if (north) handoffs.DropoffDockNorth++; else handoffs.DropoffDockSouth++; }
+        }
+
         /// @brief Reference to the paired visual layer component.
         private MachineVisual visualLayer;
 
@@ -344,7 +393,17 @@ namespace Assets.Scripts.Simulation.Machines
             ConveyorBelt belt = PickIncomingBelt();
             if (belt != null && visual != null)
             {
-                belt.TryEnqueue(jobId, visual);
+                bool alreadyOnBelt = (incomingConveyor != null && incomingConveyor.Contains(jobId))
+                                  || (secondaryIncomingConveyor != null && secondaryIncomingConveyor.Contains(jobId));
+                bool placed = belt.TryEnqueue(jobId, visual);
+                if (alreadyOnBelt)
+                {
+                    if (placed) handoffs.DropoffDoublePlaced++;
+                    else handoffs.DropoffRedundant++;
+                }
+                else if (!placed) handoffs.DropoffBeltFull++;
+                else if (belt == secondaryIncomingConveyor) handoffs.DropoffBeltSecondary++;
+                else handoffs.DropoffBeltPrimary++;
                 visual.SetOnConveyor(true);
             }
         }
@@ -357,9 +416,15 @@ namespace Assets.Scripts.Simulation.Machines
         public void RemoveFromOutgoing(int jobId)
         {
             if (outgoingConveyor != null && outgoingConveyor.Contains(jobId))
+            {
                 outgoingConveyor.RemoveJob(jobId);
+                handoffs.PickupBeltPrimary++;
+            }
             else if (secondaryOutgoingConveyor != null && secondaryOutgoingConveyor.Contains(jobId))
+            {
                 secondaryOutgoingConveyor.RemoveJob(jobId);
+                handoffs.PickupBeltSecondary++;
+            }
         }
 
         /// @brief Transfers a finished job visual from the machine center to an outgoing conveyor belt.
@@ -374,7 +439,10 @@ namespace Assets.Scripts.Simulation.Machines
             ConveyorBelt belt = PickOutgoingBelt();
             if (belt != null && visual != null)
             {
-                belt.TryEnqueue(jobId, visual);
+                bool placed = belt.TryEnqueue(jobId, visual);
+                if (!placed) handoffs.OutBeltFull++;
+                else if (belt == secondaryOutgoingConveyor) handoffs.OutPlacedSecondary++;
+                else handoffs.OutPlacedPrimary++;
                 visual.SetOnConveyor(true);
             }
         }

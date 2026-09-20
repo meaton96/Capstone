@@ -32,6 +32,10 @@ namespace Assets.Scripts.Simulation.Machines
         /// @brief Renderer for the state indicator light.
         [SerializeField] private MeshRenderer indicatorRenderer;
 
+        /// @brief How strongly the machine-type colour tints the body: 1 = full (original behaviour),
+        /// 0 = untinted. Lower it for textured meshes, where the full tint turns the texture near-black.
+        [SerializeField, Range(0f, 1f)] private float bodyTintBlend = 1f;
+
         /// @brief World offset position for incoming job visuals.
         [SerializeField] private Vector3 incomingOffset = new Vector3(-2.5f, -.5f, 0f);
 
@@ -147,7 +151,7 @@ namespace Assets.Scripts.Simulation.Machines
             SetLabel($"M{id}\n{type}");
 
             if (bodyInstanceMaterial != null && TypeColors.TryGetValue(type, out Color bodyColor))
-                bodyInstanceMaterial.color = bodyColor * 0.6f;  // darken so indicator pops
+                bodyInstanceMaterial.color = Color.Lerp(Color.white, bodyColor * 0.6f, bodyTintBlend);  // darken so indicator pops
 
             SetState(MachineState.Idle);
             Log($"Initialised as {type} at {transform.position}");
