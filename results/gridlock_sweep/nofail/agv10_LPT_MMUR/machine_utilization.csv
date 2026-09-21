@@ -1,0 +1,16 @@
+timestamp,instance,rule,seed,makespan,machine_id,machine_type,ops_completed,time_processing,time_operational,utilization_rate,idle_time,idle_rate,availability_rate,failure_count,total_repair_time
+2026-09-19 17:42:14,mfsweep_control_nofail,LPT_MMUR,42,4613.06,0,Mill,9,135.18,4613.06,0.0293,4477.88,0.9707,1.0000,0,0.0
+2026-09-19 17:42:14,mfsweep_control_nofail,LPT_MMUR,42,4613.06,1,Lathe,0,0.00,4613.06,0.0000,4613.06,1.0000,1.0000,0,0.0
+2026-09-19 17:42:14,mfsweep_control_nofail,LPT_MMUR,42,4613.06,2,Weld,8,414.08,4613.06,0.0898,4198.98,0.9102,1.0000,0,0.0
+2026-09-19 17:42:14,mfsweep_control_nofail,LPT_MMUR,42,4613.06,3,Inspect,0,0.00,4613.06,0.0000,4613.06,1.0000,1.0000,0,0.0
+2026-09-19 17:42:14,mfsweep_control_nofail,LPT_MMUR,42,4613.06,4,Assemble,0,0.00,4613.06,0.0000,4613.06,1.0000,1.0000,0,0.0
+2026-09-19 17:42:14,mfsweep_control_nofail,LPT_MMUR,42,4613.06,5,Mill,8,120.16,4613.06,0.0260,4492.90,0.9740,1.0000,0,0.0
+2026-09-19 17:42:14,mfsweep_control_nofail,LPT_MMUR,42,4613.06,6,Lathe,0,0.00,4613.06,0.0000,4613.06,1.0000,1.0000,0,0.0
+2026-09-19 17:42:14,mfsweep_control_nofail,LPT_MMUR,42,4613.06,7,Weld,10,508.16,4613.06,0.1102,4104.90,0.8898,1.0000,0,0.0
+2026-09-19 17:42:14,mfsweep_control_nofail,LPT_MMUR,42,4613.06,8,Inspect,0,0.00,4613.06,0.0000,4613.06,1.0000,1.0000,0,0.0
+2026-09-19 17:42:14,mfsweep_control_nofail,LPT_MMUR,42,4613.06,9,Assemble,0,0.00,4613.06,0.0000,4613.06,1.0000,1.0000,0,0.0
+2026-09-19 17:42:14,mfsweep_control_nofail,LPT_MMUR,42,4613.06,10,Mill,9,135.18,4613.06,0.0293,4477.88,0.9707,1.0000,0,0.0
+2026-09-19 17:42:14,mfsweep_control_nofail,LPT_MMUR,42,4613.06,11,Lathe,0,0.00,4613.06,0.0000,4613.06,1.0000,1.0000,0,0.0
+2026-09-19 17:42:14,mfsweep_control_nofail,LPT_MMUR,42,4613.06,12,Weld,6,324.98,4613.06,0.0704,4288.08,0.9296,1.0000,0,0.0
+2026-09-19 17:42:14,mfsweep_control_nofail,LPT_MMUR,42,4613.06,13,Inspect,0,0.00,4613.06,0.0000,4613.06,1.0000,1.0000,0,0.0
+2026-09-19 17:42:14,mfsweep_control_nofail,LPT_MMUR,42,4613.06,14,Assemble,0,0.00,4613.06,0.0000,4613.06,1.0000,1.0000,0,0.0

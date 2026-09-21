@@ -1,0 +1,24 @@
+timestamp,instance,rule,seed,agv_count,event_id,start_time,duration,agv_a,agv_b,min_centre_distance,zone_a,zone_b,state_a,state_b,a_x,a_z,b_x,b_z
+2026-09-21 13:34:36,mfsweep_control_nofail,SPT_SRWT,42,20,0,5.94,0.32,0,2,1.165,Bay_2,Bay_2,MovingToPickup,Idle,-14.70,-16.74,-13.50,-17.25
+2026-09-21 13:34:36,mfsweep_control_nofail,SPT_SRWT,42,20,1,30.66,0.32,1,2,1.136,Bay_2,Bay_2,MovingToPickup,Idle,-14.67,-16.76,-13.50,-17.25
+2026-09-21 13:34:36,mfsweep_control_nofail,SPT_SRWT,42,20,2,157.48,0.68,0,7,0.189,Bay_0,Lane_11,Idle,MovingToPickup,-15.95,-17.60,-16.71,-18.51
+2026-09-21 13:34:36,mfsweep_control_nofail,SPT_SRWT,42,20,3,244.98,0.68,0,7,0.198,Bay_0,Lane_11,Idle,MovingToPickup,-15.95,-17.60,-16.70,-18.51
+2026-09-21 13:34:36,mfsweep_control_nofail,SPT_SRWT,42,20,4,364.46,0.68,0,3,0.187,Bay_0,Lane_11,Idle,MovingToPrePickup,-15.95,-17.60,-16.72,-18.52
+2026-09-21 13:34:36,mfsweep_control_nofail,SPT_SRWT,42,20,5,540.22,0.68,0,6,0.198,Bay_0,Lane_11,Idle,MovingToPickup,-15.95,-17.60,-16.70,-18.51
+2026-09-21 13:34:36,mfsweep_control_nofail,SPT_SRWT,42,20,6,546.02,0.68,0,7,0.198,Bay_0,Lane_11,MovingToPrePickup,MovingToPrePickup,-15.95,-17.60,-16.70,-18.51
+2026-09-21 13:34:36,mfsweep_control_nofail,SPT_SRWT,42,20,7,663.70,0.68,0,3,0.187,Bay_0,Lane_11,Idle,MovingToPickup,-15.95,-17.60,-16.72,-18.52
+2026-09-21 13:34:36,mfsweep_control_nofail,SPT_SRWT,42,20,8,669.54,0.68,0,7,0.198,Bay_0,Lane_11,MovingToPickup,MovingToPickup,-15.95,-17.60,-16.70,-18.51
+2026-09-21 13:34:36,mfsweep_control_nofail,SPT_SRWT,42,20,9,763.66,0.68,0,2,0.180,Bay_0,Lane_11,MovingToPickup,MovingToPickup,-15.95,-17.60,-16.72,-18.51
+2026-09-21 13:34:36,mfsweep_control_nofail,SPT_SRWT,42,20,10,769.50,0.68,0,7,0.198,Bay_0,Lane_11,MovingToPickup,MovingToPickup,-15.95,-17.60,-16.70,-18.51
+2026-09-21 13:34:36,mfsweep_control_nofail,SPT_SRWT,42,20,11,848.94,0.68,0,2,0.180,Bay_0,Lane_11,MovingToPrePickup,MovingToPickup,-15.95,-17.60,-16.72,-18.51
+2026-09-21 13:34:36,mfsweep_control_nofail,SPT_SRWT,42,20,12,953.46,0.68,0,5,0.203,Bay_0,Lane_11,Idle,MovingToPickup,-15.95,-17.60,-16.69,-18.51
+2026-09-21 13:34:36,mfsweep_control_nofail,SPT_SRWT,42,20,13,1165.50,0.68,0,5,0.203,Bay_0,Lane_11,Idle,MovingToPickup,-15.95,-17.60,-16.69,-18.51
+2026-09-21 13:34:36,mfsweep_control_nofail,SPT_SRWT,42,20,14,1663.24,0.68,0,3,0.187,Bay_0,Lane_11,Idle,MovingToPickup,-15.95,-17.60,-16.72,-18.52
+2026-09-21 13:34:36,mfsweep_control_nofail,SPT_SRWT,42,20,15,2126.86,0.68,0,6,0.198,Bay_0,Lane_11,MovingToPickup,MovingToPrePickup,-15.95,-17.60,-16.70,-18.51
+2026-09-21 13:34:36,mfsweep_control_nofail,SPT_SRWT,42,20,16,2218.02,0.68,0,11,0.179,Bay_0,Lane_11,Idle,MovingToPickup,-15.95,-17.60,-16.73,-18.52
+2026-09-21 13:34:36,mfsweep_control_nofail,SPT_SRWT,42,20,17,2814.18,0.68,0,2,0.180,Bay_0,Lane_11,MovingToPrePickup,MovingToPickup,-15.95,-17.60,-16.72,-18.51
+2026-09-21 13:34:36,mfsweep_control_nofail,SPT_SRWT,42,20,18,2925.08,0.68,0,3,0.187,Bay_0,Lane_11,Idle,MovingToPickup,-15.95,-17.60,-16.72,-18.52
+2026-09-21 13:34:36,mfsweep_control_nofail,SPT_SRWT,42,20,19,3031.40,0.68,0,10,0.179,Bay_0,Lane_11,Idle,MovingToPickup,-15.95,-17.60,-16.73,-18.52
+2026-09-21 13:34:36,mfsweep_control_nofail,SPT_SRWT,42,20,20,3040.38,0.68,0,12,0.198,Bay_0,Lane_11,MovingToPrePickup,MovingToPickup,-15.95,-17.60,-16.70,-18.51
+2026-09-21 13:34:36,mfsweep_control_nofail,SPT_SRWT,42,20,21,3161.28,0.68,0,5,0.203,Bay_0,Lane_11,Idle,MovingToPickup,-15.95,-17.60,-16.69,-18.51
+2026-09-21 13:34:36,mfsweep_control_nofail,SPT_SRWT,42,20,22,3273.48,0.68,0,4,0.202,Bay_0,Lane_11,MovingToPrePickup,MovingToPickup,-15.95,-17.60,-16.69,-18.51

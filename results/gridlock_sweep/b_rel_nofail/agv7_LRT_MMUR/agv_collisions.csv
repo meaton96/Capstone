@@ -1,0 +1,12 @@
+timestamp,instance,rule,seed,agv_count,event_id,start_time,duration,agv_a,agv_b,min_centre_distance,zone_a,zone_b,state_a,state_b,a_x,a_z,b_x,b_z
+2026-09-20 18:57:27,mfsweep_control_nofail,LRT_MMUR,42,7,0,358.98,0.44,3,4,0.943,BotSpine_Dock0,BotSpine_Dock0,ReturningToParking,ReturningToParking,-8.64,-14.00,-9.73,-14.58
+2026-09-20 18:57:27,mfsweep_control_nofail,LRT_MMUR,42,7,1,1032.10,0.44,4,5,0.943,BotSpine_Dock0,BotSpine_Dock0,ReturningToParking,ReturningToParking,-8.64,-14.00,-9.73,-14.58
+2026-09-20 18:57:27,mfsweep_control_nofail,LRT_MMUR,42,7,2,1087.58,0.44,0,6,0.943,BotSpine_Dock0,BotSpine_Dock0,ReturningToParking,ReturningToParking,-8.64,-14.00,-9.73,-14.58
+2026-09-20 18:57:27,mfsweep_control_nofail,LRT_MMUR,42,7,3,1128.90,0.44,1,4,0.943,BotSpine_Dock0,BotSpine_Dock0,ReturningToParking,ReturningToParking,-8.64,-14.00,-9.73,-14.58
+2026-09-20 18:57:27,mfsweep_control_nofail,LRT_MMUR,42,7,4,1131.82,0.40,1,4,1.000,BotSpine_Dock0,BotSpine_Transit0,ReturningToParking,MovingToPickup,-8.64,-14.00,-7.48,-13.97
+2026-09-20 18:57:27,mfsweep_control_nofail,LRT_MMUR,42,7,5,1137.18,0.24,1,2,1.261,BotSpine_Dock0,BotSpine_Dock0,MovingToPickup,ReturningToParking,-9.73,-14.58,-8.61,-14.00
+2026-09-20 18:57:27,mfsweep_control_nofail,LRT_MMUR,42,7,6,1244.20,4.46,3,6,0.423,BotSpine_Dock0,BotSpine_Dock0,MovingToPickup,ReturningToParking,-8.73,-14.97,-8.08,-14.00
+2026-09-20 18:57:27,mfsweep_control_nofail,LRT_MMUR,42,7,7,1461.66,0.46,3,6,0.933,LeftVert_BotConn,BotSpine_Dock0,ReturningToParking,ReturningToParking,-9.77,-14.55,-8.64,-14.00
+2026-09-20 18:57:27,mfsweep_control_nofail,LRT_MMUR,42,7,8,2652.06,0.46,4,5,0.934,LeftVert_BotConn,BotSpine_Dock0,ReturningToParking,ReturningToParking,-9.77,-14.55,-8.64,-14.00
+2026-09-20 18:57:27,mfsweep_control_nofail,LRT_MMUR,42,7,9,2661.30,0.44,5,6,0.943,BotSpine_Dock0,BotSpine_Dock0,ReturningToParking,ReturningToParking,-9.73,-14.58,-8.64,-14.00
+2026-09-20 18:57:27,mfsweep_control_nofail,LRT_MMUR,42,7,10,2919.12,0.76,4,5,0.094,BotSpine_Transit0,BotSpine_Transit0,MovingToPickup,ReturningToParking,-4.59,-15.00,-5.28,-14.00

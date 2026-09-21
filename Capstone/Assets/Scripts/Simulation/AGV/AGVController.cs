@@ -105,6 +105,9 @@ namespace Assets.Scripts.Simulation.AGV
             _statTimeLoading = 0.0;
             _statTimeUnloading = 0.0;
             _statTotalPathLength = 0.0;
+            _statPathReturning = 0.0;
+            _statPathDeparture = 0.0;
+            _dispatchedFromIdle = false;
             _statRerouteCount = 0;
             _statStallRecoveryCount = 0;
             _statTotalTrips = 0;
@@ -134,6 +137,8 @@ namespace Assets.Scripts.Simulation.AGV
                 TimeLoading = _statTimeLoading,
                 TimeUnloading = _statTimeUnloading,
                 TotalPathLength = _statTotalPathLength,
+                PathReturningToParking = _statPathReturning,
+                PathDepartureFromParking = _statPathDeparture,
                 RerouteCount = _statRerouteCount,
                 StallRecoveryCount = _statStallRecoveryCount,
             };
@@ -184,6 +189,14 @@ namespace Assets.Scripts.Simulation.AGV
         private double _statTimeTraveling;
         private double _statTimeLoading;       // handshake timer at pickup dock
         private double _statTimeUnloading;     // handshake timer at dropoff dock
+        // Parking-cost split of the path length (thesis: what does centralised parking cost in distance?).
+        //   returning  = distance driven in the ReturningToParking state (loop back to the bays)
+        //   departure  = empty distance driven to the first pickup of a job the AGV was dispatched to
+        //                FROM parking (dispatched while Idle); a dispatch that redirects a returning
+        //                AGV is not counted, since that AGV was already away from parking.
+        private double _statPathReturning;
+        private double _statPathDeparture;
+        private bool _dispatchedFromIdle;
         private double _statTotalPathLength;   // cumulative NavMesh distance
         private int _statRerouteCount;      // RedirectDropoff calls
         private int _statStallRecoveryCount; // HandleZoneStall calls (suspected deadlock self-recoveries)
@@ -426,6 +439,7 @@ namespace Assets.Scripts.Simulation.AGV
                 SimLogger.Error($"[AGV {AgvId}] PreDispatch while unavailable (state={State}).");
                 return;
             }
+            _dispatchedFromIdle = State == AGVState.Idle;
 
             if (State == AGVState.ReturningToParking)
             {
@@ -507,6 +521,7 @@ namespace Assets.Scripts.Simulation.AGV
                 SimLogger.Error($"[AGV {AgvId}] Dispatch while busy (state={State}).");
                 return;
             }
+            _dispatchedFromIdle = State == AGVState.Idle;
 
             if (State == AGVState.ReturningToParking)
             {
@@ -1046,6 +1061,10 @@ namespace Assets.Scripts.Simulation.AGV
                 float step = moveSpeed * Time.fixedDeltaTime;
                 transform.position = Vector3.MoveTowards(transform.position, target, step);
                 _statTotalPathLength += step;    // ← NEW
+                if (State == AGVState.ReturningToParking) _statPathReturning += step;
+                else if (_dispatchedFromIdle &&
+                         (State == AGVState.MovingToPickup || State == AGVState.MovingToPrePickup))
+                    _statPathDeparture += step;
             }
 
         }

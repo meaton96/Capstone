@@ -1,0 +1,10 @@
+[Sweep] scenario=BatchConfigs/Scenarios/_mfsweep_control.json tag=P_multiple agv=3 5 7 9 rules=SPT_SRWT LRT_MMUR repeats=1 workers=8 extra='-reservation holdPrevious -parking multiple'
+[Sweep] done agv7_SPT_SRWT
+[Sweep] done agv5_SPT_SRWT
+[Sweep] done agv5_LRT_MMUR
+[Sweep] done agv9_SPT_SRWT
+[Sweep] done agv7_LRT_MMUR
+[Sweep] done agv9_LRT_MMUR
+[Sweep] done agv3_LRT_MMUR
+[Sweep] done agv3_SPT_SRWT
+[Sweep] all cells finished -> ./Results/gridlock_sweep/P_multiple

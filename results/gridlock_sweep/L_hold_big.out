@@ -1,0 +1,10 @@
+[Sweep] scenario=BatchConfigs/Scenarios/_mfsweep_control.json tag=L_hold_big agv=14 16 20 24 rules=SPT_SRWT LRT_MMUR repeats=1 workers=8 extra='-reservation holdPrevious -parking lane'
+[Sweep] done agv14_SPT_SRWT
+[Sweep] done agv16_SPT_SRWT
+[Sweep] done agv20_SPT_SRWT
+[Sweep] done agv14_LRT_MMUR
+[Sweep] done agv16_LRT_MMUR
+[Sweep] done agv20_LRT_MMUR
+[Sweep] done agv24_SPT_SRWT
+[Sweep] done agv24_LRT_MMUR
+[Sweep] all cells finished -> ./Results/gridlock_sweep/L_hold_big

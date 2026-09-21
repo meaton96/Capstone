@@ -6,9 +6,12 @@ release_previous_zone, split_spines, agv_collision_events, ...) plus the sibling
 agv_collisions.csv (one row per overlap event) when present. Config is taken from the CSV
 columns, not from directory names, so it works on any sweep layout.
 
-  overlap_ev/run   contiguous body overlaps per run between AGVs that are not both parked
-  traffic_ev/run   the same, minus events where either AGV was in the Parking_Alcove
-                   (needs agv_collisions.csv; parking overlaps are a parking-bay design issue)
+  overlap_ev/run   contiguous FLOOR (aisle/spine) body overlaps per run. Builds from 2026-09-20 on
+                   exclude parking-related AGVs at the source (counted in parking_ev instead);
+                   older builds counted them, see traffic_ev
+  traffic_ev/run   overlap events with neither AGV in the Parking_Alcove (needs agv_collisions.csv);
+                   for old builds this is the comparable floor figure
+  parking_ev/run   overlaps involving a parking-related AGV (new builds only; expected, out of scope)
   clear_ev/run     centre distance < 2 x NavMesh radius (2.36): zone-design margin violated
   min_dist         smallest centre distance seen in any run (0 = two AGVs at the same point)
   gridlock         terminal gridlocks (watchdog / unfinished jobs); such runs end early, so their
@@ -49,7 +52,12 @@ def main():
     if a.failures:
         r = r[(r.episode_failures > 0) == (a.failures == "on")]
     r["gridlock"] = (r.deadlock_detected == 1) | (r.jobs_censored > 0)
-    r["cfg"] = ("rel=" + r.release_previous_zone.astype(str) + " split=" + r.split_spines.astype(str))
+    if "reservation_protocol" in r.columns:
+        r["cfg"] = r.reservation_protocol.astype(str)
+    else:   # pre-2026-09-20 builds recorded the two experiment flags instead
+        r["cfg"] = ("rel=" + r.release_previous_zone.astype(str) + " split=" + r.split_spines.astype(str))
+    if "agv_parking_overlap_events" not in r.columns:
+        r["agv_parking_overlap_events"] = float("nan")
 
     if ev:
         e = pd.concat(ev, ignore_index=True)
@@ -63,7 +71,7 @@ def main():
     g = r.groupby(["cfg", "agvCount"]).agg(
         runs=("gridlock", "size"), gridlock=("gridlock", "sum"),
         overlap_ev=("agv_collision_events", "mean"), traffic_ev=("traffic_events", "mean"),
-        overlap_s=("agv_collision_pair_seconds", "mean"), clear_ev=("agv_clearance_events", "mean"),
+        parking_ev=("agv_parking_overlap_events", "mean"), overlap_s=("agv_collision_pair_seconds", "mean"), clear_ev=("agv_clearance_events", "mean"),
         min_dist=("agv_min_centre_distance", "min"), flow=("mean_flow_time", "mean"))
     pd.set_option("display.width", 200)
     print(g.round(1).to_string())

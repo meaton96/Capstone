@@ -296,7 +296,8 @@ namespace Assets.Scripts.Simulation.Logging
                     "agv_id,total_trips,mean_trip_duration," +
                     "time_idle,time_waiting_route,time_traveling," +
                     "time_loading,time_unloading," +
-                    "total_path_length,reroute_count,congestion_fraction,stall_recovery_count"
+                    "total_path_length,reroute_count,congestion_fraction,stall_recovery_count," +
+                    "path_returning_to_parking,path_departure_from_parking"
                 );
 
             string ts = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
@@ -308,7 +309,8 @@ namespace Assets.Scripts.Simulation.Logging
                     $"{a.AgvId},{a.TotalTrips},{a.MeanTripDuration:F2}," +
                     $"{a.TimeIdle:F2},{a.TimeWaitingRoute:F2},{a.TimeTraveling:F2}," +
                     $"{a.TimeLoading:F2},{a.TimeUnloading:F2}," +
-                    $"{a.TotalPathLength:F2},{a.RerouteCount},{a.CongestionFraction:F4},{a.StallRecoveryCount}"
+                    $"{a.TotalPathLength:F2},{a.RerouteCount},{a.CongestionFraction:F4},{a.StallRecoveryCount}," +
+                    $"{a.PathReturningToParking:F2},{a.PathDepartureFromParking:F2}"
                 );
             }
         }

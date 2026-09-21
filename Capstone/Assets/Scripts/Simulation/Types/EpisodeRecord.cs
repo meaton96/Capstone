@@ -294,6 +294,8 @@ namespace Assets.Scripts.Simulation.Types
         public double TimeUnloading;        // at dropoff dock, handshake timer
 
         public double TotalPathLength;      // cumulative NavMesh distance (sim-units)
+        public double PathReturningToParking;    // part of TotalPathLength driven in ReturningToParking
+        public double PathDepartureFromParking;  // part driven empty to the first pickup after leaving parking
         public int RerouteCount;         // RedirectDropoff calls (machine-failure reroutes)
         public int StallRecoveryCount;   // HandleZoneStall calls (suspected deadlock self-recoveries)
 

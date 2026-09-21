@@ -1,0 +1,15 @@
+timestamp,instance,rule,seed,agv_count,event_id,start_time,duration,agv_a,agv_b,min_centre_distance,zone_a,zone_b,state_a,state_b
+2026-09-20 11:44:33,mfsweep_shard0,SPT_SRWT,43,3,0,6223.42,0.62,0,1,0.572,Parking_Alcove,Parking_Alcove,Idle,ReturningToParking
+2026-09-20 11:44:33,mfsweep_shard0,SPT_SRWT,43,3,1,6297.98,0.28,0,1,0.325,Parking_Alcove,BotSpine_Dock0,MovingToPickup,ReturningToParking
+2026-09-20 11:44:33,mfsweep_shard0,SPT_SRWT,43,3,2,6369.84,0.62,0,1,0.572,Parking_Alcove,Parking_Alcove,Idle,ReturningToParking
+2026-09-20 11:50:55,mfsweep_shard0,SPT_SRWT,44,3,0,6505.34,0.14,1,2,0.490,Parking_Alcove,Parking_Alcove,Idle,ReturningToParking
+2026-09-20 11:57:13,mfsweep_shard0,SPT_SRWT,45,3,0,6459.08,1.92,0,1,0.027,Parking_Alcove,Parking_Alcove,ReturningToParking,Idle
+2026-09-20 12:03:32,mfsweep_shard0,SPT_SRWT,46,3,0,6406.14,0.62,0,1,0.589,Parking_Alcove,Parking_Alcove,Idle,ReturningToParking
+2026-09-20 12:03:32,mfsweep_shard0,SPT_SRWT,46,3,1,6411.06,1.60,0,2,0.030,BotSpine_Dock0,BotSpine_Dock0,MovingToPickup,ReturningToParking
+2026-09-20 12:03:32,mfsweep_shard0,SPT_SRWT,46,3,2,6415.94,0.76,1,2,0.032,Parking_Alcove,Parking_Alcove,MovingToPickup,ReturningToParking
+2026-09-20 12:09:25,mfsweep_shard0,SPT_SRWT,47,3,0,6367.08,1.88,0,1,0.000,Parking_Alcove,Parking_Alcove,ReturningToParking,Idle
+2026-09-20 12:09:25,mfsweep_shard0,SPT_SRWT,47,3,1,6417.74,0.74,1,2,0.027,Parking_Alcove,Parking_Alcove,Idle,ReturningToParking
+2026-09-20 12:19:24,mfsweep_shard0,SPT_SRWT,49,3,0,6270.40,0.76,1,2,0.000,Parking_Alcove,Parking_Alcove,Idle,ReturningToParking
+2026-09-20 12:19:24,mfsweep_shard0,SPT_SRWT,49,3,1,6279.72,1.48,0,1,0.027,Parking_Alcove,Parking_Alcove,ReturningToParking,MovingToPickup
+2026-09-20 12:24:21,mfsweep_shard0,SPT_SRWT,50,3,0,6389.92,0.62,0,1,0.572,Parking_Alcove,Parking_Alcove,Idle,ReturningToParking
+2026-09-20 12:29:20,mfsweep_shard0,SPT_SRWT,51,3,0,6341.68,0.62,0,1,0.572,Parking_Alcove,Parking_Alcove,Idle,ReturningToParking

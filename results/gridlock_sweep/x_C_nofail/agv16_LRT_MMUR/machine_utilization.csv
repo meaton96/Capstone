@@ -1,0 +1,16 @@
+timestamp,instance,rule,seed,makespan,machine_id,machine_type,ops_completed,time_processing,time_operational,utilization_rate,idle_time,idle_rate,availability_rate,failure_count,total_repair_time
+2026-09-20 11:58:23,mfsweep_control_nofail,LRT_MMUR,42,4057.54,0,Mill,10,150.20,4057.54,0.0370,3907.34,0.9630,1.0000,0,0.0
+2026-09-20 11:58:23,mfsweep_control_nofail,LRT_MMUR,42,4057.54,1,Lathe,0,0.00,4057.54,0.0000,4057.54,1.0000,1.0000,0,0.0
+2026-09-20 11:58:23,mfsweep_control_nofail,LRT_MMUR,42,4057.54,2,Weld,12,634.38,4057.54,0.1563,3423.16,0.8437,1.0000,0,0.0
+2026-09-20 11:58:23,mfsweep_control_nofail,LRT_MMUR,42,4057.54,3,Inspect,0,0.00,4057.54,0.0000,4057.54,1.0000,1.0000,0,0.0
+2026-09-20 11:58:23,mfsweep_control_nofail,LRT_MMUR,42,4057.54,4,Assemble,0,0.00,4057.54,0.0000,4057.54,1.0000,1.0000,0,0.0
+2026-09-20 11:58:23,mfsweep_control_nofail,LRT_MMUR,42,4057.54,5,Mill,9,135.18,4057.54,0.0333,3922.36,0.9667,1.0000,0,0.0
+2026-09-20 11:58:23,mfsweep_control_nofail,LRT_MMUR,42,4057.54,6,Lathe,0,0.00,4057.54,0.0000,4057.54,1.0000,1.0000,0,0.0
+2026-09-20 11:58:23,mfsweep_control_nofail,LRT_MMUR,42,4057.54,7,Weld,7,353.82,4057.54,0.0872,3703.72,0.9128,1.0000,0,0.0
+2026-09-20 11:58:23,mfsweep_control_nofail,LRT_MMUR,42,4057.54,8,Inspect,0,0.00,4057.54,0.0000,4057.54,1.0000,1.0000,0,0.0
+2026-09-20 11:58:23,mfsweep_control_nofail,LRT_MMUR,42,4057.54,9,Assemble,0,0.00,4057.54,0.0000,4057.54,1.0000,1.0000,0,0.0
+2026-09-20 11:58:23,mfsweep_control_nofail,LRT_MMUR,42,4057.54,10,Mill,10,150.20,4057.54,0.0370,3907.34,0.9630,1.0000,0,0.0
+2026-09-20 11:58:23,mfsweep_control_nofail,LRT_MMUR,42,4057.54,11,Lathe,0,0.00,4057.54,0.0000,4057.54,1.0000,1.0000,0,0.0
+2026-09-20 11:58:23,mfsweep_control_nofail,LRT_MMUR,42,4057.54,12,Weld,5,285.48,4057.54,0.0704,3772.06,0.9296,1.0000,0,0.0
+2026-09-20 11:58:23,mfsweep_control_nofail,LRT_MMUR,42,4057.54,13,Inspect,0,0.00,4057.54,0.0000,4057.54,1.0000,1.0000,0,0.0
+2026-09-20 11:58:23,mfsweep_control_nofail,LRT_MMUR,42,4057.54,14,Assemble,0,0.00,4057.54,0.0000,4057.54,1.0000,1.0000,0,0.0

@@ -1573,6 +1573,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.UI.SimulationMenuUI
   agent: {fileID: 516692882}
+  parkingMethodChoice: 2
   panel: {fileID: 1280180071}
   jobCountInput: {fileID: 1149106291}
   machinesPerTypeInput: {fileID: 502604743}

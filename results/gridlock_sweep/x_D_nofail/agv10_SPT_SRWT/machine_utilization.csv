@@ -1,0 +1,16 @@
+timestamp,instance,rule,seed,makespan,machine_id,machine_type,ops_completed,time_processing,time_operational,utilization_rate,idle_time,idle_rate,availability_rate,failure_count,total_repair_time
+2026-09-20 11:50:23,mfsweep_control_nofail,SPT_SRWT,42,3772.26,0,Mill,66,991.32,3772.26,0.2628,2780.94,0.7372,1.0000,0,0.0
+2026-09-20 11:50:23,mfsweep_control_nofail,SPT_SRWT,42,3772.26,1,Lathe,0,0.00,3772.26,0.0000,3772.26,1.0000,1.0000,0,0.0
+2026-09-20 11:50:23,mfsweep_control_nofail,SPT_SRWT,42,3772.26,2,Weld,55,3090.96,3772.26,0.8194,681.30,0.1806,1.0000,0,0.0
+2026-09-20 11:50:23,mfsweep_control_nofail,SPT_SRWT,42,3772.26,3,Inspect,0,0.00,3772.26,0.0000,3772.26,1.0000,1.0000,0,0.0
+2026-09-20 11:50:23,mfsweep_control_nofail,SPT_SRWT,42,3772.26,4,Assemble,0,0.00,3772.26,0.0000,3772.26,1.0000,1.0000,0,0.0
+2026-09-20 11:50:23,mfsweep_control_nofail,SPT_SRWT,42,3772.26,5,Mill,65,976.30,3772.26,0.2588,2795.96,0.7412,1.0000,0,0.0
+2026-09-20 11:50:23,mfsweep_control_nofail,SPT_SRWT,42,3772.26,6,Lathe,0,0.00,3772.26,0.0000,3772.26,1.0000,1.0000,0,0.0
+2026-09-20 11:50:23,mfsweep_control_nofail,SPT_SRWT,42,3772.26,7,Weld,52,2782.26,3772.26,0.7376,990.00,0.2624,1.0000,0,0.0
+2026-09-20 11:50:23,mfsweep_control_nofail,SPT_SRWT,42,3772.26,8,Inspect,0,0.00,3772.26,0.0000,3772.26,1.0000,1.0000,0,0.0
+2026-09-20 11:50:23,mfsweep_control_nofail,SPT_SRWT,42,3772.26,9,Assemble,0,0.00,3772.26,0.0000,3772.26,1.0000,1.0000,0,0.0
+2026-09-20 11:50:23,mfsweep_control_nofail,SPT_SRWT,42,3772.26,10,Mill,6,90.12,3772.26,0.0239,3682.14,0.9761,1.0000,0,0.0
+2026-09-20 11:50:23,mfsweep_control_nofail,SPT_SRWT,42,3772.26,11,Lathe,0,0.00,3772.26,0.0000,3772.26,1.0000,1.0000,0,0.0
+2026-09-20 11:50:23,mfsweep_control_nofail,SPT_SRWT,42,3772.26,12,Weld,30,1599.06,3772.26,0.4239,2173.20,0.5761,1.0000,0,0.0
+2026-09-20 11:50:23,mfsweep_control_nofail,SPT_SRWT,42,3772.26,13,Inspect,0,0.00,3772.26,0.0000,3772.26,1.0000,1.0000,0,0.0
+2026-09-20 11:50:23,mfsweep_control_nofail,SPT_SRWT,42,3772.26,14,Assemble,0,0.00,3772.26,0.0000,3772.26,1.0000,1.0000,0,0.0

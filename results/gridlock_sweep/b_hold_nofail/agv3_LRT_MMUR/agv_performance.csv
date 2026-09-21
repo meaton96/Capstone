@@ -1,0 +1,4 @@
+timestamp,instance,rule,seed,makespan,agv_id,total_trips,mean_trip_duration,time_idle,time_waiting_route,time_traveling,time_loading,time_unloading,total_path_length,reroute_count,congestion_fraction,stall_recovery_count
+2026-09-20 18:58:33,mfsweep_control_nofail,LRT_MMUR,42,5621.88,0,135,22.73,15.24,186.78,4905.82,250.88,263.14,14429.09,0,0.0332,0
+2026-09-20 18:58:33,mfsweep_control_nofail,LRT_MMUR,42,5621.88,1,137,23.17,62.64,248.32,4783.06,253.94,273.90,14012.94,0,0.0442,0
+2026-09-20 18:58:33,mfsweep_control_nofail,LRT_MMUR,42,5621.88,2,139,22.60,116.98,216.92,4758.76,256.38,272.82,13991.59,0,0.0386,0

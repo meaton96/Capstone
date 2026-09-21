@@ -1,0 +1,10 @@
+[Sweep] scenario=BatchConfigs/Scenarios/_mfsweep_shard0.json tag=L_hold_fail agv=5 7 9 12 rules=SPT_SRWT LRT_MMUR repeats=5 workers=8 extra='-reservation holdPrevious -parking lane'
+[Sweep] done agv7_SPT_SRWT
+[Sweep] done agv9_SPT_SRWT
+[Sweep] done agv5_SPT_SRWT
+[Sweep] done agv5_LRT_MMUR
+[Sweep] done agv7_LRT_MMUR
+[Sweep] done agv12_LRT_MMUR
+[Sweep] done agv9_LRT_MMUR
+[Sweep] done agv12_SPT_SRWT
+[Sweep] all cells finished -> ./Results/gridlock_sweep/L_hold_fail

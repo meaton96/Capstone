@@ -1,0 +1,3 @@
+timestamp,instance,rule,seed,agv_count,event_id,start_time,duration,agv_a,agv_b,min_centre_distance,zone_a,zone_b,state_a,state_b,a_x,a_z,b_x,b_z
+2026-09-21 01:55:26,mfsweep_shard0,SPT_SMPT,49,12,0,314.00,0.68,4,10,0.487,BotSpine_Transit0,BotSpine_Transit0,MovingToPickup,ReturningToParking,-5.29,-15.19,-5.63,-14.00
+2026-09-21 02:00:40,mfsweep_shard0,SPT_SMPT,51,12,0,340.54,0.36,7,10,1.090,BotSpine_Transit0,BotSpine_Transit0,MovingToPickup,MovingToPickup,-6.18,-15.18,-5.67,-14.00
