@@ -206,6 +206,9 @@ namespace Assets.Scripts.Simulation.Jobs
                 AGVMoveSpeed = root["agvMoveSpeed"]?.Value<float>(),
                 AGVHandshakeDuration = root["agvHandshakeDuration"]?.Value<float>(),
                 reservationProtocol = ReservationProtocolParser.Validated(root["reservationProtocol"]?.Value<string>()),
+                parkingMethod = root["parkingMethod"] != null
+                    ? ConfigOverrides.ValidatedParkingMethod(root["parkingMethod"].Value<string>())
+                    : "lane",
                 Stochastic = ReadStochastic(root),
                 dispatchingRule = ReadDispatchingRule(root),
             };

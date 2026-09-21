@@ -178,7 +178,7 @@ namespace Assets.Scripts.Simulation.Logging
                     "deadlock_detected,deadlock_sim_time," +
                     "first_stall_sim_time,orphan_predispatch_released," +
                     "agv_collision_events,agv_collision_pair_seconds,agv_clearance_events," +
-                    "agv_clearance_pair_seconds,agv_static_overlap_events,agv_min_centre_distance," +
+                    "agv_clearance_pair_seconds,agv_parking_overlap_events,agv_min_centre_distance," +
                     "reservation_protocol"
                 );
 
@@ -198,7 +198,7 @@ namespace Assets.Scripts.Simulation.Logging
                 $"{(r.DeadlockDetected ? 1 : 0)},{r.DeadlockSimTime:F1}," +
                 $"{r.FirstStallSimTime:F1},{r.OrphanPreDispatchesReleased}," +
                 $"{r.AgvCollisionEvents},{r.AgvCollisionPairSeconds:F2},{r.AgvClearanceEvents}," +
-                $"{r.AgvClearancePairSeconds:F2},{r.AgvStaticOverlapEvents},{r.AgvMinCentreDistance:F3}," +
+                $"{r.AgvClearancePairSeconds:F2},{r.AgvParkingOverlapEvents},{r.AgvMinCentreDistance:F3}," +
                 $"{r.ReservationProtocol}"
             );
 

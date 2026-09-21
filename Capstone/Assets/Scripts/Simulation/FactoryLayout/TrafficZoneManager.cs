@@ -31,6 +31,9 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         public Vector3 Centre;
         public Vector3 Size;
         public int Capacity = 1;
+        /// True for the parking lane's lane and bay zones (ParkingMethod.Lane). Routes may enter this
+        /// set only to park or from inside it (see TrafficZoneManager.GetRoute).
+        public bool IsParkingLane;
         public List<int> Downstream = new List<int>();
         public List<int> Upstream = new List<int>();
         public Dictionary<int, DockPoint> DockPoints = new Dictionary<int, DockPoint>();
@@ -83,6 +86,9 @@ namespace Assets.Scripts.Simulation.FactoryLayout
 
         private readonly List<int> parkingZoneIds = new List<int>();
         public IReadOnlyList<int> ParkingZoneIds => parkingZoneIds;
+        /// True when parking is a real lane with one reserved bay per AGV (ParkingMethod.Lane): idle
+        /// AGVs keep their bay reserved and parking is not an abstraction the collision monitor skips.
+        public bool ParkingIsBayed => layoutManager != null && layoutManager.ActiveParkingMethod == ParkingMethod.Lane;
 
         public static TrafficZoneManager Instance;
 
@@ -116,12 +122,16 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             int cols = layoutManager.LayoutCols;
 
             int[][] rowAisleZones = BuildRowAisleZones(rows, cols);
-            int[] topSpineZones = BuildSpineZones(true, cols);
-            int[] botSpineZones = BuildSpineZones(false, cols);
-            int[] leftVertZones = BuildVerticalZones(true, rows);
-            int[] rightVertZones = BuildVerticalZones(false, rows);
+            // Verticals first: each spine's two corner zones ARE the vertical connectors' TopConn /
+            // BotConn zones (same patch of floor), so they must exist before the spines are built.
+            var (leftVertZones, leftChain) = BuildVerticalZones(true, rows);
+            var (rightVertZones, rightChain) = BuildVerticalZones(false, rows);
+            int[] topSpineZones = BuildSpineZones(true, cols, leftVertZones[0], rightVertZones[0]);
+            int[] botSpineZones = BuildSpineZones(false, cols,
+                                                  leftVertZones[leftVertZones.Length - 1],
+                                                  rightVertZones[rightVertZones.Length - 1]);
 
-            ConnectZoneGraph(rowAisleZones, topSpineZones, botSpineZones, leftVertZones, rightVertZones, rows, cols);
+            ConnectZoneGraph(rowAisleZones, topSpineZones, botSpineZones, leftVertZones, rightVertZones, leftChain, rightChain, rows, cols);
             RegisterDockPoints(rowAisleZones, topSpineZones, botSpineZones, rows, cols, leftVertZones, rightVertZones);
             SimLogger.Medium($"[TrafficZones] Built zone graph: {zones.Count} zones.");
         }
@@ -179,9 +189,13 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         private static int SpineDockIndex(int col) => 1 + 2 * col;
 
         /// @brief Builds a spine as [cornerL, Dock0, Transit0, ..., DockN-1, cornerR].
-        /// Dock/transit zones sit at exactly the row aisles' x positions; every zone is Capacity=1
-        /// so each has its own centre and adjacent centres are >= 3 units apart.
-        private int[] BuildSpineZones(bool isTop, int cols)
+        /// Dock/transit zones sit at exactly the row aisles' x positions and are Capacity=1, so each
+        /// has its own centre (3 units apart). The two corner entries are NOT new zones: they are the
+        /// vertical connectors' TopConn/BotConn zones, which occupy the identical patch of floor.
+        /// Building a separate corner zone there gave two Capacity-1 zones over one spot, so
+        /// reservations could not keep two AGVs apart (AGVCollisionMonitor: ~96% of floor overlaps
+        /// on the original layout). The corner-to-dock spacing is 2.5 units, above the 2.36 clearance.
+        private int[] BuildSpineZones(bool isTop, int cols, int cornerLeftZoneId, int cornerRightZoneId)
         {
             int numDockTransit = 2 * cols - 1;
             int[] result = new int[numDockTransit + 2];
@@ -192,30 +206,24 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             float segWidth = layoutManager.MachineSpacingX;
             float subWidth = segWidth / 2f;
             float halfTotalWidth = ((cols - 1) * segWidth) / 2f;
-            float leftEdge = -halfTotalWidth - layoutManager.MachineDepth / 2f - layoutManager.VerticalAisleWidth / 2f;
 
-            for (int s = 0; s < result.Length; s++)
+            result[0] = cornerLeftZoneId;
+            result[result.Length - 1] = cornerRightZoneId;
+
+            for (int s = 1; s < result.Length - 1; s++)
             {
-                float centreX, width; string name;
-                if (s == 0) { centreX = leftEdge; width = layoutManager.VerticalAisleWidth; name = "CornerL"; }
-                else if (s == result.Length - 1) { centreX = -leftEdge; width = layoutManager.VerticalAisleWidth; name = "CornerR"; }
-                else
-                {
-                    int k = s - 1;                       // 0-based within dock/transit run
-                    bool isDock = k % 2 == 0;
-                    centreX = -halfTotalWidth + k * subWidth;
-                    width = subWidth;
-                    name = isDock ? $"Dock{k / 2}" : $"Transit{k / 2}";
-                }
+                int k = s - 1;                       // 0-based within the dock/transit run
+                bool isDock = k % 2 == 0;
+                float centreX = -halfTotalWidth + k * subWidth;
 
                 var zone = new TrafficZone
                 {
                     ZoneId = nextZoneId++,
-                    Name = $"{side}_{name}",
+                    Name = $"{side}_{(isDock ? $"Dock{k / 2}" : $"Transit{k / 2}")}",
                     AisleType = AisleType.SpineAisle,
                     Flow = flow,
                     Centre = new Vector3(floorCentre.x + centreX, 0.01f, floorCentre.z + z),
-                    Size = new Vector3(width, 0.1f, layoutManager.SpineAisleWidth),
+                    Size = new Vector3(subWidth, 0.1f, layoutManager.SpineAisleWidth),
                     Capacity = 1
                 };
                 RegisterZone(zone);
@@ -224,41 +232,71 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             return result;
         }
 
-        /// @brief Segments vertical connector aisles (left/right) into zones.
-        /// @param isLeft True for the left aisle, false for right.
-        /// @param rows Number of machine rows.
-        /// @return An array of zone IDs for the vertical aisle.
-        private int[] BuildVerticalZones(bool isLeft, int rows)
+        /// <summary>Minimum centre-to-centre spacing of vertical zones: just above 2 x the 1.18 NavMesh clearance.</summary>
+        private const float MinVerticalPitch = 2.4f;
+
+        /// @brief Segments a vertical connector aisle (left/right) into Capacity=1 zones.
+        /// @details The junction zones (TopConn, Row0..RowN-1, BotConn) sit where a row aisle or spine
+        /// meets the connector and keep their old names and positions, so every row-aisle / spine /
+        /// parking link is unchanged. Between consecutive junctions this inserts evenly spaced
+        /// intermediate zones (pitch >= MinVerticalPitch) so the stretch beside each machine row is
+        /// covered and reservable. Previously the connector was one zone per junction: ~7.5 units
+        /// apart with 3-4.5 unit uncovered stretches between them (47 % of the connector length),
+        /// so an AGV that reached one junction held the zone behind it for a further ~15 units of
+        /// travel and the follower could not start until then.
+        /// @return junctions: zone ids of TopConn, Row0.., BotConn (index = old array layout).
+        ///         chain: every zone top to bottom (junctions plus intermediates), for linking.
+        private (int[] junctions, int[] chain) BuildVerticalZones(bool isLeft, int rows)
         {
             int numRowAisles = rows - 1;
-            int numSegments = numRowAisles + 2;
-            int[] result = new int[numSegments];
+            int numJunctions = numRowAisles + 2;
+            int[] junctions = new int[numJunctions];
+            var chain = new List<int>();
             float halfMachineAreaW = ((layoutManager.LayoutCols - 1) * layoutManager.MachineSpacingX) / 2f + layoutManager.MachineDepth / 2f;
             float x = isLeft ? -(halfMachineAreaW + layoutManager.VerticalAisleWidth / 2f) : (halfMachineAreaW + layoutManager.VerticalAisleWidth / 2f);
             FlowDirection flow = isLeft ? FlowDirection.North : FlowDirection.South;
             Vector3 floorCentre = layoutManager.transform.position;
+            string side = isLeft ? "LeftVert" : "RightVert";
 
-            for (int s = 0; s < numSegments; s++)
+            float[] zs = new float[numJunctions];
+            float[] heights = new float[numJunctions];
+            string[] names = new string[numJunctions];
+            for (int s = 0; s < numJunctions; s++)
             {
-                float z, height; string name;
-                if (s == 0) { z = layoutManager.GetTopSpineZ(); height = layoutManager.SpineAisleWidth; name = "TopConn"; }
-                else if (s == numSegments - 1) { z = layoutManager.GetBottomSpineZ(); height = layoutManager.SpineAisleWidth; name = "BotConn"; }
-                else { Vector3 aisleCentre = layoutManager.GetRowAisleCentre(s - 1); z = aisleCentre.z - floorCentre.z; height = layoutManager.RowAisleWidth; name = $"Row{s - 1}"; }
-
-                var zone = new TrafficZone
-                {
-                    ZoneId = nextZoneId++,
-                    Name = $"{(isLeft ? "LeftVert" : "RightVert")}_{name}",
-                    AisleType = AisleType.VerticalAisle,
-                    Flow = flow,
-                    Centre = new Vector3(floorCentre.x + x, 0.01f, floorCentre.z + z),
-                    Size = new Vector3(layoutManager.VerticalAisleWidth, 0.1f, height),
-                    Capacity = 1
-                };
-                RegisterZone(zone);
-                result[s] = zone.ZoneId;
+                if (s == 0) { zs[s] = layoutManager.GetTopSpineZ(); heights[s] = layoutManager.SpineAisleWidth; names[s] = "TopConn"; }
+                else if (s == numJunctions - 1) { zs[s] = layoutManager.GetBottomSpineZ(); heights[s] = layoutManager.SpineAisleWidth; names[s] = "BotConn"; }
+                else { zs[s] = layoutManager.GetRowAisleCentre(s - 1).z - floorCentre.z; heights[s] = layoutManager.RowAisleWidth; names[s] = $"Row{s - 1}"; }
             }
-            return result;
+
+            for (int s = 0; s < numJunctions; s++)
+            {
+                junctions[s] = AddVerticalZone($"{side}_{names[s]}", x, zs[s], heights[s], flow, floorCentre);
+                chain.Add(junctions[s]);
+
+                if (s == numJunctions - 1) break;
+                float gap = zs[s] - zs[s + 1];
+                int segments = Mathf.Max(1, Mathf.FloorToInt(gap / MinVerticalPitch));
+                float pitch = gap / segments;
+                for (int k = 1; k < segments; k++)
+                    chain.Add(AddVerticalZone($"{side}_Gap{s}_{k}", x, zs[s] - k * pitch, pitch, flow, floorCentre));
+            }
+            return (junctions, chain.ToArray());
+        }
+
+        private int AddVerticalZone(string name, float x, float z, float height, FlowDirection flow, Vector3 floorCentre)
+        {
+            var zone = new TrafficZone
+            {
+                ZoneId = nextZoneId++,
+                Name = name,
+                AisleType = AisleType.VerticalAisle,
+                Flow = flow,
+                Centre = new Vector3(floorCentre.x + x, 0.01f, floorCentre.z + z),
+                Size = new Vector3(layoutManager.VerticalAisleWidth, 0.1f, height),
+                Capacity = 1
+            };
+            RegisterZone(zone);
+            return zone.ZoneId;
         }
 
         private void RegisterZone(TrafficZone zone)
@@ -271,7 +309,8 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         /// @details Connects internal chains for rows, spines, and vertical aisles, then bridges 
         /// intersections and corners based on restricted flow directions.
         /// @post Every zone has populated Downstream/Upstream lists forming a directed graph.
-        private void ConnectZoneGraph(int[][] rowAisles, int[] topSpine, int[] botSpine, int[] leftVert, int[] rightVert, int rows, int cols)
+        private void ConnectZoneGraph(int[][] rowAisles, int[] topSpine, int[] botSpine, int[] leftVert, int[] rightVert,
+                                       int[] leftChain, int[] rightChain, int rows, int cols)
         {
             for (int a = 0; a < rowAisles.Length; a++)
             {
@@ -283,8 +322,9 @@ namespace Assets.Scripts.Simulation.FactoryLayout
 
             for (int s = 0; s < topSpine.Length - 1; s++) LinkZones(topSpine[s], topSpine[s + 1]);
             for (int s = botSpine.Length - 1; s > 0; s--) LinkZones(botSpine[s], botSpine[s - 1]);
-            for (int s = leftVert.Length - 1; s > 0; s--) LinkZones(leftVert[s], leftVert[s - 1]);
-            for (int s = 0; s < rightVert.Length - 1; s++) LinkZones(rightVert[s], rightVert[s + 1]);
+            // Chains include the intermediate zones; left flows north (bottom -> top), right flows south.
+            for (int s = leftChain.Length - 1; s > 0; s--) LinkZones(leftChain[s], leftChain[s - 1]);
+            for (int s = 0; s < rightChain.Length - 1; s++) LinkZones(rightChain[s], rightChain[s + 1]);
 
             for (int a = 0; a < rowAisles.Length; a++)
             {
@@ -303,6 +343,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
 
         private void LinkZones(int fromId, int toId)
         {
+            if (fromId == toId) return;   // spine corner zone IS the vertical connector zone
             if (!zoneById.TryGetValue(fromId, out var from) || !zoneById.TryGetValue(toId, out var to)) return;
             if (!from.Downstream.Contains(toId)) from.Downstream.Add(toId);
             if (!to.Upstream.Contains(fromId)) to.Upstream.Add(fromId);
@@ -332,6 +373,10 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             if (layoutManager.ActiveParkingMethod == ParkingMethod.Single)
             {
                 BuildSingleParkingZone(botSpine, leftVert);
+            }
+            else if (layoutManager.ActiveParkingMethod == ParkingMethod.Lane)
+            {
+                BuildParkingLane(leftVert, rightVert);
             }
             else
             {
@@ -398,6 +443,80 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             LinkZones(parkingZone.ZoneId, leftVert[leftVert.Length - 1]); // drive out
         }
 
+        /// @brief Builds the parking lane: a one-way run of Capacity 1 zones south of the bottom spine with
+        ///        one dedicated Capacity 1 bay per AGV opening onto it (either side).
+        /// @details Entry: RightVert_BotConn -> Lane_0 (east end). Exit: last lane zone -> LeftVert_BotConn.
+        ///          Bays are leaves (lane <-> bay), so a departing AGV pulls out into the lane and keeps
+        ///          going west; nothing in the lane is ever passed. Parking is fully reserved: there is no
+        ///          straight-line leg across unreserved floor.
+        private void BuildParkingLane(int[] leftVert, int[] rightVert)
+        {
+            var shape = layoutManager.LaneShape;
+            if (shape == null || leftVert.Length == 0 || rightVert.Length == 0) return;
+
+            var laneIds = new int[shape.LaneCentres.Length];
+            for (int k = 0; k < laneIds.Length; k++)
+            {
+                var z = new TrafficZone
+                {
+                    ZoneId = nextZoneId++,
+                    Name = $"Lane_{k}",
+                    AisleType = AisleType.SpineAisle,
+                    Flow = FlowDirection.West,
+                    Centre = shape.LaneCentres[k],
+                    Size = new Vector3(shape.Pitch, 0.1f, shape.RowDepth),
+                    Capacity = 1,
+                    IsParkingLane = true
+                };
+                RegisterZone(z);
+                laneIds[k] = z.ZoneId;
+            }
+            for (int k = 0; k < laneIds.Length - 1; k++) LinkZones(laneIds[k], laneIds[k + 1]);
+
+            for (int i = 0; i < shape.BayCentres.Length; i++)
+            {
+                var bay = new TrafficZone
+                {
+                    ZoneId = nextZoneId++,
+                    Name = $"Bay_{i}",
+                    AisleType = AisleType.SpineAisle,
+                    Flow = FlowDirection.West,
+                    Centre = shape.BayCentres[i],
+                    Size = new Vector3(shape.Pitch, 0.1f, shape.RowDepth),
+                    Capacity = 1,
+                    IsParkingLane = true
+                };
+                RegisterZone(bay);
+                int lane = laneIds[shape.BayLaneIndex[i]];
+                LinkZones(lane, bay.ZoneId);   // pull in
+                LinkZones(bay.ZoneId, lane);   // pull out
+            }
+
+            // Exit: straight into LeftVert_BotConn, or through a reserved corridor when the lane runs
+            // west of the connector (see FactoryLayoutManager.ComputeLaneShape).
+            int prev = laneIds[laneIds.Length - 1];
+            for (int j = 0; j < shape.ExitCentres.Length; j++)
+            {
+                var ez = new TrafficZone
+                {
+                    ZoneId = nextZoneId++,
+                    Name = $"LaneExit_{j}",
+                    AisleType = AisleType.SpineAisle,
+                    Flow = j == 0 ? FlowDirection.North : FlowDirection.East,
+                    Centre = shape.ExitCentres[j],
+                    Size = new Vector3(shape.Pitch, 0.1f, shape.RowDepth),
+                    Capacity = 1,
+                    IsParkingLane = true
+                };
+                RegisterZone(ez);
+                LinkZones(prev, ez.ZoneId);
+                prev = ez.ZoneId;
+            }
+
+            LinkZones(rightVert[rightVert.Length - 1], laneIds[0]);                    // entry
+            LinkZones(prev, leftVert[leftVert.Length - 1]);                            // exit
+        }
+
         private void BuildMultipleParkingZones(int[] leftVert, int[] rightVert)
         {
             foreach (var pa in layoutManager.ParkingAreas)
@@ -441,6 +560,8 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         {
             var dist = new Dictionary<int, int>();
             var queue = new Queue<int>();
+            bool intoLaneAllowed = false;
+            foreach (int t in targetZoneIds) if (ZoneIsParkingLane(t)) intoLaneAllowed = true;
 
             foreach (int t in targetZoneIds)
             {
@@ -456,12 +577,16 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 foreach (int pred in zoneById[cur].Upstream)
                 {
                     if (dist.ContainsKey(pred)) continue;
+                    // Same rule as GetRoute: the lane is not a shortcut for non-parking trips.
+                    if (!intoLaneAllowed && zoneById[cur].IsParkingLane && !zoneById[pred].IsParkingLane) continue;
                     dist[pred] = d + 1;
                     queue.Enqueue(pred);
                 }
             }
             return dist;
         }
+
+        private bool ZoneIsParkingLane(int zoneId) => zoneById.TryGetValue(zoneId, out var z) && z.IsParkingLane;
 
         /// @brief Returns the zone hosting a given special dock (e.g. IncomingBeltId), or -1.
         public int GetZoneIdForDock(int dockKey)
@@ -565,6 +690,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         public List<int> GetRoute(int fromZoneId, int toZoneId)
         {
             if (fromZoneId == toZoneId) return new List<int> { fromZoneId };
+            bool intoLaneAllowed = ZoneIsParkingLane(toZoneId) || ZoneIsParkingLane(fromZoneId);
             var visited = new HashSet<int>(); var parent = new Dictionary<int, int>(); var queue = new Queue<int>();
             queue.Enqueue(fromZoneId); visited.Add(fromZoneId);
 
@@ -574,6 +700,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 foreach (int next in zoneById[current].Downstream)
                 {
                     if (visited.Contains(next)) continue;
+                    if (!intoLaneAllowed && zoneById[next].IsParkingLane && !zoneById[current].IsParkingLane) continue;
                     visited.Add(next); parent[next] = current;
                     if (next == toZoneId)
                     {

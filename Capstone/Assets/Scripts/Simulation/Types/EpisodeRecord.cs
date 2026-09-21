@@ -55,13 +55,13 @@ namespace Assets.Scripts.Simulation.Types
         // watchdog only fires DEADLOCK_STALL_SECONDS later). -1 when no AGV ever stalled.
         public double FirstStallSimTime = -1.0;
 
-        // AGV-AGV physical overlap (AGVCollisionMonitor). Headline numbers exclude pairs where both
-        // AGVs are Idle (parked). See that class for the body-overlap vs clearance distinction.
+        // AGV-AGV physical overlap on the FLOOR (AGVCollisionMonitor). Headline numbers exclude pairs
+        // involving a parking-related AGV, which are reported in AgvParkingOverlapEvents. See that class for the body-overlap vs clearance distinction.
         public int AgvCollisionEvents;
         public double AgvCollisionPairSeconds;
         public int AgvClearanceEvents;
         public double AgvClearancePairSeconds;
-        public int AgvStaticOverlapEvents;
+        public int AgvParkingOverlapEvents;
         public float AgvMinCentreDistance = -1f;
         public List<CollisionRecord> CollisionRecords = new List<CollisionRecord>();
 

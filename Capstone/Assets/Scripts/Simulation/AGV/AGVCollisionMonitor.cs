@@ -20,8 +20,10 @@ namespace Assets.Scripts.Simulation.AGV
     ///                      so a violation means the zone design's own safety margin is broken even
     ///                      if the bodies do not touch.
     ///
-    /// A pair of AGVs that are both Idle (parked) is reported separately as a static overlap and
-    /// excluded from the headline numbers: parking placement is not a traffic phenomenon.
+    /// Any pair where either AGV is parking-related (Idle, or in/just out of the parking alcove;
+    /// see AGVController.IsParkingRelated) is reported separately as a parking overlap and excluded
+    /// from the headline numbers. Parking is an abstraction with no queueing model, so overlaps
+    /// there are expected and out of scope; the headline counts are floor (aisle/spine) collisions.
     /// </summary>
     public class AGVCollisionMonitor
     {
@@ -38,7 +40,7 @@ namespace Assets.Scripts.Simulation.AGV
 
         private readonly Dictionary<long, OpenEvent> _open = new Dictionary<long, OpenEvent>();
         private readonly HashSet<long> _clearanceOpen = new HashSet<long>();
-        private readonly HashSet<long> _staticOpen = new HashSet<long>();
+        private readonly HashSet<long> _parkingOpen = new HashSet<long>();
         private int _nextEventId;
 
         public readonly List<CollisionRecord> Events = new List<CollisionRecord>();
@@ -50,8 +52,8 @@ namespace Assets.Scripts.Simulation.AGV
         /// <summary>Distinct contiguous clearance violations between a pair, not both Idle.</summary>
         public int ClearanceEvents { get; private set; }
         public double ClearancePairSeconds { get; private set; }
-        /// <summary>Body-overlap episodes between two Idle (parked) AGVs.</summary>
-        public int StaticOverlapEvents { get; private set; }
+        /// <summary>Body-overlap episodes involving a parking-related AGV (excluded from the floor counts).</summary>
+        public int ParkingOverlapEvents { get; private set; }
         /// <summary>Smallest centre-to-centre distance seen between any non-static pair; -1 if none.</summary>
         public float MinCentreDistance { get; private set; } = float.MaxValue;
         /// <summary>Events dropped from the CSV list because MaxLoggedEvents was reached (counters stay exact).</summary>
@@ -71,19 +73,22 @@ namespace Assets.Scripts.Simulation.AGV
                     b.GetFootprint(out Vector2 cb, out Vector2 ax_b, out Vector2 az_b, out Vector2 hb);
 
                     long key = (long)a.AgvId * 100000L + b.AgvId;
-                    bool bothIdle = a.State == AGVState.Idle && b.State == AGVState.Idle;
+                    bool parkingRelated = a.IsParkingRelated || b.IsParkingRelated;
                     float dist = Vector2.Distance(ca, cb);
 
                     bool overlap = dist < (ha.magnitude + hb.magnitude) &&
                                    OrientedBoxesOverlap(ca, ax_a, az_a, ha, cb, ax_b, az_b, hb);
 
-                    if (bothIdle)
+                    if (parkingRelated)
                     {
-                        if (overlap) { if (_staticOpen.Add(key)) StaticOverlapEvents++; }
-                        else _staticOpen.Remove(key);
+                        // A floor overlap that was open when an AGV entered the alcove ends here.
+                        if (_open.TryGetValue(key, out OpenEvent leaving)) Close(key, leaving, simTime);
+                        _clearanceOpen.Remove(key);
+                        if (overlap) { if (_parkingOpen.Add(key)) ParkingOverlapEvents++; }
+                        else _parkingOpen.Remove(key);
                         continue;
                     }
-                    _staticOpen.Remove(key);
+                    _parkingOpen.Remove(key);
 
                     if (dist < MinCentreDistance) MinCentreDistance = dist;
 

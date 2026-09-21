@@ -11,7 +11,7 @@ using Assets.Scripts.Simulation.Visuals;
 
 namespace Assets.Scripts.Simulation.FactoryLayout
 {
-    public enum ParkingMethod { Single, Multiple }
+    public enum ParkingMethod { Single, Multiple, Lane }
 
     public struct ParkingArea
     {
@@ -48,6 +48,25 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         public ParkingMethod ActiveParkingMethod { get; private set; }
         private readonly List<ParkingArea> parkingAreas = new List<ParkingArea>();
         public IReadOnlyList<ParkingArea> ParkingAreas => parkingAreas;
+
+        /// @brief Geometry of the "lane" parking method (null for the other methods).
+        /// @details A one-way lane south of the bottom spine, entered from RightVert_BotConn and left
+        ///          into LeftVert_BotConn, with one dedicated bay per AGV in pockets on both sides of it.
+        public class ParkingLaneShape
+        {
+            public Vector3[] LaneCentres;     ///< zone centres, index 0 = entry (east) ... last = exit (west)
+            public Vector3[] ExitCentres;     ///< reserved corridor from the last lane zone to LeftVert_BotConn (empty when the lane ends at its x)
+            public float Pitch;               ///< centre-to-centre spacing along the lane, also each zone's width
+            public float RowDepth;            ///< z extent of the lane row and of each bay row
+            public Vector3[] BayCentres;      ///< per AGV id
+            public int[] BayLaneIndex;        ///< per AGV id: lane zone the bay opens onto
+        }
+        public ParkingLaneShape LaneShape { get; private set; }
+
+        /// Centre-to-centre spacing of lane / bay zones: just above 2 x the 1.18 NavMesh clearance.
+        private const float LaneMinPitch = 2.5f;
+        /// Lane zones kept free of bays at the entry end, so returning AGVs queue off the loop.
+        private const int LaneQueueZones = 2;
 
         [Header("Floor")]
         [SerializeField] private Transform floorTransform;
@@ -114,6 +133,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             {
                 "single" => ParkingMethod.Single,
                 "multiple" => ParkingMethod.Multiple,
+                "lane" => ParkingMethod.Lane,
                 _ => throw new ArgumentException($"Invalid parking method: {method}")
             };
         }
@@ -145,6 +165,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             float machineAreaDepth = (layoutRows - 1) * RowPitch + machineDepth;
 
             ActiveParkingMethod = ParseParkingMethod(config.parkingMethod);
+            LaneShape = null;
 
             totalFloorWidth = verticalAisleWidth + machineAreaWidth + verticalAisleWidth;
             totalFloorDepth = spineAisleWidth + machineAreaDepth + spineAisleWidth;
@@ -157,6 +178,17 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 float minParkingWidth = (agvCount - 1) * 2f + 4f;      // fit AGVs across the south pool
                 if (minParkingWidth > totalFloorWidth)
                     totalFloorWidth = minParkingWidth;
+            }
+            else if (ActiveParkingMethod == ParkingMethod.Lane)
+            {
+                LaneShape = ComputeLaneShape(config.AGVCount);
+                // Floor plane is centred on the grid, so grow it by the band depth on both sides
+                // (the band itself sits south of the bottom spine).
+                totalFloorDepth += 2f * LaneBandDepth;
+                float laneHalfWidth = 0f;
+                foreach (var c in LaneShape.LaneCentres) laneHalfWidth = Mathf.Max(laneHalfWidth, Mathf.Abs(c.x));
+                laneHalfWidth += LaneShape.Pitch / 2f;
+                totalFloorWidth = Mathf.Max(totalFloorWidth, 2f * laneHalfWidth);
             }
             else // Multiple
             {
@@ -316,7 +348,16 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             parkingAreas.Clear();
 
             int numRowAisles = layoutRows - 1;
-            if (ActiveParkingMethod == ParkingMethod.Multiple && numRowAisles > 0)
+            if (ActiveParkingMethod == ParkingMethod.Lane)
+            {
+                // Zone / bay positions are relative to the floor centre (see ComputeLaneShape).
+                for (int i = 0; i < LaneShape.LaneCentres.Length; i++) LaneShape.LaneCentres[i] += floorCentre;
+                for (int i = 0; i < LaneShape.BayCentres.Length; i++) LaneShape.BayCentres[i] += floorCentre;
+                for (int i = 0; i < LaneShape.ExitCentres.Length; i++) LaneShape.ExitCentres[i] += floorCentre;
+                AGVParkingPosition = LaneShape.BayCentres.Length > 0 ? LaneShape.BayCentres[0] : LaneShape.LaneCentres[0];
+                parkingAreas.Add(new ParkingArea { Position = AGVParkingPosition, RowAisleIndex = -1, IsLeftSide = false });
+            }
+            else if (ActiveParkingMethod == ParkingMethod.Multiple && numRowAisles > 0)
             {
                 BuildMultipleParkingAreas(floorCentre);
                 AGVParkingPosition = parkingAreas[0].Position;   // back-compat default
@@ -334,6 +375,73 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 });
             }
         }
+        /// Depth of the lane band below the bottom spine's south edge: north bay row, lane, south bay row.
+        private float LaneBandDepth => 3f * LaneMinPitch;
+
+        /// @brief Lays out the parking lane and its bays for a fleet, relative to the floor centre.
+        /// @details Lane zones run west from the right connector's x to the left connector's x (or
+        ///          further west if the fleet needs more bays than fit), pitch >= LaneMinPitch.
+        ///          Bay i (one per AGV) opens onto a lane zone, alternating north / south of it.
+        ///          Bays fill from the exit end towards the entry so dispatch (nearest by hops)
+        ///          prefers AGVs closest to the exit, and the entry end is left as a queue.
+        private ParkingLaneShape ComputeLaneShape(int agvCount)
+        {
+            float xR = ((layoutCols - 1) * machineSpacingX) / 2f + machineDepth / 2f + verticalAisleWidth / 2f;
+            float xL = -xR;
+            float span = xR - xL;
+
+            int bayColumns = Mathf.Max(1, Mathf.CeilToInt(agvCount / 2f));
+            int zoneCount = Mathf.Max(bayColumns + 1 + LaneQueueZones,      // entry zone + queue + bays
+                                      Mathf.FloorToInt(span / LaneMinPitch) + 1);
+            float pitch = Mathf.Max(LaneMinPitch, span / (zoneCount - 1));
+
+            // Lane rows relative to the bottom spine's south edge.
+            float spineSouthEdge = GetBottomSpineZ() - spineAisleWidth / 2f;
+            float northZ = spineSouthEdge - LaneMinPitch / 2f;
+            float laneZ = northZ - LaneMinPitch;
+            float southZ = laneZ - LaneMinPitch;
+
+            var shape = new ParkingLaneShape
+            {
+                Pitch = pitch,
+                RowDepth = LaneMinPitch,
+                LaneCentres = new Vector3[zoneCount],
+                ExitCentres = new Vector3[0],
+                BayCentres = new Vector3[agvCount],
+                BayLaneIndex = new int[agvCount]
+            };
+            for (int k = 0; k < zoneCount; k++)
+                shape.LaneCentres[k] = new Vector3(xR - k * pitch, 0.01f, laneZ);
+
+            // A big fleet pushes the lane west of the left connector. The last lane zone then cannot link
+            // straight to LeftVert_BotConn (the diagonal would cut across the westmost bays), so route the
+            // exit through reserved zones: north along the lane's west end, then east along the spine row.
+            float xEnd = shape.LaneCentres[zoneCount - 1].x;
+            if (xEnd < xL - 0.01f)
+            {
+                float spineZ = GetBottomSpineZ();
+                var exit = new List<Vector3> { new Vector3(xEnd, 0.01f, northZ) };
+                float d = xL - xEnd;
+                if (d >= 2.4f)
+                {
+                    exit.Add(new Vector3(xEnd, 0.01f, spineZ));
+                    int segs = Mathf.Max(1, Mathf.FloorToInt(d / LaneMinPitch));
+                    float step = d / segs;
+                    for (int j = 1; j < segs; j++) exit.Add(new Vector3(xEnd + j * step, 0.01f, spineZ));
+                }
+                shape.ExitCentres = exit.ToArray();
+            }
+
+            for (int i = 0; i < agvCount; i++)
+            {
+                int lane = (zoneCount - 2) - i / 2;          // last bay column sits next to the exit zone
+                shape.BayLaneIndex[i] = lane;
+                float bayZ = (i % 2 == 0) ? northZ : southZ;
+                shape.BayCentres[i] = new Vector3(shape.LaneCentres[lane].x, 0.01f, bayZ);
+            }
+            return shape;
+        }
+
         /// @brief Places one parking alcove per row aisle, on that aisle's exit side
         ///        (right for eastbound, left for westbound), just beyond the outer wall.
         private void BuildMultipleParkingAreas(Vector3 floorCentre)

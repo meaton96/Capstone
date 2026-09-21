@@ -1,63 +1,60 @@
---- Log Started: 9/20/2026 1:47:37 PM ---
-2026-09-20 13:47:38.152 [Agent] OnEpisodeBegin no-op — episode start is externally managed (CLI batch runner, or UI arm not yet pressed). Not a stall.
-2026-09-20 13:47:40.750 [SimulationMenu] Spawning factory with config: 20j_15m jobs=20 machines=15 agvs=3 stochastic=mf parkingMethod=multiple preDispatchingMethod=fixed
-2026-09-20 13:47:40.750 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.005
-2026-09-20 13:47:40.754 [FactoryLayout] Distributed type layout (row x col):
+--- Log Started: 9/21/2026 1:58:54 PM ---
+2026-09-21 13:58:54.709 [Agent] OnEpisodeBegin no-op — episode start is externally managed (CLI batch runner, or UI arm not yet pressed). Not a stall.
+2026-09-21 13:58:59.890 [SimulationMenu] Spawning factory with config: 20j_15m jobs=20 machines=15 agvs=9 stochastic=mf parkingMethod=lane preDispatchingMethod=fixed
+2026-09-21 13:58:59.890 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.005
+2026-09-21 13:58:59.894 [FactoryLayout] Distributed type layout (row x col):
   Row0: Mill, Lathe, Weld, Inspect
   Row1: Assemble, Mill, Lathe, Weld
   Row2: Inspect, Assemble, Mill, Lathe
   Row3: Weld, Inspect, Assemble
   [OK] No two same-type machines share a row aisle.
 
-2026-09-20 13:47:40.773 [FactoryLayout] Distance matrix (15x15):
+2026-09-21 13:58:59.914 [FactoryLayout] Distance matrix (15x15):
        M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
-2026-09-20 13:47:40.783 [FactoryLayout] Built aisle-based floor: 15 machines.
-2026-09-20 13:47:40.788 [TrafficZones] Built zone graph: 44 zones.
-2026-09-20 13:47:40.789 [AGVPool] AGV 0 -> alcove 0 (aisle 0, L), slot 0/0.
-2026-09-20 13:47:40.789 [AGVPool] AGV 1 -> alcove 1 (aisle 1, R), slot 0/0.
-2026-09-20 13:47:40.789 [AGVPool] AGV 2 -> alcove 2 (aisle 2, L), slot 0/0.
-2026-09-20 13:47:40.791 [AGVPool] Spawned fleet of 3 AGVs (multiple parking).
-2026-09-20 13:47:43.609 [Job Generator] Generating job definitions with config seed = 42
-2026-09-20 13:47:43.611 Generated Job 0: arrival=0.00, ops=3
-2026-09-20 13:47:43.611 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
-2026-09-20 13:47:43.611 Generated Job 17: arrival=0.00, ops=5
-2026-09-20 13:47:43.611 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
-2026-09-20 13:47:43.612 Generated Job 16: arrival=0.00, ops=5
-2026-09-20 13:47:43.612 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
-2026-09-20 13:47:43.612 Generated Job 15: arrival=0.00, ops=5
-2026-09-20 13:47:43.612 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
-2026-09-20 13:47:43.612 Generated Job 14: arrival=0.00, ops=7
-2026-09-20 13:47:43.613 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
-2026-09-20 13:47:43.613 Generated Job 13: arrival=0.00, ops=4
-2026-09-20 13:47:43.613 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
-2026-09-20 13:47:43.613 Generated Job 12: arrival=0.00, ops=4
-2026-09-20 13:47:43.613 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
-2026-09-20 13:47:43.613 Generated Job 11: arrival=0.00, ops=5
-2026-09-20 13:47:43.614 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
-2026-09-20 13:47:43.614 Generated Job 10: arrival=0.00, ops=4
-2026-09-20 13:47:43.614 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
-2026-09-20 13:47:43.614 Generated Job 9: arrival=0.00, ops=3
-2026-09-20 13:47:43.614 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
-2026-09-20 13:47:43.614 Generated Job 8: arrival=0.00, ops=4
-2026-09-20 13:47:43.615 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
-2026-09-20 13:47:43.615 Generated Job 7: arrival=0.00, ops=6
-2026-09-20 13:47:43.615 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
-2026-09-20 13:47:43.615 Generated Job 6: arrival=0.00, ops=6
-2026-09-20 13:47:43.615 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
-2026-09-20 13:47:43.615 Generated Job 5: arrival=0.00, ops=6
-2026-09-20 13:47:43.616 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
-2026-09-20 13:47:43.616 Generated Job 4: arrival=0.00, ops=3
-2026-09-20 13:47:43.616 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
-2026-09-20 13:47:43.616 Generated Job 3: arrival=0.00, ops=3
-2026-09-20 13:47:43.616 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
-2026-09-20 13:47:43.616 Generated Job 2: arrival=0.00, ops=4
-2026-09-20 13:47:43.617 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
-2026-09-20 13:47:43.617 Generated Job 1: arrival=0.00, ops=7
-2026-09-20 13:47:43.617 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
-2026-09-20 13:47:43.617 Generated Job 18: arrival=0.00, ops=4
-2026-09-20 13:47:43.617 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
-2026-09-20 13:47:43.617 Generated Job 19: arrival=0.00, ops=5
-2026-09-20 13:47:43.618 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
-2026-09-20 13:47:43.620 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.005
-2026-09-20 13:47:43.621 [Orchestrator] Episode started: 20 jobs, 15 machines, stochastic=True, seed=-1 (queue index -1)
-2026-09-20 13:47:43.634 [Orchestrator] Academy.AutomaticSteppingEnabled -> True (RLDecisionDrainMode=False).
+2026-09-21 13:58:59.923 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-09-21 13:58:59.928 [TrafficZones] Built zone graph: 76 zones.
+2026-09-21 13:58:59.930 [AGVPool] Spawned fleet of 9 AGVs (single parking).
+2026-09-21 13:59:13.043 [Job Generator] Generating job definitions with config seed = 42
+2026-09-21 13:59:13.044 Generated Job 0: arrival=0.00, ops=5
+2026-09-21 13:59:13.044 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-21 13:59:13.044 Generated Job 17: arrival=0.00, ops=3
+2026-09-21 13:59:13.045 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-21 13:59:13.045 Generated Job 16: arrival=0.00, ops=6
+2026-09-21 13:59:13.045 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-21 13:59:13.045 Generated Job 15: arrival=0.00, ops=5
+2026-09-21 13:59:13.045 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-21 13:59:13.045 Generated Job 14: arrival=0.00, ops=4
+2026-09-21 13:59:13.046 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-21 13:59:13.046 Generated Job 13: arrival=0.00, ops=6
+2026-09-21 13:59:13.046 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-21 13:59:13.046 Generated Job 12: arrival=0.00, ops=7
+2026-09-21 13:59:13.046 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-21 13:59:13.046 Generated Job 11: arrival=0.00, ops=5
+2026-09-21 13:59:13.047 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-21 13:59:13.047 Generated Job 10: arrival=0.00, ops=6
+2026-09-21 13:59:13.047 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-21 13:59:13.047 Generated Job 9: arrival=0.00, ops=4
+2026-09-21 13:59:13.047 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-21 13:59:13.047 Generated Job 8: arrival=0.00, ops=5
+2026-09-21 13:59:13.047 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-21 13:59:13.048 Generated Job 7: arrival=0.00, ops=4
+2026-09-21 13:59:13.048 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-21 13:59:13.048 Generated Job 6: arrival=0.00, ops=3
+2026-09-21 13:59:13.048 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-21 13:59:13.048 Generated Job 5: arrival=0.00, ops=3
+2026-09-21 13:59:13.048 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-21 13:59:13.049 Generated Job 4: arrival=0.00, ops=7
+2026-09-21 13:59:13.049 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-21 13:59:13.049 Generated Job 3: arrival=0.00, ops=6
+2026-09-21 13:59:13.049 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-21 13:59:13.049 Generated Job 2: arrival=0.00, ops=4
+2026-09-21 13:59:13.049 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-21 13:59:13.050 Generated Job 1: arrival=0.00, ops=5
+2026-09-21 13:59:13.050 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-21 13:59:13.050 Generated Job 18: arrival=0.00, ops=4
+2026-09-21 13:59:13.050 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-21 13:59:13.050 Generated Job 19: arrival=0.00, ops=7
+2026-09-21 13:59:13.050 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-21 13:59:13.053 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.005
+2026-09-21 13:59:13.054 [Orchestrator] Episode started: 20 jobs, 15 machines, stochastic=True, seed=-1 (queue index -1)
+2026-09-21 13:59:13.064 [Orchestrator] Academy.AutomaticSteppingEnabled -> True (RLDecisionDrainMode=False).

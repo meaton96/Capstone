@@ -463,6 +463,8 @@ namespace Assets.Scripts.Simulation
         {
             if (config != null && ConfigOverrides.ReservationProtocol != null)
                 config.reservationProtocol = ConfigOverrides.ReservationProtocol;
+            if (config != null && ConfigOverrides.ParkingMethod != null)
+                config.parkingMethod = ConfigOverrides.ParkingMethod;
             return config;
         }
 
@@ -1332,7 +1334,7 @@ namespace Assets.Scripts.Simulation
             record.AgvCollisionPairSeconds = _collisions.OverlapPairSeconds;
             record.AgvClearanceEvents = _collisions.ClearanceEvents;
             record.AgvClearancePairSeconds = _collisions.ClearancePairSeconds;
-            record.AgvStaticOverlapEvents = _collisions.StaticOverlapEvents;
+            record.AgvParkingOverlapEvents = _collisions.ParkingOverlapEvents;
             record.AgvMinCentreDistance = _collisions.MinCentreDistance == float.MaxValue ? -1f : _collisions.MinCentreDistance;
             record.CollisionRecords = _collisions.Events;
             record.ReservationProtocol = currentConfig.reservationProtocol;

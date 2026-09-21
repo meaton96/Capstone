@@ -298,6 +298,25 @@ namespace Assets.Scripts.Simulation.AGV
             return true;
         }
 
+        /// @brief True while this AGV is parked or moving through the parking alcove (Idle, or its
+        ///        current/previous zone is a parking zone). Parking is an abstraction with no queueing
+        ///        model, so AGVCollisionMonitor reports overlaps involving such an AGV separately and
+        ///        keeps them out of the headline floor-collision counts.
+        public bool IsParkingRelated
+        {
+            get
+            {
+                // Lane parking is fully reserved and physical, so it is counted like any other floor.
+                if (trafficMgr != null && trafficMgr.ParkingIsBayed) return false;
+                if (State == AGVState.Idle) return true;
+                var ids = trafficMgr != null ? trafficMgr.ParkingZoneIds : null;
+                if (ids == null) return false;
+                for (int i = 0; i < ids.Count; i++)
+                    if (ids[i] == currentZoneId || ids[i] == previousZoneId) return true;
+                return false;
+            }
+        }
+
         /// @brief Navigation clearance radius (NavMeshAgent.radius, 1.18 on the prefab). Zone sizes
         ///        were designed around 2x this figure; it is NOT the physical body (see GetFootprint).
         public float ClearanceRadius => navAgent != null ? navAgent.radius : 1.18f;
@@ -734,7 +753,16 @@ namespace Assets.Scripts.Simulation.AGV
         private void ArriveAtParking()
         {
             if (previousZoneId >= 0) { trafficMgr.Release(previousZoneId, AgvId); previousZoneId = -1; }
-            if (currentZoneId >= 0) { trafficMgr.Release(currentZoneId, AgvId); currentZoneId = -1; }
+            if (trafficMgr.ParkingIsBayed)
+            {
+                // Parking lane: an idle AGV keeps its own bay reserved (nobody else routes into it).
+                TrafficZone bay = trafficMgr.GetZoneAtPosition(AGVPool.Instance.GetParkingPosition(AgvId));
+                int bayId = bay?.ZoneId ?? -1;
+                if (currentZoneId >= 0 && currentZoneId != bayId) trafficMgr.Release(currentZoneId, AgvId);
+                currentZoneId = bayId;
+                if (bayId >= 0) trafficMgr.TryReserve(bayId, AgvId);
+            }
+            else if (currentZoneId >= 0) { trafficMgr.Release(currentZoneId, AgvId); currentZoneId = -1; }
             currentRoute.Clear();
             routeIndex = 0;
             waitingForZone = false;

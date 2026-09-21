@@ -99,10 +99,9 @@ namespace Assets.Scripts.Simulation.Types
 
         // ── Parking method ──
 
-        /// @brief Strategy used for AGV parking assignments.
-        /// @details Controls how AGVs are assigned to parking spots when idle.
-        ///          Defaults to "single" (single parking zone per AGV type).
-        public string parkingMethod = "single";
+        /// @brief Parking layout: "lane" (default; reserved lane, one dedicated bay per AGV),
+        ///        "single" (one abstract alcove) or "multiple" (per-aisle alcoves).
+        public string parkingMethod = "lane";
 
         /// @brief AGV zone-reservation protocol: "holdPrevious" (default) or "releasePrevious".
         ///        See ReservationProtocol. Validated at load by ReservationProtocolParser.

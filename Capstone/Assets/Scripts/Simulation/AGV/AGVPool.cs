@@ -60,7 +60,10 @@ namespace Assets.Scripts.Simulation.AGV
                 && layoutManager.ParkingAreas.Count > 0
                 && layoutManager.ParkingAreas[0].RowAisleIndex >= 0;
 
-            if (multiple)
+            if (layoutManager != null && layoutManager.ActiveParkingMethod == ParkingMethod.Lane
+                && layoutManager.LaneShape != null)
+                AssignLaneParkingPositions(fleetSize);
+            else if (multiple)
                 AssignMultipleParkingPositions(fleetSize);
             else
                 AssignSingleParkingPositions(fleetSize);
@@ -76,6 +79,14 @@ namespace Assets.Scripts.Simulation.AGV
 
             SimLogger.Medium($"[AGVPool] Spawned fleet of {fleetSize} AGVs ({(multiple ? "multiple" : "single")} parking).");
         }
+        /// @brief Parking lane: AGV i parks in its own bay (see FactoryLayoutManager.ComputeLaneShape).
+        private void AssignLaneParkingPositions(int fleetSize)
+        {
+            var bays = layoutManager.LaneShape.BayCentres;
+            for (int i = 0; i < fleetSize; i++)
+                parkingPositions[i] = bays[i];
+        }
+
         /// @brief Original behaviour: AGVs line up along X, centred on the single parking pool.
         private void AssignSingleParkingPositions(int fleetSize)
         {

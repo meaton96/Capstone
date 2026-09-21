@@ -171,7 +171,7 @@ namespace Assets.Scripts.Simulation.Channels
                 AGVMoveSpeed = root["agvMoveSpeed"]?.Value<float>(),
                 AGVHandshakeDuration = root["agvHandshakeDuration"]?.Value<float>(),
                 MachineFlexibilityProbability = root["machineFlexibilityProbability"]?.Value<float>() ?? 0f,
-                parkingMethod = root["parkingMethod"]?.Value<string>() ?? "single",
+                parkingMethod = root["parkingMethod"]?.Value<string>() ?? "lane",
                 reservationProtocol = ReservationProtocolParser.Validated(root["reservationProtocol"]?.Value<string>()),
                 preDispatchingMethod = root["preDispatchingMethod"]?.Value<string>() ?? "fixed",
             };

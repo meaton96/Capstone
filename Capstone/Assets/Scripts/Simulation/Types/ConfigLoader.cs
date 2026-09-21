@@ -142,7 +142,7 @@ namespace Assets.Scripts.Simulation.Types
             public float agvHandshakeDuration = 0f;
             public float machineFlexibilityProbability = 0f;
             public float throughputTimingWindow = 0f;
-            public string parkingMethod = "single";
+            public string parkingMethod = "lane";
             public string reservationProtocol = "holdPrevious";
             public string preDispatchingMethod = "fixed";
             public JsonStochasticConfig stochastic = null;

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using TMPro;
+using Assets.Scripts.Simulation.FactoryLayout;
 using Assets.Scripts.Simulation.Machines;
 using Assets.Scripts.Simulation.Types;
 using Assets.Scripts.Simulation;
@@ -26,6 +27,11 @@ namespace Assets.Scripts.UI
         [Header("References")]
         //[SerializeField] private FactoryOrchestrator bridge;
         [SerializeField] private SchedulingAgent agent;
+
+        [Tooltip("Parking layout for runs started from this menu. Lane = reserved parking lane with one " +
+                 "dedicated bay per AGV (default). Single / Multiple = the older abstract alcoves, kept " +
+                 "for comparison.")]
+        [SerializeField] private ParkingMethod parkingMethodChoice = ParkingMethod.Lane;
         [SerializeField] private GameObject panel;
 
         // ── General parameters ────────────────────────────────────────────────
@@ -279,7 +285,7 @@ namespace Assets.Scripts.UI
                 MinProcTime = 1f,
                 MaxProcTime = 30f,
                 Stochastic = BuildStochasticConfig(),
-                parkingMethod = "multiple",
+                parkingMethod = parkingMethodChoice.ToString().ToLowerInvariant(),
                 preDispatchingMethod = "fixed",
 
             };

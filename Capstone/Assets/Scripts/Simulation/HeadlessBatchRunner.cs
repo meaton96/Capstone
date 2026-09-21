@@ -132,6 +132,14 @@ namespace Assets.Scripts.Simulation
                 SimLogger.Low($"[BatchRunner] Reservation protocol override: {reservationStr}");
             }
 
+            // Parking method override ("single" | "multiple" | "lane"), same single-point mechanism.
+            string parkingStr = GetCLIArg("-parking");
+            if (!string.IsNullOrEmpty(parkingStr))
+            {
+                ConfigOverrides.ParkingMethod = ConfigOverrides.ValidatedParkingMethod(parkingStr);
+                SimLogger.Low($"[BatchRunner] Parking method override: {ConfigOverrides.ParkingMethod}");
+            }
+
             // Repeats
             int repeats = 1;
             string repeatsStr = GetCLIArg("-repeats");
