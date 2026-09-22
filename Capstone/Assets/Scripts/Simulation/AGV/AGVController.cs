@@ -105,6 +105,7 @@ namespace Assets.Scripts.Simulation.AGV
             _statTimeLoading = 0.0;
             _statTimeUnloading = 0.0;
             _statTotalPathLength = 0.0;
+            _retreatReleaseZoneId = _retreatTargetZoneId = -1;
             _statPathReturning = 0.0;
             _statPathDeparture = 0.0;
             _dispatchedFromIdle = false;
@@ -371,6 +372,19 @@ namespace Assets.Scripts.Simulation.AGV
                    $"stalls={_statStallRecoveryCount}";
         }
 
+        /// @brief Route-level detail for overlap diagnostics: the zone ahead, the waypoint being driven to, and
+        ///        the zones still on the route.
+        public string DebugRoute()
+        {
+            string Z(int id) => id < 0 ? "-" : (trafficMgr?.GetZone(id)?.Name ?? id.ToString());
+            var rest = new System.Text.StringBuilder();
+            for (int i = routeIndex; i < currentRoute.Count && i < routeIndex + 4; i++)
+                rest.Append(i == routeIndex ? "" : ">").Append(Z(currentRoute[i]));
+            return $"ahead={(routeIndex < currentRoute.Count ? Z(currentRoute[routeIndex]) : "-")} waiting={waitingForZone} " +
+                   $"wp=({currentWaypoint.x:F1},{currentWaypoint.z:F1}) route=[{rest}] " +
+                   $"pos=({transform.position.x:F2},{transform.position.z:F2})";
+        }
+
         /// @brief Terminates the active route and releases future traffic zone reservations.
         private void CancelCurrentRoute()
         {
@@ -378,7 +392,21 @@ namespace Assets.Scripts.Simulation.AGV
             {
                 int aheadZoneId = currentRoute[routeIndex];
                 if (aheadZoneId != currentZoneId)
-                    trafficMgr.Release(aheadZoneId, AgvId);
+                {
+                    TrafficZone ahead = trafficMgr.GetZone(aheadZoneId);
+                    if (ahead != null && ahead.Contains(transform.position))
+                    {
+                        // Already inside the zone reserved ahead (it only counts as entered at its centre).
+                        // Releasing it here freed a zone the AGV was physically in: a follower reserved and
+                        // entered it, and the redirected AGV then reversed against the one-way flow through it
+                        // (AGVCollisionMonitor: the RightVert_Row1 overlaps with no stall involved). Commit the
+                        // entry instead, so the AGV keeps the zone and is re-planned from where it really is.
+                        OnEnteredZone(aheadZoneId);
+                        routeIndex++;
+                    }
+                    else
+                        trafficMgr.Release(aheadZoneId, AgvId);
+                }
             }
 
             currentRoute.Clear();
@@ -386,6 +414,7 @@ namespace Assets.Scripts.Simulation.AGV
             waitingForZone = false;
             pendingZoneId = -1;
             parkingZoneId = -1;
+            _retreatReleaseZoneId = _retreatTargetZoneId = -1;   // route abandoned mid-retreat: currentZone stays held
         }
         /// @brief Redirects an AGV that is already carrying a job to a new dropoff machine.
         /// Called when the original destination machine fails mid-transit.
@@ -731,7 +760,7 @@ namespace Assets.Scripts.Simulation.AGV
         }
 
         /// @brief Determines the return path to the assigned @c AGVPool parking station.
-        private void BeginParkingRoute()
+        private void BeginParkingRoute(int fromZoneOverride = -2)
         {
             Vector3 parkPos = AGVPool.Instance.GetParkingPosition(AgvId);
             TrafficZone parkZone = trafficMgr.GetZoneAtPosition(parkPos);
@@ -747,7 +776,8 @@ namespace Assets.Scripts.Simulation.AGV
                 };
             }
 
-            if (parkingZoneId < 0 || !PlanRoute(currentZoneId, parkingZoneId))
+            int fromZone = fromZoneOverride == -2 ? currentZoneId : fromZoneOverride;
+            if (parkingZoneId < 0 || !PlanRoute(fromZone, parkingZoneId))
             {
                 SimLogger.Error($"[AGV {AgvId}] No route to parking — resetting in place.");
                 ArriveAtParking();
@@ -767,6 +797,7 @@ namespace Assets.Scripts.Simulation.AGV
         /// @brief Cleanup function to release final zone reservations and return to @c Idle state.
         private void ArriveAtParking()
         {
+            _retreatReleaseZoneId = _retreatTargetZoneId = -1;
             if (previousZoneId >= 0) { trafficMgr.Release(previousZoneId, AgvId); previousZoneId = -1; }
             if (trafficMgr.ParkingIsBayed)
             {
@@ -989,13 +1020,18 @@ namespace Assets.Scripts.Simulation.AGV
             if (previousZoneId >= 0 && previousZoneId != currentZoneId &&
                 trafficMgr.TryReserve(previousZoneId, AgvId))
             {
-                trafficMgr.Release(currentZoneId, AgvId);
-                currentZoneId = previousZoneId;
-                previousZoneId = -1;
-                currentWaypoint = FlatY(trafficMgr.GetZone(currentZoneId).Centre);
+                // The AGV is still physically inside currentZone and needs a moment to drive back into the
+                // previous zone. Releasing currentZone now (as this used to) let a follower reserve and enter
+                // it on top of the retreating AGV (AGVCollisionMonitor: the RightVert_Row1 overlaps, every one
+                // right after a stall recovery). So keep it reserved, plan the way to parking from the
+                // previous zone (route[0] = previous zone = the retreat leg) and free currentZone in
+                // OnEnteredZone once the previous zone's centre is reached.
+                int backZone = previousZoneId;
+                _retreatReleaseZoneId = currentZoneId;
+                _retreatTargetZoneId = backZone;
 
                 State = AGVState.ReturningToParking;
-                BeginParkingRoute();
+                BeginParkingRoute(backZone);
                 return;
             }
 
@@ -1021,6 +1057,9 @@ namespace Assets.Scripts.Simulation.AGV
         /// @brief Manages the transition of reservations when crossing zone boundaries.
         private void OnEnteredZone(int newZoneId)
         {
+            bool retreatDone = _retreatReleaseZoneId >= 0 && newZoneId == _retreatTargetZoneId;
+            int retreatFreed = _retreatReleaseZoneId;
+
             if (previousZoneId >= 0 && previousZoneId != newZoneId)
                 trafficMgr.Release(previousZoneId, AgvId);
 
@@ -1029,7 +1068,19 @@ namespace Assets.Scripts.Simulation.AGV
 
             previousZoneId = currentZoneId;
             currentZoneId = newZoneId;
+
+            if (retreatDone)
+            {
+                // Retreat leg complete: the AGV is out of the zone it stalled in, so free it now.
+                trafficMgr.Release(retreatFreed, AgvId);
+                if (previousZoneId == retreatFreed) previousZoneId = -1;
+                _retreatReleaseZoneId = _retreatTargetZoneId = -1;
+            }
         }
+
+        // RetreatFromStall bookkeeping: the zone still held until the AGV reaches _retreatTargetZoneId.
+        private int _retreatReleaseZoneId = -1;
+        private int _retreatTargetZoneId = -1;
 
         /// @brief Requests a list of zone IDs from the @c TrafficZoneManager to form a navigation path.
         private bool PlanRoute(int fromZone, int toZone)

@@ -1,25 +1,31 @@
---- Log Started: 9/21/2026 2:00:40 PM ---
-2026-09-21 14:00:40.515 [Agent] OnEpisodeBegin no-op — episode start is externally managed (CLI batch runner, or UI arm not yet pressed). Not a stall.
-2026-09-21 14:00:45.410 [SimulationMenu] Spawning factory with config: 20j_15m jobs=20 machines=15 agvs=9 stochastic=mf parkingMethod=multiple preDispatchingMethod=fixed
-2026-09-21 14:00:45.410 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.005
-2026-09-21 14:00:45.413 [FactoryLayout] Distributed type layout (row x col):
+--- Log Started: 9/21/2026 4:40:41 PM ---
+2026-09-21 16:40:42.190 [Agent] OnEpisodeBegin no-op — episode start is externally managed (CLI batch runner, or UI arm not yet pressed). Not a stall.
+2026-09-21 16:40:48.428 [SimulationMenu] Spawning factory with config: 20j_15m jobs=20 machines=15 agvs=3 stochastic=mf parkingMethod=lane layout=D preDispatchingMethod=fixed
+2026-09-21 16:40:48.429 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.005
+2026-09-21 16:40:48.432 [FactoryLayout] Distributed type layout (row x col):
   Row0: Mill, Lathe, Weld, Inspect
   Row1: Assemble, Mill, Lathe, Weld
   Row2: Inspect, Assemble, Mill, Lathe
   Row3: Weld, Inspect, Assemble
   [OK] No two same-type machines share a row aisle.
 
-2026-09-21 14:00:45.433 [FactoryLayout] Distance matrix (15x15):
+2026-09-21 16:40:48.451 [FactoryLayout] Distance matrix (15x15):
        M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
-2026-09-21 14:00:45.442 [FactoryLayout] Built aisle-based floor: 15 machines.
-2026-09-21 14:00:45.446 [TrafficZones] Built zone graph: 60 zones.
-2026-09-21 14:00:45.447 [AGVPool] AGV 0 -> alcove 0 (aisle 0, L), slot 0/2.
-2026-09-21 14:00:45.447 [AGVPool] AGV 1 -> alcove 1 (aisle 1, R), slot 0/2.
-2026-09-21 14:00:45.448 [AGVPool] AGV 2 -> alcove 2 (aisle 2, L), slot 0/2.
-2026-09-21 14:00:45.448 [AGVPool] AGV 3 -> alcove 0 (aisle 0, L), slot 1/2.
-2026-09-21 14:00:45.448 [AGVPool] AGV 4 -> alcove 1 (aisle 1, R), slot 1/2.
-2026-09-21 14:00:45.448 [AGVPool] AGV 5 -> alcove 2 (aisle 2, L), slot 1/2.
-2026-09-21 14:00:45.448 [AGVPool] AGV 6 -> alcove 0 (aisle 0, L), slot 2/2.
-2026-09-21 14:00:45.448 [AGVPool] AGV 7 -> alcove 1 (aisle 1, R), slot 2/2.
-2026-09-21 14:00:45.448 [AGVPool] AGV 8 -> alcove 2 (aisle 2, L), slot 2/2.
-2026-09-21 14:00:45.451 [AGVPool] Spawned fleet of 9 AGVs (multiple parking).
+2026-09-21 16:40:48.462 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-09-21 16:40:48.466 [TrafficZones] Built zone graph: 70 zones.
+2026-09-21 16:40:48.468 [AGVPool] Spawned fleet of 3 AGVs (single parking).
+2026-09-21 16:40:48.469 [SimulationMenu] Spawning factory with config: 20j_15m jobs=20 machines=15 agvs=3 stochastic=mf parkingMethod=lane layout=E preDispatchingMethod=fixed
+2026-09-21 16:40:48.469 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.005
+2026-09-21 16:40:48.470 [FactoryLayout] Distributed type layout (row x col):
+  Row0: Mill, Lathe, Weld, Inspect
+  Row1: Assemble, Mill, Lathe, Weld
+  Row2: Inspect, Assemble, Mill, Lathe
+  Row3: Weld, Inspect, Assemble
+  [OK] No two same-type machines share a row aisle.
+
+2026-09-21 16:40:48.481 [FactoryLayout] Distance matrix (15x15):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
+2026-09-21 16:40:48.484 [FactoryLayout] Built aisle-based floor: 15 machines.
+2026-09-21 16:40:48.484 [TrafficZones] Built zone graph: 70 zones.
+2026-09-21 16:40:48.485 [AGVPool] Spawned fleet of 3 AGVs (single parking).
+2026-09-21 16:40:48.485 [Error] [SimulationMenu] Layout 'F' cannot run: two-way aisles are not built yet. Built layouts: A, B, C, D, E. See docs/LAYOUT_CONFIGURATION_SCOPE.md.

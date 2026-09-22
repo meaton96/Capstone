@@ -122,22 +122,45 @@ namespace Assets.Scripts.Simulation
                 SimLogger.Low($"[BatchRunner] AGV count override: {agvCountOverride}");
             }
 
-            // Reservation protocol override (applied to every config by FactoryOrchestrator.ApplyConfigOverrides).
-            // Validated here so a typo aborts before any run instead of silently using the default.
-            string reservationStr = GetCLIArg("-reservation");
-            if (!string.IsNullOrEmpty(reservationStr))
+            // CLI overrides that select a variant of the simulation are validated up front. A bad value
+            // must end the process (exit 1): an exception here is only logged by Unity and would leave a
+            // batch-mode worker idling forever, stalling a whole sweep.
+            try
             {
-                ReservationProtocolParser.Parse(reservationStr);
-                ConfigOverrides.ReservationProtocol = reservationStr;
-                SimLogger.Low($"[BatchRunner] Reservation protocol override: {reservationStr}");
-            }
+                // Reservation protocol override (applied to every config by FactoryOrchestrator.ApplyConfigOverrides).
+                // Validated here so a typo aborts before any run instead of silently using the default.
+                string reservationStr = GetCLIArg("-reservation");
+                if (!string.IsNullOrEmpty(reservationStr))
+                {
+                    ReservationProtocolParser.Parse(reservationStr);
+                    ConfigOverrides.ReservationProtocol = reservationStr;
+                    SimLogger.Low($"[BatchRunner] Reservation protocol override: {reservationStr}");
+                }
 
-            // Parking method override ("single" | "multiple" | "lane"), same single-point mechanism.
-            string parkingStr = GetCLIArg("-parking");
-            if (!string.IsNullOrEmpty(parkingStr))
+                // Parking method override ("single" | "multiple" | "lane"), same single-point mechanism.
+                string parkingStr = GetCLIArg("-parking");
+                if (!string.IsNullOrEmpty(parkingStr))
+                {
+                    ConfigOverrides.ParkingMethod = ConfigOverrides.ValidatedParkingMethod(parkingStr);
+                    SimLogger.Low($"[BatchRunner] Parking method override: {ConfigOverrides.ParkingMethod}");
+                }
+
+                // Layout override (LayoutSpec name A-J), same single-point mechanism. Validated here so a typo
+                // or a layout that is not built yet aborts before any run.
+                string layoutStr = GetCLIArg("-layout");
+                if (!string.IsNullOrEmpty(layoutStr))
+                {
+                    ConfigOverrides.Layout = LayoutSpec.FromPreset(layoutStr).Id;
+                    SimLogger.Low($"[BatchRunner] Layout override: {ConfigOverrides.Layout}");
+                }
+
+            }
+            catch (Exception ex)
             {
-                ConfigOverrides.ParkingMethod = ConfigOverrides.ValidatedParkingMethod(parkingStr);
-                SimLogger.Low($"[BatchRunner] Parking method override: {ConfigOverrides.ParkingMethod}");
+                SimLogger.LogError($"[BatchRunner] Invalid command-line override: {ex.Message}");
+                enabled = false;
+                Application.Quit(1);
+                return;
             }
 
             // Repeats

@@ -65,6 +65,15 @@ namespace Assets.Scripts.Simulation.Types
         public float AgvMinCentreDistance = -1f;
         public List<CollisionRecord> CollisionRecords = new List<CollisionRecord>();
 
+        // Layout for this run (FJSSPConfig.Layout) and the resulting floor footprint. Part of scenario
+        // identity: rows with different values must never be pooled. Footprint is recorded because layouts
+        // and AGV counts change floor size, so "more AGVs fit" must not be confounded with "bigger floor".
+        public string LayoutId = "legacy";
+        public string LayoutBelts = "";
+        public string LayoutAisles = "oneway";
+        public float FloorWidth;
+        public float FloorDepth;
+
         // AGV zone-reservation protocol for this run (FJSSPConfig.reservationProtocol). Part of
         // scenario identity: never compare rows with different values.
         public string ReservationProtocol = "holdPrevious";

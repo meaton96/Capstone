@@ -103,6 +103,10 @@ namespace Assets.Scripts.Simulation.Types
         ///        "single" (one abstract alcove) or "multiple" (per-aisle alcoves).
         public string parkingMethod = "lane";
 
+        /// @brief Factory layout (belt sides per row x aisle topology). Default legacy = today's floor, so a
+        ///        config that omits it is unchanged. Immutable, shared by reference across per-seed clones.
+        public LayoutSpec Layout = LayoutSpec.Legacy;
+
         /// @brief AGV zone-reservation protocol: "holdPrevious" (default) or "releasePrevious".
         ///        See ReservationProtocol. Validated at load by ReservationProtocolParser.
         public string reservationProtocol = "holdPrevious";
@@ -169,6 +173,7 @@ namespace Assets.Scripts.Simulation.Types
                 Stochastic = Stochastic,
                 MachineFlexibilityProbability = MachineFlexibilityProbability,
                 parkingMethod = parkingMethod,
+                Layout = Layout,
                 reservationProtocol = reservationProtocol,
                 preDispatchingMethod = preDispatchingMethod,
                 ThroughputTimingWindow = ThroughputTimingWindow,

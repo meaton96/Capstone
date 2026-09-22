@@ -202,7 +202,7 @@ namespace Assets.Scripts.Simulation.AGV
             // A machine can dock from more than one aisle; seed the BFS with all its zones.
             List<int> pickupZones;
             if (pickupMachine != null)
-                pickupZones = TrafficZoneManager.Instance.GetZonesForMachine(pickupMachine.MachineId);
+                pickupZones = TrafficZoneManager.Instance.GetPickupZonesForMachine(pickupMachine.MachineId);
             else
             {
                 int beltZone = TrafficZoneManager.Instance.GetZoneIdForDock(TrafficZoneManager.IncomingBeltId);

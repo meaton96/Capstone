@@ -121,10 +121,18 @@ namespace Assets.Scripts.Simulation.Jobs
         //  Phase 1: config (runs before SpawnFactory, no runtime machine IDs yet)
         // ─────────────────────────────────────────────────────────────────────
 
+        /// <summary>Top-level scenario keys BuildConfig / BuildJobs read. Others are reported (typo guard); "_"-prefixed keys are comments.</summary>
+        private static readonly string[] KnownKeys =
+        {
+            "name", "seed", "agvCount", "agvMoveSpeed", "agvHandshakeDuration", "dispatchingRule",
+            "jobs", "machineTypeLayout", "parkingMethod", "reservationProtocol", "stochastic", "layout"
+        };
+
         private static FJSSPConfig BuildConfig(string json, string fileName,
                                                  int seedOverride, int agvCountOverride)
         {
             JObject root = JObject.Parse(json);
+            ConfigKeyCheck.WarnUnknownTopLevel(root, KnownKeys, $"scenario '{fileName}'");
             JArray jobsArray = (JArray)root["jobs"];
             if (jobsArray == null || jobsArray.Count == 0)
             {
@@ -206,6 +214,7 @@ namespace Assets.Scripts.Simulation.Jobs
                 AGVMoveSpeed = root["agvMoveSpeed"]?.Value<float>(),
                 AGVHandshakeDuration = root["agvHandshakeDuration"]?.Value<float>(),
                 reservationProtocol = ReservationProtocolParser.Validated(root["reservationProtocol"]?.Value<string>()),
+                Layout = LayoutSpec.FromJson(root["layout"]),
                 parkingMethod = root["parkingMethod"] != null
                     ? ConfigOverrides.ValidatedParkingMethod(root["parkingMethod"].Value<string>())
                     : "lane",

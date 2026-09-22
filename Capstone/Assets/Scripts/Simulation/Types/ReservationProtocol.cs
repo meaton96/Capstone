@@ -59,6 +59,8 @@ namespace Assets.Scripts.Simulation.Types
         public static string ReservationProtocol;
         /// <summary>Parking method ("single" | "multiple" | "lane"); overrides every config's parkingMethod.</summary>
         public static string ParkingMethod;
+        /// <summary>Layout name A-J (see LayoutSpec); overrides every config's "layout" block. CLI over JSON over legacy.</summary>
+        public static string Layout;
 
         /// <summary>Throws on an unknown parking method so a typo cannot silently run the default.</summary>
         public static string ValidatedParkingMethod(string value)

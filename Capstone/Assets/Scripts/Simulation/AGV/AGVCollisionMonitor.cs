@@ -110,6 +110,7 @@ namespace Assets.Scripts.Simulation.AGV
                         else
                         {
                             OverlapEvents++;
+                            LogDiagnostic(a, b, simTime, dist);
                             _open[key] = new OpenEvent
                             {
                                 Id = _nextEventId++, Start = simTime, MinDistance = dist,
@@ -126,6 +127,23 @@ namespace Assets.Scripts.Simulation.AGV
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// One log line per overlap event with each AGV's zone state, route ahead and the occupants of the zones
+        /// under both, so an overlap can be traced to the reservation that let it happen. Logging only.
+        /// </summary>
+        private static void LogDiagnostic(AGVController a, AGVController b, double simTime, float dist)
+        {
+            var tz = FactoryLayout.TrafficZoneManager.Instance;
+            string Occ(AGVController g)
+            {
+                var z = tz != null ? tz.GetZoneAtPosition(g.transform.position) : null;
+                return z == null ? "no-zone" : $"{z.Name}[{string.Join(",", z.OccupantAgvIds)}]";
+            }
+            Logging.SimLogger.Low(
+                $"[OverlapDiag] t={simTime:F1} dist={dist:F2} | {a.DebugSummary()} {a.DebugRoute()} under={Occ(a)} || " +
+                $"{b.DebugSummary()} {b.DebugRoute()} under={Occ(b)}");
         }
 
         /// <summary>Closes any still-open overlaps at episode end so they are recorded.</summary>

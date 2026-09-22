@@ -5,6 +5,7 @@ using UnityEngine;
 using Assets.Scripts.Simulation.Machines;
 using Assets.Scripts.Simulation.Logging;
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
 namespace Assets.Scripts.Simulation.Types
 {
@@ -77,7 +78,9 @@ namespace Assets.Scripts.Simulation.Types
             try
             {
                 JsonConfig raw = JsonUtility.FromJson<JsonConfig>(json);
-                return Convert(raw);
+                JObject obj = JObject.Parse(json);
+                ConfigKeyCheck.WarnUnknownTopLevel(obj, KnownKeys, $"config '{raw?.name}'");
+                return Convert(raw, obj);
             }
             catch (Exception ex)
             {
@@ -101,7 +104,27 @@ namespace Assets.Scripts.Simulation.Types
                     var single = ParseSingle(json);
                     return single != null ? new[] { single } : Array.Empty<FJSSPConfig>();
                 }
-                return wrapper.configs.Select(Convert).Where(c => c != null).ToArray();
+
+                // Raw objects, index-aligned with wrapper.configs: JsonUtility cannot read the "layout"
+                // block (or report unknown keys), so those come from Newtonsoft.
+                JObject root = JObject.Parse(json);
+                var rawConfigs = (JArray)root["configs"];
+                var result = new List<FJSSPConfig>();
+                for (int i = 0; i < wrapper.configs.Length; i++)
+                {
+                    JObject obj = rawConfigs[i] as JObject;
+                    ConfigKeyCheck.WarnUnknownTopLevel(obj, KnownKeys, $"config #{i} '{wrapper.configs[i]?.name}'");
+                    FJSSPConfig cfg;
+                    try { cfg = Convert(wrapper.configs[i], obj); }
+                    catch (Exception ex)
+                    {
+                        // Fail fast: one bad config aborts the whole batch before any run starts, instead of
+                        // silently dropping it (which would skew a sweep) or failing hours in.
+                        throw new ArgumentException($"config #{i} '{wrapper.configs[i]?.name}': {ex.Message}", ex);
+                    }
+                    if (cfg != null) result.Add(cfg);
+                }
+                return result.ToArray();
             }
             catch (Exception ex)
             {
@@ -109,6 +132,10 @@ namespace Assets.Scripts.Simulation.Types
                 return Array.Empty<FJSSPConfig>();
             }
         }
+
+        /// <summary>Top-level keys a config may carry: every JsonConfig field, plus the batch wrapper's "configs" and "layout".</summary>
+        private static readonly string[] KnownKeys =
+            typeof(JsonConfig).GetFields().Select(f => f.Name).Concat(new[] { "configs", "layout" }).ToArray();
 
         // ── Internal JSON data classes (JsonUtility-compatible) ──
 
@@ -198,7 +225,7 @@ namespace Assets.Scripts.Simulation.Types
         ///          the layout by repeating each type machinesPerType times.
         /// @param raw  Parsed JSON config data.
         /// @returns     Runtime FJSSPConfig, or null if raw is null.
-        private static FJSSPConfig Convert(JsonConfig raw)
+        private static FJSSPConfig Convert(JsonConfig raw, JObject rawObj)
         {
             if (raw == null) return null;
 
@@ -262,6 +289,9 @@ namespace Assets.Scripts.Simulation.Types
                 ThroughputTimingWindow = raw.throughputTimingWindow,
                 ProcTimeParams = procTimeParams,
                 parkingMethod = raw.parkingMethod,
+                // "layout" block: read with Newtonsoft (JsonUtility cannot), validated against this config's
+                // own machine grid so a bad layout aborts at load time, not mid-sweep.
+                Layout = LayoutSpec.FromJson(rawObj?["layout"]),
                 reservationProtocol = ReservationProtocolParser.Validated(raw.reservationProtocol),
                 preDispatchingMethod = raw.preDispatchingMethod ?? "fixed",
             };

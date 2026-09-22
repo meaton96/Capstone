@@ -46,6 +46,8 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         public ConveyorBelt IncomingBelt { get; private set; }
         public ConveyorBelt OutgoingBelt { get; private set; }
         public ParkingMethod ActiveParkingMethod { get; private set; }
+        /// <summary>Layout (A-J) of the floor currently built; set at the start of BuildFloor.</summary>
+        public LayoutSpec ActiveLayout { get; private set; } = LayoutSpec.Legacy;
         private readonly List<ParkingArea> parkingAreas = new List<ParkingArea>();
         public IReadOnlyList<ParkingArea> ParkingAreas => parkingAreas;
 
@@ -158,8 +160,11 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             int machineCount = config.MachineTypeLayout.Length;
             var machinesByType = new Dictionary<MachineType, List<int>>();
 
-            layoutCols = Mathf.CeilToInt(Mathf.Sqrt(machineCount));
-            layoutRows = Mathf.CeilToInt((float)machineCount / layoutCols);
+            // Defence in depth: loaders reject unbuilt layouts at load time; never silently build A for one.
+            ActiveLayout = config.Layout ?? LayoutSpec.Legacy;
+            ActiveLayout.EnsureBuildable();
+
+            (layoutCols, layoutRows) = LayoutSpec.GridFor(machineCount);
 
             float machineAreaWidth = (layoutCols - 1) * machineSpacingX + machineDepth;
             float machineAreaDepth = (layoutRows - 1) * RowPitch + machineDepth;
@@ -230,7 +235,26 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 PhysicalMachine prefabToSpawn;
                 Quaternion rotation;
 
-                if (row == 0)
+                bool passthrough = ActiveLayout.IsPassthrough;
+                if (passthrough)
+                {
+                    // Layouts D and E: the 4-belt machine on every row, unrotated; ConfigureBelts (below, after
+                    // Instantiate) keeps only the input belt on one side and the output belt on the other.
+                    prefabToSpawn = Visuals.DoubleSidedMachinePrefab;
+                    if (prefabToSpawn == null)
+                        throw new InvalidOperationException(
+                            $"Layout {ActiveLayout.Id} needs the 4-belt (double-sided) machine prefab, which the active visual set does not provide.");
+                    rotation = Quaternion.identity;
+                }
+                else if (!ActiveLayout.IsLegacy)
+                {
+                    // Layouts B and C: the 2-belt machine on every row (no 4-belt interior machines), belts all
+                    // on the north side (identity) or all on the south side (turned 180 degrees). The prefab's
+                    // belts are on its local +z, exactly as row 0 / the last row use it in layout A.
+                    prefabToSpawn = Visuals.MachinePrefab;
+                    rotation = ActiveLayout.HasBeltOn(row, 'S') ? Quaternion.Euler(0f, 180f, 0f) : Quaternion.identity;
+                }
+                else if (row == 0)
                 {
                     prefabToSpawn = Visuals.MachinePrefab;
                     rotation = Quaternion.Euler(0f, 180f, 0f);
@@ -250,6 +274,11 @@ namespace Assets.Scripts.Simulation.FactoryLayout
 
                 PhysicalMachine pm = Instantiate(prefabToSpawn, worldPos, rotation, transform);
                 pm.gameObject.name = $"Machine_{i}_{primary}";
+                if (passthrough)
+                {
+                    var (inSide, outSide) = ActiveLayout.BeltSides(row);
+                    pm.ConfigureBelts(inSide, outSide);
+                }
                 pm.Initialize(i, primary, caps);
                 machines[i] = pm;
 

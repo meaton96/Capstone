@@ -465,6 +465,8 @@ namespace Assets.Scripts.Simulation
                 config.reservationProtocol = ConfigOverrides.ReservationProtocol;
             if (config != null && ConfigOverrides.ParkingMethod != null)
                 config.parkingMethod = ConfigOverrides.ParkingMethod;
+            if (config != null && ConfigOverrides.Layout != null)
+                config.Layout = LayoutSpec.FromPreset(ConfigOverrides.Layout);
             return config;
         }
 
@@ -1338,6 +1340,12 @@ namespace Assets.Scripts.Simulation
             record.AgvMinCentreDistance = _collisions.MinCentreDistance == float.MaxValue ? -1f : _collisions.MinCentreDistance;
             record.CollisionRecords = _collisions.Events;
             record.ReservationProtocol = currentConfig.reservationProtocol;
+            LayoutSpec layoutSpec = currentConfig.Layout ?? LayoutSpec.Legacy;
+            record.LayoutId = layoutSpec.Id;
+            record.LayoutBelts = layoutSpec.DescribeBelts(layoutManager.LayoutRows);
+            record.LayoutAisles = layoutSpec.AislesString;
+            record.FloorWidth = layoutManager.FloorSize.x;
+            record.FloorDepth = layoutManager.FloorSize.y;
             record.OrphanPreDispatchesReleased = _flags != null ? _flags.OrphanPreDispatchesReleased : 0;
 
             // Collect AGV performance records

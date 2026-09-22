@@ -171,6 +171,33 @@ namespace Assets.Scripts.Simulation.Machines
             }
         }
 
+        /// @brief Selects which two of the 4-belt prefab's belts are active, for the passthrough layouts.
+        /// @details The prefab has a primary in/out pair on the north side and a secondary pair on the south
+        ///          side. This keeps the input belt on @p inputSide and the output belt on @p outputSide,
+        ///          makes them the machine's only belts (so @ref HasSecondaryBelts becomes false and every
+        ///          handoff uses them), and deactivates the other two. Call right after Instantiate, before
+        ///          Initialize. Requires the 4-belt prefab.
+        /// @param inputSide  'N' or 'S': side AGVs deliver jobs to.
+        /// @param outputSide 'N' or 'S': side AGVs collect finished jobs from.
+        public void ConfigureBelts(char inputSide, char outputSide)
+        {
+            if (secondaryIncomingConveyor == null || secondaryOutgoingConveyor == null ||
+                incomingConveyor == null || outgoingConveyor == null)
+                throw new System.InvalidOperationException(
+                    $"{name}: ConfigureBelts needs the 4-belt machine prefab (primary and secondary belt pairs).");
+
+            ConveyorBelt input = inputSide == 'N' ? incomingConveyor : secondaryIncomingConveyor;
+            ConveyorBelt output = outputSide == 'N' ? outgoingConveyor : secondaryOutgoingConveyor;
+
+            foreach (ConveyorBelt b in new[] { incomingConveyor, outgoingConveyor, secondaryIncomingConveyor, secondaryOutgoingConveyor })
+                if (b != input && b != output) b.gameObject.SetActive(false);
+
+            incomingConveyor = input;
+            outgoingConveyor = output;
+            secondaryIncomingConveyor = null;
+            secondaryOutgoingConveyor = null;
+        }
+
         /// @brief Clears the handoff counters. Called at the start of each episode.
         public void ResetHandoffStats() => handoffs = default;
 

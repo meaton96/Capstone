@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Assets.Scripts.Simulation.Logging;
+using Assets.Scripts.Simulation.Types;
 
 namespace Assets.Scripts.Simulation.FactoryLayout
 {
@@ -39,6 +40,13 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         public Dictionary<int, DockPoint> DockPoints = new Dictionary<int, DockPoint>();
 
         [NonSerialized] public HashSet<int> OccupantAgvIds = new HashSet<int>();
+
+        /// True if a floor position is inside this zone's box (same test as TrafficZoneManager.GetZoneAtPosition).
+        public bool Contains(Vector3 p)
+        {
+            Vector3 half = Size / 2f; Vector3 d = p - Centre;
+            return Mathf.Abs(d.x) <= half.x && Mathf.Abs(d.z) <= half.z;
+        }
 
         public bool IsFull => OccupantAgvIds.Count >= Capacity;
         public bool IsEmpty => OccupantAgvIds.Count == 0;
@@ -78,6 +86,9 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         private readonly Dictionary<int, TrafficZone> zoneById = new Dictionary<int, TrafficZone>();
         private int nextZoneId;
         private readonly Dictionary<int, List<int>> machineToZones = new Dictionary<int, List<int>>();
+        // Zones a pickup from each machine is served from. Same list as machineToZones except in passthrough
+        // layouts, where only the output-side dock counts (the input-side dock is for dropoffs).
+        private readonly Dictionary<int, List<int>> machinePickupZones = new Dictionary<int, List<int>>();
 
         public IReadOnlyList<TrafficZone> Zones => zones;
 
@@ -109,6 +120,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             zones.Clear();
             zoneById.Clear();
             machineToZones.Clear();
+            machinePickupZones.Clear();
             parkingZoneIds.Clear();
             nextZoneId = 0;
 
@@ -390,16 +402,31 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 int row = i / cols; int col = i % cols;
                 Vector3 machinePos = layoutManager.Machines[i].transform.position;
 
-                if (row < rowAisles.Length)
+                // Layout A registers docks on both sides wherever a zone exists (its interior machines carry an
+                // unused secondary belt pair). Other layouts register a dock only on a side that has a belt, so
+                // the hop-distance dispatch heuristic never seeds a dock nobody drives to, and the last row can
+                // dock on the bottom spine (layout C).
+                LayoutSpec layout = layoutManager.ActiveLayout;
+                bool southDock = layout.IsLegacy ? row < rowAisles.Length : layout.HasBeltOn(row, 'S');
+                bool northDock = layout.IsLegacy || layout.HasBeltOn(row, 'N');
+
+                var (inputSide, outputSide) = layout.BeltSides(row);
+                int southZone = -1, northZone = -1;
+
+                if (southDock)
                 {
-                    int zId = rowAisles[row][col * 2];   // dock zones sit at even indices — see BuildRowAisleZones
+                    int zId = row < rowAisles.Length
+                        ? rowAisles[row][col * 2]                    // dock zones sit at even indices — see BuildRowAisleZones
+                        : botSpine[SpineDockIndex(col)];             // last row's south side is the bottom spine
+
                     Vector3 conveyorEnd = machinePos - Vector3.forward * (layoutManager.MachineDepth / 2f + layoutManager.ConveyorReach);
-                    zoneById[zId].DockPoints[i] = new DockPoint { ApproachPosition = conveyorEnd - Vector3.forward * standoff, HandshakePosition = conveyorEnd, FacingDirection = Vector3.forward, IsPickup = false };
+                    zoneById[zId].DockPoints[i] = new DockPoint { ApproachPosition = conveyorEnd - Vector3.forward * standoff, HandshakePosition = conveyorEnd, FacingDirection = Vector3.forward, IsPickup = layout.IsLegacy ? false : outputSide == 'S' };
+                    southZone = zId;
                     if (!machineToZones.ContainsKey(i)) machineToZones[i] = new List<int>();
                     machineToZones[i].Add(zId);
                 }
 
-                if (row > 0 || row == 0) // Check north aisles
+                if (northDock) // north side: the aisle above, or the top spine for row 0
                 {
                     int zId = -1;
                     if (row > 0) zId = rowAisles[row - 1][col * 2];   // dock zones sit at even indices
@@ -408,11 +435,22 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                     if (zId != -1)
                     {
                         Vector3 conveyorEnd = machinePos + Vector3.forward * (layoutManager.MachineDepth / 2f + layoutManager.ConveyorReach);
-                        zoneById[zId].DockPoints[i] = new DockPoint { ApproachPosition = conveyorEnd + Vector3.forward * standoff, HandshakePosition = conveyorEnd, FacingDirection = -Vector3.forward, IsPickup = true };
+                        zoneById[zId].DockPoints[i] = new DockPoint { ApproachPosition = conveyorEnd + Vector3.forward * standoff, HandshakePosition = conveyorEnd, FacingDirection = -Vector3.forward, IsPickup = layout.IsLegacy ? true : outputSide == 'N' };
+                        northZone = zId;
                         if (!machineToZones.ContainsKey(i)) machineToZones[i] = new List<int>();
                         machineToZones[i].Add(zId);
                     }
                 }
+
+                // Passthrough: a pickup is only ever served from the output-side dock. Elsewhere every dock
+                // serves both roles, so the pickup list is the machine's full dock list (unchanged behaviour).
+                if (layout.IsPassthrough)
+                {
+                    int outZone = outputSide == 'N' ? northZone : southZone;
+                    if (outZone >= 0) machinePickupZones[i] = new List<int> { outZone };
+                }
+                else if (machineToZones.TryGetValue(i, out var allZones))
+                    machinePickupZones[i] = allZones;
             }
         }
         private void BuildSingleParkingZone(int[] botSpine, int[] leftVert)
@@ -675,6 +713,13 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         {
             dock = default;
             return zoneById.TryGetValue(zoneId, out TrafficZone zone) && zone.DockPoints.TryGetValue(machineId, out dock);
+        }
+
+        /// @brief Zones a pickup from this machine is served from (its output-side dock in passthrough layouts,
+        ///        otherwise all of its docks). Used to seed the AGV-to-pickup hop distance.
+        public List<int> GetPickupZonesForMachine(int machineId)
+        {
+            return machinePickupZones.TryGetValue(machineId, out var list) ? list : GetZonesForMachine(machineId);
         }
 
         /// @brief Returns all zones that have interaction points for a specific machine.

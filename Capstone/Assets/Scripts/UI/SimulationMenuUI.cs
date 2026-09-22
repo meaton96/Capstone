@@ -12,6 +12,9 @@ using Assets.Scripts.Simulation.Logging;
 
 namespace Assets.Scripts.UI
 {
+    /// <summary>Inspector dropdown for the start menu's layout; names match LayoutSpec.PresetNames. Only A-E are built.</summary>
+    public enum LayoutChoice { A, B, C, D, E, F, G, H, I, J }
+
 
     [System.Serializable]
     public class MachineTypeProcRow
@@ -32,6 +35,12 @@ namespace Assets.Scripts.UI
                  "dedicated bay per AGV (default). Single / Multiple = the older abstract alcoves, kept " +
                  "for comparison.")]
         [SerializeField] private ParkingMethod parkingMethodChoice = ParkingMethod.Lane;
+
+        [Tooltip("Factory layout for runs started from this menu (see docs/LAYOUT_CONFIGURATION_SCOPE.md): " +
+                 "A = current, B = all machines face north, C = all face south, D = passthrough input north / output south, E = passthrough input south / output north. F-J are not built yet and " +
+                 "report an error on Spawn. Change it in the Inspector (also while playing), then press Spawn " +
+                 "again to rebuild the floor with the new layout.")]
+        [SerializeField] private LayoutChoice layoutChoice = LayoutChoice.A;
         [SerializeField] private GameObject panel;
 
         // ── General parameters ────────────────────────────────────────────────
@@ -185,12 +194,20 @@ namespace Assets.Scripts.UI
         private void OnSpawnClicked()
         {
             if (FactoryOrchestrator.Instance == null) return;
-            FJSSPConfig config = BuildConfig();
+            FJSSPConfig config;
+            try { config = BuildConfig(); }
+            catch (Exception ex) when (ex is ArgumentException || ex is NotSupportedException)
+            {
+                // e.g. a layout that is named but not built yet: report it, keep the current floor.
+                SetStatus($"<color=#FF5555>{ex.Message}</color>");
+                SimLogger.LogError($"[SimulationMenu] {ex.Message}");
+                return;
+            }
             SimLogger.Low($"[SimulationMenu] Spawning factory with config: {config.Name} " +
                           $"jobs={config.JobCount} machines={config.TotalMachines} " +
                           $"agvs={config.AGVCount} " +
                           $"stochastic={config.Stochastic?.Tag ?? "none"} " +
-                          $"parkingMethod={config.parkingMethod} " +
+                          $"parkingMethod={config.parkingMethod} layout={config.Layout.Id} " +
                           $"preDispatchingMethod={config.preDispatchingMethod}");
             FactoryOrchestrator.Instance.LoadConfig(config);
             FactoryOrchestrator.Instance.SpawnFactory();
@@ -286,6 +303,7 @@ namespace Assets.Scripts.UI
                 MaxProcTime = 30f,
                 Stochastic = BuildStochasticConfig(),
                 parkingMethod = parkingMethodChoice.ToString().ToLowerInvariant(),
+                Layout = LayoutSpec.FromPreset(layoutChoice.ToString()),
                 preDispatchingMethod = "fixed",
 
             };
