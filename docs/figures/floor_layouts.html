@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Factory Floor Layouts</title>
+<style>
+:root{
+  --bg:#f7f6f2; --card:#ffffff; --ink:#1d1f23; --muted:#5f6670; --line:#d9d6ce;
+  --floor:#eeece6; --aisle:#e2dfd6; --machine:#3b4552; --machine-ink:#ffffff; --empty:#cfcbc1;
+  --in:#2f6fd0; --out:#d9721c; --arrow:#8a8578; --park:#7a5bb5; --bay:#e6def5;
+  --good:#2e8b57; --bad:#c0392b; --accent:#1d1f23;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15171a; --card:#1e2125; --ink:#eceae4; --muted:#a3a8b0; --line:#34383e;
+    --floor:#24282d; --aisle:#2d3238; --machine:#aeb8c4; --machine-ink:#15171a; --empty:#3a3f46;
+    --in:#6aa2f2; --out:#f0a05a; --arrow:#8d8a83; --park:#b39ae6; --bay:#352d47;
+    --good:#5cc28a; --bad:#e8776b; --accent:#eceae4;
+  }
+}
+:root[data-theme="dark"]{
+    --bg:#15171a; --card:#1e2125; --ink:#eceae4; --muted:#a3a8b0; --line:#34383e;
+    --floor:#24282d; --aisle:#2d3238; --machine:#aeb8c4; --machine-ink:#15171a; --empty:#3a3f46;
+    --in:#6aa2f2; --out:#f0a05a; --arrow:#8d8a83; --park:#b39ae6; --bay:#352d47;
+    --good:#5cc28a; --bad:#e8776b; --accent:#eceae4;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:1180px;margin:0 auto;padding:28px 16px 60px}
+h1{font-size:26px;margin:0 0 4px}
+h2{font-size:19px;margin:36px 0 10px}
+p{margin:6px 0 12px;max-width:78ch}
+.muted{color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:14px 22px;margin:14px 0 6px;font-size:13.5px}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.sw{width:16px;height:10px;border-radius:2px;display:inline-block}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:18px 0 12px}
+.tabs button{font:inherit;padding:7px 14px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.feature{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:22px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+.feature svg{width:100%;height:auto;display:block}
+.feature h3{margin:0 0 6px;font-size:20px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.stat{border:1px solid var(--line);border-radius:8px;padding:9px 11px}
+.stat b{display:block;font-size:22px;font-variant-numeric:tabular-nums}
+.stat small{color:var(--muted);font-size:12.5px}
+.badge{display:inline-block;font-size:12px;padding:2px 8px;border-radius:99px;border:1px solid currentColor;margin-left:6px;vertical-align:middle}
+.grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.mini{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px;cursor:pointer}
+.mini:hover{border-color:var(--muted)}
+.mini svg{width:100%;height:auto;display:block}
+.mini h4{margin:0 0 4px;font-size:14px}
+.mini p{font-size:12.5px;margin:4px 0 0;color:var(--muted)}
+table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right}
+th:first-child,td:first-child{text-align:left}
+th{font-weight:600;color:var(--muted);font-size:12.5px;text-transform:uppercase;letter-spacing:.03em}
+tr.sel td{background:color-mix(in srgb,var(--in) 10%,transparent)}
+.bar{height:8px;border-radius:4px;background:var(--in);display:inline-block;vertical-align:middle;margin-left:8px}
+.bar.bad{background:var(--bad)}
+.tablewrap{overflow-x:auto}
+footer{margin-top:30px;font-size:12.5px;color:var(--muted)}
+@media (max-width:860px){.feature{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media print{.tabs{display:none}body{background:#fff}}
+</style>
+</head>
+<body>
+<main>
+<h1>Factory floor layouts A–E</h1>
+<p class="muted">15 machines on a 4 × 4 grid with one-way aisles and zone-reserved AGV traffic. The five layouts differ only in which side of each machine its input and output belts face. Machine positions, jobs, and random seeds are identical across layouts.</p>
+
+<div class="legend" id="legend"></div>
+
+<h2>Layout detail</h2>
+<div class="tabs" role="tablist" id="tabs"></div>
+<div class="feature" id="feature"></div>
+
+<h2>All five side by side</h2>
+<div class="grid" id="grid"></div>
+
+<h2>Results under machine failures</h2>
+<p class="muted">500 runs: 5 layouts × 5 fleet sizes (5, 7, 9, 12, 15 AGVs) × 2 dispatching rules × 10 seeds. Parking lane, <code>holdPrevious</code>, Weibull machine failures. Zero AGV collisions in all 500 runs.</p>
+<div class="tablewrap"><table id="results"></table></div>
+
+<footer>Source: docs/LAYOUT_CONFIGURATION_SCOPE.md §16 (post-fix comparison, 2026-09-22) and the layout D fleet/protocol sweeps (2026-09-23). Diagrams are schematic but follow the zone graph in TrafficZoneManager: aisle directions, dock sides, belt positions, and parking lane placement.</footer>
+</main>
+
+<script>
+const LAYOUTS = {
+  A:{name:"Original", belts:r=> r===0?["S","S"]:["N","N"],
+     desc:"Row 0 faces south, every other row faces north, so each machine is loaded and unloaded from one aisle. The bottom spine carries no dock traffic.",
+     flow:470, dead:31, off7:221, note:"Not viable near 1:1. Deadlocks in 75% of runs at 15 AGVs."},
+  B:{name:"All north", belts:()=>["N","N"],
+     desc:"Every machine faces north. Row 0 now docks on the top spine, so the top spine becomes a working aisle.",
+     flow:377, dead:14, off7:195, note:"Second-fastest. Travels the least distance of the five."},
+  C:{name:"All south", belts:()=>["S","S"],
+     desc:"Every machine faces south. The last row docks on the bottom spine, next to the parking gateway.",
+     flow:420, dead:5, off7:201, note:"Fewest deadlocks at every fleet size, but about 13% slower than D."},
+  D:{name:"Passthrough N→S", belts:()=>["N","S"],
+     desc:"Material enters from the north and leaves to the south. Dropoffs and pickups for a machine happen on different aisles, which spreads traffic across the floor.",
+     flow:373, dead:9, off7:184, note:"Selected. Fastest at 5–9 AGVs, and ties C at the 1:1 ratio (3/20 deadlocks at 15 AGVs).", chosen:true},
+  E:{name:"Passthrough S→N", belts:()=>["S","N"],
+     desc:"The mirror of D: material enters from the south and leaves to the north.",
+     flow:458, dead:6, off7:208, note:"Nearly as deadlock-resistant as C, but among the slowest."}
+};
+const DEAD_BY_FLEET = {A:[0,16,15],B:[0,8,6],C:[0,2,3],D:[0,6,3],E:[0,2,4]};
+
+const COLS=4, ROWS=4, N=15;
+const X0=3.5, SX=6, MW=4, Y0=4, SY=7, MD=3;
+const W=30.5, H=40;
+const colX=c=>X0+SX*c;              // machine box left
+const rowY=r=>Y0+SY*r;              // machine box top
+const aisleY=a=>rowY(a)+MD+0.5;     // aisle a between row a and a+1, height 3
+const TOPSPINE=[0.5,3.5], BOTSPINE=[rowY(ROWS-1)+MD+0.5, rowY(ROWS-1)+MD+3.5];
+const LV=[0,3], RV=[27.5,30.5];
+// directions from code: top spine E, bottom spine W, left vertical N, right vertical S, row aisle a: even=W, odd=E
+const aisleDir=a=> a%2===0?"W":"E";
+
+function el(tag,attrs,parent,text){const e=document.createElementNS("http://www.w3.org/2000/svg",tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;if(parent)parent.appendChild(e);return e;}
+function arrow(g,x,y,dir,size){
+  const s=size||0.9, d={E:[1,0],W:[-1,0],N:[0,-1],S:[0,1]}[dir], px=-d[1], py=d[0];
+  const tip=[x+d[0]*s,y+d[1]*s], b1=[x-d[0]*s+px*s*0.75,y-d[1]*s+py*s*0.75], b2=[x-d[0]*s-px*s*0.75,y-d[1]*s-py*s*0.75];
+  el("polygon",{points:[tip,b1,b2].map(p=>p.join(",")).join(" "),fill:"var(--arrow)"},g);
+}
+// the aisle band a machine side docks on: returns [y0,y1]
+function sideBand(r,side){
+  if(side==="N") return r===0?TOPSPINE:[aisleY(r-1),aisleY(r-1)+3];
+  return r===ROWS-1?BOTSPINE:[aisleY(r),aisleY(r)+3];
+}
+
+function draw(id,{labels=true}={}){
+  const L=LAYOUTS[id];
+  const svg=el("svg",{viewBox:`-0.5 -3.2 ${W+1} ${H+4}`,role:"img","aria-label":`Layout ${id}: ${L.name}`});
+  el("rect",{x:0,y:0,width:W,height:BOTSPINE[1]+0.5,fill:"var(--floor)",rx:0.6},svg);
+  const g=el("g",{},svg);
+  // aisles
+  const bands=[TOPSPINE,BOTSPINE,...[0,1,2].map(a=>[aisleY(a),aisleY(a)+3])];
+  bands.forEach(b=>el("rect",{x:LV[0],y:b[0],width:W,height:b[1]-b[0],fill:"var(--aisle)"},g));
+  [LV,RV].forEach(v=>el("rect",{x:v[0],y:TOPSPINE[0],width:v[1]-v[0],height:BOTSPINE[1]-TOPSPINE[0],fill:"var(--aisle)"},g));
+  // docks (drawn before machines)
+  for(let i=0;i<N;i++){
+    const r=Math.floor(i/COLS), c=i%COLS, [inS,outS]=L.belts(r);
+    const x=colX(c)+0.3, w=MW-0.6;
+    const sides = inS===outS ? [[inS,"both"]] : [[inS,"in"],[outS,"out"]];
+    sides.forEach(([side,role])=>{
+      const b=sideBand(r,side);
+      const fill = role==="in"?"var(--in)":role==="out"?"var(--out)":"url(#both"+id+")";
+      // a machine's north dock uses the half of the aisle nearest it (lower half), south dock the upper half
+      const top = side==="N" ? b[0]+1.5 : b[0]+0.15;
+      el("rect",{x,y:top,width:w,height:1.35,fill,opacity:0.45,rx:0.25},g);
+    });
+  }
+  const defs=el("defs",{},svg);
+  const pat=el("pattern",{id:"both"+id,width:1.2,height:1.2,patternUnits:"userSpaceOnUse",patternTransform:"rotate(45)"},defs);
+  el("rect",{width:0.6,height:1.2,fill:"var(--in)"},pat); el("rect",{x:0.6,width:0.6,height:1.2,fill:"var(--out)"},pat);
+  // arrows
+  // arrows sit in the gaps between machine columns so they never cover a dock
+  const gapX=[8.5,14.5,20.5];
+  [0,1,2].forEach(a=>{const y=aisleY(a)+1.5;gapX.forEach(x=>arrow(g,x,y,aisleDir(a),0.55));});
+  gapX.forEach(x=>{arrow(g,x,TOPSPINE[0]+1.5,"E",0.55);arrow(g,x,BOTSPINE[0]+1.5,"W",0.55);});
+  [8,15,22,29].forEach(y=>{arrow(g,1.5,y,"N",0.55);arrow(g,29,y,"S",0.55);});
+  // machines + belts
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const i=r*COLS+c, x=colX(c), y=rowY(r);
+    if(i>=N){el("rect",{x,y,width:MW,height:MD,fill:"none",stroke:"var(--empty)","stroke-dasharray":"0.4 0.3","stroke-width":0.12,rx:0.3},g);continue;}
+    el("rect",{x,y,width:MW,height:MD,fill:"var(--machine)",rx:0.3},g);
+    if(labels) el("text",{x:x+MW/2,y:y+MD/2+0.4,"text-anchor":"middle","font-size":1.1,fill:"var(--machine-ink)","font-weight":600},g,"M"+i);
+    const [inS,outS]=L.belts(r);
+    const beltY=s=> s==="N"? y-0.55 : y+MD-0.05;
+    if(inS===outS){
+      el("rect",{x:x+0.35,y:beltY(inS),width:1.5,height:0.6,fill:"var(--in)",rx:0.12},g);
+      el("rect",{x:x+MW-1.85,y:beltY(outS),width:1.5,height:0.6,fill:"var(--out)",rx:0.12},g);
+    }else{
+      el("rect",{x:x+0.6,y:beltY(inS),width:MW-1.2,height:0.6,fill:"var(--in)",rx:0.12},g);
+      el("rect",{x:x+0.6,y:beltY(outS),width:MW-1.2,height:0.6,fill:"var(--out)",rx:0.12},g);
+    }
+  }
+  // plant in / out belts
+  el("rect",{x:3.6,y:TOPSPINE[0]+0.9,width:3,height:1.2,fill:"none",stroke:"var(--in)","stroke-width":0.25,rx:0.2},g);
+  el("rect",{x:W-4.4,y:BOTSPINE[0]+0.9,width:3,height:1.2,fill:"none",stroke:"var(--out)","stroke-width":0.25,rx:0.2},g);
+  if(labels){
+    el("text",{x:3.6,y:-0.7,"font-size":1.15,fill:"var(--in)","font-weight":600},svg,"▼ raw jobs in");
+    el("text",{x:W-0.2,y:-0.7,"text-anchor":"end","font-size":1.15,fill:"var(--muted)"},svg,"top spine →");
+  }
+  // parking lane
+  const ly=BOTSPINE[1]+2.2;
+  el("rect",{x:LV[0],y:ly,width:W,height:2.3,fill:"none",stroke:"var(--park)","stroke-width":0.2,rx:0.4},g);
+  for(let k=0;k<9;k++){const bx=3.8+k*2.6; el("rect",{x:bx,y:ly+(k%2?2.55:-1.75),width:1.8,height:1.2,fill:"var(--bay)",stroke:"var(--park)","stroke-width":0.1,rx:0.2},g);}
+  [24,17,10].forEach(x=>arrow(g,x,ly+1.15,"W",0.5));
+  el("line",{x1:29,y1:BOTSPINE[1],x2:29,y2:ly,stroke:"var(--park)","stroke-width":0.2},g);
+  el("line",{x1:1.5,y1:ly,x2:1.5,y2:BOTSPINE[1],stroke:"var(--park)","stroke-width":0.2},g);
+  if(labels){
+    el("text",{x:W/2,y:ly+5.2,"text-anchor":"middle","font-size":1.15,fill:"var(--park)"},svg,"parking lane: one bay per AGV, enter right, exit left");
+    el("text",{x:W-0.2,y:BOTSPINE[0]-0.35,"text-anchor":"end","font-size":1.05,fill:"var(--out)","font-weight":600},svg,"finished out ▼");
+  }
+  return svg;
+}
+
+// legend
+const lg=document.getElementById("legend");
+[["var(--in)","Input belt / dropoff dock"],["var(--out)","Output belt / pickup dock"],["var(--machine)","Machine"],["var(--aisle)","One-way aisle (arrows show direction)"],["var(--park)","Parking lane"]]
+ .forEach(([c,t])=>{const s=document.createElement("span");s.innerHTML=`<i class="sw" style="background:${c}"></i>${t}`;lg.appendChild(s);});
+
+const tabs=document.getElementById("tabs"), feat=document.getElementById("feature"), grid=document.getElementById("grid"), tbl=document.getElementById("results");
+let current="D";
+try{const s=localStorage.getItem("layoutTab");if(s&&LAYOUTS[s])current=s;}catch(e){}
+
+function select(id){
+  current=id; try{localStorage.setItem("layoutTab",id);}catch(e){}
+  [...tabs.children].forEach(b=>b.setAttribute("aria-selected",b.dataset.id===id));
+  const L=LAYOUTS[id]; feat.innerHTML="";
+  const left=document.createElement("div"); left.appendChild(draw(id)); feat.appendChild(left);
+  const right=document.createElement("div");
+  const d=DEAD_BY_FLEET[id];
+  right.innerHTML=`<h3>Layout ${id}: ${L.name}${L.chosen?'<span class="badge" style="color:var(--good)">selected</span>':''}</h3>
+   <p>${L.desc}</p>
+   <div class="stats">
+     <div class="stat"><b>${L.flow} s</b><small>mean flow time, 5–9 AGVs, failures on (both rules)</small></div>
+     <div class="stat"><b style="color:${L.dead>20?'var(--bad)':'inherit'}">${L.dead} / 100</b><small>runs deadlocked, 5–15 AGVs</small></div>
+     <div class="stat"><b>${L.off7} s</b><small>mean flow, 7 AGVs, failures off (SRWT)</small></div>
+     <div class="stat"><b>${d[1]} · ${d[2]}</b><small>deadlocks / 20 at 12 · 15 AGVs</small></div>
+   </div>
+   <p class="muted">${L.note}</p>`;
+  feat.appendChild(right);
+  [...tbl.querySelectorAll("tr[data-id]")].forEach(tr=>tr.classList.toggle("sel",tr.dataset.id===id));
+}
+
+Object.keys(LAYOUTS).forEach(id=>{
+  const b=document.createElement("button"); b.textContent=`${id} · ${LAYOUTS[id].name}`; b.dataset.id=id; b.setAttribute("role","tab");
+  b.onclick=()=>select(id); tabs.appendChild(b);
+  const m=document.createElement("div"); m.className="mini"; m.onclick=()=>{select(id);feat.scrollIntoView({behavior:"smooth"});};
+  m.innerHTML=`<h4>${id} · ${LAYOUTS[id].name}</h4>`; m.appendChild(draw(id,{labels:false}));
+  const p=document.createElement("p"); p.textContent=`${LAYOUTS[id].flow} s flow · ${LAYOUTS[id].dead}/100 deadlocked`; m.appendChild(p);
+  grid.appendChild(m);
+});
+
+const maxFlow=Math.max(...Object.values(LAYOUTS).map(l=>l.flow));
+tbl.innerHTML=`<thead><tr><th>Layout</th><th>Flow time 5–9 AGVs (s)</th><th>Deadlocked 5–9</th><th>at 12 AGVs</th><th>at 15 AGVs</th><th>Total / 100</th></tr></thead><tbody>`+
+ Object.entries(LAYOUTS).map(([id,L])=>{const d=DEAD_BY_FLEET[id];return `<tr data-id="${id}"><td><b>${id}</b> ${L.name}</td>
+   <td>${L.flow}<span class="bar" style="width:${Math.round(L.flow/maxFlow*90)}px"></span></td>
+   <td>${d[0]}/60</td><td>${d[1]}/20</td><td>${d[2]}/20</td>
+   <td>${L.dead}<span class="bar bad" style="width:${L.dead*2.5}px"></span></td></tr>`;}).join("")+`</tbody>`;
+
+select(current);
+</script>
+</body>
+</html>
