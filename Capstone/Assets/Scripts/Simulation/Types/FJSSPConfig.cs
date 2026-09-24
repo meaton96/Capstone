@@ -103,9 +103,15 @@ namespace Assets.Scripts.Simulation.Types
         ///        "single" (one abstract alcove) or "multiple" (per-aisle alcoves).
         public string parkingMethod = "lane";
 
+        /// @brief Input/output belt docks: "corner" (default; the belt docks on the corner zone of the loop, so a
+        ///        loading AGV blocks the corner) or "siding" (a two-zone one-way siding outside each side wall, so
+        ///        the corner stays free for through traffic) or "bypass" (input siding that wraps around the corner and
+        ///        merges into the top spine past it; output stays on its corner). See FactoryLayoutManager.IoDockMethod.
+        public string ioDocks = "corner";
+
         /// @brief Factory layout (belt sides per row x aisle topology). Default legacy = today's floor, so a
         ///        config that omits it is unchanged. Immutable, shared by reference across per-seed clones.
-        public LayoutSpec Layout = LayoutSpec.Legacy;
+        public LayoutSpec Layout = LayoutSpec.Default;
 
         /// @brief AGV zone-reservation protocol: "holdPrevious" (default) or "releasePrevious".
         ///        See ReservationProtocol. Validated at load by ReservationProtocolParser.
@@ -173,6 +179,7 @@ namespace Assets.Scripts.Simulation.Types
                 Stochastic = Stochastic,
                 MachineFlexibilityProbability = MachineFlexibilityProbability,
                 parkingMethod = parkingMethod,
+                ioDocks = ioDocks,
                 Layout = Layout,
                 reservationProtocol = reservationProtocol,
                 preDispatchingMethod = preDispatchingMethod,

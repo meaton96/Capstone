@@ -39,6 +39,8 @@ namespace Assets.Scripts.Simulation.Types
 
         // ── Configuration snapshot ────────────────────────────────────────────
         public string ParkingMethod;
+        /// <summary>Input/output belt docks: "corner" or "siding" (FJSSPConfig.ioDocks).</summary>
+        public string IoDocks = "corner";
         public string PreDispatchingMethod;
 
         // ── Deadlock watchdog outcome ──────────────────────────────────────────

@@ -61,6 +61,8 @@ namespace Assets.Scripts.Simulation.Types
         public static string ParkingMethod;
         /// <summary>Layout name A-J (see LayoutSpec); overrides every config's "layout" block. CLI over JSON over legacy.</summary>
         public static string Layout;
+        /// <summary>Input/output belt docks ("corner" | "siding" | "bypass"); overrides every config's ioDocks.</summary>
+        public static string IoDocks;
 
         /// <summary>Throws on an unknown parking method so a typo cannot silently run the default.</summary>
         public static string ValidatedParkingMethod(string value)
@@ -68,6 +70,15 @@ namespace Assets.Scripts.Simulation.Types
             string v = (value ?? "").Trim().ToLowerInvariant();
             if (v != "single" && v != "multiple" && v != "lane")
                 throw new ArgumentException($"Invalid parkingMethod '{value}'. Valid values: single, multiple, lane.");
+            return v;
+        }
+
+        /// <summary>Throws on an unknown ioDocks value so a typo cannot silently run the default.</summary>
+        public static string ValidatedIoDocks(string value)
+        {
+            string v = (value ?? "").Trim().ToLowerInvariant();
+            if (v != "corner" && v != "siding" && v != "bypass")
+                throw new ArgumentException($"Invalid ioDocks '{value}'. Valid values: corner, siding, bypass.");
             return v;
         }
     }

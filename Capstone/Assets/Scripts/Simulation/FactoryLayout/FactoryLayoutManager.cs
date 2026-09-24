@@ -13,6 +13,21 @@ namespace Assets.Scripts.Simulation.FactoryLayout
 {
     public enum ParkingMethod { Single, Multiple, Lane }
 
+    /// <summary>
+    /// Where the input/output belts dock (FJSSPConfig.ioDocks). Corner: the belt docks on the loop's corner zone
+    /// (LeftVert_TopConn / RightVert_BotConn), so an AGV loading or unloading holds the corner and everything on
+    /// that vertical queues behind it (the dominant hotspot in the 2026-09-23 heatmaps). Siding: each belt sits at
+    /// the end of a two-zone one-way siding outside the side wall, branching off the vertical one zone before
+    /// the corner and rejoining at the corner, so a docked AGV holds only siding zones (under holdPrevious too:
+    /// its held previous zone is the siding entry) and the corner stays free for through traffic.
+    /// </summary>
+    /// Bypass (input only; the output belt stays on its corner): the input siding does not rejoin at the corner
+    /// but wraps around it outside, through a strip north of the top spine, and merges into the top spine one zone
+    /// past the corner (TopSpine_Transit0). Pickup AGVs never enter LeftVert_TopConn, so the corner carries only
+    /// through traffic. Siding (v1) was measured first and made both corners worse: its loaded AGVs still merged
+    /// into the corner (docs/EXPERIMENT_PLAN_2026-09-23.md run log).
+    public enum IoDockMethod { Corner, Siding, Bypass }
+
     public struct ParkingArea
     {
         public Vector3 Position;
@@ -47,7 +62,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         public ConveyorBelt OutgoingBelt { get; private set; }
         public ParkingMethod ActiveParkingMethod { get; private set; }
         /// <summary>Layout (A-J) of the floor currently built; set at the start of BuildFloor.</summary>
-        public LayoutSpec ActiveLayout { get; private set; } = LayoutSpec.Legacy;
+        public LayoutSpec ActiveLayout { get; private set; } = LayoutSpec.Default;
         private readonly List<ParkingArea> parkingAreas = new List<ParkingArea>();
         public IReadOnlyList<ParkingArea> ParkingAreas => parkingAreas;
 
@@ -64,6 +79,31 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             public int[] BayLaneIndex;        ///< per AGV id: lane zone the bay opens onto
         }
         public ParkingLaneShape LaneShape { get; private set; }
+
+        public IoDockMethod ActiveIoDocks { get; private set; }
+        /// <summary>Width (x) of each I/O siding lane. The belt's handshake sits on its outer edge, so the dock's
+        /// approach point (1.5 in from the belt end) is the siding zone's centre.</summary>
+        public const float SidingWidth = 3f;
+        /// <summary>Floor kept beyond each siding for the belt body.</summary>
+        private const float SidingBeltClearance = 3f;
+        /// <summary>World x of the input (left, west) or output (right, east) siding's centreline.</summary>
+        public float SidingCentreX(bool left)
+        {
+            float x = ((layoutCols - 1) * machineSpacingX) / 2f + machineDepth / 2f + VerticalAisleWidth + SidingWidth / 2f;
+            return (floorTransform != null ? floorTransform.position.x : 0f) + (left ? -x : x);
+        }
+        /// <summary>Spacing between a corner's junction zone and the next vertical zone toward the machines: the
+        /// same pitch TrafficZoneManager.BuildVerticalZones uses, so the siding entry lines up with that zone.</summary>
+        public float CornerVerticalPitch(bool top)
+        {
+            float spineZ = top ? GetTopSpineZ() : GetBottomSpineZ();
+            float fz = floorTransform != null ? floorTransform.position.z : 0f;
+            float nextZ = layoutRows > 1
+                ? GetRowAisleCentre(top ? 0 : layoutRows - 2).z - fz
+                : (top ? GetBottomSpineZ() : GetTopSpineZ());
+            float gap = Mathf.Abs(spineZ - nextZ);
+            return gap / Mathf.Max(1, Mathf.FloorToInt(gap / TrafficZoneManager.MinVerticalPitch));
+        }
 
         /// Centre-to-centre spacing of lane / bay zones: just above 2 x the 1.18 NavMesh clearance.
         private const float LaneMinPitch = 2.5f;
@@ -112,11 +152,29 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         public float[] DistanceMatrixFlat => distanceMatrixFlat;
         public int LayoutRows => layoutRows;
         public int LayoutCols => layoutCols;
-        public float RowPitch => machineDepth + conveyorReach * 2f + rowAisleWidth;
+        public float RowPitch => machineDepth + conveyorReach * 2f + RowAisleWidth;
         public float MachineSpacingX => machineSpacingX;
+
+        /// <summary>
+        /// Two-way layouts (F-J) split each ROW aisle into two stacked one-way lanes (see
+        /// TrafficZoneManager.BuildZoneGraph), so the row aisle is twice the Inspector width. The perimeter
+        /// (top/bottom spines, left/right verticals) stays a single one-way lane in every layout.
+        /// </summary>
+        private bool IsTwoWay => ActiveLayout != null && ActiveLayout.Aisles == AisleTopology.TwoWay;
+
         public float SpineAisleWidth => spineAisleWidth;
         public float VerticalAisleWidth => verticalAisleWidth;
-        public float RowAisleWidth => rowAisleWidth;
+        /// <summary>Full row aisle width (both lanes in two-way): use for floor/wall/spacing geometry.</summary>
+        public float RowAisleWidth => IsTwoWay ? rowAisleWidth * 2f : rowAisleWidth;
+        /// <summary>One lane's width (the Inspector value), one-way or two-way: use for a row lane zone's Size.</summary>
+        public float RowLaneWidth => rowAisleWidth;
+        /// <summary>
+        /// Two-way row aisles: the Z offset of each lane from the aisle centreline (0 in one-way). The north lane
+        /// (+offset) runs west and the south lane (-offset) runs east in every aisle (right-hand traffic seen
+        /// from above), so a dock on a machine's south face is served from the north lane of the aisle below
+        /// it, and a north-face dock from the south lane of the aisle above it.
+        /// </summary>
+        public float RowLaneOffset => IsTwoWay ? rowAisleWidth / 2f : 0f;
         public float ConveyorReach => conveyorReach;
         public float MachineDepth => machineDepth;
         public Vector3 GridOrigin { get; private set; }
@@ -161,7 +219,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             var machinesByType = new Dictionary<MachineType, List<int>>();
 
             // Defence in depth: loaders reject unbuilt layouts at load time; never silently build A for one.
-            ActiveLayout = config.Layout ?? LayoutSpec.Legacy;
+            ActiveLayout = config.Layout ?? LayoutSpec.Default;
             ActiveLayout.EnsureBuildable();
 
             (layoutCols, layoutRows) = LayoutSpec.GridFor(machineCount);
@@ -171,9 +229,16 @@ namespace Assets.Scripts.Simulation.FactoryLayout
 
             ActiveParkingMethod = ParseParkingMethod(config.parkingMethod);
             LaneShape = null;
+            string ioDocks = (config.ioDocks ?? "corner").Trim().ToLowerInvariant();
+            ActiveIoDocks = ioDocks == "siding" ? IoDockMethod.Siding : ioDocks == "bypass" ? IoDockMethod.Bypass : IoDockMethod.Corner;
+            if (ActiveIoDocks != IoDockMethod.Corner && ActiveParkingMethod == ParkingMethod.Multiple)
+                throw new NotSupportedException($"ioDocks \"{ioDocks}\" is not supported with parkingMethod \"multiple\" (its side alcoves use the same wall openings).");
 
-            totalFloorWidth = verticalAisleWidth + machineAreaWidth + verticalAisleWidth;
-            totalFloorDepth = spineAisleWidth + machineAreaDepth + spineAisleWidth;
+            totalFloorWidth = VerticalAisleWidth + machineAreaWidth + VerticalAisleWidth;
+            totalFloorDepth = SpineAisleWidth + machineAreaDepth + SpineAisleWidth;
+            if (ActiveIoDocks != IoDockMethod.Corner)
+                totalFloorWidth += 2f * (SidingWidth + SidingBeltClearance);   // one siding per side, floor stays centred
+            float baseFloorDepth = totalFloorDepth;
 
             if (ActiveParkingMethod == ParkingMethod.Single)
             {
@@ -199,6 +264,11 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             {
                 totalFloorWidth += parkingAlcoveDepth * 2f;            // side alcoves, both edges
             }
+
+            // Bypass: the siding's return strip runs north of the top spine; the floor is centred, so keep at least
+            // that strip (plus a margin) of floor on both ends. Lane parking already leaves more than this.
+            if (ActiveIoDocks == IoDockMethod.Bypass)
+                totalFloorDepth = Mathf.Max(totalFloorDepth, baseFloorDepth + 2f * (SidingWidth + 1f));
 
             if (floorTransform != null)
             {
@@ -337,6 +407,9 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             float machineAreaHalfW = ((layoutCols - 1) * machineSpacingX) / 2f;
 
             float topZ = floorCentre.z + GetTopSpineZ();
+            float botZ = floorCentre.z + GetBottomSpineZ();
+            bool inSiding = ActiveIoDocks != IoDockMethod.Corner;      // siding and bypass both move the input belt
+            bool outSiding = ActiveIoDocks == IoDockMethod.Siding;     // bypass leaves the output belt on its corner
             IncomingBeltPosition = new Vector3(
                 floorCentre.x - machineAreaHalfW + incomingBeltOffset.x,
                 incomingBeltOffset.y,
@@ -350,6 +423,10 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 inBelt.transform.localScale = ioConveyorScale;
                 IncomingBelt = inBelt.GetComponent<ConveyorBelt>();
                 IncomingBelt.Capacity = 8;
+                // Siding: belt body runs west from the input siding's outer edge, output end at the edge.
+                if (inSiding) PlaceBelt(IncomingBelt, new Vector3(SidingCentreX(true) - SidingWidth / 2f, IncomingBeltPosition.y, topZ),
+                                      Vector3.left, handshakeIsOutput: true);
+                IncomingBeltPosition = inBelt.transform.position;
                 Material incomingBeltMaterial = Visuals.IncomingBeltMaterial;
                 if (incomingBeltMaterial != null)
                 {
@@ -359,9 +436,8 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 spawnedObjects.Add(inBelt);
             }
 
-            float botZ = floorCentre.z + GetBottomSpineZ();
             OutgoingBeltPosition = new Vector3(
-                floorCentre.x + machineAreaHalfW + verticalAisleWidth + outgoingBeltOffset.x,
+                floorCentre.x + machineAreaHalfW + VerticalAisleWidth + outgoingBeltOffset.x,
                 outgoingBeltOffset.y,
                 botZ + outgoingBeltOffset.z);
 
@@ -372,6 +448,10 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 outBelt.transform.localScale = ioConveyorScale;
                 spawnedObjects.Add(outBelt);
                 OutgoingBelt = outBelt.GetComponent<ConveyorBelt>();
+                // Siding: belt body runs east from the output siding's outer edge, input end at the edge.
+                if (outSiding) PlaceBelt(OutgoingBelt, new Vector3(SidingCentreX(false) + SidingWidth / 2f, OutgoingBeltPosition.y, botZ),
+                                      Vector3.right, handshakeIsOutput: false);
+                OutgoingBeltPosition = outBelt.transform.position;
             }
 
             parkingAreas.Clear();
@@ -394,7 +474,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             else
             {
                 // Single (or degenerate single-row layout): one south alcove.
-                float alcoveZ = botZ - (spineAisleWidth / 2f) - (parkingAlcoveDepth / 2f);
+                float alcoveZ = botZ - (SpineAisleWidth / 2f) - (parkingAlcoveDepth / 2f);
                 AGVParkingPosition = new Vector3(floorCentre.x, 0.01f, alcoveZ);
                 parkingAreas.Add(new ParkingArea
                 {
@@ -415,7 +495,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         ///          prefers AGVs closest to the exit, and the entry end is left as a queue.
         private ParkingLaneShape ComputeLaneShape(int agvCount)
         {
-            float xR = ((layoutCols - 1) * machineSpacingX) / 2f + machineDepth / 2f + verticalAisleWidth / 2f;
+            float xR = ((layoutCols - 1) * machineSpacingX) / 2f + machineDepth / 2f + VerticalAisleWidth / 2f;
             float xL = -xR;
             float span = xR - xL;
 
@@ -425,7 +505,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             float pitch = Mathf.Max(LaneMinPitch, span / (zoneCount - 1));
 
             // Lane rows relative to the bottom spine's south edge.
-            float spineSouthEdge = GetBottomSpineZ() - spineAisleWidth / 2f;
+            float spineSouthEdge = GetBottomSpineZ() - SpineAisleWidth / 2f;
             float northZ = spineSouthEdge - LaneMinPitch / 2f;
             float laneZ = northZ - LaneMinPitch;
             float southZ = laneZ - LaneMinPitch;
@@ -477,7 +557,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         {
             int numRowAisles = layoutRows - 1;
             float machineAreaHalfW = ((layoutCols - 1) * machineSpacingX + machineDepth) / 2f;
-            float outerEdgeX = machineAreaHalfW + verticalAisleWidth;          // current outer wall x
+            float outerEdgeX = machineAreaHalfW + VerticalAisleWidth;          // current outer wall x
             float alcoveOffsetX = outerEdgeX + parkingAlcoveDepth / 2f;        // alcove centre, beyond wall
 
             for (int a = 0; a < numRowAisles; a++)
@@ -582,14 +662,14 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         public float GetTopSpineZ()
         {
             float machineAreaDepth = (layoutRows - 1) * RowPitch + machineDepth;
-            return machineAreaDepth / 2f + spineAisleWidth / 2f;
+            return machineAreaDepth / 2f + SpineAisleWidth / 2f;
         }
 
         /// @brief Returns the Z offset for the bottom peripheral spine.
         public float GetBottomSpineZ()
         {
             float machineAreaDepth = (layoutRows - 1) * RowPitch + machineDepth;
-            return -(machineAreaDepth / 2f + spineAisleWidth / 2f);
+            return -(machineAreaDepth / 2f + SpineAisleWidth / 2f);
         }
 
         /// @brief Generates physical aisle wall segments.
@@ -614,10 +694,41 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             }
 
             float machineAreaDepth = (layoutRows - 1) * RowPitch + machineDepth;
-            float fullHeight = machineAreaDepth + spineAisleWidth * 2f;
+            float fullHeight = machineAreaDepth + SpineAisleWidth * 2f;
 
-            SpawnWallSegmentVertical(floorCentre + new Vector3(-(machineAreaWidth / 2f + verticalAisleWidth), wallHeight / 2f, 0f), fullHeight, "LeftOuter");
-            SpawnWallSegmentVertical(floorCentre + new Vector3(machineAreaWidth / 2f + verticalAisleWidth, wallHeight / 2f, 0f), fullHeight, "RightOuter");
+            float leftX = -(machineAreaWidth / 2f + VerticalAisleWidth), rightX = machineAreaWidth / 2f + VerticalAisleWidth;
+            if (ActiveIoDocks == IoDockMethod.Corner)
+            {
+                SpawnWallSegmentVertical(floorCentre + new Vector3(leftX, wallHeight / 2f, 0f), fullHeight, "LeftOuter");
+                SpawnWallSegmentVertical(floorCentre + new Vector3(rightX, wallHeight / 2f, 0f), fullHeight, "RightOuter");
+                return;
+            }
+            // Siding: open each outer wall where its siding joins the vertical (from half a pitch beyond the siding
+            // entry to the floor's end at that corner), so the connecting moves are not blocked on the NavMesh.
+            float half = fullHeight / 2f;
+            float leftOpen = GetTopSpineZ() - 1.5f * CornerVerticalPitch(true);      // wall ends here (top-left open)
+            float rightOpen = GetBottomSpineZ() + 1.5f * CornerVerticalPitch(false); // wall starts here (bottom-right open)
+            SpawnWallSegmentVertical(floorCentre + new Vector3(leftX, wallHeight / 2f, (leftOpen - half) / 2f), leftOpen + half, "LeftOuter");
+            if (ActiveIoDocks == IoDockMethod.Siding)
+                SpawnWallSegmentVertical(floorCentre + new Vector3(rightX, wallHeight / 2f, (rightOpen + half) / 2f), half - rightOpen, "RightOuter");
+            else
+                SpawnWallSegmentVertical(floorCentre + new Vector3(rightX, wallHeight / 2f, 0f), fullHeight, "RightOuter");
+        }
+
+        /// @brief Rotates and moves an I/O belt so its AGV-facing end sits exactly at @p handshake with the belt
+        /// body extending along @p bodyDir, whichever end of the prefab (origin or far end) that is.
+        private static void PlaceBelt(ConveyorBelt belt, Vector3 handshake, Vector3 bodyDir, bool handshakeIsOutput)
+        {
+            Transform t = belt.transform;
+            t.rotation = Quaternion.LookRotation(bodyDir, Vector3.up);
+            t.position = handshake;
+            Vector3 end = handshakeIsOutput ? belt.OutputEndPosition : belt.InputEndPosition;
+            if (new Vector2(end.x - handshake.x, end.z - handshake.z).sqrMagnitude > 1e-4f)
+            {
+                // The handshake end is the far end: point the belt the other way and step back by its length.
+                t.rotation = Quaternion.LookRotation(-bodyDir, Vector3.up);
+                t.position = handshake + bodyDir * belt.BeltLength;
+            }
         }
 
         /// @brief Spawns wall segments for machine rows with gaps for conveyor access.
@@ -724,14 +835,14 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             for (int a = 0; a < numRowAisles; a++)
             {
                 Vector3 aisleCentre = GetRowAisleCentre(a);
-                Vector3 dir = GetRowAisleDirection(a);
-                float yaw = (dir.x > 0) ? 90f : -90f;
-
                 float halfWidth = ((layoutCols - 1) * machineSpacingX) / 2f;
-                for (float x = -halfWidth; x <= halfWidth; x += machineSpacingX)
-                {
-                    SpawnFloorArrow(new Vector3(floorCentre.x + x, y, aisleCentre.z), yaw, arrowSize, new Color(0.9f, 0.7f, 0.2f, 0.3f), $"Arrow_RowAisle{a}");
-                }
+                // One-way: one arrow row on the centreline. Two-way: one per lane (north west, south east).
+                var lanes = IsTwoWay
+                    ? new[] { (z: RowLaneOffset, yaw: -90f), (z: -RowLaneOffset, yaw: 90f) }
+                    : new[] { (z: 0f, yaw: GetRowAisleDirection(a).x > 0 ? 90f : -90f) };
+                foreach (var lane in lanes)
+                    for (float x = -halfWidth; x <= halfWidth; x += machineSpacingX)
+                        SpawnFloorArrow(new Vector3(floorCentre.x + x, y, aisleCentre.z + lane.z), lane.yaw, arrowSize, new Color(0.9f, 0.7f, 0.2f, 0.3f), $"Arrow_RowAisle{a}");
             }
 
             float topZ = floorCentre.z + GetTopSpineZ();
@@ -743,11 +854,11 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             for (float x = machineAreaHalfW; x >= -machineAreaHalfW; x -= machineSpacingX)
                 SpawnFloorArrow(new Vector3(floorCentre.x + x, y, botZ), -90f, arrowSize * 1.2f, new Color(0.1f, 0.7f, 0.5f, 0.3f), "Arrow_BotSpine");
 
-            float leftX = floorCentre.x - machineAreaHalfW - machineDepth / 2f - verticalAisleWidth / 2f;
+            float leftX = floorCentre.x - machineAreaHalfW - machineDepth / 2f - VerticalAisleWidth / 2f;
             for (int a = 0; a < numRowAisles; a++)
                 SpawnFloorArrow(new Vector3(leftX, y, GetRowAisleCentre(a).z), 0f, arrowSize, new Color(0.2f, 0.4f, 0.9f, 0.3f), "Arrow_LeftVert");
 
-            float rightX = floorCentre.x + machineAreaHalfW + machineDepth / 2f + verticalAisleWidth / 2f;
+            float rightX = floorCentre.x + machineAreaHalfW + machineDepth / 2f + VerticalAisleWidth / 2f;
             for (int a = 0; a < numRowAisles; a++)
                 SpawnFloorArrow(new Vector3(rightX, y, GetRowAisleCentre(a).z), 180f, arrowSize, new Color(0.2f, 0.4f, 0.9f, 0.3f), "Arrow_RightVert");
         }
@@ -956,8 +1067,8 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             int previewCols = 5; int previewRows = 4;
             float areaW = (previewCols - 1) * machineSpacingX + machineDepth;
             float areaD = (previewRows - 1) * RowPitch + machineDepth;
-            float totalW = verticalAisleWidth * 2 + areaW;
-            float totalD = spineAisleWidth * 2 + areaD;
+            float totalW = VerticalAisleWidth * 2 + areaW;
+            float totalD = SpineAisleWidth * 2 + areaD;
 
             Gizmos.color = new Color(1f, 1f, 1f, 0.15f);
             Gizmos.DrawWireCube(c, new Vector3(totalW, 0f, totalD));

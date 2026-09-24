@@ -5,7 +5,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Assets.Scripts.Simulation.Types
 {
-    /// <summary>Aisle topology axis of a layout. F-J (two-way) are not built yet.</summary>
+    /// <summary>Aisle topology axis of a layout. One-way (A-E) and two-way row aisles (F-J) are both built.</summary>
     public enum AisleTopology { OneWay, TwoWay }
 
     /// <summary>
@@ -18,14 +18,16 @@ namespace Assets.Scripts.Simulation.Types
     /// A  current layout: row 0 belts south, other rows north (interior machines are 4-belt, secondary pair unused)
     /// B  one-way aisles, every machine's belts north, 2-belt machines only
     /// C  as B, every machine's belts south
-    /// D  passthrough, one-way aisles: input north, output south
+    /// D  passthrough, one-way aisles: input north, output south (the default layout — see Default)
     /// E  as D with input south, output north
-    /// F-J  A-E with two-way aisles (aisles widened so AGVs can pass in either direction)
+    /// F-J  A-E's belt patterns (2-belt machines, F included) with two-way row aisles: each row aisle is two
+    ///      stacked one-way lanes (north lane west, south lane east); the perimeter (spines and verticals)
+    ///      stays one-way. A dock is served only from the lane beside it. See TrafficZoneManager.BuildZoneGraph.
     /// </code>
-    /// JSON (optional; absent = A, so every existing config is unchanged):
-    /// <c>"layout": "B"</c> or <c>"layout": { "preset": "B" }</c>. "legacy" is accepted as an alias for A.
-    /// A layout that is named here but whose machinery is not built yet is rejected at load by
-    /// <see cref="EnsureBuildable"/>, never silently run as A.
+    /// JSON (optional; absent = <see cref="Default"/> (D), so a config only reproduces the pre-2026-09-21 floor
+    /// (A) if it says so explicitly): <c>"layout": "B"</c> or <c>"layout": { "preset": "B" }</c>. "legacy" is
+    /// accepted as an alias for A. A layout that is named here but whose machinery is not built yet is rejected
+    /// at load by <see cref="EnsureBuildable"/>, never silently run as the default.
     /// </remarks>
     public sealed class LayoutSpec
     {
@@ -33,13 +35,21 @@ namespace Assets.Scripts.Simulation.Types
         public static readonly string[] PresetNames = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" };
 
         /// <summary>Layouts whose machinery exists. Widen as each one is built.</summary>
-        public static readonly string[] BuiltIds = { "A", "B", "C", "D", "E" };
+        public static readonly string[] BuiltIds = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" };
 
-        /// <summary>Keys allowed inside a "layout" block. Anything else is an error (a typo must not run layout A).</summary>
+        /// <summary>Keys allowed inside a "layout" block. Anything else is an error (a typo must not run the default layout).</summary>
         public static readonly string[] JsonKeys = { "preset" };
 
-        /// <summary>Layout A, the current floor and the default.</summary>
+        /// <summary>Layout A: the pre-layout-config floor, kept selectable by name ("A" or "legacy") to reproduce old results.</summary>
         public static readonly LayoutSpec Legacy = new LayoutSpec("A");
+
+        /// <summary>
+        /// The layout a config gets when it omits "layout" entirely: D (passthrough, one-way), chosen 2026-09-22
+        /// after the full A-E failures-on comparison (ties the most gridlock-robust layout at a 1:1 AGV:machine
+        /// ratio, fastest flow time at moderate fleet sizes — see docs/LAYOUT_CONFIGURATION_SCOPE.md section 16).
+        /// Old results (all layout A) need "layout": "A" (or -layout A) to reproduce.
+        /// </summary>
+        public static readonly LayoutSpec Default = new LayoutSpec("D");
 
         /// <summary>Canonical id used in logs and results ("A" .. "J").</summary>
         public string Id { get; }
@@ -76,12 +86,13 @@ namespace Assets.Scripts.Simulation.Types
         }
 
         /// <summary>
-        /// Parses an optional JSON "layout" value (a string, an object with "preset", or null/absent for A) and checks
-        /// it is buildable. Shared by ConfigLoader and ScenarioLoader so both regimes validate identically.
+        /// Parses an optional JSON "layout" value (a string, an object with "preset", or null/absent for
+        /// <see cref="Default"/>) and checks it is buildable. Shared by ConfigLoader and ScenarioLoader so both
+        /// regimes validate identically.
         /// </summary>
         public static LayoutSpec FromJson(JToken token)
         {
-            if (token == null || token.Type == JTokenType.Null) return Legacy;
+            if (token == null || token.Type == JTokenType.Null) return Default;
 
             if (token.Type == JTokenType.String) return FromPreset((string)token);
 
@@ -94,7 +105,7 @@ namespace Assets.Scripts.Simulation.Types
                         $"Unknown key \"{prop.Name}\" in \"layout\". Valid keys: {string.Join(", ", JsonKeys)}.");
 
             JToken p = obj["preset"];
-            if (p == null || p.Type == JTokenType.Null) return Legacy;
+            if (p == null || p.Type == JTokenType.Null) return Default;
             if (p.Type != JTokenType.String) throw new ArgumentException("\"preset\" must be a string.");
             return FromPreset((string)p);
         }

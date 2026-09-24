@@ -145,6 +145,14 @@ namespace Assets.Scripts.Simulation
                     SimLogger.Low($"[BatchRunner] Parking method override: {ConfigOverrides.ParkingMethod}");
                 }
 
+                // I/O belt dock override ("corner" | "siding"), same single-point mechanism.
+                string ioDocksStr = GetCLIArg("-iodocks");
+                if (!string.IsNullOrEmpty(ioDocksStr))
+                {
+                    ConfigOverrides.IoDocks = ConfigOverrides.ValidatedIoDocks(ioDocksStr);
+                    SimLogger.Low($"[BatchRunner] I/O docks override: {ConfigOverrides.IoDocks}");
+                }
+
                 // Layout override (LayoutSpec name A-J), same single-point mechanism. Validated here so a typo
                 // or a layout that is not built yet aborts before any run.
                 string layoutStr = GetCLIArg("-layout");

@@ -717,6 +717,178 @@ def compound_scenario_v2(seed=42):
 
 
 # ─────────────────────────────────────────────────────────────────────────
+#  Scaled floors (E4: machine count x AGV ratio) -- docs/EXPERIMENT_PLAN_2026-09-23.md
+# ─────────────────────────────────────────────────────────────────────────
+# The 15-machine scenarios above pin phases to fixed machines (Weld[1], Weld[0,1]) and fix job counts. Scaling
+# to M machines keeps each regime's per-machine load: machines per type k = M/5, s = k/3 (the capacity ratio to the
+# 15-machine floor), g = round(s) "lanes". A 1-machine bottleneck becomes g independent single-machine bottlenecks
+# (Weld[1..g], each at the same utilisation, jobs still pinned so there is no routing choice); the 2-machine
+# standoff / speed-trap pool becomes 2g machines (Weld[0..2g-1]). Job counts scale with the same capacity, so
+# utilisation per machine is unchanged. At M=15 (s=1, g=1) every function reproduces the original scenario
+# EXACTLY (same jobs, same rng draws) -- checked by check_scaled_matches_original() -- so the 15-machine point
+# of an E4 sweep is directly comparable with the E1 data. For M not a multiple of 15, g is rounded, so the
+# per-machine load of the pinned phases is off by at most 1/(2g)-ish (e.g. M=100: g=7 vs the exact 6.67).
+
+TYPES = ["Mill", "Lathe", "Weld", "Inspect", "Assemble"]
+
+
+def scaled_floor(machines):
+    if machines % len(TYPES):
+        raise ValueError(f"machines={machines} must be a multiple of {len(TYPES)} (equal machines per type)")
+    return [t for t in TYPES for _ in range(machines // len(TYPES))]
+
+
+def _scale(machines):
+    """(s, g): capacity ratio to the 15-machine floor, and the number of parallel pinned 'lanes'."""
+    k = machines // len(TYPES)
+    s = k / MACHINES_PER_TYPE
+    g = max(1, round(s))
+    if 2 * g > k:
+        raise ValueError(f"machines={machines}: standoff pool of {2 * g} exceeds {k} Weld machines")
+    return s, g
+
+
+def _bottleneck_phase_scaled(rng, id_start, t0, duration, targets, mean_duration=55.0, utilization=0.85):
+    """g single-machine bottlenecks, each _bottleneck_phase_jobs' load, arrivals staggered across the lanes."""
+    n = max(1, int(utilization * duration / mean_duration))
+    interval = duration / n
+    jobs = []
+    for c, idx in enumerate(targets):
+        for i in range(n):
+            t = t0 + i * interval + c * interval / len(targets)
+            d = mean_duration * rng.uniform(0.7, 1.3)
+            jobs.append(job(id_start + len(jobs), t, [op("Mill", "any", 15.0), op("Weld", idx, d)]))
+    return jobs, len(jobs)
+
+
+def _standoff_phase_scaled(rng, id_start, t0, duration, pool, mean_duration=40.0, utilization=0.7, cost_gap=(1.3, 2.0)):
+    """_standoff_phase_jobs over a pool of any size: half of a job's candidates are cost_gap x dearer, chosen at random."""
+    m = len(pool)
+    n_jobs = max(1, int(utilization * duration * m / mean_duration))
+    interval = duration / n_jobs
+    jobs = []
+    for i in range(n_jobs):
+        d = mean_duration * rng.uniform(0.7, 1.3)
+        gap = rng.uniform(*cost_gap)
+        if m == 2:
+            durations = [d, d * gap] if rng.random() < 0.5 else [d * gap, d]
+        else:
+            cheap = set(rng.sample(range(m), m // 2))
+            durations = [d if k in cheap else d * gap for k in range(m)]
+        jobs.append(job(id_start + i, t0 + i * interval,
+                        [op("Mill", "any", 15.0), op("Weld", list(pool), durations)]))
+    return jobs, n_jobs
+
+
+def _speed_trap_phase_scaled(rng, id_start, t0, duration, pool, mean_duration=40.0, cost_gap=1.5,
+                             funneled_utilization=1.4):
+    """_speed_trap_phase_jobs over a pool: the first half is consistently cheaper; sized so funnelling onto it saturates it."""
+    m = len(pool)
+    n_cheap = m // 2
+    n_jobs = max(1, int(funneled_utilization * duration * n_cheap / mean_duration))
+    interval = duration / n_jobs
+    jobs = []
+    for i in range(n_jobs):
+        d = mean_duration * rng.uniform(0.85, 1.15)
+        durations = [d] * n_cheap + [d * cost_gap] * (m - n_cheap)
+        jobs.append(job(id_start + i, t0 + i * interval,
+                        [op("Mill", "any", 15.0), op("Weld", list(pool), durations)]))
+    return jobs, n_jobs
+
+
+# Phase order and quiet-phase sizes copied from compound_scenario / compound_scenario_v2 above.
+_TIMELINE_V1 = [("quiet", "quiet_1", 15), ("bottleneck", "bottleneck_1"), ("quiet", "quiet_2", 12),
+                ("standoff", "standoff_1"), ("quiet", "quiet_3", 12), ("burst", "burst_1"),
+                ("quiet", "quiet_4", 12), ("starvation", "starvation_1"), ("quiet", "quiet_5", 12),
+                ("bottleneck", "bottleneck_2"), ("quiet", "quiet_6", 12), ("standoff", "standoff_2"),
+                ("quiet", "quiet_7_cooldown", 15)]
+_TIMELINE_V2 = [("quiet", "quiet_1", 15), ("bottleneck", "bottleneck_1"), ("quiet", "quiet_2", 12),
+                ("standoff", "standoff_1"), ("quiet", "quiet_2b", 12), ("speed_trap", "speed_trap_1"),
+                ("quiet", "quiet_3", 12), ("burst", "burst_1"), ("quiet", "quiet_4", 12),
+                ("starvation", "starvation_1"), ("quiet", "quiet_5", 12), ("bottleneck", "bottleneck_2"),
+                ("quiet", "quiet_6", 12), ("standoff", "standoff_2"), ("quiet", "quiet_6b", 12),
+                ("speed_trap", "speed_trap_2"), ("quiet", "quiet_7_cooldown", 15)]
+
+
+def compound_scaled(machines, version=1, seed=42, agv_count=None):
+    """compound_scenario (version=1) or compound_scenario_v2 (version=2) on a floor of `machines` machines."""
+    s, g = _scale(machines)
+    rng = random.Random(seed)
+    timeline = _TIMELINE_V1 if version == 1 else _TIMELINE_V2
+    bn_targets = list(range(1, 1 + g))          # g=1 -> Weld[1], as in the original
+    pool = list(range(0, 2 * g))                # g=1 -> Weld[0,1]
+    jobs, phases, jid, t = [], [], 0, 0.0
+    for entry in timeline:
+        kind, name = entry[0], entry[1]
+        if kind == "quiet":
+            js, n = _quiet_phase_jobs(rng, jid, t, 400.0, n_jobs=max(1, int(round(entry[2] * s))))
+            span, adv = 400.0, (400.0 if name == "quiet_7_cooldown" else 450.0)
+        elif kind == "bottleneck":
+            js, n = _bottleneck_phase_scaled(rng, jid, t, 1800.0, bn_targets); span, adv = 1800.0, 1850.0
+        elif kind == "standoff":
+            js, n = _standoff_phase_scaled(rng, jid, t, 1800.0, pool); span, adv = 1800.0, 1850.0
+        elif kind == "speed_trap":
+            js, n = _speed_trap_phase_scaled(rng, jid, t, 1800.0, pool); span, adv = 1800.0, 1850.0
+        elif kind == "burst":
+            js, n = [], 0
+            for idx in bn_targets:
+                j2, n2 = _burst_phase_jobs(rng, jid + n, t, n_jobs=30, index=idx); js += j2; n += n2
+            span, adv = 5.0, 300.0
+        else:  # starvation: an independent long-job-starvation stream on each lane
+            js, n = [], 0
+            for idx in bn_targets:
+                j2, n2, span = _starvation_phase_jobs(rng, jid + n, t, n_short=80, index=idx); js += j2; n += n2
+            adv = span + 50.0
+        jobs += js; jid += n
+        phases.append({"name": name, "start": t, "end": t + span, "n_jobs": n})
+        t += adv
+    name = f"e4_compound{'_v2' if version == 2 else ''}_m{machines}"
+    out = scenario(
+        name, jobs, seed=seed, agv_count=agv_count or max(1, round(machines / 3)), floor=scaled_floor(machines),
+        comment=(f"E4 scaled {'compound_scenario_v2' if version == 2 else 'compound_scenario'} on {machines} machines "
+                 f"({machines // len(TYPES)} per type): {len(jobs)} jobs, ~{t:.0f}s, {len(phases)} phases. Same regimes "
+                 f"as the 15-machine scenario at the same per-machine load: {g} parallel single-machine bottleneck "
+                 f"lane(s) Weld{bn_targets}, a {len(pool)}-machine standoff/speed-trap pool Weld{pool}; quiet, burst "
+                 f"and starvation load scaled with capacity (x{s:.2f}). At 15 machines identical to the original."))
+    out["_phases"] = phases
+    return out
+
+
+def steady_scaled(machines, utilization=0.7, seed=42, agv_count=None, mean_duration=55.0, horizon=3600.0):
+    """The _mfsweep steady load on `machines` machines: evenly spaced jobs, Mill then any Weld, `utilization` across all
+    Weld machines. Regime-matched to _mfsweep_control (137 jobs at 15 machines), not byte-identical (fresh draws)."""
+    k = machines // len(TYPES)
+    n = max(1, int(utilization * k * horizon / mean_duration))
+    rng = random.Random(seed)
+    jobs = [job(i, i * horizon / n, [op("Mill", "any", 15.0),
+                                     op("Weld", "any", mean_duration * rng.uniform(0.7, 1.3))]) for i in range(n)]
+    return scenario(
+        f"e4_steady_m{machines}", jobs, seed=seed, agv_count=agv_count or max(1, round(machines / 3)),
+        floor=scaled_floor(machines),
+        comment=(f"E4 steady load on {machines} machines ({k} Weld): {n} jobs evenly spaced over {horizon:.0f}s, each "
+                 f"Mill then any Weld (~{mean_duration:.0f}s +-30%), utilisation {utilization} across the Weld machines "
+                 f"-- the _mfsweep_control regime scaled with capacity."))
+
+
+def check_scaled_matches_original():
+    """At 15 machines the scaled compound generators must reproduce compound_scenario / v2 exactly."""
+    for version, orig in ((1, compound_scenario()), (2, compound_scenario_v2())):
+        sc = compound_scaled(15, version)
+        assert sc["jobs"] == orig["jobs"], f"v{version}: scaled jobs differ from the original"
+        assert sc["_phases"] == orig["_phases"], f"v{version}: scaled phases differ from the original"
+        assert sc["machineTypeLayout"] == orig["machineTypeLayout"]
+    print("scaled compound generators reproduce compound_scenario[_v2] exactly at 15 machines")
+
+
+def write_scaled(machine_counts):
+    check_scaled_matches_original()
+    for m in machine_counts:
+        for s in (steady_scaled(m), compound_scaled(m, 1), compound_scaled(m, 2)):
+            write(os.path.join(OUT_DIR, f"{s['name']}.json"), s)
+            write(os.path.join(OUT_DIR, f"{s['name']}_fail.json"), with_failures(s))
+
+
+# ─────────────────────────────────────────────────────────────────────────
 
 def main():
     generators = [
@@ -733,7 +905,37 @@ def main():
     ]
     for s in generators:
         write(os.path.join(OUT_DIR, f"{s['name']}.json"), s)
+    # Failures-on variants of the phased scenarios, for the load-regime sweep (docs/EXPERIMENT_PLAN_2026-09-23.md
+    # E1). Same job stream; only machine failures differ (same Weibull/lognormal parameters as _mfsweep_shard0).
+    for s in (compound_scenario(), compound_scenario_v2()):
+        write(os.path.join(OUT_DIR, f"{s['name']}_fail.json"), with_failures(s))
+
+
+# Machine-failure block shared by every failures-on scenario (matches _mfsweep_shard0.json).
+FAILURES = {
+    "machineFailuresEnabled": True,
+    "weibullK": 1.5,
+    "weibullLambda": 900.0,
+    "repairLogMu": 4.0,
+    "repairLogSigma": 0.5,
+}
+
+
+def with_failures(s):
+    """Copy of scenario s with machine failures on. episodeDurationSeconds covers the last arrival plus drain."""
+    s = dict(s)
+    last = max(j["arrivalTime"] for j in s["jobs"])
+    s["stochastic"] = dict(FAILURES, episodeDurationSeconds=float(round(last * 2 + 5000, -3)))
+    s["name"] = s["name"] + "_fail"
+    s["_comment"] = s["_comment"] + " [FAILURES ON: Weibull k=1.5 lambda=900 s, lognormal repair mu=4.0 sigma=0.5.]"
+    return s
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--scaled", type=int, nargs="+", metavar="MACHINES",
+                    help="write only the E4 scaled scenarios (steady, compound, compound_v2, each +_fail) for these "
+                         "machine counts, e.g. --scaled 15 30 60 100; without it the standard set is regenerated")
+    args = ap.parse_args()
+    write_scaled(args.scaled) if args.scaled else main()

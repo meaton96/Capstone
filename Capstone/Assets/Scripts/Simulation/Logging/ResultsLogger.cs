@@ -180,7 +180,8 @@ namespace Assets.Scripts.Simulation.Logging
                     "agv_collision_events,agv_collision_pair_seconds,agv_clearance_events," +
                     "agv_clearance_pair_seconds,agv_parking_overlap_events,agv_min_centre_distance," +
                     "reservation_protocol," +
-                    "layout_id,layout_belts,layout_aisles,floor_width,floor_depth"
+                    "layout_id,layout_belts,layout_aisles,floor_width,floor_depth," +
+                    "io_docks"
                 );
 
             writer.WriteLine(
@@ -201,7 +202,8 @@ namespace Assets.Scripts.Simulation.Logging
                 $"{r.AgvCollisionEvents},{r.AgvCollisionPairSeconds:F2},{r.AgvClearanceEvents}," +
                 $"{r.AgvClearancePairSeconds:F2},{r.AgvParkingOverlapEvents},{r.AgvMinCentreDistance:F3}," +
                 $"{r.ReservationProtocol}," +
-                $"{r.LayoutId},{r.LayoutBelts},{r.LayoutAisles},{r.FloorWidth:F2},{r.FloorDepth:F2}"
+                $"{r.LayoutId},{r.LayoutBelts},{r.LayoutAisles},{r.FloorWidth:F2},{r.FloorDepth:F2}," +
+                $"{r.IoDocks}"
             );
 
             Debug.Log($"[Results] {r.InstanceName} {r.RuleName} seed={r.Seed} " +

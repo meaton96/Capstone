@@ -19,13 +19,24 @@ namespace Assets.Scripts.Editor
         /// @brief Output executable, relative to the Unity project folder.
         private static readonly string OutputPath = Path.Combine("..", "linux_server", "capstone.x86_64");
 
+        /// @brief Second build folder, so a new build can be tested while a sweep keeps running on linux_server/
+        ///        (overwriting a player's files under running processes is unsafe). run_experiment_queue.py
+        ///        --exe ../linux_server2/capstone.x86_64 runs it; its results go to linux_server2/Results.
+        private static readonly string AltOutputPath = Path.Combine("..", "linux_server2", "capstone.x86_64");
+
         [MenuItem("Build/Linux Server (ML-Agents)")]
-        public static void Build()
+        public static void Build() => BuildTo(OutputPath);
+
+        /// Headless: -executeMethod Assets.Scripts.Editor.LinuxServerBuild.BuildAlt
+        [MenuItem("Build/Linux Server (ML-Agents) - linux_server2")]
+        public static void BuildAlt() => BuildTo(AltOutputPath);
+
+        private static void BuildTo(string outputPath)
         {
             var options = new BuildPlayerOptions
             {
                 scenes = EditorBuildSettings.scenes.Where(s => s.enabled).Select(s => s.path).ToArray(),
-                locationPathName = OutputPath,
+                locationPathName = outputPath,
                 target = BuildTarget.StandaloneLinux64,
                 targetGroup = BuildTargetGroup.Standalone,
                 subtarget = (int)StandaloneBuildSubtarget.Server,
@@ -33,7 +44,7 @@ namespace Assets.Scripts.Editor
             };
 
             BuildReport report = BuildPipeline.BuildPlayer(options);
-            Debug.Log($"[LinuxServerBuild] {report.summary.result} -> {Path.GetFullPath(OutputPath)} " +
+            Debug.Log($"[LinuxServerBuild] {report.summary.result} -> {Path.GetFullPath(outputPath)} " +
                       $"({report.summary.totalErrors} errors, {report.summary.totalTime})");
 
             // Only signal failure via exit code when headless — from the menu this would close the editor.

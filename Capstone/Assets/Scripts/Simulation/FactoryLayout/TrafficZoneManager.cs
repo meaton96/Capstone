@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Assets.Scripts.Simulation.Logging;
 using Assets.Scripts.Simulation.Types;
@@ -132,8 +133,23 @@ namespace Assets.Scripts.Simulation.FactoryLayout
 
             int rows = layoutManager.LayoutRows;
             int cols = layoutManager.LayoutCols;
+            bool twoWay = layoutManager.ActiveLayout != null && layoutManager.ActiveLayout.Aisles == Types.AisleTopology.TwoWay;
 
-            int[][] rowAisleZones = BuildRowAisleZones(rows, cols);
+            // One-way: each row aisle is one lane in the aisle's own direction (GetRowAisleDirection), and it
+            // is both the "north lane" and the "south lane" below. Two-way (F-J): two stacked one-way lanes,
+            // north lane westbound and south lane eastbound in every aisle. There are NO lane-change links:
+            // an AGV reverses by leaving its lane onto the one-way vertical at the aisle end and turning into
+            // the other lane at that same junction (or a later one). A direct Fwd<->Rev link is a two-zone
+            // cycle, which two AGVs can deadlock on — the failure behind every earlier two-way attempt
+            // (docs/LAYOUT_CONFIGURATION_SCOPE.md section 18). The perimeter stays one-way in every layout.
+            int[][] rowLaneN, rowLaneS;
+            if (!twoWay) rowLaneN = rowLaneS = BuildRowAisleZones(rows, cols);
+            else
+            {
+                float off = layoutManager.RowLaneOffset;
+                rowLaneN = BuildRowAisleZones(rows, cols, off, "_N", eastbound: false);
+                rowLaneS = BuildRowAisleZones(rows, cols, -off, "_S", eastbound: true);
+            }
             // Verticals first: each spine's two corner zones ARE the vertical connectors' TopConn /
             // BotConn zones (same patch of floor), so they must exist before the spines are built.
             var (leftVertZones, leftChain) = BuildVerticalZones(true, rows);
@@ -143,9 +159,71 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                                                   leftVertZones[leftVertZones.Length - 1],
                                                   rightVertZones[rightVertZones.Length - 1]);
 
-            ConnectZoneGraph(rowAisleZones, topSpineZones, botSpineZones, leftVertZones, rightVertZones, leftChain, rightChain, rows, cols);
-            RegisterDockPoints(rowAisleZones, topSpineZones, botSpineZones, rows, cols, leftVertZones, rightVertZones);
-            SimLogger.Medium($"[TrafficZones] Built zone graph: {zones.Count} zones.");
+            ConnectZoneGraph(rowLaneN, rowLaneS, twoWay, topSpineZones, botSpineZones, leftVertZones, rightVertZones, leftChain, rightChain);
+            RegisterDockPoints(rowLaneN, rowLaneS, topSpineZones, botSpineZones, rows, cols, leftVertZones, rightVertZones);
+            if (layoutManager.ActiveIoDocks != IoDockMethod.Corner) BuildIoSidings(leftChain, rightChain, topSpineZones);
+            SimLogger.Medium($"[TrafficZones] Built zone graph: {zones.Count} zones{(twoWay ? " (two-way row aisles)" : "")}.");
+            CheckZoneGraph();
+        }
+
+        /// @brief Static sanity check of the built graph, logged once per build.
+        /// @details (1) Strong connectivity: every zone reaches every other, so no dock or parking bay is
+        /// unreachable (would have caught the first two-way attempt's disconnected reverse lanes without a sim
+        /// run). (2) Every machine dock's approach point lies inside the zone that reserves it — otherwise an
+        /// AGV drives into floor another zone owns (the first two-way attempt registered each dock on both
+        /// lanes, so the far lane's AGV crossed the near lane to reach it). (3) Girth: the shortest directed
+        /// cycle over the shared Capacity-1 zones (parking lane/bays excluded — bays are per-AGV). A wait-for
+        /// deadlock needs every zone of some cycle held, and a blocked AGV holds at most 2 zones under
+        /// holdPrevious (1 under releasePrevious), so no fleet smaller than ceil(girth/2) can deadlock.
+        private void CheckZoneGraph()
+        {
+            if (zones.Count == 0) return;
+
+            int Reach(bool forward)
+            {
+                var seen = new HashSet<int> { zones[0].ZoneId }; var q = new Queue<int>(seen);
+                while (q.Count > 0)
+                {
+                    var z = zoneById[q.Dequeue()];
+                    foreach (int n in forward ? z.Downstream : z.Upstream)
+                        if (seen.Add(n)) q.Enqueue(n);
+                }
+                return seen.Count;
+            }
+            bool stronglyConnected = Reach(true) == zones.Count && Reach(false) == zones.Count;
+
+            int misplacedDocks = 0;
+            foreach (var z in zones)
+                foreach (var kv in z.DockPoints)
+                    if (kv.Key >= 0 && !z.Contains(kv.Value.ApproachPosition))
+                    {
+                        misplacedDocks++;
+                        SimLogger.Error($"[TrafficZones] Dock for machine {kv.Key} approaches outside its zone {z.Name}.");
+                    }
+
+            int girth = int.MaxValue;
+            foreach (var s in zones)
+            {
+                if (s.IsParkingLane || s.Capacity > 1) continue;
+                var dist = new Dictionary<int, int> { [s.ZoneId] = 0 }; var q = new Queue<int>(); q.Enqueue(s.ZoneId);
+                while (q.Count > 0)
+                {
+                    int u = q.Dequeue();
+                    if (dist[u] + 1 >= girth) break;
+                    foreach (int v in zoneById[u].Downstream)
+                    {
+                        var vz = zoneById[v];
+                        if (vz.IsParkingLane || vz.Capacity > 1) continue;
+                        if (v == s.ZoneId) { girth = Math.Min(girth, dist[u] + 1); continue; }
+                        if (dist.ContainsKey(v)) continue;
+                        dist[v] = dist[u] + 1; q.Enqueue(v);
+                    }
+                }
+            }
+
+            string msg = $"[TrafficZones] Graph check: strongly connected={stronglyConnected}, misplaced docks={misplacedDocks}, " +
+                         (girth == int.MaxValue ? "no cycle" : $"girth={girth} (no deadlock below {(girth + 1) / 2} AGVs under holdPrevious).");
+            if (!stronglyConnected || misplacedDocks > 0) SimLogger.Error(msg); else SimLogger.Medium(msg);
         }
 
         /// @brief Segments row aisles into discrete zones: one dock zone per machine column plus
@@ -155,9 +233,13 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         /// the same point).
         /// @param rows Number of machine rows.
         /// @param cols Number of machine columns.
+        /// @param zOffset Lane centre offset from the aisle centreline (0 one-way, +-RowLaneOffset two-way).
+        /// @param suffix Appended to every zone name ("_N"/"_S" for two-way lanes).
+        /// @param eastbound Lane direction label; null = the aisle's one-way direction. Graph edges come
+        /// from ConnectZoneGraph, which must be given the same direction.
         /// @return A 2D array mapping [aisleIndex][segmentIndex] to zone IDs — even indices are
         /// dock zones (index/2 = machine column), odd indices are the transit zones between them.
-        private int[][] BuildRowAisleZones(int rows, int cols)
+        private int[][] BuildRowAisleZones(int rows, int cols, float zOffset = 0f, string suffix = "", bool? eastbound = null)
         {
             int numAisles = rows - 1;
             int[][] result = new int[numAisles][];
@@ -165,8 +247,8 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             for (int a = 0; a < numAisles; a++)
             {
                 Vector3 aisleCentre = layoutManager.GetRowAisleCentre(a);
-                Vector3 flowDir = layoutManager.GetRowAisleDirection(a);
-                FlowDirection flow = flowDir.x > 0 ? FlowDirection.East : FlowDirection.West;
+                bool east = eastbound ?? layoutManager.GetRowAisleDirection(a).x > 0;
+                FlowDirection flow = east ? FlowDirection.East : FlowDirection.West;
 
                 int numSegs = 2 * cols - 1;
                 result[a] = new int[numSegs];
@@ -183,11 +265,11 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                     var zone = new TrafficZone
                     {
                         ZoneId = nextZoneId++,
-                        Name = isDock ? $"RowAisle{a}_Dock{machineCol}" : $"RowAisle{a}_Transit{machineCol}",
+                        Name = (isDock ? $"RowAisle{a}_Dock{machineCol}" : $"RowAisle{a}_Transit{machineCol}") + suffix,
                         AisleType = AisleType.RowAisle,
                         Flow = flow,
-                        Centre = new Vector3(aisleCentre.x + centreX, aisleCentre.y, aisleCentre.z),
-                        Size = new Vector3(subWidth, 0.1f, layoutManager.RowAisleWidth),
+                        Centre = new Vector3(aisleCentre.x + centreX, aisleCentre.y, aisleCentre.z + zOffset),
+                        Size = new Vector3(subWidth, 0.1f, layoutManager.RowLaneWidth),
                         Capacity = 1
                     };
                     RegisterZone(zone);
@@ -245,7 +327,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         }
 
         /// <summary>Minimum centre-to-centre spacing of vertical zones: just above 2 x the 1.18 NavMesh clearance.</summary>
-        private const float MinVerticalPitch = 2.4f;
+        public const float MinVerticalPitch = 2.4f;
 
         /// @brief Segments a vertical connector aisle (left/right) into Capacity=1 zones.
         /// @details The junction zones (TopConn, Row0..RowN-1, BotConn) sit where a row aisle or spine
@@ -320,17 +402,16 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         /// @brief Wires up downstream and upstream links between all zones to form a circulation loop.
         /// @details Connects internal chains for rows, spines, and vertical aisles, then bridges 
         /// intersections and corners based on restricted flow directions.
+        /// Two-way: both row lanes are wired the same way, each into the vertical junction at its upstream
+        /// end and out onto the one at its downstream end, so each Row junction becomes a 2-in/2-out
+        /// intersection (straight on the vertical, or turn into the lane leading away from it).
         /// @post Every zone has populated Downstream/Upstream lists forming a directed graph.
-        private void ConnectZoneGraph(int[][] rowAisles, int[] topSpine, int[] botSpine, int[] leftVert, int[] rightVert,
-                                       int[] leftChain, int[] rightChain, int rows, int cols)
+        private void ConnectZoneGraph(int[][] rowLaneN, int[][] rowLaneS, bool twoWay, int[] topSpine, int[] botSpine,
+                                       int[] leftVert, int[] rightVert, int[] leftChain, int[] rightChain)
         {
-            for (int a = 0; a < rowAisles.Length; a++)
-            {
-                bool eastbound = layoutManager.GetRowAisleDirection(a).x > 0f;
-                int[] segs = rowAisles[a];
-                if (eastbound) for (int s = 0; s < segs.Length - 1; s++) LinkZones(segs[s], segs[s + 1]);
-                else for (int s = segs.Length - 1; s > 0; s--) LinkZones(segs[s], segs[s - 1]);
-            }
+            // Link order matters: Downstream order is GetRoute's BFS tie-break, so one-way keeps its original
+            // order (lane chains, then perimeter chains, then junction joins) to stay byte-identical.
+            for (int a = 0; a < rowLaneN.Length; a++) WireRowLanes(a, rowLaneN, rowLaneS, twoWay, leftVert, rightVert, junctions: false);
 
             for (int s = 0; s < topSpine.Length - 1; s++) LinkZones(topSpine[s], topSpine[s + 1]);
             for (int s = botSpine.Length - 1; s > 0; s--) LinkZones(botSpine[s], botSpine[s - 1]);
@@ -338,19 +419,33 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             for (int s = leftChain.Length - 1; s > 0; s--) LinkZones(leftChain[s], leftChain[s - 1]);
             for (int s = 0; s < rightChain.Length - 1; s++) LinkZones(rightChain[s], rightChain[s + 1]);
 
-            for (int a = 0; a < rowAisles.Length; a++)
-            {
-                bool eastbound = layoutManager.GetRowAisleDirection(a).x > 0f;
-                int[] segs = rowAisles[a];
-                int vIdx = a + 1;
-                if (eastbound) { LinkZones(leftVert[vIdx], segs[0]); LinkZones(segs[segs.Length - 1], rightVert[vIdx]); }
-                else { LinkZones(rightVert[vIdx], segs[segs.Length - 1]); LinkZones(segs[0], leftVert[vIdx]); }
-            }
+            for (int a = 0; a < rowLaneN.Length; a++) WireRowLanes(a, rowLaneN, rowLaneS, twoWay, leftVert, rightVert, junctions: true);
 
             LinkZones(leftVert[0], topSpine[0]);
             LinkZones(topSpine[topSpine.Length - 1], rightVert[0]);
             LinkZones(rightVert[rightVert.Length - 1], botSpine[botSpine.Length - 1]);
             LinkZones(botSpine[0], leftVert[leftVert.Length - 1]);
+        }
+
+        /// @brief Wires aisle a's lane(s): junctions=false chains each lane in its direction; junctions=true
+        /// joins each lane to the vertical junction at its upstream (in) and downstream (out) end.
+        private void WireRowLanes(int a, int[][] rowLaneN, int[][] rowLaneS, bool twoWay, int[] leftVert, int[] rightVert, bool junctions)
+        {
+            var lanes = twoWay
+                ? new[] { (segs: rowLaneN[a], east: false), (segs: rowLaneS[a], east: true) }
+                : new[] { (segs: rowLaneN[a], east: layoutManager.GetRowAisleDirection(a).x > 0f) };
+            int left = leftVert[a + 1], right = rightVert[a + 1];
+            foreach (var (segs, east) in lanes)
+            {
+                int last = segs.Length - 1;
+                if (!junctions)
+                {
+                    if (east) for (int s = 0; s < last; s++) LinkZones(segs[s], segs[s + 1]);
+                    else for (int s = last; s > 0; s--) LinkZones(segs[s], segs[s - 1]);
+                }
+                else if (east) { LinkZones(left, segs[0]); LinkZones(segs[last], right); }
+                else { LinkZones(right, segs[last]); LinkZones(segs[0], left); }
+            }
         }
 
         private void LinkZones(int fromId, int toId)
@@ -365,17 +460,24 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         /// @details Resolves the handshake and approach positions for every physical machine 
         /// and maps them to the nearest reservable traffic zone.
         /// @post TrafficZone.DockPoints dictionaries are populated for relevant zones.
-        private void RegisterDockPoints(int[][] rowAisles, int[] topSpine, int[] botSpine,
+        /// @param rowLaneN, rowLaneS The lane beside the aisle's north edge (hosts the south-face docks of the
+        /// machine row above) and beside its south edge (north-face docks of the row below). The same array in
+        /// one-way. A dock's approach point lies in the lane beside it, so it is registered on that lane only.
+        private void RegisterDockPoints(int[][] rowLaneN, int[][] rowLaneS, int[] topSpine, int[] botSpine,
                                 int rows, int cols, int[] leftVert, int[] rightVert)
         {
-            if (topSpine.Length > 0 && layoutManager.IncomingBelt != null)
+            // Siding / bypass register the moved belt docks on their sidings instead (BuildIoSidings); bypass keeps
+            // the output belt on its corner.
+            bool inCorner = layoutManager.ActiveIoDocks == IoDockMethod.Corner;
+            bool outCorner = layoutManager.ActiveIoDocks != IoDockMethod.Siding;
+            if (inCorner && topSpine.Length > 0 && layoutManager.IncomingBelt != null)
             {
                 TrafficZone inZone = zoneById[topSpine[0]];
                 Vector3 handshake = layoutManager.IncomingBelt.OutputEndPosition;
                 inZone.DockPoints[IncomingBeltId] = new DockPoint { ApproachPosition = handshake - Vector3.forward * 1.5f, HandshakePosition = handshake, FacingDirection = Vector3.forward, IsPickup = true };
             }
 
-            if (botSpine.Length > 0 && layoutManager.OutgoingBelt != null)
+            if (outCorner && botSpine.Length > 0 && layoutManager.OutgoingBelt != null)
             {
                 TrafficZone outZone = zoneById[botSpine[botSpine.Length - 1]];
                 Vector3 handshake = layoutManager.OutgoingBelt.InputEndPosition;
@@ -407,7 +509,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 // the hop-distance dispatch heuristic never seeds a dock nobody drives to, and the last row can
                 // dock on the bottom spine (layout C).
                 LayoutSpec layout = layoutManager.ActiveLayout;
-                bool southDock = layout.IsLegacy ? row < rowAisles.Length : layout.HasBeltOn(row, 'S');
+                bool southDock = layout.IsLegacy ? row < rowLaneN.Length : layout.HasBeltOn(row, 'S');
                 bool northDock = layout.IsLegacy || layout.HasBeltOn(row, 'N');
 
                 var (inputSide, outputSide) = layout.BeltSides(row);
@@ -415,8 +517,8 @@ namespace Assets.Scripts.Simulation.FactoryLayout
 
                 if (southDock)
                 {
-                    int zId = row < rowAisles.Length
-                        ? rowAisles[row][col * 2]                    // dock zones sit at even indices — see BuildRowAisleZones
+                    int zId = row < rowLaneN.Length
+                        ? rowLaneN[row][col * 2]                     // dock zones sit at even indices — see BuildRowAisleZones
                         : botSpine[SpineDockIndex(col)];             // last row's south side is the bottom spine
 
                     Vector3 conveyorEnd = machinePos - Vector3.forward * (layoutManager.MachineDepth / 2f + layoutManager.ConveyorReach);
@@ -429,7 +531,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 if (northDock) // north side: the aisle above, or the top spine for row 0
                 {
                     int zId = -1;
-                    if (row > 0) zId = rowAisles[row - 1][col * 2];   // dock zones sit at even indices
+                    if (row > 0) zId = rowLaneS[row - 1][col * 2];    // dock zones sit at even indices
                     else if (row == 0) zId = topSpine[SpineDockIndex(col)];
 
                     if (zId != -1)
@@ -453,6 +555,82 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                     machinePickupZones[i] = allZones;
             }
         }
+        /// @brief I/O sidings (IoDockMethod.Siding): per belt, a two-zone one-way siding outside the side wall.
+        /// @details Input, west of the left vertical (flows north): leftChain[1] (the zone just south of TopConn)
+        ///          -> InSiding_Entry -> InSiding_Dock -> LeftVert_TopConn. Output, east of the right vertical
+        ///          (flows south): the zone just north of BotConn -> OutSiding_Entry -> OutSiding_Dock ->
+        ///          RightVert_BotConn. Entry sits beside the branch zone, Dock beside the corner; both are Capacity 1.
+        ///          A docked AGV holds Dock (and Entry as its held previous zone under holdPrevious), never the
+        ///          corner, so through traffic and turns at the corner are not blocked by loading. The siding is a
+        ///          forward bypass of one vertical hop, so it adds no new cycle (girth unchanged) and no two-zone
+        ///          loop (which a dead-end bay shared by several AGVs would, see LAYOUT_CONFIGURATION_SCOPE.md s19).
+        /// @details Bypass (input only): InSiding_Dock does not rejoin at the corner. It continues north into a strip
+        ///          beyond the top spine and east above it (InSiding_Exit above the dock, InSiding_Over above
+        ///          TopConn, InSiding_N{k} above top-spine zone k) and drops into the top spine at Transit0 (index 2;
+        ///          Dock0 hosts row 0's north docks, so merging there would queue behind them). The return strip is
+        ///          one lane width north of the spine, so it never shares floor with TopConn.
+        private void BuildIoSidings(int[] leftChain, int[] rightChain, int[] topSpine)
+        {
+            if (leftChain.Length < 2 || rightChain.Length < 2) return;
+            bool bypass = layoutManager.ActiveIoDocks == IoDockMethod.Bypass;
+            float w = FactoryLayoutManager.SidingWidth;
+            const float standoff = 1.5f;   // belt end -> approach point, same as every other dock
+
+            (int entry, int dock) Build(string prefix, bool left, int branchId, int cornerId, FlowDirection flow, bool rejoin = true)
+            {
+                TrafficZone branch = zoneById[branchId], corner = zoneById[cornerId];
+                // Beside the vertical: its centre, out by half the vertical plus half the siding.
+                float x = branch.Centre.x + (left ? -1f : 1f) * (layoutManager.VerticalAisleWidth + w) / 2f;
+                var e = new TrafficZone { ZoneId = nextZoneId++, Name = $"{prefix}_Entry", AisleType = AisleType.VerticalAisle,
+                    Flow = flow, Centre = new Vector3(x, 0.01f, branch.Centre.z), Size = new Vector3(w, 0.1f, branch.Size.z), Capacity = 1 };
+                var d = new TrafficZone { ZoneId = nextZoneId++, Name = $"{prefix}_Dock", AisleType = AisleType.VerticalAisle,
+                    Flow = flow, Centre = new Vector3(x, 0.01f, corner.Centre.z), Size = new Vector3(w, 0.1f, corner.Size.z), Capacity = 1 };
+                RegisterZone(e); RegisterZone(d);
+                LinkZones(branchId, e.ZoneId); LinkZones(e.ZoneId, d.ZoneId);
+                if (rejoin) LinkZones(d.ZoneId, cornerId);
+                return (e.ZoneId, d.ZoneId);
+            }
+
+            var (_, inDock) = Build("InSiding", true, leftChain[1], leftChain[0], FlowDirection.North, rejoin: !bypass);
+            int outDock = -1;
+            if (!bypass)
+                (_, outDock) = Build("OutSiding", false, rightChain[rightChain.Length - 2], rightChain[rightChain.Length - 1], FlowDirection.South);
+            else
+            {
+                TrafficZone corner = zoneById[leftChain[0]], dockZ = zoneById[inDock];
+                float zN = corner.Centre.z + corner.Size.z / 2f + w / 2f;          // strip centre, one lane north of the spine
+                int target = topSpine[Mathf.Min(2, topSpine.Length - 2)];          // Transit0 (Dock0 if a 1-column floor)
+                var xs = new List<(string name, float x)> { ("Exit", dockZ.Centre.x), ("Over", corner.Centre.x) };
+                for (int k = 1; k < topSpine.Length - 1 && topSpine[k - 1] != target; k++)
+                    xs.Add(($"N{k}", zoneById[topSpine[k]].Centre.x));
+                int prev = inDock;
+                foreach (var (name, x) in xs)
+                {
+                    var z = new TrafficZone { ZoneId = nextZoneId++, Name = $"InSiding_{name}", AisleType = AisleType.SpineAisle,
+                        Flow = FlowDirection.East, Centre = new Vector3(x, 0.01f, zN), Size = new Vector3(w, 0.1f, w), Capacity = 1 };
+                    RegisterZone(z); LinkZones(prev, z.ZoneId); prev = z.ZoneId;
+                }
+                LinkZones(prev, target);
+            }
+
+            if (layoutManager.IncomingBelt != null)
+            {
+                Vector3 h = layoutManager.IncomingBelt.OutputEndPosition;   // west edge of the input siding
+                zoneById[inDock].DockPoints[IncomingBeltId] = new DockPoint
+                    { ApproachPosition = h + Vector3.right * standoff, HandshakePosition = h, FacingDirection = Vector3.left, IsPickup = true };
+            }
+            if (outDock >= 0 && layoutManager.OutgoingBelt != null)
+            {
+                Vector3 h = layoutManager.OutgoingBelt.InputEndPosition;    // east edge of the output siding
+                zoneById[outDock].DockPoints[OutgoingBeltId] = new DockPoint
+                    { ApproachPosition = h + Vector3.left * standoff, HandshakePosition = h, FacingDirection = Vector3.right, IsPickup = false };
+            }
+            foreach (int z in new[] { inDock, outDock }.Where(id => id >= 0))
+                foreach (var kv in zoneById[z].DockPoints)
+                    if (!zoneById[z].Contains(kv.Value.ApproachPosition))
+                        SimLogger.Error($"[TrafficZones] I/O siding dock approach lies outside {zoneById[z].Name}.");
+        }
+
         private void BuildSingleParkingZone(int[] botSpine, int[] leftVert)
         {
             if (botSpine.Length == 0) return;

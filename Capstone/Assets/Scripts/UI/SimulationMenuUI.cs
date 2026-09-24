@@ -12,7 +12,7 @@ using Assets.Scripts.Simulation.Logging;
 
 namespace Assets.Scripts.UI
 {
-    /// <summary>Inspector dropdown for the start menu's layout; names match LayoutSpec.PresetNames. Only A-E are built.</summary>
+    /// <summary>Inspector dropdown for the start menu's layout; names match LayoutSpec.PresetNames (all ten built).</summary>
     public enum LayoutChoice { A, B, C, D, E, F, G, H, I, J }
 
 
@@ -35,12 +35,14 @@ namespace Assets.Scripts.UI
                  "dedicated bay per AGV (default). Single / Multiple = the older abstract alcoves, kept " +
                  "for comparison.")]
         [SerializeField] private ParkingMethod parkingMethodChoice = ParkingMethod.Lane;
+        [SerializeField] private IoDockMethod ioDocksChoice = IoDockMethod.Corner;
 
         [Tooltip("Factory layout for runs started from this menu (see docs/LAYOUT_CONFIGURATION_SCOPE.md): " +
-                 "A = current, B = all machines face north, C = all face south, D = passthrough input north / output south, E = passthrough input south / output north. F-J are not built yet and " +
-                 "report an error on Spawn. Change it in the Inspector (also while playing), then press Spawn " +
-                 "again to rebuild the floor with the new layout.")]
-        [SerializeField] private LayoutChoice layoutChoice = LayoutChoice.A;
+                 "A = current/legacy, B = all machines face north, C = all face south, D = passthrough input " +
+                 "north / output south (default, chosen 2026-09-22), E = passthrough input south / output " +
+                 "north, F-J = A-E with two-way aisles. Change it in the Inspector (also while playing), then " +
+                 "press Spawn again to rebuild the floor with the new layout.")]
+        [SerializeField] private LayoutChoice layoutChoice = LayoutChoice.D;
         [SerializeField] private GameObject panel;
 
         // ── General parameters ────────────────────────────────────────────────
@@ -303,6 +305,7 @@ namespace Assets.Scripts.UI
                 MaxProcTime = 30f,
                 Stochastic = BuildStochasticConfig(),
                 parkingMethod = parkingMethodChoice.ToString().ToLowerInvariant(),
+                ioDocks = ioDocksChoice.ToString().ToLowerInvariant(),
                 Layout = LayoutSpec.FromPreset(layoutChoice.ToString()),
                 preDispatchingMethod = "fixed",
 

@@ -467,6 +467,8 @@ namespace Assets.Scripts.Simulation
                 config.parkingMethod = ConfigOverrides.ParkingMethod;
             if (config != null && ConfigOverrides.Layout != null)
                 config.Layout = LayoutSpec.FromPreset(ConfigOverrides.Layout);
+            if (config != null && ConfigOverrides.IoDocks != null)
+                config.ioDocks = ConfigOverrides.IoDocks;
             return config;
         }
 
@@ -1325,6 +1327,7 @@ namespace Assets.Scripts.Simulation
 
             // Configuration snapshot fields
             record.ParkingMethod = currentConfig.parkingMethod;
+            record.IoDocks = currentConfig.ioDocks;
             record.PreDispatchingMethod = currentConfig.preDispatchingMethod;
 
             // Deadlock watchdog outcome — see CheckForDeadlock
@@ -1340,7 +1343,7 @@ namespace Assets.Scripts.Simulation
             record.AgvMinCentreDistance = _collisions.MinCentreDistance == float.MaxValue ? -1f : _collisions.MinCentreDistance;
             record.CollisionRecords = _collisions.Events;
             record.ReservationProtocol = currentConfig.reservationProtocol;
-            LayoutSpec layoutSpec = currentConfig.Layout ?? LayoutSpec.Legacy;
+            LayoutSpec layoutSpec = currentConfig.Layout ?? LayoutSpec.Default;
             record.LayoutId = layoutSpec.Id;
             record.LayoutBelts = layoutSpec.DescribeBelts(layoutManager.LayoutRows);
             record.LayoutAisles = layoutSpec.AislesString;

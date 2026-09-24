@@ -153,9 +153,11 @@ namespace Assets.Scripts.Simulation
 
                     if (!anyAvailable)
                     {
-                        _jobs.DeferredJobIds.Add(jobId);
-                        SimLogger.Low($"[Orchestrator] Job {jobId}: all eligible machines " +
-                                      $"are Failed/Repairing. Deferring routing decision.");
+                        // Log only on first deferral: this runs every decision poll, so a pinned phase waiting
+                        // out a repair otherwise logs each job every tick (~1 MB / 10 s wall on compound + failures).
+                        if (_jobs.DeferredJobIds.Add(jobId))
+                            SimLogger.Low($"[Orchestrator] Job {jobId}: all eligible machines " +
+                                          $"are Failed/Repairing. Deferring routing decision.");
                     }
                     else
                     {

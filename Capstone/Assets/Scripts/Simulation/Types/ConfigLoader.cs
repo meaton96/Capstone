@@ -170,6 +170,7 @@ namespace Assets.Scripts.Simulation.Types
             public float machineFlexibilityProbability = 0f;
             public float throughputTimingWindow = 0f;
             public string parkingMethod = "lane";
+            public string ioDocks = "corner";
             public string reservationProtocol = "holdPrevious";
             public string preDispatchingMethod = "fixed";
             public JsonStochasticConfig stochastic = null;
@@ -289,6 +290,7 @@ namespace Assets.Scripts.Simulation.Types
                 ThroughputTimingWindow = raw.throughputTimingWindow,
                 ProcTimeParams = procTimeParams,
                 parkingMethod = raw.parkingMethod,
+                ioDocks = ConfigOverrides.ValidatedIoDocks(raw.ioDocks),
                 // "layout" block: read with Newtonsoft (JsonUtility cannot), validated against this config's
                 // own machine grid so a bad layout aborts at load time, not mid-sweep.
                 Layout = LayoutSpec.FromJson(rawObj?["layout"]),

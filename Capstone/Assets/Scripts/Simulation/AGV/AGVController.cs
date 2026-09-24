@@ -37,6 +37,9 @@ namespace Assets.Scripts.Simulation.AGV
         [SerializeField] private float pathTurnThreshold = 10f;
         [SerializeField] private float waypointArrivalDist = 0.4f;
         [SerializeField] private float dockArrivalDist = 0.3f;
+        /// @brief ReleasePrevious: centre distance from a just-left zone before it is freed. Body diagonal (1.41)
+        ///        plus the 0.4 a follower enters short of its centre.
+        [SerializeField] private float releaseClearance = 1.8f;
         [SerializeField] private float alignmentThreshold = 3f;
         [SerializeField] private float reservationRetryInterval = 0.05f;
         [SerializeField] private float groundOffset = 0.5f;
@@ -106,6 +109,7 @@ namespace Assets.Scripts.Simulation.AGV
             _statTimeUnloading = 0.0;
             _statTotalPathLength = 0.0;
             _retreatReleaseZoneId = _retreatTargetZoneId = -1;
+            _deferredReleaseZoneId = -1;
             _statPathReturning = 0.0;
             _statPathDeparture = 0.0;
             _dispatchedFromIdle = false;
@@ -600,6 +604,7 @@ namespace Assets.Scripts.Simulation.AGV
         private void FixedUpdate()
         {
             float dt = Time.fixedDeltaTime;
+            PollDeferredRelease();
 
             switch (State)
             {
@@ -1062,9 +1067,19 @@ namespace Assets.Scripts.Simulation.AGV
 
             if (previousZoneId >= 0 && previousZoneId != newZoneId)
                 trafficMgr.Release(previousZoneId, AgvId);
+            _deferredReleaseZoneId = -1;
 
             if (_protocol == ReservationProtocol.ReleasePrevious && currentZoneId >= 0 && currentZoneId != newZoneId)
-                trafficMgr.Release(currentZoneId, AgvId);
+            {
+                // A follower drives to the centre of the zone freed here, so freeing it while this AGV is still
+                // within a body length of that centre overlaps them. Normal entry (0.4 short of the new centre) is
+                // always far enough; a mid-zone commit (CancelCurrentRoute) is not, so it waits for the gap.
+                TrafficZone left = trafficMgr.GetZone(currentZoneId);
+                if (left != null && FlatDistance(transform.position, left.Centre) < releaseClearance)
+                    _deferredReleaseZoneId = currentZoneId;
+                else
+                    trafficMgr.Release(currentZoneId, AgvId);
+            }
 
             previousZoneId = currentZoneId;
             currentZoneId = newZoneId;
@@ -1075,6 +1090,22 @@ namespace Assets.Scripts.Simulation.AGV
                 trafficMgr.Release(retreatFreed, AgvId);
                 if (previousZoneId == retreatFreed) previousZoneId = -1;
                 _retreatReleaseZoneId = _retreatTargetZoneId = -1;
+            }
+        }
+
+        /// @brief ReleasePrevious only: the zone just left, still reserved until this AGV is releaseClearance
+        ///        clear of its centre (or enters the next zone, which flushes it).
+        private int _deferredReleaseZoneId = -1;
+
+        private void PollDeferredRelease()
+        {
+            if (_deferredReleaseZoneId < 0) return;
+            if (_deferredReleaseZoneId != previousZoneId) { _deferredReleaseZoneId = -1; return; }   // route reset released it
+            TrafficZone z = trafficMgr.GetZone(_deferredReleaseZoneId);
+            if (z == null || FlatDistance(transform.position, z.Centre) >= releaseClearance)
+            {
+                trafficMgr.Release(_deferredReleaseZoneId, AgvId);
+                _deferredReleaseZoneId = -1;
             }
         }
 
