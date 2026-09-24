@@ -34,12 +34,12 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config import (
     EncoderConfig, FusionConfig, ActorCriticConfig,
-    GRID_SIZE, GRID_CHANNELS, MAX_JOBS, MAX_MACHINES, SCHED_CHANNELS,
-    GLOBAL_SCALARS, DISTANCE_DIM, EVENT_FLAGS, TOTAL_OBS_SIZE,
-    SLICE_SPATIAL_END, SLICE_SCHED_END, SLICE_SCALARS_END,
-    SLICE_DIST_END, SLICE_FLAGS_END,
+    GRID_SIZE, GRID_CHANNELS, MAX_JOBS, JOB_FEATURES, MAX_MACHINES, MACHINE_FEATURES,
+    GLOBAL_SCALARS, EVENT_FLAGS, TOTAL_OBS_SIZE, OBS_SHAPES, OBS_LAYOUT,
+    SLICE_SPATIAL_END, SLICE_MACHINES_END, SLICE_JOBS_END, SLICE_SCALARS_END, SLICE_FLAGS_END,
+    MACHINE_CANDIDATE_COL,
 )
-from models.encoder import CNNSPPFEncoder, SPPF, MLPEncoder, MultiModalEncoder
+from models.encoder import CNNSPPFEncoder, SPPF, MLPEncoder, MultiModalEncoder, SetEncoder
 from models.actor_critic import FusionHead, ActorHead, CriticHead, ActorCritic
 from models.network import SchedulingNetwork
 from env_wrappers.unity_env import slice_obs
@@ -59,13 +59,13 @@ def make_dummy_obs(batch_size: int = BATCH) -> dict:
     @param batch_size  Number of samples in the batch.
     @return Dict of random tensors keyed by observation-space names.
     """
-    return {
-        "factory_grid": torch.randn(batch_size, 3, 64, 64),
-        "sched_matrix": torch.randn(batch_size, 3, 20, 16),
-        "global_scalars": torch.randn(batch_size, 10),
-        "distance_matrix": torch.randn(batch_size, 64),
-        "event_flags": torch.randn(batch_size, 6),
-    }
+    obs = {k: torch.rand(batch_size, *shape) for k, shape in OBS_SHAPES.items()}
+    # A 15-machine floor with 10 active jobs: rows past those are padding (present = 0).
+    obs["machine_table"][:, 15:] = 0.0
+    obs["machine_table"][:, :15, 0] = 1.0
+    obs["job_table"][:, 10:] = 0.0
+    obs["job_table"][:, :10, 0] = 1.0
+    return obs
 
 
 # ============================================================
@@ -100,27 +100,65 @@ class TestCNNSPPFEncoder:
         out = enc(x)
         assert out.shape == (BATCH, 256), f"Factory encoder: {out.shape}"
 
-    def test_sched_encoder_shape(self):
-        """@brief Scheduling-matrix image (3, 20, 16) → 128-D embedding."""
-        enc = CNNSPPFEncoder(in_channels=3, out_dim=128)
-        x = torch.randn(BATCH, 3, 20, 16)
-        out = enc(x)
-        assert out.shape == (BATCH, 128), f"Sched encoder: {out.shape}"
+
+
+class TestSetEncoder:
+    """@brief @ref SetEncoder: shape, and invariance to row order and padding."""
+
+    def _table(self, rows=15, total=MAX_MACHINES):
+        t = torch.zeros(BATCH, total, MACHINE_FEATURES)
+        t[:, :rows] = torch.rand(BATCH, rows, MACHINE_FEATURES)
+        t[:, :rows, 0] = 1.0
+        return t
+
+    def _enc(self):
+        torch.manual_seed(0)
+        return SetEncoder(MACHINE_FEATURES, 128, 64, present_col=0,
+                          candidate_col=MACHINE_CANDIDATE_COL).eval()
+
+    def test_shape(self):
+        assert self._enc()(self._table()).shape == (BATCH, 128)
+
+    def test_row_permutation_invariant(self):
+        """@brief Reordering the present rows must not change the embedding."""
+        enc, t = self._enc(), self._table()
+        perm = torch.randperm(15)
+        t2 = t.clone()
+        t2[:, :15] = t[:, perm]
+        torch.testing.assert_close(enc(t), enc(t2))
+
+    def test_padding_invariant(self):
+        """@brief Garbage in padding rows (present = 0) must be ignored, so a 15-machine floor
+        encodes the same in a 100-row or a 30-row table."""
+        enc, t = self._enc(), self._table()
+        noisy = t.clone()
+        noisy[:, 15:, 1:] = torch.rand(BATCH, MAX_MACHINES - 15, MACHINE_FEATURES - 1)
+        torch.testing.assert_close(enc(t), enc(noisy))
+        torch.testing.assert_close(enc(t), enc(t[:, :30]))
+
+    def test_candidate_flag_changes_embedding(self):
+        """@brief Marking different candidate rows must change the output (the candidate pool is live)."""
+        enc, t = self._enc(), self._table()
+        a, b = t.clone(), t.clone()
+        a[:, :15, MACHINE_CANDIDATE_COL] = 0.0
+        b[:, :15, MACHINE_CANDIDATE_COL] = 0.0
+        a[:, 0, MACHINE_CANDIDATE_COL] = 1.0
+        b[:, 1, MACHINE_CANDIDATE_COL] = 1.0
+        assert not torch.allclose(enc(a), enc(b))
+
+    def test_empty_table_is_finite(self):
+        """@brief No present rows (e.g. the zero-padded obs between episodes) must not produce NaN/inf."""
+        out = self._enc()(torch.zeros(BATCH, MAX_MACHINES, MACHINE_FEATURES))
+        assert torch.isfinite(out).all()
 
 
 class TestMLPEncoder:
     """@brief Shape tests for @ref MLPEncoder across the three vector modalities."""
 
     def test_global_scalars(self):
-        """@brief 10-D global scalars → 32-D embedding."""
-        mlp = MLPEncoder(10, 32)
-        out = mlp(torch.randn(BATCH, 10))
-        assert out.shape == (BATCH, 32)
-
-    def test_distance_matrix(self):
-        """@brief 64-D flattened distances → 32-D embedding."""
-        mlp = MLPEncoder(64, 32)
-        out = mlp(torch.randn(BATCH, 64))
+        """@brief 16-D global scalars → 32-D embedding."""
+        mlp = MLPEncoder(GLOBAL_SCALARS, 32)
+        out = mlp(torch.randn(BATCH, GLOBAL_SCALARS))
         assert out.shape == (BATCH, 32)
 
     def test_event_flags(self):
@@ -134,17 +172,17 @@ class TestMultiModalEncoder:
     """@brief Integration tests for @ref MultiModalEncoder."""
 
     def test_output_dim(self):
-        """@brief Concatenated output must be (B, 464)."""
+        """@brief Concatenated output must be (B, 560)."""
         enc = MultiModalEncoder()
         obs = make_dummy_obs()
         out = enc(obs)
-        assert out.shape == (BATCH, 464), f"Encoder concat: {out.shape}"
+        assert out.shape == (BATCH, 560), f"Encoder concat: {out.shape}"
 
     def test_output_dim_matches_config(self):
         """@brief @ref MultiModalEncoder.output_dim must agree with EncoderConfig.concat_dim."""
         cfg = EncoderConfig()
         enc = MultiModalEncoder(cfg)
-        assert enc.output_dim == cfg.concat_dim == 464
+        assert enc.output_dim == cfg.concat_dim == 560
 
 
 class TestFusionHead:
@@ -152,16 +190,16 @@ class TestFusionHead:
 
     def test_shape(self):
         """@brief Fusion output must be (B, 256)."""
-        fusion = FusionHead(464, 512, 256)
-        x = torch.randn(BATCH, 464)
+        fusion = FusionHead(560, 512, 256)
+        x = torch.randn(BATCH, 560)
         out = fusion(x)
         assert out.shape == (BATCH, 256)
 
     def test_deterministic_eval(self):
         """@brief Eval-mode forward passes on the same input must match."""
-        fusion = FusionHead(464, 512, 256)
+        fusion = FusionHead(560, 512, 256)
         fusion.eval()
-        x = torch.randn(1, 464)
+        x = torch.randn(1, 560)
         with torch.no_grad():
             out1 = fusion(x)
             out2 = fusion(x)
@@ -321,13 +359,7 @@ class TestRolloutBuffer:
         computes GAE, then verifies the identity
         @c returns = @c advantages + @c values.
         """
-        obs_shapes = {
-            "factory_grid": (3, 64, 64),
-            "sched_matrix": (3, 20, 16),
-            "global_scalars": (10,),
-            "distance_matrix": (64,),
-            "event_flags": (6,),
-        }
+        obs_shapes = dict(OBS_SHAPES)
         buf = RolloutBuffer(
             rollout_length=8, num_envs=2,
             obs_shapes=obs_shapes, gamma=0.99, gae_lambda=0.95,
@@ -442,139 +474,99 @@ class TestRolloutBuffer:
 # ============================================================
 
 class TestSliceObs:
-    """@brief Tests for @ref slice_obs: flat vector → named observation dict."""
+    """@brief Tests for @ref slice_obs: flat vector → named observation dict (schema v2)."""
 
     def _make_flat_obs(self) -> np.ndarray:
-        """@brief Build a synthetic flat observation vector of length
-        TOTAL_OBS_SIZE with distinguishable per-stream values.
-
-        @return 1-D float32 array of length 13,328.
-        """
+        """@brief Flat vector of length TOTAL_OBS_SIZE with a distinct constant per stream."""
         raw = np.zeros(TOTAL_OBS_SIZE, dtype=np.float32)
-        # Tag each stream with a distinct constant so slicing errors
-        # are easy to diagnose.
         raw[:SLICE_SPATIAL_END] = 0.1
-        raw[SLICE_SPATIAL_END:SLICE_SCHED_END] = 0.2
-        raw[SLICE_SCHED_END:SLICE_SCALARS_END] = 0.3
-        raw[SLICE_SCALARS_END:SLICE_DIST_END] = 0.4
-        raw[SLICE_DIST_END:SLICE_FLAGS_END] = 0.5
+        raw[SLICE_SPATIAL_END:SLICE_MACHINES_END] = 0.2
+        raw[SLICE_MACHINES_END:SLICE_JOBS_END] = 0.3
+        raw[SLICE_JOBS_END:SLICE_SCALARS_END] = 0.4
+        raw[SLICE_SCALARS_END:SLICE_FLAGS_END] = 0.5
         return raw
 
-    def test_output_keys(self):
-        """@brief slice_obs must return all five expected observation keys."""
-        raw = self._make_flat_obs()
-        d = slice_obs(raw)
-        expected_keys = {
-            "factory_grid", "sched_matrix", "global_scalars",
-            "distance_matrix", "event_flags",
-        }
-        assert set(d.keys()) == expected_keys
-
-    def test_factory_grid_shape(self):
-        """@brief factory_grid must reshape to (C, H, W) = (3, 64, 64)."""
+    def test_output_keys_and_shapes(self):
         d = slice_obs(self._make_flat_obs())
-        assert d["factory_grid"].shape == (GRID_CHANNELS, GRID_SIZE, GRID_SIZE)
-
-    def test_sched_matrix_shape(self):
-        """@brief sched_matrix must end up in CHW order: (3, 20, 16)."""
-        d = slice_obs(self._make_flat_obs())
-        sched_cols = 2 * MAX_MACHINES  # 16
-        assert d["sched_matrix"].shape == (SCHED_CHANNELS, MAX_JOBS, sched_cols)
-
-    def test_scalar_shapes(self):
-        """@brief global_scalars, distance_matrix, event_flags must retain
-        their 1-D shapes."""
-        d = slice_obs(self._make_flat_obs())
-        assert d["global_scalars"].shape == (GLOBAL_SCALARS,)
-        assert d["distance_matrix"].shape == (DISTANCE_DIM,)
-        assert d["event_flags"].shape == (EVENT_FLAGS,)
+        assert set(d) == set(OBS_SHAPES)
+        for k, shape in OBS_SHAPES.items():
+            assert d[k].shape == shape, k
+            assert d[k].dtype == np.float32, k
 
     def test_stream_values_preserved(self):
-        """@brief Each stream must contain only the constant assigned
-        to its slice region — verifies no off-by-one in boundaries."""
         d = slice_obs(self._make_flat_obs())
-        np.testing.assert_allclose(d["factory_grid"], 0.1, atol=1e-7)
-        np.testing.assert_allclose(d["sched_matrix"], 0.2, atol=1e-7)
-        np.testing.assert_allclose(d["global_scalars"], 0.3, atol=1e-7)
-        np.testing.assert_allclose(d["distance_matrix"], 0.4, atol=1e-7)
-        np.testing.assert_allclose(d["event_flags"], 0.5, atol=1e-7)
+        for k, v in (("factory_grid", 0.1), ("machine_table", 0.2), ("job_table", 0.3),
+                     ("global_scalars", 0.4), ("event_flags", 0.5)):
+            np.testing.assert_allclose(d[k], v, atol=1e-7, err_msg=k)
 
-    def test_dtype_is_float32(self):
-        """@brief Every output array must be float32."""
-        d = slice_obs(self._make_flat_obs())
-        for key, val in d.items():
-            assert val.dtype == np.float32, f"{key} dtype is {val.dtype}"
+    def test_tables_are_row_major(self):
+        """@brief C# writes table[row * features + col]; row r, col c must land at [r, c]."""
+        raw = np.zeros(TOTAL_OBS_SIZE, dtype=np.float32)
+        raw[SLICE_SPATIAL_END + 14 * MACHINE_FEATURES + 13] = 1.0   # machine 14, candidate column
+        raw[SLICE_MACHINES_END + 3 * JOB_FEATURES + 7] = 1.0        # job row 3, age column
+        d = slice_obs(raw)
+        assert d["machine_table"][14, 13] == 1.0 and d["machine_table"].sum() == 1.0
+        assert d["job_table"][3, 7] == 1.0 and d["job_table"].sum() == 1.0
 
     def test_wrong_length_raises(self):
-        """@brief Passing a vector of incorrect length must raise AssertionError."""
-        bad = np.zeros(100, dtype=np.float32)
+        """@brief A v1 player (13,328 floats) must be rejected, not silently mis-sliced."""
         try:
-            slice_obs(bad)
-            assert False, "Should have raised AssertionError"
-        except AssertionError:
-            pass
+            slice_obs(np.zeros(13_328, dtype=np.float32))
+            assert False, "Expected AssertionError"
+        except AssertionError as e:
+            assert "Expected" in str(e)
 
     def test_batched_slice(self):
-        """@brief slice_obs must handle a (B, TOTAL_OBS_SIZE) batch correctly.
-
-        @details The leading batch dimension should propagate through
-        all reshapes via the `*raw.shape[:-1]` pattern.
-        """
         B = 3
-        raw = np.random.rand(B, TOTAL_OBS_SIZE).astype(np.float32)
-        d = slice_obs(raw)
-        assert d["factory_grid"].shape == (B, GRID_CHANNELS, GRID_SIZE, GRID_SIZE)
-        assert d["sched_matrix"].shape == (B, SCHED_CHANNELS, MAX_JOBS, 2 * MAX_MACHINES)
-        assert d["global_scalars"].shape == (B, GLOBAL_SCALARS)
-        assert d["distance_matrix"].shape == (B, DISTANCE_DIM)
-        assert d["event_flags"].shape == (B, EVENT_FLAGS)
+        d = slice_obs(np.zeros((B, TOTAL_OBS_SIZE), dtype=np.float32))
+        for k, shape in OBS_SHAPES.items():
+            assert d[k].shape == (B, *shape), k
 
-    def test_sched_matrix_hwc_to_chw(self):
-        """@brief Verify HWC→CHW transposition of the scheduling matrix.
-
-        @details The flat vector stores the matrix in (jobs, cols, channels)
-        order.  After slicing, channel 0 of the CHW tensor should contain
-        the first channel's data from every (job, col) position.
-        """
-        raw = np.zeros(TOTAL_OBS_SIZE, dtype=np.float32)
-        # Fill scheduling region with identifiable pattern:
-        # channel 0 = 0.1, channel 1 = 0.2, channel 2 = 0.3
-        sched_start = SLICE_SPATIAL_END
-        sched_len = MAX_JOBS * (2 * MAX_MACHINES) * SCHED_CHANNELS
-        sched_flat = np.zeros(sched_len, dtype=np.float32)
-        for i in range(MAX_JOBS * (2 * MAX_MACHINES)):
-            sched_flat[i * SCHED_CHANNELS + 0] = 0.1  # channel 0
-            sched_flat[i * SCHED_CHANNELS + 1] = 0.2  # channel 1
-            sched_flat[i * SCHED_CHANNELS + 2] = 0.3  # channel 2
-        raw[sched_start:sched_start + sched_len] = sched_flat
-
-        d = slice_obs(raw)
-        # After moveaxis to CHW, d["sched_matrix"][c] should be uniform
-        np.testing.assert_allclose(d["sched_matrix"][0], 0.1, atol=1e-7)
-        np.testing.assert_allclose(d["sched_matrix"][1], 0.2, atol=1e-7)
-        np.testing.assert_allclose(d["sched_matrix"][2], 0.3, atol=1e-7)
-
-    def test_total_obs_size_consistent(self):
-        """@brief TOTAL_OBS_SIZE must equal the sum of all stream lengths."""
-        expected = (
-            GRID_CHANNELS * GRID_SIZE * GRID_SIZE
-            + MAX_JOBS * (2 * MAX_MACHINES) * SCHED_CHANNELS
-            + GLOBAL_SCALARS
-            + DISTANCE_DIM
-            + EVENT_FLAGS
-        )
-        assert TOTAL_OBS_SIZE == expected, (
-            f"TOTAL_OBS_SIZE={TOTAL_OBS_SIZE} != computed {expected}"
-        )
-
-    def test_slice_boundaries_contiguous(self):
-        """@brief Slice boundaries must be contiguous with no gaps or overlaps."""
-        assert SLICE_SPATIAL_END > 0
-        assert SLICE_SCHED_END > SLICE_SPATIAL_END
-        assert SLICE_SCALARS_END > SLICE_SCHED_END
-        assert SLICE_DIST_END > SLICE_SCALARS_END
-        assert SLICE_FLAGS_END > SLICE_DIST_END
+    def test_total_obs_size_matches_csharp(self):
+        """@brief Mirrors ObservationBuilder.TotalObservationSize (64*64*3 + 100*16 + 64*17 + 16 + 6)."""
+        assert TOTAL_OBS_SIZE == 14_998
         assert SLICE_FLAGS_END == TOTAL_OBS_SIZE
+        assert (MAX_MACHINES, MACHINE_FEATURES, MAX_JOBS, JOB_FEATURES) == (100, 16, 64, 17)
+
+
+class TestCheckpointSchema:
+    """@brief Checkpoint compatibility follows the per-row feature layout, not the row caps."""
+
+    def _check(self, ckpt):
+        from train import check_obs_schema
+        check_obs_schema(ckpt, "ckpt.pt")
+
+    def test_v1_checkpoint_rejected(self):
+        try:
+            self._check({"model_state_dict": {}})   # no obs_layout = v1
+            assert False, "Expected ValueError"
+        except ValueError as e:
+            assert "schema v1" in str(e)
+
+    def test_current_layout_accepted(self):
+        self._check({"obs_layout": dict(OBS_LAYOUT)})
+
+    def test_different_row_caps_accepted(self):
+        """@brief Caps are not part of the layout: a checkpoint from a 100-row player is fine in a 200-row one."""
+        self._check({"obs_layout": dict(OBS_LAYOUT), "obs_row_caps": {"max_machines": 40, "max_jobs": 32}})
+
+    def test_different_feature_width_rejected(self):
+        layout = dict(OBS_LAYOUT, machine_features=OBS_LAYOUT["machine_features"] + 1)
+        try:
+            self._check({"obs_layout": layout})
+            assert False, "Expected ValueError"
+        except ValueError as e:
+            assert "machine_features" in str(e)
+
+    def test_weights_run_on_a_larger_table(self):
+        """@brief The same weights accept more machine/job rows (a player built with bigger caps)."""
+        net = SchedulingNetwork().eval()
+        obs = make_dummy_obs(2)
+        big = dict(obs)
+        big["machine_table"] = torch.cat([obs["machine_table"], torch.zeros(2, 100, MACHINE_FEATURES)], dim=1)
+        big["job_table"] = torch.cat([obs["job_table"], torch.zeros(2, 64, JOB_FEATURES)], dim=1)
+        with torch.no_grad():
+            torch.testing.assert_close(net(obs)[0], net(big)[0])
 
 
 # ============================================================
@@ -668,8 +660,8 @@ class TestUnitySchedulingEnv:
         assert not done
         assert abs(reward - 1.5) < 1e-6
         assert set(obs.keys()) == {
-            "factory_grid", "sched_matrix", "global_scalars",
-            "distance_matrix", "event_flags",
+            "factory_grid", "machine_table", "job_table",
+            "global_scalars", "event_flags",
         }
 
     def test_step_returns_on_terminal(self):
@@ -729,8 +721,8 @@ class TestUnitySchedulingEnv:
         obs = env.reset()
 
         assert set(obs.keys()) == {
-            "factory_grid", "sched_matrix", "global_scalars",
-            "distance_matrix", "event_flags",
+            "factory_grid", "machine_table", "job_table",
+            "global_scalars", "event_flags",
         }
         assert obs["factory_grid"].shape == (GRID_CHANNELS, GRID_SIZE, GRID_SIZE)
 
@@ -948,11 +940,7 @@ class TestVectorizedUnityEnv:
     def _make_dummy_obs_dict(self):
         """@brief Create a single-env observation dict with valid shapes."""
         return {
-            "factory_grid": np.random.rand(GRID_CHANNELS, GRID_SIZE, GRID_SIZE).astype(np.float32),
-            "sched_matrix": np.random.rand(SCHED_CHANNELS, MAX_JOBS, 2 * MAX_MACHINES).astype(np.float32),
-            "global_scalars": np.random.rand(GLOBAL_SCALARS).astype(np.float32),
-            "distance_matrix": np.random.rand(DISTANCE_DIM).astype(np.float32),
-            "event_flags": np.random.rand(EVENT_FLAGS).astype(np.float32),
+            k: np.random.rand(*shape).astype(np.float32) for k, shape in OBS_SHAPES.items()
         }
 
     def test_reset_stacks_obs(self):

@@ -5,8 +5,8 @@
 @details
 Combines the three major components into an end-to-end pipeline:
 
-  1. @ref MultiModalEncoder — five observation modalities → 464-D
-  2. @ref FusionHead — 464-D → 256-D with domain randomization
+  1. @ref MultiModalEncoder — five observation modalities → 560-D
+  2. @ref FusionHead — 560-D → 256-D with domain randomization
   3. @ref ActorCritic — 256-D → action logits + state value
 """
 
@@ -24,7 +24,7 @@ class SchedulingNetwork(nn.Module):
     """@brief End-to-end DRL network for job-shop scheduling.
 
     @details
-    Observation dict → Encoder (464-D) → Fusion (256-D) → Actor + Critic.
+    Observation dict → Encoder (560-D) → Fusion (256-D) → Actor + Critic.
 
     The network exposes three entry points depending on the call-site:
     - @ref forward — raw logits and value (general use / debugging).
@@ -60,10 +60,10 @@ class SchedulingNetwork(nn.Module):
         fusion_cfg = fusion_cfg or FusionConfig()
         ac_cfg = ac_cfg or ActorCriticConfig()
 
-        ## @brief Multi-modal encoder producing a 464-D concatenated embedding.
+        ## @brief Multi-modal encoder producing a 560-D concatenated embedding.
         self.encoder = MultiModalEncoder(encoder_cfg)
 
-        ## @brief Fusion MLP projecting encoder output (464-D → 256-D).
+        ## @brief Fusion MLP projecting encoder output (560-D → 256-D).
         self.fusion = FusionHead(
             input_dim=encoder_cfg.concat_dim,
             hidden_dim=fusion_cfg.hidden_dim,
@@ -86,7 +86,7 @@ class SchedulingNetwork(nn.Module):
                 - @c action_logits (B, 8) — raw logits over PDR rules.
                 - @c value         (B, 1) — state-value estimate.
         """
-        encoded = self.encoder(obs)       # (B, 464)
+        encoded = self.encoder(obs)       # (B, 560)
         fused = self.fusion(encoded)      # (B, 256)
         return self.actor_critic(fused)
 
@@ -137,9 +137,9 @@ class SchedulingNetwork(nn.Module):
 
         return {
             "encoder_factory_cnn": count(self.encoder.factory_encoder),
-            "encoder_sched_cnn": count(self.encoder.sched_encoder),
+            "encoder_machine_set": count(self.encoder.machine_encoder),
+            "encoder_job_set": count(self.encoder.job_encoder),
             "encoder_global_mlp": count(self.encoder.global_mlp),
-            "encoder_distance_mlp": count(self.encoder.distance_mlp),
             "encoder_event_embed": count(self.encoder.event_embed),
             "fusion_head": count(self.fusion),
             "actor": count(self.actor_critic.actor),

@@ -60,9 +60,16 @@ namespace Assets.Scripts.Simulation.Types
         /// @brief IDs of all jobs that were simultaneously ready for a routing decision (had
         ///        >=1 available eligible machine) when this one was selected via job-priority
         ///        scoring (DispatchingEngine.SelectRoutingJob). Length 1 = JobId was the only
-        ///        ready job (degenerate case, no rule ran). Diagnostic-only, not consumed by
-        ///        SelectMachine.
+        ///        ready job (degenerate case, no rule ran). When JobSelectedByRule is false, the
+        ///        executing action's rule picks among these at Step time (see
+        ///        FactoryOrchestrator.ExecuteRoutingDecision).
         public int[] JobCandidateIds;
+
+        /// @brief True when JobId was already chosen by a known rule at assembly time (heuristic
+        ///        drain or warm-up). False in agent/heuristic-Step mode, where no rule is known until
+        ///        the action arrives: JobId is then the oldest routable job (the observation's focus
+        ///        job) and the action's rule re-selects the job among JobCandidateIds.
+        public bool JobSelectedByRule;
 
         /// @brief Current queue lengths at each candidate machine (parallel to @c CandidateMachineIds).
         public float[] CandidateQueueLengths;

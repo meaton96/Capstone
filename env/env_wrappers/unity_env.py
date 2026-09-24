@@ -46,9 +46,9 @@ from mlagents_envs.side_channel.engine_configuration_channel import (
 )
 
 from config import (
-    GRID_SIZE, GRID_CHANNELS, MAX_JOBS, MAX_MACHINES, SCHED_CHANNELS,
-    TOTAL_OBS_SIZE, SLICE_SPATIAL_END, SLICE_SCHED_END, SLICE_SCALARS_END,
-    SLICE_DIST_END, SLICE_FLAGS_END,
+    GRID_SIZE, GRID_CHANNELS, MAX_JOBS, JOB_FEATURES, MAX_MACHINES, MACHINE_FEATURES,
+    TOTAL_OBS_SIZE, SLICE_SPATIAL_END, SLICE_MACHINES_END, SLICE_JOBS_END,
+    SLICE_SCALARS_END, SLICE_FLAGS_END,
 )
 from channels.channels import EpisodeConfigChannel, EpisodeSeedChannel, EpisodeTelemetryChannel
 from rewards import (
@@ -65,31 +65,21 @@ SEED_BUFFER = 4
 
 
 def slice_obs(raw: np.ndarray) -> Dict[str, np.ndarray]:
-    """@brief Slice a flat observation vector into the five named streams."""
+    """@brief Slice a flat observation vector into the five named streams (schema v2, see config.py)."""
     assert raw.shape[-1] == TOTAL_OBS_SIZE, (
-        f"Expected {TOTAL_OBS_SIZE} floats, got {raw.shape[-1]}"
+        f"Expected {TOTAL_OBS_SIZE} floats, got {raw.shape[-1]} -- player and env/config.py "
+        f"observation schemas differ (rebuild the player or sync config.py)"
     )
-
-    factory_grid = raw[..., :SLICE_SPATIAL_END].reshape(
-        *raw.shape[:-1], GRID_CHANNELS, GRID_SIZE, GRID_SIZE
-    )
-
-    sched_cols = 2 * MAX_MACHINES
-    sched_hwc = raw[..., SLICE_SPATIAL_END:SLICE_SCHED_END].reshape(
-        *raw.shape[:-1], MAX_JOBS, sched_cols, SCHED_CHANNELS
-    )
-    sched_matrix = np.moveaxis(sched_hwc, -1, -3)
-
-    global_scalars  = raw[..., SLICE_SCHED_END:SLICE_SCALARS_END]
-    distance_matrix = raw[..., SLICE_SCALARS_END:SLICE_DIST_END]
-    event_flags     = raw[..., SLICE_DIST_END:SLICE_FLAGS_END]
-
+    lead = raw.shape[:-1]
     return {
-        "factory_grid":    factory_grid.astype(np.float32),
-        "sched_matrix":    sched_matrix.astype(np.float32),
-        "global_scalars":  global_scalars.astype(np.float32),
-        "distance_matrix": distance_matrix.astype(np.float32),
-        "event_flags":     event_flags.astype(np.float32),
+        "factory_grid": raw[..., :SLICE_SPATIAL_END].reshape(
+            *lead, GRID_CHANNELS, GRID_SIZE, GRID_SIZE).astype(np.float32),
+        "machine_table": raw[..., SLICE_SPATIAL_END:SLICE_MACHINES_END].reshape(
+            *lead, MAX_MACHINES, MACHINE_FEATURES).astype(np.float32),
+        "job_table": raw[..., SLICE_MACHINES_END:SLICE_JOBS_END].reshape(
+            *lead, MAX_JOBS, JOB_FEATURES).astype(np.float32),
+        "global_scalars": raw[..., SLICE_JOBS_END:SLICE_SCALARS_END].astype(np.float32),
+        "event_flags": raw[..., SLICE_SCALARS_END:SLICE_FLAGS_END].astype(np.float32),
     }
 
 

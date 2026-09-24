@@ -103,6 +103,10 @@ namespace Assets.Scripts.Simulation.Machines
         /// @details Normalize against @c SampledRepairDuration for the Global Scalars observation channel.
         public float RemainingRepairTime { get; private set; }
 
+        /// @brief Remaining processing time of the current operation in seconds (0 when idle).
+        /// @details Read by ObservationBuilder's machine table.
+        public float RemainingProcessingTime => IsIdle ? 0f : Mathf.Max(remainingTime, 0f);
+
         /// @brief True when this machine can accept new work.
         ///
         /// @details Use this property to filter routing candidates and dispatch decisions

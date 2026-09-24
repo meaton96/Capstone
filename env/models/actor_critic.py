@@ -3,7 +3,7 @@
 @brief Fusion head and Actor-Critic output heads.
 
 @details
-Pipeline: 464-D concat → Fusion (256-D) → Actor (8 PDR actions) + Critic (V).
+Pipeline: 560-D concat → Fusion (256-D) → Actor (8 PDR actions) + Critic (V).
 
 The fusion head projects the concatenated encoder features down to a
 shared 256-D representation consumed by both the actor and critic
@@ -28,10 +28,10 @@ class FusionHead(nn.Module):
     Architecture: Linear(@p input_dim, @p hidden_dim) → LayerNorm → SiLU
     → Linear(@p hidden_dim, @p output_dim) → LayerNorm → SiLU.
 
-    Default dimensionality: 464-D → 256-D.
+    Default dimensionality: 560-D → 256-D.
     """
 
-    def __init__(self, input_dim: int = 464, hidden_dim: int = 512,
+    def __init__(self, input_dim: int = 560, hidden_dim: int = 512,
                  output_dim: int = 256):
         """@brief Construct the fusion head.
 

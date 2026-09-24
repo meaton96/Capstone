@@ -200,6 +200,13 @@ namespace Assets.Scripts.Simulation
         public double SimTime => _simTime;
 
         /// <summary>
+        /// Cumulative utilization (busy / operational time so far) of a machine as of now — the same
+        /// signal the MMUR rules route on. 0 before the episode's decision coordinator exists.
+        /// </summary>
+        public float MachineUtilization(int machineId) =>
+            _decisions != null ? _decisions.MachineUtilization(machineId, _simTime) : 0f;
+
+        /// <summary>
         /// The current FJSSP configuration for this episode.
         /// </summary>
         public FJSSPConfig CurrentConfig => currentConfig;
@@ -1156,6 +1163,27 @@ namespace Assets.Scripts.Simulation
         /// <param name="actionIndex">The action index encoding the machine selection.</param>
         private void ExecuteRoutingDecision(int actionIndex)
         {
+            // Job half of the rule. When no rule was known at assembly time (agent, or heuristic via
+            // Step), JobId is only the oldest routable job; apply the action's job-priority rule now so
+            // routing uses both halves of the rule, as heuristic-drain mode already did. Before this, the
+            // routed job was always the oldest one in these modes, for PDR sweeps and the agent alike.
+            DecisionRequest req = CurrentDecision;
+            if (!req.JobSelectedByRule && req.JobCandidateIds != null && req.JobCandidateIds.Length > 1)
+            {
+                int jobId = DispatchingEngine.SelectRoutingJob(actionIndex, new List<int>(req.JobCandidateIds), Jobs, SimTime);
+                JobData picked = jobId >= 0 ? Jobs.Get(jobId) : null;
+                if (picked != null && jobId != req.JobId && picked.State == JobState.NeedsRouting)
+                {
+                    DecisionRequest rebuilt = _decisions.BuildRoutingDecision(picked, countsAsNewDecision: false);
+                    if (rebuilt.CandidateMachineIds.Length > 0)
+                    {
+                        rebuilt.JobCandidateIds = req.JobCandidateIds;
+                        rebuilt.JobSelectedByRule = true;
+                        CurrentDecision = rebuilt;
+                    }
+                }
+            }
+
             int chosenMachineId = DispatchingEngine.SelectMachine(actionIndex, CurrentDecision);
             LogRoutingDecision(chosenMachineId);
             JobData job = Jobs.Get(CurrentDecision.JobId);

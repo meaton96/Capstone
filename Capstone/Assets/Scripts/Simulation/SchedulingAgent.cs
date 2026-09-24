@@ -1,6 +1,7 @@
 using Assets.Scripts.Simulation.Logging;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
+using Unity.MLAgents.Policies;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
 using Assets.Scripts.Simulation.Types;
@@ -70,6 +71,15 @@ namespace Assets.Scripts.Simulation
         {
             if (GetComponent<RewardMetricsSensorComponent>() == null)
                 gameObject.AddComponent<RewardMetricsSensorComponent>();
+
+            // The scene serializes BehaviorParameters.VectorObservationSize; derive it from the builder so a
+            // schema change can't leave the two out of sync. Awake runs before Agent.OnEnable creates sensors.
+            var behavior = GetComponent<BehaviorParameters>();
+            if (behavior != null && behavior.BrainParameters.VectorObservationSize != ObservationSize)
+            {
+                SimLogger.Low($"[Agent] VectorObservationSize {behavior.BrainParameters.VectorObservationSize} -> {ObservationSize} (ObservationBuilder schema).");
+                behavior.BrainParameters.VectorObservationSize = ObservationSize;
+            }
         }
 
         /// @brief Subscribes to simulation events once every scene object has finished Awake.

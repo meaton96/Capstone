@@ -102,7 +102,7 @@ namespace Assets.Scripts.Simulation
         /// _tracker, which only accumulates on operation completion) on top of the tracker's
         /// closed-operation total.
         /// </summary>
-        private float MachineUtilization(int machineId, double simTime)
+        public float MachineUtilization(int machineId, double simTime)
         {
             double busy = _tracker.ProcessingTimeSoFar(machineId);
             if (_machineProcessingStartTime.TryGetValue(machineId, out double opStart))
@@ -167,9 +167,10 @@ namespace Assets.Scripts.Simulation
 
                 if (routableIds.Count > 0)
                 {
-                    int chosenJobId = SelectRoutingJobId(routableIds);
+                    int chosenJobId = SelectRoutingJobId(routableIds, out bool selectedByRule);
                     DecisionRequest decision = BuildRoutingDecision(_jobs.Get(chosenJobId));
                     decision.JobCandidateIds = routableIds.ToArray();
+                    decision.JobSelectedByRule = selectedByRule;
                     return decision;
                 }
             }
@@ -191,12 +192,19 @@ namespace Assets.Scripts.Simulation
         /// known; falls back to first-in-list (previous FIFO behaviour, unchanged) in RL-agent
         /// mode or when only one job is routable (no real choice either way).
         /// </summary>
-        private int SelectRoutingJobId(List<int> routableIds)
+        private int SelectRoutingJobId(List<int> routableIds, out bool selectedByRule)
         {
+            selectedByRule = true;
             if (routableIds.Count == 1) return routableIds[0];
 
             int actionIndex = _getBaselineActionIndex?.Invoke() ?? -1;
-            if (actionIndex < 0) return routableIds[0];
+            if (actionIndex < 0)
+            {
+                // No rule known yet (agent, or heuristic via Step): hand over the oldest routable job as a
+                // placeholder; FactoryOrchestrator.ExecuteRoutingDecision re-selects with the action's rule.
+                selectedByRule = false;
+                return routableIds[0];
+            }
 
             return DispatchingEngine.SelectRoutingJob(actionIndex, routableIds, _jobs, _getSimTime());
         }
@@ -211,7 +219,7 @@ namespace Assets.Scripts.Simulation
         /// A DecisionRequest containing routing options with candidate machine IDs, queue lengths,
         /// and processing times for the specified job.
         /// </returns>
-        public DecisionRequest BuildRoutingDecision(JobData job)
+        public DecisionRequest BuildRoutingDecision(JobData job, bool countsAsNewDecision = true)
         {
             var eligibleIds = new HashSet<int>(
                 job.EligibleMachinesPerOp[job.CurrentOpIndex].Keys);
@@ -221,8 +229,9 @@ namespace Assets.Scripts.Simulation
                 .Select(m => m.MachineId)
                 .ToList();
 
-            int currentDecisionCount = _getDecisionCount();
-            _incrementDecisionCount();
+            // countsAsNewDecision = false re-targets a decision already counted (Step-time job re-selection).
+            int currentDecisionCount = countsAsNewDecision ? _getDecisionCount() : _getDecisionCount() - 1;
+            if (countsAsNewDecision) _incrementDecisionCount();
             double simTime = _getSimTime();
 
             return new DecisionRequest

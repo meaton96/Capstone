@@ -3,14 +3,18 @@
 @brief Configuration for DRL Job-Shop Scheduling Architecture.
 
 @details
-All dimensions are synced to the C# ObservationBuilder constants:
+Observation schema v2 (2026-09-24). All dimensions are synced to the C# ObservationBuilder constants:
   SpatialGridSize = 64,  SpatialChannels = 3
-  MaxJobs         = 20,  MaxMachines     = 8,  SchedChannels = 3
-  GlobalScalarLength = 10
-  DistanceLength     = 64  (8 x 8)
+  MaxMachines = 100, MachineFeatures = 16     (machine table, one row per machine, zero-padded)
+  MaxJobs     = 64,  JobFeatures     = 17     (job table over ACTIVE jobs, decision-relevant first)
+  GlobalScalarLength = 16
   EventFlagLength    = 6
 
-Total flat observation from ML-Agents: 13,328 floats.
+Total flat observation from ML-Agents: 14,998 floats.
+
+v1 (13,328 floats) had an 8-machine x first-20-jobs scheduling matrix and an 8x8 distance matrix: on the
+15-machine floor it dropped machines 8-14 and went blank once the first 20 jobs had exited. v1 checkpoints
+do not load into v2 networks.
 """
 
 from dataclasses import dataclass, field
@@ -21,28 +25,61 @@ from typing import List, Tuple
 #  Observation-stream dimensions  (must mirror ObservationBuilder.cs)
 # ─────────────────────────────────────────────────────────────────────
 
-## @brief C#-side constants reproduced here so every Python file can
-##        import a single source of truth.
-GRID_SIZE       = 64
-GRID_CHANNELS   = 3
-MAX_JOBS        = 20
-MAX_MACHINES    = 8      # m — half-columns in the scheduling matrix
-SCHED_CHANNELS  = 3
-GLOBAL_SCALARS  = 10
-DISTANCE_DIM    = MAX_MACHINES * MAX_MACHINES   # 64
-EVENT_FLAGS     = 6
+## @brief Version of the observation's column meanings; bump together with ObservationBuilder.cs whenever a
+##        feature is added, removed or redefined.
+OBS_SCHEMA_VERSION = 2
 
-## @brief Byte-lengths of each stream inside the flat vector.
-SPATIAL_LEN     = GRID_CHANNELS * GRID_SIZE * GRID_SIZE   # 12 288
-SCHED_LEN       = MAX_JOBS * (2 * MAX_MACHINES) * SCHED_CHANNELS  # 960
-TOTAL_OBS_SIZE  = SPATIAL_LEN + SCHED_LEN + GLOBAL_SCALARS + DISTANCE_DIM + EVENT_FLAGS  # 13 328
+GRID_SIZE        = 64
+GRID_CHANNELS    = 3
+MAX_MACHINES     = 100
+MACHINE_FEATURES = 16
+MAX_JOBS         = 64
+JOB_FEATURES     = 17
+GLOBAL_SCALARS   = 16
+EVENT_FLAGS      = 6
 
-## @brief Slice boundaries inside the flat observation vector.
-SLICE_SPATIAL_END   = SPATIAL_LEN
-SLICE_SCHED_END     = SLICE_SPATIAL_END + SCHED_LEN
-SLICE_SCALARS_END   = SLICE_SCHED_END  + GLOBAL_SCALARS
-SLICE_DIST_END      = SLICE_SCALARS_END + DISTANCE_DIM
-SLICE_FLAGS_END     = SLICE_DIST_END    + EVENT_FLAGS  # == TOTAL_OBS_SIZE
+## @brief Column meanings (see ObservationBuilder.BuildMachineTable / BuildJobTable). Column 0 of both
+##        tables is the "present" mask; the candidate column marks rows that are options in the
+##        current decision.
+MACHINE_PRESENT_COL   = 0
+MACHINE_CANDIDATE_COL = 13
+JOB_PRESENT_COL       = 0
+JOB_CANDIDATE_COL     = 15
+
+## @brief Lengths of each stream inside the flat vector.
+SPATIAL_LEN       = GRID_CHANNELS * GRID_SIZE * GRID_SIZE    # 12 288
+MACHINE_TABLE_LEN = MAX_MACHINES * MACHINE_FEATURES          #  1 600
+JOB_TABLE_LEN     = MAX_JOBS * JOB_FEATURES                  #  1 088
+TOTAL_OBS_SIZE    = SPATIAL_LEN + MACHINE_TABLE_LEN + JOB_TABLE_LEN + GLOBAL_SCALARS + EVENT_FLAGS  # 14 998
+
+## @brief Slice boundaries inside the flat observation vector (C# FlattenStreams order).
+SLICE_SPATIAL_END  = SPATIAL_LEN
+SLICE_MACHINES_END = SLICE_SPATIAL_END + MACHINE_TABLE_LEN
+SLICE_JOBS_END     = SLICE_MACHINES_END + JOB_TABLE_LEN
+SLICE_SCALARS_END  = SLICE_JOBS_END + GLOBAL_SCALARS
+SLICE_FLAGS_END    = SLICE_SCALARS_END + EVENT_FLAGS          # == TOTAL_OBS_SIZE
+
+## @brief What a trained network depends on: column meanings and per-row widths. The row caps
+##        (MAX_MACHINES, MAX_JOBS) are deliberately NOT part of it -- the set encoders' weights do not
+##        depend on the row count, so raising a cap (and rebuilding the player) keeps checkpoints loadable.
+OBS_LAYOUT = {
+    "schema_version": OBS_SCHEMA_VERSION,
+    "grid": [GRID_CHANNELS, GRID_SIZE, GRID_SIZE],
+    "machine_features": MACHINE_FEATURES,
+    "job_features": JOB_FEATURES,
+    "global_scalars": GLOBAL_SCALARS,
+    "event_flags": EVENT_FLAGS,
+}
+
+## @brief Per-key observation shapes (no batch dim) — the single source for train.py, the
+##        placeholder env and tests.
+OBS_SHAPES = {
+    "factory_grid":   (GRID_CHANNELS, GRID_SIZE, GRID_SIZE),
+    "machine_table":  (MAX_MACHINES, MACHINE_FEATURES),
+    "job_table":      (MAX_JOBS, JOB_FEATURES),
+    "global_scalars": (GLOBAL_SCALARS,),
+    "event_flags":    (EVENT_FLAGS,),
+}
 
 
 @dataclass
@@ -51,40 +88,30 @@ class EnvConfig:
 
     grid_size: int = GRID_SIZE
     grid_channels: int = GRID_CHANNELS
-    num_machines_range: Tuple[int, int] = (4, MAX_MACHINES)
-    num_jobs_range: Tuple[int, int] = (10, MAX_JOBS)
-    ops_per_machine: int = MAX_MACHINES
-    processing_time_range: Tuple[int, int] = (1, 99)
+    num_machines_range: Tuple[int, int] = (4, 20)
+    num_jobs_range: Tuple[int, int] = (5, MAX_JOBS)
     num_global_scalars: int = GLOBAL_SCALARS
-    distance_matrix_dim: int = DISTANCE_DIM
     num_event_flags: int = EVENT_FLAGS
     max_machines: int = MAX_MACHINES
+    machine_features: int = MACHINE_FEATURES
     max_jobs: int = MAX_JOBS
-
-
-@dataclass
-class SchedulingMatrixConfig:
-    """@brief Scheduling-matrix image dimensions: n × 2m × 3.
-
-    @details
-    The C# side lays out the matrix in (jobs, cols, channels) order
-    — i.e. HWC.  Python reshapes to (channels, jobs, cols) = CHW
-    for the CNN encoder.
-    """
-
-    max_jobs: int = MAX_JOBS           # 20  (rows)
-    max_cols: int = 2 * MAX_MACHINES   # 16  (columns)
-    channels: int = SCHED_CHANNELS     # 3
+    job_features: int = JOB_FEATURES
 
 
 @dataclass
 class EncoderConfig:
-    """@brief Encoder output dimensions from the architecture diagram."""
+    """@brief Encoder output dimensions.
+
+    @details The machine and job tables go through set encoders (shared per-row MLP, masked mean + max
+    pooling over all present rows and over decision-candidate rows), so the embedding does not depend
+    on the floor size or on row order.
+    """
 
     factory_cnn_out: int = 256
-    sched_cnn_out: int = 128
+    machine_set_out: int = 128
+    job_set_out: int = 128
+    set_row_hidden: int = 64
     global_mlp_out: int = 32
-    distance_mlp_out: int = 32
     event_embed_out: int = 16
     sppf_pool_sizes: List[int] = field(default_factory=lambda: [5, 9, 13])
 
@@ -92,18 +119,17 @@ class EncoderConfig:
     def concat_dim(self) -> int:
         return (
             self.factory_cnn_out
-            + self.sched_cnn_out
+            + self.machine_set_out
+            + self.job_set_out
             + self.global_mlp_out
-            + self.distance_mlp_out
             + self.event_embed_out
         )
 
 
 @dataclass
 class FusionConfig:
-    """@brief Fusion head parameters."""
+    """@brief Fusion head parameters (input is EncoderConfig.concat_dim, 560 by default)."""
 
-    input_dim: int = 464
     hidden_dim: int = 512
     output_dim: int = 256
 

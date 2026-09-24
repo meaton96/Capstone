@@ -15,17 +15,32 @@ namespace Assets.Scripts.Simulation
         public const int SpatialChannels = 3;
         public const int SpatialLength = SpatialGridSize * SpatialGridSize * SpatialChannels;
 
-        public const int MaxJobs = 20;
-        public const int MaxMachines = 8;
-        public const int SchedChannels = 3;
-        public const int SchedulingLength = MaxJobs * (2 * MaxMachines) * SchedChannels;
+        // Observation schema v2 (2026-09-24). v1 had an 8-machine x first-20-jobs scheduling matrix and an
+        // 8x8 distance matrix, which on the 15-machine floor dropped machines 8-14 and went blank once
+        // the first 20 jobs exited. v2 uses per-entity tables sized for the largest planned floor (100
+        // machines, E4); the Python side encodes them with set pooling, so one network serves any floor
+        // up to MaxMachines. Keep env/config.py in sync.
+        public const int MaxMachines = 100;
+        public const int MachineFeatures = 16;
+        public const int MachineTableLength = MaxMachines * MachineFeatures;
 
-        public const int GlobalScalarLength = 10;
-        public const int DistanceLength = MaxMachines * MaxMachines;
+        public const int MaxJobs = 64;
+        public const int JobFeatures = 17;
+        public const int JobTableLength = MaxJobs * JobFeatures;
+
+        public const int GlobalScalarLength = 16;
         public const int EventFlagLength = 6;
 
         public static int TotalObservationSize =>
-            SpatialLength + SchedulingLength + GlobalScalarLength + DistanceLength + EventFlagLength;
+            SpatialLength + MachineTableLength + JobTableLength + GlobalScalarLength + EventFlagLength;
+
+        // Half-saturation scales for Squash() (sim-seconds, or counts).
+        private const float TimeScale = 300f;     // operation / repair / waiting durations
+        private const float AgeScale = 1200f;     // job age and remaining work (several operations)
+        private const float HorizonScale = 7200f; // sim time
+        private const float CountScale = 5f;      // queue lengths, candidate counts, eligible machines
+        private const float OpsScale = 3f;        // remaining operations
+        private const float WipScale = 30f;       // active jobs
 
         private const float NoiseStdDev = 0.02f;
         private const float DropoutRate = 0.05f;
@@ -45,19 +60,19 @@ namespace Assets.Scripts.Simulation
         public float[] BuildCompleteSnapshot(DecisionRequest currentDecision)
         {
             float[] spatialGrid = BuildSpatialOccupancyGrid();
-            float[] schedulingMatrix = BuildSchedulingMatrix();
-            float[] globalScalars = BuildGlobalScalars();
-            float[] distanceMatrix = BuildDistanceMatrix();
+            float[] machineTable = BuildMachineTable(currentDecision);
+            float[] jobTable = BuildJobTable(currentDecision);
+            float[] globalScalars = BuildGlobalScalars(currentDecision);
             float[] eventFlags = BuildEventFlags(currentDecision);
 
-            // ApplyDomainRandomization(spatialGrid, schedulingMatrix, globalScalars);
+            // ApplyDomainRandomization(spatialGrid, jobTable, globalScalars);
 
-            return FlattenStreams(spatialGrid, schedulingMatrix, globalScalars, distanceMatrix, eventFlags);
+            return FlattenStreams(spatialGrid, machineTable, jobTable, globalScalars, eventFlags);
         }
 
         /**
          * @brief Builds the 64x64x3 spatial occupancy grid.
-         * @details Channel 0 encodes machine status (idle=0.25, processing=0.75, finished=1.0).
+         * @details Channel 0 encodes machine status (idle=0.25, down=0.5, processing=0.75, finished=1.0).
          *          Channel 1 encodes job locations, with intensity set to the normalized
          *          remaining-ops fraction. Channel 2 encodes AGV locations and movement
          *          state (idle=0.25, returning=0.30, moving-to-pickup=0.50, carrying=0.75).
@@ -87,7 +102,8 @@ namespace Assets.Scripts.Simulation
                 if (!InBounds(gx, gy)) continue;
 
                 float val;
-                if (m.FinishedFlag) val = 1.0f;
+                if (!m.IsAvailableForWork) val = 0.5f;   // down: a repairing machine is otherwise IsIdle
+                else if (m.FinishedFlag) val = 1.0f;
                 else if (!m.IsIdle) val = 0.75f;
                 else val = 0.25f;
 
@@ -138,179 +154,284 @@ namespace Assets.Scripts.Simulation
         }
 
         /**
-         * @brief Builds the scheduling matrix of shape (MaxJobs, 2 * MaxMachines, 3).
-         * @details Rows are jobs padded/truncated to MaxJobs. The first MaxMachines columns
-         *          represent the current operation; the next MaxMachines columns represent
-         *          the next operation. Channel 0 is normalized processing time (0 if
-         *          ineligible), channel 1 is the completion flag, channel 2 is the machine
-         *          busy flag.
-         * @return Flattened scheduling matrix.
+         * @brief Bounded, scale-free squash for non-negative magnitudes: x / (x + scale), in [0, 1).
+         * @details Durations and counts have no fixed upper bound (op lengths and WIP vary per
+         *          episode), so min-max normalisation against a config maximum either saturates or
+         *          wastes range. Half-saturation at @p scale keeps typical values mid-range.
          */
-        private float[] BuildSchedulingMatrix()
+        private static float Squash(double x, float scale)
         {
-            float[] matrix = new float[SchedulingLength];
-
-            IReadOnlyList<JobData> jobs = FactoryOrchestrator.Instance.Jobs.AllJobs;
-            FactoryLayoutManager layout = FactoryLayoutManager.Instance;
-            if (layout == null) return matrix;
-
-            float maxProcTime = FactoryOrchestrator.Instance.CurrentConfig != null ? FactoryOrchestrator.Instance.CurrentConfig.MaxProcTime : 90f;
-
-            int colWidth = 2 * MaxMachines;
-
-            for (int j = 0; j < Mathf.Min(jobs.Count, MaxJobs); j++)
-            {
-                JobData job = jobs[j];
-
-                // Current operation slice (columns 0 to MaxMachines-1).
-                if (job.CurrentOpIndex < job.TotalOperations)
-                {
-                    var eligible = job.EligibleMachinesPerOp[job.CurrentOpIndex];
-                    foreach (var kvp in eligible)
-                    {
-                        int machId = kvp.Key;
-                        if (machId >= MaxMachines) continue;
-
-                        float normTime = kvp.Value / Mathf.Max(maxProcTime, 0.001f);
-
-                        int baseIdx = (j * colWidth + machId) * SchedChannels;
-                        matrix[baseIdx + 0] = Mathf.Clamp01(normTime);
-                        matrix[baseIdx + 1] = 0f;
-                        matrix[baseIdx + 2] = layout.GetMachine(machId) != null && !layout.GetMachine(machId).IsIdle ? 1f : 0f;
-                    }
-                }
-
-                // Mark completed ops.
-                if (job.CompletedOps > 0 && job.CurrentOpIndex > 0)
-                {
-                    int prevOp = job.CurrentOpIndex - 1;
-                    if (prevOp < job.EligibleMachinesPerOp.Length)
-                    {
-                        foreach (var kvp in job.EligibleMachinesPerOp[prevOp])
-                        {
-                            int machId = kvp.Key;
-                            if (machId >= MaxMachines) continue;
-                            int baseIdx = (j * colWidth + machId) * SchedChannels;
-                            matrix[baseIdx + 1] = 1f;
-                        }
-                    }
-                }
-
-                // Next operation slice (columns MaxMachines to 2*MaxMachines-1).
-                int nextOp = job.CurrentOpIndex + 1;
-                if (nextOp < job.TotalOperations)
-                {
-                    var eligible = job.EligibleMachinesPerOp[nextOp];
-                    foreach (var kvp in eligible)
-                    {
-                        int machId = kvp.Key;
-                        if (machId >= MaxMachines) continue;
-
-                        float normTime = kvp.Value / Mathf.Max(maxProcTime, 0.001f);
-
-                        int col = MaxMachines + machId;
-                        int baseIdx = (j * colWidth + col) * SchedChannels;
-                        matrix[baseIdx + 0] = Mathf.Clamp01(normTime);
-                        matrix[baseIdx + 1] = 0f;
-                        matrix[baseIdx + 2] = layout.GetMachine(machId) != null && !layout.GetMachine(machId).IsIdle ? 1f : 0f;
-                    }
-                }
-            }
-
-            return matrix;
+            if (x <= 0.0) return 0f;
+            return (float)(x / (x + scale));
         }
 
         /**
-         * @brief Builds the 10-dimensional global scalar feature vector.
-         * @details Encodes simulation time, job state fractions, machine/AGV utilization,
-         *          queue pressure, and normalized decision index.
-         * @return Float array of length GlobalScalarLength.
+         * @brief One-hot index of a job state among the five pre-exit states, or -1 for Exited.
          */
-        private float[] BuildGlobalScalars()
+        private static int StateSlot(JobState s) => s switch
         {
-            float[] s = new float[GlobalScalarLength];
-            JobStore store = FactoryOrchestrator.Instance.Jobs;
+            JobState.NeedsRouting => 0,
+            JobState.WaitingForPickup => 1,
+            JobState.InTransit => 2,
+            JobState.Queued => 3,
+            JobState.Processing => 4,
+            _ => -1,
+        };
+
+        /**
+         * @brief Builds the machine table, shape (MaxMachines, MachineFeatures), one row per machine
+         *        in machine-id order, zero-padded past the floor's machine count.
+         * @details Features (all in [0, 1]):
+         *   [0]  present (1 for a real machine; padding rows are all zero)
+         *   [1-5] primary type one-hot (Mill, Lathe, Weld, Inspect, Assemble)
+         *   [6]  busy (processing an operation)
+         *   [7]  operational (0 while Failed or Repairing)
+         *   [8]  remaining repair time, squashed (TimeScale)
+         *   [9]  remaining processing time of the current operation, squashed (TimeScale)
+         *   [10] committed work: queued + in-transit/awaiting-pickup jobs targeted here, squashed (TimeScale)
+         *   [11] jobs physically queued here, squashed (CountScale)
+         *   [12] cumulative utilisation, busy / operational time so far (the MMUR signal)
+         *   [13] candidate for the current decision (routing: eligible and operational; dispatch: the machine dispatching)
+         *   [14] routing only: processing time of the focus job's current op on this machine, squashed (TimeScale)
+         *   [15] routing only: distance from the focus job's position to this machine / floor diagonal
+         * The focus job is DecisionRequest.JobId: with several routable jobs and no rule known yet (agent
+         * mode) it is the oldest routable job, and the action's rule may route another candidate instead
+         * (FactoryOrchestrator.ExecuteRoutingDecision); those candidates' own signals are in the job table.
+         */
+        private float[] BuildMachineTable(DecisionRequest req)
+        {
+            float[] table = new float[MachineTableLength];
+            FactoryOrchestrator orch = FactoryOrchestrator.Instance;
             FactoryLayoutManager layout = FactoryLayoutManager.Instance;
+            if (layout == null || layout.Machines == null || orch == null) return table;
 
-            int totalJobs = Mathf.Max(store.JobCount, 1);
-            int totalMachines = layout != null ? layout.MachineCount : 1;
+            JobStore store = orch.Jobs;
+            var queuedCount = new Dictionary<int, int>();
+            foreach (JobData job in store.AllJobs)
+                if (job.State == JobState.Queued && job.LocationMachineId >= 0)
+                    queuedCount[job.LocationMachineId] = queuedCount.TryGetValue(job.LocationMachineId, out int c) ? c + 1 : 1;
 
-            // [0] Normalized simulation time against a rough horizon estimate.
-            float horizon = FactoryOrchestrator.Instance.CurrentConfig != null
-                ? FactoryOrchestrator.Instance.CurrentConfig.MaxProcTime * (FactoryOrchestrator.Instance.CurrentConfig.MaxOpsPerJob)
-                : 500f;
-            s[0] = Mathf.Clamp01((float)FactoryOrchestrator.Instance.SimTime / horizon);
-
-            // [1] Overall completion ratio.
-            s[1] = (float)store.CountInState(JobState.Exited) / totalJobs;
-
-            // [2] Fraction of jobs currently processing.
-            s[2] = (float)store.CountInState(JobState.Processing) / totalJobs;
-
-            // [3] Fraction of jobs waiting for pickup or in transit.
-            s[3] = (float)(store.CountInState(JobState.WaitingForPickup) +
-                           store.CountInState(JobState.InTransit)) / totalJobs;
-
-            // [4] Fraction of jobs queued at machines.
-            s[4] = (float)store.CountInState(JobState.Queued) / totalJobs;
-
-            // [5] Fraction of jobs needing routing decisions.
-            s[5] = (float)store.CountInState(JobState.NeedsRouting) / totalJobs;
-
-            // [6] Machine utilization.
-            if (layout != null && layout.Machines != null)
+            var candidates = new HashSet<int>();
+            JobData focus = null;
+            Vector3 focusPos = Vector3.zero;
+            if (req != null && req.Type == DecisionType.Routing)
             {
-                int busy = 0;
-                foreach (PhysicalMachine m in layout.Machines)
-                    if (!m.IsIdle) busy++;
-                s[6] = (float)busy / Mathf.Max(totalMachines, 1);
+                if (req.CandidateMachineIds != null) candidates.UnionWith(req.CandidateMachineIds);
+                focus = store.Get(req.JobId);
+                if (focus != null) focusPos = GetJobWorldPosition(focus, layout);
+            }
+            else if (req != null && req.Type == DecisionType.Dispatch)
+            {
+                candidates.Add(req.MachineId);
             }
 
-            // [7] AGV utilization.
+            Vector2 floor = layout.FloorSize;
+            float diag = Mathf.Max(floor.magnitude, 1f);
+
+            int n = Mathf.Min(layout.Machines.Count, MaxMachines);
+            for (int i = 0; i < n; i++)
+            {
+                PhysicalMachine m = layout.Machines[i];
+                int b = i * MachineFeatures;
+                table[b + 0] = 1f;
+                int type = (int)m.PrimaryType;
+                if (type >= 0 && type < 5) table[b + 1 + type] = 1f;
+                table[b + 6] = m.IsIdle ? 0f : 1f;
+                table[b + 7] = m.IsAvailableForWork ? 1f : 0f;
+                table[b + 8] = Squash(m.RemainingRepairTime, TimeScale);
+                table[b + 9] = Squash(m.RemainingProcessingTime, TimeScale);
+                table[b + 10] = Squash(store.GetMachineLoad(m.MachineId), TimeScale);
+                table[b + 11] = Squash(queuedCount.TryGetValue(m.MachineId, out int q) ? q : 0, CountScale);
+                table[b + 12] = Mathf.Clamp01(orch.MachineUtilization(m.MachineId));
+                table[b + 13] = candidates.Contains(m.MachineId) ? 1f : 0f;
+                if (focus != null && focus.CurrentOpIndex < focus.TotalOperations
+                    && focus.EligibleMachinesPerOp[focus.CurrentOpIndex].TryGetValue(m.MachineId, out float pt))
+                {
+                    table[b + 14] = Squash(pt, TimeScale);
+                    table[b + 15] = Mathf.Clamp01(Vector3.Distance(focusPos, m.transform.position) / diag);
+                }
+            }
+            return table;
+        }
+
+        /**
+         * @brief Builds the job table, shape (MaxJobs, JobFeatures), over ACTIVE jobs only
+         *        (arrived and not exited), zero-padded.
+         * @details The store keeps every job ever spawned, so the old matrix (first MaxJobs entries
+         *          of AllJobs) went blank once the first jobs exited. Rows are filled in priority
+         *          order so truncation drops the least relevant jobs: the routing focus job, then
+         *          the other decision candidates (routable jobs / the dispatching machine's queue),
+         *          then every other active job oldest-first. Row order carries no meaning beyond
+         *          that; the Python side pools over rows.
+         *   [0]  present
+         *   [1-5] state one-hot (NeedsRouting, WaitingForPickup, InTransit, Queued, Processing)
+         *   [6]  deferred (every eligible machine for its next op is down)
+         *   [7]  age since arrival, squashed (AgeScale)
+         *   [8]  time in current state, squashed (TimeScale)
+         *   [9]  remaining operations incl. current, squashed (OpsScale)
+         *   [10] current op's minimum processing time over eligible machines, squashed (TimeScale)
+         *   [11] remaining work: sum of per-op minimum processing times, squashed (AgeScale)
+         *   [12] eligible machines for the current op, squashed (CountScale)
+         *   [13] fraction of those eligible machines currently operational
+         *   [14] routing focus job (DecisionRequest.JobId; see BuildMachineTable on agent mode)
+         *   [15] decision candidate (routing: routable job; dispatch: queued at the dispatching machine)
+         *   [16] dispatch only: processing time on the dispatching machine, squashed (TimeScale)
+         */
+        private float[] BuildJobTable(DecisionRequest req)
+        {
+            float[] table = new float[JobTableLength];
+            FactoryOrchestrator orch = FactoryOrchestrator.Instance;
+            FactoryLayoutManager layout = FactoryLayoutManager.Instance;
+            if (orch == null || layout == null) return table;
+
+            JobStore store = orch.Jobs;
+            double now = orch.SimTime;
+
+            int focusId = -1;
+            var candidateIds = new HashSet<int>();
+            int dispatchMachine = -1;
+            if (req != null && req.Type == DecisionType.Routing)
+            {
+                focusId = req.JobId;
+                if (req.JobCandidateIds != null) candidateIds.UnionWith(req.JobCandidateIds);
+                candidateIds.Add(req.JobId);
+            }
+            else if (req != null && req.Type == DecisionType.Dispatch)
+            {
+                dispatchMachine = req.MachineId;
+                if (req.QueuedJobIds != null) candidateIds.UnionWith(req.QueuedJobIds);
+            }
+
+            // AllJobs is in arrival order, so a stable partition keeps "oldest first" within each tier.
+            var rows = new List<JobData>();
+            var rest = new List<JobData>();
+            JobData focus = null;
+            foreach (JobData job in store.AllJobs)
+            {
+                if (job.State == JobState.Exited) continue;
+                if (job.JobId == focusId) focus = job;
+                else if (candidateIds.Contains(job.JobId)) rows.Add(job);
+                else rest.Add(job);
+            }
+            if (focus != null) rows.Insert(0, focus);
+            rows.AddRange(rest);
+
+            int n = Mathf.Min(rows.Count, MaxJobs);
+            for (int r = 0; r < n; r++)
+            {
+                JobData job = rows[r];
+                int b = r * JobFeatures;
+                table[b + 0] = 1f;
+                int slot = StateSlot(job.State);
+                if (slot >= 0) table[b + 1 + slot] = 1f;
+                table[b + 6] = store.DeferredJobIds.Contains(job.JobId) ? 1f : 0f;
+                table[b + 7] = Squash(now - job.ArrivalTime, AgeScale);
+                table[b + 8] = Squash(now - job.StateEntryTime, TimeScale);
+                table[b + 9] = Squash(job.TotalOperations - job.CurrentOpIndex, OpsScale);
+
+                if (job.CurrentOpIndex < job.TotalOperations)
+                {
+                    var eligible = job.EligibleMachinesPerOp[job.CurrentOpIndex];
+                    float minPt = float.MaxValue;
+                    int up = 0;
+                    foreach (var kvp in eligible)
+                    {
+                        if (kvp.Value < minPt) minPt = kvp.Value;
+                        PhysicalMachine m = layout.GetMachine(kvp.Key);
+                        if (m != null && m.IsAvailableForWork) up++;
+                    }
+                    if (eligible.Count > 0)
+                    {
+                        table[b + 10] = Squash(minPt, TimeScale);
+                        table[b + 12] = Squash(eligible.Count, CountScale);
+                        table[b + 13] = (float)up / eligible.Count;
+                    }
+                    table[b + 11] = Squash(DispatchingEngine.GetRemainingWork(job.JobId, store), AgeScale);
+                }
+
+                table[b + 14] = job.JobId == focusId ? 1f : 0f;
+                table[b + 15] = candidateIds.Contains(job.JobId) ? 1f : 0f;
+                if (dispatchMachine >= 0 && job.State == JobState.Queued && job.LocationMachineId == dispatchMachine)
+                    table[b + 16] = Squash(job.GetProcessingTime(dispatchMachine), TimeScale);
+            }
+            return table;
+        }
+
+        /**
+         * @brief Builds the global scalar vector (GlobalScalarLength).
+         * @details Floor-level aggregates. The old version normalised time and queue pressure
+         *          against MaxProcTime x MaxOpsPerJob (~360 s on the compound scenarios), so both
+         *          saturated within minutes; everything here is squashed or a true fraction.
+         *   [0]  sim time, squashed (HorizonScale)
+         *   [1]  active jobs (WIP), squashed (WipScale)
+         *   [2-6] fraction of active jobs in NeedsRouting / WaitingForPickup / InTransit / Queued / Processing
+         *   [7]  fraction of machines busy
+         *   [8]  fraction of machines down (Failed or Repairing)
+         *   [9]  fraction of AGVs busy
+         *   [10] mean committed work per machine, squashed (TimeScale)
+         *   [11] fraction of active jobs that did not fit in the job table
+         *   [12] machine count / MaxMachines
+         *   [13] AGVs per machine (clamped to 1)
+         *   [14] deferred jobs, squashed (CountScale)
+         *   [15] options in the current decision (routing: candidate machines; dispatch: queued jobs), squashed (CountScale)
+         */
+        private float[] BuildGlobalScalars(DecisionRequest req)
+        {
+            float[] s = new float[GlobalScalarLength];
+            FactoryOrchestrator orch = FactoryOrchestrator.Instance;
+            FactoryLayoutManager layout = FactoryLayoutManager.Instance;
+            if (orch == null) return s;
+            JobStore store = orch.Jobs;
+
+            int[] byState = new int[5];
+            int active = 0;
+            foreach (JobData job in store.AllJobs)
+            {
+                int slot = StateSlot(job.State);
+                if (slot < 0) continue;
+                byState[slot]++;
+                active++;
+            }
+
+            s[0] = Squash(orch.SimTime, HorizonScale);
+            s[1] = Squash(active, WipScale);
+            if (active > 0)
+                for (int k = 0; k < 5; k++) s[2 + k] = (float)byState[k] / active;
+
+            int machineCount = layout != null && layout.Machines != null ? layout.Machines.Count : 0;
+            if (machineCount > 0)
+            {
+                int busy = 0, down = 0;
+                float load = 0f;
+                foreach (PhysicalMachine m in layout.Machines)
+                {
+                    if (!m.IsIdle) busy++;
+                    if (!m.IsAvailableForWork) down++;
+                    load += store.GetMachineLoad(m.MachineId);
+                }
+                s[7] = (float)busy / machineCount;
+                s[8] = (float)down / machineCount;
+                s[10] = Squash(load / machineCount, TimeScale);
+                s[12] = Mathf.Clamp01((float)machineCount / MaxMachines);
+            }
+
             if (AGVPool.Instance != null && AGVPool.Instance.AllAGVs.Count > 0)
             {
                 int activeAgvs = 0;
                 foreach (AGVController agv in AGVPool.Instance.AllAGVs)
                     if (!agv.IsIdle) activeAgvs++;
-                s[7] = (float)activeAgvs / AGVPool.Instance.AllAGVs.Count;
+                s[9] = (float)activeAgvs / AGVPool.Instance.AllAGVs.Count;
+                if (machineCount > 0)
+                    s[13] = Mathf.Clamp01((float)AGVPool.Instance.AllAGVs.Count / machineCount);
             }
 
-            // [8] Queue pressure: max queue load across all machines, normalized.
-            if (layout != null && layout.Machines != null)
-            {
-                float maxLoad = 0f;
-                foreach (PhysicalMachine m in layout.Machines)
-                {
-                    float load = store.GetMachineLoad(m.MachineId);
-                    if (load > maxLoad) maxLoad = load;
-                }
-                s[8] = Mathf.Clamp01(maxLoad / Mathf.Max(horizon, 1f));
-            }
-
-            // [9] Normalized decision index. Each op generates ~2 decisions (routing + dispatch).
-            int totalOps = 0;
-            foreach (JobData job in store.AllJobs)
-                totalOps += job.TotalOperations;
-            s[9] = Mathf.Clamp01((float)FactoryOrchestrator.Instance.DecisionCount / Mathf.Max(totalOps * 2, 1));
-
+            if (active > MaxJobs) s[11] = (float)(active - MaxJobs) / active;
+            s[14] = Squash(store.DeferredJobIds.Count, CountScale);
+            int options = req == null ? 0
+                : req.Type == DecisionType.Routing ? (req.CandidateMachineIds?.Length ?? 0)
+                : (req.QueuedJobIds?.Length ?? 0);
+            s[15] = Squash(options, CountScale);
             return s;
-        }
-
-        /**
-         * @brief Copies the layout manager's precomputed machine-to-machine distance matrix.
-         * @return Flattened distance matrix of length DistanceLength.
-         */
-        private float[] BuildDistanceMatrix()
-        {
-            float[] dist = new float[DistanceLength];
-
-            FactoryLayoutManager layout = FactoryLayoutManager.Instance;
-            if (layout == null || layout.DistanceMatrixFlat == null) return dist;
-
-            int copyLen = Mathf.Min(layout.DistanceMatrixFlat.Length, dist.Length);
-            System.Array.Copy(layout.DistanceMatrixFlat, dist, copyLen);
-
-            return dist;
         }
 
         /**
@@ -345,8 +466,19 @@ namespace Assets.Scripts.Simulation
                 }
             }
 
-            // [4] Past the halfway point of all operations.
-            flags[4] = FactoryOrchestrator.Instance.Jobs.CountInState(JobState.Exited) > FactoryOrchestrator.Instance.Jobs.JobCount / 2 ? 1f : 0f;
+            // [4] At least one machine is down (Failed or Repairing). Was "more than half of JobCount exited",
+            //     which is meaningless once jobs arrive over time (JobCount only counts arrivals so far).
+            if (FactoryLayoutManager.Instance != null)
+            {
+                foreach (PhysicalMachine m in FactoryLayoutManager.Instance.Machines)
+                {
+                    if (!m.IsAvailableForWork)
+                    {
+                        flags[4] = 1f;
+                        break;
+                    }
+                }
+            }
 
             // [5] Any machine's AlmostDoneFlag is active.
             if (FactoryLayoutManager.Instance != null)

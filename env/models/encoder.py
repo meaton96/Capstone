@@ -4,18 +4,21 @@
 
 @details
 Each observation modality is processed by a dedicated encoder, and the
-resulting embeddings are concatenated into a single 464-D vector consumed
+resulting embeddings are concatenated into a single 560-D vector consumed
 by the FusionHead.
 
-@par Encoder outputs (from architecture diagram)
+@par Encoder outputs (observation schema v2)
 | Encoder                              | Input             | Output |
 |--------------------------------------|-------------------|--------|
 | CNN-SPPF (Factory Floor)             | 64×64×3           | 256-D  |
-| CNN-SPPF (Scheduling Matrix)         | n×2m×3            | 128-D  |
-| Global Context MLP                   | 10-D              | 32-D   |
-| Distance Embed MLP                   | 64-D              | 32-D   |
+| Set encoder (Machine table)          | 100×16            | 128-D  |
+| Set encoder (Job table)              | 64×17             | 128-D  |
+| Global Context MLP                   | 16-D              | 32-D   |
 | Event Flag Embed                     | 6-D               | 16-D   |
-| **Total concatenation**              |                   | 464-D  |
+| **Total concatenation**              |                   | 560-D  |
+
+v1 used a CNN over an 8-machine scheduling matrix and an MLP over an 8×8 distance matrix; both were
+replaced because they could not represent the 15-machine floor (see config.py).
 """
 
 import torch
@@ -187,9 +190,83 @@ class MLPEncoder(nn.Module):
         return self.net(x)
 
 
+
+
+def _masked_pool(h: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
+    """@brief Masked mean and max over the row axis.
+
+    @param h     Row embeddings of shape (B, R, D).
+    @param mask  Row mask of shape (B, R), 1 for rows to pool over.
+    @return (B, 2D): mean then max. Both are 0 when no row is selected.
+    """
+    m = mask.unsqueeze(-1)
+    count = m.sum(dim=1).clamp(min=1.0)
+    mean = (h * m).sum(dim=1) / count
+    very_neg = torch.finfo(h.dtype).min
+    mx = h.masked_fill(m == 0, very_neg).max(dim=1).values
+    mx = torch.where(mask.sum(dim=1, keepdim=True) > 0, mx, torch.zeros_like(mx))
+    return torch.cat([mean, mx], dim=-1)
+
+
+class SetEncoder(nn.Module):
+    """@brief Permutation-invariant encoder for an entity table (machines or jobs).
+
+    @details
+    A shared two-layer MLP embeds every row; rows are then pooled twice with masked mean + max:
+    once over all present rows (floor / WIP state) and once over the rows flagged as options in
+    the current decision (the candidate machines of a routing decision, or the queue of a dispatch
+    decision). The four pooled vectors are projected to @p out_dim.
+
+    Because pooling ignores row count and order, the same weights apply to any floor up to the
+    table size: this is what lets a policy trained on 15 machines be evaluated on 30-100.
+    """
+
+    def __init__(self, in_features: int, out_dim: int, hidden: int = 64,
+                 present_col: int = 0, candidate_col: int = None):
+        """@brief Construct the set encoder.
+
+        @param in_features    Features per row.
+        @param out_dim        Output embedding size.
+        @param hidden         Per-row embedding size.
+        @param present_col    Column holding the present mask (1 real row, 0 padding).
+        @param candidate_col  Column flagging decision candidates, or None to skip that pool.
+        """
+        super().__init__()
+        self.present_col = present_col
+        self.candidate_col = candidate_col
+        ## @brief Shared per-row embedding.
+        self.row_mlp = nn.Sequential(
+            nn.Linear(in_features, hidden),
+            nn.SiLU(inplace=True),
+            nn.Linear(hidden, hidden),
+            nn.SiLU(inplace=True),
+        )
+        n_pools = 2 if candidate_col is not None else 1
+        ## @brief Projection of the pooled (mean, max) vectors.
+        self.proj = nn.Sequential(
+            nn.Linear(2 * hidden * n_pools, out_dim),
+            nn.LayerNorm(out_dim),
+            nn.SiLU(inplace=True),
+        )
+
+    def forward(self, table: torch.Tensor) -> torch.Tensor:
+        """@brief Encode a batch of tables.
+
+        @param table  Shape (B, R, F).
+        @return Shape (B, @p out_dim).
+        """
+        present = (table[..., self.present_col] > 0.5).to(table.dtype)
+        h = self.row_mlp(table)
+        pooled = [_masked_pool(h, present)]
+        if self.candidate_col is not None:
+            cand = present * (table[..., self.candidate_col] > 0.5).to(table.dtype)
+            pooled.append(_masked_pool(h, cand))
+        return self.proj(torch.cat(pooled, dim=-1))
+
+
 class MultiModalEncoder(nn.Module):
     """@brief Full encoder that processes all five observation modalities
-    and concatenates the results into a 464-D vector.
+    and concatenates the results into a 560-D vector.
 
     @details
     Each modality is handled by a dedicated sub-encoder:
@@ -197,13 +274,10 @@ class MultiModalEncoder(nn.Module):
     | Sub-encoder          | Observation key     | Input shape       | Output dim |
     |----------------------|---------------------|-------------------|------------|
     | @ref factory_encoder | @c factory_grid     | (B, 3, 64, 64)    | 256        |
-    | @ref sched_encoder   | @c sched_matrix     | (B, 3, 20, 16)    | 128        |
-    | @ref global_mlp      | @c global_scalars   | (B, 10)           | 32         |
-    | @ref distance_mlp    | @c distance_matrix  | (B, 64)           | 32         |
+    | @ref machine_encoder | @c machine_table    | (B, 100, 16)      | 128        |
+    | @ref job_encoder     | @c job_table        | (B, 64, 17)       | 128        |
+    | @ref global_mlp      | @c global_scalars   | (B, 16)           | 32         |
     | @ref event_embed     | @c event_flags      | (B, 6)            | 16         |
-
-    The five embeddings are concatenated along the feature dimension to
-    produce a single (B, 464) tensor.
     """
 
     def __init__(self, encoder_cfg=None):
@@ -214,59 +288,51 @@ class MultiModalEncoder(nn.Module):
                             EncoderConfig() if None.
         """
         super().__init__()
-        from config import EncoderConfig
+        from config import (
+            EncoderConfig, MACHINE_FEATURES, JOB_FEATURES, GLOBAL_SCALARS, EVENT_FLAGS,
+            MACHINE_PRESENT_COL, MACHINE_CANDIDATE_COL, JOB_PRESENT_COL, JOB_CANDIDATE_COL,
+        )
         cfg = encoder_cfg or EncoderConfig()
 
         ## @brief CNN-SPPF encoder for the factory-floor occupancy grid (→ 256-D).
         self.factory_encoder = CNNSPPFEncoder(
             in_channels=3,
-            out_dim=cfg.factory_cnn_out,       # 256
+            out_dim=cfg.factory_cnn_out,
             pool_sizes=cfg.sppf_pool_sizes,
         )
 
-        ## @brief CNN-SPPF encoder for the scheduling-matrix image (→ 128-D).
-        self.sched_encoder = CNNSPPFEncoder(
-            in_channels=3,
-            out_dim=cfg.sched_cnn_out,         # 128
-            pool_sizes=cfg.sppf_pool_sizes,
+        ## @brief Set encoder for the machine table (→ 128-D).
+        self.machine_encoder = SetEncoder(
+            MACHINE_FEATURES, cfg.machine_set_out, cfg.set_row_hidden,
+            present_col=MACHINE_PRESENT_COL, candidate_col=MACHINE_CANDIDATE_COL,
         )
 
-        ## @brief MLP encoder for normalized global scalar features (→ 32-D).
-        self.global_mlp = MLPEncoder(
-            in_dim=10,
-            out_dim=cfg.global_mlp_out,        # 32
+        ## @brief Set encoder for the active-job table (→ 128-D).
+        self.job_encoder = SetEncoder(
+            JOB_FEATURES, cfg.job_set_out, cfg.set_row_hidden,
+            present_col=JOB_PRESENT_COL, candidate_col=JOB_CANDIDATE_COL,
         )
 
-        ## @brief MLP encoder for flattened pairwise distance matrix (→ 32-D).
-        self.distance_mlp = MLPEncoder(
-            in_dim=64,
-            out_dim=cfg.distance_mlp_out,      # 32
-        )
+        ## @brief MLP encoder for global scalar features (→ 32-D).
+        self.global_mlp = MLPEncoder(in_dim=GLOBAL_SCALARS, out_dim=cfg.global_mlp_out)
 
         ## @brief MLP encoder for binary event flags (→ 16-D).
-        self.event_embed = MLPEncoder(
-            in_dim=6,
-            out_dim=cfg.event_embed_out,       # 16
-        )
+        self.event_embed = MLPEncoder(in_dim=EVENT_FLAGS, out_dim=cfg.event_embed_out)
 
-        ## @brief Total concatenated output dimensionality (464).
-        self.output_dim = cfg.concat_dim       # 464
+        ## @brief Total concatenated output dimensionality (560).
+        self.output_dim = cfg.concat_dim
 
     def forward(self, obs: dict) -> torch.Tensor:
         """@brief Encode all observation modalities and concatenate.
 
-        @param obs  Dict with keys matching the state-space components:
-                    @c factory_grid, @c sched_matrix, @c global_scalars,
-                    @c distance_matrix, and @c event_flags.
-        @return Concatenated multi-modal embedding of shape
-                (B, @ref output_dim).
+        @param obs  Dict with keys @c factory_grid, @c machine_table, @c job_table,
+                    @c global_scalars and @c event_flags.
+        @return Concatenated multi-modal embedding of shape (B, @ref output_dim).
         """
-        h_factory = self.factory_encoder(obs["factory_grid"])
-        h_sched = self.sched_encoder(obs["sched_matrix"])
-        h_global = self.global_mlp(obs["global_scalars"])
-        h_dist = self.distance_mlp(obs["distance_matrix"])
-        h_event = self.event_embed(obs["event_flags"])
-
-        return torch.cat(
-            [h_factory, h_sched, h_global, h_dist, h_event], dim=-1
-        )
+        return torch.cat([
+            self.factory_encoder(obs["factory_grid"]),
+            self.machine_encoder(obs["machine_table"]),
+            self.job_encoder(obs["job_table"]),
+            self.global_mlp(obs["global_scalars"]),
+            self.event_embed(obs["event_flags"]),
+        ], dim=-1)

@@ -130,6 +130,8 @@ class CheckpointPolicy:
 
         path = Path(path)
         checkpoint = torch.load(path, map_location=device)
+        from train import check_obs_schema
+        check_obs_schema(checkpoint, path)
         self.net = SchedulingNetwork(EncoderConfig(), FusionConfig(), ActorCriticConfig()).to(device)
         self.net.load_state_dict(checkpoint["model_state_dict"])
         self.net.eval()

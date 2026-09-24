@@ -48,7 +48,8 @@ from torch.utils.tensorboard import SummaryWriter
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from config import (
-    EncoderConfig, FusionConfig, ActorCriticConfig, PPOConfig,
+    EncoderConfig, FusionConfig, ActorCriticConfig, PPOConfig, OBS_SHAPES, OBS_LAYOUT,
+    MAX_MACHINES, MAX_JOBS,
 )
 from models.network import SchedulingNetwork
 from rollout_buffer import RolloutBuffer
@@ -76,13 +77,7 @@ def build_env(args, ppo_cfg, run_dir: Path, reward, scenario_generator=None):
                                then gets a fresh scripted-scenario variant every episode.
     @return Tuple of (vec_env, obs_shapes_dict).
     """
-    obs_shapes = {
-        "factory_grid":   (3, 64, 64),
-        "sched_matrix":   (3, 20, 16),
-        "global_scalars": (10,),
-        "distance_matrix": (64,),
-        "event_flags":    (6,),
-    }
+    obs_shapes = dict(OBS_SHAPES)
 
     if args.unity:
         from env_wrappers.unity_env import VectorizedUnityEnv
@@ -168,6 +163,25 @@ def compute_truncation_bootstrap(net, truncateds: np.ndarray, infos, device: str
     return bootstrap
 
 
+def check_obs_schema(ckpt: dict, path) -> None:
+    """@brief Refuse a checkpoint whose observation layout this network cannot read, with a clear message.
+
+    @details Compares OBS_LAYOUT (column meanings and per-row widths). Row caps may differ: a network
+    trained with 100 machine rows loads into a player built with more. Checkpoints saved before the
+    layout was recorded are schema v1 (13,328-float observation) and are always refused.
+    """
+    saved = ckpt.get("obs_layout")
+    if saved is None:
+        raise ValueError(
+            f"{path}: checkpoint uses observation schema v1 (no obs_layout recorded), this code is "
+            f"v{OBS_LAYOUT['schema_version']}. Networks do not transfer across schemas (see env/config.py); "
+            f"train a new run.")
+    diff = {k: (saved.get(k), v) for k, v in OBS_LAYOUT.items() if saved.get(k) != v}
+    if diff:
+        detail = ", ".join(f"{k}: checkpoint {a} vs code {b}" for k, (a, b) in diff.items())
+        raise ValueError(f"{path}: observation layout differs ({detail}); the network cannot read it.")
+
+
 def save_checkpoint(path: Path, net, optimizer, global_step: int, ppo_cfg: PPOConfig,
                     reward_name):
     """@brief Save network, optimizer, and config so a run can be resumed or evaluated."""
@@ -176,6 +190,8 @@ def save_checkpoint(path: Path, net, optimizer, global_step: int, ppo_cfg: PPOCo
         "optimizer_state_dict": optimizer.state_dict(),
         "global_step": global_step,
         "reward": reward_name,
+        "obs_layout": dict(OBS_LAYOUT),
+        "obs_row_caps": {"max_machines": MAX_MACHINES, "max_jobs": MAX_JOBS},   # informational only
         "config": {
             "encoder": EncoderConfig().__dict__,
             "fusion": FusionConfig().__dict__,
@@ -230,6 +246,7 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
     resumed_global_step = 0
     if args.resume_from:
         ckpt = torch.load(args.resume_from, map_location=device)
+        check_obs_schema(ckpt, args.resume_from)
         net.load_state_dict(ckpt["model_state_dict"])
         optimizer.load_state_dict(ckpt["optimizer_state_dict"])
         resumed_global_step = ckpt["global_step"]
