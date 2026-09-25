@@ -137,6 +137,15 @@ namespace Assets.Scripts.Simulation
                     SimLogger.Low($"[BatchRunner] Reservation protocol override: {reservationStr}");
                 }
 
+                // Routing trigger override ("onTransport" | "onReady"), same single-point mechanism.
+                string routingStr = GetCLIArg("-routingtrigger");
+                if (!string.IsNullOrEmpty(routingStr))
+                {
+                    RoutingTriggerParser.Parse(routingStr);
+                    ConfigOverrides.RoutingTrigger = routingStr;
+                    SimLogger.Low($"[BatchRunner] Routing trigger override: {routingStr}");
+                }
+
                 // Parking method override ("single" | "multiple" | "lane"), same single-point mechanism.
                 string parkingStr = GetCLIArg("-parking");
                 if (!string.IsNullOrEmpty(parkingStr))

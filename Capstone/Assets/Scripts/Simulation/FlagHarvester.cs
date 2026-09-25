@@ -137,8 +137,10 @@ namespace Assets.Scripts.Simulation
         /// reducing wait times. Machines that are not in an operational health state are skipped.
         /// </summary>
         /// <param name="preDispatchLeadTime">The lead time threshold for triggering pre-dispatch.</param>
-        public void HarvestAlmostDoneFlags(int preDispatchLeadTime)
+        public void HarvestAlmostDoneFlags(int preDispatchLeadTime, bool yieldToWaitingJobs = false)
         {
+            // OnTransport: a free AGV belongs to a job already waiting (ranked by the rule), not to one still processing.
+            bool yieldAgvs = yieldToWaitingJobs && AnyJobWaitingForTransport();
             foreach (var machine in _layout.Machines)
             {
                 if (!machine.AlmostDoneFlag) continue;
@@ -152,6 +154,8 @@ namespace Assets.Scripts.Simulation
 
                 // Skip pre-dispatch if the source machine is not operational
                 if (machine.HealthState != MachineHealthState.Operational) continue;
+
+                if (yieldAgvs) continue;
 
                 AGVController agv = _agvPool.GetNearestAvailableAGV(machine, machine.GetPickupPosition());
                 if (agv == null) continue;
@@ -317,38 +321,66 @@ namespace Assets.Scripts.Simulation
             }
 
             foreach (var job in candidates)
+                if (!TryAssignAgv(job)) break;
+        }
+
+        /// <summary>
+        /// Gives one WaitingForPickup job the nearest available AGV and dispatches it. Returns false only
+        /// when no AGV is available (the caller should stop assigning). A job whose routed target machine is
+        /// no longer operational is returned to NeedsRouting instead (returns true: an AGV may still be free).
+        /// Used by AssignAGVs, and directly after a routing decision under RoutingTrigger.OnTransport so the
+        /// routed job takes its AGV in the same step.
+        /// </summary>
+        public bool TryAssignAgv(JobData job)
+        {
+            // Return job to NeedsRouting if the routed destination machine is non-operational
+            if (job.TargetMachineId >= 0)
             {
-                // Return job to NeedsRouting if the routed destination machine is non-operational
-                if (job.TargetMachineId >= 0)
+                PhysicalMachine dst = _layout.GetMachine(job.TargetMachineId);
+                if (dst != null && dst.HealthState != MachineHealthState.Operational)
                 {
-                    PhysicalMachine dst = _layout.GetMachine(job.TargetMachineId);
-                    if (dst != null && dst.HealthState != MachineHealthState.Operational)
-                    {
-                        job.TransitionTo(JobState.NeedsRouting, _simTimeRef);
-                        job.TargetMachineId = -1;
-                        SimLogger.Low($"[FlagHarvester] Job {job.JobId} returned to NeedsRouting — " +
-                                      $"target machine {dst.MachineId} is {dst.HealthState}.");
-                        continue;
-                    }
+                    job.TransitionTo(JobState.NeedsRouting, _simTimeRef);
+                    job.TargetMachineId = -1;
+                    SimLogger.Low($"[FlagHarvester] Job {job.JobId} returned to NeedsRouting — " +
+                                  $"target machine {dst.MachineId} is {dst.HealthState}.");
+                    return true;
                 }
-
-                PhysicalMachine src = job.LocationMachineId >= 0
-                    ? _layout.GetMachine(job.LocationMachineId) : null;
-                Vector3 pickupPos = src != null
-                    ? src.GetPickupPosition() : _layout.IncomingBeltPosition;
-
-                AGVController agv = _agvPool.GetNearestAvailableAGV(src, pickupPos);
-                if (agv == null) break;
-
-                PhysicalMachine target = job.TargetMachineId >= 0
-                    ? _layout.GetMachine(job.TargetMachineId) : null;
-                Vector3 dropoffPos = target != null
-                    ? target.GetDropoffPosition() : _layout.OutgoingBeltPosition;
-
-                job.AssignedAgvId = agv.AgvId;
-                agv.Dispatch(job.JobId, pickupPos, dropoffPos, src, target, job.Visual);
-                agv.SetCarryVisual(job.Visual);
             }
+
+            PhysicalMachine src = job.LocationMachineId >= 0
+                ? _layout.GetMachine(job.LocationMachineId) : null;
+            Vector3 pickupPos = src != null
+                ? src.GetPickupPosition() : _layout.IncomingBeltPosition;
+
+            AGVController agv = _agvPool.GetNearestAvailableAGV(src, pickupPos);
+            if (agv == null) return false;
+
+            PhysicalMachine target = job.TargetMachineId >= 0
+                ? _layout.GetMachine(job.TargetMachineId) : null;
+            Vector3 dropoffPos = target != null
+                ? target.GetDropoffPosition() : _layout.OutgoingBeltPosition;
+
+            job.AssignedAgvId = agv.AgvId;
+            agv.Dispatch(job.JobId, pickupPos, dropoffPos, src, target, job.Visual);
+            agv.SetCarryVisual(job.Visual);
+            return true;
+        }
+
+        /// <summary>
+        /// True when some job is waiting for transport: NeedsRouting (and not deferred on a failure) or
+        /// WaitingForPickup without an AGV. Under RoutingTrigger.OnTransport, pre-dispatch yields to these so
+        /// a free AGV goes to a job that is already waiting, ranked by the rule, rather than being reserved
+        /// for a job still processing.
+        /// </summary>
+        public bool AnyJobWaitingForTransport()
+        {
+            foreach (var job in _jobs.AllJobs)
+            {
+                if (job.State == JobState.NeedsRouting && !_jobs.DeferredJobIds.Contains(job.JobId)) return true;
+                if (job.State == JobState.WaitingForPickup && job.AssignedAgvId == -1 && job.PreDispatchedAgvId < 0)
+                    return true;
+            }
+            return false;
         }
 
         /// <summary>

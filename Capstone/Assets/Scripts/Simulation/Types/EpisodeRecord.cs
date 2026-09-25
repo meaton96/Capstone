@@ -79,6 +79,8 @@ namespace Assets.Scripts.Simulation.Types
         // AGV zone-reservation protocol for this run (FJSSPConfig.reservationProtocol). Part of
         // scenario identity: never compare rows with different values.
         public string ReservationProtocol = "holdPrevious";
+        // When routing decisions were made (FJSSPConfig.routingTrigger). Part of scenario identity.
+        public string RoutingTrigger = RoutingTriggerParser.Default;
         // Pre-dispatched AGVs found orphaned (job no longer claims them, e.g. its source machine
         // failed) and released by FlagHarvester.ReleaseOrphanedPreDispatches. Always 0 when the
         // legacy switch -legacyorphanpredispatch is set (reaper disabled).

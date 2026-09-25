@@ -47,6 +47,7 @@ namespace Assets.Scripts.Simulation
         /// heuristic headless runs (BaselineDrainMode) — null in interactive/RL mode.
         /// </summary>
         private Func<int> _getBaselineActionIndex;
+        private Func<bool> _transportAvailable;
 
         /// <summary>
         /// Reference to the episode's live per-machine statistics (processing time, downtime),
@@ -84,8 +85,12 @@ namespace Assets.Scripts.Simulation
             Action incrementDecisionCount,
             EpisodeTracker tracker,
             Dictionary<int, double> machineProcessingStartTime,
-            Func<int> getBaselineActionIndex = null)
+            Func<int> getBaselineActionIndex = null,
+            Func<bool> transportAvailable = null)
         {
+            // Null = RoutingTrigger.OnReady (route as soon as a job is ready). Otherwise routing is gated on it:
+            // see RoutingTrigger.OnTransport.
+            _transportAvailable = transportAvailable;
             _jobs = jobs;
             _layout = layout;
             _getSimTime = getSimTime;
@@ -126,6 +131,7 @@ namespace Assets.Scripts.Simulation
             List<int> readyIds = _jobs.GetAllNeedingRouting();
             if (readyIds.Count > 0)
             {
+                bool transportOpen = _transportAvailable == null || _transportAvailable();
                 var routableIds = new List<int>();
                 foreach (int jobId in readyIds)
                 {
@@ -159,10 +165,12 @@ namespace Assets.Scripts.Simulation
                             SimLogger.Low($"[Orchestrator] Job {jobId}: all eligible machines " +
                                           $"are Failed/Repairing. Deferring routing decision.");
                     }
-                    else
+                    else if (transportOpen || job.PreDispatchedAgvId >= 0)
                     {
                         routableIds.Add(jobId);
                     }
+                    // else: OnTransport and every AGV is busy -- the job waits in NeedsRouting and joins the
+                    // pool the rule ranks when an AGV frees up (a pre-dispatched job already has its AGV).
                 }
 
                 if (routableIds.Count > 0)

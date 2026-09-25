@@ -117,6 +117,9 @@ namespace Assets.Scripts.Simulation.Types
         ///        See ReservationProtocol. Validated at load by ReservationProtocolParser.
         public string reservationProtocol = "holdPrevious";
 
+        /// @brief When routing decisions are made: "onTransport" (default) or "onReady" (legacy). See RoutingTrigger.
+        public string routingTrigger = RoutingTriggerParser.Default;
+
         // ── Pre-dispatching method ──
 
         /// @brief Strategy used for pre-dispatching decisions.
@@ -182,6 +185,7 @@ namespace Assets.Scripts.Simulation.Types
                 ioDocks = ioDocks,
                 Layout = Layout,
                 reservationProtocol = reservationProtocol,
+                routingTrigger = routingTrigger,
                 preDispatchingMethod = preDispatchingMethod,
                 ThroughputTimingWindow = ThroughputTimingWindow,
             };

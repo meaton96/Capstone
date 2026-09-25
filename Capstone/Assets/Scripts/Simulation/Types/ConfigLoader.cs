@@ -172,6 +172,7 @@ namespace Assets.Scripts.Simulation.Types
             public string parkingMethod = "lane";
             public string ioDocks = "corner";
             public string reservationProtocol = "holdPrevious";
+            public string routingTrigger = null;
             public string preDispatchingMethod = "fixed";
             public JsonStochasticConfig stochastic = null;
 
@@ -295,6 +296,7 @@ namespace Assets.Scripts.Simulation.Types
                 // own machine grid so a bad layout aborts at load time, not mid-sweep.
                 Layout = LayoutSpec.FromJson(rawObj?["layout"]),
                 reservationProtocol = ReservationProtocolParser.Validated(raw.reservationProtocol),
+                routingTrigger = RoutingTriggerParser.Validated(raw.routingTrigger),
                 preDispatchingMethod = raw.preDispatchingMethod ?? "fixed",
             };
 

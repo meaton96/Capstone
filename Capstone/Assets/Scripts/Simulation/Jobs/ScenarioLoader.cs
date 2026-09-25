@@ -125,7 +125,7 @@ namespace Assets.Scripts.Simulation.Jobs
         private static readonly string[] KnownKeys =
         {
             "name", "seed", "agvCount", "agvMoveSpeed", "agvHandshakeDuration", "dispatchingRule",
-            "jobs", "machineTypeLayout", "parkingMethod", "ioDocks", "reservationProtocol", "stochastic", "layout"
+            "jobs", "machineTypeLayout", "parkingMethod", "ioDocks", "reservationProtocol", "routingTrigger", "stochastic", "layout"
         };
 
         private static FJSSPConfig BuildConfig(string json, string fileName,
@@ -214,6 +214,7 @@ namespace Assets.Scripts.Simulation.Jobs
                 AGVMoveSpeed = root["agvMoveSpeed"]?.Value<float>(),
                 AGVHandshakeDuration = root["agvHandshakeDuration"]?.Value<float>(),
                 reservationProtocol = ReservationProtocolParser.Validated(root["reservationProtocol"]?.Value<string>()),
+                routingTrigger = RoutingTriggerParser.Validated(root["routingTrigger"]?.Value<string>()),
                 Layout = LayoutSpec.FromJson(root["layout"]),
                 parkingMethod = root["parkingMethod"] != null
                     ? ConfigOverrides.ValidatedParkingMethod(root["parkingMethod"].Value<string>())

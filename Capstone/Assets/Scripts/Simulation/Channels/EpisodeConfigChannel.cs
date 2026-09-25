@@ -174,6 +174,7 @@ namespace Assets.Scripts.Simulation.Channels
                 parkingMethod = root["parkingMethod"]?.Value<string>() ?? "lane",
                 ioDocks = ConfigOverrides.ValidatedIoDocks(root["ioDocks"]?.Value<string>() ?? "corner"),
                 reservationProtocol = ReservationProtocolParser.Validated(root["reservationProtocol"]?.Value<string>()),
+                routingTrigger = RoutingTriggerParser.Validated(root["routingTrigger"]?.Value<string>()),
                 preDispatchingMethod = root["preDispatchingMethod"]?.Value<string>() ?? "fixed",
             };
 

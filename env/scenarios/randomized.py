@@ -67,6 +67,7 @@ class RandomizedParams:
     layout: str = "D"
     reservation_protocol: str = "releasePrevious"
     parking_method: str = "lane"
+    routing_trigger: str = "onTransport"                 # see RoutingTrigger.cs; "onReady" = legacy
 
     horizon_seconds: float = 14400.0                     # span of arrivals (sim-seconds)
     segment_seconds: Tuple[float, float] = (1200.0, 3600.0)
@@ -190,6 +191,7 @@ def randomized_scenario(seed: int, params: RandomizedParams = DEFAULT_PARAMS) ->
         "layout": p.layout,
         "reservationProtocol": p.reservation_protocol,
         "parkingMethod": p.parking_method,
+        "routingTrigger": p.routing_trigger,
         "jobs": jobs,
         "_phases": phases,
         "_meta": {

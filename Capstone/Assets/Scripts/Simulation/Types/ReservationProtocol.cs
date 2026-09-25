@@ -57,6 +57,8 @@ namespace Assets.Scripts.Simulation.Types
     public static class ConfigOverrides
     {
         public static string ReservationProtocol;
+        /// <summary>Routing trigger ("onTransport" | "onReady"); overrides every config's routingTrigger.</summary>
+        public static string RoutingTrigger;
         /// <summary>Parking method ("single" | "multiple" | "lane"); overrides every config's parkingMethod.</summary>
         public static string ParkingMethod;
         /// <summary>Layout name A-J (see LayoutSpec); overrides every config's "layout" block. CLI over JSON over legacy.</summary>

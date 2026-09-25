@@ -258,6 +258,9 @@ namespace Assets.Scripts.Simulation
         /// </summary>
         private DecisionCoordinator _decisions;
 
+        /// <summary>This episode's RoutingTrigger is OnTransport (set at StartEpisode from the config).</summary>
+        private bool _routeOnTransport = true;
+
         // ── Scripted arrivals (jobs with an explicit ArrivalTime > 0 in the initial batch,
         //    from a hand-crafted scenario or a jittered generated batch) ───────────────────
 
@@ -470,6 +473,8 @@ namespace Assets.Scripts.Simulation
         {
             if (config != null && ConfigOverrides.ReservationProtocol != null)
                 config.reservationProtocol = ConfigOverrides.ReservationProtocol;
+            if (config != null && ConfigOverrides.RoutingTrigger != null)
+                config.routingTrigger = ConfigOverrides.RoutingTrigger;
             if (config != null && ConfigOverrides.ParkingMethod != null)
                 config.parkingMethod = ConfigOverrides.ParkingMethod;
             if (config != null && ConfigOverrides.Layout != null)
@@ -662,6 +667,9 @@ namespace Assets.Scripts.Simulation
                 refreshLabels: _flags.RefreshMachineLabels
             );
 
+            _routeOnTransport = RoutingTriggerParser.Parse(currentConfig.routingTrigger) == RoutingTrigger.OnTransport;
+            SimLogger.Low($"[Orchestrator] Routing trigger: {currentConfig.routingTrigger}");
+
             _decisions = new DecisionCoordinator();
             _decisions.Initialize(
                 Jobs, layoutManager,
@@ -677,7 +685,8 @@ namespace Assets.Scripts.Simulation
                 // Execute-time choice, an accepted minor inconsistency specific to the Random PDR.
                 getBaselineActionIndex: () => (BaselineDrainMode || InWarmup)
                     ? (_baselineRuleIsRandom ? UnityEngine.Random.Range(0, DispatchingEngine.ActionCount) : _baselineRuleIndex)
-                    : -1
+                    : -1,
+                transportAvailable: _routeOnTransport ? () => agvPool.AnyAvailableAGV() : (Func<bool>)null
             );
 
             episodeActive = true;
@@ -808,7 +817,7 @@ namespace Assets.Scripts.Simulation
             _flags.HarvestAGVFlags();
             _flags.HarvestStalledAGVs();
             _flags.ReleaseOrphanedPreDispatches();
-            _flags.HarvestAlmostDoneFlags(PreDispatchLeadTime);
+            _flags.HarvestAlmostDoneFlags(PreDispatchLeadTime, yieldToWaitingJobs: _routeOnTransport);
             _flags.AssignAGVs();
 
             if (_warmupActive && !InWarmup)
@@ -1192,6 +1201,14 @@ namespace Assets.Scripts.Simulation
             job.TargetMachineId = chosenMachineId;
             job.TransitionTo(JobState.WaitingForPickup, SimTime);
 
+            // OnTransport: the decision was offered because an AGV is free, so the routed job takes it now
+            // (nearest free unit). Otherwise several decisions drained in one tick would all count the same AGV.
+            if (_routeOnTransport && job.PreDispatchedAgvId < 0)
+            {
+                _flags.TryAssignAgv(job);
+                return;
+            }
+
             if (job.PreDispatchedAgvId >= 0)
             {
                 AGVController preAgv = agvPool.GetPreDispatchedAGV(job.JobId);
@@ -1371,6 +1388,7 @@ namespace Assets.Scripts.Simulation
             record.AgvMinCentreDistance = _collisions.MinCentreDistance == float.MaxValue ? -1f : _collisions.MinCentreDistance;
             record.CollisionRecords = _collisions.Events;
             record.ReservationProtocol = currentConfig.reservationProtocol;
+            record.RoutingTrigger = currentConfig.routingTrigger;
             LayoutSpec layoutSpec = currentConfig.Layout ?? LayoutSpec.Default;
             record.LayoutId = layoutSpec.Id;
             record.LayoutBelts = layoutSpec.DescribeBelts(layoutManager.LayoutRows);

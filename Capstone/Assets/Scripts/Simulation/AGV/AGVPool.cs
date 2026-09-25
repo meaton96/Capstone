@@ -246,6 +246,16 @@ namespace Assets.Scripts.Simulation.AGV
             return z?.ZoneId ?? -1;
         }
 
+        /// @brief True when some AGV can take a new transport now: Idle, or ReturningToParking (redirectable).
+        ///        The same two states GetNearestAvailableAGV chooses from, so a true result means it will
+        ///        return a unit.
+        public bool AnyAvailableAGV()
+        {
+            foreach (var agv in fleet)
+                if (agv.IsIdle || agv.State == AGVState.ReturningToParking) return true;
+            return false;
+        }
+
         /// @brief Returns the AGV unit assigned to a specific job ID via pre-dispatch.
         ///
         /// @param jobId The identifier of the job to check.
