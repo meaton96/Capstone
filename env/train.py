@@ -163,6 +163,14 @@ def compute_truncation_bootstrap(net, truncateds: np.ndarray, infos, device: str
     return bootstrap
 
 
+def entropy_coef_at(ppo_cfg: PPOConfig, global_step: int) -> float:
+    """@brief Entropy coefficient at global_step: constant, or linear decay to entropy_coef_final."""
+    if ppo_cfg.entropy_coef_final is None:
+        return ppo_cfg.entropy_coef
+    frac = min(max(global_step / max(ppo_cfg.total_timesteps, 1), 0.0), 1.0)
+    return ppo_cfg.entropy_coef + frac * (ppo_cfg.entropy_coef_final - ppo_cfg.entropy_coef)
+
+
 def check_obs_schema(ckpt: dict, path) -> None:
     """@brief Refuse a checkpoint whose observation layout this network cannot read, with a clear message.
 
@@ -387,6 +395,7 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
             total_entropy = 0.0
             n_batches = 0
 
+            ent_coef = entropy_coef_at(ppo_cfg, global_step)
             for epoch in range(ppo_cfg.num_epochs):
                 for batch in buffer.get_batches(ppo_cfg.batch_size):
                     new_log_probs, new_values, entropy = net.evaluate(
@@ -411,7 +420,7 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
                     loss = (
                         pg_loss
                         + ppo_cfg.value_coef * v_loss
-                        + ppo_cfg.entropy_coef * ent_loss
+                        + ent_coef * ent_loss
                     )
 
                     optimizer.zero_grad()
@@ -440,6 +449,7 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
             writer.add_scalar("losses/policy", total_pg_loss / n_batches, global_step)
             writer.add_scalar("losses/value", total_v_loss / n_batches, global_step)
             writer.add_scalar("losses/entropy", total_entropy / n_batches, global_step)
+            writer.add_scalar("charts/entropy_coef", ent_coef, global_step)
             writer.add_scalar("charts/step_reward_mean", avg_reward, global_step)
             writer.add_scalar("charts/sps", sps, global_step)
             writer.add_scalar("charts/episodes", episodes_done, global_step)
@@ -529,8 +539,9 @@ if __name__ == "__main__":
     parser.add_argument("--scenario", type=str, default=None,
                         help="Scripted scenario JSON (ScenarioLoader schema) to replay every episode "
                              "(mutually exclusive with --scenario-generator)")
+    from scenarios import REGISTRY as _SCENARIO_REGISTRY
     parser.add_argument("--scenario-generator", type=str, default=None,
-                        choices=["compound", "compound_v2"],
+                        choices=sorted(_SCENARIO_REGISTRY),
                         help="Generate a fresh seeded scripted-scenario variant every episode "
                              "(see env/scenarios); needs --train-seed >= 0")
     parser.add_argument("--episode-duration-seconds", type=float, default=0.0,
@@ -559,6 +570,11 @@ if __name__ == "__main__":
                              "time (sim-seconds; prefab default 1.5)")
     parser.add_argument("--sequential-envs", action="store_true",
                         help="Step Unity envs one after another instead of concurrently")
+    parser.add_argument("--ent-coef", type=float, default=0.01, help="Entropy bonus coefficient")
+    parser.add_argument("--ent-coef-final", type=float, default=None,
+                        help="If set, decay the entropy coefficient linearly to this value over --total-timesteps")
+    parser.add_argument("--torch-threads", type=int, default=0,
+                        help="torch.set_num_threads (0 = torch default); keep low when sharing a node with Unity players")
     parser.add_argument("--base-worker-id", type=int, default=0,
                         help="Unity port offset (5005 + id); change to run several trainings at once")
 
@@ -570,5 +586,19 @@ if __name__ == "__main__":
         rollout_length=args.rollout_length,
         batch_size=args.batch_size,
         lr=args.lr,
+        entropy_coef=args.ent_coef,
+        entropy_coef_final=args.ent_coef_final,
     )
+    if args.torch_threads > 0:
+        torch.set_num_threads(args.torch_threads)
+
+    # Slurm ends a job with SIGTERM (at --time, or early with #SBATCH --signal). Python's default SIGTERM
+    # exits without running train()'s finally block, so the final checkpoint.pt would be lost; raising
+    # KeyboardInterrupt takes the same save-and-close path as Ctrl-C.
+    import signal
+
+    def _terminate(signum, _frame):
+        raise KeyboardInterrupt(f"received signal {signum}")
+
+    signal.signal(signal.SIGTERM, _terminate)
     train(cfg, args, device=args.device)

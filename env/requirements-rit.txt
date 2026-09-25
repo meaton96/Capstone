@@ -1,0 +1,10 @@
+# Minimal training environment for RIT Research Computing (CPU only, Python 3.10.x exactly: mlagents-envs 1.1.0).
+# torch is installed separately from the PyTorch CPU index (see linux_server/slurm/setup_rit_python.sh);
+# the full requirements.txt also carries the mlagents trainer and CUDA wheels, which training does not use.
+numpy==1.23.5
+mlagents-envs==1.1.0
+grpcio==1.48.2
+protobuf==3.20.3
+tensorboard==2.20.0
+Gymnasium==0.26.3
+pytest==9.0.2

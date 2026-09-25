@@ -1136,3 +1136,20 @@ class TestVectorizedUnityEnv:
 
         assert dones[0] and dones[1]
         assert truncs[0] == True and truncs[1] == False
+
+class TestEntropySchedule:
+    """@brief --ent-coef / --ent-coef-final: constant by default, linear decay by absolute step otherwise."""
+
+    def test_constant_by_default(self):
+        from train import entropy_coef_at
+        from config import PPOConfig
+        cfg = PPOConfig(total_timesteps=1000, entropy_coef=0.02)
+        assert entropy_coef_at(cfg, 0) == entropy_coef_at(cfg, 999) == 0.02
+
+    def test_linear_decay_and_clamp(self):
+        from train import entropy_coef_at
+        from config import PPOConfig
+        cfg = PPOConfig(total_timesteps=1000, entropy_coef=0.01, entropy_coef_final=0.001)
+        assert abs(entropy_coef_at(cfg, 0) - 0.01) < 1e-12
+        assert abs(entropy_coef_at(cfg, 500) - 0.0055) < 1e-12
+        assert abs(entropy_coef_at(cfg, 5000) - 0.001) < 1e-12      # past the end stays at the final value

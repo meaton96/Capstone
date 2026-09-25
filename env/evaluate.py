@@ -318,8 +318,9 @@ def main(argv=None):
                         help="Scripted scenario JSON (ScenarioLoader schema) to evaluate on instead of "
                              "the generated default config; seeds then only label repeats "
                              "(mutually exclusive with --scenario-generator)")
+    from scenarios import REGISTRY as _SCENARIO_REGISTRY
     parser.add_argument("--scenario-generator", type=str, default=None,
-                        choices=["compound", "compound_v2"],
+                        choices=sorted(_SCENARIO_REGISTRY),
                         help="Evaluate each seed on its own generated scripted-scenario variant "
                              "instead of a fixed instance (see env/scenarios)")
     parser.add_argument("--episode-duration-seconds", type=float, default=0.0,

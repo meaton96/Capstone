@@ -19,7 +19,7 @@ do not load into v2 networks.
 """
 
 from dataclasses import dataclass, field
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 
 # ─────────────────────────────────────────────────────────────────────
@@ -153,6 +153,9 @@ class PPOConfig:
     gae_lambda: float = 0.95
     clip_epsilon: float = 0.2
     entropy_coef: float = 0.01
+    ## @brief If set, the entropy coefficient decays linearly from entropy_coef to this value over
+    ##        total_timesteps (by absolute global step, so a resumed run continues the schedule).
+    entropy_coef_final: Optional[float] = None
     value_coef: float = 0.5
     max_grad_norm: float = 0.5
     num_epochs: int = 4
