@@ -6,11 +6,12 @@
 Observation schema v2 (2026-09-24). All dimensions are synced to the C# ObservationBuilder constants:
   SpatialGridSize = 64,  SpatialChannels = 3
   MaxMachines = 100, MachineFeatures = 16     (machine table, one row per machine, zero-padded)
-  MaxJobs     = 64,  JobFeatures     = 17     (job table over ACTIVE jobs, decision-relevant first)
+  MaxJobs     = 256, JobFeatures     = 17     (job table over ACTIVE jobs, decision-relevant first)
   GlobalScalarLength = 16
   EventFlagLength    = 6
 
-Total flat observation from ML-Agents: 14,998 floats.
+Total flat observation from ML-Agents: 18,262 floats (MaxJobs 64 -> 256 on 2026-09-25; a row-cap change,
+so checkpoints stay compatible).
 
 v1 (13,328 floats) had an 8-machine x first-20-jobs scheduling matrix and an 8x8 distance matrix: on the
 15-machine floor it dropped machines 8-14 and went blank once the first 20 jobs had exited. v1 checkpoints
@@ -33,7 +34,7 @@ GRID_SIZE        = 64
 GRID_CHANNELS    = 3
 MAX_MACHINES     = 100
 MACHINE_FEATURES = 16
-MAX_JOBS         = 64
+MAX_JOBS         = 256
 JOB_FEATURES     = 17
 GLOBAL_SCALARS   = 16
 EVENT_FLAGS      = 6
@@ -49,8 +50,8 @@ JOB_CANDIDATE_COL     = 15
 ## @brief Lengths of each stream inside the flat vector.
 SPATIAL_LEN       = GRID_CHANNELS * GRID_SIZE * GRID_SIZE    # 12 288
 MACHINE_TABLE_LEN = MAX_MACHINES * MACHINE_FEATURES          #  1 600
-JOB_TABLE_LEN     = MAX_JOBS * JOB_FEATURES                  #  1 088
-TOTAL_OBS_SIZE    = SPATIAL_LEN + MACHINE_TABLE_LEN + JOB_TABLE_LEN + GLOBAL_SCALARS + EVENT_FLAGS  # 14 998
+JOB_TABLE_LEN     = MAX_JOBS * JOB_FEATURES                  #  4 352
+TOTAL_OBS_SIZE    = SPATIAL_LEN + MACHINE_TABLE_LEN + JOB_TABLE_LEN + GLOBAL_SCALARS + EVENT_FLAGS  # 18 262
 
 ## @brief Slice boundaries inside the flat observation vector (C# FlattenStreams order).
 SLICE_SPATIAL_END  = SPATIAL_LEN

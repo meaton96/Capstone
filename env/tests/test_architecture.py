@@ -523,10 +523,10 @@ class TestSliceObs:
             assert d[k].shape == (B, *shape), k
 
     def test_total_obs_size_matches_csharp(self):
-        """@brief Mirrors ObservationBuilder.TotalObservationSize (64*64*3 + 100*16 + 64*17 + 16 + 6)."""
-        assert TOTAL_OBS_SIZE == 14_998
+        """@brief Mirrors ObservationBuilder.TotalObservationSize (64*64*3 + 100*16 + 256*17 + 16 + 6)."""
+        assert TOTAL_OBS_SIZE == 18_262
         assert SLICE_FLAGS_END == TOTAL_OBS_SIZE
-        assert (MAX_MACHINES, MACHINE_FEATURES, MAX_JOBS, JOB_FEATURES) == (100, 16, 64, 17)
+        assert (MAX_MACHINES, MACHINE_FEATURES, MAX_JOBS, JOB_FEATURES) == (100, 16, 256, 17)
 
 
 class TestCheckpointSchema:

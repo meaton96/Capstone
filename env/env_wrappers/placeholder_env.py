@@ -12,7 +12,7 @@ All observations are dicts of tensors:
 |------------------|----------------|-----------------------------------|
 | factory_grid     | (3, 64, 64)    | Spatial occupancy grid            |
 | machine_table    | (100, 16)      | Per-machine features (padded)     |
-| job_table        | (64, 17)       | Per-active-job features (padded)  |
+| job_table        | (256, 17)      | Per-active-job features (padded)  |
 | global_scalars   | (16,)          | Normalized scalar features        |
 | event_flags      | (6,)           | Binary event indicators           |
 

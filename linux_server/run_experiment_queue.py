@@ -98,7 +98,8 @@ def main():
                "-repeats", "1", "-timescale", a.timescale, "-loglevel", a.loglevel, "-layout", layout,
                "-outputdir", rel, "-logFile", os.path.join(out, "sim.log")] + a.extra.split()
         t0 = time.time()
-        rc = subprocess.run(cmd, cwd=os.path.dirname(exe), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode
+        with open(os.path.join(out, "player.out"), "w") as log:   # loader/crash errors land here, not in sim.log
+            rc = subprocess.run(cmd, cwd=os.path.dirname(exe), stdout=log, stderr=subprocess.STDOUT).returncode
         ok = os.path.exists(os.path.join(out, "results.csv"))
         return rel, rc, ok, time.time() - t0
 

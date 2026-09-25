@@ -24,7 +24,7 @@ namespace Assets.Scripts.Simulation
         public const int MachineFeatures = 16;
         public const int MachineTableLength = MaxMachines * MachineFeatures;
 
-        public const int MaxJobs = 64;
+        public const int MaxJobs = 256;   // 64 until 2026-09-25: randomized-family WIP peaks reached 165
         public const int JobFeatures = 17;
         public const int JobTableLength = MaxJobs * JobFeatures;
 

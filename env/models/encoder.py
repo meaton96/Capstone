@@ -12,7 +12,7 @@ by the FusionHead.
 |--------------------------------------|-------------------|--------|
 | CNN-SPPF (Factory Floor)             | 64×64×3           | 256-D  |
 | Set encoder (Machine table)          | 100×16            | 128-D  |
-| Set encoder (Job table)              | 64×17             | 128-D  |
+| Set encoder (Job table)              | 256×17            | 128-D  |
 | Global Context MLP                   | 16-D              | 32-D   |
 | Event Flag Embed                     | 6-D               | 16-D   |
 | **Total concatenation**              |                   | 560-D  |
@@ -275,7 +275,7 @@ class MultiModalEncoder(nn.Module):
     |----------------------|---------------------|-------------------|------------|
     | @ref factory_encoder | @c factory_grid     | (B, 3, 64, 64)    | 256        |
     | @ref machine_encoder | @c machine_table    | (B, 100, 16)      | 128        |
-    | @ref job_encoder     | @c job_table        | (B, 64, 17)       | 128        |
+    | @ref job_encoder     | @c job_table        | (B, 256, 17)      | 128        |
     | @ref global_mlp      | @c global_scalars   | (B, 16)           | 32         |
     | @ref event_embed     | @c event_flags      | (B, 6)            | 16         |
     """

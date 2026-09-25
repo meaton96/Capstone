@@ -96,3 +96,7 @@ docs
 
 __pycache__/
 */__pycache__/
+
+# Second test build (LinuxServerBuild.BuildAlt), used while a sweep runs on linux_server/
+
+linux_server2/

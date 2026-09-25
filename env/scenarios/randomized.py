@@ -9,19 +9,20 @@ Weld machines, so 12 of 15 machines are background and a policy trained on them 
 (docs/features/SCENARIO_GENERATORS.md §9-10). This generator draws each episode from a family instead:
 
 - **Jobs:** 1-5 operations each (uniform), each on a random machine type (no immediate repeat), eligible on
-  every machine of that type. Machines of a type differ in speed (a fixed per-episode factor per machine,
-  plus ±10% per job), so machine choice (SMPT vs SRWT vs MMUR) matters.
-- **Operation length:** the episode's mean op is log-uniform in `op_mean_seconds` (default 150-360 s,
-  2.5-6 min). Longer ops than the compound family, deliberately: at ~64 AGV-seconds per transport move
+  every machine of that type. Each op's time differs per machine (±30%, independently per op: "affinity"), so
+  which machine is fastest changes from job to job and machine choice (SMPT vs SRWT vs MMUR) matters without
+  one machine always being best.
+- **Operation length:** the episode's mean op is log-uniform in `op_mean_seconds` (default 240-480 s,
+  4-8 min). Longer ops than the compound family, deliberately: at ~64 AGV-seconds per transport move
   (measured on compound at 7 AGVs) 7 AGVs move ~0.11 jobs/s at full load, so short ops make the floor
-  transport-bound again, the regime where every rule converged.
+  transport-bound again, the regime where every rule converged, and cap the machine load below where queues form.
 - **Load:** the arrival stream is a sequence of segments (20-60 min each), each with its own kind and
   target machine utilization, so queues build up and drain within an episode:
     - `balanced`: Poisson arrivals, uniform type mix
     - `skewed`: one machine type gets 2.5x the op share (a bottleneck group with routing choice inside it)
     - `bimodal`: 70% short ops (0.4x mean) and 30% long ops (2.4x mean) — SPT-vs-starvation pressure
     - `burst`: the segment's whole job count arrives in the first 60 s, then nothing
-    - `lull`: low utilization (0.1-0.3), recovery
+    - `lull`: low utilization (0.2-0.4), recovery
   Target utilization is floor-average (all 15 machines); overload segments (> 1) are allowed. Arrival rates
   are capped so AGV demand stays under `agv_max_utilization` of the fleet: the regime stays machine-bound.
 - **Failures:** on for a seeded `failure_probability` share of episodes (default 2/3), rarer and longer than
@@ -60,7 +61,15 @@ SEGMENT_KINDS = ("balanced", "skewed", "bimodal", "burst", "lull")
 
 @dataclass(frozen=True)
 class RandomizedParams:
-    """@brief The generator's knobs. Defaults are the first training run's configuration (2026-09-24)."""
+    """@brief The generator's knobs.
+
+    Defaults are the tuned training configuration (2026-09-25, `rnd_load`; SCENARIO_GENERATORS.md §12): per-op
+    machine affinity instead of fixed machine speeds (any fixed speed gap turned SMPT into a speed trap), 4-8 min
+    ops and 0.7-1.4 target utilization so machine queues form and job ordering matters. The first version
+    (fixed speed ±25%, ops 150-360 s, utilization 0.4-1.25; instances `randomized_s0-8`) is reproduced by
+    machine_speed_spread=0.25, op_machine_spread=0.10, op_mean_seconds=(150,360), utilization=(0.4,1.25),
+    lull_utilization=(0.1,0.3), segment_weights=(0.35,0.2,0.15,0.1,0.2).
+    """
 
     machines_per_type: int = 3
     agv_count: int = 7
@@ -71,14 +80,14 @@ class RandomizedParams:
 
     horizon_seconds: float = 14400.0                     # span of arrivals (sim-seconds)
     segment_seconds: Tuple[float, float] = (1200.0, 3600.0)
-    segment_weights: Tuple[float, ...] = (0.35, 0.2, 0.15, 0.1, 0.2)   # SEGMENT_KINDS order
-    utilization: Tuple[float, float] = (0.4, 1.25)        # floor-average target, non-lull segments
-    lull_utilization: Tuple[float, float] = (0.1, 0.3)
-    op_mean_seconds: Tuple[float, float] = (150.0, 360.0)  # per-episode mean op, log-uniform
+    segment_weights: Tuple[float, ...] = (0.30, 0.25, 0.20, 0.10, 0.15)   # SEGMENT_KINDS order
+    utilization: Tuple[float, float] = (0.7, 1.4)         # floor-average target, non-lull segments
+    lull_utilization: Tuple[float, float] = (0.2, 0.4)
+    op_mean_seconds: Tuple[float, float] = (240.0, 480.0)  # per-episode mean op, log-uniform
     op_sigma: float = 0.35                               # lognormal spread of a single op around the mean
     ops_per_job: Tuple[int, int] = (1, 5)
-    machine_speed_spread: float = 0.25                   # per-machine factor log-uniform in [1/1.25, 1.25]
-    op_machine_spread: float = 0.10                      # per-op, per-machine factor uniform in [1-x, 1+x]
+    machine_speed_spread: float = 0.0                    # fixed per-machine factor, log-uniform in [1/(1+x), 1+x]
+    op_machine_spread: float = 0.30                      # per-op, per-machine factor uniform in [1-x, 1+x]
     skew_weight: float = 2.5
     burst_window_seconds: float = 60.0
 
@@ -305,11 +314,20 @@ if __name__ == "__main__":
     ap.add_argument("--prefix", default="randomized", help="file / scenario name prefix: <prefix>_s<seed>.json")
     ap.add_argument("--machine-speed-spread", type=float, default=DEFAULT_PARAMS.machine_speed_spread)
     ap.add_argument("--op-machine-spread", type=float, default=DEFAULT_PARAMS.op_machine_spread)
+    ap.add_argument("--set", nargs="*", default=[], metavar="KEY=JSON",
+                    help="override any RandomizedParams field, value as JSON, e.g. op_mean_seconds=[240,480]")
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)
     from dataclasses import replace
+    overrides = {}
+    for kv in args.set:
+        key, value = kv.split("=", 1)
+        if not hasattr(DEFAULT_PARAMS, key):
+            raise SystemExit(f"unknown RandomizedParams field: {key}")
+        v = json.loads(value)
+        overrides[key] = tuple(v) if isinstance(v, list) else v
     params = replace(DEFAULT_PARAMS, machine_speed_spread=args.machine_speed_spread,
-                     op_machine_spread=args.op_machine_spread)
+                     op_machine_spread=args.op_machine_spread, **overrides)
     for seed in _parse_seeds(args.write):
         sc = randomized_variant(seed, params=params)
         sc["name"] = f"{args.prefix}_s{seed}"

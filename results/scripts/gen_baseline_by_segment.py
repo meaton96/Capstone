@@ -104,6 +104,64 @@ def main():
         best = min(tot, key=tot.get)
         print(f"s{seed}: best single {best} {tot[best]:.0f}, segment oracle {oracle:.0f} ({oracle / tot[best] - 1:+.1%})")
 
+    job_half_spread(runs)
+    load_profile(a.results, a.prefix, a.rules)
+
+
+def load_profile(results, prefix, rules=None):
+    """Per rule, over seeds: machine utilization, AGV busy, peak WIP, dispatch decisions with <=1 candidate,
+    routing decisions with >1 job in the pool, plus deadlocks / collisions / censored jobs."""
+    agg = defaultdict(lambda: defaultdict(list))
+    for d in glob.glob(os.path.join(results, f"{prefix}_s*", "*", "*")):
+        if not os.path.exists(os.path.join(d, "results.csv")):
+            continue
+        cell = os.path.basename(d)
+        rule = "_".join(cell.split("_")[1:-1])
+        if rules and rule not in rules:
+            continue
+        r = next(csv.DictReader(open(os.path.join(d, "results.csv"))))
+        ms = float(r["makespan"])
+        mu = [float(x["utilization_rate"]) for x in csv.DictReader(open(os.path.join(d, "machine_utilization.csv")))]
+        agv = list(csv.DictReader(open(os.path.join(d, "agv_performance.csv"))))
+        wip = [int(x["work_in_progress"]) for x in csv.DictReader(open(os.path.join(d, "throughput.csv")))]
+        dec = list(csv.DictReader(open(os.path.join(d, "decision_log.csv"))))
+        disp = [x for x in dec if x["decision_type"] == "Dispatch"]
+        rout = [x for x in dec if x["decision_type"] == "Routing"]
+        a = agg[rule]
+        a["util"].append(st.mean(mu)); a["util_max"].append(max(mu))
+        a["agv"].append(1 - sum(float(x["time_idle"]) for x in agv) / (ms * len(agv)))
+        a["wip_max"].append(max(wip))
+        a["disp_deg"].append(sum(int(x["candidate_count"]) <= 1 for x in disp) / max(len(disp), 1))
+        a["route_pool"].append(sum(int(x["job_candidate_count"]) > 1 for x in rout) / max(len(rout), 1))
+        a["bad"].append(int(r["deadlock_detected"]) + int(r["agv_collision_events"]) + int(r["jobs_censored"]))
+    print("\n== Load profile per rule (min-max over seeds)")
+    for rule in sorted(agg):
+        a = agg[rule]
+        rng = lambda k, f="{:.2f}": f"{f.format(min(a[k]))}-{f.format(max(a[k]))}"
+        print(f"{rule:10s} util {rng('util')} (max {rng('util_max')}) | AGV busy {rng('agv')} | WIP max "
+              f"{rng('wip_max', '{:.0f}')} | dispatch<=1 {rng('disp_deg', '{:.0%}')} | routing pool>1 "
+              f"{rng('route_pool', '{:.0%}')} | deadlock+collision+censored {sum(a['bad'])}")
+
+
+def job_half_spread(runs):
+    """Mean-flow spread across job-ordering rules with the machine half held fixed (per seed, then averaged)."""
+    groups = defaultdict(list)
+    for seed, rr in runs.items():
+        by_machine = defaultdict(dict)
+        for rule, jobs in rr.items():
+            job_half, machine_half = rule.split("_")
+            flows = [f for _, f, c in jobs if c]
+            if flows:
+                by_machine[machine_half][job_half] = st.mean(flows)
+        for mh, m in by_machine.items():
+            if len(m) > 1:
+                groups[mh].append((max(m.values()) / min(m.values()) - 1, min(m, key=m.get)))
+    print("\n== Job-ordering spread with the machine half fixed (worst/best job rule - 1, per seed)")
+    for mh, v in sorted(groups.items()):
+        spreads = [x for x, _ in v]
+        print(f"{mh:5s} mean {st.mean(spreads):+.1%} (range {min(spreads):+.1%} to {max(spreads):+.1%}); "
+              f"best job rule: {dict(Counter(b for _, b in v))}")
+
 
 if __name__ == "__main__":
     main()

@@ -4,8 +4,7 @@
 # Cluster storage is not backed up, so pulling results is also the backup.
 set -euo pipefail
 EXP="${1:?usage: pull_results.sh <exp>}"
-REMOTE="${RIT_REMOTE:-me3870@sporcsubmit.rc.rit.edu}"
-DEST="${RIT_DEST:-capstone/linux_server}"
+source "$(dirname "$0")/rit_ssh.sh"
 mkdir -p "Results/$EXP"
-rsync -az --info=progress2 "$REMOTE:$DEST/Results/$EXP/" "Results/$EXP/"
+rsync -az -e "$RSYNC_SSH" --info=progress2 "$REMOTE:$DEST/Results/$EXP/" "Results/$EXP/"
 find "Results/$EXP" -name results.csv | wc -l | xargs echo "results.csv files:"
