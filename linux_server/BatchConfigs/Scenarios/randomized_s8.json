@@ -1,0 +1,11085 @@
+{
+ "_comment": "Randomized training instance seed=8: 228 jobs over 14400s in 7 segments, mean op 183s, failures on. See env/scenarios/randomized.py.",
+ "name": "randomized_s8",
+ "seed": 8,
+ "agvCount": 7,
+ "machineTypeLayout": [
+  "Mill",
+  "Mill",
+  "Mill",
+  "Lathe",
+  "Lathe",
+  "Lathe",
+  "Weld",
+  "Weld",
+  "Weld",
+  "Inspect",
+  "Inspect",
+  "Inspect",
+  "Assemble",
+  "Assemble",
+  "Assemble"
+ ],
+ "layout": "D",
+ "reservationProtocol": "releasePrevious",
+ "parkingMethod": "lane",
+ "jobs": [
+  {
+   "id": 0,
+   "arrivalTime": 63.13,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      101.36,
+      106.6,
+      102.9
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      212.13,
+      252.35,
+      374.24
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      193.28,
+      185.16,
+      188.67
+     ]
+    }
+   ]
+  },
+  {
+   "id": 1,
+   "arrivalTime": 116.16,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      276.39,
+      307.39,
+      260.23
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      177.22,
+      186.81,
+      196.08
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      223.9,
+      153.62,
+      151.68
+     ]
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "arrivalTime": 121.14,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      118.05,
+      124.93,
+      109.73
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      316.92,
+      230.79,
+      290.24
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      284.57,
+      289.18,
+      249.79
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      269.35,
+      162.99,
+      218.48
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      159.54,
+      115.19,
+      138.15
+     ]
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "arrivalTime": 203.22,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      170.04,
+      203.35,
+      190.03
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      197.29,
+      126.73,
+      172.24
+     ]
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "arrivalTime": 227.04,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      147.37,
+      157.92,
+      216.77
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      207.32,
+      234.16,
+      256.91
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      185.67,
+      180.06,
+      163.68
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      229.61,
+      164.98,
+      209.63
+     ]
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "arrivalTime": 313.31,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      174.48,
+      179.12,
+      263.7
+     ]
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "arrivalTime": 318.87,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      86.71,
+      87.4,
+      124.89
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      303.72,
+      356.64,
+      298.39
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      187.04,
+      213.6,
+      182.79
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      158.63,
+      113.45,
+      129.17
+     ]
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "arrivalTime": 321.78,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      139.27,
+      106.21,
+      101.21
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      184.08,
+      214.83,
+      171.1
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      182.41,
+      117.39,
+      125.68
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      194.49,
+      186.95,
+      155.92
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      183.12,
+      221.33,
+      299.62
+     ]
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "arrivalTime": 334.81,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      110.31,
+      128.66,
+      180.37
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      120.6,
+      127.82,
+      110.19
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      222.35,
+      236.55,
+      240.29
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      186.53,
+      144.97,
+      155.7
+     ]
+    }
+   ]
+  },
+  {
+   "id": 9,
+   "arrivalTime": 339.19,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      167.38,
+      137.64,
+      176.18
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      148.46,
+      150.87,
+      129.57
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      154.51,
+      104.9,
+      111.37
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      139.25,
+      130.4,
+      128.92
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      176.78,
+      182.67,
+      260.7
+     ]
+    }
+   ]
+  },
+  {
+   "id": 10,
+   "arrivalTime": 453.16,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      409.09,
+      273.66,
+      410.56
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      227.55,
+      268.95,
+      207.9
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      257.56,
+      175.39,
+      239.42
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      241.1,
+      278.0,
+      213.3
+     ]
+    }
+   ]
+  },
+  {
+   "id": 11,
+   "arrivalTime": 488.62,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      157.67,
+      127.67,
+      118.03
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      312.98,
+      203.44,
+      264.83
+     ]
+    }
+   ]
+  },
+  {
+   "id": 12,
+   "arrivalTime": 499.99,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      128.4,
+      134.81,
+      114.83
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      208.91,
+      199.41,
+      283.57
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      335.78,
+      306.1,
+      287.47
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      121.22,
+      155.31,
+      135.65
+     ]
+    }
+   ]
+  },
+  {
+   "id": 13,
+   "arrivalTime": 580.56,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      219.34,
+      215.18,
+      177.82
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      208.03,
+      208.56,
+      279.43
+     ]
+    }
+   ]
+  },
+  {
+   "id": 14,
+   "arrivalTime": 626.06,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      208.3,
+      193.32,
+      199.44
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      165.76,
+      209.41,
+      205.6
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      531.65,
+      411.39,
+      538.28
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      420.42,
+      379.34,
+      371.55
+     ]
+    }
+   ]
+  },
+  {
+   "id": 15,
+   "arrivalTime": 663.9,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      185.6,
+      188.37,
+      165.43
+     ]
+    }
+   ]
+  },
+  {
+   "id": 16,
+   "arrivalTime": 665.76,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      197.16,
+      247.42,
+      203.62
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      210.2,
+      214.42,
+      194.83
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      213.85,
+      157.85,
+      209.86
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      163.81,
+      164.91,
+      258.77
+     ]
+    }
+   ]
+  },
+  {
+   "id": 17,
+   "arrivalTime": 724.77,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      78.98,
+      112.69,
+      95.02
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      286.23,
+      330.2,
+      285.66
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      296.15,
+      374.8,
+      320.27
+     ]
+    }
+   ]
+  },
+  {
+   "id": 18,
+   "arrivalTime": 732.59,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      186.18,
+      206.52,
+      166.98
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      128.86,
+      77.45,
+      98.52
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      231.83,
+      254.66,
+      405.19
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      237.11,
+      170.4,
+      176.14
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      217.39,
+      136.08,
+      195.33
+     ]
+    }
+   ]
+  },
+  {
+   "id": 19,
+   "arrivalTime": 828.57,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      137.78,
+      138.86,
+      223.68
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      201.12,
+      135.4,
+      156.79
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      80.73,
+      92.75,
+      82.92
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      186.22,
+      205.09,
+      174.23
+     ]
+    }
+   ]
+  },
+  {
+   "id": 20,
+   "arrivalTime": 858.28,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      98.7,
+      104.75,
+      83.23
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      131.2,
+      95.26,
+      125.3
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      194.11,
+      200.29,
+      308.93
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      209.61,
+      140.21,
+      188.94
+     ]
+    }
+   ]
+  },
+  {
+   "id": 21,
+   "arrivalTime": 901.09,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      113.72,
+      133.61,
+      184.5
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      133.83,
+      99.05,
+      100.53
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      116.93,
+      126.49,
+      174.3
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      158.51,
+      105.71,
+      121.38
+     ]
+    }
+   ]
+  },
+  {
+   "id": 22,
+   "arrivalTime": 929.81,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      164.39,
+      157.67,
+      142.89
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      173.61,
+      226.45,
+      218.8
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      153.67,
+      149.29,
+      224.55
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      232.8,
+      228.69,
+      191.34
+     ]
+    }
+   ]
+  },
+  {
+   "id": 23,
+   "arrivalTime": 969.55,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      241.47,
+      166.24,
+      248.06
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      139.93,
+      175.29,
+      138.33
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      118.67,
+      117.79,
+      111.72
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      203.72,
+      167.09,
+      149.92
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      170.09,
+      186.32,
+      169.53
+     ]
+    }
+   ]
+  },
+  {
+   "id": 24,
+   "arrivalTime": 1063.72,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      207.61,
+      236.44,
+      338.05
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      150.23,
+      156.89,
+      137.69
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      129.02,
+      93.6,
+      100.35
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      172.3,
+      154.26,
+      133.55
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      300.27,
+      224.81,
+      231.85
+     ]
+    }
+   ]
+  },
+  {
+   "id": 25,
+   "arrivalTime": 1090.8,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      145.73,
+      152.36,
+      135.55
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      130.45,
+      156.15,
+      182.95
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      220.69,
+      170.74,
+      226.15
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      138.33,
+      128.87,
+      103.29
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      137.26,
+      173.0,
+      206.62
+     ]
+    }
+   ]
+  },
+  {
+   "id": 26,
+   "arrivalTime": 1099.2,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      126.98,
+      93.28,
+      103.83
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      110.32,
+      113.0,
+      171.63
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      98.59,
+      117.75,
+      107.65
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      126.63,
+      131.45,
+      122.01
+     ]
+    }
+   ]
+  },
+  {
+   "id": 27,
+   "arrivalTime": 1144.04,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      248.42,
+      274.17,
+      236.6
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      120.42,
+      137.12,
+      112.76
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      298.64,
+      186.6,
+      239.81
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      91.23,
+      115.67,
+      106.57
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      207.89,
+      224.19,
+      178.11
+     ]
+    }
+   ]
+  },
+  {
+   "id": 28,
+   "arrivalTime": 1181.05,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      198.66,
+      126.2,
+      173.59
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      161.26,
+      177.0,
+      250.06
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      178.43,
+      249.77,
+      224.79
+     ]
+    }
+   ]
+  },
+  {
+   "id": 29,
+   "arrivalTime": 1199.41,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      136.67,
+      148.57,
+      201.04
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      238.49,
+      157.55,
+      191.45
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      204.94,
+      273.32,
+      254.96
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      135.4,
+      131.93,
+      122.27
+     ]
+    }
+   ]
+  },
+  {
+   "id": 30,
+   "arrivalTime": 1220.95,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      87.16,
+      59.55,
+      89.13
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      122.92,
+      126.24,
+      126.46
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      100.36,
+      118.55,
+      102.83
+     ]
+    }
+   ]
+  },
+  {
+   "id": 31,
+   "arrivalTime": 1271.3,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      267.4,
+      275.19,
+      351.02
+     ]
+    }
+   ]
+  },
+  {
+   "id": 32,
+   "arrivalTime": 1304.57,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      108.04,
+      123.58,
+      163.7
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      179.55,
+      210.15,
+      182.13
+     ]
+    }
+   ]
+  },
+  {
+   "id": 33,
+   "arrivalTime": 1352.27,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      89.58,
+      94.64,
+      77.28
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      99.83,
+      67.5,
+      75.97
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      265.76,
+      189.4,
+      221.74
+     ]
+    }
+   ]
+  },
+  {
+   "id": 34,
+   "arrivalTime": 1370.28,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      92.32,
+      97.83,
+      133.96
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      101.9,
+      105.76,
+      102.11
+     ]
+    }
+   ]
+  },
+  {
+   "id": 35,
+   "arrivalTime": 1391.72,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      154.06,
+      160.67,
+      158.37
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      359.15,
+      264.23,
+      268.43
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      140.66,
+      159.58,
+      210.89
+     ]
+    }
+   ]
+  },
+  {
+   "id": 36,
+   "arrivalTime": 1408.03,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      277.25,
+      298.09,
+      259.55
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      226.57,
+      158.25,
+      198.19
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      191.7,
+      257.5,
+      210.67
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      124.79,
+      89.62,
+      107.2
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      228.05,
+      145.9,
+      198.83
+     ]
+    }
+   ]
+  },
+  {
+   "id": 37,
+   "arrivalTime": 1460.22,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      228.89,
+      252.27,
+      252.07
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      233.23,
+      164.07,
+      189.41
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      79.3,
+      97.25,
+      80.15
+     ]
+    }
+   ]
+  },
+  {
+   "id": 38,
+   "arrivalTime": 1540.72,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      127.07,
+      131.48,
+      118.75
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      260.38,
+      165.24,
+      182.04
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      149.39,
+      170.95,
+      156.21
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      322.06,
+      207.75,
+      212.94
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      147.28,
+      145.92,
+      144.5
+     ]
+    }
+   ]
+  },
+  {
+   "id": 39,
+   "arrivalTime": 1635.46,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      97.11,
+      91.88,
+      77.87
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      139.58,
+      109.0,
+      136.07
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      217.46,
+      152.53,
+      165.58
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      200.49,
+      136.2,
+      166.22
+     ]
+    }
+   ]
+  },
+  {
+   "id": 40,
+   "arrivalTime": 1754.56,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      154.85,
+      148.58,
+      137.6
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      180.97,
+      114.95,
+      162.44
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      187.44,
+      120.31,
+      135.14
+     ]
+    }
+   ]
+  },
+  {
+   "id": 41,
+   "arrivalTime": 1792.96,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      153.95,
+      131.21,
+      118.53
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      126.88,
+      146.2,
+      185.19
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      134.53,
+      161.56,
+      142.15
+     ]
+    }
+   ]
+  },
+  {
+   "id": 42,
+   "arrivalTime": 1813.53,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      217.02,
+      252.3,
+      213.43
+     ]
+    }
+   ]
+  },
+  {
+   "id": 43,
+   "arrivalTime": 2142.17,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      153.54,
+      105.92,
+      111.1
+     ]
+    }
+   ]
+  },
+  {
+   "id": 44,
+   "arrivalTime": 2428.03,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      174.4,
+      139.29,
+      137.09
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      108.38,
+      128.86,
+      153.21
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      201.34,
+      128.31,
+      169.71
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      134.29,
+      144.34,
+      201.75
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      140.68,
+      103.62,
+      133.79
+     ]
+    }
+   ]
+  },
+  {
+   "id": 45,
+   "arrivalTime": 2491.62,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      148.26,
+      133.92,
+      190.9
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      265.85,
+      276.39,
+      299.04
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      136.61,
+      95.73,
+      139.04
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      129.58,
+      135.02,
+      207.62
+     ]
+    }
+   ]
+  },
+  {
+   "id": 46,
+   "arrivalTime": 2675.67,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      163.87,
+      104.07,
+      125.49
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      159.84,
+      178.71,
+      240.15
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      261.03,
+      150.69,
+      230.09
+     ]
+    }
+   ]
+  },
+  {
+   "id": 47,
+   "arrivalTime": 3528.96,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      234.93,
+      153.68,
+      209.82
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      193.05,
+      193.39,
+      251.17
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      81.95,
+      86.34,
+      82.41
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      290.05,
+      196.7,
+      240.92
+     ]
+    }
+   ]
+  },
+  {
+   "id": 48,
+   "arrivalTime": 3837.89,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      197.37,
+      239.51,
+      219.39
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      288.93,
+      282.06,
+      252.92
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      137.28,
+      161.54,
+      231.07
+     ]
+    }
+   ]
+  },
+  {
+   "id": 49,
+   "arrivalTime": 3936.39,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      184.87,
+      198.22,
+      170.3
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      123.44,
+      130.58,
+      184.14
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      221.88,
+      138.06,
+      151.41
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      87.81,
+      87.4,
+      82.58
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      116.0,
+      88.01,
+      93.88
+     ]
+    }
+   ]
+  },
+  {
+   "id": 50,
+   "arrivalTime": 4192.43,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      134.09,
+      126.03,
+      120.03
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      145.98,
+      116.3,
+      111.06
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      154.38,
+      163.19,
+      156.81
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      242.36,
+      269.3,
+      237.79
+     ]
+    }
+   ]
+  },
+  {
+   "id": 51,
+   "arrivalTime": 4821.89,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      209.96,
+      163.76,
+      179.58
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      323.35,
+      192.82,
+      290.82
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      195.2,
+      219.8,
+      189.79
+     ]
+    }
+   ]
+  },
+  {
+   "id": 52,
+   "arrivalTime": 4966.84,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      181.97,
+      131.84,
+      186.63
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      105.03,
+      102.17,
+      159.13
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      103.95,
+      111.55,
+      115.08
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      227.67,
+      161.07,
+      188.1
+     ]
+    }
+   ]
+  },
+  {
+   "id": 53,
+   "arrivalTime": 4974.79,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      150.87,
+      194.01,
+      160.72
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      157.87,
+      174.76,
+      164.63
+     ]
+    }
+   ]
+  },
+  {
+   "id": 54,
+   "arrivalTime": 5228.38,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      97.09,
+      108.71,
+      85.03
+     ]
+    }
+   ]
+  },
+  {
+   "id": 55,
+   "arrivalTime": 5597.43,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      194.03,
+      202.01,
+      201.91
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      149.9,
+      165.88,
+      216.35
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      158.21,
+      188.16,
+      183.09
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      236.84,
+      143.19,
+      201.99
+     ]
+    }
+   ]
+  },
+  {
+   "id": 56,
+   "arrivalTime": 5663.16,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      106.76,
+      118.96,
+      180.45
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      205.17,
+      225.52,
+      183.1
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      185.51,
+      194.77,
+      287.26
+     ]
+    }
+   ]
+  },
+  {
+   "id": 57,
+   "arrivalTime": 5795.91,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      160.88,
+      205.33,
+      271.37
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      219.62,
+      237.1,
+      201.1
+     ]
+    }
+   ]
+  },
+  {
+   "id": 58,
+   "arrivalTime": 5894.84,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      192.21,
+      191.04,
+      262.23
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      149.1,
+      151.47,
+      132.84
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      546.24,
+      411.15,
+      476.13
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      60.48,
+      61.24,
+      57.43
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      459.63,
+      269.99,
+      405.04
+     ]
+    }
+   ]
+  },
+  {
+   "id": 59,
+   "arrivalTime": 5897.16,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      193.45,
+      202.23,
+      295.25
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      134.76,
+      129.33,
+      114.2
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      185.49,
+      220.11,
+      184.21
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      144.01,
+      160.3,
+      229.85
+     ]
+    }
+   ]
+  },
+  {
+   "id": 60,
+   "arrivalTime": 5934.08,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      116.26,
+      91.42,
+      88.2
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      106.16,
+      131.99,
+      106.89
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      200.34,
+      216.64,
+      173.62
+     ]
+    }
+   ]
+  },
+  {
+   "id": 61,
+   "arrivalTime": 5941.8,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      185.44,
+      151.19,
+      143.81
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      290.15,
+      202.61,
+      287.46
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      332.8,
+      257.77,
+      291.76
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      226.19,
+      150.65,
+      206.59
+     ]
+    }
+   ]
+  },
+  {
+   "id": 62,
+   "arrivalTime": 5987.97,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      240.12,
+      284.42,
+      368.45
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      80.22,
+      99.58,
+      88.94
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      124.4,
+      80.34,
+      95.77
+     ]
+    }
+   ]
+  },
+  {
+   "id": 63,
+   "arrivalTime": 5988.66,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      149.51,
+      160.69,
+      212.51
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      143.63,
+      156.46,
+      139.01
+     ]
+    }
+   ]
+  },
+  {
+   "id": 64,
+   "arrivalTime": 6154.31,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      145.05,
+      87.89,
+      127.59
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      126.46,
+      124.11,
+      124.02
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      134.27,
+      175.47,
+      167.64
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      171.1,
+      165.88,
+      155.34
+     ]
+    }
+   ]
+  },
+  {
+   "id": 65,
+   "arrivalTime": 6187.19,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      260.6,
+      309.08,
+      265.61
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      215.26,
+      139.98,
+      173.52
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      66.17,
+      74.91,
+      101.58
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      129.77,
+      97.1,
+      100.37
+     ]
+    }
+   ]
+  },
+  {
+   "id": 66,
+   "arrivalTime": 6197.59,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      127.63,
+      126.42,
+      99.81
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      287.47,
+      225.77,
+      268.79
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      155.68,
+      154.82,
+      227.97
+     ]
+    }
+   ]
+  },
+  {
+   "id": 67,
+   "arrivalTime": 6226.65,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      228.69,
+      250.99,
+      244.06
+     ]
+    }
+   ]
+  },
+  {
+   "id": 68,
+   "arrivalTime": 6246.91,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      111.24,
+      74.97,
+      72.82
+     ]
+    }
+   ]
+  },
+  {
+   "id": 69,
+   "arrivalTime": 6282.83,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      322.91,
+      275.9,
+      283.78
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      169.69,
+      110.32,
+      121.43
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      71.86,
+      82.47,
+      68.88
+     ]
+    }
+   ]
+  },
+  {
+   "id": 70,
+   "arrivalTime": 6311.7,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      237.9,
+      173.69,
+      175.22
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      125.27,
+      156.75,
+      200.72
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      205.46,
+      128.13,
+      153.91
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      189.59,
+      220.66,
+      169.58
+     ]
+    }
+   ]
+  },
+  {
+   "id": 71,
+   "arrivalTime": 6498.02,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      113.08,
+      77.65,
+      92.94
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      301.78,
+      208.18,
+      284.53
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      168.6,
+      210.7,
+      278.74
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      157.27,
+      158.81,
+      154.54
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      72.43,
+      81.08,
+      107.83
+     ]
+    }
+   ]
+  },
+  {
+   "id": 72,
+   "arrivalTime": 6518.5,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      180.43,
+      205.4,
+      172.5
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      274.98,
+      289.61,
+      285.7
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      77.26,
+      82.39,
+      134.66
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      279.88,
+      203.09,
+      241.74
+     ]
+    }
+   ]
+  },
+  {
+   "id": 73,
+   "arrivalTime": 6522.18,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      117.12,
+      116.38,
+      112.02
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      214.96,
+      151.15,
+      153.09
+     ]
+    }
+   ]
+  },
+  {
+   "id": 74,
+   "arrivalTime": 6565.84,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      248.63,
+      340.39,
+      284.75
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      133.67,
+      132.65,
+      110.53
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      125.4,
+      144.67,
+      186.77
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      228.53,
+      157.96,
+      194.0
+     ]
+    }
+   ]
+  },
+  {
+   "id": 75,
+   "arrivalTime": 6600.93,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      132.39,
+      171.03,
+      143.83
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      264.85,
+      257.31,
+      212.12
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      233.83,
+      151.44,
+      171.15
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      245.56,
+      258.35,
+      351.55
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      108.68,
+      123.61,
+      105.32
+     ]
+    }
+   ]
+  },
+  {
+   "id": 76,
+   "arrivalTime": 6624.85,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      158.41,
+      114.42,
+      126.51
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      171.67,
+      193.05,
+      175.39
+     ]
+    }
+   ]
+  },
+  {
+   "id": 77,
+   "arrivalTime": 6803.23,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      180.34,
+      181.0,
+      285.0
+     ]
+    }
+   ]
+  },
+  {
+   "id": 78,
+   "arrivalTime": 6904.11,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      178.25,
+      136.05,
+      145.86
+     ]
+    }
+   ]
+  },
+  {
+   "id": 79,
+   "arrivalTime": 6932.72,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      175.81,
+      226.1,
+      228.09
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      186.62,
+      119.53,
+      159.58
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      121.59,
+      124.75,
+      89.68
+     ]
+    }
+   ]
+  },
+  {
+   "id": 80,
+   "arrivalTime": 6940.79,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      145.68,
+      168.87,
+      182.72
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      112.7,
+      90.26,
+      112.14
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      217.75,
+      188.75,
+      163.68
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      198.73,
+      226.45,
+      347.18
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      208.58,
+      140.18,
+      144.51
+     ]
+    }
+   ]
+  },
+  {
+   "id": 81,
+   "arrivalTime": 7056.41,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      209.13,
+      180.09,
+      170.52
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      116.84,
+      135.19,
+      184.52
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      200.93,
+      137.7,
+      167.53
+     ]
+    }
+   ]
+  },
+  {
+   "id": 82,
+   "arrivalTime": 7144.72,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      140.97,
+      134.79,
+      196.04
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      249.74,
+      256.26,
+      226.62
+     ]
+    }
+   ]
+  },
+  {
+   "id": 83,
+   "arrivalTime": 7214.5,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      106.21,
+      128.9,
+      158.97
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      196.61,
+      122.22,
+      148.03
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      466.82,
+      330.41,
+      331.48
+     ]
+    }
+   ]
+  },
+  {
+   "id": 84,
+   "arrivalTime": 7214.87,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      195.29,
+      158.87,
+      173.35
+     ]
+    }
+   ]
+  },
+  {
+   "id": 85,
+   "arrivalTime": 7215.38,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      244.4,
+      159.22,
+      234.33
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      174.39,
+      179.86,
+      148.55
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      182.22,
+      126.6,
+      168.93
+     ]
+    }
+   ]
+  },
+  {
+   "id": 86,
+   "arrivalTime": 7220.09,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      129.58,
+      147.31,
+      186.39
+     ]
+    }
+   ]
+  },
+  {
+   "id": 87,
+   "arrivalTime": 7220.61,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      193.16,
+      139.87,
+      167.22
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      186.06,
+      216.03,
+      192.04
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      111.03,
+      131.23,
+      168.76
+     ]
+    }
+   ]
+  },
+  {
+   "id": 88,
+   "arrivalTime": 7221.73,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      89.11,
+      81.84,
+      73.34
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      135.08,
+      134.54,
+      189.92
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      280.31,
+      245.95,
+      220.45
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      101.69,
+      103.35,
+      161.38
+     ]
+    }
+   ]
+  },
+  {
+   "id": 89,
+   "arrivalTime": 7223.86,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      87.13,
+      98.54,
+      138.33
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      234.82,
+      174.39,
+      225.81
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      121.06,
+      141.47,
+      132.07
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      339.57,
+      236.26,
+      295.38
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      138.65,
+      103.49,
+      110.78
+     ]
+    }
+   ]
+  },
+  {
+   "id": 90,
+   "arrivalTime": 7230.61,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      140.97,
+      176.22,
+      241.85
+     ]
+    }
+   ]
+  },
+  {
+   "id": 91,
+   "arrivalTime": 7231.83,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      252.81,
+      189.49,
+      202.49
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      181.63,
+      199.5,
+      286.22
+     ]
+    }
+   ]
+  },
+  {
+   "id": 92,
+   "arrivalTime": 7232.34,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      201.86,
+      140.73,
+      165.03
+     ]
+    }
+   ]
+  },
+  {
+   "id": 93,
+   "arrivalTime": 7234.62,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      187.87,
+      129.95,
+      166.81
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      114.4,
+      79.71,
+      91.1
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      189.58,
+      201.8,
+      183.7
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      208.14,
+      141.09,
+      147.8
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      214.39,
+      212.83,
+      185.16
+     ]
+    }
+   ]
+  },
+  {
+   "id": 94,
+   "arrivalTime": 7235.6,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      136.48,
+      141.28,
+      146.96
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      129.38,
+      136.75,
+      171.09
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      277.47,
+      246.36,
+      217.28
+     ]
+    }
+   ]
+  },
+  {
+   "id": 95,
+   "arrivalTime": 7236.77,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      123.09,
+      146.37,
+      125.79
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      88.36,
+      96.7,
+      153.42
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      215.05,
+      280.8,
+      246.3
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      241.11,
+      160.08,
+      212.83
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      237.3,
+      165.44,
+      164.63
+     ]
+    }
+   ]
+  },
+  {
+   "id": 96,
+   "arrivalTime": 7238.77,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      164.56,
+      158.05,
+      159.37
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      265.02,
+      312.03,
+      302.29
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      278.72,
+      210.38,
+      254.78
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      333.65,
+      226.82,
+      240.41
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      102.27,
+      126.05,
+      114.32
+     ]
+    }
+   ]
+  },
+  {
+   "id": 97,
+   "arrivalTime": 7239.27,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      144.45,
+      196.11,
+      163.96
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      308.08,
+      203.37,
+      270.78
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      91.82,
+      70.99,
+      79.49
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      226.82,
+      144.27,
+      190.78
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      150.63,
+      178.39,
+      142.28
+     ]
+    }
+   ]
+  },
+  {
+   "id": 98,
+   "arrivalTime": 7239.48,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      129.68,
+      153.46,
+      200.65
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      179.54,
+      177.09,
+      138.73
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      210.44,
+      265.45,
+      227.24
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      185.84,
+      184.5,
+      270.85
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      186.63,
+      152.67,
+      187.74
+     ]
+    }
+   ]
+  },
+  {
+   "id": 99,
+   "arrivalTime": 7240.84,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      239.88,
+      158.41,
+      155.69
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      301.86,
+      198.62,
+      266.01
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      108.23,
+      111.71,
+      100.11
+     ]
+    }
+   ]
+  },
+  {
+   "id": 100,
+   "arrivalTime": 7241.48,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      174.35,
+      119.73,
+      132.01
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      135.7,
+      91.75,
+      125.22
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      136.68,
+      151.54,
+      216.54
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      183.6,
+      131.09,
+      165.12
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      201.18,
+      222.01,
+      193.64
+     ]
+    }
+   ]
+  },
+  {
+   "id": 101,
+   "arrivalTime": 7244.21,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      96.17,
+      61.08,
+      73.07
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      119.46,
+      155.49,
+      144.0
+     ]
+    }
+   ]
+  },
+  {
+   "id": 102,
+   "arrivalTime": 7244.89,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      231.59,
+      161.61,
+      176.73
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      255.57,
+      298.3,
+      236.94
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      261.65,
+      186.46,
+      215.78
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      167.35,
+      231.58,
+      201.76
+     ]
+    }
+   ]
+  },
+  {
+   "id": 103,
+   "arrivalTime": 7245.02,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      232.8,
+      156.04,
+      205.31
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      125.42,
+      90.76,
+      95.33
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      150.97,
+      166.45,
+      170.64
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      168.88,
+      135.93,
+      155.25
+     ]
+    }
+   ]
+  },
+  {
+   "id": 104,
+   "arrivalTime": 7245.89,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      292.67,
+      319.61,
+      259.1
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      142.26,
+      161.59,
+      229.87
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      200.45,
+      150.59,
+      178.41
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      100.56,
+      116.2,
+      169.6
+     ]
+    }
+   ]
+  },
+  {
+   "id": 105,
+   "arrivalTime": 7248.11,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      167.52,
+      184.2,
+      277.5
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      167.47,
+      117.43,
+      140.54
+     ]
+    }
+   ]
+  },
+  {
+   "id": 106,
+   "arrivalTime": 7249.96,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      126.43,
+      73.14,
+      99.96
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      257.41,
+      277.03,
+      261.19
+     ]
+    }
+   ]
+  },
+  {
+   "id": 107,
+   "arrivalTime": 7249.97,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      101.48,
+      99.06,
+      157.83
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      264.49,
+      352.15,
+      287.83
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      153.0,
+      99.43,
+      138.2
+     ]
+    }
+   ]
+  },
+  {
+   "id": 108,
+   "arrivalTime": 7250.22,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      381.7,
+      509.98,
+      413.46
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      157.14,
+      180.45,
+      154.09
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      271.96,
+      193.5,
+      262.88
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      105.65,
+      121.03,
+      99.41
+     ]
+    }
+   ]
+  },
+  {
+   "id": 109,
+   "arrivalTime": 7251.29,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      131.27,
+      120.99,
+      102.3
+     ]
+    }
+   ]
+  },
+  {
+   "id": 110,
+   "arrivalTime": 7251.96,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      87.67,
+      68.82,
+      75.53
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      92.84,
+      103.97,
+      145.61
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      273.39,
+      179.57,
+      240.35
+     ]
+    }
+   ]
+  },
+  {
+   "id": 111,
+   "arrivalTime": 7253.65,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      251.96,
+      258.92,
+      208.64
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      105.85,
+      120.97,
+      112.67
+     ]
+    }
+   ]
+  },
+  {
+   "id": 112,
+   "arrivalTime": 7253.66,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      199.72,
+      245.07,
+      289.29
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      190.3,
+      141.83,
+      171.03
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      128.99,
+      145.07,
+      137.31
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      136.57,
+      140.44,
+      216.75
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      113.12,
+      132.81,
+      127.06
+     ]
+    }
+   ]
+  },
+  {
+   "id": 113,
+   "arrivalTime": 7255.39,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      124.8,
+      102.76,
+      115.16
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      220.43,
+      240.75,
+      216.12
+     ]
+    }
+   ]
+  },
+  {
+   "id": 114,
+   "arrivalTime": 7255.49,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      206.4,
+      257.65,
+      323.61
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      152.58,
+      161.85,
+      158.11
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      229.1,
+      229.79,
+      357.56
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      169.71,
+      158.67,
+      153.0
+     ]
+    }
+   ]
+  },
+  {
+   "id": 115,
+   "arrivalTime": 7258.82,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      153.74,
+      202.58,
+      187.66
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      145.76,
+      164.68,
+      122.29
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      156.32,
+      123.39,
+      115.25
+     ]
+    }
+   ]
+  },
+  {
+   "id": 116,
+   "arrivalTime": 7260.43,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      332.03,
+      196.01,
+      291.81
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      210.63,
+      156.27,
+      170.74
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      180.76,
+      201.56,
+      201.63
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      164.79,
+      106.6,
+      107.73
+     ]
+    }
+   ]
+  },
+  {
+   "id": 117,
+   "arrivalTime": 7260.94,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      154.08,
+      120.98,
+      160.54
+     ]
+    }
+   ]
+  },
+  {
+   "id": 118,
+   "arrivalTime": 7264.55,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      161.38,
+      190.11,
+      251.97
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      249.58,
+      201.47,
+      230.6
+     ]
+    }
+   ]
+  },
+  {
+   "id": 119,
+   "arrivalTime": 7264.7,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      223.42,
+      229.24,
+      199.43
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      111.72,
+      140.7,
+      122.98
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      174.37,
+      103.1,
+      136.08
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      122.32,
+      131.63,
+      170.69
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      144.02,
+      183.26,
+      182.21
+     ]
+    }
+   ]
+  },
+  {
+   "id": 120,
+   "arrivalTime": 7265.88,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      129.83,
+      102.8,
+      106.6
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      141.5,
+      113.64,
+      123.9
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      134.71,
+      142.2,
+      221.39
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      171.43,
+      167.6,
+      146.98
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      187.52,
+      270.04,
+      234.92
+     ]
+    }
+   ]
+  },
+  {
+   "id": 121,
+   "arrivalTime": 7266.03,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      216.79,
+      265.51,
+      231.02
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      149.06,
+      155.11,
+      124.0
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      91.57,
+      113.26,
+      135.88
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      124.86,
+      152.91,
+      147.39
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      226.66,
+      260.34,
+      233.11
+     ]
+    }
+   ]
+  },
+  {
+   "id": 122,
+   "arrivalTime": 7269.83,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      193.11,
+      200.26,
+      263.67
+     ]
+    }
+   ]
+  },
+  {
+   "id": 123,
+   "arrivalTime": 7269.86,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      319.64,
+      199.99,
+      222.35
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      218.01,
+      222.61,
+      214.82
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      81.6,
+      75.6,
+      123.76
+     ]
+    }
+   ]
+  },
+  {
+   "id": 124,
+   "arrivalTime": 7270.59,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      173.58,
+      188.65,
+      222.73
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      155.22,
+      99.17,
+      124.6
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      288.16,
+      217.45,
+      205.18
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      141.27,
+      144.39,
+      121.74
+     ]
+    }
+   ]
+  },
+  {
+   "id": 125,
+   "arrivalTime": 7270.66,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      269.57,
+      194.46,
+      204.45
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      124.48,
+      85.56,
+      124.33
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      109.88,
+      113.57,
+      169.82
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      208.21,
+      132.66,
+      161.67
+     ]
+    }
+   ]
+  },
+  {
+   "id": 126,
+   "arrivalTime": 9300.49,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      147.11,
+      183.14,
+      179.3
+     ]
+    }
+   ]
+  },
+  {
+   "id": 127,
+   "arrivalTime": 9301.61,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      342.71,
+      208.77,
+      225.88
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      168.75,
+      192.71,
+      175.54
+     ]
+    }
+   ]
+  },
+  {
+   "id": 128,
+   "arrivalTime": 9302.67,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      213.75,
+      213.85,
+      310.95
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      140.87,
+      185.01,
+      154.75
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      200.81,
+      133.33,
+      179.06
+     ]
+    }
+   ]
+  },
+  {
+   "id": 129,
+   "arrivalTime": 9303.52,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      220.91,
+      158.33,
+      207.51
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      108.13,
+      142.2,
+      119.07
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      302.06,
+      298.9,
+      234.04
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      71.49,
+      82.68,
+      112.1
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      109.15,
+      112.48,
+      90.94
+     ]
+    }
+   ]
+  },
+  {
+   "id": 130,
+   "arrivalTime": 9303.8,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      161.73,
+      168.39,
+      244.46
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      236.75,
+      150.21,
+      215.91
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      251.0,
+      303.48,
+      284.37
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      261.32,
+      255.15,
+      202.54
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      138.6,
+      144.74,
+      195.57
+     ]
+    }
+   ]
+  },
+  {
+   "id": 131,
+   "arrivalTime": 9304.68,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      208.99,
+      146.75,
+      218.07
+     ]
+    }
+   ]
+  },
+  {
+   "id": 132,
+   "arrivalTime": 9306.13,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      111.78,
+      72.75,
+      96.01
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      316.69,
+      310.94,
+      239.54
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      262.62,
+      190.0,
+      195.1
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      106.67,
+      110.69,
+      157.74
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      209.62,
+      236.42,
+      203.81
+     ]
+    }
+   ]
+  },
+  {
+   "id": 133,
+   "arrivalTime": 9309.24,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      121.79,
+      128.27,
+      108.02
+     ]
+    }
+   ]
+  },
+  {
+   "id": 134,
+   "arrivalTime": 9309.72,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      113.59,
+      84.66,
+      77.35
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      192.26,
+      185.54,
+      157.26
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      274.16,
+      200.44,
+      241.62
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      148.1,
+      161.71,
+      131.19
+     ]
+    }
+   ]
+  },
+  {
+   "id": 135,
+   "arrivalTime": 9309.91,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      335.02,
+      212.86,
+      235.65
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      347.08,
+      236.0,
+      335.06
+     ]
+    }
+   ]
+  },
+  {
+   "id": 136,
+   "arrivalTime": 9310.69,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      234.83,
+      170.13,
+      170.02
+     ]
+    }
+   ]
+  },
+  {
+   "id": 137,
+   "arrivalTime": 9311.53,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      148.49,
+      188.84,
+      256.07
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      122.9,
+      90.65,
+      94.39
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      95.08,
+      106.03,
+      100.45
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      213.89,
+      204.83,
+      180.54
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      125.18,
+      81.18,
+      96.99
+     ]
+    }
+   ]
+  },
+  {
+   "id": 138,
+   "arrivalTime": 9312.52,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      250.91,
+      240.95,
+      190.38
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      67.97,
+      81.52,
+      84.79
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      227.83,
+      232.39,
+      235.66
+     ]
+    }
+   ]
+  },
+  {
+   "id": 139,
+   "arrivalTime": 9313.7,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      92.5,
+      66.59,
+      69.18
+     ]
+    }
+   ]
+  },
+  {
+   "id": 140,
+   "arrivalTime": 9314.48,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      241.44,
+      170.97,
+      171.48
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      85.61,
+      96.74,
+      126.42
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      151.99,
+      170.0,
+      144.32
+     ]
+    }
+   ]
+  },
+  {
+   "id": 141,
+   "arrivalTime": 9315.77,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      222.35,
+      218.09,
+      210.43
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      146.44,
+      85.52,
+      120.6
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      293.02,
+      188.02,
+      203.07
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      174.25,
+      173.41,
+      154.21
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      168.19,
+      115.48,
+      107.15
+     ]
+    }
+   ]
+  },
+  {
+   "id": 142,
+   "arrivalTime": 9317.0,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      75.9,
+      90.3,
+      84.95
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      82.55,
+      95.73,
+      85.61
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      139.81,
+      181.43,
+      230.1
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      171.35,
+      125.75,
+      116.08
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      165.4,
+      207.78,
+      202.72
+     ]
+    }
+   ]
+  },
+  {
+   "id": 143,
+   "arrivalTime": 9317.34,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      230.46,
+      189.29,
+      203.66
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      163.74,
+      158.53,
+      138.5
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      197.81,
+      142.51,
+      167.07
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      128.86,
+      136.17,
+      139.37
+     ]
+    }
+   ]
+  },
+  {
+   "id": 144,
+   "arrivalTime": 9317.54,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      185.11,
+      136.2,
+      146.77
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      126.41,
+      89.4,
+      124.5
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      159.19,
+      155.08,
+      247.69
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      147.55,
+      99.82,
+      102.46
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      205.63,
+      215.6,
+      284.8
+     ]
+    }
+   ]
+  },
+  {
+   "id": 145,
+   "arrivalTime": 9317.56,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      142.36,
+      121.73,
+      129.32
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      212.1,
+      223.64,
+      314.59
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      167.11,
+      164.1,
+      143.96
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      187.79,
+      137.32,
+      154.69
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      193.6,
+      144.89,
+      149.38
+     ]
+    }
+   ]
+  },
+  {
+   "id": 146,
+   "arrivalTime": 9318.99,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      204.79,
+      144.46,
+      204.12
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      165.79,
+      113.19,
+      109.94
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      192.22,
+      113.09,
+      148.49
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      218.64,
+      147.12,
+      171.74
+     ]
+    }
+   ]
+  },
+  {
+   "id": 147,
+   "arrivalTime": 9319.9,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      269.08,
+      294.75,
+      298.2
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      129.18,
+      104.32,
+      125.44
+     ]
+    }
+   ]
+  },
+  {
+   "id": 148,
+   "arrivalTime": 9320.88,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      193.34,
+      112.07,
+      165.07
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      188.04,
+      194.92,
+      265.37
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      213.54,
+      227.81,
+      216.48
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      280.77,
+      321.66,
+      430.84
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      163.99,
+      168.71,
+      161.64
+     ]
+    }
+   ]
+  },
+  {
+   "id": 149,
+   "arrivalTime": 9322.5,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      184.16,
+      190.33,
+      181.74
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      183.05,
+      113.19,
+      159.35
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      70.93,
+      47.77,
+      58.96
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      142.85,
+      194.37,
+      164.41
+     ]
+    }
+   ]
+  },
+  {
+   "id": 150,
+   "arrivalTime": 9324.71,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      155.8,
+      190.25,
+      275.6
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      127.55,
+      130.36,
+      105.18
+     ]
+    }
+   ]
+  },
+  {
+   "id": 151,
+   "arrivalTime": 9326.16,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      205.09,
+      158.69,
+      152.49
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      120.1,
+      131.86,
+      124.06
+     ]
+    }
+   ]
+  },
+  {
+   "id": 152,
+   "arrivalTime": 9330.31,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      103.77,
+      119.0,
+      104.28
+     ]
+    }
+   ]
+  },
+  {
+   "id": 153,
+   "arrivalTime": 9332.25,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      158.61,
+      103.23,
+      129.72
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      123.32,
+      143.91,
+      179.17
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      92.43,
+      102.35,
+      79.98
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      282.35,
+      192.29,
+      208.69
+     ]
+    }
+   ]
+  },
+  {
+   "id": 154,
+   "arrivalTime": 9333.13,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      180.8,
+      189.45,
+      259.21
+     ]
+    }
+   ]
+  },
+  {
+   "id": 155,
+   "arrivalTime": 9335.35,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      117.99,
+      87.47,
+      112.08
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      98.58,
+      68.9,
+      79.45
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      136.51,
+      87.3,
+      117.26
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      71.33,
+      76.38,
+      114.81
+     ]
+    }
+   ]
+  },
+  {
+   "id": 156,
+   "arrivalTime": 9337.21,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      103.55,
+      128.2,
+      157.63
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      362.83,
+      401.11,
+      336.03
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      96.88,
+      64.1,
+      90.53
+     ]
+    }
+   ]
+  },
+  {
+   "id": 157,
+   "arrivalTime": 9338.45,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      165.73,
+      153.8,
+      145.25
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      147.75,
+      95.69,
+      121.37
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      293.35,
+      216.77,
+      250.31
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      172.04,
+      168.17,
+      259.35
+     ]
+    }
+   ]
+  },
+  {
+   "id": 158,
+   "arrivalTime": 9341.28,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      191.14,
+      183.61,
+      267.67
+     ]
+    }
+   ]
+  },
+  {
+   "id": 159,
+   "arrivalTime": 9342.64,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      265.2,
+      192.01,
+      209.53
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      137.38,
+      159.95,
+      195.32
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      284.41,
+      186.04,
+      255.9
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      157.04,
+      164.96,
+      135.0
+     ]
+    }
+   ]
+  },
+  {
+   "id": 160,
+   "arrivalTime": 9344.53,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      206.32,
+      205.34,
+      175.97
+     ]
+    }
+   ]
+  },
+  {
+   "id": 161,
+   "arrivalTime": 9346.27,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      220.56,
+      144.11,
+      169.93
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      304.26,
+      203.96,
+      199.32
+     ]
+    }
+   ]
+  },
+  {
+   "id": 162,
+   "arrivalTime": 9346.33,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      272.24,
+      166.62,
+      218.29
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      134.07,
+      147.35,
+      194.53
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      243.34,
+      165.97,
+      216.9
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      120.78,
+      127.48,
+      124.91
+     ]
+    }
+   ]
+  },
+  {
+   "id": 163,
+   "arrivalTime": 9346.96,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      216.35,
+      255.36,
+      215.71
+     ]
+    }
+   ]
+  },
+  {
+   "id": 164,
+   "arrivalTime": 9348.98,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      204.01,
+      157.54,
+      144.88
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      240.58,
+      155.6,
+      216.47
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      148.13,
+      161.97,
+      137.15
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      114.37,
+      134.14,
+      119.34
+     ]
+    }
+   ]
+  },
+  {
+   "id": 165,
+   "arrivalTime": 9353.13,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      92.42,
+      112.72,
+      110.7
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      116.54,
+      123.28,
+      93.56
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      84.2,
+      103.56,
+      143.26
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      147.85,
+      125.31,
+      135.34
+     ]
+    }
+   ]
+  },
+  {
+   "id": 166,
+   "arrivalTime": 9355.62,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      442.36,
+      293.23,
+      378.75
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      113.89,
+      131.93,
+      164.99
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      205.61,
+      236.11,
+      236.31
+     ]
+    }
+   ]
+  },
+  {
+   "id": 167,
+   "arrivalTime": 9357.17,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      141.79,
+      118.22,
+      121.45
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      188.34,
+      212.25,
+      190.18
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      150.82,
+      159.26,
+      156.3
+     ]
+    }
+   ]
+  },
+  {
+   "id": 168,
+   "arrivalTime": 9357.45,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      229.66,
+      169.38,
+      175.38
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      219.73,
+      163.84,
+      203.34
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      151.37,
+      114.76,
+      125.24
+     ]
+    }
+   ]
+  },
+  {
+   "id": 169,
+   "arrivalTime": 9357.72,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      283.77,
+      225.63,
+      245.55
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      148.8,
+      154.41,
+      137.5
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      116.68,
+      161.43,
+      139.34
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      124.3,
+      122.94,
+      172.56
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      155.38,
+      196.83,
+      189.25
+     ]
+    }
+   ]
+  },
+  {
+   "id": 170,
+   "arrivalTime": 9358.45,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      232.02,
+      159.99,
+      159.46
+     ]
+    }
+   ]
+  },
+  {
+   "id": 171,
+   "arrivalTime": 11870.72,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      54.98,
+      67.89,
+      56.14
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      137.23,
+      157.06,
+      198.96
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      181.22,
+      177.6,
+      155.33
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      164.15,
+      195.91,
+      186.64
+     ]
+    }
+   ]
+  },
+  {
+   "id": 172,
+   "arrivalTime": 11939.33,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      137.15,
+      162.3,
+      157.01
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      136.97,
+      153.97,
+      198.55
+     ]
+    }
+   ]
+  },
+  {
+   "id": 173,
+   "arrivalTime": 11978.73,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      144.1,
+      106.13,
+      113.39
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      179.03,
+      214.75,
+      294.92
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      188.93,
+      129.14,
+      168.62
+     ]
+    }
+   ]
+  },
+  {
+   "id": 174,
+   "arrivalTime": 11986.62,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      144.17,
+      146.47,
+      193.56
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      177.8,
+      128.17,
+      125.29
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      115.59,
+      115.8,
+      92.94
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      339.73,
+      285.74,
+      250.88
+     ]
+    }
+   ]
+  },
+  {
+   "id": 175,
+   "arrivalTime": 12104.46,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      167.68,
+      194.75,
+      174.24
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      187.59,
+      127.06,
+      125.99
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      149.77,
+      165.78,
+      156.29
+     ]
+    }
+   ]
+  },
+  {
+   "id": 176,
+   "arrivalTime": 12116.68,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      253.36,
+      166.15,
+      208.05
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      134.4,
+      180.25,
+      151.33
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      120.28,
+      128.45,
+      175.4
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      245.16,
+      151.7,
+      198.65
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      130.78,
+      165.28,
+      152.4
+     ]
+    }
+   ]
+  },
+  {
+   "id": 177,
+   "arrivalTime": 12176.45,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      223.96,
+      322.03,
+      288.86
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      178.37,
+      128.99,
+      184.41
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      96.54,
+      117.99,
+      158.59
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      250.25,
+      192.58,
+      215.34
+     ]
+    }
+   ]
+  },
+  {
+   "id": 178,
+   "arrivalTime": 12179.32,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      84.04,
+      96.15,
+      84.01
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      120.57,
+      120.35,
+      185.21
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      291.28,
+      185.53,
+      228.97
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      197.8,
+      231.27,
+      297.74
+     ]
+    }
+   ]
+  },
+  {
+   "id": 179,
+   "arrivalTime": 12188.04,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      138.99,
+      171.75,
+      150.01
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      125.45,
+      127.01,
+      117.66
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      129.21,
+      140.97,
+      218.2
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      184.71,
+      130.18,
+      153.06
+     ]
+    }
+   ]
+  },
+  {
+   "id": 180,
+   "arrivalTime": 12188.17,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      458.44,
+      376.55,
+      348.28
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      206.36,
+      138.35,
+      184.78
+     ]
+    }
+   ]
+  },
+  {
+   "id": 181,
+   "arrivalTime": 12210.33,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      148.93,
+      150.15,
+      140.23
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      147.09,
+      107.74,
+      131.04
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      132.26,
+      135.23,
+      189.8
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      150.24,
+      159.69,
+      144.23
+     ]
+    }
+   ]
+  },
+  {
+   "id": 182,
+   "arrivalTime": 12223.78,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      158.61,
+      202.99,
+      177.57
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      149.09,
+      105.82,
+      110.93
+     ]
+    }
+   ]
+  },
+  {
+   "id": 183,
+   "arrivalTime": 12291.6,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      134.79,
+      100.3,
+      98.31
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      183.88,
+      200.31,
+      287.45
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      119.04,
+      85.61,
+      98.82
+     ]
+    }
+   ]
+  },
+  {
+   "id": 184,
+   "arrivalTime": 12373.01,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      168.85,
+      129.16,
+      118.66
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      198.55,
+      231.64,
+      214.73
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      165.12,
+      107.4,
+      128.47
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      221.68,
+      218.42,
+      188.97
+     ]
+    }
+   ]
+  },
+  {
+   "id": 185,
+   "arrivalTime": 12468.46,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      156.36,
+      107.85,
+      103.35
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      276.76,
+      332.09,
+      281.54
+     ]
+    }
+   ]
+  },
+  {
+   "id": 186,
+   "arrivalTime": 12476.42,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      120.74,
+      142.37,
+      131.84
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      97.16,
+      105.55,
+      92.93
+     ]
+    }
+   ]
+  },
+  {
+   "id": 187,
+   "arrivalTime": 12521.22,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      147.37,
+      163.73,
+      142.82
+     ]
+    }
+   ]
+  },
+  {
+   "id": 188,
+   "arrivalTime": 12582.99,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      196.69,
+      228.17,
+      198.63
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      143.83,
+      145.83,
+      118.66
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      93.3,
+      106.23,
+      97.77
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      328.33,
+      229.72,
+      309.85
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      450.77,
+      314.26,
+      317.13
+     ]
+    }
+   ]
+  },
+  {
+   "id": 189,
+   "arrivalTime": 12627.23,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      227.78,
+      280.02,
+      301.9
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      193.79,
+      114.88,
+      174.11
+     ]
+    }
+   ]
+  },
+  {
+   "id": 190,
+   "arrivalTime": 12655.17,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      286.83,
+      220.29,
+      216.66
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      99.96,
+      113.34,
+      114.73
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      263.38,
+      216.62,
+      212.7
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      124.78,
+      152.13,
+      147.04
+     ]
+    }
+   ]
+  },
+  {
+   "id": 191,
+   "arrivalTime": 12737.59,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      244.06,
+      189.53,
+      220.34
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      188.32,
+      213.37,
+      189.59
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      190.46,
+      227.36,
+      185.42
+     ]
+    }
+   ]
+  },
+  {
+   "id": 192,
+   "arrivalTime": 12749.14,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      211.01,
+      129.2,
+      198.38
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      190.42,
+      120.83,
+      134.58
+     ]
+    }
+   ]
+  },
+  {
+   "id": 193,
+   "arrivalTime": 12756.21,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      87.22,
+      85.05,
+      137.49
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      131.61,
+      125.66,
+      115.28
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      205.74,
+      229.74,
+      335.49
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      540.43,
+      366.43,
+      500.45
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      180.7,
+      189.56,
+      273.34
+     ]
+    }
+   ]
+  },
+  {
+   "id": 194,
+   "arrivalTime": 12852.36,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      194.04,
+      142.07,
+      164.14
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      157.97,
+      159.38,
+      251.52
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      321.33,
+      223.67,
+      275.75
+     ]
+    }
+   ]
+  },
+  {
+   "id": 195,
+   "arrivalTime": 12940.45,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      326.73,
+      243.02,
+      240.21
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      155.31,
+      171.01,
+      163.33
+     ]
+    }
+   ]
+  },
+  {
+   "id": 196,
+   "arrivalTime": 12983.72,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      429.0,
+      402.04,
+      324.16
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      174.28,
+      123.57,
+      131.83
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      172.43,
+      203.78,
+      182.1
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      169.56,
+      206.54,
+      256.04
+     ]
+    }
+   ]
+  },
+  {
+   "id": 197,
+   "arrivalTime": 13021.92,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      136.85,
+      121.33,
+      116.36
+     ]
+    }
+   ]
+  },
+  {
+   "id": 198,
+   "arrivalTime": 13084.38,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      203.45,
+      136.04,
+      195.02
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      373.22,
+      240.15,
+      263.9
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      115.18,
+      140.92,
+      179.84
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      209.35,
+      237.68,
+      246.63
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      191.33,
+      203.9,
+      309.25
+     ]
+    }
+   ]
+  },
+  {
+   "id": 199,
+   "arrivalTime": 13110.37,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      543.94,
+      337.23,
+      453.91
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      178.64,
+      182.65,
+      159.21
+     ]
+    }
+   ]
+  },
+  {
+   "id": 200,
+   "arrivalTime": 13121.8,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      204.74,
+      160.48,
+      191.45
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      117.09,
+      147.58,
+      127.43
+     ]
+    }
+   ]
+  },
+  {
+   "id": 201,
+   "arrivalTime": 13131.23,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      179.49,
+      231.86,
+      308.42
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      378.44,
+      290.95,
+      344.63
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      163.96,
+      171.05,
+      154.92
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      185.73,
+      126.85,
+      143.13
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      86.2,
+      114.18,
+      112.9
+     ]
+    }
+   ]
+  },
+  {
+   "id": 202,
+   "arrivalTime": 13174.5,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      263.84,
+      171.66,
+      201.4
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      99.97,
+      128.8,
+      102.35
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      99.81,
+      116.45,
+      88.28
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      129.29,
+      90.63,
+      123.82
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      202.63,
+      232.07,
+      202.36
+     ]
+    }
+   ]
+  },
+  {
+   "id": 203,
+   "arrivalTime": 13220.05,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      429.27,
+      413.06,
+      370.98
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      117.89,
+      91.07,
+      101.87
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      179.23,
+      190.47,
+      143.79
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      92.82,
+      103.48,
+      167.32
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      139.53,
+      107.07,
+      97.84
+     ]
+    }
+   ]
+  },
+  {
+   "id": 204,
+   "arrivalTime": 13257.23,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      145.25,
+      156.96,
+      166.49
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      366.73,
+      239.21,
+      271.16
+     ]
+    }
+   ]
+  },
+  {
+   "id": 205,
+   "arrivalTime": 13307.48,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      406.18,
+      305.86,
+      329.94
+     ]
+    }
+   ]
+  },
+  {
+   "id": 206,
+   "arrivalTime": 13351.95,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      205.31,
+      221.34,
+      283.87
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      159.54,
+      182.79,
+      184.06
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      221.21,
+      146.04,
+      190.92
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      183.17,
+      150.75,
+      151.75
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      106.59,
+      68.44,
+      91.79
+     ]
+    }
+   ]
+  },
+  {
+   "id": 207,
+   "arrivalTime": 13391.44,
+   "operations": [
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      98.18,
+      77.98,
+      72.36
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      190.5,
+      196.89,
+      283.9
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      189.95,
+      133.04,
+      162.17
+     ]
+    }
+   ]
+  },
+  {
+   "id": 208,
+   "arrivalTime": 13433.55,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      162.01,
+      98.12,
+      133.31
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      252.19,
+      196.95,
+      186.12
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      228.77,
+      144.82,
+      195.88
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      133.84,
+      155.84,
+      154.53
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      154.66,
+      168.96,
+      204.53
+     ]
+    }
+   ]
+  },
+  {
+   "id": 209,
+   "arrivalTime": 13509.97,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      107.6,
+      111.09,
+      182.39
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      97.86,
+      102.21,
+      77.62
+     ]
+    }
+   ]
+  },
+  {
+   "id": 210,
+   "arrivalTime": 13546.77,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      156.91,
+      166.2,
+      159.8
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      234.77,
+      258.43,
+      201.71
+     ]
+    }
+   ]
+  },
+  {
+   "id": 211,
+   "arrivalTime": 13587.51,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      186.88,
+      221.33,
+      220.97
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      261.93,
+      281.71,
+      439.91
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      136.18,
+      146.05,
+      130.76
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      173.01,
+      127.07,
+      158.66
+     ]
+    }
+   ]
+  },
+  {
+   "id": 212,
+   "arrivalTime": 13634.82,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      141.54,
+      184.34,
+      155.4
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      126.41,
+      136.04,
+      112.45
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      316.56,
+      246.37,
+      234.63
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      164.99,
+      200.9,
+      170.76
+     ]
+    }
+   ]
+  },
+  {
+   "id": 213,
+   "arrivalTime": 13641.5,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      108.04,
+      128.83,
+      118.12
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      173.83,
+      108.97,
+      114.21
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      140.52,
+      163.73,
+      231.05
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      155.04,
+      111.12,
+      136.2
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      70.2,
+      90.3,
+      78.3
+     ]
+    }
+   ]
+  },
+  {
+   "id": 214,
+   "arrivalTime": 13689.78,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      106.47,
+      109.4,
+      121.1
+     ]
+    }
+   ]
+  },
+  {
+   "id": 215,
+   "arrivalTime": 13773.31,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      197.68,
+      205.0,
+      160.0
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      168.75,
+      191.2,
+      179.15
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      175.97,
+      193.69,
+      270.08
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      314.22,
+      238.51,
+      289.85
+     ]
+    }
+   ]
+  },
+  {
+   "id": 216,
+   "arrivalTime": 13827.59,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      234.02,
+      257.34,
+      344.6
+     ]
+    }
+   ]
+  },
+  {
+   "id": 217,
+   "arrivalTime": 13860.52,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      152.95,
+      139.48,
+      128.8
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      100.73,
+      90.11,
+      146.52
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      90.71,
+      103.31,
+      88.49
+     ]
+    }
+   ]
+  },
+  {
+   "id": 218,
+   "arrivalTime": 14014.04,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      178.16,
+      234.56,
+      208.84
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      175.68,
+      218.48,
+      292.73
+     ]
+    }
+   ]
+  },
+  {
+   "id": 219,
+   "arrivalTime": 14052.07,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      276.47,
+      346.45,
+      325.3
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      156.63,
+      101.17,
+      114.13
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      127.56,
+      139.5,
+      137.37
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      358.37,
+      235.46,
+      229.43
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      163.07,
+      171.13,
+      183.12
+     ]
+    }
+   ]
+  },
+  {
+   "id": 220,
+   "arrivalTime": 14087.68,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      108.01,
+      120.52,
+      95.68
+     ]
+    }
+   ]
+  },
+  {
+   "id": 221,
+   "arrivalTime": 14109.06,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      142.76,
+      175.73,
+      151.78
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      157.06,
+      163.48,
+      160.17
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      103.1,
+      105.19,
+      177.52
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      269.76,
+      199.57,
+      190.67
+     ]
+    }
+   ]
+  },
+  {
+   "id": 222,
+   "arrivalTime": 14159.51,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      239.85,
+      321.39,
+      261.83
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      196.09,
+      124.43,
+      147.29
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      122.79,
+      148.27,
+      126.29
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      136.08,
+      120.91,
+      195.16
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      301.36,
+      210.97,
+      228.95
+     ]
+    }
+   ]
+  },
+  {
+   "id": 223,
+   "arrivalTime": 14176.21,
+   "operations": [
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      183.7,
+      201.68,
+      179.19
+     ]
+    },
+    {
+     "machineType": "Assemble",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      243.04,
+      159.47,
+      170.14
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      160.23,
+      152.9,
+      230.45
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      194.91,
+      129.65,
+      183.92
+     ]
+    },
+    {
+     "machineType": "Weld",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      137.62,
+      167.35,
+      152.02
+     ]
+    }
+   ]
+  },
+  {
+   "id": 224,
+   "arrivalTime": 14221.76,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      152.56,
+      182.92,
+      230.35
+     ]
+    }
+   ]
+  },
+  {
+   "id": 225,
+   "arrivalTime": 14227.75,
+   "operations": [
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      133.69,
+      131.19,
+      128.43
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      178.23,
+      125.87,
+      142.06
+     ]
+    }
+   ]
+  },
+  {
+   "id": 226,
+   "arrivalTime": 14333.5,
+   "operations": [
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      159.34,
+      171.22,
+      202.1
+     ]
+    },
+    {
+     "machineType": "Inspect",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      131.2,
+      142.58,
+      129.11
+     ]
+    },
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      241.38,
+      181.46,
+      234.78
+     ]
+    }
+   ]
+  },
+  {
+   "id": 227,
+   "arrivalTime": 14337.54,
+   "operations": [
+    {
+     "machineType": "Mill",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      264.27,
+      168.28,
+      213.73
+     ]
+    },
+    {
+     "machineType": "Lathe",
+     "machineIndex": [
+      0,
+      1,
+      2
+     ],
+     "duration": [
+      217.66,
+      238.2,
+      323.28
+     ]
+    }
+   ]
+  }
+ ],
+ "_phases": [
+  {
+   "name": "skewed_0",
+   "kind": "skewed",
+   "start": 0.0,
+   "end": 1840.24,
+   "n_jobs": 43,
+   "utilization": 1.167,
+   "skew_type": "Inspect",
+   "transport_capped": true
+  },
+  {
+   "name": "lull_1",
+   "kind": "lull",
+   "start": 1840.24,
+   "end": 3292.79,
+   "n_jobs": 4,
+   "utilization": 0.116,
+   "skew_type": null,
+   "transport_capped": false
+  },
+  {
+   "name": "lull_2",
+   "kind": "lull",
+   "start": 3292.79,
+   "end": 5597.1,
+   "n_jobs": 8,
+   "utilization": 0.136,
+   "skew_type": null,
+   "transport_capped": false
+  },
+  {
+   "name": "balanced_3",
+   "kind": "balanced",
+   "start": 5597.1,
+   "end": 7214.27,
+   "n_jobs": 28,
+   "utilization": 0.674,
+   "skew_type": null,
+   "transport_capped": false
+  },
+  {
+   "name": "burst_4",
+   "kind": "burst",
+   "start": 7214.27,
+   "end": 9299.16,
+   "n_jobs": 43,
+   "utilization": 0.83,
+   "skew_type": null,
+   "transport_capped": true
+  },
+  {
+   "name": "burst_5",
+   "kind": "burst",
+   "start": 9299.16,
+   "end": 11865.29,
+   "n_jobs": 45,
+   "utilization": 0.635,
+   "skew_type": null,
+   "transport_capped": false
+  },
+  {
+   "name": "balanced_6",
+   "kind": "balanced",
+   "start": 11865.29,
+   "end": 14400.0,
+   "n_jobs": 57,
+   "utilization": 1.136,
+   "skew_type": null,
+   "transport_capped": true
+  }
+ ],
+ "_meta": {
+  "op_mean_seconds": 182.93,
+  "machine_speed": {
+   "Mill": [
+    1.229,
+    0.846,
+    1.096
+   ],
+   "Lathe": [
+    0.831,
+    0.893,
+    1.25
+   ],
+   "Weld": [
+    0.878,
+    1.065,
+    0.982
+   ],
+   "Inspect": [
+    0.979,
+    0.998,
+    0.872
+   ],
+   "Assemble": [
+    1.159,
+    0.833,
+    0.888
+   ]
+  },
+  "failures_on": true,
+  "params": {
+   "machines_per_type": 3,
+   "agv_count": 7,
+   "layout": "D",
+   "reservation_protocol": "releasePrevious",
+   "parking_method": "lane",
+   "horizon_seconds": 14400.0,
+   "segment_seconds": [
+    1200.0,
+    3600.0
+   ],
+   "segment_weights": [
+    0.35,
+    0.2,
+    0.15,
+    0.1,
+    0.2
+   ],
+   "utilization": [
+    0.4,
+    1.25
+   ],
+   "lull_utilization": [
+    0.1,
+    0.3
+   ],
+   "op_mean_seconds": [
+    150.0,
+    360.0
+   ],
+   "op_sigma": 0.35,
+   "ops_per_job": [
+    1,
+    5
+   ],
+   "machine_speed_spread": 0.25,
+   "skew_weight": 2.5,
+   "burst_window_seconds": 60.0,
+   "agv_seconds_per_move": 64.0,
+   "agv_max_utilization": 0.75,
+   "failure_probability": 0.6666666666666666,
+   "failures": {
+    "machineFailuresEnabled": true,
+    "weibullK": 1.5,
+    "weibullLambda": 7200.0,
+    "repairLogMu": 6.3,
+    "repairLogSigma": 0.5
+   }
+  }
+ },
+ "stochastic": {
+  "machineFailuresEnabled": true,
+  "weibullK": 1.5,
+  "weibullLambda": 7200.0,
+  "repairLogMu": 6.3,
+  "repairLogSigma": 0.5
+ },
+ "dispatchingRule": "SPT_SMPT"
+}

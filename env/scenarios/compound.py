@@ -165,3 +165,15 @@ def _generator_for(variant: str):
 
 ## @brief name -> generator-factory, for a --scenario-generator NAME style CLI flag.
 REGISTRY = {name: _generator_for(name) for name in _SCENARIO_FN_NAMES}
+
+
+def _randomized_factory(episode_duration_seconds=None, random_warmup=False, warmup_dispatching_rule=None,
+                        agv_move_speed=None, agv_handshake_duration=None):
+    from scenarios.randomized import randomized_generator
+    return randomized_generator(episode_duration_seconds, random_warmup, warmup_dispatching_rule,
+                                agv_move_speed, agv_handshake_duration)
+
+
+## @brief The randomized training family (scenarios/randomized.py): multi-op jobs over all machine types,
+##        per-episode op length, rising/falling load, failures on in 2/3 of episodes.
+REGISTRY["randomized"] = _randomized_factory

@@ -9,3 +9,4 @@ always return the same scenario, so training instances stay reproducible.
 """
 
 from scenarios.compound import REGISTRY, compound_generator, compound_variant
+from scenarios.randomized import randomized_generator, randomized_scenario, randomized_variant
