@@ -100,3 +100,5 @@ __pycache__/
 # Second test build (LinuxServerBuild.BuildAlt), used while a sweep runs on linux_server/
 
 linux_server2/
+# Development build (LinuxServerBuild.BuildDev), kept apart from the baseline and any running player
+linux_server_dev/

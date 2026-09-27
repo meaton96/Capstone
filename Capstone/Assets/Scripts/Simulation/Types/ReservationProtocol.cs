@@ -9,20 +9,21 @@ namespace Assets.Scripts.Simulation.Types
     /// </summary>
     public enum ReservationProtocol
     {
-        /// <summary>Default. Hold the current AND previous zone (released one zone later). Two slots per AGV.</summary>
+        /// <summary>Hold the current AND previous zone (released one zone later). Two slots per AGV. The default
+        /// until 2026-09-26; deadlocks at 12+ AGVs on most layouts (docs/experiments/E1_E2_findings.md section 3).</summary>
         HoldPrevious,
         /// <summary>
-        /// Release the zone just left as soon as the next zone's centre is reached. One slot per AGV.
-        /// Raises the gridlock threshold but produces AGV-AGV body overlaps (see
-        /// docs/GRIDLOCK_INVESTIGATION_2026-09-19.md, section 8c), so treat results as non-physical
-        /// until the overlap is designed out.
+        /// Default since 2026-09-26. Release the zone just left as soon as the next zone's centre is reached (or once
+        /// the AGV is clear of it). One slot per AGV. Its body-overlap bug was fixed 2026-09-24; the full E1 grid
+        /// (864 runs) then had 0 collisions and 0 deadlocks from 3 to 15 AGVs on every layout
+        /// (docs/experiments/E1_E2_findings.md section 6b).
         /// </summary>
         ReleasePrevious,
     }
 
     public static class ReservationProtocolParser
     {
-        public const string Default = "holdPrevious";
+        public const string Default = "releasePrevious";
 
         /// <summary>Parses a config/CLI string. Throws on unknown values so a typo cannot silently run the default.</summary>
         public static ReservationProtocol Parse(string value)
@@ -40,13 +41,13 @@ namespace Assets.Scripts.Simulation.Types
         /// <summary>Returns the value (or the default when null) after checking it parses; throws otherwise.</summary>
         public static string Validated(string value)
         {
-            if (value == null) return Default;
+            if (string.IsNullOrWhiteSpace(value)) return Default;   // absent (JsonUtility may give "")
             Parse(value);
             return value;
         }
 
         public static string ToConfigString(ReservationProtocol p) =>
-            p == ReservationProtocol.ReleasePrevious ? "releasePrevious" : Default;
+            p == ReservationProtocol.ReleasePrevious ? "releasePrevious" : "holdPrevious";
     }
 
     /// <summary>
@@ -65,6 +66,10 @@ namespace Assets.Scripts.Simulation.Types
         public static string Layout;
         /// <summary>Input/output belt docks ("corner" | "siding" | "bypass"); overrides every config's ioDocks.</summary>
         public static string IoDocks;
+        /// <summary>Tile count (TilingSpec.Tiles); overrides every config's tiling.tiles. Null = no override.</summary>
+        public static int? Tiles;
+        /// <summary>Tiled floors: which tile an arriving job enters ("roundRobin" | "leastWip").</summary>
+        public static string ReleaseRule;
 
         /// <summary>Throws on an unknown parking method so a typo cannot silently run the default.</summary>
         public static string ValidatedParkingMethod(string value)

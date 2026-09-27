@@ -37,7 +37,7 @@ from config import (
     GRID_SIZE, GRID_CHANNELS, MAX_JOBS, JOB_FEATURES, MAX_MACHINES, MACHINE_FEATURES,
     GLOBAL_SCALARS, EVENT_FLAGS, TOTAL_OBS_SIZE, OBS_SHAPES, OBS_LAYOUT,
     SLICE_SPATIAL_END, SLICE_MACHINES_END, SLICE_JOBS_END, SLICE_SCALARS_END, SLICE_FLAGS_END,
-    MACHINE_CANDIDATE_COL,
+    MACHINE_CANDIDATE_COL, ACTION_BRANCHES, ACTION_MASK_LEN, ACTION_LAYOUT,
 )
 from models.encoder import CNNSPPFEncoder, SPPF, MLPEncoder, MultiModalEncoder, SetEncoder
 from models.actor_critic import FusionHead, ActorHead, CriticHead, ActorCritic
@@ -53,6 +53,15 @@ BATCH = 4
 DEVICE = "cpu"
 
 
+## @brief The streams slice_obs cuts from the flat vector (every OBS_SHAPES key except action_mask).
+SLICED_SHAPES = {k: v for k, v in OBS_SHAPES.items() if k != "action_mask"}
+
+
+def random_actions(batch_size: int = BATCH) -> torch.Tensor:
+    """@brief A batch of random (job head, machine head) actions."""
+    return torch.stack([torch.randint(0, size, (batch_size,)) for size in ACTION_BRANCHES], dim=-1)
+
+
 def make_dummy_obs(batch_size: int = BATCH) -> dict:
     """@brief Create a batch of dummy observations matching the state space.
 
@@ -65,6 +74,7 @@ def make_dummy_obs(batch_size: int = BATCH) -> dict:
     obs["machine_table"][:, :15, 0] = 1.0
     obs["job_table"][:, 10:] = 0.0
     obs["job_table"][:, :10, 0] = 1.0
+    obs["action_mask"] = torch.ones(batch_size, ACTION_MASK_LEN)
     return obs
 
 
@@ -212,9 +222,9 @@ class TestActorCritic:
 
     def test_actor_shape(self):
         """@brief Actor logits must be (B, 8)."""
-        actor = ActorHead(256, 256, 8)
+        actor = ActorHead(256, 256, ACTION_BRANCHES)
         out = actor(torch.randn(BATCH, 256))
-        assert out.shape == (BATCH, 8)
+        assert out.shape == (BATCH, ACTION_MASK_LEN)
 
     def test_critic_shape(self):
         """@brief Critic value must be (B, 1)."""
@@ -224,26 +234,53 @@ class TestActorCritic:
 
     def test_act_outputs(self):
         """@brief @ref ActorCritic.act must return (action, log_prob, value)
-        with correct shapes and valid action range [0, 8)."""
-        ac = ActorCritic(256, 256, 8)
+        with one in-range index per branch."""
+        ac = ActorCritic(256, 256, ACTION_BRANCHES)
         features = torch.randn(BATCH, 256)
         action, log_prob, value = ac.act(features)
-        assert action.shape == (BATCH,)
+        assert action.shape == (BATCH, len(ACTION_BRANCHES))
         assert log_prob.shape == (BATCH,)
         assert value.shape == (BATCH,)
-        assert (action >= 0).all() and (action < 8).all()
+        for i, size in enumerate(ACTION_BRANCHES):
+            assert (action[:, i] >= 0).all() and (action[:, i] < size).all()
 
     def test_evaluate_outputs(self):
         """@brief @ref ActorCritic.evaluate must return (log_probs, values, entropy)
         with non-negative entropy."""
-        ac = ActorCritic(256, 256, 8)
+        ac = ActorCritic(256, 256, ACTION_BRANCHES)
         features = torch.randn(BATCH, 256)
-        actions = torch.randint(0, 8, (BATCH,))
+        actions = random_actions(BATCH)
         lp, val, ent = ac.evaluate(features, actions)
         assert lp.shape == (BATCH,)
         assert val.shape == (BATCH,)
         assert ent.shape == (BATCH,)
         assert (ent >= 0).all(), "Entropy should be non-negative"
+
+    def test_masked_head_is_forced_and_excluded(self):
+        """@brief A head masked down to action 0 always picks 0 and adds nothing to log-prob or entropy,
+        so the decision's log-prob equals the unmasked head's alone."""
+        ac = ActorCritic(256, 256, ACTION_BRANCHES)
+        features = torch.randn(BATCH, 256)
+        mask = torch.ones(BATCH, ACTION_MASK_LEN)
+        mask[:, ACTION_BRANCHES[0] + 1:] = 0.0          # machine head: only action 0 enabled
+        action, log_prob, _ = ac.act(features, mask)
+        assert (action[:, 1] == 0).all()
+
+        lp, _, ent = ac.evaluate(features, action, mask)
+        job_dist = ac.actor.get_distributions(features)[0]
+        torch.testing.assert_close(lp, job_dist.log_prob(action[:, 0]))
+        torch.testing.assert_close(ent, job_dist.entropy())
+        torch.testing.assert_close(lp, log_prob)
+
+    def test_fully_masked_decision_has_zero_log_prob(self):
+        """@brief A decision no head can change contributes no policy gradient (log-prob 0, entropy 0)."""
+        ac = ActorCritic(256, 256, ACTION_BRANCHES)
+        features = torch.randn(BATCH, 256, requires_grad=True)
+        mask = torch.zeros(BATCH, ACTION_MASK_LEN)
+        mask[:, 0] = mask[:, ACTION_BRANCHES[0]] = 1.0
+        lp, _, ent = ac.evaluate(features, torch.zeros(BATCH, 2, dtype=torch.long), mask)
+        torch.testing.assert_close(lp, torch.zeros(BATCH))
+        torch.testing.assert_close(ent, torch.zeros(BATCH))
 
 
 # ============================================================
@@ -254,25 +291,27 @@ class TestSchedulingNetwork:
     """@brief End-to-end tests for @ref SchedulingNetwork."""
 
     def test_forward_shapes(self):
-        """@brief Forward pass must produce logits (B, 8) and value (B, 1)."""
+        """@brief Forward pass must produce concatenated branch logits and value (B, 1)."""
         net = SchedulingNetwork()
         obs = make_dummy_obs()
         logits, value = net(obs)
-        assert logits.shape == (BATCH, 8), f"Logits: {logits.shape}"
+        assert logits.shape == (BATCH, ACTION_MASK_LEN), f"Logits: {logits.shape}"
         assert value.shape == (BATCH, 1), f"Value: {value.shape}"
 
     def test_act(self):
-        """@brief @ref SchedulingNetwork.act must return actions of shape (B,)."""
+        """@brief @ref SchedulingNetwork.act must return one action per branch, respecting obs["action_mask"]."""
         net = SchedulingNetwork()
         obs = make_dummy_obs()
+        obs["action_mask"][:, 1:ACTION_BRANCHES[0]] = 0.0      # job head masked down to action 0
         action, lp, val = net.act(obs)
-        assert action.shape == (BATCH,)
+        assert action.shape == (BATCH, len(ACTION_BRANCHES))
+        assert (action[:, 0] == 0).all()
 
     def test_evaluate(self):
         """@brief @ref SchedulingNetwork.evaluate must return log_probs of shape (B,)."""
         net = SchedulingNetwork()
         obs = make_dummy_obs()
-        actions = torch.randint(0, 8, (BATCH,))
+        actions = random_actions()
         lp, val, ent = net.evaluate(obs, actions)
         assert lp.shape == (BATCH,)
 
@@ -286,7 +325,7 @@ class TestSchedulingNetwork:
         """
         net = SchedulingNetwork()
         obs = make_dummy_obs()
-        actions = torch.randint(0, 8, (BATCH,))
+        actions = random_actions()
         lp, val, ent = net.evaluate(obs, actions)
         loss = -lp.mean() + val.mean() - 0.01 * ent.mean()
         loss.backward()
@@ -303,7 +342,7 @@ class TestSchedulingNetwork:
         obs = make_dummy_obs(1)
         a1, _, _ = net.act(obs, deterministic=True)
         a2, _, _ = net.act(obs, deterministic=True)
-        assert a1.item() == a2.item(), "Deterministic actions should match"
+        assert torch.equal(a1, a2), "Deterministic actions should match"
 
     def test_param_summary(self):
         """@brief @ref SchedulingNetwork.get_param_summary totals must be
@@ -487,9 +526,10 @@ class TestSliceObs:
         return raw
 
     def test_output_keys_and_shapes(self):
+        """@brief slice_obs yields every observation stream; action_mask comes from the step's masks, not the vector."""
         d = slice_obs(self._make_flat_obs())
-        assert set(d) == set(OBS_SHAPES)
-        for k, shape in OBS_SHAPES.items():
+        assert set(d) == set(SLICED_SHAPES)
+        for k, shape in SLICED_SHAPES.items():
             assert d[k].shape == shape, k
             assert d[k].dtype == np.float32, k
 
@@ -519,7 +559,7 @@ class TestSliceObs:
     def test_batched_slice(self):
         B = 3
         d = slice_obs(np.zeros((B, TOTAL_OBS_SIZE), dtype=np.float32))
-        for k, shape in OBS_SHAPES.items():
+        for k, shape in SLICED_SHAPES.items():
             assert d[k].shape == (B, *shape), k
 
     def test_total_obs_size_matches_csharp(self):
@@ -569,6 +609,79 @@ class TestCheckpointSchema:
             torch.testing.assert_close(net(obs)[0], net(big)[0])
 
 
+
+class TestActionSpace:
+    """@brief Two-branch action space: checkpoint layout, Unity masks, branched rollout storage."""
+
+    def test_v1_action_checkpoint_rejected(self):
+        from train import check_action_layout
+        try:
+            check_action_layout({"obs_layout": dict(OBS_LAYOUT)}, "ckpt.pt")   # no action_layout = v1
+            assert False, "Expected ValueError"
+        except ValueError as e:
+            assert "action schema v1" in str(e)
+
+    def test_different_head_rejected(self):
+        from train import check_action_layout
+        layout = dict(ACTION_LAYOUT, machine_head=["ECT", "SRWT"])
+        try:
+            check_action_layout({"action_layout": layout}, "ckpt.pt")
+            assert False, "Expected ValueError"
+        except ValueError as e:
+            assert "action layout differs" in str(e)
+
+    def test_current_action_layout_accepted(self):
+        from train import check_action_layout
+        check_action_layout({"action_layout": dict(ACTION_LAYOUT)}, "ckpt.pt")
+
+    def test_mask_from_mlagents(self):
+        """@brief ML-Agents masks are per branch, True = masked; obs["action_mask"] is 1 = enabled, concatenated."""
+        from env_wrappers.unity_env import action_mask_from
+        steps = MagicMock()
+        steps.action_mask = [np.array([[False, True, True, True]]), np.array([[False, False, False]])]
+        np.testing.assert_array_equal(action_mask_from(steps), [1, 0, 0, 0, 1, 1, 1])
+
+    def test_no_mask_enables_everything(self):
+        from env_wrappers.unity_env import action_mask_from
+        steps = MagicMock()
+        steps.action_mask = None
+        np.testing.assert_array_equal(action_mask_from(steps), np.ones(ACTION_MASK_LEN))
+
+    def test_step_sends_both_branches(self):
+        """@brief The wrapper hands Unity one row (job head, machine head)."""
+        env, mock_unity = TestUnitySchedulingEnv()._make_env(
+            [(_make_mock_steps(np.random.rand(TOTAL_OBS_SIZE).astype(np.float32)), _empty_steps())])
+        env.step((2, 1))
+        sent = mock_unity.set_actions.call_args[0][1].discrete
+        np.testing.assert_array_equal(sent, [[2, 1]])
+
+    def test_legacy_player_refused(self):
+        """@brief A player still built with one 8-way branch must fail at connect, not mid-training."""
+        from env_wrappers.unity_env import UnitySchedulingEnv
+        with patch("env_wrappers.unity_env.UnityEnvironment") as MockUnity, \
+             patch("env_wrappers.unity_env.EngineConfigurationChannel"):
+            spec = MagicMock()
+            obs_spec = MagicMock()
+            obs_spec.shape, obs_spec.name = (TOTAL_OBS_SIZE,), "VectorSensor"
+            spec.observation_specs = [obs_spec]
+            spec.action_spec.discrete_branches = (8,)
+            MockUnity.return_value.behavior_specs = {"SchedulingBehavior?team=0": spec}
+            try:
+                UnitySchedulingEnv(file_name=None)
+                assert False, "Expected RuntimeError"
+            except RuntimeError as e:
+                assert "Rebuild the player" in str(e)
+
+    def test_buffer_stores_branched_actions(self):
+        buf = RolloutBuffer(2, 3, {"global_scalars": (4,)}, action_shape=(len(ACTION_BRANCHES),))
+        for t in range(2):
+            buf.add({"global_scalars": np.zeros((3, 4), dtype=np.float32)},
+                    np.array([[0, 1], [2, 0], [3, 2]]), np.zeros(3), np.zeros(3), np.zeros(3), np.zeros(3))
+        buf.compute_gae(np.zeros(3, dtype=np.float32))
+        batch = next(buf.get_batches(6))
+        assert batch["actions"].shape == (6, len(ACTION_BRANCHES))
+
+
 # ============================================================
 #  5. Unity environment wrapper tests (mocked)
 # ============================================================
@@ -585,6 +698,7 @@ def _make_mock_steps(obs_array, reward=0.0, n_agents=1):
     steps.obs = [obs_array.reshape(1, -1)]  # (1, TOTAL_OBS_SIZE)
     steps.reward = np.array([reward], dtype=np.float32)
     steps.interrupted = np.array([False] * n_agents)
+    steps.action_mask = None
     steps.__len__ = lambda self: n_agents
     return steps
 
@@ -629,6 +743,7 @@ class TestUnitySchedulingEnv:
             mock_obs_spec.shape = (TOTAL_OBS_SIZE,)
             mock_obs_spec.name = f"VectorSensor_size{TOTAL_OBS_SIZE}"
             mock_spec.observation_specs = [mock_obs_spec]
+            mock_spec.action_spec.discrete_branches = ACTION_BRANCHES
             if with_metrics:
                 metrics_spec = MagicMock()
                 metrics_spec.shape = (len(METRIC_NAMES),)
@@ -655,12 +770,12 @@ class TestUnitySchedulingEnv:
         terminal = _empty_steps()
 
         env, _ = self._make_env([(decision, terminal)])
-        obs, reward, done, info = env.step(3)
+        obs, reward, done, info = env.step((3, 0))
 
         assert not done
         assert abs(reward - 1.5) < 1e-6
         assert set(obs.keys()) == {
-            "factory_grid", "machine_table", "job_table",
+            "factory_grid", "machine_table", "job_table", "action_mask",
             "global_scalars", "event_flags",
         }
 
@@ -676,7 +791,7 @@ class TestUnitySchedulingEnv:
             (_empty_steps(), terminal),
             (next_decision, _empty_steps()),
         ])
-        obs, reward, done, info = env.step(0)
+        obs, reward, done, info = env.step((0, 0))
 
         assert done
         assert abs(reward - 10.0) < 1e-6
@@ -701,7 +816,7 @@ class TestUnitySchedulingEnv:
         env, mock_unity = self._make_env([
             silent, silent, silent, (decision, terminal)
         ])
-        obs, reward, done, info = env.step(1)
+        obs, reward, done, info = env.step((1, 0))
 
         assert not done
         # Only the decision frame contributes reward (silent frames
@@ -721,7 +836,7 @@ class TestUnitySchedulingEnv:
         obs = env.reset()
 
         assert set(obs.keys()) == {
-            "factory_grid", "machine_table", "job_table",
+            "factory_grid", "machine_table", "job_table", "action_mask",
             "global_scalars", "event_flags",
         }
         assert obs["factory_grid"].shape == (GRID_CHANNELS, GRID_SIZE, GRID_SIZE)
@@ -762,9 +877,9 @@ class TestUnitySchedulingEnv:
         ], reward_fn=reward_fn, with_metrics=True)
 
         env.reset()
-        assert abs(env.step(0)[1] - (-4.0)) < 1e-6
+        assert abs(env.step((0, 0))[1] - (-4.0)) < 1e-6
 
-        _, reward, done, info = env.step(0)
+        _, reward, done, info = env.step((0, 0))
         assert done
         assert abs(reward - (-5.0)) < 1e-6
         assert info["episode"]["makespan"] == 9.0
@@ -772,7 +887,7 @@ class TestUnitySchedulingEnv:
         assert abs(info["episode"]["reward_terms"]["time"] - (-9.0)) < 1e-6
 
         # Measured from the new episode's first snapshot (t=0), not the old terminal (t=9).
-        assert abs(env.step(0)[1] - (-2.5)) < 1e-6
+        assert abs(env.step((0, 0))[1] - (-2.5)) < 1e-6
 
     def test_seed_rng_keeps_unity_seed_queue_filled(self):
         """@brief With a seed RNG, reset() replaces Unity's seed queue with a buffer of
@@ -801,7 +916,7 @@ class TestUnitySchedulingEnv:
         assert first.kwargs["clear"] is True
         assert all(s >= TRAIN_SEED_LOW for s in first.args[0])
 
-        _, _, done, info = env.step(0)
+        _, _, done, info = env.step((0, 0))
         assert done
         assert info["episode"]["seed"] == -1
         top_up = env.seed_channel.queue_seeds.call_args_list[1]
@@ -851,7 +966,7 @@ class TestUnitySchedulingEnv:
         assert [s["seed"] for s in scenario_call.args[0]] == list(seed_call.args[0])
         assert generator.call_args_list == [((s,),) for s in seed_call.args[0]]
 
-        env.step(0)   # ends the unseeded episode; tops both queues up by exactly one
+        env.step((0, 0))   # ends the unseeded episode; tops both queues up by exactly one
         seed_top_up = env.seed_channel.queue_seeds.call_args_list[1]
         scenario_top_up = env.config_channel.queue_scenarios.call_args_list[1]
         assert len(seed_top_up.args[0]) == 1 and len(scenario_top_up.args[0]) == 1
@@ -879,7 +994,7 @@ class TestUnitySchedulingEnv:
         ], with_metrics=True)
 
         env.reset()
-        _, _, done, info = env.step(0)
+        _, _, done, info = env.step((0, 0))
 
         assert done
         assert info["episode"]["truncated"] is True
@@ -900,6 +1015,7 @@ class TestUnitySchedulingEnv:
             mock_obs_spec.shape = (TOTAL_OBS_SIZE,)
             mock_obs_spec.name = f"VectorSensor_size{TOTAL_OBS_SIZE}"
             mock_spec.observation_specs = [mock_obs_spec]
+            mock_spec.action_spec.discrete_branches = ACTION_BRANCHES
             mock_env_instance.behavior_specs = {"SchedulingBehavior?team=0": mock_spec}
             MockUnity.return_value = mock_env_instance
 

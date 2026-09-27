@@ -113,6 +113,9 @@ namespace Assets.Scripts.Simulation.Jobs
         /// </summary>
         public Dictionary<int, float>[] EligibleMachinesPerOp;
 
+        /// <summary>Home tile on a tiled floor (FactoryLayoutManager.AssignJobTile); 0 on an untiled floor.</summary>
+        public int TileId;
+
         /// <summary>Total number of operations scheduled for this job.</summary>
         public int TotalOperations;
 

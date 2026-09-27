@@ -481,6 +481,10 @@ namespace Assets.Scripts.Simulation
                 config.Layout = LayoutSpec.FromPreset(ConfigOverrides.Layout);
             if (config != null && ConfigOverrides.IoDocks != null)
                 config.ioDocks = ConfigOverrides.IoDocks;
+            if (config != null && ConfigOverrides.Tiles.HasValue)
+                config.Tiling = (config.Tiling ?? TilingSpec.Single).WithTiles(ConfigOverrides.Tiles.Value);
+            if (config != null && ConfigOverrides.ReleaseRule != null)
+                config.Tiling = (config.Tiling ?? TilingSpec.Single).WithRelease(TilingSpec.ParseRelease(ConfigOverrides.ReleaseRule));
             return config;
         }
 
@@ -686,7 +690,8 @@ namespace Assets.Scripts.Simulation
                 getBaselineActionIndex: () => (BaselineDrainMode || InWarmup)
                     ? (_baselineRuleIsRandom ? UnityEngine.Random.Range(0, DispatchingEngine.ActionCount) : _baselineRuleIndex)
                     : -1,
-                transportAvailable: _routeOnTransport ? () => agvPool.AnyAvailableAGV() : (Func<bool>)null
+                transportAvailable: _routeOnTransport ? tile => agvPool.AnyAvailableAGV(tile) : (Func<int, bool>)null,
+                estimateTravelSeconds: EstimateTravelSeconds
             );
 
             episodeActive = true;
@@ -1147,6 +1152,19 @@ namespace Assets.Scripts.Simulation
         }
 
         /// <summary>
+        /// Loaded AGV travel estimate for the TECT rule: zone-graph path length from the job's current location
+        /// (its machine, or its tile's incoming belt) to the candidate machine, divided by AGV speed. Ignores
+        /// congestion, handshakes and the empty trip to the pickup (the same for every candidate).
+        /// </summary>
+        private float EstimateTravelSeconds(JobData job, int machineId)
+        {
+            float speed = agvPool.AllAGVs.Count > 0 ? agvPool.AllAGVs[0].MoveSpeed : 0f;
+            if (speed <= 0f) return 0f;
+            float len = trafficZoneManager.EstimatePathLength(job.LocationMachineId, job.TileId, machineId);
+            return len == float.MaxValue ? float.MaxValue : len / speed;
+        }
+
+        /// <summary>
         /// Executes a single simulation step given an action index from the agent.
         /// Applies the dispatch or routing decision and returns the result. No reward is computed
         /// here — see <see cref="WriteRewardMetrics"/>.
@@ -1216,7 +1234,7 @@ namespace Assets.Scripts.Simulation
                 {
                     PhysicalMachine targetMachine = layoutManager.GetMachine(chosenMachineId);
                     Vector3 dropoffPos = targetMachine != null
-                        ? targetMachine.GetDropoffPosition() : layoutManager.OutgoingBeltPosition;
+                        ? targetMachine.GetDropoffPosition() : layoutManager.OutgoingBeltPositionOf(job.TileId);
                     preAgv.FinalizePreDispatch(job.JobId, dropoffPos, targetMachine, job.Visual);
                     job.AssignedAgvId = preAgv.AgvId;
                     job.PreDispatchedAgvId = -1;
@@ -1395,6 +1413,12 @@ namespace Assets.Scripts.Simulation
             record.LayoutAisles = layoutSpec.AislesString;
             record.FloorWidth = layoutManager.FloorSize.x;
             record.FloorDepth = layoutManager.FloorSize.y;
+            TilingSpec tiling = currentConfig.Tiling ?? TilingSpec.Single;
+            record.Tiles = tiling.Tiles;
+            record.MachinesPerTile = layoutManager.MachinesPerTile;
+            record.JobScope = tiling.JobScope;
+            record.AgvAssignment = tiling.AgvAssignment;
+            record.ReleaseRule = tiling.ReleaseString;
             record.OrphanPreDispatchesReleased = _flags != null ? _flags.OrphanPreDispatchesReleased : 0;
 
             // Collect AGV performance records

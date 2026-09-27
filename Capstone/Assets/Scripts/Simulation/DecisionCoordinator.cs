@@ -47,7 +47,9 @@ namespace Assets.Scripts.Simulation
         /// heuristic headless runs (BaselineDrainMode) — null in interactive/RL mode.
         /// </summary>
         private Func<int> _getBaselineActionIndex;
-        private Func<bool> _transportAvailable;
+        private Func<int, bool> _transportAvailable;
+        /// <summary>(job, candidate machine) -> estimated loaded travel seconds, for TECT. Null = not wired.</summary>
+        private Func<JobData, int, float> _estimateTravelSeconds;
 
         /// <summary>
         /// Reference to the episode's live per-machine statistics (processing time, downtime),
@@ -86,8 +88,10 @@ namespace Assets.Scripts.Simulation
             EpisodeTracker tracker,
             Dictionary<int, double> machineProcessingStartTime,
             Func<int> getBaselineActionIndex = null,
-            Func<bool> transportAvailable = null)
+            Func<int, bool> transportAvailable = null,
+            Func<JobData, int, float> estimateTravelSeconds = null)
         {
+            _estimateTravelSeconds = estimateTravelSeconds;
             // Null = RoutingTrigger.OnReady (route as soon as a job is ready). Otherwise routing is gated on it:
             // see RoutingTrigger.OnTransport.
             _transportAvailable = transportAvailable;
@@ -131,7 +135,8 @@ namespace Assets.Scripts.Simulation
             List<int> readyIds = _jobs.GetAllNeedingRouting();
             if (readyIds.Count > 0)
             {
-                bool transportOpen = _transportAvailable == null || _transportAvailable();
+                // OnTransport gate, per home tile (an AGV only serves its own tile); evaluated once per tile.
+                var transportOpenByTile = new Dictionary<int, bool>();
                 var routableIds = new List<int>();
                 foreach (int jobId in readyIds)
                 {
@@ -165,7 +170,7 @@ namespace Assets.Scripts.Simulation
                             SimLogger.Low($"[Orchestrator] Job {jobId}: all eligible machines " +
                                           $"are Failed/Repairing. Deferring routing decision.");
                     }
-                    else if (transportOpen || job.PreDispatchedAgvId >= 0)
+                    else if (TransportOpen(job.TileId, transportOpenByTile) || job.PreDispatchedAgvId >= 0)
                     {
                         routableIds.Add(jobId);
                     }
@@ -192,6 +197,14 @@ namespace Assets.Scripts.Simulation
             }
 
             return null;
+        }
+
+        private bool TransportOpen(int tile, Dictionary<int, bool> cache)
+        {
+            if (_transportAvailable == null) return true;
+            if (!cache.TryGetValue(tile, out bool open))
+                cache[tile] = open = _transportAvailable(_layout.TileCount > 1 ? tile : -1);
+            return open;
         }
 
         /// <summary>
@@ -256,6 +269,8 @@ namespace Assets.Scripts.Simulation
                 CandidateQueueLengths = candidates.Select(id => _jobs.GetMachineLoad(id)).ToArray(),
                 CandidateJobTimes = candidates.Select(id => job.GetProcessingTime(id)).ToArray(),
                 CandidateUtilization = candidates.Select(id => MachineUtilization(id, simTime)).ToArray(),
+                CandidateTravelTimes = _estimateTravelSeconds == null ? null
+                    : candidates.Select(id => _estimateTravelSeconds(job, id)).ToArray(),
             };
         }
 

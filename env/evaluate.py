@@ -9,7 +9,9 @@ episode is attributed to exactly one policy even though episodes roll over insid
 The episode already running when evaluation starts (index -1) is discarded.
 
 PDR baselines run as constant-action policies through the same wrapper and decision path
-as the learned policy, so the comparison differs only in the actions chosen. Evaluation
+as the learned policy, so the comparison differs only in the actions chosen. Only the
+(job head, machine head) pairs are reachable this way (config.PDR_ACTIONS); other catalog
+rules run through the batch runner (linux_server/run_experiment_queue.py). Evaluation
 seeds should stay below unity_env.TRAIN_SEED_LOW so they never coincide with training
 instances.
 
@@ -37,7 +39,8 @@ import torch
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from config import ActorCriticConfig, EncoderConfig, FusionConfig, PDR_ACTIONS
+from config import (ActorCriticConfig, EncoderConfig, FusionConfig, PDR_ACTIONS, pdr_action,
+                    ACTION_BRANCHES, JOB_HEAD_RULES, MACHINE_HEAD_RULES)
 from env_wrappers.unity_env import TRAIN_SEED_LOW, UnitySchedulingEnv
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -80,43 +83,67 @@ def resolve_pdr_names(spec: str) -> list:
     return names
 
 
+## @brief Per-head probability columns of decisions.csv.
+HEAD_PROB_FIELDS = [f"p_job_{r}" for r in JOB_HEAD_RULES] + [f"p_machine_{r}" for r in MACHINE_HEAD_RULES]
+
 DECISION_FIELDS = (
     ["policy", "kind", "seed", "seed_index", "step", "sim_time", "decision_count", "wip",
-     "jobs_exited", "action", "rule", "entropy", "chosen_prob"]
-    + [f"p_{name}" for name in PDR_ACTIONS]
+     "jobs_exited", "job_head", "machine_head", "job_head_used", "machine_head_used", "rule",
+     "entropy", "chosen_prob"]
+    + HEAD_PROB_FIELDS
 )
 
 
-def decision_row(policy, seed: int, seed_index: int, step: int, metrics, action: int) -> dict:
-    """@brief One decisions.csv row: the rule chosen at a decision and, for checkpoints, the
-    policy's full action distribution (entropy, probability of the chosen rule, p_<rule>)."""
+def heads_used(action_mask) -> list:
+    """@brief Per branch, whether Unity left more than action 0 enabled (the head could change the outcome)."""
+    if action_mask is None:
+        return [True] * len(ACTION_BRANCHES)
+    used, offset = [], 0
+    for size in ACTION_BRANCHES:
+        used.append(bool(np.asarray(action_mask)[offset + 1:offset + size].sum() > 0))
+        offset += size
+    return used
+
+
+def decision_row(policy, seed: int, seed_index: int, step: int, metrics, action, action_mask=None) -> dict:
+    """@brief One decisions.csv row: the (job head, machine head) chosen at a decision, which heads could
+    change it, and, for checkpoints, the policy's per-head distributions (summed entropy, probability of
+    the chosen action over the heads used, p_job_<rule> / p_machine_<rule>)."""
+    job, machine = int(action[0]), int(action[1])
+    used = heads_used(action_mask)
     row = {
         "policy": policy.name, "kind": policy.kind, "seed": seed, "seed_index": seed_index,
         "step": step, "sim_time": round(metrics.sim_time, 3),
         "decision_count": int(metrics.decision_count), "wip": int(metrics.wip),
-        "jobs_exited": int(metrics.jobs_exited), "action": action,
-        "rule": PDR_ACTIONS[action] if 0 <= action < len(PDR_ACTIONS) else str(action),
+        "jobs_exited": int(metrics.jobs_exited), "job_head": job, "machine_head": machine,
+        "job_head_used": int(used[0]), "machine_head_used": int(used[1]),
+        "rule": f"{JOB_HEAD_RULES[job]}-{MACHINE_HEAD_RULES[machine]}",
     }
     probs = getattr(policy, "last_probs", None)
     if probs is not None:
-        p = np.clip(probs, 1e-12, 1.0)
-        row["entropy"] = round(float(-(p * np.log(p)).sum()), 5)
-        row["chosen_prob"] = round(float(probs[action]), 5)
-        row.update({f"p_{name}": round(float(v), 5) for name, v in zip(PDR_ACTIONS, probs)})
+        entropy, chosen = 0.0, 1.0
+        for head, (p_head, a, is_used) in enumerate(zip(probs, (job, machine), used)):
+            p = np.clip(p_head, 1e-12, 1.0)
+            entropy += float(-(p_head * np.log(p)).sum())
+            if is_used:
+                chosen *= float(p_head[a])
+        row["entropy"] = round(entropy, 5)
+        row["chosen_prob"] = round(chosen, 5)
+        row.update({name: round(float(v), 5) for name, v in zip(HEAD_PROB_FIELDS, np.concatenate(probs))})
     return row
 
 
 class ConstantPolicy:
-    """@brief A fixed dispatching rule: always the same action index."""
+    """@brief A fixed dispatching rule: always the same (job head, machine head)."""
 
     kind = "pdr"
     last_probs = None
 
-    def __init__(self, action: int, name: str):
-        self.action = action
+    def __init__(self, action, name: str):
+        self.action = tuple(action)
         self.name = name
 
-    def __call__(self, obs) -> int:
+    def __call__(self, obs):
         return self.action
 
 
@@ -130,30 +157,31 @@ class CheckpointPolicy:
 
         path = Path(path)
         checkpoint = torch.load(path, map_location=device)
-        from train import check_obs_schema
+        from train import check_action_layout, check_obs_schema
         check_obs_schema(checkpoint, path)
+        check_action_layout(checkpoint, path)
         self.net = SchedulingNetwork(EncoderConfig(), FusionConfig(), ActorCriticConfig()).to(device)
         self.net.load_state_dict(checkpoint["model_state_dict"])
         self.net.eval()
         self.device = device
         self.deterministic = deterministic
         self.name = f"ckpt:{path.parent.name}/{path.stem}"
-        ## @brief Action probabilities from the latest call (for decision logging).
+        ## @brief Per-head action probabilities from the latest call (for decision logging).
         self.last_probs = None
 
-    def __call__(self, obs) -> int:
+    def __call__(self, obs):
         obs_t = {k: torch.tensor(v[None], dtype=torch.float32, device=self.device) for k, v in obs.items()}
         with torch.no_grad():
-            # Same path as SchedulingNetwork.act, but keeps the full distribution for logging.
-            logits = self.net.actor_critic.actor(self.net.fusion(self.net.encoder(obs_t)))
-            probs = torch.softmax(logits, dim=-1)[0]
-            action = int(probs.argmax()) if self.deterministic else int(torch.multinomial(probs, 1))
-        self.last_probs = probs.cpu().numpy()
+            # Same distributions as SchedulingNetwork.act (masked per head), kept for logging.
+            probs = [d.probs[0] for d in self.net.distributions(obs_t)]
+            action = tuple(int(p.argmax()) if self.deterministic else int(torch.multinomial(p, 1))
+                           for p in probs)
+        self.last_probs = [p.cpu().numpy() for p in probs]
         return action
 
 
 def build_policies(pdr_spec: str, checkpoints, device: str, deterministic: bool) -> list:
-    policies = [ConstantPolicy(PDR_ACTIONS.index(name), name) for name in resolve_pdr_names(pdr_spec)]
+    policies = [ConstantPolicy(pdr_action(name), name) for name in resolve_pdr_names(pdr_spec)]
     policies += [CheckpointPolicy(path, device, deterministic) for path in checkpoints or []]
 
     seen = {}
@@ -192,11 +220,12 @@ def run_evaluation(env, policies: list, schedule: list, log=print, decision_writ
         metrics = env.current_metrics
         index = int(metrics.episode_seed_index)
         # The episode that was already running before our seeds were queued (index -1) is
-        # played out with action 0 and discarded.
+        # played out with action (0, 0) and discarded.
         policy = policies[schedule[index][0]] if 0 <= index < total else None
-        action = policy(obs) if policy is not None else 0
+        action = policy(obs) if policy is not None else (0,) * len(ACTION_BRANCHES)
         if decision_writer is not None and policy is not None:
-            decision_writer.writerow(decision_row(policy, schedule[index][1], index, episode_step, metrics, action))
+            decision_writer.writerow(decision_row(policy, schedule[index][1], index, episode_step, metrics,
+                                                  action, obs.get("action_mask")))
         episode_step += 1
         obs, _, done, info = env.step(action)
         if not done:
@@ -311,7 +340,8 @@ def main(argv=None):
     parser.add_argument("--seeds", type=str, default="0-19",
                         help="Evaluation seeds, e.g. '0-19' or '1,5,9' (keep below %d)" % TRAIN_SEED_LOW)
     parser.add_argument("--pdr", type=str, default="all",
-                        help="PDR baselines: 'all', 'none', or a comma list of rule names")
+                        help="PDR baselines: 'all', 'none', or a comma list of JOB-MACHINE names from the "
+                             "RL heads (e.g. SPT-ECT)")
     parser.add_argument("--checkpoint", action="append", default=[],
                         help="train.py checkpoint to evaluate (repeatable)")
     parser.add_argument("--scenario", type=str, default=None,

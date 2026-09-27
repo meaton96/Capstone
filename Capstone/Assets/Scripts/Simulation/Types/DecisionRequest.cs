@@ -81,5 +81,10 @@ namespace Assets.Scripts.Simulation.Types
         ///        [0, 1]) at each candidate machine (parallel to @c CandidateMachineIds). Used by
         ///        the MMUR (Minimum Machine Utilization) routing rule.
         public float[] CandidateUtilization;
+
+        /// @brief Estimated loaded AGV travel time (sim-seconds, zone-graph path / AGV speed, no congestion)
+        ///        from the job's location to each candidate machine (parallel to @c CandidateMachineIds).
+        ///        Used by the TECT routing rule; null when no estimator is wired.
+        public float[] CandidateTravelTimes;
     }
 }

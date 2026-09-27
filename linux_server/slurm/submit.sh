@@ -7,7 +7,7 @@
 # CPUS/MEM default to the sbatch file (36 cores, 120g); small tests start much sooner with e.g. CPUS=4 MEM=16g.
 set -euo pipefail
 : "${ACCOUNT:?}" "${EXP:?}" "${SCENARIOS:?}" "${LAYOUTS:?}" "${AGVS:?}" "${RULES:?}"
-: "${PARTITION:=debug}" "${TIME:=0-01:00:00}" "${NODES:=1}" "${EXTRA:=-reservation holdPrevious -parking lane}"
+: "${PARTITION:=debug}" "${TIME:=0-01:00:00}" "${NODES:=1}" "${EXTRA:=-reservation releasePrevious -parking lane}"
 export EXP SCENARIOS LAYOUTS AGVS RULES EXTRA             # sbatch passes the submit environment through (--export=ALL default)
 mkdir -p logs                                             # Slurm will not create the --output folder
 CMD=(sbatch --account="$ACCOUNT" --partition="$PARTITION" --time="$TIME" --job-name="$EXP"

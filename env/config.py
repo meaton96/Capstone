@@ -72,6 +72,33 @@ OBS_LAYOUT = {
     "event_flags": EVENT_FLAGS,
 }
 
+# ─────────────────────────────────────────────────────────────────────
+#  Action space  (must mirror DispatchingEngine.JobHead / MachineHead)
+# ─────────────────────────────────────────────────────────────────────
+
+## @brief Version of the action space; bump whenever a head's rules or order change. v1 was one 8-way branch
+##        of composite rules (SPT-SMPT ... FIFO-SRWT); v2 (2026-09-26) is two branches, job head x machine
+##        head, chosen from the gen_rules0926 sweep (docs/features/DECISION_POINTS.md section 7).
+ACTION_SCHEMA_VERSION = 2
+
+## @brief Branch 0: which job (dispatch: from the machine's queue; routing: from the pool).
+JOB_HEAD_RULES = ["SPT", "SRT", "PTWINQ", "FIFO"]
+## @brief Branch 1: which machine a routed job goes to.
+MACHINE_HEAD_RULES = ["ECT", "TECT", "SRWT"]
+ACTION_BRANCHES = (len(JOB_HEAD_RULES), len(MACHINE_HEAD_RULES))
+
+## @brief Unity masks a head that cannot change a decision down to its action 0 (DispatchingEngine.HeadsThatMatter).
+##        The wrapper passes the masks as obs["action_mask"]: 1 = enabled, branches concatenated.
+ACTION_MASK_LEN = sum(ACTION_BRANCHES)
+
+## @brief What a trained actor depends on; checkpoints record it and train/evaluate refuse a mismatch.
+ACTION_LAYOUT = {
+    "schema_version": ACTION_SCHEMA_VERSION,
+    "job_head": list(JOB_HEAD_RULES),
+    "machine_head": list(MACHINE_HEAD_RULES),
+}
+
+
 ## @brief Per-key observation shapes (no batch dim) — the single source for train.py, the
 ##        placeholder env and tests.
 OBS_SHAPES = {
@@ -80,6 +107,7 @@ OBS_SHAPES = {
     "job_table":      (MAX_JOBS, JOB_FEATURES),
     "global_scalars": (GLOBAL_SCALARS,),
     "event_flags":    (EVENT_FLAGS,),
+    "action_mask":    (ACTION_MASK_LEN,),   # not encoded: masks the actor's heads (see ACTION_MASK_LEN)
 }
 
 
@@ -141,7 +169,7 @@ class ActorCriticConfig:
 
     input_dim: int = 256
     hidden_dim: int = 256
-    num_actions: int = 8
+    action_branches: Tuple[int, ...] = ACTION_BRANCHES
 
 
 @dataclass
@@ -165,13 +193,12 @@ class PPOConfig:
     total_timesteps: int = 1_000_000
 
 
-PDR_ACTIONS = [
-    "SPT-SMPT",
-    "SPT-SRWT",
-    "LPT-MMUR",
-    "LPT-SMPT",
-    "SRT-SRWT",
-    "SRT-SMPT",
-    "LRT-MMUR",
-    "FIFO-SRWT",
-]
+## @brief Fixed-rule baselines reachable through the RL action space: every (job head, machine head) pair,
+##        named JOB-MACHINE, job-major. Rules outside the heads (e.g. SPT-SMPT) run through the batch runner.
+PDR_ACTIONS = [f"{job}-{machine}" for job in JOB_HEAD_RULES for machine in MACHINE_HEAD_RULES]
+
+
+def pdr_action(name: str) -> Tuple[int, int]:
+    """@brief (job head, machine head) of a PDR_ACTIONS name."""
+    job, machine = name.split("-")
+    return JOB_HEAD_RULES.index(job), MACHINE_HEAD_RULES.index(machine)

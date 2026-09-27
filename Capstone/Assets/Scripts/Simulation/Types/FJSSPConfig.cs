@@ -113,12 +113,16 @@ namespace Assets.Scripts.Simulation.Types
         ///        config that omits it is unchanged. Immutable, shared by reference across per-seed clones.
         public LayoutSpec Layout = LayoutSpec.Default;
 
-        /// @brief AGV zone-reservation protocol: "holdPrevious" (default) or "releasePrevious".
+        /// @brief AGV zone-reservation protocol: "releasePrevious" (default since 2026-09-26) or "holdPrevious".
         ///        See ReservationProtocol. Validated at load by ReservationProtocolParser.
-        public string reservationProtocol = "holdPrevious";
+        public string reservationProtocol = ReservationProtocolParser.Default;
 
         /// @brief When routing decisions are made: "onTransport" (default) or "onReady" (legacy). See RoutingTrigger.
         public string routingTrigger = RoutingTriggerParser.Default;
+
+        /// @brief Tiled floor: copies of the layout side by side, each with its own machines, belts, lane and AGVs
+        ///        (docs/features/TILED_LAYOUT_SCOPE.md). Default one tile = today's floor. Immutable, shared by reference.
+        public TilingSpec Tiling = TilingSpec.Single;
 
         // ── Pre-dispatching method ──
 
@@ -186,6 +190,7 @@ namespace Assets.Scripts.Simulation.Types
                 Layout = Layout,
                 reservationProtocol = reservationProtocol,
                 routingTrigger = routingTrigger,
+                Tiling = Tiling,
                 preDispatchingMethod = preDispatchingMethod,
                 ThroughputTimingWindow = ThroughputTimingWindow,
             };

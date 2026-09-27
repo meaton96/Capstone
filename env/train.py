@@ -49,7 +49,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from config import (
     EncoderConfig, FusionConfig, ActorCriticConfig, PPOConfig, OBS_SHAPES, OBS_LAYOUT,
-    MAX_MACHINES, MAX_JOBS,
+    MAX_MACHINES, MAX_JOBS, ACTION_BRANCHES, ACTION_LAYOUT,
 )
 from models.network import SchedulingNetwork
 from rollout_buffer import RolloutBuffer
@@ -190,6 +190,21 @@ def check_obs_schema(ckpt: dict, path) -> None:
         raise ValueError(f"{path}: observation layout differs ({detail}); the network cannot read it.")
 
 
+def check_action_layout(ckpt: dict, path) -> None:
+    """@brief Refuse a checkpoint trained on a different action space (see config.ACTION_LAYOUT).
+
+    @details Checkpoints saved before action schema v2 have no action_layout: they have a single 8-way
+    actor output and cannot drive the two-branch player.
+    """
+    saved = ckpt.get("action_layout")
+    if saved is None:
+        raise ValueError(
+            f"{path}: checkpoint uses action schema v1 (one 8-way composite-rule branch), this code is "
+            f"v{ACTION_LAYOUT['schema_version']} (job head x machine head, see env/config.py); train a new run.")
+    if saved != ACTION_LAYOUT:
+        raise ValueError(f"{path}: action layout differs (checkpoint {saved} vs code {ACTION_LAYOUT}).")
+
+
 def save_checkpoint(path: Path, net, optimizer, global_step: int, ppo_cfg: PPOConfig,
                     reward_name):
     """@brief Save network, optimizer, and config so a run can be resumed or evaluated."""
@@ -199,6 +214,7 @@ def save_checkpoint(path: Path, net, optimizer, global_step: int, ppo_cfg: PPOCo
         "global_step": global_step,
         "reward": reward_name,
         "obs_layout": dict(OBS_LAYOUT),
+        "action_layout": dict(ACTION_LAYOUT),
         "obs_row_caps": {"max_machines": MAX_MACHINES, "max_jobs": MAX_JOBS},   # informational only
         "config": {
             "encoder": EncoderConfig().__dict__,
@@ -255,6 +271,7 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
     if args.resume_from:
         ckpt = torch.load(args.resume_from, map_location=device)
         check_obs_schema(ckpt, args.resume_from)
+        check_action_layout(ckpt, args.resume_from)
         net.load_state_dict(ckpt["model_state_dict"])
         optimizer.load_state_dict(ckpt["optimizer_state_dict"])
         resumed_global_step = ckpt["global_step"]
@@ -303,6 +320,7 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
         gamma=ppo_cfg.gamma,
         gae_lambda=ppo_cfg.gae_lambda,
         device=device,
+        action_shape=(len(ACTION_BRANCHES),),
     )
     writer = SummaryWriter(log_dir=str(run_dir))
 
@@ -453,6 +471,12 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
             writer.add_scalar("charts/step_reward_mean", avg_reward, global_step)
             writer.add_scalar("charts/sps", sps, global_step)
             writer.add_scalar("charts/episodes", episodes_done, global_step)
+            # Share of this rollout's decisions each head could change (Unity leaves more than action 0 enabled).
+            offset = 0
+            for name, size in zip(("job", "machine"), ACTION_BRANCHES):
+                used = buffer.obs_buffers["action_mask"][..., offset + 1:offset + size].sum(-1) > 0
+                writer.add_scalar(f"charts/{name}_head_used", float(used.mean()), global_step)
+                offset += size
 
             if update % 5 == 0 or update == 1:
                 episode_stats = ""

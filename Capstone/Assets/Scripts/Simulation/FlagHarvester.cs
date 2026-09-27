@@ -117,7 +117,7 @@ namespace Assets.Scripts.Simulation
                         AGVController preAgv = _agvPool.GetPreDispatchedAGV(job.JobId);
                         if (preAgv != null)
                         {
-                            preAgv.FinalizePreDispatch(job.JobId, _layout.OutgoingBeltPosition, null, job.Visual);
+                            preAgv.FinalizePreDispatch(job.JobId, _layout.OutgoingBeltPositionOf(job.TileId), null, job.Visual);
                             job.AssignedAgvId = preAgv.AgvId;
                         }
                         job.PreDispatchedAgvId = -1;
@@ -140,7 +140,8 @@ namespace Assets.Scripts.Simulation
         public void HarvestAlmostDoneFlags(int preDispatchLeadTime, bool yieldToWaitingJobs = false)
         {
             // OnTransport: a free AGV belongs to a job already waiting (ranked by the rule), not to one still processing.
-            bool yieldAgvs = yieldToWaitingJobs && AnyJobWaitingForTransport();
+            // Per tile on a tiled floor (an AGV only ever serves its own tile's jobs); evaluated once per tile.
+            bool?[] yieldByTile = new bool?[_layout.TileCount];
             foreach (var machine in _layout.Machines)
             {
                 if (!machine.AlmostDoneFlag) continue;
@@ -155,7 +156,12 @@ namespace Assets.Scripts.Simulation
                 // Skip pre-dispatch if the source machine is not operational
                 if (machine.HealthState != MachineHealthState.Operational) continue;
 
-                if (yieldAgvs) continue;
+                if (yieldToWaitingJobs)
+                {
+                    int tile = _layout.TileOfMachine(machine.MachineId);
+                    yieldByTile[tile] ??= AnyJobWaitingForTransport(_layout.TileCount > 1 ? tile : -1);
+                    if (yieldByTile[tile].Value) continue;
+                }
 
                 AGVController agv = _agvPool.GetNearestAvailableAGV(machine, machine.GetPickupPosition());
                 if (agv == null) continue;
@@ -320,8 +326,17 @@ namespace Assets.Scripts.Simulation
                     candidates.Add(job);
             }
 
+            // Stop once no AGV is free; on a tiled floor per tile (an empty tile must not starve the others).
+            var exhausted = new HashSet<int>();
             foreach (var job in candidates)
-                if (!TryAssignAgv(job)) break;
+            {
+                if (exhausted.Contains(job.TileId)) continue;
+                if (!TryAssignAgv(job))
+                {
+                    exhausted.Add(job.TileId);
+                    if (exhausted.Count >= _layout.TileCount) break;
+                }
+            }
         }
 
         /// <summary>
@@ -350,15 +365,15 @@ namespace Assets.Scripts.Simulation
             PhysicalMachine src = job.LocationMachineId >= 0
                 ? _layout.GetMachine(job.LocationMachineId) : null;
             Vector3 pickupPos = src != null
-                ? src.GetPickupPosition() : _layout.IncomingBeltPosition;
+                ? src.GetPickupPosition() : _layout.IncomingBeltPositionOf(job.TileId);
 
-            AGVController agv = _agvPool.GetNearestAvailableAGV(src, pickupPos);
+            AGVController agv = _agvPool.GetNearestAvailableAGV(src, pickupPos, job.TileId);
             if (agv == null) return false;
 
             PhysicalMachine target = job.TargetMachineId >= 0
                 ? _layout.GetMachine(job.TargetMachineId) : null;
             Vector3 dropoffPos = target != null
-                ? target.GetDropoffPosition() : _layout.OutgoingBeltPosition;
+                ? target.GetDropoffPosition() : _layout.OutgoingBeltPositionOf(job.TileId);
 
             job.AssignedAgvId = agv.AgvId;
             agv.Dispatch(job.JobId, pickupPos, dropoffPos, src, target, job.Visual);
@@ -372,10 +387,11 @@ namespace Assets.Scripts.Simulation
         /// a free AGV goes to a job that is already waiting, ranked by the rule, rather than being reserved
         /// for a job still processing.
         /// </summary>
-        public bool AnyJobWaitingForTransport()
+        public bool AnyJobWaitingForTransport(int tile = -1)
         {
             foreach (var job in _jobs.AllJobs)
             {
+                if (tile >= 0 && job.TileId != tile) continue;
                 if (job.State == JobState.NeedsRouting && !_jobs.DeferredJobIds.Contains(job.JobId)) return true;
                 if (job.State == JobState.WaitingForPickup && job.AssignedAgvId == -1 && job.PreDispatchedAgvId < 0)
                     return true;

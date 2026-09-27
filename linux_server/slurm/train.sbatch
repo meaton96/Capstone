@@ -17,6 +17,7 @@ cd "${SLURM_SUBMIT_DIR:-$HOME/capstone/linux_server}"     # the folder holding c
 REPO="$(dirname "$PWD")"
 
 spack env activate default-ml-x86_64-25111401 2>/dev/null || true   # same runtime as run_queue.sbatch for the player
+unset PYTHONPATH   # spack puts its python3.11 site-packages here, which breaks numpy in the 3.10 venv
 export LD_LIBRARY_PATH="$PWD:${LD_LIBRARY_PATH:-}"
 chmod +x capstone.x86_64
 source "$REPO/.venv/bin/activate"

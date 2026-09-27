@@ -18,7 +18,8 @@ namespace Assets.Scripts.Simulation
         /// Array mapping action indices to their corresponding dispatching rules.
         /// Each rule defines a specific priority heuristic for job selection.
         /// Supported dispatching rules in order: SPT_SMPT, SPT_SRWT, LPT_MMUR, LPT_SMPT,
-        /// SRT_SRWT, SRT_SMPT, LRT_MMUR, FIFO_SRWT, and Random.
+        /// SRT_SRWT, SRT_SMPT, LRT_MMUR, FIFO_SRWT, and Random. These keep catalog indices 0-8 (baselines,
+        /// Random's pool); the RL action space is the two heads below (JobHead x MachineHead).
         /// </summary>
         private static readonly DispatchingRule[] ActionToRule = new DispatchingRule[]
         {
@@ -31,116 +32,217 @@ namespace Assets.Scripts.Simulation
             DispatchingRule.LRT_MMUR,   // Longest Remaining Time - Machine
             DispatchingRule.FIFO_SRWT,  // FIFO/FCFS (arrival order) - Server
             DispatchingRule.Random
-            // NOTE: Random must stay last -- SelectJob/SelectMachine/SelectRoutingJob resolve it via
-            // Random.Range(0, ActionToRule.Length - 1), which relies on this position to exclude itself.
+            // NOTE: Random must stay last -- Resolve draws Random.Range(0, ActionToRule.Length - 1),
+            // which relies on this position to exclude itself.
         };
 
         /// <summary>
-        /// Gets the total number of dispatching rules available in the engine.
+        /// Every rule the engine can run: ActionToRule first (so indices 0..ActionCount-1 keep their old
+        /// values), then the rest of the job x machine catalog. The agent reaches its rules through
+        /// IndexForHeads.
+        /// </summary>
+        private static readonly DispatchingRule[] AllRules = ActionToRule
+            .Concat(((DispatchingRule[])Enum.GetValues(typeof(DispatchingRule))).Where(r => !ActionToRule.Contains(r)))
+            .ToArray();
+
+        /// <summary>Job-priority half of a rule: which job to take (dispatch) or route first.</summary>
+        private enum JobRule { SPT, LPT, SRT, LRT, FIFO, PTWINQ }
+
+        /// <summary>Machine-selection half of a rule: which candidate machine to route a job to.</summary>
+        private enum MachineRule { SMPT, SRWT, MMUR, ECT, TECT }
+
+        /// <summary>(job half, machine half) of every non-Random rule, parsed once from its JOB_MACHINE name.</summary>
+        private static readonly Dictionary<DispatchingRule, (JobRule job, MachineRule machine)> Halves =
+            AllRules.Where(r => r != DispatchingRule.Random).ToDictionary(r => r, r =>
+            {
+                string[] parts = r.ToString().Split('_');
+                return ((JobRule)Enum.Parse(typeof(JobRule), parts[0]), (MachineRule)Enum.Parse(typeof(MachineRule), parts[1]));
+            });
+
+        /// <summary>
+        /// RL action branch 0 (job head): the job half the agent picks. Order is the Python contract
+        /// (env/config.py JOB_HEAD_RULES); append only.
+        /// </summary>
+        private static readonly JobRule[] JobHead = { JobRule.SPT, JobRule.SRT, JobRule.PTWINQ, JobRule.FIFO };
+
+        /// <summary>
+        /// RL action branch 1 (machine head): the machine half the agent picks. Order is the Python contract
+        /// (env/config.py MACHINE_HEAD_RULES); append only.
+        /// </summary>
+        private static readonly MachineRule[] MachineHead = { MachineRule.ECT, MachineRule.TECT, MachineRule.SRWT };
+
+        /// <summary>Catalog index of each (job head, machine head) pair; every pair must exist as a JOB_MACHINE rule.</summary>
+        private static readonly int[,] HeadsToIndex = BuildHeadsToIndex();
+
+        private static int[,] BuildHeadsToIndex()
+        {
+            var table = new int[JobHead.Length, MachineHead.Length];
+            for (int j = 0; j < JobHead.Length; j++)
+                for (int m = 0; m < MachineHead.Length; m++)
+                {
+                    DispatchingRule rule = Halves.First(kv => kv.Value == (JobHead[j], MachineHead[m])).Key;
+                    table[j, m] = IndexForRule(rule);
+                }
+            return table;
+        }
+
+        /// <summary>Size of RL action branch 0 (job head).</summary>
+        public static int JobBranchSize => JobHead.Length;
+
+        /// <summary>Size of RL action branch 1 (machine head).</summary>
+        public static int MachineBranchSize => MachineHead.Length;
+
+        /// <summary>Catalog index (for Step) of the rule an RL action (job head, machine head) stands for.</summary>
+        public static int IndexForHeads(int jobHead, int machineHead) => HeadsToIndex[jobHead, machineHead];
+
+        /// <summary>The RL head indices that reproduce a catalog rule; false if a half is not in its head.</summary>
+        public static bool TryHeadsForRule(DispatchingRule rule, out int jobHead, out int machineHead)
+        {
+            jobHead = machineHead = -1;
+            if (!Halves.TryGetValue(rule, out var halves)) return false;
+            jobHead = Array.IndexOf(JobHead, halves.job);
+            machineHead = Array.IndexOf(MachineHead, halves.machine);
+            return jobHead >= 0 && machineHead >= 0;
+        }
+
+        /// <summary>
+        /// Which RL heads can change the outcome of this decision. Dispatch uses only the job half, and only
+        /// with more than one job queued. Routing uses the job half when the pool holds more than one job,
+        /// and the machine half when the job has more than one candidate machine. With a pool &gt; 1 the
+        /// job is picked at Step time, so the machine head counts whenever the pool does (the focus job's
+        /// candidates do not tell us the picked job's).
+        /// </summary>
+        public static (bool job, bool machine) HeadsThatMatter(DecisionRequest req)
+        {
+            if (req.Type == DecisionType.Dispatch)
+                return ((req.QueuedJobIds?.Length ?? 0) > 1, false);
+
+            bool poolChoice = !req.JobSelectedByRule && (req.JobCandidateIds?.Length ?? 0) > 1;
+            return (poolChoice, poolChoice || (req.CandidateMachineIds?.Length ?? 0) > 1);
+        }
+
+        /// <summary>
+        /// Number of legacy rules in ActionToRule (the pool Random draws from). Not the RL action space any more:
+        /// the agent acts with two branches, JobBranchSize x MachineBranchSize (see IndexForHeads).
         /// </summary>
         public static int ActionCount => ActionToRule.Length;
 
         /// <summary>
-        /// Retrieves the dispatching rule associated with the given index.
+        /// Retrieves the dispatching rule associated with the given index (RL action or catalog index).
         /// </summary>
         /// <param name="index">Zero-based index of the rule.</param>
         /// <returns>The dispatching rule at the specified index.</returns>
-        public static DispatchingRule RuleForIndex(int index) => ActionToRule[index];
+        public static DispatchingRule RuleForIndex(int index) => AllRules[index];
 
         /// <summary>
-        /// Retrieves the index of the given dispatching rule within the registered rule array.
+        /// Retrieves the index of the given dispatching rule: its RL action index for the 9 legacy rules,
+        /// otherwise its catalog index (>= ActionCount).
         /// </summary>
         /// <param name="rule">The dispatching rule to look up.</param>
         /// <returns>The zero-based index of the rule, or -1 if not found.</returns>
-        public static int IndexForRule(DispatchingRule rule) => Array.IndexOf(ActionToRule, rule);
+        public static int IndexForRule(DispatchingRule rule) => Array.IndexOf(AllRules, rule);
+
+        /// <summary>
+        /// Resolves an index to its (job, machine) halves. Random re-samples one of the 8 legacy non-random
+        /// rules per call, as before.
+        /// </summary>
+        private static (JobRule job, MachineRule machine) Resolve(int index)
+        {
+            DispatchingRule rule = AllRules[index];
+            if (rule == DispatchingRule.Random)
+                rule = ActionToRule[UnityEngine.Random.Range(0, ActionToRule.Length - 1)];
+            return Halves[rule];
+        }
 
         /// <summary>
         /// Selects the best job for a given machine based on the dispatching rule specified by actionIndex.
         /// Uses the rule to evaluate candidate jobs and returns the job ID that best satisfies the priority criterion.
         /// </summary>
-        /// <param name="actionIndex">Index into ActionToRule to determine which dispatching rule to apply.</param>
+        /// <param name="actionIndex">RL action or catalog index (see RuleForIndex).</param>
         /// <param name="machineId">ID of the machine that needs a job assigned.</param>
         /// <param name="jobs">Reference to the JobStore containing all job data.</param>
         /// <param name="simTime">Current simulation time, used for time-based rules such as SDT.</param>
         /// <returns>The selected job ID, or -1 if no dispatchable jobs are available for the machine.</returns>
         public static int SelectJob(int actionIndex, int machineId, JobStore jobs, double simTime)
         {
-            DispatchingRule rule = ActionToRule[actionIndex];
-
-            // Random rule requires re-sampling a specific non-random rule at decision time
-            if (rule == DispatchingRule.Random)
-                rule = ActionToRule[UnityEngine.Random.Range(0, ActionToRule.Length - 1)];
+            JobRule rule = Resolve(actionIndex).job;
 
             List<int> queue = jobs.GetDispatchableJobs(machineId);
             if (queue.Count == 0) return -1;
             if (queue.Count == 1) return queue[0];
 
-            return rule switch
-            {
-                // Shortest Processing Time rules — minimize processing time on the target machine
-                DispatchingRule.SPT_SMPT or DispatchingRule.SPT_SRWT
-                    => ArgMin(queue, id => jobs.Get(id).GetProcessingTime(machineId)),
-                // Longest Processing Time rules — maximize processing time on the target machine
-                DispatchingRule.LPT_MMUR or DispatchingRule.LPT_SMPT
-                    => ArgMax(queue, id => jobs.Get(id).GetProcessingTime(machineId)),
-                // Shortest Remaining Time rules — minimize total remaining work across all operations
-                DispatchingRule.SRT_SRWT or DispatchingRule.SRT_SMPT
-                    => ArgMin(queue, id => GetRemainingWork(id, jobs)),
-                // Longest Remaining Time rule — maximize total remaining work
-                DispatchingRule.LRT_MMUR
-                    => ArgMax(queue, id => GetRemainingWork(id, jobs)),
-                // FIFO/FCFS — prioritize jobs that have been waiting the longest (arrival order).
-                // Was ArgMin here (picked newest arrival, the opposite of "SDT"/FIFO as documented
-                // in Types/DispatchingRule.cs and this method's own original comment) -- fixed.
-                DispatchingRule.FIFO_SRWT
-                    => ArgMax(queue, id => (float)(simTime - jobs.Get(id).ArrivalTime)),
-                // Fallback — select a random job from the queue
-                _ => queue[UnityEngine.Random.Range(0, queue.Count)]
-            };
+            return RankJobs(rule, queue, jobs, simTime, id => jobs.Get(id).GetProcessingTime(machineId));
         }
 
         /// <summary>
         /// Selects which job gets the next routing decision, when multiple jobs are simultaneously
-        /// ready (state NeedsRouting) — the job-priority half of a rule (SPT/LPT/SRT/LRT/SDT),
+        /// ready (state NeedsRouting) — the job-priority half of a rule (SPT/LPT/SRT/LRT/SDT/PTWINQ),
         /// applied at the point of routing-eligibility rather than only at machine-side dispatch.
         /// </summary>
         /// <remarks>
         /// Machine-agnostic proxies replace SelectJob's per-machine stats, since the target
-        /// machine hasn't been chosen yet at this point: SPT/LPT use the job's minimum processing
+        /// machine hasn't been chosen yet at this point: SPT/LPT/PTWINQ use the job's minimum processing
         /// time across its eligible machines for the current op (GetMinEligibleProcTime) in place
         /// of processing time at one specific machine; SRT/LRT/SDT reuse GetRemainingWork and the
         /// wait-time formula unchanged, since neither depends on a specific machine.
         /// </remarks>
-        /// <param name="actionIndex">Index into ActionToRule to determine which dispatching rule to apply.</param>
+        /// <param name="actionIndex">RL action or catalog index (see RuleForIndex).</param>
         /// <param name="readyJobIds">IDs of jobs currently ready for a routing decision (has &gt;=1 available eligible machine).</param>
         /// <param name="jobs">Reference to the JobStore containing all job data.</param>
         /// <param name="simTime">Current simulation time, used for SDT.</param>
         /// <returns>The selected job ID, or -1 if readyJobIds is empty.</returns>
         public static int SelectRoutingJob(int actionIndex, List<int> readyJobIds, JobStore jobs, double simTime)
         {
-            DispatchingRule rule = ActionToRule[actionIndex];
-
-            // Random rule requires re-sampling a specific non-random rule at decision time
-            if (rule == DispatchingRule.Random)
-                rule = ActionToRule[UnityEngine.Random.Range(0, ActionToRule.Length - 1)];
+            JobRule rule = Resolve(actionIndex).job;
 
             if (readyJobIds.Count == 0) return -1;
             if (readyJobIds.Count == 1) return readyJobIds[0];
 
-            return rule switch
+            return RankJobs(rule, readyJobIds, jobs, simTime, id => GetMinEligibleProcTime(id, jobs));
+        }
+
+        /// <summary>
+        /// Applies a job-priority rule to a candidate set (shared by dispatch and routing-job selection).
+        /// </summary>
+        /// <param name="procTime">The processing-time stat for SPT/LPT/PTWINQ: time on this machine
+        /// (dispatch) or the minimum over eligible machines (routing).</param>
+        private static int RankJobs(JobRule rule, List<int> ids, JobStore jobs, double simTime, Func<int, float> procTime)
+        {
+            switch (rule)
             {
-                DispatchingRule.SPT_SMPT or DispatchingRule.SPT_SRWT
-                    => ArgMin(readyJobIds, id => GetMinEligibleProcTime(id, jobs)),
-                DispatchingRule.LPT_MMUR or DispatchingRule.LPT_SMPT
-                    => ArgMax(readyJobIds, id => GetMinEligibleProcTime(id, jobs)),
-                DispatchingRule.SRT_SRWT or DispatchingRule.SRT_SMPT
-                    => ArgMin(readyJobIds, id => GetRemainingWork(id, jobs)),
-                DispatchingRule.LRT_MMUR
-                    => ArgMax(readyJobIds, id => GetRemainingWork(id, jobs)),
-                DispatchingRule.FIFO_SRWT
-                    => ArgMax(readyJobIds, id => (float)(simTime - jobs.Get(id).ArrivalTime)),
-                _ => readyJobIds[UnityEngine.Random.Range(0, readyJobIds.Count)]
-            };
+                // Shortest / longest processing time
+                case JobRule.SPT: return ArgMin(ids, procTime);
+                case JobRule.LPT: return ArgMax(ids, procTime);
+                // Shortest / longest remaining work across all remaining operations
+                case JobRule.SRT: return ArgMin(ids, id => GetRemainingWork(id, jobs));
+                case JobRule.LRT: return ArgMax(ids, id => GetRemainingWork(id, jobs));
+                // FIFO/FCFS — prioritize jobs that have been waiting the longest (arrival order).
+                // Was ArgMin here (picked newest arrival, the opposite of "SDT"/FIFO as documented
+                // in Types/DispatchingRule.cs and this method's own original comment) -- fixed.
+                case JobRule.FIFO: return ArgMax(ids, id => (float)(simTime - jobs.Get(id).ArrivalTime));
+                // PT+WINQ — processing time plus the least queued work among the machines that can take the
+                // job's next operation (0 on its last op): favours short jobs headed for idle machines.
+                case JobRule.PTWINQ:
+                {
+                    Dictionary<int, float> loads = jobs.GetAllMachineLoads();
+                    return ArgMin(ids, id => procTime(id) + WorkInNextQueue(jobs.Get(id), loads));
+                }
+                default: return ids[UnityEngine.Random.Range(0, ids.Count)];
+            }
+        }
+
+        /// <summary>
+        /// WINQ for a flexible next operation: the least load (GetMachineLoad) among the machines eligible
+        /// for the job's operation after the current one; 0 when the current operation is its last.
+        /// </summary>
+        private static float WorkInNextQueue(JobData job, Dictionary<int, float> loads)
+        {
+            int next = job.CurrentOpIndex + 1;
+            if (next >= job.TotalOperations) return 0f;
+            float best = float.MaxValue;
+            foreach (int m in job.EligibleMachinesPerOp[next].Keys)
+                if (loads.TryGetValue(m, out float l) && l < best) best = l;
+            return best == float.MaxValue ? 0f : best;
         }
 
         /// <summary>
@@ -162,37 +264,48 @@ namespace Assets.Scripts.Simulation
         /// Selects the best machine from candidate machines based on the dispatching rule specified by actionIndex.
         /// Evaluates candidates using metrics from the DecisionRequest (e.g., job times, queue lengths).
         /// </summary>
-        /// <param name="actionIndex">Index into ActionToRule to determine which dispatching rule to apply.</param>
+        /// <param name="actionIndex">RL action or catalog index (see RuleForIndex).</param>
         /// <param name="req">The decision request containing candidate machine IDs and their associated metrics.</param>
         /// <returns>The selected machine ID from the candidate set.</returns>
         public static int SelectMachine(int actionIndex, DecisionRequest req)
         {
-            DispatchingRule rule = ActionToRule[actionIndex];
-
-            // Random rule requires re-sampling a specific non-random rule at decision time
-            if (rule == DispatchingRule.Random)
-                rule = ActionToRule[UnityEngine.Random.Range(0, ActionToRule.Length - 1)];
+            MachineRule rule = Resolve(actionIndex).machine;
 
             int[] candidates = req.CandidateMachineIds;
             if (candidates.Length == 1) return candidates[0];
 
-            return rule switch
+            switch (rule)
             {
                 // Machine-focused rules — select machine with minimum job processing time
-                DispatchingRule.SPT_SMPT or DispatchingRule.LPT_SMPT or DispatchingRule.SRT_SMPT
-                    => candidates[ArgMinIdx(req.CandidateJobTimes)],
+                case MachineRule.SMPT: return candidates[ArgMinIdx(req.CandidateJobTimes)];
                 // Server-focused rules — select machine with minimum queued workload (SRWT)
-                DispatchingRule.SPT_SRWT or DispatchingRule.SRT_SRWT or DispatchingRule.FIFO_SRWT
-                    => candidates[ArgMinIdx(req.CandidateQueueLengths)],
+                case MachineRule.SRWT: return candidates[ArgMinIdx(req.CandidateQueueLengths)];
                 // Minimum Machine Utilization Rule — select machine with the lowest cumulative
                 // utilization ratio so far (distinct signal from SRWT's instantaneous queued
                 // workload: a machine can be idle right now yet have run hot all episode, or
                 // vice versa).
-                DispatchingRule.LPT_MMUR or DispatchingRule.LRT_MMUR
-                    => candidates[ArgMinIdx(req.CandidateUtilization)],
-                // Fallback — select a random machine from candidates
-                _ => candidates[UnityEngine.Random.Range(0, candidates.Length)]
-            };
+                case MachineRule.MMUR: return candidates[ArgMinIdx(req.CandidateUtilization)];
+                // Earliest completion: queued work (incl. in-process remainder) + this job's time there.
+                case MachineRule.ECT:
+                {
+                    var ect = new float[candidates.Length];
+                    for (int i = 0; i < ect.Length; i++) ect[i] = req.CandidateQueueLengths[i] + req.CandidateJobTimes[i];
+                    return candidates[ArgMinIdx(ect)];
+                }
+                // Travel-aware earliest completion: the job can start once it has arrived AND the machine has
+                // cleared its queue. Without travel estimates (null) this is plain ECT.
+                case MachineRule.TECT:
+                {
+                    var ect = new float[candidates.Length];
+                    for (int i = 0; i < ect.Length; i++)
+                    {
+                        float travel = req.CandidateTravelTimes != null ? req.CandidateTravelTimes[i] : 0f;
+                        ect[i] = Math.Max(travel, req.CandidateQueueLengths[i]) + req.CandidateJobTimes[i];
+                    }
+                    return candidates[ArgMinIdx(ect)];
+                }
+                default: return candidates[UnityEngine.Random.Range(0, candidates.Length)];
+            }
         }
 
         /// <summary>

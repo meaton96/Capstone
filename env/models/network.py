@@ -74,7 +74,7 @@ class SchedulingNetwork(nn.Module):
         self.actor_critic = ActorCritic(
             input_dim=fusion_cfg.output_dim,
             hidden_dim=ac_cfg.hidden_dim,
-            num_actions=ac_cfg.num_actions,
+            branches=ac_cfg.action_branches,
         )
 
     def forward(self, obs: dict):
@@ -83,7 +83,7 @@ class SchedulingNetwork(nn.Module):
         @param obs  Observation dict with keys matching the state-space spec
                     (see @ref MultiModalEncoder).
         @return Tuple of:
-                - @c action_logits (B, 8) — raw logits over PDR rules.
+                - @c action_logits (B, sum(branches)) — raw branch logits, concatenated.
                 - @c value         (B, 1) — state-value estimate.
         """
         encoded = self.encoder(obs)       # (B, 560)
@@ -93,23 +93,24 @@ class SchedulingNetwork(nn.Module):
     def act(self, obs: dict, deterministic: bool = False):
         """@brief Select an action for environment stepping.
 
-        @param obs            Observation dict from the environment.
+        @param obs            Observation dict from the environment; its optional "action_mask"
+                              masks the heads (see config.ACTION_MASK_LEN).
         @param deterministic  If True, take argmax instead of sampling.
         @return Tuple of:
-                - @c action   (B,) — selected PDR rule index.
+                - @c action   (B, n_branches) — (job head, machine head).
                 - @c log_prob (B,) — log-probability of the selected action.
                 - @c value    (B,) — state-value estimate.
         """
         encoded = self.encoder(obs)
         fused = self.fusion(encoded)
-        return self.actor_critic.act(fused, deterministic=deterministic)
+        return self.actor_critic.act(fused, obs.get("action_mask"), deterministic=deterministic)
 
     def evaluate(self, obs: dict, actions: torch.Tensor):
         """@brief Re-evaluate stored actions for the PPO loss computation.
 
         @param obs      Observation dict corresponding to the stored
                         transitions.
-        @param actions  Previously selected action indices of shape (B,).
+        @param actions  Previously selected actions of shape (B, n_branches).
         @return Tuple of:
                 - @c log_probs (B,) — log-probability of @p actions under
                   the current policy.
@@ -119,7 +120,12 @@ class SchedulingNetwork(nn.Module):
         """
         encoded = self.encoder(obs)
         fused = self.fusion(encoded)
-        return self.actor_critic.evaluate(fused, actions)
+        return self.actor_critic.evaluate(fused, actions, obs.get("action_mask"))
+
+    def distributions(self, obs: dict):
+        """@brief The (masked) Categorical of each action branch, for inspection and decision logging."""
+        fused = self.fusion(self.encoder(obs))
+        return self.actor_critic.actor.get_distributions(fused, obs.get("action_mask"))
 
     def get_param_summary(self) -> dict:
         """@brief Parameter-count summary for each submodule.

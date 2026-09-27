@@ -27,7 +27,8 @@ class RolloutBuffer:
 
     def __init__(self, rollout_length: int, num_envs: int,
                  obs_shapes: dict, gamma: float = 0.99,
-                 gae_lambda: float = 0.95, device: str = "cpu"):
+                 gae_lambda: float = 0.95, device: str = "cpu",
+                 action_shape: tuple = ()):
         """@brief Construct the rollout buffer and pre-allocate storage.
 
         @param rollout_length  Number of environment steps per rollout.
@@ -39,6 +40,8 @@ class RolloutBuffer:
         @param gae_lambda      Lambda parameter for GAE smoothing.
         @param device          Torch device string used when yielding
                                mini-batch tensors.
+        @param action_shape    Per-step action shape: () for one discrete
+                               action, (n_branches,) for a branched action.
         """
         ## @brief Number of environment steps collected per rollout.
         self.rollout_length = rollout_length
@@ -63,8 +66,10 @@ class RolloutBuffer:
 
         # ---- Scalar buffers (rollout_length, num_envs) ----
 
-        ## @brief Selected action indices (int64).
-        self.actions = np.zeros((rollout_length, num_envs), dtype=np.int64)
+        ## @brief Per-step action shape (see __init__).
+        self.action_shape = tuple(action_shape)
+        ## @brief Selected action indices (int64), shape (rollout_length, num_envs, *action_shape).
+        self.actions = np.zeros((rollout_length, num_envs, *self.action_shape), dtype=np.int64)
         ## @brief Log-probabilities of the selected actions under the
         ##        collection policy.
         self.log_probs = np.zeros((rollout_length, num_envs), dtype=np.float32)
@@ -91,7 +96,7 @@ class RolloutBuffer:
         """@brief Store one timestep of data from all parallel environments.
 
         @param obs        Observation dict with arrays of shape (num_envs, ...).
-        @param actions    Action indices, shape (num_envs,).
+        @param actions    Action indices, shape (num_envs, *action_shape).
         @param log_probs  Log-probabilities, shape (num_envs,).
         @param rewards    Rewards, shape (num_envs,).
         @param values     Value estimates, shape (num_envs,).
@@ -179,7 +184,7 @@ class RolloutBuffer:
             for k, v in self.obs_buffers.items()
         }
         flat_actions = torch.tensor(
-            self.actions.reshape(total), dtype=torch.long
+            self.actions.reshape(total, *self.action_shape), dtype=torch.long
         ).to(self.device)
         flat_log_probs = torch.tensor(
             self.log_probs.reshape(total), dtype=torch.float32

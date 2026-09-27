@@ -18,7 +18,7 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from config import PDR_ACTIONS
+from config import ACTION_BRANCHES, ACTION_MASK_LEN, PDR_ACTIONS
 from evaluate import (
     DECISION_FIELDS, ConstantPolicy, decision_row, parse_seeds, resolve_pdr_names, run_evaluation, summarize,
 )
@@ -30,7 +30,7 @@ class FakeEnv:
 
     @details The episode running at reset is unseeded (index -1); each later episode
     consumes the next queued seed. Episodes last @p length steps and report
-    makespan = seed * 10 + last action, so attribution is checkable.
+    makespan = seed * 10 + the last action's flat index (job * 3 + machine), so attribution is checkable.
     """
 
     def __init__(self, length=2):
@@ -62,7 +62,7 @@ class FakeEnv:
         if self.t < self.length:
             return {}, 0.0, False, {}
         episode = {
-            "seed": self.seed, "seed_index": self.index, "makespan": self.seed * 10 + action,
+            "seed": self.seed, "seed_index": self.index, "makespan": self.seed * 10 + action[0] * ACTION_BRANCHES[1] + action[1],
             "mean_flow_time": 1.0, "total_flow_time": 2.0, "return": -1.0, "length": self.length,
             "jobs_exited": 15, "deadlock": False, "timed_out": False, "truncated": False,
         }
@@ -87,14 +87,16 @@ def test_parse_seeds():
 def test_resolve_pdr_names():
     assert resolve_pdr_names("all") == list(PDR_ACTIONS)
     assert resolve_pdr_names("none") == []
-    assert resolve_pdr_names("spt_smpt, FIFO-SRWT") == ["SPT-SMPT", "FIFO-SRWT"]
+    assert resolve_pdr_names("spt_ect, FIFO-SRWT") == ["SPT-ECT", "FIFO-SRWT"]
     with pytest.raises(ValueError):
         resolve_pdr_names("NOT-A-RULE")
+    with pytest.raises(ValueError):
+        resolve_pdr_names("SPT-SMPT")   # a catalog rule outside the RL heads
 
 
 def test_run_evaluation_attributes_episodes_to_policies():
     """@brief Each queued (policy, seed) runs under that policy; the unseeded startup episode is dropped."""
-    policies = [ConstantPolicy(3, "A"), ConstantPolicy(5, "B")]
+    policies = [ConstantPolicy((1, 0), "A"), ConstantPolicy((1, 2), "B")]
     schedule = [(p, seed) for seed in (7, 8) for p in range(2)]
 
     rows = run_evaluation(FakeEnv(), policies, schedule, log=lambda *_: None)
@@ -108,7 +110,7 @@ def test_run_evaluation_attributes_episodes_to_policies():
 def test_run_evaluation_queues_matching_scenarios_when_generator_given():
     """@brief With a scenario_generator, each queued seed's scenario variant must be queued too,
     in the same order, cleared together with the seed queue."""
-    policies = [ConstantPolicy(3, "A")]
+    policies = [ConstantPolicy((1, 0), "A")]
     schedule = [(0, seed) for seed in (11, 22, 33)]
     generator = lambda seed: {"name": f"variant-{seed}", "seed": seed}  # noqa: E731
     env = FakeEnv()
@@ -123,14 +125,14 @@ def test_run_evaluation_queues_no_scenarios_without_generator():
     """@brief Without a scenario_generator (the default: evaluate on the generated config or a
     fixed --scenario), queue_scenarios must not be called at all."""
     env = FakeEnv()
-    run_evaluation(env, [ConstantPolicy(3, "A")], [(0, 1)], log=lambda *_: None)
+    run_evaluation(env, [ConstantPolicy((1, 0), "A")], [(0, 1)], log=lambda *_: None)
     assert env.queued_scenarios == []
 
 
 def test_decision_log_records_every_decision_of_scheduled_episodes():
     """@brief Each scored decision gets one row (step numbering restarts per episode); the
     discarded startup episode is not logged."""
-    policies = [ConstantPolicy(3, "A"), ConstantPolicy(5, "B")]
+    policies = [ConstantPolicy((1, 0), "A"), ConstantPolicy((1, 2), "B")]
     buffer = io.StringIO()
     writer = csv.DictWriter(buffer, fieldnames=DECISION_FIELDS)
     writer.writeheader()
@@ -139,24 +141,41 @@ def test_decision_log_records_every_decision_of_scheduled_episodes():
                    decision_writer=writer)
 
     rows = list(csv.DictReader(io.StringIO(buffer.getvalue())))
-    assert [(r["policy"], r["step"], r["action"], r["rule"]) for r in rows] == [
-        ("A", str(step), "3", PDR_ACTIONS[3]) for step in range(3)
-    ] + [("B", str(step), "5", PDR_ACTIONS[5]) for step in range(3)]
+    assert [(r["policy"], r["step"], r["job_head"], r["machine_head"], r["rule"]) for r in rows] == [
+        ("A", str(step), "1", "0", PDR_ACTIONS[3]) for step in range(3)
+    ] + [("B", str(step), "1", "2", PDR_ACTIONS[5]) for step in range(3)]
     assert all(r["entropy"] == "" for r in rows)   # constant rules have no action distribution
 
 
 def test_decision_row_includes_checkpoint_probabilities():
     class ProbabilisticPolicy:
         kind, name = "checkpoint", "P"
-        last_probs = np.array([0.7, 0.3] + [0.0] * (len(PDR_ACTIONS) - 2))
+        last_probs = [np.array([0.7, 0.3, 0.0, 0.0]), np.array([0.5, 0.25, 0.25])]
 
     metrics = MetricsSnapshot.from_dict({"sim_time": 12.5, "wip": 3})
-    row = decision_row(ProbabilisticPolicy(), seed=1, seed_index=0, step=4, metrics=metrics, action=0)
+    row = decision_row(ProbabilisticPolicy(), seed=1, seed_index=0, step=4, metrics=metrics, action=(0, 1))
 
-    assert row["chosen_prob"] == 0.7
-    assert row[f"p_{PDR_ACTIONS[1]}"] == 0.3
-    assert row["wip"] == 3 and row["rule"] == PDR_ACTIONS[0]
-    assert row["entropy"] == pytest.approx(-(0.7 * np.log(0.7) + 0.3 * np.log(0.3)), abs=1e-4)
+    assert row["chosen_prob"] == pytest.approx(0.7 * 0.25)
+    assert row["p_job_SRT"] == 0.3 and row["p_machine_TECT"] == 0.25
+    assert row["wip"] == 3 and row["rule"] == "SPT-TECT"
+    assert row["job_head_used"] == 1 and row["machine_head_used"] == 1
+    job_entropy = -(0.7 * np.log(0.7) + 0.3 * np.log(0.3))
+    machine_entropy = -(0.5 * np.log(0.5) + 2 * 0.25 * np.log(0.25))
+    assert row["entropy"] == pytest.approx(job_entropy + machine_entropy, abs=1e-4)
+
+
+def test_decision_row_skips_masked_head_in_chosen_prob():
+    """@brief A head Unity masked (could not change the decision) does not scale the chosen action's probability."""
+    class ProbabilisticPolicy:
+        kind, name = "checkpoint", "P"
+        last_probs = [np.array([0.7, 0.3, 0.0, 0.0]), np.array([1.0, 0.0, 0.0])]
+
+    mask = np.ones(ACTION_MASK_LEN)
+    mask[ACTION_BRANCHES[0] + 1:] = 0.0
+    metrics = MetricsSnapshot.from_dict({"sim_time": 1.0})
+    row = decision_row(ProbabilisticPolicy(), 1, 0, 0, metrics, action=(1, 0), action_mask=mask)
+    assert row["machine_head_used"] == 0
+    assert row["chosen_prob"] == pytest.approx(0.3)
 
 
 def test_summarize_gaps_against_best_pdr_per_seed():

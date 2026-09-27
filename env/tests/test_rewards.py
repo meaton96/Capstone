@@ -33,6 +33,7 @@ def snap(**values):
     return MetricsSnapshot.from_dict(values)
 
 
+@pytest.mark.skipif(not CSHARP_METRICS.exists(), reason="C# sources not present (e.g. on the cluster)")
 class TestMetricsContract:
     """@brief Python METRIC_NAMES must stay in lockstep with RewardMetrics.cs."""
 

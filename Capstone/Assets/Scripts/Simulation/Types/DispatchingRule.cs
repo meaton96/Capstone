@@ -12,6 +12,11 @@ namespace Assets.Scripts.Simulation.Types
     ///          - MMUR (Minimum Machine Utilization): routes to the candidate machine with the
     ///            lowest cumulative utilization ratio so far this episode — a longer-horizon,
     ///            workload-history signal, distinct from SRWT's instantaneous queued workload.
+    ///          - ECT (Earliest Completion Time): routes to the candidate minimising queued work
+    ///            (incl. the in-process remainder) + this job's processing time there.
+    ///          - TECT: ECT with AGV travel: max(zone-graph travel time, queued work) + processing time.
+    ///          - PTWINQ: job priority = processing time + least queued work among the machines
+    ///            eligible for the job's next operation (Holthaus &amp; Rajendran PT+WINQ).
     ///          - Random: unweighted random selection (useful for exploration).
     public enum DispatchingRule
     {
@@ -52,5 +57,19 @@ namespace Assets.Scripts.Simulation.Types
         /// @brief Random — unweighted random selection of queued jobs.
         /// @details Useful for exploration or baseline comparison.
         Random,
+
+        // ── Full job-rule x machine-rule catalog (2026-09-26) ─────────────────────────────────
+        // Baseline-only: the RL action space is still the 9 rules above (DispatchingEngine.ActionToRule).
+        // Appended after Random so serialized int values of the members above are unchanged.
+        // Every name is JOB_MACHINE; DispatchingEngine splits it into its two halves.
+        //   Job:     SPT, LPT, SRT, LRT, FIFO, PTWINQ (processing time + least work in the next op's queue)
+        //   Machine: SMPT, SRWT, MMUR, ECT (least queued work + own processing time),
+        //            TECT (ECT with travel: max(travel, queued work) + own processing time)
+        SPT_MMUR, SPT_ECT, SPT_TECT,
+        LPT_SRWT, LPT_ECT, LPT_TECT,
+        SRT_MMUR, SRT_ECT, SRT_TECT,
+        LRT_SMPT, LRT_SRWT, LRT_ECT, LRT_TECT,
+        FIFO_SMPT, FIFO_MMUR, FIFO_ECT, FIFO_TECT,
+        PTWINQ_SMPT, PTWINQ_SRWT, PTWINQ_MMUR, PTWINQ_ECT, PTWINQ_TECT,
     }
 }

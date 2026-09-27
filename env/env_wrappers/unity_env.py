@@ -48,7 +48,7 @@ from mlagents_envs.side_channel.engine_configuration_channel import (
 from config import (
     GRID_SIZE, GRID_CHANNELS, MAX_JOBS, JOB_FEATURES, MAX_MACHINES, MACHINE_FEATURES,
     TOTAL_OBS_SIZE, SLICE_SPATIAL_END, SLICE_MACHINES_END, SLICE_JOBS_END,
-    SLICE_SCALARS_END, SLICE_FLAGS_END,
+    SLICE_SCALARS_END, SLICE_FLAGS_END, ACTION_BRANCHES, ACTION_MASK_LEN,
 )
 from channels.channels import EpisodeConfigChannel, EpisodeSeedChannel, EpisodeTelemetryChannel
 from rewards import (
@@ -62,6 +62,18 @@ TRAIN_SEED_LOW = 10_000
 ## @brief Seeds kept queued in Unity ahead of the running episode. Unity starts the next
 ##        episode before Python sees the previous one end, so the queue must never run dry.
 SEED_BUFFER = 4
+
+
+def action_mask_from(steps) -> np.ndarray:
+    """@brief obs["action_mask"] for the first agent in @p steps: 1 = enabled, branches concatenated.
+
+    @details ML-Agents reports masks as one (n_agents, branch_size) array per branch, True = masked. Terminal
+    steps carry no mask, and neither does a decision whose agent wrote none: every action is enabled then.
+    """
+    masks = getattr(steps, "action_mask", None)
+    if not masks:
+        return np.ones(ACTION_MASK_LEN, dtype=np.float32)
+    return np.concatenate([~np.asarray(m[0], dtype=bool) for m in masks]).astype(np.float32)
 
 
 def slice_obs(raw: np.ndarray) -> Dict[str, np.ndarray]:
@@ -154,6 +166,11 @@ class UnitySchedulingEnv:
         self.behavior_name = list(self.env.behavior_specs.keys())[0]
         self.spec = self.env.behavior_specs[self.behavior_name]
         self._policy_index, self._metrics_index = self._find_observation_indices(self.spec)
+        branches = tuple(self.spec.action_spec.discrete_branches)
+        if branches != ACTION_BRANCHES:
+            raise RuntimeError(
+                f"Unity action branches {branches} do not match env/config.py {ACTION_BRANCHES} (job head x "
+                f"machine head). Rebuild the player with the two-branch SchedulingAgent.")
         if reward_fn is not None and self._metrics_index is None:
             raise RuntimeError(
                 f"A reward function was given but the Unity build has no '{SENSOR_NAME}' "
@@ -253,8 +270,8 @@ class UnitySchedulingEnv:
         decision, _ = self.env.get_steps(self.behavior_name)
         return self._begin_episode(self._wait_for_decision(decision))
 
-    def step(self, action: int) -> Tuple[Dict[str, np.ndarray], float, bool, dict]:
-        """@brief Apply one scheduling action and advance to the next decision.
+    def step(self, action) -> Tuple[Dict[str, np.ndarray], float, bool, dict]:
+        """@brief Apply one scheduling action (job head, machine head) and advance to the next decision.
 
         @return (obs, reward, done, info). @c info["reward_terms"] holds this step's named
                 reward terms. When @c done is True the episode just ended: @c reward is its
@@ -265,7 +282,7 @@ class UnitySchedulingEnv:
         """
         self.env.set_actions(
             self.behavior_name,
-            ActionTuple(discrete=np.array([[action]], dtype=np.int32)),
+            ActionTuple(discrete=np.asarray(action, dtype=np.int32).reshape(1, len(ACTION_BRANCHES))),
         )
         self.env.step()
         decision, terminal = self.env.get_steps(self.behavior_name)
@@ -363,7 +380,9 @@ class UnitySchedulingEnv:
         return summary
 
     def _extract_obs(self, steps) -> Dict[str, np.ndarray]:
-        return slice_obs(steps.obs[self._policy_index][0])
+        obs = slice_obs(steps.obs[self._policy_index][0])
+        obs["action_mask"] = action_mask_from(steps)
+        return obs
 
     def _extract_metrics(self, steps) -> Optional[MetricsSnapshot]:
         if self._metrics_index is None:
@@ -467,7 +486,7 @@ class VectorizedUnityEnv:
         self.global_step += self.num_envs
         for env in self.envs:
             env.global_step = self.global_step
-        results = self._map(lambda env, action: env.step(int(action)), self.envs, actions)
+        results = self._map(lambda env, action: env.step(action), self.envs, actions)
         obs_list, rewards, dones, infos = zip(*results)
         truncateds = [bool(info["episode"]["truncated"]) if done else False
                      for done, info in zip(dones, infos)]

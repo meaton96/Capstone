@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Assets.Scripts.Scheduling.Core;
 using Assets.Scripts.Simulation.Logging;
@@ -54,12 +55,47 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         [Range(0f, 1f)]
         public float MachineFlexibilityProbability = 0f;
 
-        public Vector3 IncomingBeltPosition { get; private set; }
-        public Vector3 OutgoingBeltPosition { get; private set; }
-        public Vector3 AGVParkingPosition { get; private set; }
+        // Per tile (index = tile; one entry on an untiled floor). The singular accessors are tile 0.
+        private Vector3[] incomingBeltPositions = new Vector3[1];
+        private Vector3[] outgoingBeltPositions = new Vector3[1];
+        private Vector3[] agvParkingPositions = new Vector3[1];
+        private ConveyorBelt[] incomingBelts = new ConveyorBelt[1];
+        private ConveyorBelt[] outgoingBelts = new ConveyorBelt[1];
+        private ParkingLaneShape[] laneShapes = new ParkingLaneShape[1];
 
-        public ConveyorBelt IncomingBelt { get; private set; }
-        public ConveyorBelt OutgoingBelt { get; private set; }
+        public Vector3 IncomingBeltPosition => incomingBeltPositions[0];
+        public Vector3 OutgoingBeltPosition => outgoingBeltPositions[0];
+        public Vector3 AGVParkingPosition => agvParkingPositions[0];
+        public ConveyorBelt IncomingBelt => incomingBelts[0];
+        public ConveyorBelt OutgoingBelt => outgoingBelts[0];
+        public Vector3 IncomingBeltPositionOf(int tile) => incomingBeltPositions[tile];
+        public Vector3 OutgoingBeltPositionOf(int tile) => outgoingBeltPositions[tile];
+        public Vector3 AGVParkingPositionOf(int tile) => agvParkingPositions[tile];
+        public ConveyorBelt IncomingBeltOf(int tile) => incomingBelts[tile];
+        public ConveyorBelt OutgoingBeltOf(int tile) => outgoingBelts[tile];
+
+        // ── Tiling (TilingSpec; docs/features/TILED_LAYOUT_SCOPE.md) ──
+        // The floor is TileCount copies of one layout side by side west to east, each laid out exactly like an
+        // untiled floor around its own centre (floor centre + TileOffset). Geometry queries (GetRowAisleCentre,
+        // TileOrigin) answer for BuildTile, which BuildFloor and TrafficZoneManager.BuildZoneGraph set while they
+        // build each tile; it is 0 otherwise. One tile: every offset is zero, so the floor is unchanged.
+        public TilingSpec ActiveTiling { get; private set; } = TilingSpec.Single;
+        public int TileCount { get; private set; } = 1;
+        /// <summary>Machines per tile (= MachineCount on an untiled floor). Machine i is in tile i / MachinesPerTile.</summary>
+        public int MachinesPerTile { get; private set; }
+        /// <summary>AGVs per tile (= AGV count on an untiled floor). AGV i serves tile i / AgvsPerTile.</summary>
+        public int AgvsPerTile { get; private set; }
+        /// <summary>Tile the geometry queries currently answer for (set per tile during a build).</summary>
+        public int BuildTile { get; set; }
+        private float tileStride;   // centre-to-centre x distance between adjacent tiles
+        public Vector3 TileOffset(int tile) => new Vector3((tile - (TileCount - 1) / 2f) * tileStride, 0f, 0f);
+        /// <summary>World centre of the tile being built: this transform's position plus BuildTile's offset.</summary>
+        public Vector3 TileOrigin => transform.position + TileOffset(BuildTile);
+        public int TileOfMachine(int machineId) => MachinesPerTile > 0 ? machineId / MachinesPerTile : 0;
+        public int TileOfAgv(int agvId) => AgvsPerTile > 0 ? agvId / AgvsPerTile : 0;
+        /// <summary>Machines of each primary type in each tile, ascending id: [tile][type].</summary>
+        private Dictionary<MachineType, List<int>>[] tileMachinesByType = new Dictionary<MachineType, List<int>>[0];
+        private int roundRobinNext;
         public ParkingMethod ActiveParkingMethod { get; private set; }
         /// <summary>Layout (A-J) of the floor currently built; set at the start of BuildFloor.</summary>
         public LayoutSpec ActiveLayout { get; private set; } = LayoutSpec.Default;
@@ -78,7 +114,8 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             public Vector3[] BayCentres;      ///< per AGV id
             public int[] BayLaneIndex;        ///< per AGV id: lane zone the bay opens onto
         }
-        public ParkingLaneShape LaneShape { get; private set; }
+        public ParkingLaneShape LaneShape => laneShapes[0];
+        public ParkingLaneShape LaneShapeOf(int tile) => laneShapes[tile];
 
         public IoDockMethod ActiveIoDocks { get; private set; }
         /// <summary>Width (x) of each I/O siding lane. The belt's handshake sits on its outer edge, so the dock's
@@ -90,7 +127,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         public float SidingCentreX(bool left)
         {
             float x = ((layoutCols - 1) * machineSpacingX) / 2f + machineDepth / 2f + VerticalAisleWidth + SidingWidth / 2f;
-            return (floorTransform != null ? floorTransform.position.x : 0f) + (left ? -x : x);
+            return (floorTransform != null ? floorTransform.position.x : 0f) + TileOffset(BuildTile).x + (left ? -x : x);
         }
         /// <summary>Spacing between a corner's junction zone and the next vertical zone toward the machines: the
         /// same pitch TrafficZoneManager.BuildVerticalZones uses, so the siding entry lines up with that zone.</summary>
@@ -222,13 +259,27 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             ActiveLayout = config.Layout ?? LayoutSpec.Default;
             ActiveLayout.EnsureBuildable();
 
-            (layoutCols, layoutRows) = LayoutSpec.GridFor(machineCount);
+            ActiveTiling = config.Tiling ?? TilingSpec.Single;
+            ActiveTiling.Validate(config.MachineTypeLayout, config.AGVCount, config.parkingMethod, config.ioDocks);
+            TileCount = ActiveTiling.Tiles;
+            MachinesPerTile = ActiveTiling.MachinesPerTileFor(machineCount);
+            AgvsPerTile = config.AGVCount / TileCount;
+            BuildTile = 0;
+            tileStride = 0f;
+            roundRobinNext = 0;
+            incomingBeltPositions = new Vector3[TileCount];
+            outgoingBeltPositions = new Vector3[TileCount];
+            agvParkingPositions = new Vector3[TileCount];
+            incomingBelts = new ConveyorBelt[TileCount];
+            outgoingBelts = new ConveyorBelt[TileCount];
+            laneShapes = new ParkingLaneShape[TileCount];
+
+            (layoutCols, layoutRows) = LayoutSpec.GridFor(MachinesPerTile);   // one tile's grid
 
             float machineAreaWidth = (layoutCols - 1) * machineSpacingX + machineDepth;
             float machineAreaDepth = (layoutRows - 1) * RowPitch + machineDepth;
 
             ActiveParkingMethod = ParseParkingMethod(config.parkingMethod);
-            LaneShape = null;
             string ioDocks = (config.ioDocks ?? "corner").Trim().ToLowerInvariant();
             ActiveIoDocks = ioDocks == "siding" ? IoDockMethod.Siding : ioDocks == "bypass" ? IoDockMethod.Bypass : IoDockMethod.Corner;
             if (ActiveIoDocks != IoDockMethod.Corner && ActiveParkingMethod == ParkingMethod.Multiple)
@@ -251,7 +302,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             }
             else if (ActiveParkingMethod == ParkingMethod.Lane)
             {
-                LaneShape = ComputeLaneShape(config.AGVCount);
+                for (int t = 0; t < TileCount; t++) laneShapes[t] = ComputeLaneShape(AgvsPerTile);
                 // Floor plane is centred on the grid, so grow it by the band depth on both sides
                 // (the band itself sits south of the bottom spine).
                 totalFloorDepth += 2f * LaneBandDepth;
@@ -270,6 +321,13 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             if (ActiveIoDocks == IoDockMethod.Bypass)
                 totalFloorDepth = Mathf.Max(totalFloorDepth, baseFloorDepth + 2f * (SidingWidth + 1f));
 
+            // Tiles: totalFloorWidth so far is one tile's width; tiles sit side by side SeamGap apart.
+            if (TileCount > 1)
+            {
+                tileStride = totalFloorWidth + ActiveTiling.SeamGap;
+                totalFloorWidth = TileCount * totalFloorWidth + (TileCount - 1) * ActiveTiling.SeamGap;
+            }
+
             if (floorTransform != null)
             {
                 floorTransform.localScale = new Vector3(
@@ -287,19 +345,24 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             // physical row aisle.  Same-type clustering would force all AGVs heading to that
             // type to compete for the same aisle; spreading them across rows lets the
             // _SRWT composite PDR route jobs to a less-congested aisle instead.
-            MachineType[] distributedLayout = BuildDistributedTypeLayout(
-                config.MachineTypeLayout, layoutRows, layoutCols);
+            // Tiled: each tile gets an equal share of every type (TilingSpec.Validate), distributed the same way.
+            MachineType[] distributedLayout = TileCount == 1
+                ? BuildDistributedTypeLayout(config.MachineTypeLayout, layoutRows, layoutCols)
+                : BuildTiledTypeLayout(config.MachineTypeLayout);
             MachineType[] allTypes = (MachineType[])Enum.GetValues(typeof(MachineType));
             LogDistributedLayout(distributedLayout, layoutRows, layoutCols);
 
             machines = new PhysicalMachine[machineCount];
+            tileMachinesByType = new Dictionary<MachineType, List<int>>[TileCount];
+            for (int t = 0; t < TileCount; t++) tileMachinesByType[t] = new Dictionary<MachineType, List<int>>();
             for (int i = 0; i < machineCount; i++)
             {
-                int col = i % layoutCols;
-                int row = i / layoutCols;
+                int tile = i / MachinesPerTile, local = i % MachinesPerTile;
+                int col = local % layoutCols;
+                int row = local / layoutCols;
 
                 Vector3 localPos = GetMachineLocalPosition(row, col);
-                Vector3 worldPos = floorCentre + localPos;
+                Vector3 worldPos = floorCentre + TileOffset(tile) + localPos;
                 worldPos.y = machineYOffset;
 
                 PhysicalMachine prefabToSpawn;
@@ -351,6 +414,9 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 }
                 pm.Initialize(i, primary, caps);
                 machines[i] = pm;
+                if (!tileMachinesByType[tile].TryGetValue(primary, out var sameType))
+                    tileMachinesByType[tile][primary] = sameType = new List<int>();
+                sameType.Add(i);
 
                 // Register under every capability — FJSSPJobGenerator queries machinesByType[opType]
                 // so a Mill+Lathe machine must appear in both buckets.
@@ -362,16 +428,28 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 }
             }
 
-            BuildAisleWalls(floorCentre);
-            BuildFloorArrows(floorCentre);
+            for (int t = 0; t < TileCount; t++)
+            {
+                BuildTile = t;
+                BuildAisleWalls(floorCentre + TileOffset(t));
+                BuildFloorArrows(floorCentre + TileOffset(t));
+            }
+            BuildTile = 0;
             ComputeDistanceMatrix();
             if (logDistanceMatrix) LogDistanceMatrix();
 
-            BuildInfrastructure(floorCentre);
+            parkingAreas.Clear();
+            for (int t = 0; t < TileCount; t++)
+            {
+                BuildTile = t;
+                BuildInfrastructure(floorCentre + TileOffset(t));
+            }
+            BuildTile = 0;
 
             navMeshSurface.BuildNavMesh();
 
-            SimLogger.Medium($"[FactoryLayout] Built aisle-based floor: {machineCount} machines.");
+            SimLogger.Medium($"[FactoryLayout] Built aisle-based floor: {machineCount} machines" +
+                             (TileCount > 1 ? $" in {TileCount} tiles of {MachinesPerTile} ({AgvsPerTile} AGVs each)." : "."));
             return machinesByType;
         }
         /// @brief Samples a set of MachineType capabilities for one machine.
@@ -410,7 +488,9 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             float botZ = floorCentre.z + GetBottomSpineZ();
             bool inSiding = ActiveIoDocks != IoDockMethod.Corner;      // siding and bypass both move the input belt
             bool outSiding = ActiveIoDocks == IoDockMethod.Siding;     // bypass leaves the output belt on its corner
-            IncomingBeltPosition = new Vector3(
+            int tile = BuildTile;
+            string suffix = TileCount > 1 ? $"_T{tile}" : "";
+            incomingBeltPositions[tile] = new Vector3(
                 floorCentre.x - machineAreaHalfW + incomingBeltOffset.x,
                 incomingBeltOffset.y,
                 topZ + incomingBeltOffset.z);
@@ -418,15 +498,15 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             GameObject conveyorPrefab = Visuals.ConveyorPrefab;
             if (conveyorPrefab != null)
             {
-                GameObject inBelt = Instantiate(conveyorPrefab, IncomingBeltPosition, Quaternion.Euler(0, 0, 0), transform);
-                inBelt.name = "Incoming_Belt";
+                GameObject inBelt = Instantiate(conveyorPrefab, incomingBeltPositions[tile], Quaternion.Euler(0, 0, 0), transform);
+                inBelt.name = "Incoming_Belt" + suffix;
                 inBelt.transform.localScale = ioConveyorScale;
-                IncomingBelt = inBelt.GetComponent<ConveyorBelt>();
-                IncomingBelt.Capacity = 8;
+                incomingBelts[tile] = inBelt.GetComponent<ConveyorBelt>();
+                incomingBelts[tile].Capacity = 8;
                 // Siding: belt body runs west from the input siding's outer edge, output end at the edge.
-                if (inSiding) PlaceBelt(IncomingBelt, new Vector3(SidingCentreX(true) - SidingWidth / 2f, IncomingBeltPosition.y, topZ),
+                if (inSiding) PlaceBelt(incomingBelts[tile], new Vector3(SidingCentreX(true) - SidingWidth / 2f, incomingBeltPositions[tile].y, topZ),
                                       Vector3.left, handshakeIsOutput: true);
-                IncomingBeltPosition = inBelt.transform.position;
+                incomingBeltPositions[tile] = inBelt.transform.position;
                 Material incomingBeltMaterial = Visuals.IncomingBeltMaterial;
                 if (incomingBeltMaterial != null)
                 {
@@ -436,49 +516,48 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 spawnedObjects.Add(inBelt);
             }
 
-            OutgoingBeltPosition = new Vector3(
+            outgoingBeltPositions[tile] = new Vector3(
                 floorCentre.x + machineAreaHalfW + VerticalAisleWidth + outgoingBeltOffset.x,
                 outgoingBeltOffset.y,
                 botZ + outgoingBeltOffset.z);
 
             if (conveyorPrefab != null)
             {
-                GameObject outBelt = Instantiate(conveyorPrefab, OutgoingBeltPosition, Quaternion.Euler(0, 180, 0), transform);
-                outBelt.name = "Outgoing_Belt";
+                GameObject outBelt = Instantiate(conveyorPrefab, outgoingBeltPositions[tile], Quaternion.Euler(0, 180, 0), transform);
+                outBelt.name = "Outgoing_Belt" + suffix;
                 outBelt.transform.localScale = ioConveyorScale;
                 spawnedObjects.Add(outBelt);
-                OutgoingBelt = outBelt.GetComponent<ConveyorBelt>();
+                outgoingBelts[tile] = outBelt.GetComponent<ConveyorBelt>();
                 // Siding: belt body runs east from the output siding's outer edge, input end at the edge.
-                if (outSiding) PlaceBelt(OutgoingBelt, new Vector3(SidingCentreX(false) + SidingWidth / 2f, OutgoingBeltPosition.y, botZ),
+                if (outSiding) PlaceBelt(outgoingBelts[tile], new Vector3(SidingCentreX(false) + SidingWidth / 2f, outgoingBeltPositions[tile].y, botZ),
                                       Vector3.right, handshakeIsOutput: false);
-                OutgoingBeltPosition = outBelt.transform.position;
+                outgoingBeltPositions[tile] = outBelt.transform.position;
             }
-
-            parkingAreas.Clear();
 
             int numRowAisles = layoutRows - 1;
             if (ActiveParkingMethod == ParkingMethod.Lane)
             {
-                // Zone / bay positions are relative to the floor centre (see ComputeLaneShape).
-                for (int i = 0; i < LaneShape.LaneCentres.Length; i++) LaneShape.LaneCentres[i] += floorCentre;
-                for (int i = 0; i < LaneShape.BayCentres.Length; i++) LaneShape.BayCentres[i] += floorCentre;
-                for (int i = 0; i < LaneShape.ExitCentres.Length; i++) LaneShape.ExitCentres[i] += floorCentre;
-                AGVParkingPosition = LaneShape.BayCentres.Length > 0 ? LaneShape.BayCentres[0] : LaneShape.LaneCentres[0];
-                parkingAreas.Add(new ParkingArea { Position = AGVParkingPosition, RowAisleIndex = -1, IsLeftSide = false });
+                // Zone / bay positions are relative to the (tile's) floor centre (see ComputeLaneShape).
+                ParkingLaneShape lane = laneShapes[tile];
+                for (int i = 0; i < lane.LaneCentres.Length; i++) lane.LaneCentres[i] += floorCentre;
+                for (int i = 0; i < lane.BayCentres.Length; i++) lane.BayCentres[i] += floorCentre;
+                for (int i = 0; i < lane.ExitCentres.Length; i++) lane.ExitCentres[i] += floorCentre;
+                agvParkingPositions[tile] = lane.BayCentres.Length > 0 ? lane.BayCentres[0] : lane.LaneCentres[0];
+                parkingAreas.Add(new ParkingArea { Position = agvParkingPositions[tile], RowAisleIndex = -1, IsLeftSide = false });
             }
             else if (ActiveParkingMethod == ParkingMethod.Multiple && numRowAisles > 0)
             {
                 BuildMultipleParkingAreas(floorCentre);
-                AGVParkingPosition = parkingAreas[0].Position;   // back-compat default
+                agvParkingPositions[tile] = parkingAreas[0].Position;   // back-compat default
             }
             else
             {
                 // Single (or degenerate single-row layout): one south alcove.
                 float alcoveZ = botZ - (SpineAisleWidth / 2f) - (parkingAlcoveDepth / 2f);
-                AGVParkingPosition = new Vector3(floorCentre.x, 0.01f, alcoveZ);
+                agvParkingPositions[tile] = new Vector3(floorCentre.x, 0.01f, alcoveZ);
                 parkingAreas.Add(new ParkingArea
                 {
-                    Position = AGVParkingPosition,
+                    Position = agvParkingPositions[tile],
                     RowAisleIndex = -1,
                     IsLeftSide = false
                 });
@@ -640,7 +719,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         /// @param aisleIndex The index of the aisle (0 is between machine row 0 and 1).
         public Vector3 GetRowAisleCentre(int aisleIndex)
         {
-            Vector3 floorCentre = floorTransform != null ? floorTransform.position : Vector3.zero;
+            Vector3 floorCentre = (floorTransform != null ? floorTransform.position : Vector3.zero) + TileOffset(BuildTile);
             float machineAreaDepth = (layoutRows - 1) * RowPitch;
 
             float zTop = machineAreaDepth / 2f - aisleIndex * RowPitch;
@@ -1014,6 +1093,79 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             }
 
             return result;
+        }
+
+        /// @brief Tiled type layout: every tile gets an equal share of each type (TilingSpec.Validate checks it
+        ///        divides), in the order types first appear in @p original, distributed within the tile by
+        ///        BuildDistributedTypeLayout exactly as an untiled floor of that size would be.
+        private MachineType[] BuildTiledTypeLayout(MachineType[] original)
+        {
+            var share = new List<MachineType>();
+            foreach (var g in original.GroupBy(t => t))
+                for (int k = 0; k < g.Count() / TileCount; k++) share.Add(g.Key);
+            MachineType[] tileLayout = BuildDistributedTypeLayout(share.ToArray(), layoutRows, layoutCols);
+            var result = new MachineType[original.Length];
+            for (int t = 0; t < TileCount; t++) Array.Copy(tileLayout, 0, result, t * MachinesPerTile, MachinesPerTile);
+            return result;
+        }
+
+        /// @brief Resets the round-robin release counter; called when an episode's job store is (re)filled.
+        public void ResetJobTiling() => roundRobinNext = 0;
+
+        /// @brief Gives a newly arrived job its home tile (TilingSpec.Release) and confines its operations to it.
+        /// @details Each operation keeps the eligible machines that are in the home tile. An operation with none
+        ///          there (pinned to specific machines in another tile, e.g. a scenario's Weld[1]) is mapped to the
+        ///          same machines' counterparts in the home tile: the machine of the same type at the same position
+        ///          among its tile's machines of that type, with the same processing time. The job's own eligibility
+        ///          table is replaced (definitions can be shared between episodes, so it is never edited in place).
+        ///          One tile: no-op, so an untiled floor is unchanged.
+        /// @param activeJobs Jobs already in the store, for LeastWip (jobs not yet exited count as work in a tile).
+        public void AssignJobTile(JobData job, IEnumerable<JobData> activeJobs)
+        {
+            if (TileCount <= 1 || job == null) return;
+
+            int tile;
+            if (ActiveTiling.Release == ReleaseRule.LeastWip)
+            {
+                var wip = new int[TileCount];
+                foreach (var j in activeJobs)
+                    if (j.State != JobState.Exited) wip[j.TileId]++;
+                tile = 0;
+                for (int t = 1; t < TileCount; t++) if (wip[t] < wip[tile]) tile = t;
+            }
+            else tile = roundRobinNext++ % TileCount;
+
+            job.TileId = tile;
+            var src = job.EligibleMachinesPerOp;
+            var confined = new Dictionary<int, float>[src.Length];
+            for (int o = 0; o < src.Length; o++)
+            {
+                var d = new Dictionary<int, float>();
+                foreach (var kv in src[o])
+                    if (TileOfMachine(kv.Key) == tile) d[kv.Key] = kv.Value;
+                if (d.Count == 0)
+                    foreach (var kv in src[o])
+                    {
+                        int m = EquivalentMachine(kv.Key, tile);
+                        if (m >= 0 && !d.ContainsKey(m)) d[m] = kv.Value;
+                    }
+                if (d.Count == 0)
+                    SimLogger.Error($"[FactoryLayout] Job {job.JobId} op {o} has no eligible machine in tile {tile}.");
+                confined[o] = d;
+            }
+            job.EligibleMachinesPerOp = confined;
+        }
+
+        /// @brief The machine in @p tile that corresponds to @p machineId: same primary type, same index among its
+        ///        own tile's machines of that type. -1 if there is none.
+        private int EquivalentMachine(int machineId, int tile)
+        {
+            PhysicalMachine m = GetMachine(machineId);
+            if (m == null) return -1;
+            int from = TileOfMachine(machineId);
+            if (!tileMachinesByType[from].TryGetValue(m.PrimaryType, out var own)) return -1;
+            int k = own.IndexOf(machineId);
+            return tileMachinesByType[tile].TryGetValue(m.PrimaryType, out var there) && k >= 0 && k < there.Count ? there[k] : -1;
         }
 
         /// @brief Logs the distributed machine-type grid so you can visually verify

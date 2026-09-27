@@ -175,6 +175,7 @@ namespace Assets.Scripts.Simulation.Channels
                 ioDocks = ConfigOverrides.ValidatedIoDocks(root["ioDocks"]?.Value<string>() ?? "corner"),
                 reservationProtocol = ReservationProtocolParser.Validated(root["reservationProtocol"]?.Value<string>()),
                 routingTrigger = RoutingTriggerParser.Validated(root["routingTrigger"]?.Value<string>()),
+                Tiling = TilingSpec.FromJson(root["tiling"]),
                 preDispatchingMethod = root["preDispatchingMethod"]?.Value<string>() ?? "fixed",
             };
 

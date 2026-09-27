@@ -14,7 +14,7 @@ Usage (from linux_server/):
   python3 run_experiment_queue.py --exp E1_load --workers 12 \
       --scenarios _mfsweep_control:1 _mfsweep_shard0:5 compound_scenario:1 compound_scenario_fail:5 \
       --layouts D C G J --agv 3 5 7 9 12 15 --rules SPT_SRWT LRT_MMUR \
-      --extra "-reservation holdPrevious -parking lane"
+      --extra "-reservation releasePrevious -parking lane"
   (scenario:N = run N seeds of that scenario)  add --dry-run to print the plan only.
   --shard i/N splits the grid across N array tasks/nodes (see slurm/run_queue.sbatch).
   --exe ../linux_server_e2/capstone.x86_64 runs a second build; its results go to that build's own Results/.

@@ -171,7 +171,7 @@ namespace Assets.Scripts.Simulation.Types
             public float throughputTimingWindow = 0f;
             public string parkingMethod = "lane";
             public string ioDocks = "corner";
-            public string reservationProtocol = "holdPrevious";
+            public string reservationProtocol = null;   // null = ReservationProtocolParser.Default
             public string routingTrigger = null;
             public string preDispatchingMethod = "fixed";
             public JsonStochasticConfig stochastic = null;
@@ -297,6 +297,7 @@ namespace Assets.Scripts.Simulation.Types
                 Layout = LayoutSpec.FromJson(rawObj?["layout"]),
                 reservationProtocol = ReservationProtocolParser.Validated(raw.reservationProtocol),
                 routingTrigger = RoutingTriggerParser.Validated(raw.routingTrigger),
+                Tiling = TilingSpec.FromJson(rawObj?["tiling"]),
                 preDispatchingMethod = raw.preDispatchingMethod ?? "fixed",
             };
 

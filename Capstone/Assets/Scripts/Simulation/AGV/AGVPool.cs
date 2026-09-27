@@ -74,17 +74,19 @@ namespace Assets.Scripts.Simulation.AGV
                 newAgv.gameObject.name = $"AGV_{i}";
                 newAgv.Initialize(i, config.AGVMoveSpeed, config.AGVHandshakeDuration,
                                   ReservationProtocolParser.Parse(config.reservationProtocol));
+                newAgv.TileId = layoutManager != null ? layoutManager.TileOfAgv(i) : 0;
                 fleet.Add(newAgv);
             }
 
             SimLogger.Medium($"[AGVPool] Spawned fleet of {fleetSize} AGVs ({(multiple ? "multiple" : "single")} parking).");
         }
-        /// @brief Parking lane: AGV i parks in its own bay (see FactoryLayoutManager.ComputeLaneShape).
+        /// @brief Parking lane: AGV i parks in its own bay (see FactoryLayoutManager.ComputeLaneShape), in its
+        ///        tile's lane on a tiled floor (bay index = position among that tile's AGVs).
         private void AssignLaneParkingPositions(int fleetSize)
         {
-            var bays = layoutManager.LaneShape.BayCentres;
+            int perTile = Mathf.Max(1, layoutManager.AgvsPerTile);
             for (int i = 0; i < fleetSize; i++)
-                parkingPositions[i] = bays[i];
+                parkingPositions[i] = layoutManager.LaneShapeOf(layoutManager.TileOfAgv(i)).BayCentres[i % perTile];
         }
 
         /// @brief Original behaviour: AGVs line up along X, centred on the single parking pool.
@@ -173,18 +175,21 @@ namespace Assets.Scripts.Simulation.AGV
             return null;
         }
 
+        /// @brief True if @p agv may serve @p tile: any tile when @p tile is negative (untiled callers).
+        private static bool Serves(AGVController agv, int tile) => tile < 0 || agv.TileId == tile;
+
         /// @brief Identifies the best candidate for a new task dispatch.
         ///
         /// @details Performs a two-pass search: first for units already at their
         /// parking stations (@c Idle), and second for units currently @c ReturningToParking
         /// that can be redirected mid-route to optimize travel time.
-        public AGVController GetAvailableAGV()
+        public AGVController GetAvailableAGV(int tile = -1)
         {
             foreach (var agv in fleet)
-                if (agv.IsIdle) return agv;
+                if (agv.IsIdle && Serves(agv, tile)) return agv;
 
             foreach (var agv in fleet)
-                if (agv.State == AGVState.ReturningToParking) return agv;
+                if (agv.State == AGVState.ReturningToParking && Serves(agv, tile)) return agv;
 
             return null;
         }
@@ -195,9 +200,12 @@ namespace Assets.Scripts.Simulation.AGV
         ///          make straight-line distance a poor proxy for actual travel cost.
         /// @param pickupMachine The source machine (null = incoming belt).
         /// @param pickupPos     Reserved for future tie-breaking; not used for routing.
-        public AGVController GetNearestAvailableAGV(PhysicalMachine pickupMachine, Vector3 pickupPos)
+        /// @param tile          Tiled floor: the job's home tile. Only that tile's AGVs are considered, and a belt
+        ///                      pickup uses that tile's input belt. A machine pickup's tile is the machine's own.
+        public AGVController GetNearestAvailableAGV(PhysicalMachine pickupMachine, Vector3 pickupPos, int tile = 0)
         {
-            if (TrafficZoneManager.Instance == null) return GetAvailableAGV();   // no zone graph → legacy behaviour
+            if (pickupMachine != null && layoutManager != null) tile = layoutManager.TileOfMachine(pickupMachine.MachineId);
+            if (TrafficZoneManager.Instance == null) return GetAvailableAGV(tile);   // no zone graph → legacy behaviour
 
             // A machine can dock from more than one aisle; seed the BFS with all its zones.
             List<int> pickupZones;
@@ -205,10 +213,10 @@ namespace Assets.Scripts.Simulation.AGV
                 pickupZones = TrafficZoneManager.Instance.GetPickupZonesForMachine(pickupMachine.MachineId);
             else
             {
-                int beltZone = TrafficZoneManager.Instance.GetZoneIdForDock(TrafficZoneManager.IncomingBeltId);
+                int beltZone = TrafficZoneManager.Instance.GetZoneIdForDock(TrafficZoneManager.IncomingDockKey(tile));
                 pickupZones = beltZone >= 0 ? new List<int> { beltZone } : new List<int>();
             }
-            if (pickupZones == null || pickupZones.Count == 0) return GetAvailableAGV();
+            if (pickupZones == null || pickupZones.Count == 0) return GetAvailableAGV(tile);
 
             Dictionary<int, int> hops = TrafficZoneManager.Instance.GetHopDistancesToNearest(pickupZones);
 
@@ -220,6 +228,7 @@ namespace Assets.Scripts.Simulation.AGV
                 bool idle = agv.IsIdle;
                 bool returning = agv.State == AGVState.ReturningToParking;
                 if (!idle && !returning) continue;
+                if (!Serves(agv, tile)) continue;
 
                 int zone = ResolveZone(agv);
                 int d = (zone >= 0 && hops.TryGetValue(zone, out int hop)) ? hop : int.MaxValue;
@@ -249,10 +258,10 @@ namespace Assets.Scripts.Simulation.AGV
         /// @brief True when some AGV can take a new transport now: Idle, or ReturningToParking (redirectable).
         ///        The same two states GetNearestAvailableAGV chooses from, so a true result means it will
         ///        return a unit.
-        public bool AnyAvailableAGV()
+        public bool AnyAvailableAGV(int tile = -1)
         {
             foreach (var agv in fleet)
-                if (agv.IsIdle || agv.State == AGVState.ReturningToParking) return true;
+                if ((agv.IsIdle || agv.State == AGVState.ReturningToParking) && Serves(agv, tile)) return true;
             return false;
         }
 

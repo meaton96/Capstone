@@ -17,7 +17,8 @@ All observations are dicts of tensors:
 | event_flags      | (6,)           | Binary event indicators           |
 
 @par Action Space
-Discrete(8) — one of 8 composite PDR rules.
+MultiDiscrete(ACTION_BRANCHES) — (job head, machine head), see config.py. obs["action_mask"]
+masks each head down to action 0 at random, as Unity does when a head cannot change a decision.
 
 @par Reward
 Synthetic shaped reward simulating makespan optimization.
@@ -31,7 +32,7 @@ from typing import Optional, Tuple
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import (EnvConfig, PDR_ACTIONS, MACHINE_PRESENT_COL, MACHINE_CANDIDATE_COL,
-                    JOB_PRESENT_COL, JOB_CANDIDATE_COL)
+                    JOB_PRESENT_COL, JOB_CANDIDATE_COL, ACTION_BRANCHES, ACTION_MASK_LEN)
 
 
 class PlaceholderSchedulingEnv(gym.Env):
@@ -66,8 +67,8 @@ class PlaceholderSchedulingEnv(gym.Env):
         ## @brief Maximum steps per episode before truncation.
         self.max_steps = max_steps
 
-        ## @brief Action space: 8 composite PDR rules (Discrete).
-        self.action_space = spaces.Discrete(len(PDR_ACTIONS))
+        ## @brief Action space: (job head, machine head).
+        self.action_space = spaces.MultiDiscrete(list(ACTION_BRANCHES))
 
         ## @brief Dict observation space matching the thesis state-space spec.
         self.observation_space = spaces.Dict({
@@ -87,6 +88,7 @@ class PlaceholderSchedulingEnv(gym.Env):
             "event_flags": spaces.Box(
                 0, 1, shape=(self.cfg.num_event_flags,), dtype=np.float32
             ),
+            "action_mask": spaces.Box(0, 1, shape=(ACTION_MASK_LEN,), dtype=np.float32),
         })
 
         ## @brief Current step count within the episode.
@@ -159,15 +161,24 @@ class PlaceholderSchedulingEnv(gym.Env):
             idxs = rng.choice(6, size=n_events, replace=False)
             event_flags[idxs] = 1.0
 
+        # --- Action mask: each head is masked down to action 0 half the time ---
+        action_mask = np.ones(ACTION_MASK_LEN, dtype=np.float32)
+        offset = 0
+        for size in ACTION_BRANCHES:
+            if rng.uniform() < 0.5:
+                action_mask[offset + 1:offset + size] = 0.0
+            offset += size
+
         return {
             "factory_grid": factory_grid,
             "machine_table": machine_table,
             "job_table": job_table,
             "global_scalars": global_scalars,
             "event_flags": event_flags,
+            "action_mask": action_mask,
         }
 
-    def _compute_reward(self, action: int) -> float:
+    def _compute_reward(self, action) -> float:
         """@brief Compute a synthetic reward signal for the given action.
 
         @details
@@ -179,7 +190,7 @@ class PlaceholderSchedulingEnv(gym.Env):
         A small step penalty (−0.01) encourages the agent to finish
         episodes efficiently.
 
-        @param action  Index into PDR_ACTIONS (0–7).
+        @param action  (job head, machine head).
         @return Scalar reward value (float).
         """
         rng = self._rng
@@ -187,9 +198,10 @@ class PlaceholderSchedulingEnv(gym.Env):
         # Base reward: negative makespan delta (want to minimize)
         prev_makespan = self._makespan_estimate
 
-        ## @brief Per-action quality multipliers (higher = stronger reduction).
-        action_quality = [0.8, 0.7, 0.5, 0.75, 0.4, 0.45, 0.6, 0.65]
-        reduction = action_quality[action] * rng.uniform(0.5, 1.5)
+        ## @brief Per-head quality multipliers (higher = stronger reduction).
+        job_quality = [0.8, 0.7, 0.75, 0.4]
+        machine_quality = [1.0, 0.9, 0.7]
+        reduction = job_quality[action[0]] * machine_quality[action[1]] * rng.uniform(0.5, 1.5)
         self._makespan_estimate = max(0, prev_makespan - reduction + rng.normal(0, 0.3))
 
         reward = -(self._makespan_estimate - prev_makespan)  # positive when makespan decreases
@@ -227,10 +239,10 @@ class PlaceholderSchedulingEnv(gym.Env):
         }
         return obs, info
 
-    def step(self, action: int) -> Tuple[dict, float, bool, bool, dict]:
+    def step(self, action) -> Tuple[dict, float, bool, bool, dict]:
         """@brief Execute one scheduling decision and advance the environment.
 
-        @param action  Integer action index in [0, 7] selecting a PDR rule.
+        @param action  (job head, machine head).
         @return Tuple of (obs, reward, terminated, truncated, info).
                 - @c terminated is True when makespan reaches zero.
                 - @c truncated  is True when @ref _step_count reaches
@@ -239,6 +251,7 @@ class PlaceholderSchedulingEnv(gym.Env):
                   @c pdr_rule name.
         @throws AssertionError if @p action is outside the action space.
         """
+        action = np.asarray(action, dtype=np.int64)
         assert self.action_space.contains(action), f"Invalid action {action}"
         self._step_count += 1
 
@@ -252,7 +265,7 @@ class PlaceholderSchedulingEnv(gym.Env):
         info = {
             "step": self._step_count,
             "makespan_estimate": self._makespan_estimate,
-            "pdr_rule": PDR_ACTIONS[action],
+            "pdr_rule": PDR_ACTIONS[int(action[0]) * ACTION_BRANCHES[1] + int(action[1])],
         }
         return obs, reward, terminated, truncated, info
 
@@ -306,13 +319,13 @@ class VectorizedPlaceholderEnv:
         Automatically resets any environment whose episode has ended
         (terminated or truncated).
 
-        @param actions  Array-like of length @ref num_envs with integer
-                        actions for each environment.
+        @param actions  Array-like of shape (@ref num_envs, n_branches):
+                        (job head, machine head) for each environment.
         @return Tuple of (batched_obs, rewards, terminateds, truncateds, infos).
                 Each array has leading dimension @ref num_envs.
         """
         results = [
-            env.step(int(a)) for env, a in zip(self.envs, actions)
+            env.step(a) for env, a in zip(self.envs, actions)
         ]
         obs_list, rewards, terminateds, truncateds, infos = zip(*results)
 

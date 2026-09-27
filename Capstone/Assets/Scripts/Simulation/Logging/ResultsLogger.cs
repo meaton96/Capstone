@@ -181,7 +181,7 @@ namespace Assets.Scripts.Simulation.Logging
                     "agv_clearance_pair_seconds,agv_parking_overlap_events,agv_min_centre_distance," +
                     "reservation_protocol," +
                     "layout_id,layout_belts,layout_aisles,floor_width,floor_depth," +
-                    "io_docks,routing_trigger"
+                    "io_docks,routing_trigger,tiles,machines_per_tile,job_scope,agv_assignment,release_rule"
                 );
 
             writer.WriteLine(
@@ -203,7 +203,7 @@ namespace Assets.Scripts.Simulation.Logging
                 $"{r.AgvClearancePairSeconds:F2},{r.AgvParkingOverlapEvents},{r.AgvMinCentreDistance:F3}," +
                 $"{r.ReservationProtocol}," +
                 $"{r.LayoutId},{r.LayoutBelts},{r.LayoutAisles},{r.FloorWidth:F2},{r.FloorDepth:F2}," +
-                $"{r.IoDocks},{r.RoutingTrigger}"
+                $"{r.IoDocks},{r.RoutingTrigger},{r.Tiles},{r.MachinesPerTile},{r.JobScope},{r.AgvAssignment},{r.ReleaseRule}"
             );
 
             Debug.Log($"[Results] {r.InstanceName} {r.RuleName} seed={r.Seed} " +

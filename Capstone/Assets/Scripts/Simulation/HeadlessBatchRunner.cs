@@ -162,6 +162,22 @@ namespace Assets.Scripts.Simulation
                     SimLogger.Low($"[BatchRunner] I/O docks override: {ConfigOverrides.IoDocks}");
                 }
 
+                // Tiled floor overrides (TilingSpec): tile count and release rule, same single-point mechanism.
+                string tilesStr = GetCLIArg("-tiles");
+                if (!string.IsNullOrEmpty(tilesStr))
+                {
+                    if (!int.TryParse(tilesStr, out int tiles) || tiles < 1)
+                        throw new ArgumentException($"Invalid -tiles '{tilesStr}': expected an integer >= 1.");
+                    ConfigOverrides.Tiles = tiles;
+                    SimLogger.Low($"[BatchRunner] Tiles override: {tiles}");
+                }
+                string releaseStr = GetCLIArg("-releaserule");
+                if (!string.IsNullOrEmpty(releaseStr))
+                {
+                    ConfigOverrides.ReleaseRule = TilingSpec.ReleaseToString(TilingSpec.ParseRelease(releaseStr));
+                    SimLogger.Low($"[BatchRunner] Release rule override: {ConfigOverrides.ReleaseRule}");
+                }
+
                 // Layout override (LayoutSpec name A-J), same single-point mechanism. Validated here so a typo
                 // or a layout that is not built yet aborts before any run.
                 string layoutStr = GetCLIArg("-layout");

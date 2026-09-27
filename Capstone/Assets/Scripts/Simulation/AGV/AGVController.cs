@@ -33,6 +33,8 @@ namespace Assets.Scripts.Simulation.AGV
         [SerializeField] private Transform carryPos;
         [SerializeField] private float handshakeDuration = 1.5f;
         [SerializeField] private float moveSpeed = 3.5f;
+        /// <summary>Travel speed in world units per sim-second (after any config override).</summary>
+        public float MoveSpeed => moveSpeed;
         [SerializeField] private float turnSpeed = 180f;
         [SerializeField] private float pathTurnThreshold = 10f;
         [SerializeField] private float waypointArrivalDist = 0.4f;
@@ -59,6 +61,8 @@ namespace Assets.Scripts.Simulation.AGV
         [SerializeField] private TextMeshProUGUI statusLabel;
 
         public int AgvId { get; private set; }
+        /// <summary>Tile this AGV serves on a tiled floor (it never leaves it); 0 on an untiled floor.</summary>
+        public int TileId { get; set; }
         public AGVState State { get; private set; } = AGVState.Idle;
         public int CurrentJobId { get; private set; } = -1;
         public int CurrentZoneId => currentZoneId;
@@ -450,7 +454,7 @@ namespace Assets.Scripts.Simulation.AGV
 
             (dropoffZoneId, dropoffDock) = newTarget != null
                 ? FindDockForMachine(newTarget.MachineId, currentZoneId, newDropoffPos)
-                : FindSpecialDock(TrafficZoneManager.OutgoingBeltId);
+                : FindSpecialDock(TrafficZoneManager.OutgoingDockKey(TileId));
 
             if (dropoffZoneId < 0 || !PlanRoute(currentZoneId, dropoffZoneId))
             {
@@ -502,7 +506,7 @@ namespace Assets.Scripts.Simulation.AGV
             if (source != null)
                 (pickupZoneId, pickupDock) = FindDockForMachine(source.MachineId, currentZoneId, pickupPos);
             else
-                (pickupZoneId, pickupDock) = FindSpecialDock(TrafficZoneManager.IncomingBeltId);
+                (pickupZoneId, pickupDock) = FindSpecialDock(TrafficZoneManager.IncomingDockKey(TileId));
 
             if (pickupZoneId < 0 || !PlanRoute(currentZoneId, pickupZoneId))
             {
@@ -586,7 +590,7 @@ namespace Assets.Scripts.Simulation.AGV
             if (sourceMachine != null)
                 (pickupZoneId, pickupDock) = FindDockForMachine(sourceMachine.MachineId, currentZoneId, pickupPos);
             else
-                (pickupZoneId, pickupDock) = FindSpecialDock(TrafficZoneManager.IncomingBeltId);
+                (pickupZoneId, pickupDock) = FindSpecialDock(TrafficZoneManager.IncomingDockKey(TileId));
 
             if (pickupZoneId < 0 || !PlanRoute(currentZoneId, pickupZoneId))
             {
@@ -700,7 +704,7 @@ namespace Assets.Scripts.Simulation.AGV
                 sourceMachine.RecordDockHandoff(true, pickupDock.HandshakePosition);
             }
             else
-                FactoryLayoutManager.Instance.IncomingBelt?.RemoveJob(CurrentJobId);
+                FactoryLayoutManager.Instance.IncomingBeltOf(TileId)?.RemoveJob(CurrentJobId);
 
             if (loadedJobVisual != null)
                 loadedJobVisual.AttachToCarrier(carryPos);
@@ -708,7 +712,7 @@ namespace Assets.Scripts.Simulation.AGV
             if (targetMachine != null)
                 (dropoffZoneId, dropoffDock) = FindDockForMachine(targetMachine.MachineId, currentZoneId, targetDropoffPos);
             else
-                (dropoffZoneId, dropoffDock) = FindSpecialDock(TrafficZoneManager.OutgoingBeltId);
+                (dropoffZoneId, dropoffDock) = FindSpecialDock(TrafficZoneManager.OutgoingDockKey(TileId));
 
             if (dropoffZoneId < 0 || !PlanRoute(currentZoneId, dropoffZoneId))
             {
@@ -739,7 +743,7 @@ namespace Assets.Scripts.Simulation.AGV
                 targetMachine.RecordDockHandoff(false, dropoffDock.HandshakePosition);
             }
             else
-                FactoryLayoutManager.Instance.OutgoingBelt?.TryEnqueue(CurrentJobId, loadedJobVisual);
+                FactoryLayoutManager.Instance.OutgoingBeltOf(TileId)?.TryEnqueue(CurrentJobId, loadedJobVisual);
 
             DeliveredFlag = true;
             DeliveredJobId = CurrentJobId;
@@ -1057,7 +1061,7 @@ namespace Assets.Scripts.Simulation.AGV
         /// instead of one zone later; previousZoneId is still tracked (unreserved) so
         /// RetreatFromStall can back into it if free.
         /// </summary>
-        private ReservationProtocol _protocol = ReservationProtocol.HoldPrevious;
+        private ReservationProtocol _protocol = ReservationProtocol.ReleasePrevious;
 
         /// @brief Manages the transition of reservations when crossing zone boundaries.
         private void OnEnteredZone(int newZoneId)

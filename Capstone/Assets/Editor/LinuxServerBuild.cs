@@ -24,12 +24,20 @@ namespace Assets.Scripts.Editor
         ///        --exe ../linux_server2/capstone.x86_64 runs it; its results go to linux_server2/Results.
         private static readonly string AltOutputPath = Path.Combine("..", "linux_server2", "capstone.x86_64");
 
+        /// @brief Third build folder for development builds, so neither linux_server/ (the baseline a change is
+        ///        compared against) nor linux_server2/ (which may have a player running) is overwritten.
+        private static readonly string DevOutputPath = Path.Combine("..", "linux_server_dev", "capstone.x86_64");
+
         [MenuItem("Build/Linux Server (ML-Agents)")]
         public static void Build() => BuildTo(OutputPath);
 
         /// Headless: -executeMethod Assets.Scripts.Editor.LinuxServerBuild.BuildAlt
         [MenuItem("Build/Linux Server (ML-Agents) - linux_server2")]
         public static void BuildAlt() => BuildTo(AltOutputPath);
+
+        /// Headless: -executeMethod Assets.Scripts.Editor.LinuxServerBuild.BuildDev
+        [MenuItem("Build/Linux Server (ML-Agents) - linux_server_dev")]
+        public static void BuildDev() => BuildTo(DevOutputPath);
 
         private static void BuildTo(string outputPath)
         {

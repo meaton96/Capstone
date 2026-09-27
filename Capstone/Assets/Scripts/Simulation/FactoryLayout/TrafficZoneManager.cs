@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Assets.Scripts.Simulation.Logging;
+using Assets.Scripts.Simulation.Machines;
 using Assets.Scripts.Simulation.Types;
 
 namespace Assets.Scripts.Simulation.FactoryLayout
@@ -82,6 +83,12 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         public const int IncomingBeltId = -1;
         public const int OutgoingBeltId = -2;
         public const int ParkingAreaId = -3;
+        /// <summary>Special dock key of a tile's input / output belt. Tile 0 keeps -1 / -2 (IncomingBeltId /
+        /// OutgoingBeltId); tile t uses -1-3t / -2-3t, which never collide with ParkingAreaId (-3).</summary>
+        public static int IncomingDockKey(int tile) => IncomingBeltId - 3 * tile;
+        public static int OutgoingDockKey(int tile) => OutgoingBeltId - 3 * tile;
+        /// <summary>Zone id range of each tile's graph: [tile] = (first zone index, zone count).</summary>
+        private readonly List<(int start, int count)> tileZoneRanges = new List<(int start, int count)>();
 
         private readonly List<TrafficZone> zones = new List<TrafficZone>();
         private readonly Dictionary<int, TrafficZone> zoneById = new Dictionary<int, TrafficZone>();
@@ -90,6 +97,8 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         // Zones a pickup from each machine is served from. Same list as machineToZones except in passthrough
         // layouts, where only the output-side dock counts (the input-side dock is for dropoffs).
         private readonly Dictionary<int, List<int>> machinePickupZones = new Dictionary<int, List<int>>();
+        // EstimatePathLength cache, keyed (source dock key, target machine); cleared with the graph.
+        private readonly Dictionary<(int, int), float> pathLengthCache = new Dictionary<(int, int), float>();
 
         public IReadOnlyList<TrafficZone> Zones => zones;
 
@@ -122,6 +131,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             zoneById.Clear();
             machineToZones.Clear();
             machinePickupZones.Clear();
+            pathLengthCache.Clear();
             parkingZoneIds.Clear();
             nextZoneId = 0;
 
@@ -131,6 +141,29 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 return;
             }
 
+            // Tiled floor: one independent graph per tile, built by the same code around each tile's centre
+            // (layoutManager.BuildTile), zone names prefixed T{t}_. One tile: built exactly as before, no prefix.
+            tileZoneRanges.Clear();
+            int tiles = layoutManager.TileCount;
+            for (int t = 0; t < tiles; t++)
+            {
+                layoutManager.BuildTile = t;
+                int start = zones.Count;
+                BuildTileGraph(t);
+                if (tiles > 1)
+                    for (int k = start; k < zones.Count; k++) zones[k].Name = $"T{t}_{zones[k].Name}";
+                tileZoneRanges.Add((start, zones.Count - start));
+            }
+            layoutManager.BuildTile = 0;
+            SimLogger.Medium($"[TrafficZones] Built zone graph: {zones.Count} zones" +
+                             $"{(layoutManager.ActiveLayout != null && layoutManager.ActiveLayout.Aisles == Types.AisleTopology.TwoWay ? " (two-way row aisles)" : "")}" +
+                             $"{(tiles > 1 ? $" in {tiles} tiles" : "")}.");
+            CheckZoneGraph();
+        }
+
+        /// @brief Builds one tile's zones, links, docks and parking (the whole floor when untiled).
+        private void BuildTileGraph(int tile)
+        {
             int rows = layoutManager.LayoutRows;
             int cols = layoutManager.LayoutCols;
             bool twoWay = layoutManager.ActiveLayout != null && layoutManager.ActiveLayout.Aisles == Types.AisleTopology.TwoWay;
@@ -160,10 +193,8 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                                                   rightVertZones[rightVertZones.Length - 1]);
 
             ConnectZoneGraph(rowLaneN, rowLaneS, twoWay, topSpineZones, botSpineZones, leftVertZones, rightVertZones, leftChain, rightChain);
-            RegisterDockPoints(rowLaneN, rowLaneS, topSpineZones, botSpineZones, rows, cols, leftVertZones, rightVertZones);
+            RegisterDockPoints(tile, rowLaneN, rowLaneS, topSpineZones, botSpineZones, rows, cols, leftVertZones, rightVertZones);
             if (layoutManager.ActiveIoDocks != IoDockMethod.Corner) BuildIoSidings(leftChain, rightChain, topSpineZones);
-            SimLogger.Medium($"[TrafficZones] Built zone graph: {zones.Count} zones{(twoWay ? " (two-way row aisles)" : "")}.");
-            CheckZoneGraph();
         }
 
         /// @brief Static sanity check of the built graph, logged once per build.
@@ -179,9 +210,9 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         {
             if (zones.Count == 0) return;
 
-            int Reach(bool forward)
+            int Reach(int from, bool forward)
             {
-                var seen = new HashSet<int> { zones[0].ZoneId }; var q = new Queue<int>(seen);
+                var seen = new HashSet<int> { zones[from].ZoneId }; var q = new Queue<int>(seen);
                 while (q.Count > 0)
                 {
                     var z = zoneById[q.Dequeue()];
@@ -190,7 +221,10 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 }
                 return seen.Count;
             }
-            bool stronglyConnected = Reach(true) == zones.Count && Reach(false) == zones.Count;
+            // Per tile: a tiled floor is deliberately several disconnected graphs (AGVs never leave their tile).
+            bool stronglyConnected = true;
+            foreach (var (start, count) in tileZoneRanges)
+                if (count > 0 && (Reach(start, true) != count || Reach(start, false) != count)) stronglyConnected = false;
 
             int misplacedDocks = 0;
             foreach (var z in zones)
@@ -221,7 +255,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 }
             }
 
-            string msg = $"[TrafficZones] Graph check: strongly connected={stronglyConnected}, misplaced docks={misplacedDocks}, " +
+            string msg = $"[TrafficZones] Graph check: strongly connected{(tileZoneRanges.Count > 1 ? " (per tile)" : "")}={stronglyConnected}, misplaced docks={misplacedDocks}, " +
                          (girth == int.MaxValue ? "no cycle" : $"girth={girth} (no deadlock below {(girth + 1) / 2} AGVs under holdPrevious).");
             if (!stronglyConnected || misplacedDocks > 0) SimLogger.Error(msg); else SimLogger.Medium(msg);
         }
@@ -294,7 +328,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             int numDockTransit = 2 * cols - 1;
             int[] result = new int[numDockTransit + 2];
             float z = isTop ? layoutManager.GetTopSpineZ() : layoutManager.GetBottomSpineZ();
-            Vector3 floorCentre = layoutManager.transform.position;
+            Vector3 floorCentre = layoutManager.TileOrigin;
             FlowDirection flow = isTop ? FlowDirection.East : FlowDirection.West;
             string side = isTop ? "TopSpine" : "BotSpine";
             float segWidth = layoutManager.MachineSpacingX;
@@ -349,7 +383,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             float halfMachineAreaW = ((layoutManager.LayoutCols - 1) * layoutManager.MachineSpacingX) / 2f + layoutManager.MachineDepth / 2f;
             float x = isLeft ? -(halfMachineAreaW + layoutManager.VerticalAisleWidth / 2f) : (halfMachineAreaW + layoutManager.VerticalAisleWidth / 2f);
             FlowDirection flow = isLeft ? FlowDirection.North : FlowDirection.South;
-            Vector3 floorCentre = layoutManager.transform.position;
+            Vector3 floorCentre = layoutManager.TileOrigin;
             string side = isLeft ? "LeftVert" : "RightVert";
 
             float[] zs = new float[numJunctions];
@@ -463,25 +497,26 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         /// @param rowLaneN, rowLaneS The lane beside the aisle's north edge (hosts the south-face docks of the
         /// machine row above) and beside its south edge (north-face docks of the row below). The same array in
         /// one-way. A dock's approach point lies in the lane beside it, so it is registered on that lane only.
-        private void RegisterDockPoints(int[][] rowLaneN, int[][] rowLaneS, int[] topSpine, int[] botSpine,
+        private void RegisterDockPoints(int tile, int[][] rowLaneN, int[][] rowLaneS, int[] topSpine, int[] botSpine,
                                 int rows, int cols, int[] leftVert, int[] rightVert)
         {
+            ConveyorBelt inBelt = layoutManager.IncomingBeltOf(tile), outBelt = layoutManager.OutgoingBeltOf(tile);
             // Siding / bypass register the moved belt docks on their sidings instead (BuildIoSidings); bypass keeps
             // the output belt on its corner.
             bool inCorner = layoutManager.ActiveIoDocks == IoDockMethod.Corner;
             bool outCorner = layoutManager.ActiveIoDocks != IoDockMethod.Siding;
-            if (inCorner && topSpine.Length > 0 && layoutManager.IncomingBelt != null)
+            if (inCorner && topSpine.Length > 0 && inBelt != null)
             {
                 TrafficZone inZone = zoneById[topSpine[0]];
-                Vector3 handshake = layoutManager.IncomingBelt.OutputEndPosition;
-                inZone.DockPoints[IncomingBeltId] = new DockPoint { ApproachPosition = handshake - Vector3.forward * 1.5f, HandshakePosition = handshake, FacingDirection = Vector3.forward, IsPickup = true };
+                Vector3 handshake = inBelt.OutputEndPosition;
+                inZone.DockPoints[IncomingDockKey(tile)] = new DockPoint { ApproachPosition = handshake - Vector3.forward * 1.5f, HandshakePosition = handshake, FacingDirection = Vector3.forward, IsPickup = true };
             }
 
-            if (outCorner && botSpine.Length > 0 && layoutManager.OutgoingBelt != null)
+            if (outCorner && botSpine.Length > 0 && outBelt != null)
             {
                 TrafficZone outZone = zoneById[botSpine[botSpine.Length - 1]];
-                Vector3 handshake = layoutManager.OutgoingBelt.InputEndPosition;
-                outZone.DockPoints[OutgoingBeltId] = new DockPoint { ApproachPosition = handshake + Vector3.forward * 1.5f, HandshakePosition = handshake, FacingDirection = -Vector3.forward, IsPickup = false };
+                Vector3 handshake = outBelt.InputEndPosition;
+                outZone.DockPoints[OutgoingDockKey(tile)] = new DockPoint { ApproachPosition = handshake + Vector3.forward * 1.5f, HandshakePosition = handshake, FacingDirection = -Vector3.forward, IsPickup = false };
             }
 
             if (layoutManager.ActiveParkingMethod == ParkingMethod.Single)
@@ -490,7 +525,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             }
             else if (layoutManager.ActiveParkingMethod == ParkingMethod.Lane)
             {
-                BuildParkingLane(leftVert, rightVert);
+                BuildParkingLane(layoutManager.LaneShapeOf(tile), leftVert, rightVert);
             }
             else
             {
@@ -499,9 +534,10 @@ namespace Assets.Scripts.Simulation.FactoryLayout
 
 
             float standoff = 1.5f;
-            for (int i = 0; i < layoutManager.MachineCount; i++)
+            int perTile = layoutManager.MachinesPerTile, first = tile * perTile;
+            for (int i = first; i < first + perTile; i++)
             {
-                int row = i / cols; int col = i % cols;
+                int row = (i - first) / cols; int col = (i - first) % cols;
                 Vector3 machinePos = layoutManager.Machines[i].transform.position;
 
                 // Layout A registers docks on both sides wherever a zone exists (its interior machines carry an
@@ -665,9 +701,8 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         ///          Bays are leaves (lane <-> bay), so a departing AGV pulls out into the lane and keeps
         ///          going west; nothing in the lane is ever passed. Parking is fully reserved: there is no
         ///          straight-line leg across unreserved floor.
-        private void BuildParkingLane(int[] leftVert, int[] rightVert)
+        private void BuildParkingLane(FactoryLayoutManager.ParkingLaneShape shape, int[] leftVert, int[] rightVert)
         {
-            var shape = layoutManager.LaneShape;
             if (shape == null || leftVert.Length == 0 || rightVert.Length == 0) return;
 
             var laneIds = new int[shape.LaneCentres.Length];
@@ -904,6 +939,49 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         public List<int> GetZonesForMachine(int machineId)
         {
             return machineToZones.TryGetValue(machineId, out var list) ? list : new List<int>();
+        }
+
+        /// @brief Zone-graph path length (sum of zone-centre hops) from where a job is picked up to where it
+        ///        would be dropped at a machine: the shortest over the source's pickup docks and the target's
+        ///        dropoff docks. Ignores congestion. Cached per (source dock key, target) until the graph is rebuilt.
+        /// @param fromMachineId The job's current machine, or -1 for the incoming belt of @p tile.
+        /// @param tile          The job's home tile (used only when @p fromMachineId is -1).
+        /// @param toMachineId   The candidate target machine.
+        /// @return Path length in world units; float.MaxValue when no route exists.
+        public float EstimatePathLength(int fromMachineId, int tile, int toMachineId)
+        {
+            int srcKey = fromMachineId >= 0 ? fromMachineId : IncomingDockKey(tile);
+            var key = (srcKey, toMachineId);
+            if (pathLengthCache.TryGetValue(key, out float cached)) return cached;
+
+            List<int> srcZones;
+            if (fromMachineId >= 0) srcZones = GetPickupZonesForMachine(fromMachineId);
+            else
+            {
+                int z = GetZoneIdForDock(srcKey);
+                srcZones = z >= 0 ? new List<int> { z } : new List<int>();
+            }
+
+            // Passthrough layouts drop off only at the input-side dock (the one that is not the pickup dock).
+            List<int> allDst = GetZonesForMachine(toMachineId);
+            List<int> pickupDst = GetPickupZonesForMachine(toMachineId);
+            var dstZones = allDst.Where(z => !(pickupDst != allDst && pickupDst.Contains(z))).ToList();
+            if (dstZones.Count == 0) dstZones = allDst;
+
+            float best = float.MaxValue;
+            foreach (int s in srcZones)
+                foreach (int d in dstZones)
+                {
+                    List<int> route = GetRoute(s, d);
+                    if (route.Count == 0) continue;
+                    float len = 0f;
+                    for (int k = 1; k < route.Count; k++)
+                        len += Vector3.Distance(zoneById[route[k - 1]].Centre, zoneById[route[k]].Centre);
+                    if (len < best) best = len;
+                }
+
+            pathLengthCache[key] = best;
+            return best;
         }
 
         /// @brief Calculates a zone-level path using BFS following restricted flow.
