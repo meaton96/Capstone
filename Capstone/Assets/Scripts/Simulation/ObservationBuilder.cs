@@ -17,16 +17,48 @@ namespace Assets.Scripts.Simulation
 
         // Observation schema v2 (2026-09-24). v1 had an 8-machine x first-20-jobs scheduling matrix and an
         // 8x8 distance matrix, which on the 15-machine floor dropped machines 8-14 and went blank once
-        // the first 20 jobs exited. v2 uses per-entity tables sized for the largest planned floor (100
-        // machines, E4); the Python side encodes them with set pooling, so one network serves any floor
-        // up to MaxMachines. Keep env/config.py in sync.
-        public const int MaxMachines = 100;
-        public const int MachineFeatures = 16;
-        public const int MachineTableLength = MaxMachines * MachineFeatures;
+        // the first 20 jobs exited. v2 uses per-entity tables; the Python side encodes them with set
+        // pooling, so one network serves any row count.
+        //
+        // Row caps are per launch (2026-09-27): -obsmaxmachines N -obsmaxjobs J, read once before the agent
+        // registers (ML-Agents fixes the vector length at connection, before any scenario loads). Python
+        // (env_wrappers/unity_env.py) picks the smallest caps that fit the run's floors, so a 15-machine run
+        // isn't padded to the largest floor. The defaults, for runs launched without the flags (editor, batch
+        // runner), fit the largest planned floor: 7 tiles x 15 machines, 7 x 256 job rows (the 7-tile compound
+        // pilot peaked at 476 active jobs). Keep them equal to MAX_MACHINES / MAX_JOBS in env/config.py.
+        public const int DefaultMaxMachines = 105;
+        public const int DefaultMaxJobs = 1792;   // 64 until 2026-09-25, 256 until 2026-09-27
 
-        public const int MaxJobs = 256;   // 64 until 2026-09-25: randomized-family WIP peaks reached 165
+        public static int MaxMachines { get; private set; }
+        public static int MaxJobs { get; private set; }
+
+        public const int MachineFeatures = 16;
+        public static int MachineTableLength => MaxMachines * MachineFeatures;
+
         public const int JobFeatures = 17;
-        public const int JobTableLength = MaxJobs * JobFeatures;
+        public static int JobTableLength => MaxJobs * JobFeatures;
+
+        static ObservationBuilder()
+        {
+            MaxMachines = ReadCapArg("-obsmaxmachines", DefaultMaxMachines);
+            MaxJobs = ReadCapArg("-obsmaxjobs", DefaultMaxJobs);
+        }
+
+        /** @brief Positive integer value of @p key on the command line, else @p fallback. */
+        private static int ReadCapArg(string key, int fallback)
+        {
+            string[] args = System.Environment.GetCommandLineArgs();
+            for (int i = 0; i < args.Length - 1; i++)
+            {
+                if (args[i] != key) continue;
+                if (int.TryParse(args[i + 1], out int value) && value > 0) return value;
+                Debug.LogError($"[ObservationBuilder] {key} '{args[i + 1]}' is not a positive integer; using {fallback}.");
+                return fallback;
+            }
+            return fallback;
+        }
+
+        private static bool _warnedMachineTruncation;
 
         public const int GlobalScalarLength = 16;
         public const int EventFlagLength = 6;
@@ -41,6 +73,8 @@ namespace Assets.Scripts.Simulation
         private const float CountScale = 5f;      // queue lengths, candidate counts, eligible machines
         private const float OpsScale = 3f;        // remaining operations
         private const float WipScale = 30f;       // active jobs
+        private const float MachineCountScale = 100f; // machine count; was MaxMachines, pinned so the feature
+                                                      // is unchanged when the row cap moves
 
         private const float NoiseStdDev = 0.02f;
         private const float DropoutRate = 0.05f;
@@ -228,6 +262,12 @@ namespace Assets.Scripts.Simulation
             Vector2 floor = layout.FloorSize;
             float diag = Mathf.Max(floor.magnitude, 1f);
 
+            if (layout.Machines.Count > MaxMachines && !_warnedMachineTruncation)
+            {
+                _warnedMachineTruncation = true;
+                Debug.LogWarning($"[ObservationBuilder] {layout.Machines.Count} machines but -obsmaxmachines {MaxMachines}: "
+                                 + $"machines {MaxMachines}+ are missing from the observation. Relaunch with a larger cap.");
+            }
             int n = Mathf.Min(layout.Machines.Count, MaxMachines);
             for (int i = 0; i < n; i++)
             {
@@ -370,7 +410,7 @@ namespace Assets.Scripts.Simulation
          *   [9]  fraction of AGVs busy
          *   [10] mean committed work per machine, squashed (TimeScale)
          *   [11] fraction of active jobs that did not fit in the job table
-         *   [12] machine count / MaxMachines
+         *   [12] machine count / MachineCountScale (clamped to 1)
          *   [13] AGVs per machine (clamped to 1)
          *   [14] deferred jobs, squashed (CountScale)
          *   [15] options in the current decision (routing: candidate machines; dispatch: queued jobs), squashed (CountScale)
@@ -412,7 +452,7 @@ namespace Assets.Scripts.Simulation
                 s[7] = (float)busy / machineCount;
                 s[8] = (float)down / machineCount;
                 s[10] = Squash(load / machineCount, TimeScale);
-                s[12] = Mathf.Clamp01((float)machineCount / MaxMachines);
+                s[12] = Mathf.Clamp01((float)machineCount / MachineCountScale);
             }
 
             if (AGVPool.Instance != null && AGVPool.Instance.AllAGVs.Count > 0)

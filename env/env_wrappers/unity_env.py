@@ -47,8 +47,7 @@ from mlagents_envs.side_channel.engine_configuration_channel import (
 
 from config import (
     GRID_SIZE, GRID_CHANNELS, MAX_JOBS, JOB_FEATURES, MAX_MACHINES, MACHINE_FEATURES,
-    TOTAL_OBS_SIZE, SLICE_SPATIAL_END, SLICE_MACHINES_END, SLICE_JOBS_END,
-    SLICE_SCALARS_END, SLICE_FLAGS_END, ACTION_BRANCHES, ACTION_MASK_LEN,
+    SPATIAL_LEN, GLOBAL_SCALARS, EVENT_FLAGS, ACTION_BRANCHES, ACTION_MASK_LEN, obs_total_size,
 )
 from channels.channels import EpisodeConfigChannel, EpisodeSeedChannel, EpisodeTelemetryChannel
 from rewards import (
@@ -76,22 +75,31 @@ def action_mask_from(steps) -> np.ndarray:
     return np.concatenate([~np.asarray(m[0], dtype=bool) for m in masks]).astype(np.float32)
 
 
-def slice_obs(raw: np.ndarray) -> Dict[str, np.ndarray]:
-    """@brief Slice a flat observation vector into the five named streams (schema v2, see config.py)."""
-    assert raw.shape[-1] == TOTAL_OBS_SIZE, (
-        f"Expected {TOTAL_OBS_SIZE} floats, got {raw.shape[-1]} -- player and env/config.py "
-        f"observation schemas differ (rebuild the player or sync config.py)"
+def slice_obs(raw: np.ndarray, max_machines: int = MAX_MACHINES,
+              max_jobs: int = MAX_JOBS) -> Dict[str, np.ndarray]:
+    """@brief Slice a flat observation vector into the five named streams (schema v2, see config.py).
+
+    @param max_machines, max_jobs  The row caps the player was launched with (-obsmaxmachines / -obsmaxjobs).
+    """
+    expected = obs_total_size(max_machines, max_jobs)
+    assert raw.shape[-1] == expected, (
+        f"Expected {expected} floats (row caps {max_machines} machines / {max_jobs} jobs), got "
+        f"{raw.shape[-1]} -- player and env/config.py observation schemas differ (rebuild the player or "
+        f"sync config.py)"
     )
+    machines_end = SPATIAL_LEN + max_machines * MACHINE_FEATURES
+    jobs_end = machines_end + max_jobs * JOB_FEATURES
+    scalars_end = jobs_end + GLOBAL_SCALARS
     lead = raw.shape[:-1]
     return {
-        "factory_grid": raw[..., :SLICE_SPATIAL_END].reshape(
+        "factory_grid": raw[..., :SPATIAL_LEN].reshape(
             *lead, GRID_CHANNELS, GRID_SIZE, GRID_SIZE).astype(np.float32),
-        "machine_table": raw[..., SLICE_SPATIAL_END:SLICE_MACHINES_END].reshape(
-            *lead, MAX_MACHINES, MACHINE_FEATURES).astype(np.float32),
-        "job_table": raw[..., SLICE_MACHINES_END:SLICE_JOBS_END].reshape(
-            *lead, MAX_JOBS, JOB_FEATURES).astype(np.float32),
-        "global_scalars": raw[..., SLICE_JOBS_END:SLICE_SCALARS_END].astype(np.float32),
-        "event_flags": raw[..., SLICE_SCALARS_END:SLICE_FLAGS_END].astype(np.float32),
+        "machine_table": raw[..., SPATIAL_LEN:machines_end].reshape(
+            *lead, max_machines, MACHINE_FEATURES).astype(np.float32),
+        "job_table": raw[..., machines_end:jobs_end].reshape(
+            *lead, max_jobs, JOB_FEATURES).astype(np.float32),
+        "global_scalars": raw[..., jobs_end:scalars_end].astype(np.float32),
+        "event_flags": raw[..., scalars_end:scalars_end + EVENT_FLAGS].astype(np.float32),
     }
 
 
@@ -107,8 +115,13 @@ class UnitySchedulingEnv:
                  capture_frame_rate: Optional[int] = 60,
                  target_frame_rate: Optional[int] = -1,
                  extra_args: Optional[list] = None,
-                 scenario_generator: Optional[Callable[[int], dict]] = None):
+                 scenario_generator: Optional[Callable[[int], dict]] = None,
+                 obs_caps: Optional[Tuple[int, int]] = None):
         """
+        @param obs_caps        Observation row caps (machine rows, job rows), passed to the player as
+                               -obsmaxmachines / -obsmaxjobs. Pick them with config.obs_row_caps for the
+                               largest floor the run will see; None uses the defaults (MAX_MACHINES,
+                               MAX_JOBS), which fit every planned floor but pad small ones.
         @param reward_fn       Python reward function; None passes Unity's reward through.
         @param capture_frame_rate  Engine capture frame rate, as mlagents-learn sends. Without it Unity
                                    paces frames by wall-clock time and episodes simulated 2.9x slower
@@ -134,7 +147,8 @@ class UnitySchedulingEnv:
         self.seed_channel = EpisodeSeedChannel()
         self.telemetry = EpisodeTelemetryChannel()
 
-        additional_args = []
+        self.obs_caps = (MAX_MACHINES, MAX_JOBS) if obs_caps is None else (int(obs_caps[0]), int(obs_caps[1]))
+        additional_args = ["-obsmaxmachines", str(self.obs_caps[0]), "-obsmaxjobs", str(self.obs_caps[1])]
         if decision_drain:
             additional_args += ["-rldecisiondrain", "true"]
         if log_file is not None:
@@ -165,7 +179,7 @@ class UnitySchedulingEnv:
         self.env.reset()
         self.behavior_name = list(self.env.behavior_specs.keys())[0]
         self.spec = self.env.behavior_specs[self.behavior_name]
-        self._policy_index, self._metrics_index = self._find_observation_indices(self.spec)
+        self._policy_index, self._metrics_index = self._find_observation_indices(self.spec, self.obs_caps)
         branches = tuple(self.spec.action_spec.discrete_branches)
         if branches != ACTION_BRANCHES:
             raise RuntimeError(
@@ -192,7 +206,7 @@ class UnitySchedulingEnv:
         self._episode_terms: Dict[str, float] = {}
 
     @staticmethod
-    def _find_observation_indices(spec) -> Tuple[int, Optional[int]]:
+    def _find_observation_indices(spec, obs_caps: Tuple[int, int]) -> Tuple[int, Optional[int]]:
         """@brief Locate the policy observation and the reward-metrics sensor by name."""
         policy_index, metrics_index = None, None
         for i, obs_spec in enumerate(spec.observation_specs):
@@ -202,10 +216,11 @@ class UnitySchedulingEnv:
                 policy_index = i
 
         shape = None if policy_index is None else tuple(spec.observation_specs[policy_index].shape)
-        assert shape == (TOTAL_OBS_SIZE,), (
-            f"Unity VectorSensor size {shape} does not match "
-            f"expected ({TOTAL_OBS_SIZE},). Update BehaviorParameters "
-            f"Space Size in the Inspector to {TOTAL_OBS_SIZE}."
+        expected = obs_total_size(*obs_caps)
+        assert shape == (expected,), (
+            f"Unity VectorSensor size {shape} does not match the {expected} floats expected for row caps "
+            f"{obs_caps[0]} machines / {obs_caps[1]} jobs. A player built before 2026-09-27 ignores "
+            f"-obsmaxmachines / -obsmaxjobs: rebuild it."
         )
         return policy_index, metrics_index
 
@@ -380,7 +395,7 @@ class UnitySchedulingEnv:
         return summary
 
     def _extract_obs(self, steps) -> Dict[str, np.ndarray]:
-        obs = slice_obs(steps.obs[self._policy_index][0])
+        obs = slice_obs(steps.obs[self._policy_index][0], *self.obs_caps)
         obs["action_mask"] = action_mask_from(steps)
         return obs
 
@@ -409,8 +424,10 @@ class VectorizedUnityEnv:
                  no_graphics: bool = False, decision_drain: bool = True,
                  log_dir: Optional[str] = None, train_seed: Optional[int] = None,
                  parallel: bool = True,
-                 scenario_generator: Optional[Callable[[int], dict]] = None):
+                 scenario_generator: Optional[Callable[[int], dict]] = None,
+                 obs_caps: Optional[Tuple[int, int]] = None):
         """
+        @param obs_caps     Observation row caps for every player (see UnitySchedulingEnv).
         @param reward_spec  Reward spec path or dict, or a @ref rewards.LoadedReward. Each env
                             gets its own reward instance. None passes Unity's reward through.
         @param log_dir      If set, instance i writes its player log to log_dir/Player-i.log.
@@ -445,6 +462,7 @@ class VectorizedUnityEnv:
                     env_id=i,
                     seed_rng=None if train_seed is None else np.random.default_rng([train_seed, i]),
                     scenario_generator=scenario_generator,
+                    obs_caps=obs_caps,
                 ))
         except BaseException:
             # Don't leave already-launched players running when a later one fails to start.

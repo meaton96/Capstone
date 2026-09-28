@@ -43,6 +43,7 @@ from models.encoder import CNNSPPFEncoder, SPPF, MLPEncoder, MultiModalEncoder, 
 from models.actor_critic import FusionHead, ActorHead, CriticHead, ActorCritic
 from models.network import SchedulingNetwork
 from env_wrappers.unity_env import slice_obs
+from config import obs_shapes as obs_shapes_for
 from rollout_buffer import RolloutBuffer
 
 
@@ -563,10 +564,78 @@ class TestSliceObs:
             assert d[k].shape == (B, *shape), k
 
     def test_total_obs_size_matches_csharp(self):
-        """@brief Mirrors ObservationBuilder.TotalObservationSize (64*64*3 + 100*16 + 256*17 + 16 + 6)."""
-        assert TOTAL_OBS_SIZE == 18_262
+        """@brief Mirrors ObservationBuilder.TotalObservationSize at the default caps (64*64*3 + 105*16 + 1792*17 + 16 + 6)."""
+        assert TOTAL_OBS_SIZE == 44_454
         assert SLICE_FLAGS_END == TOTAL_OBS_SIZE
-        assert (MAX_MACHINES, MACHINE_FEATURES, MAX_JOBS, JOB_FEATURES) == (100, 16, 256, 17)
+        assert (MAX_MACHINES, MACHINE_FEATURES, MAX_JOBS, JOB_FEATURES) == (105, 16, 1792, 17)
+
+
+class TestPerLaunchRowCaps:
+    """@brief Row caps chosen per player launch (config.obs_row_caps, scenarios.row_caps_for, slice_obs caps)."""
+
+    def test_obs_row_caps_rule(self):
+        """@brief Machine rows = the floor, job rows = 256 per started block of 15 machines."""
+        from config import obs_row_caps
+        assert obs_row_caps(15) == (15, 256)
+        assert obs_row_caps(30) == (30, 512)
+        assert obs_row_caps(16) == (16, 512)
+        assert obs_row_caps(105) == (105, 1792) == (MAX_MACHINES, MAX_JOBS)
+
+    def test_total_size_at_default_caps(self):
+        from config import obs_total_size
+        assert obs_total_size(MAX_MACHINES, MAX_JOBS) == TOTAL_OBS_SIZE
+        assert obs_total_size(15, 256) == 16_902
+
+    def test_row_caps_for_scenarios(self):
+        """@brief Caps fit the largest floor; overrides replace one half; no scenarios -> defaults."""
+        from scenarios import row_caps_for
+        small = {"machineTypeLayout": ["Mill"] * 15}
+        big = {"machineTypeLayout": ["Mill"] * 105}
+        assert row_caps_for([small]) == (15, 256)
+        assert row_caps_for([small, big]) == (105, 1792)
+        assert row_caps_for([small], max_jobs=64) == (15, 64)
+        assert row_caps_for([]) == (MAX_MACHINES, MAX_JOBS)
+
+    def test_randomized_generator_floor(self):
+        """@brief The training generator's floor (15 machines) gives the small caps."""
+        from scenarios import randomized_generator, row_caps_for
+        gen = randomized_generator(5400.0)
+        assert row_caps_for([gen(10_000 + i) for i in range(3)]) == (15, 256)
+
+    def test_slice_small_caps(self):
+        from config import obs_total_size
+        raw = np.zeros(obs_total_size(15, 256), dtype=np.float32)
+        raw[SLICE_SPATIAL_END + 14 * MACHINE_FEATURES + 13] = 1.0
+        raw[SLICE_SPATIAL_END + 15 * MACHINE_FEATURES + 255 * JOB_FEATURES + 7] = 1.0   # last job row
+        raw[-1] = 0.5                                                                    # last event flag
+        d = slice_obs(raw, 15, 256)
+        assert d["machine_table"].shape == (15, MACHINE_FEATURES) and d["machine_table"][14, 13] == 1.0
+        assert d["job_table"].shape == (256, JOB_FEATURES) and d["job_table"][255, 7] == 1.0
+        assert d["event_flags"][-1] == 0.5
+        try:
+            slice_obs(raw, MAX_MACHINES, MAX_JOBS)
+            assert False, "Expected AssertionError"
+        except AssertionError as e:
+            assert "row caps" in str(e)
+
+    def test_network_output_independent_of_caps(self):
+        """@brief One network, the same floor at small and default caps: identical outputs."""
+        torch.manual_seed(0)
+        net = SchedulingNetwork().eval()
+        small = {k: torch.rand(BATCH, *shape) for k, shape in obs_shapes_for(15, 256).items()}
+        small["machine_table"][:, :, 0] = 1.0
+        small["job_table"][:, 10:] = 0.0
+        small["job_table"][:, :10, 0] = 1.0
+        small["action_mask"] = torch.ones(BATCH, ACTION_MASK_LEN)
+        big = dict(small)
+        big["machine_table"] = torch.zeros(BATCH, MAX_MACHINES, MACHINE_FEATURES)
+        big["machine_table"][:, :15] = small["machine_table"]
+        big["job_table"] = torch.zeros(BATCH, MAX_JOBS, JOB_FEATURES)
+        big["job_table"][:, :256] = small["job_table"]
+        with torch.no_grad():
+            (la, va), (lb, vb) = net(small), net(big)
+        torch.testing.assert_close(la, lb, atol=1e-5, rtol=1e-5)
+        torch.testing.assert_close(va, vb, atol=1e-5, rtol=1e-5)
 
 
 class TestCheckpointSchema:
@@ -778,6 +847,34 @@ class TestUnitySchedulingEnv:
             "factory_grid", "machine_table", "job_table", "action_mask",
             "global_scalars", "event_flags",
         }
+
+    def test_row_caps_passed_to_player_and_checked(self):
+        """@brief obs_caps become -obsmaxmachines / -obsmaxjobs, and the spec size is checked against them."""
+        from config import obs_total_size
+        from env_wrappers.unity_env import UnitySchedulingEnv
+        size = obs_total_size(15, 256)
+        with patch("env_wrappers.unity_env.UnityEnvironment") as MockUnity, \
+             patch("env_wrappers.unity_env.EngineConfigurationChannel"):
+            spec = MagicMock()
+            obs_spec = MagicMock()
+            obs_spec.shape, obs_spec.name = (size,), "VectorSensor"
+            spec.observation_specs = [obs_spec]
+            spec.action_spec.discrete_branches = ACTION_BRANCHES
+            MockUnity.return_value.behavior_specs = {"SchedulingBehavior?team=0": spec}
+            decision = _make_mock_steps(np.zeros(size, dtype=np.float32))
+            MockUnity.return_value.get_steps.side_effect = [(decision, _empty_steps())]
+            env = UnitySchedulingEnv(file_name=None, obs_caps=(15, 256))
+            args = MockUnity.call_args.kwargs["additional_args"]
+            assert args[args.index("-obsmaxmachines") + 1] == "15"
+            assert args[args.index("-obsmaxjobs") + 1] == "256"
+            obs, _, _, _ = env.step((0, 0))
+            assert obs["machine_table"].shape == (15, MACHINE_FEATURES)
+            assert obs["job_table"].shape == (256, JOB_FEATURES)
+            try:
+                UnitySchedulingEnv(file_name=None)   # default caps vs a 15-machine-sized player
+                assert False, "Expected AssertionError"
+            except AssertionError as e:
+                assert "rebuild" in str(e)
 
     def test_step_returns_on_terminal(self):
         """@brief On a terminal step done must be True, and the returned obs must already

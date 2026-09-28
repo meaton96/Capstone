@@ -373,6 +373,10 @@ def main(argv=None):
     parser.add_argument("--no-graphics", action="store_true")
     parser.add_argument("--no-decision-drain", action="store_true")
     parser.add_argument("--base-worker-id", type=int, default=0)
+    parser.add_argument("--obs-max-machines", type=int, default=0,
+                        help="Observation machine rows (0 = fit the largest evaluated floor)")
+    parser.add_argument("--obs-max-jobs", type=int, default=0,
+                        help="Observation job rows (0 = 256 per 15 machines of the largest floor)")
     args = parser.parse_args(argv)
 
     if args.scenario and args.scenario_generator:
@@ -403,8 +407,20 @@ def main(argv=None):
         from rewards import load_reward
         reward_fn = load_reward(args.reward_spec).build()
 
+    # Row caps fit the evaluated floors (checkpoints don't depend on them; see config.obs_row_caps).
+    from scenarios import row_caps_for
+    if args.scenario:
+        planned = [args.scenario]
+    elif scenario_generator is not None:
+        planned = [scenario_generator(seed) for seed in seeds]
+    else:
+        planned = []
+    obs_caps = row_caps_for(planned, args.obs_max_machines, args.obs_max_jobs)
+    print(f"Observation row caps: {obs_caps[0]} machines, {obs_caps[1]} jobs")
+
     env = UnitySchedulingEnv(
         file_name=args.unity_path,
+        obs_caps=obs_caps,
         reward_fn=reward_fn,
         time_scale=args.time_scale,
         worker_id=args.base_worker_id,

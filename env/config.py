@@ -5,13 +5,16 @@
 @details
 Observation schema v2 (2026-09-24). All dimensions are synced to the C# ObservationBuilder constants:
   SpatialGridSize = 64,  SpatialChannels = 3
-  MaxMachines = 100, MachineFeatures = 16     (machine table, one row per machine, zero-padded)
-  MaxJobs     = 256, JobFeatures     = 17     (job table over ACTIVE jobs, decision-relevant first)
+  MaxMachines = 105,  MachineFeatures = 16    (machine table, one row per machine, zero-padded)
+  MaxJobs     = 1792, JobFeatures     = 17    (job table over ACTIVE jobs, decision-relevant first)
   GlobalScalarLength = 16
   EventFlagLength    = 6
 
-Total flat observation from ML-Agents: 18,262 floats (MaxJobs 64 -> 256 on 2026-09-25; a row-cap change,
-so checkpoints stay compatible).
+Row caps are chosen per player launch (2026-09-27, see obs_row_caps / env_wrappers/unity_env.py): machine rows =
+the largest floor the run will see, job rows = JOB_ROWS_PER_15_MACHINES per 15 machines. A 15-machine run is
+12,310 + 15*16 + 256*17 = 16,902 floats; the defaults below (7 tiles, 105 machines / 1,792 jobs) give 44,454.
+Row-cap history: MaxJobs 64 -> 256 on 2026-09-25; defaults 105 / 1792 and per-launch caps on 2026-09-27. The
+caps never affect checkpoints (no weight depends on the row count).
 
 v1 (13,328 floats) had an 8-machine x first-20-jobs scheduling matrix and an 8x8 distance matrix: on the
 15-machine floor it dropped machines 8-14 and went blank once the first 20 jobs had exited. v1 checkpoints
@@ -32,9 +35,14 @@ OBS_SCHEMA_VERSION = 2
 
 GRID_SIZE        = 64
 GRID_CHANNELS    = 3
-MAX_MACHINES     = 100
+## @brief Default row caps (ObservationBuilder.DefaultMaxMachines / DefaultMaxJobs): what a player launched
+##        without -obsmaxmachines / -obsmaxjobs uses. Sized for 7 tiles of 15 machines.
+MAX_MACHINES     = 105
 MACHINE_FEATURES = 16
-MAX_JOBS         = 256
+MAX_JOBS         = 1792
+## @brief Job rows per 15 machines when caps are chosen per launch (randomized-family WIP peaked at 165 on
+##        15 machines; the 7-tile compound pilot at 476 = 68 per tile).
+JOB_ROWS_PER_15_MACHINES = 256
 JOB_FEATURES     = 17
 GLOBAL_SCALARS   = 16
 EVENT_FLAGS      = 6
@@ -49,9 +57,9 @@ JOB_CANDIDATE_COL     = 15
 
 ## @brief Lengths of each stream inside the flat vector.
 SPATIAL_LEN       = GRID_CHANNELS * GRID_SIZE * GRID_SIZE    # 12 288
-MACHINE_TABLE_LEN = MAX_MACHINES * MACHINE_FEATURES          #  1 600
-JOB_TABLE_LEN     = MAX_JOBS * JOB_FEATURES                  #  4 352
-TOTAL_OBS_SIZE    = SPATIAL_LEN + MACHINE_TABLE_LEN + JOB_TABLE_LEN + GLOBAL_SCALARS + EVENT_FLAGS  # 18 262
+MACHINE_TABLE_LEN = MAX_MACHINES * MACHINE_FEATURES          #  1 680
+JOB_TABLE_LEN     = MAX_JOBS * JOB_FEATURES                  # 30 464
+TOTAL_OBS_SIZE    = SPATIAL_LEN + MACHINE_TABLE_LEN + JOB_TABLE_LEN + GLOBAL_SCALARS + EVENT_FLAGS  # 44 454
 
 ## @brief Slice boundaries inside the flat observation vector (C# FlattenStreams order).
 SLICE_SPATIAL_END  = SPATIAL_LEN
@@ -101,14 +109,36 @@ ACTION_LAYOUT = {
 
 ## @brief Per-key observation shapes (no batch dim) — the single source for train.py, the
 ##        placeholder env and tests.
-OBS_SHAPES = {
-    "factory_grid":   (GRID_CHANNELS, GRID_SIZE, GRID_SIZE),
-    "machine_table":  (MAX_MACHINES, MACHINE_FEATURES),
-    "job_table":      (MAX_JOBS, JOB_FEATURES),
-    "global_scalars": (GLOBAL_SCALARS,),
-    "event_flags":    (EVENT_FLAGS,),
-    "action_mask":    (ACTION_MASK_LEN,),   # not encoded: masks the actor's heads (see ACTION_MASK_LEN)
-}
+def obs_shapes(max_machines: int = MAX_MACHINES, max_jobs: int = MAX_JOBS) -> dict:
+    """@brief Per-key observation shapes (no batch dim) for the given row caps."""
+    return {
+        "factory_grid":   (GRID_CHANNELS, GRID_SIZE, GRID_SIZE),
+        "machine_table":  (max_machines, MACHINE_FEATURES),
+        "job_table":      (max_jobs, JOB_FEATURES),
+        "global_scalars": (GLOBAL_SCALARS,),
+        "event_flags":    (EVENT_FLAGS,),
+        "action_mask":    (ACTION_MASK_LEN,),   # not encoded: masks the actor's heads (see ACTION_MASK_LEN)
+    }
+
+
+## @brief Shapes at the default caps (the placeholder env and tests use these).
+OBS_SHAPES = obs_shapes()
+
+
+def obs_total_size(max_machines: int, max_jobs: int) -> int:
+    """@brief Flat observation length the player sends for the given row caps."""
+    return SPATIAL_LEN + max_machines * MACHINE_FEATURES + max_jobs * JOB_FEATURES + GLOBAL_SCALARS + EVENT_FLAGS
+
+
+def obs_row_caps(n_machines: int) -> Tuple[int, int]:
+    """@brief Smallest row caps for floors of up to @p n_machines machines: (machine rows, job rows).
+
+    @details Job rows scale with the floor, JOB_ROWS_PER_15_MACHINES per started block of 15 machines,
+    so 15 machines -> (15, 256) and 7 tiles of 15 -> (105, 1792), the defaults.
+    """
+    if n_machines <= 0:
+        raise ValueError(f"n_machines must be positive, got {n_machines}")
+    return n_machines, JOB_ROWS_PER_15_MACHINES * -(-n_machines // 15)
 
 
 @dataclass
@@ -118,7 +148,7 @@ class EnvConfig:
     grid_size: int = GRID_SIZE
     grid_channels: int = GRID_CHANNELS
     num_machines_range: Tuple[int, int] = (4, 20)
-    num_jobs_range: Tuple[int, int] = (5, MAX_JOBS)
+    num_jobs_range: Tuple[int, int] = (5, 256)   # placeholder env only; was (5, MAX_JOBS) when MAX_JOBS was 256
     num_global_scalars: int = GLOBAL_SCALARS
     num_event_flags: int = EVENT_FLAGS
     max_machines: int = MAX_MACHINES

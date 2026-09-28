@@ -49,7 +49,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from config import (
     EncoderConfig, FusionConfig, ActorCriticConfig, PPOConfig, OBS_SHAPES, OBS_LAYOUT,
-    MAX_MACHINES, MAX_JOBS, ACTION_BRANCHES, ACTION_LAYOUT,
+    ACTION_BRANCHES, ACTION_LAYOUT, obs_shapes as shapes_for_caps,
 )
 from models.network import SchedulingNetwork
 from rollout_buffer import RolloutBuffer
@@ -80,7 +80,19 @@ def build_env(args, ppo_cfg, run_dir: Path, reward, scenario_generator=None):
     obs_shapes = dict(OBS_SHAPES)
 
     if args.unity:
-        from env_wrappers.unity_env import VectorizedUnityEnv
+        from env_wrappers.unity_env import TRAIN_SEED_LOW, VectorizedUnityEnv
+        from scenarios import row_caps_for
+        # Row caps fit the floors this run will see, so a small floor isn't padded to the largest one.
+        # A generator's floor is fixed per generator; sample a few training seeds to be safe.
+        if args.scenario:
+            planned = [args.scenario]
+        elif scenario_generator is not None:
+            planned = [scenario_generator(TRAIN_SEED_LOW + i) for i in range(8)]
+        else:
+            planned = []   # the player's own default floor: size unknown here, use the defaults
+        obs_caps = row_caps_for(planned, args.obs_max_machines, args.obs_max_jobs)
+        obs_shapes = shapes_for_caps(*obs_caps)
+        print(f"Observation row caps: {obs_caps[0]} machines, {obs_caps[1]} jobs")
         vec_env = VectorizedUnityEnv(
             num_envs=ppo_cfg.num_envs,
             file_name=args.unity_path,
@@ -93,6 +105,7 @@ def build_env(args, ppo_cfg, run_dir: Path, reward, scenario_generator=None):
             train_seed=None if args.train_seed < 0 else args.train_seed,
             parallel=not args.sequential_envs,
             scenario_generator=scenario_generator,
+            obs_caps=obs_caps,
         )
     else:
         from env_wrappers.placeholder_env import VectorizedPlaceholderEnv
@@ -206,7 +219,7 @@ def check_action_layout(ckpt: dict, path) -> None:
 
 
 def save_checkpoint(path: Path, net, optimizer, global_step: int, ppo_cfg: PPOConfig,
-                    reward_name):
+                    reward_name, row_caps):
     """@brief Save network, optimizer, and config so a run can be resumed or evaluated."""
     torch.save({
         "model_state_dict": net.state_dict(),
@@ -215,7 +228,7 @@ def save_checkpoint(path: Path, net, optimizer, global_step: int, ppo_cfg: PPOCo
         "reward": reward_name,
         "obs_layout": dict(OBS_LAYOUT),
         "action_layout": dict(ACTION_LAYOUT),
-        "obs_row_caps": {"max_machines": MAX_MACHINES, "max_jobs": MAX_JOBS},   # informational only
+        "obs_row_caps": {"max_machines": row_caps[0], "max_jobs": row_caps[1]},   # informational only
         "config": {
             "encoder": EncoderConfig().__dict__,
             "fusion": FusionConfig().__dict__,
@@ -307,6 +320,7 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
 
     # ---- Initialize environments ----
     vec_env, obs_shapes = build_env(args, ppo_cfg, run_dir, reward, scenario_generator)
+    row_caps = (obs_shapes["machine_table"][0], obs_shapes["job_table"][0])
     if args.unity and args.scenario:
         vec_env.load_scenario_all(args.scenario)
         shutil.copy2(args.scenario, run_dir / "scenario.json")
@@ -341,7 +355,7 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
     if not args.resume_from:
         # Untrained starting policy, as a reference point for evaluation. Skipped when resuming
         # -- that file already exists from the original run and still means "untrained".
-        save_checkpoint(run_dir / "checkpoint_init.pt", net, optimizer, 0, ppo_cfg, reward_name)
+        save_checkpoint(run_dir / "checkpoint_init.pt", net, optimizer, 0, ppo_cfg, reward_name, row_caps)
 
     backend = "Unity" if args.unity else "Placeholder"
     print(f"\nBackend: {backend}")
@@ -501,10 +515,10 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
 
             if args.save_every > 0 and update % args.save_every == 0:
                 save_checkpoint(run_dir / f"checkpoint_step{global_step}.pt", net, optimizer,
-                                global_step, ppo_cfg, reward_name)
+                                global_step, ppo_cfg, reward_name, row_caps)
     finally:
         # Save and shut Unity down even on Ctrl-C, so long runs keep their progress.
-        save_checkpoint(ckpt_path, net, optimizer, global_step, ppo_cfg, reward_name)
+        save_checkpoint(ckpt_path, net, optimizer, global_step, ppo_cfg, reward_name, row_caps)
         writer.close()
         episode_file.close()
         if args.unity and hasattr(vec_env, 'close'):
@@ -601,6 +615,10 @@ if __name__ == "__main__":
                         help="torch.set_num_threads (0 = torch default); keep low when sharing a node with Unity players")
     parser.add_argument("--base-worker-id", type=int, default=0,
                         help="Unity port offset (5005 + id); change to run several trainings at once")
+    parser.add_argument("--obs-max-machines", type=int, default=0,
+                        help="Observation machine rows (0 = fit the largest floor in the run's scenarios)")
+    parser.add_argument("--obs-max-jobs", type=int, default=0,
+                        help="Observation job rows (0 = 256 per 15 machines of the largest floor)")
 
     args = parser.parse_args()
 
