@@ -177,6 +177,19 @@ namespace Assets.Scripts.Simulation
                     ConfigOverrides.ReleaseRule = TilingSpec.ReleaseToString(TilingSpec.ParseRelease(releaseStr));
                     SimLogger.Low($"[BatchRunner] Release rule override: {ConfigOverrides.ReleaseRule}");
                 }
+                // Linked tiles (TilingSpec.AgvsPooled / JobsOpen): "-jobscope open" alone implies "-agvassignment pooled".
+                string scopeStr = GetCLIArg("-jobscope");
+                if (!string.IsNullOrEmpty(scopeStr))
+                {
+                    ConfigOverrides.JobScope = TilingSpec.ParseJobScope(scopeStr) ? "open" : "tile";
+                    SimLogger.Low($"[BatchRunner] Job scope override: {ConfigOverrides.JobScope}");
+                }
+                string assignStr = GetCLIArg("-agvassignment");
+                if (!string.IsNullOrEmpty(assignStr))
+                {
+                    ConfigOverrides.AgvAssignment = TilingSpec.ParseAgvAssignment(assignStr) ? "pooled" : "tile";
+                    SimLogger.Low($"[BatchRunner] AGV assignment override: {ConfigOverrides.AgvAssignment}");
+                }
 
                 // Machine flexibility overrides (FJSSPConfig.MachineFlexibilityProbability / SecondaryTimeMultiplier).
                 string flexStr = GetCLIArg("-flex");

@@ -716,10 +716,10 @@ namespace Assets.Scripts.Simulation
                         PhysicalMachine m = layout.GetMachine(job.LocationMachineId);
                         if (m != null) return m.transform.position;
                     }
-                    return layout.IncomingBeltPosition;
+                    return layout.IncomingBeltPositionOf(job.TileId);
             }
 
-            return layout.IncomingBeltPosition;
+            return layout.IncomingBeltPositionOf(job.TileId);
         }
     }
 }

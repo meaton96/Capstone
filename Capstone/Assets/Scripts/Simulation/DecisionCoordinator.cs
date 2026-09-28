@@ -203,7 +203,7 @@ namespace Assets.Scripts.Simulation
         {
             if (_transportAvailable == null) return true;
             if (!cache.TryGetValue(tile, out bool open))
-                cache[tile] = open = _transportAvailable(_layout.TileCount > 1 ? tile : -1);
+                cache[tile] = open = _transportAvailable(_layout.AgvServiceTile(tile));
             return open;
         }
 

@@ -127,6 +127,17 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         public Vector3 TileOrigin => transform.position + TileOffset(BuildTile);
         public int TileOfMachine(int machineId) => MachinesPerTile > 0 ? machineId / MachinesPerTile : 0;
         public int TileOfAgv(int agvId) => AgvsPerTile > 0 ? agvId / AgvsPerTile : 0;
+        /// <summary>Linked floor: spines joined across seams, any AGV serves any tile (TilingSpec.AgvsPooled).</summary>
+        public bool AgvsPooled => TileCount > 1 && ActiveTiling.AgvsPooled;
+        /// <summary>Jobs may use machines in any tile (TilingSpec.JobsOpen; implies AgvsPooled).</summary>
+        public bool JobsOpen => TileCount > 1 && ActiveTiling.JobsOpen;
+        /// <summary>Tile argument for AGV-availability queries: -1 (any AGV) when the fleet is pooled or the floor
+        ///          is untiled, otherwise <paramref name="tile"/>.</summary>
+        public int AgvServiceTile(int tile) => TileCount > 1 && !AgvsPooled ? tile : -1;
+        /// <summary>Tile whose output belt a finished job leaves by: its home tile, or with open jobs the tile of
+        ///          the machine it finished on (the nearest exit; a job never crosses the floor just to leave).</summary>
+        public int ExitTileOf(JobData job)
+            => JobsOpen && job.LocationMachineId >= 0 ? TileOfMachine(job.LocationMachineId) : job.TileId;
         /// <summary>Machines of each primary type in each tile, ascending id: [tile][type].</summary>
         private Dictionary<MachineType, List<int>>[] tileMachinesByType = new Dictionary<MachineType, List<int>>[0];
         private int roundRobinNext;
@@ -827,8 +838,12 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             float leftX = -(machineAreaWidth / 2f + VerticalAisleWidth), rightX = machineAreaWidth / 2f + VerticalAisleWidth;
             if (ActiveIoDocks == IoDockMethod.Corner)
             {
-                SpawnWallSegmentVertical(floorCentre + new Vector3(leftX, wallHeight / 2f, 0f), fullHeight, "LeftOuter");
-                SpawnWallSegmentVertical(floorCentre + new Vector3(rightX, wallHeight / 2f, 0f), fullHeight, "RightOuter");
+                // Linked floor: a wall facing a neighbouring tile stops at the spines, so the seam bridges
+                // (TrafficZoneManager.BuildSeamBridges) are open floor on the NavMesh.
+                float leftLen = AgvsPooled && BuildTile > 0 ? machineAreaDepth : fullHeight;
+                float rightLen = AgvsPooled && BuildTile < TileCount - 1 ? machineAreaDepth : fullHeight;
+                SpawnWallSegmentVertical(floorCentre + new Vector3(leftX, wallHeight / 2f, 0f), leftLen, "LeftOuter");
+                SpawnWallSegmentVertical(floorCentre + new Vector3(rightX, wallHeight / 2f, 0f), rightLen, "RightOuter");
                 return;
             }
             // Siding: open each outer wall where its siding joins the vertical (from half a pitch beyond the siding
@@ -1185,6 +1200,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             else tile = roundRobinNext++ % TileCount;
 
             job.TileId = tile;
+            if (JobsOpen) return;   // open jobs: the home tile is only the input belt; eligibility stays floor-wide
             var src = job.EligibleMachinesPerOp;
             var confined = new Dictionary<int, float>[src.Length];
             for (int o = 0; o < src.Length; o++)

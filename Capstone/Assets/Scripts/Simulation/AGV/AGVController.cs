@@ -61,8 +61,11 @@ namespace Assets.Scripts.Simulation.AGV
         [SerializeField] private TextMeshProUGUI statusLabel;
 
         public int AgvId { get; private set; }
-        /// <summary>Tile this AGV serves on a tiled floor (it never leaves it); 0 on an untiled floor.</summary>
+        /// <summary>Home tile on a tiled floor: the only tile it serves (phase 1), and where it parks; 0 untiled.</summary>
         public int TileId { get; set; }
+        /// <summary>Tile whose input / output belt the current transport uses. The home tile unless the fleet is
+        ///          pooled (linked tiles), where the dispatcher sets it per transport from the job.</summary>
+        public int BeltTile { get; set; }
         public AGVState State { get; private set; } = AGVState.Idle;
         public int CurrentJobId { get; private set; } = -1;
         public int CurrentZoneId => currentZoneId;
@@ -454,7 +457,7 @@ namespace Assets.Scripts.Simulation.AGV
 
             (dropoffZoneId, dropoffDock) = newTarget != null
                 ? FindDockForMachine(newTarget.MachineId, currentZoneId, newDropoffPos)
-                : FindSpecialDock(TrafficZoneManager.OutgoingDockKey(TileId));
+                : FindSpecialDock(TrafficZoneManager.OutgoingDockKey(BeltTile));
 
             if (dropoffZoneId < 0 || !PlanRoute(currentZoneId, dropoffZoneId))
             {
@@ -506,7 +509,7 @@ namespace Assets.Scripts.Simulation.AGV
             if (source != null)
                 (pickupZoneId, pickupDock) = FindDockForMachine(source.MachineId, currentZoneId, pickupPos);
             else
-                (pickupZoneId, pickupDock) = FindSpecialDock(TrafficZoneManager.IncomingDockKey(TileId));
+                (pickupZoneId, pickupDock) = FindSpecialDock(TrafficZoneManager.IncomingDockKey(BeltTile));
 
             if (pickupZoneId < 0 || !PlanRoute(currentZoneId, pickupZoneId))
             {
@@ -590,7 +593,7 @@ namespace Assets.Scripts.Simulation.AGV
             if (sourceMachine != null)
                 (pickupZoneId, pickupDock) = FindDockForMachine(sourceMachine.MachineId, currentZoneId, pickupPos);
             else
-                (pickupZoneId, pickupDock) = FindSpecialDock(TrafficZoneManager.IncomingDockKey(TileId));
+                (pickupZoneId, pickupDock) = FindSpecialDock(TrafficZoneManager.IncomingDockKey(BeltTile));
 
             if (pickupZoneId < 0 || !PlanRoute(currentZoneId, pickupZoneId))
             {
@@ -704,7 +707,7 @@ namespace Assets.Scripts.Simulation.AGV
                 sourceMachine.RecordDockHandoff(true, pickupDock.HandshakePosition);
             }
             else
-                FactoryLayoutManager.Instance.IncomingBeltOf(TileId)?.RemoveJob(CurrentJobId);
+                FactoryLayoutManager.Instance.IncomingBeltOf(BeltTile)?.RemoveJob(CurrentJobId);
 
             if (loadedJobVisual != null)
                 loadedJobVisual.AttachToCarrier(carryPos);
@@ -712,7 +715,7 @@ namespace Assets.Scripts.Simulation.AGV
             if (targetMachine != null)
                 (dropoffZoneId, dropoffDock) = FindDockForMachine(targetMachine.MachineId, currentZoneId, targetDropoffPos);
             else
-                (dropoffZoneId, dropoffDock) = FindSpecialDock(TrafficZoneManager.OutgoingDockKey(TileId));
+                (dropoffZoneId, dropoffDock) = FindSpecialDock(TrafficZoneManager.OutgoingDockKey(BeltTile));
 
             if (dropoffZoneId < 0 || !PlanRoute(currentZoneId, dropoffZoneId))
             {
@@ -743,7 +746,7 @@ namespace Assets.Scripts.Simulation.AGV
                 targetMachine.RecordDockHandoff(false, dropoffDock.HandshakePosition);
             }
             else
-                FactoryLayoutManager.Instance.OutgoingBeltOf(TileId)?.TryEnqueue(CurrentJobId, loadedJobVisual);
+                FactoryLayoutManager.Instance.OutgoingBeltOf(BeltTile)?.TryEnqueue(CurrentJobId, loadedJobVisual);
 
             DeliveredFlag = true;
             DeliveredJobId = CurrentJobId;

@@ -70,6 +70,10 @@ namespace Assets.Scripts.Simulation.Types
         public static int? Tiles;
         /// <summary>Tiled floors: which tile an arriving job enters ("roundRobin" | "leastWip").</summary>
         public static string ReleaseRule;
+        /// <summary>tiling.jobScope ("tile" | "open") for every config. Null = no override.</summary>
+        public static string JobScope;
+        /// <summary>tiling.agvAssignment ("tile" | "pooled") for every config. Null = no override.</summary>
+        public static string AgvAssignment;
         /// <summary>Machine flexibility probability [0, 1]; overrides every config's machineFlexibilityProbability.</summary>
         public static float? MachineFlexibility;
         /// <summary>Secondary-capability processing-time factor (> 0); overrides every config's secondaryTimeMultiplier.</summary>

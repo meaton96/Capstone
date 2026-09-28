@@ -485,6 +485,8 @@ namespace Assets.Scripts.Simulation
                 config.Tiling = (config.Tiling ?? TilingSpec.Single).WithTiles(ConfigOverrides.Tiles.Value);
             if (config != null && ConfigOverrides.ReleaseRule != null)
                 config.Tiling = (config.Tiling ?? TilingSpec.Single).WithRelease(TilingSpec.ParseRelease(ConfigOverrides.ReleaseRule));
+            if (config != null && (ConfigOverrides.JobScope != null || ConfigOverrides.AgvAssignment != null))
+                config.Tiling = (config.Tiling ?? TilingSpec.Single).WithScope(ConfigOverrides.JobScope, ConfigOverrides.AgvAssignment);
             if (config != null && ConfigOverrides.MachineFlexibility.HasValue)
                 config.MachineFlexibilityProbability = ConfigOverrides.MachineFlexibility.Value;
             if (config != null && ConfigOverrides.SecondaryTimeMultiplier.HasValue)
@@ -1238,7 +1240,8 @@ namespace Assets.Scripts.Simulation
                 {
                     PhysicalMachine targetMachine = layoutManager.GetMachine(chosenMachineId);
                     Vector3 dropoffPos = targetMachine != null
-                        ? targetMachine.GetDropoffPosition() : layoutManager.OutgoingBeltPositionOf(job.TileId);
+                        ? targetMachine.GetDropoffPosition() : layoutManager.OutgoingBeltPositionOf(layoutManager.ExitTileOf(job));
+                    preAgv.BeltTile = layoutManager.ExitTileOf(job);
                     preAgv.FinalizePreDispatch(job.JobId, dropoffPos, targetMachine, job.Visual);
                     job.AssignedAgvId = preAgv.AgvId;
                     job.PreDispatchedAgvId = -1;

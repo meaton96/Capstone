@@ -89,6 +89,8 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         public static int OutgoingDockKey(int tile) => OutgoingBeltId - 3 * tile;
         /// <summary>Zone id range of each tile's graph: [tile] = (first zone index, zone count).</summary>
         private readonly List<(int start, int count)> tileZoneRanges = new List<(int start, int count)>();
+        /// <summary>Each tile's four perimeter corner zones, for the seam bridges of a linked floor.</summary>
+        private readonly List<(int leftTop, int leftBot, int rightTop, int rightBot)> tileCorners = new List<(int, int, int, int)>();
 
         private readonly List<TrafficZone> zones = new List<TrafficZone>();
         private readonly Dictionary<int, TrafficZone> zoneById = new Dictionary<int, TrafficZone>();
@@ -144,6 +146,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             // Tiled floor: one independent graph per tile, built by the same code around each tile's centre
             // (layoutManager.BuildTile), zone names prefixed T{t}_. One tile: built exactly as before, no prefix.
             tileZoneRanges.Clear();
+            tileCorners.Clear();
             int tiles = layoutManager.TileCount;
             for (int t = 0; t < tiles; t++)
             {
@@ -155,9 +158,10 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 tileZoneRanges.Add((start, zones.Count - start));
             }
             layoutManager.BuildTile = 0;
+            if (layoutManager.AgvsPooled) BuildSeamBridges();
             SimLogger.Medium($"[TrafficZones] Built zone graph: {zones.Count} zones" +
                              $"{(layoutManager.ActiveLayout != null && layoutManager.ActiveLayout.Aisles == Types.AisleTopology.TwoWay ? " (two-way row aisles)" : "")}" +
-                             $"{(tiles > 1 ? $" in {tiles} tiles" : "")}.");
+                             $"{(tiles > 1 ? $" in {tiles} {(layoutManager.AgvsPooled ? "linked " : "")}tiles" : "")}.");
             CheckZoneGraph();
         }
 
@@ -194,7 +198,55 @@ namespace Assets.Scripts.Simulation.FactoryLayout
 
             ConnectZoneGraph(rowLaneN, rowLaneS, twoWay, topSpineZones, botSpineZones, leftVertZones, rightVertZones, leftChain, rightChain);
             RegisterDockPoints(tile, rowLaneN, rowLaneS, topSpineZones, botSpineZones, rows, cols, leftVertZones, rightVertZones);
+            tileCorners.Add((leftVertZones[0], leftVertZones[leftVertZones.Length - 1],
+                             rightVertZones[0], rightVertZones[rightVertZones.Length - 1]));
             if (layoutManager.ActiveIoDocks != IoDockMethod.Corner) BuildIoSidings(leftChain, rightChain, topSpineZones);
+        }
+
+        /// @brief Linked floor (TilingSpec.AgvsPooled): joins neighbouring tiles' perimeters across each seam.
+        /// @details Every tile's loop runs clockwise, so the top spines all flow east and the bottom spines west
+        ///          (TILED_LAYOUT_SCOPE.md s2.1). Tile t's north-east corner (RightVert_TopConn) continues east over
+        ///          the seam into tile t+1's north-west corner (LeftVert_TopConn), and tile t+1's south-west corner
+        ///          continues west into tile t's south-east corner. Each corner becomes a split (turn south or carry
+        ///          on east) or a merge; nothing crosses. The floor is then one eastbound top spine, one westbound
+        ///          bottom spine and alternating north/south verticals, two per tile. Every new cycle runs through two
+        ///          or more tiles, so it is longer than a tile's own loop and the girth does not drop. The seam floor
+        ///          between the two corner zones is covered by Capacity 1 bridge zones at least MinVerticalPitch
+        ///          wide (none when the seam is narrower, the corners are then linked directly).
+        private void BuildSeamBridges()
+        {
+            for (int t = 0; t + 1 < tileCorners.Count; t++)
+            {
+                Bridge($"Seam{t}_Top", tileCorners[t].rightTop, tileCorners[t + 1].leftTop, FlowDirection.East);
+                Bridge($"Seam{t}_Bot", tileCorners[t + 1].leftBot, tileCorners[t].rightBot, FlowDirection.West);
+            }
+
+            void Bridge(string name, int fromId, int toId, FlowDirection flow)
+            {
+                TrafficZone from = zoneById[fromId], to = zoneById[toId];
+                float x0 = from.Centre.x + Mathf.Sign(to.Centre.x - from.Centre.x) * from.Size.x / 2f;   // seam edges
+                float x1 = to.Centre.x - Mathf.Sign(to.Centre.x - from.Centre.x) * to.Size.x / 2f;
+                float gap = Mathf.Abs(x1 - x0);
+                int n = Mathf.FloorToInt(gap / MinVerticalPitch);
+                int prev = fromId;
+                for (int k = 0; k < n; k++)
+                {
+                    var z = new TrafficZone
+                    {
+                        ZoneId = nextZoneId++,
+                        Name = $"{name}{k}",
+                        AisleType = AisleType.SpineAisle,
+                        Flow = flow,
+                        Centre = new Vector3(Mathf.Lerp(x0, x1, (k + 0.5f) / n), from.Centre.y, from.Centre.z),
+                        Size = new Vector3(gap / n, 0.1f, from.Size.z),
+                        Capacity = 1
+                    };
+                    RegisterZone(z);
+                    LinkZones(prev, z.ZoneId);
+                    prev = z.ZoneId;
+                }
+                LinkZones(prev, toId);
+            }
         }
 
         /// @brief Static sanity check of the built graph, logged once per build.
@@ -222,8 +274,10 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 return seen.Count;
             }
             // Per tile: a tiled floor is deliberately several disconnected graphs (AGVs never leave their tile).
+            // A linked floor is one graph, bridges included.
+            var ranges = layoutManager.AgvsPooled ? new List<(int start, int count)> { (0, zones.Count) } : tileZoneRanges;
             bool stronglyConnected = true;
-            foreach (var (start, count) in tileZoneRanges)
+            foreach (var (start, count) in ranges)
                 if (count > 0 && (Reach(start, true) != count || Reach(start, false) != count)) stronglyConnected = false;
 
             int misplacedDocks = 0;
@@ -255,7 +309,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 }
             }
 
-            string msg = $"[TrafficZones] Graph check: strongly connected{(tileZoneRanges.Count > 1 ? " (per tile)" : "")}={stronglyConnected}, misplaced docks={misplacedDocks}, " +
+            string msg = $"[TrafficZones] Graph check: strongly connected{(ranges.Count > 1 ? " (per tile)" : "")}={stronglyConnected}, misplaced docks={misplacedDocks}, " +
                          (girth == int.MaxValue ? "no cycle" : $"girth={girth} (no deadlock below {(girth + 1) / 2} AGVs under holdPrevious).");
             if (!stronglyConnected || misplacedDocks > 0) SimLogger.Error(msg); else SimLogger.Medium(msg);
         }

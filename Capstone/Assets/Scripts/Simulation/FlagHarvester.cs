@@ -117,7 +117,9 @@ namespace Assets.Scripts.Simulation
                         AGVController preAgv = _agvPool.GetPreDispatchedAGV(job.JobId);
                         if (preAgv != null)
                         {
-                            preAgv.FinalizePreDispatch(job.JobId, _layout.OutgoingBeltPositionOf(job.TileId), null, job.Visual);
+                            int exitTile = _layout.ExitTileOf(job);
+                            preAgv.BeltTile = exitTile;
+                            preAgv.FinalizePreDispatch(job.JobId, _layout.OutgoingBeltPositionOf(exitTile), null, job.Visual);
                             job.AssignedAgvId = preAgv.AgvId;
                         }
                         job.PreDispatchedAgvId = -1;
@@ -141,6 +143,7 @@ namespace Assets.Scripts.Simulation
         {
             // OnTransport: a free AGV belongs to a job already waiting (ranked by the rule), not to one still processing.
             // Per tile on a tiled floor (an AGV only ever serves its own tile's jobs); evaluated once per tile.
+            // A pooled fleet serves every tile, so there it is one floor-wide check (slot 0).
             bool?[] yieldByTile = new bool?[_layout.TileCount];
             foreach (var machine in _layout.Machines)
             {
@@ -158,8 +161,8 @@ namespace Assets.Scripts.Simulation
 
                 if (yieldToWaitingJobs)
                 {
-                    int tile = _layout.TileOfMachine(machine.MachineId);
-                    yieldByTile[tile] ??= AnyJobWaitingForTransport(_layout.TileCount > 1 ? tile : -1);
+                    int tile = _layout.AgvsPooled ? 0 : _layout.TileOfMachine(machine.MachineId);
+                    yieldByTile[tile] ??= AnyJobWaitingForTransport(_layout.AgvServiceTile(tile));
                     if (yieldByTile[tile].Value) continue;
                 }
 
@@ -327,14 +330,17 @@ namespace Assets.Scripts.Simulation
             }
 
             // Stop once no AGV is free; on a tiled floor per tile (an empty tile must not starve the others).
+            // A pooled fleet is one pool, so the first failure ends it.
             var exhausted = new HashSet<int>();
+            int pools = _layout.AgvsPooled ? 1 : _layout.TileCount;
             foreach (var job in candidates)
             {
-                if (exhausted.Contains(job.TileId)) continue;
+                int pool = _layout.AgvsPooled ? 0 : job.TileId;
+                if (exhausted.Contains(pool)) continue;
                 if (!TryAssignAgv(job))
                 {
-                    exhausted.Add(job.TileId);
-                    if (exhausted.Count >= _layout.TileCount) break;
+                    exhausted.Add(pool);
+                    if (exhausted.Count >= pools) break;
                 }
             }
         }
@@ -373,9 +379,10 @@ namespace Assets.Scripts.Simulation
             PhysicalMachine target = job.TargetMachineId >= 0
                 ? _layout.GetMachine(job.TargetMachineId) : null;
             Vector3 dropoffPos = target != null
-                ? target.GetDropoffPosition() : _layout.OutgoingBeltPositionOf(job.TileId);
+                ? target.GetDropoffPosition() : _layout.OutgoingBeltPositionOf(_layout.ExitTileOf(job));
 
             job.AssignedAgvId = agv.AgvId;
+            agv.BeltTile = src == null ? job.TileId : _layout.ExitTileOf(job);   // pickup belt, else dropoff belt
             agv.Dispatch(job.JobId, pickupPos, dropoffPos, src, target, job.Visual);
             agv.SetCarryVisual(job.Visual);
             return true;
