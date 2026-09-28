@@ -12,8 +12,8 @@ using Assets.Scripts.Simulation.Logging;
 
 namespace Assets.Scripts.UI
 {
-    /// <summary>Inspector dropdown for the start menu's layout; names match LayoutSpec.PresetNames (all ten built).</summary>
-    public enum LayoutChoice { A, B, C, D, E, F, G, H, I, J }
+    /// <summary>Inspector dropdown for the start menu's layout; names match LayoutSpec.PresetNames (all fifteen built; append only, the scene stores the index).</summary>
+    public enum LayoutChoice { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O }
 
 
     [System.Serializable]

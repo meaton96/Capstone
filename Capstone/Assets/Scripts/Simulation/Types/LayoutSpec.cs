@@ -5,11 +5,12 @@ using Newtonsoft.Json.Linq;
 
 namespace Assets.Scripts.Simulation.Types
 {
-    /// <summary>Aisle topology axis of a layout. One-way (A-E) and two-way row aisles (F-J) are both built.</summary>
-    public enum AisleTopology { OneWay, TwoWay }
+    /// <summary>Aisle topology axis of a layout: one-way (A-E), two-way row aisles (F-J), or a two-way perimeter
+    /// with one-way row aisles (K-O). All three are built.</summary>
+    public enum AisleTopology { OneWay, TwoWay, TwoWayPerimeter }
 
     /// <summary>
-    /// One of the named factory layouts A-J (docs/LAYOUT_CONFIGURATION_SCOPE.md). Immutable, so configs and their
+    /// One of the named factory layouts A-O (docs/LAYOUT_CONFIGURATION_SCOPE.md). Immutable, so configs and their
     /// per-seed clones share instances. All layouts use the same machine grid and machine positions; they differ in
     /// which side of a machine its belts are on and (F-J) in the aisles.
     /// </summary>
@@ -23,6 +24,12 @@ namespace Assets.Scripts.Simulation.Types
     /// F-J  A-E's belt patterns (2-belt machines, F included) with two-way row aisles: each row aisle is two
     ///      stacked one-way lanes (north lane west, south lane east); the perimeter (spines and verticals)
     ///      stays one-way. A dock is served only from the lane beside it. See TrafficZoneManager.BuildZoneGraph.
+    /// K-O  A-E's belt patterns (2-belt machines) with one-way row aisles and a two-way perimeter: every spine and
+    ///      vertical is two stacked one-way lanes. The outer lanes are today's clockwise loop (belts, parking lane,
+    ///      seam bridges); the inner lanes, beside the machines, run counter-clockwise and host the row ends and the
+    ///      row-0 / last-row spine docks. Lane changes are exit-only: a row ending at a vertical may leave onto either
+    ///      lane, rows are entered from the inner lane only, and the rings otherwise meet at two corner crossovers
+    ///      (outer to inner, south-west and north-east). See TrafficZoneManager.BuildPerimeterTwoWayGraph.
     /// </code>
     /// JSON (optional; absent = <see cref="Default"/> (D), so a config only reproduces the pre-2026-09-21 floor
     /// (A) if it says so explicitly): <c>"layout": "B"</c> or <c>"layout": { "preset": "B" }</c>. "legacy" is
@@ -32,10 +39,10 @@ namespace Assets.Scripts.Simulation.Types
     public sealed class LayoutSpec
     {
         /// <summary>Layout ids in canonical spelling.</summary>
-        public static readonly string[] PresetNames = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" };
+        public static readonly string[] PresetNames = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O" };
 
         /// <summary>Layouts whose machinery exists. Widen as each one is built.</summary>
-        public static readonly string[] BuiltIds = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J" };
+        public static readonly string[] BuiltIds = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O" };
 
         /// <summary>Keys allowed inside a "layout" block. Anything else is an error (a typo must not run the default layout).</summary>
         public static readonly string[] JsonKeys = { "preset" };
@@ -51,10 +58,11 @@ namespace Assets.Scripts.Simulation.Types
         /// </summary>
         public static readonly LayoutSpec Default = new LayoutSpec("D");
 
-        /// <summary>Canonical id used in logs and results ("A" .. "J").</summary>
+        /// <summary>Canonical id used in logs and results ("A" .. "O").</summary>
         public string Id { get; }
 
-        public AisleTopology Aisles => Id[0] >= 'F' ? AisleTopology.TwoWay : AisleTopology.OneWay;
+        public AisleTopology Aisles => Id[0] >= 'K' ? AisleTopology.TwoWayPerimeter
+                                     : Id[0] >= 'F' ? AisleTopology.TwoWay : AisleTopology.OneWay;
 
         /// <summary>True for layout A (the pre-layout-config floor, including its 4-belt interior machines).</summary>
         public bool IsLegacy => Id == "A";
@@ -126,7 +134,7 @@ namespace Assets.Scripts.Simulation.Types
         public void EnsureBuildable()
         {
             if (BuiltIds.Contains(Id)) return;
-            string what = Aisles == AisleTopology.TwoWay ? "two-way aisles are not built yet"
+            string what = Aisles != AisleTopology.OneWay ? "two-way aisles are not built yet"
                                                           : "this belt layout is not built yet";
             throw new NotSupportedException(
                 $"Layout '{Id}' cannot run: {what}. Built layouts: {string.Join(", ", BuiltIds)}. " +
@@ -138,8 +146,9 @@ namespace Assets.Scripts.Simulation.Types
         /// <summary>Belt side ('N' or 'S') of the input and output belts of a machine in the given grid row.</summary>
         public (char input, char output) BeltSides(int row)
         {
-            // Two-way variants (F-J) reuse the belt pattern of A-E; only the aisles differ.
-            char basis = Aisles == AisleTopology.TwoWay ? (char)(Id[0] - 5) : Id[0];
+            // Two-way variants (F-J rows, K-O perimeter) reuse the belt pattern of A-E; only the aisles differ.
+            char basis = Aisles == AisleTopology.TwoWay ? (char)(Id[0] - 5)
+                       : Aisles == AisleTopology.TwoWayPerimeter ? (char)(Id[0] - 10) : Id[0];
             switch (basis)
             {
                 case 'A': return row == 0 ? ('S', 'S') : ('N', 'N');
@@ -165,7 +174,8 @@ namespace Assets.Scripts.Simulation.Types
         public string DescribeBelts(int machineRows)
             => string.Join("/", Enumerable.Range(0, machineRows).Select(r => { var (i, o) = BeltSides(r); return $"{i}{o}"; }));
 
-        public string AislesString => Aisles == AisleTopology.TwoWay ? "twoway" : "oneway";
+        public string AislesString => Aisles == AisleTopology.TwoWay ? "twoway"
+                                    : Aisles == AisleTopology.TwoWayPerimeter ? "twowayperimeter" : "oneway";
 
         public override string ToString() => Id;
     }

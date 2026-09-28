@@ -244,8 +244,23 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         /// </summary>
         private bool IsTwoWay => ActiveLayout != null && ActiveLayout.Aisles == AisleTopology.TwoWay;
 
-        public float SpineAisleWidth => spineAisleWidth;
-        public float VerticalAisleWidth => verticalAisleWidth;
+        /// <summary>
+        /// Two-way perimeter layouts (K-O) split each spine and vertical into two stacked one-way lanes, so those
+        /// aisles are twice the Inspector width. The outer lane (away from the machines) carries the clockwise loop,
+        /// the inner lane the counter-clockwise one (TrafficZoneManager.BuildPerimeterTwoWayGraph).
+        /// </summary>
+        public bool IsPerimeterTwoWay => ActiveLayout != null && ActiveLayout.Aisles == AisleTopology.TwoWayPerimeter;
+
+        /// <summary>Full spine / vertical aisle width (both lanes on a two-way perimeter): floor, wall, belt geometry.</summary>
+        public float SpineAisleWidth => IsPerimeterTwoWay ? spineAisleWidth * 2f : spineAisleWidth;
+        public float VerticalAisleWidth => IsPerimeterTwoWay ? verticalAisleWidth * 2f : verticalAisleWidth;
+        /// <summary>One perimeter lane's width (the Inspector value) in every layout: use for a zone's Size.</summary>
+        public float SpineLaneWidth => spineAisleWidth;
+        public float VerticalLaneWidth => verticalAisleWidth;
+        /// <summary>Distance of each perimeter lane's centreline from its aisle's centreline (0 on a one-way
+        /// perimeter). The outer lane is the one further from the machines.</summary>
+        public float SpineLaneOffset => IsPerimeterTwoWay ? spineAisleWidth / 2f : 0f;
+        public float VerticalLaneOffset => IsPerimeterTwoWay ? verticalAisleWidth / 2f : 0f;
         /// <summary>Full row aisle width (both lanes in two-way): use for floor/wall/spacing geometry.</summary>
         public float RowAisleWidth => IsTwoWay ? rowAisleWidth * 2f : rowAisleWidth;
         /// <summary>One lane's width (the Inspector value), one-way or two-way: use for a row lane zone's Size.</summary>
@@ -331,6 +346,9 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             ActiveParkingMethod = ParseParkingMethod(config.parkingMethod);
             string ioDocks = (config.ioDocks ?? "corner").Trim().ToLowerInvariant();
             ActiveIoDocks = ioDocks == "siding" ? IoDockMethod.Siding : ioDocks == "bypass" ? IoDockMethod.Bypass : IoDockMethod.Corner;
+            if (IsPerimeterTwoWay && (ActiveParkingMethod != ParkingMethod.Lane || ActiveIoDocks != IoDockMethod.Corner))
+                throw new NotSupportedException($"Layout {ActiveLayout.Id} (two-way perimeter) needs parkingMethod \"lane\" and ioDocks \"corner\" " +
+                                                $"(got \"{config.parkingMethod}\", \"{ioDocks}\").");
             if (ActiveIoDocks != IoDockMethod.Corner && ActiveParkingMethod == ParkingMethod.Multiple)
                 throw new NotSupportedException($"ioDocks \"{ioDocks}\" is not supported with parkingMethod \"multiple\" (its side alcoves use the same wall openings).");
 
@@ -550,10 +568,11 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             bool outSiding = ActiveIoDocks == IoDockMethod.Siding;     // bypass leaves the output belt on its corner
             int tile = BuildTile;
             string suffix = TileCount > 1 ? $"_T{tile}" : "";
+            // Belts serve the outer lane's corners (on a one-way perimeter the offsets are 0 and the outer lane is the aisle).
             incomingBeltPositions[tile] = new Vector3(
-                floorCentre.x - machineAreaHalfW + incomingBeltOffset.x,
+                floorCentre.x - machineAreaHalfW - 2f * VerticalLaneOffset + incomingBeltOffset.x,
                 incomingBeltOffset.y,
-                topZ + incomingBeltOffset.z);
+                topZ + SpineLaneOffset + incomingBeltOffset.z);
 
             GameObject conveyorPrefab = Visuals.ConveyorPrefab;
             if (conveyorPrefab != null)
@@ -579,7 +598,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             outgoingBeltPositions[tile] = new Vector3(
                 floorCentre.x + machineAreaHalfW + VerticalAisleWidth + outgoingBeltOffset.x,
                 outgoingBeltOffset.y,
-                botZ + outgoingBeltOffset.z);
+                botZ - SpineLaneOffset + outgoingBeltOffset.z);
 
             if (conveyorPrefab != null)
             {
@@ -634,7 +653,8 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         ///          prefers AGVs closest to the exit, and the entry end is left as a queue.
         private ParkingLaneShape ComputeLaneShape(int agvCount)
         {
-            float xR = ((layoutCols - 1) * machineSpacingX) / 2f + machineDepth / 2f + VerticalAisleWidth / 2f;
+            // The lane joins the outer lane's corners (the aisle centre on a one-way perimeter).
+            float xR = ((layoutCols - 1) * machineSpacingX) / 2f + machineDepth / 2f + VerticalAisleWidth / 2f + VerticalLaneOffset;
             float xL = -xR;
             float span = xR - xL;
 
@@ -667,7 +687,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             float xEnd = shape.LaneCentres[zoneCount - 1].x;
             if (xEnd < xL - 0.01f)
             {
-                float spineZ = GetBottomSpineZ();
+                float spineZ = GetBottomSpineZ() - SpineLaneOffset;
                 var exit = new List<Vector3> { new Vector3(xEnd, 0.01f, northZ) };
                 float d = xL - xEnd;
                 if (d >= 2.4f)
@@ -988,22 +1008,38 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                         SpawnFloorArrow(new Vector3(floorCentre.x + x, y, aisleCentre.z + lane.z), lane.yaw, arrowSize, new Color(0.9f, 0.7f, 0.2f, 0.3f), $"Arrow_RowAisle{a}");
             }
 
+            // Perimeter: the outer (clockwise) lane, plus the inner counter-clockwise lane on a two-way perimeter.
+            // Offsets are 0 one-way, so the single arrow row stays on the aisle centreline.
+            float so = SpineLaneOffset, vo = VerticalLaneOffset;
+            bool perim2 = IsPerimeterTwoWay;
             float topZ = floorCentre.z + GetTopSpineZ();
             float machineAreaHalfW = ((layoutCols - 1) * machineSpacingX) / 2f;
             for (float x = -machineAreaHalfW; x <= machineAreaHalfW; x += machineSpacingX)
-                SpawnFloorArrow(new Vector3(floorCentre.x + x, y, topZ), 90f, arrowSize * 1.2f, new Color(0.1f, 0.7f, 0.5f, 0.3f), "Arrow_TopSpine");
+            {
+                SpawnFloorArrow(new Vector3(floorCentre.x + x, y, topZ + so), 90f, arrowSize * 1.2f, new Color(0.1f, 0.7f, 0.5f, 0.3f), "Arrow_TopSpine");
+                if (perim2) SpawnFloorArrow(new Vector3(floorCentre.x + x, y, topZ - so), -90f, arrowSize * 1.2f, new Color(0.1f, 0.7f, 0.5f, 0.3f), "Arrow_TopSpine_Inner");
+            }
 
             float botZ = floorCentre.z + GetBottomSpineZ();
             for (float x = machineAreaHalfW; x >= -machineAreaHalfW; x -= machineSpacingX)
-                SpawnFloorArrow(new Vector3(floorCentre.x + x, y, botZ), -90f, arrowSize * 1.2f, new Color(0.1f, 0.7f, 0.5f, 0.3f), "Arrow_BotSpine");
+            {
+                SpawnFloorArrow(new Vector3(floorCentre.x + x, y, botZ - so), -90f, arrowSize * 1.2f, new Color(0.1f, 0.7f, 0.5f, 0.3f), "Arrow_BotSpine");
+                if (perim2) SpawnFloorArrow(new Vector3(floorCentre.x + x, y, botZ + so), 90f, arrowSize * 1.2f, new Color(0.1f, 0.7f, 0.5f, 0.3f), "Arrow_BotSpine_Inner");
+            }
 
             float leftX = floorCentre.x - machineAreaHalfW - machineDepth / 2f - VerticalAisleWidth / 2f;
             for (int a = 0; a < numRowAisles; a++)
-                SpawnFloorArrow(new Vector3(leftX, y, GetRowAisleCentre(a).z), 0f, arrowSize, new Color(0.2f, 0.4f, 0.9f, 0.3f), "Arrow_LeftVert");
+            {
+                SpawnFloorArrow(new Vector3(leftX - vo, y, GetRowAisleCentre(a).z), 0f, arrowSize, new Color(0.2f, 0.4f, 0.9f, 0.3f), "Arrow_LeftVert");
+                if (perim2) SpawnFloorArrow(new Vector3(leftX + vo, y, GetRowAisleCentre(a).z), 180f, arrowSize, new Color(0.2f, 0.4f, 0.9f, 0.3f), "Arrow_LeftVert_Inner");
+            }
 
             float rightX = floorCentre.x + machineAreaHalfW + machineDepth / 2f + VerticalAisleWidth / 2f;
             for (int a = 0; a < numRowAisles; a++)
-                SpawnFloorArrow(new Vector3(rightX, y, GetRowAisleCentre(a).z), 180f, arrowSize, new Color(0.2f, 0.4f, 0.9f, 0.3f), "Arrow_RightVert");
+            {
+                SpawnFloorArrow(new Vector3(rightX + vo, y, GetRowAisleCentre(a).z), 180f, arrowSize, new Color(0.2f, 0.4f, 0.9f, 0.3f), "Arrow_RightVert");
+                if (perim2) SpawnFloorArrow(new Vector3(rightX - vo, y, GetRowAisleCentre(a).z), 0f, arrowSize, new Color(0.2f, 0.4f, 0.9f, 0.3f), "Arrow_RightVert_Inner");
+            }
         }
 
         /// @brief Generates a custom mesh for a flat arrow on the floor plane.

@@ -161,6 +161,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             if (layoutManager.AgvsPooled) BuildSeamBridges();
             SimLogger.Medium($"[TrafficZones] Built zone graph: {zones.Count} zones" +
                              $"{(layoutManager.ActiveLayout != null && layoutManager.ActiveLayout.Aisles == Types.AisleTopology.TwoWay ? " (two-way row aisles)" : "")}" +
+                             $"{(layoutManager.IsPerimeterTwoWay ? " (two-way perimeter)" : "")}" +
                              $"{(tiles > 1 ? $" in {tiles} {(layoutManager.AgvsPooled ? "linked " : "")}tiles" : "")}.");
             CheckZoneGraph();
         }
@@ -170,6 +171,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         {
             int rows = layoutManager.LayoutRows;
             int cols = layoutManager.LayoutCols;
+            if (layoutManager.IsPerimeterTwoWay) { BuildPerimeterTwoWayGraph(tile, rows, cols); return; }
             bool twoWay = layoutManager.ActiveLayout != null && layoutManager.ActiveLayout.Aisles == Types.AisleTopology.TwoWay;
 
             // One-way: each row aisle is one lane in the aisle's own direction (GetRowAisleDirection), and it
@@ -197,10 +199,113 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                                                   rightVertZones[rightVertZones.Length - 1]);
 
             ConnectZoneGraph(rowLaneN, rowLaneS, twoWay, topSpineZones, botSpineZones, leftVertZones, rightVertZones, leftChain, rightChain);
-            RegisterDockPoints(tile, rowLaneN, rowLaneS, topSpineZones, botSpineZones, rows, cols, leftVertZones, rightVertZones);
+            RegisterDockPoints(tile, rowLaneN, rowLaneS, topSpineZones, botSpineZones, rows, cols, leftVertZones, rightVertZones,
+                               topSpineZones[0], botSpineZones[botSpineZones.Length - 1]);
             tileCorners.Add((leftVertZones[0], leftVertZones[leftVertZones.Length - 1],
                              rightVertZones[0], rightVertZones[rightVertZones.Length - 1]));
             if (layoutManager.ActiveIoDocks != IoDockMethod.Corner) BuildIoSidings(leftChain, rightChain, topSpineZones);
+        }
+
+        /// @brief Two-way perimeter (layouts K-O): one-way row aisles inside two concentric one-way perimeter rings.
+        /// @details Every spine and vertical is two stacked lanes. The OUTER lane (away from the machines) is the
+        ///          clockwise loop every other layout has (left north, top east, right south, bottom west) and keeps
+        ///          the corner zone names (LeftVert_TopConn ...), the belts, the parking lane and the seam bridges. The
+        ///          INNER lane (beside the machines, zone names with "In") runs counter-clockwise and carries everything
+        ///          that touches the machine area: row aisles start and end on it, and the row-0 / last-row spine docks
+        ///          are on it.
+        ///
+        ///          Lane changes are exit-only, so no short cycle forms (docs/LAYOUT_CONFIGURATION_SCOPE.md section 20):
+        ///          - a row aisle starts on the inner lane (outer traffic reaches it through the changes below);
+        ///          - at its downstream end a row leaves onto the inner lane, or crosses it onto the outer lane
+        ///            (inner Row junction -> outer Row junction). Inner through traffic may take that crossing too;
+        ///          - the outer ring feeds the inner ring at two corner crossovers: south-west (the outer left
+        ///            lane, heading north, into the inner south-west corner, which heads east) and north-east (outer
+        ///            right, heading south, into the inner north-east corner, which heads west); and at a row's
+        ///            upstream end only where that cannot close a short cycle (right vertical: above every exit
+        ///            change; left: below every one). On the 4 x 4 tile that is aisle 0's east end.
+        ///          On the left vertical the inner lane flows south and the outer north, so a short cycle would need an
+        ///          inner-to-outer change BELOW an outer-to-inner one; the only outer-to-inner change there is at the
+        ///          bottom. The right vertical mirrors this with its crossover at the top. Every remaining cycle runs
+        ///          through a row aisle or around a ring, so the girth is not below the one-way floor's.
+        ///
+        ///          Outer vertical junctions: [corner, spine-row pass, Row0.., spine-row pass, corner]; inner vertical
+        ///          junctions: [inner corner, Row0.., inner corner] (the same shape as a one-way vertical). The outer
+        ///          spine lanes have a pass zone above / below each inner vertical lane.
+        private void BuildPerimeterTwoWayGraph(int tile, int rows, int cols)
+        {
+            int[][] rowAisles = BuildRowAisleZones(rows, cols);
+            Vector3 floorCentre = layoutManager.TileOrigin;
+            float halfW = ((cols - 1) * layoutManager.MachineSpacingX) / 2f + layoutManager.MachineDepth / 2f;
+            float xc = halfW + layoutManager.VerticalAisleWidth / 2f, vo = layoutManager.VerticalLaneOffset;
+            float xIn = xc - vo, xOut = xc + vo;
+            float so = layoutManager.SpineLaneOffset, sw = layoutManager.SpineLaneWidth;
+            float zInT = layoutManager.GetTopSpineZ() - so, zOutT = layoutManager.GetTopSpineZ() + so;
+            float zInB = layoutManager.GetBottomSpineZ() + so, zOutB = layoutManager.GetBottomSpineZ() - so;
+
+            (int[] junctions, int[] chain) Vertical(bool left, bool outer)
+            {
+                var names = new List<string>(); var zs = new List<float>(); var hs = new List<float>();
+                void J(string n, float z, float h) { names.Add(n); zs.Add(z); hs.Add(h); }
+                if (outer) { J("TopConn", zOutT, sw); J("TopPass", zInT, sw); }
+                else J("TopConn", zInT, sw);
+                for (int a = 0; a < rows - 1; a++)
+                    J($"Row{a}", layoutManager.GetRowAisleCentre(a).z - floorCentre.z, layoutManager.RowAisleWidth);
+                if (outer) { J("BotPass", zInB, sw); J("BotConn", zOutB, sw); }
+                else J("BotConn", zInB, sw);
+                string side = (left ? "LeftVert" : "RightVert") + (outer ? "" : "In");
+                // Outer ring clockwise: left north, right south. Inner ring counter-clockwise: left south, right north.
+                FlowDirection flow = left == outer ? FlowDirection.North : FlowDirection.South;
+                return BuildVerticalChain(side, (left ? -1f : 1f) * (outer ? xOut : xIn), flow, names.ToArray(), zs.ToArray(), hs.ToArray());
+            }
+            var (loJ, loChain) = Vertical(true, true);
+            var (roJ, roChain) = Vertical(false, true);
+            var (liJ, liChain) = Vertical(true, false);
+            var (riJ, riChain) = Vertical(false, false);
+            int last = loJ.Length - 1;   // outer: [TopConn, TopPass, Row0.., BotPass, BotConn]; inner: [TopConn, Row0.., BotConn]
+
+            int[] topOut = BuildSpineChain("TopSpine", cols, zOutT, FlowDirection.East, loJ[0], roJ[0], xIn);
+            int[] botOut = BuildSpineChain("BotSpine", cols, zOutB, FlowDirection.West, loJ[last], roJ[last], xIn);
+            int[] topIn = BuildSpineChain("TopSpineIn", cols, zInT, FlowDirection.West, liJ[0], riJ[0], float.NaN);
+            int[] botIn = BuildSpineChain("BotSpineIn", cols, zInB, FlowDirection.East, liJ[liJ.Length - 1], riJ[riJ.Length - 1], float.NaN);
+
+            void Forward(int[] c) { for (int k = 0; k < c.Length - 1; k++) LinkZones(c[k], c[k + 1]); }
+            void Backward(int[] c) { for (int k = c.Length - 1; k > 0; k--) LinkZones(c[k], c[k - 1]); }
+
+            for (int a = 0; a < rowAisles.Length; a++) WireRowLanes(a, rowAisles, rowAisles, false, liJ, riJ, junctions: false);
+            // Outer ring, clockwise.
+            Backward(loChain); Forward(topOut); Forward(roChain); Backward(botOut);
+            // Inner ring, counter-clockwise.
+            Forward(liChain); Forward(botIn); Backward(riChain); Backward(topIn);
+            // Rows start and end on the inner lane.
+            for (int a = 0; a < rowAisles.Length; a++) WireRowLanes(a, rowAisles, rowAisles, false, liJ, riJ, junctions: true);
+            // Exit-only lane changes: at a row's downstream end, inner lane -> outer lane.
+            for (int a = 0; a < rowAisles.Length; a++)
+            {
+                if (layoutManager.GetRowAisleDirection(a).x > 0f) LinkZones(riJ[a + 1], roJ[a + 2]);
+                else LinkZones(liJ[a + 1], loJ[a + 2]);
+            }
+            // Corner crossovers, outer -> inner: south-west (outer left BotPass -> inner BotConn) and
+            // north-east (outer right TopPass -> inner TopConn).
+            LinkZones(loJ[last - 1], liJ[liJ.Length - 1]);
+            LinkZones(roJ[1], riJ[0]);
+            // Entry changes, outer -> inner at a row's upstream end, only where no short cycle can form: on the right
+            // vertical above its highest exit change, on the left below its lowest one (the corner crossovers are the
+            // limiting case). This lets outer-lane traffic enter aisle 0 from the right without lapping the inner ring.
+            int aisles = rowAisles.Length, topExitRight = aisles, lowExitLeft = -1;
+            for (int a = 0; a < aisles; a++)
+            {
+                if (layoutManager.GetRowAisleDirection(a).x > 0f) topExitRight = Mathf.Min(topExitRight, a);
+                else lowExitLeft = a;
+            }
+            for (int a = 0; a < aisles; a++)
+            {
+                bool east = layoutManager.GetRowAisleDirection(a).x > 0f;
+                if (!east && a < topExitRight) LinkZones(roJ[a + 2], riJ[a + 1]);
+                if (east && a > lowExitLeft) LinkZones(loJ[a + 2], liJ[a + 1]);
+            }
+
+            RegisterDockPoints(tile, rowAisles, rowAisles, topIn, botIn, rows, cols, loJ, roJ, loJ[0], roJ[last]);
+            tileCorners.Add((loJ[0], loJ[last], roJ[0], roJ[last]));
         }
 
         /// @brief Linked floor (TilingSpec.AgvsPooled): joins neighbouring tiles' perimeters across each seam.
@@ -283,10 +388,10 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             int misplacedDocks = 0;
             foreach (var z in zones)
                 foreach (var kv in z.DockPoints)
-                    if (kv.Key >= 0 && !z.Contains(kv.Value.ApproachPosition))
+                    if (kv.Key != ParkingAreaId && !z.Contains(kv.Value.ApproachPosition))
                     {
                         misplacedDocks++;
-                        SimLogger.Error($"[TrafficZones] Dock for machine {kv.Key} approaches outside its zone {z.Name}.");
+                        SimLogger.Error($"[TrafficZones] Dock {(kv.Key >= 0 ? $"for machine {kv.Key}" : $"for belt key {kv.Key}")} approaches outside its zone {z.Name}.");
                     }
 
             int girth = int.MaxValue;
@@ -378,40 +483,49 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         /// reservations could not keep two AGVs apart (AGVCollisionMonitor: ~96% of floor overlaps
         /// on the original layout). The corner-to-dock spacing is 2.5 units, above the 2.36 clearance.
         private int[] BuildSpineZones(bool isTop, int cols, int cornerLeftZoneId, int cornerRightZoneId)
+            => BuildSpineChain(isTop ? "TopSpine" : "BotSpine", cols,
+                               isTop ? layoutManager.GetTopSpineZ() : layoutManager.GetBottomSpineZ(),
+                               isTop ? FlowDirection.East : FlowDirection.West, cornerLeftZoneId, cornerRightZoneId, float.NaN);
+
+        /// @brief One spine lane: [cornerL, (PassL), Dock0, Transit0, ..., DockN-1, (PassR), cornerR] at local z @p z.
+        /// @param passX NaN for none; otherwise the |x| of the inner vertical lane, where a two-way perimeter's outer
+        /// spine lane gets a zone of its own (PassL / PassR) between its corner and the dock run. Dock zones then sit
+        /// at indices 2 + 2k, so SpineDockIndex applies only to spines without pass zones (the only ones with docks).
+        private int[] BuildSpineChain(string side, int cols, float z, FlowDirection flow, int cornerLeftZoneId, int cornerRightZoneId, float passX)
         {
+            bool pass = !float.IsNaN(passX);
             int numDockTransit = 2 * cols - 1;
-            int[] result = new int[numDockTransit + 2];
-            float z = isTop ? layoutManager.GetTopSpineZ() : layoutManager.GetBottomSpineZ();
+            var result = new List<int> { cornerLeftZoneId };
             Vector3 floorCentre = layoutManager.TileOrigin;
-            FlowDirection flow = isTop ? FlowDirection.East : FlowDirection.West;
-            string side = isTop ? "TopSpine" : "BotSpine";
             float segWidth = layoutManager.MachineSpacingX;
             float subWidth = segWidth / 2f;
             float halfTotalWidth = ((cols - 1) * segWidth) / 2f;
 
-            result[0] = cornerLeftZoneId;
-            result[result.Length - 1] = cornerRightZoneId;
-
-            for (int s = 1; s < result.Length - 1; s++)
+            int AddZone(string name, float x, float width)
             {
-                int k = s - 1;                       // 0-based within the dock/transit run
-                bool isDock = k % 2 == 0;
-                float centreX = -halfTotalWidth + k * subWidth;
-
                 var zone = new TrafficZone
                 {
                     ZoneId = nextZoneId++,
-                    Name = $"{side}_{(isDock ? $"Dock{k / 2}" : $"Transit{k / 2}")}",
+                    Name = $"{side}_{name}",
                     AisleType = AisleType.SpineAisle,
                     Flow = flow,
-                    Centre = new Vector3(floorCentre.x + centreX, 0.01f, floorCentre.z + z),
-                    Size = new Vector3(subWidth, 0.1f, layoutManager.SpineAisleWidth),
+                    Centre = new Vector3(floorCentre.x + x, 0.01f, floorCentre.z + z),
+                    Size = new Vector3(width, 0.1f, layoutManager.SpineLaneWidth),
                     Capacity = 1
                 };
                 RegisterZone(zone);
-                result[s] = zone.ZoneId;
+                return zone.ZoneId;
             }
-            return result;
+
+            if (pass) result.Add(AddZone("PassL", -passX, layoutManager.VerticalLaneWidth));
+            for (int k = 0; k < numDockTransit; k++)   // 0-based within the dock/transit run
+            {
+                bool isDock = k % 2 == 0;
+                result.Add(AddZone(isDock ? $"Dock{k / 2}" : $"Transit{k / 2}", -halfTotalWidth + k * subWidth, subWidth));
+            }
+            if (pass) result.Add(AddZone("PassR", passX, layoutManager.VerticalLaneWidth));
+            result.Add(cornerRightZoneId);
+            return result.ToArray();
         }
 
         /// <summary>Minimum centre-to-centre spacing of vertical zones: just above 2 x the 1.18 NavMesh clearance.</summary>
@@ -432,8 +546,6 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         {
             int numRowAisles = rows - 1;
             int numJunctions = numRowAisles + 2;
-            int[] junctions = new int[numJunctions];
-            var chain = new List<int>();
             float halfMachineAreaW = ((layoutManager.LayoutCols - 1) * layoutManager.MachineSpacingX) / 2f + layoutManager.MachineDepth / 2f;
             float x = isLeft ? -(halfMachineAreaW + layoutManager.VerticalAisleWidth / 2f) : (halfMachineAreaW + layoutManager.VerticalAisleWidth / 2f);
             FlowDirection flow = isLeft ? FlowDirection.North : FlowDirection.South;
@@ -449,6 +561,17 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 else if (s == numJunctions - 1) { zs[s] = layoutManager.GetBottomSpineZ(); heights[s] = layoutManager.SpineAisleWidth; names[s] = "BotConn"; }
                 else { zs[s] = layoutManager.GetRowAisleCentre(s - 1).z - floorCentre.z; heights[s] = layoutManager.RowAisleWidth; names[s] = $"Row{s - 1}"; }
             }
+            return BuildVerticalChain(side, x, flow, names, zs, heights);
+        }
+
+        /// @brief One vertical lane at local x @p x: a junction zone per (name, z, height), top to bottom, with evenly
+        /// spaced gap zones (pitch >= MinVerticalPitch) between consecutive junctions. See BuildVerticalZones.
+        private (int[] junctions, int[] chain) BuildVerticalChain(string side, float x, FlowDirection flow, string[] names, float[] zs, float[] heights)
+        {
+            int numJunctions = names.Length;
+            int[] junctions = new int[numJunctions];
+            var chain = new List<int>();
+            Vector3 floorCentre = layoutManager.TileOrigin;
 
             for (int s = 0; s < numJunctions; s++)
             {
@@ -474,7 +597,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 AisleType = AisleType.VerticalAisle,
                 Flow = flow,
                 Centre = new Vector3(floorCentre.x + x, 0.01f, floorCentre.z + z),
-                Size = new Vector3(layoutManager.VerticalAisleWidth, 0.1f, height),
+                Size = new Vector3(layoutManager.VerticalLaneWidth, 0.1f, height),
                 Capacity = 1
             };
             RegisterZone(zone);
@@ -551,8 +674,10 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         /// @param rowLaneN, rowLaneS The lane beside the aisle's north edge (hosts the south-face docks of the
         /// machine row above) and beside its south edge (north-face docks of the row below). The same array in
         /// one-way. A dock's approach point lies in the lane beside it, so it is registered on that lane only.
+        /// @param inBeltZone, outBeltZone The zones serving the input belt (north-west corner) and output belt (south-east
+        /// corner): the spine ends on a one-way perimeter, the outer lane's corners on a two-way one.
         private void RegisterDockPoints(int tile, int[][] rowLaneN, int[][] rowLaneS, int[] topSpine, int[] botSpine,
-                                int rows, int cols, int[] leftVert, int[] rightVert)
+                                int rows, int cols, int[] leftVert, int[] rightVert, int inBeltZone, int outBeltZone)
         {
             ConveyorBelt inBelt = layoutManager.IncomingBeltOf(tile), outBelt = layoutManager.OutgoingBeltOf(tile);
             // Siding / bypass register the moved belt docks on their sidings instead (BuildIoSidings); bypass keeps
@@ -561,14 +686,14 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             bool outCorner = layoutManager.ActiveIoDocks != IoDockMethod.Siding;
             if (inCorner && topSpine.Length > 0 && inBelt != null)
             {
-                TrafficZone inZone = zoneById[topSpine[0]];
+                TrafficZone inZone = zoneById[inBeltZone];
                 Vector3 handshake = inBelt.OutputEndPosition;
                 inZone.DockPoints[IncomingDockKey(tile)] = new DockPoint { ApproachPosition = handshake - Vector3.forward * 1.5f, HandshakePosition = handshake, FacingDirection = Vector3.forward, IsPickup = true };
             }
 
             if (outCorner && botSpine.Length > 0 && outBelt != null)
             {
-                TrafficZone outZone = zoneById[botSpine[botSpine.Length - 1]];
+                TrafficZone outZone = zoneById[outBeltZone];
                 Vector3 handshake = outBelt.InputEndPosition;
                 outZone.DockPoints[OutgoingDockKey(tile)] = new DockPoint { ApproachPosition = handshake + Vector3.forward * 1.5f, HandshakePosition = handshake, FacingDirection = -Vector3.forward, IsPickup = false };
             }
