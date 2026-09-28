@@ -485,6 +485,10 @@ namespace Assets.Scripts.Simulation
                 config.Tiling = (config.Tiling ?? TilingSpec.Single).WithTiles(ConfigOverrides.Tiles.Value);
             if (config != null && ConfigOverrides.ReleaseRule != null)
                 config.Tiling = (config.Tiling ?? TilingSpec.Single).WithRelease(TilingSpec.ParseRelease(ConfigOverrides.ReleaseRule));
+            if (config != null && ConfigOverrides.MachineFlexibility.HasValue)
+                config.MachineFlexibilityProbability = ConfigOverrides.MachineFlexibility.Value;
+            if (config != null && ConfigOverrides.SecondaryTimeMultiplier.HasValue)
+                config.SecondaryTimeMultiplier = ConfigOverrides.SecondaryTimeMultiplier.Value;
             return config;
         }
 
@@ -1419,6 +1423,9 @@ namespace Assets.Scripts.Simulation
             record.JobScope = tiling.JobScope;
             record.AgvAssignment = tiling.AgvAssignment;
             record.ReleaseRule = tiling.ReleaseString;
+            record.MachineFlexibility = layoutManager.ActiveFlexibilityProbability;
+            record.SecondaryTimeMultiplier = layoutManager.ActiveSecondaryTimeMultiplier;
+            record.MeanCapabilitiesPerMachine = layoutManager.MeanCapabilitiesPerMachine;
             record.OrphanPreDispatchesReleased = _flags != null ? _flags.OrphanPreDispatchesReleased : 0;
 
             // Collect AGV performance records

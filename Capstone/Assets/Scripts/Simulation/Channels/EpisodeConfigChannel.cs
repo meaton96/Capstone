@@ -171,6 +171,7 @@ namespace Assets.Scripts.Simulation.Channels
                 AGVMoveSpeed = root["agvMoveSpeed"]?.Value<float>(),
                 AGVHandshakeDuration = root["agvHandshakeDuration"]?.Value<float>(),
                 MachineFlexibilityProbability = root["machineFlexibilityProbability"]?.Value<float>() ?? 0f,
+                SecondaryTimeMultiplier = root["secondaryTimeMultiplier"]?.Value<float>() ?? 1f,
                 parkingMethod = root["parkingMethod"]?.Value<string>() ?? "lane",
                 ioDocks = ConfigOverrides.ValidatedIoDocks(root["ioDocks"]?.Value<string>() ?? "corner"),
                 reservationProtocol = ReservationProtocolParser.Validated(root["reservationProtocol"]?.Value<string>()),

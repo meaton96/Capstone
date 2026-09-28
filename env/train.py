@@ -31,6 +31,7 @@ tensorboard --logdir results
 
 import argparse
 import csv
+import json
 import math
 import os
 import shutil
@@ -52,6 +53,7 @@ from config import (
     ACTION_BRANCHES, ACTION_LAYOUT, obs_shapes as shapes_for_caps,
 )
 from models.network import SchedulingNetwork
+from notify import Watchdog, notify, run_label
 from rollout_buffer import RolloutBuffer
 
 ENV_ROOT = Path(__file__).resolve().parent
@@ -238,6 +240,25 @@ def save_checkpoint(path: Path, net, optimizer, global_step: int, ppo_cfg: PPOCo
     }, path)
 
 
+## @brief Live run status for the watchdog and the crash handler in __main__ (label, step, total, phase).
+RUN_STATUS = {"label": "", "step": 0, "total": 0, "phase": "not started"}
+
+
+def write_progress(run_dir: Path, progress: dict) -> None:
+    """@brief Atomically write run_dir/progress.json (read by slurm/train_status.sh)."""
+    tmp = run_dir / "progress.json.tmp"
+    tmp.write_text(json.dumps(progress, indent=1))
+    os.replace(tmp, run_dir / "progress.json")
+
+
+def progress_line(p: dict) -> str:
+    """@brief One-line summary of a progress.json dict."""
+    flow = f", recent mean flow {p['recent_mean_flow']:.0f} s" if p.get("recent_mean_flow") is not None else ""
+    return (f"step {p['global_step']:,}/{p['total_timesteps']:,} "
+            f"({100 * p['global_step'] / max(p['total_timesteps'], 1):.1f}%), {p['sps']:.1f} SPS, "
+            f"ETA {p['eta_hours']:.1f} h, {p['episodes']} episodes{flow}")
+
+
 def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
     """@brief Main PPO training loop.
 
@@ -252,6 +273,12 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
 
     run_dir = Path(args.results_dir) / args.run_id
     run_dir.mkdir(parents=True, exist_ok=True)
+
+    # Progress shared with the watchdog, the heartbeat messages, progress.json and the crash handler in __main__.
+    label = run_label(args.run_id)
+    RUN_STATUS.update(label=label, step=0, total=ppo_cfg.total_timesteps, phase="starting")
+    watchdog = Watchdog(args.stall_minutes, label,
+                        status=lambda: f"Last phase: {RUN_STATUS['phase']}, step {RUN_STATUS['step']:,}.")
 
     reward = None
     if args.unity:
@@ -308,7 +335,8 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
         scenario_generator = REGISTRY[args.scenario_generator](
             duration, random_warmup=args.random_warmup,
             warmup_dispatching_rule=args.warmup_dispatching_rule,
-            agv_move_speed=args.agv_move_speed, agv_handshake_duration=args.agv_handshake_duration)
+            agv_move_speed=args.agv_move_speed, agv_handshake_duration=args.agv_handshake_duration,
+            machine_flexibility=args.machine_flexibility, secondary_time_multiplier=args.secondary_time_multiplier)
         print(f"\nScenario generator: {args.scenario_generator}"
               + (f" (episode_duration_seconds={args.episode_duration_seconds})"
                  if args.episode_duration_seconds else "")
@@ -316,7 +344,9 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
                  if args.random_warmup else "")
               + (f" (agv_move_speed={args.agv_move_speed})" if args.agv_move_speed else "")
               + (f" (agv_handshake_duration={args.agv_handshake_duration})"
-                 if args.agv_handshake_duration else ""))
+                 if args.agv_handshake_duration else "")
+              + (f" (machine_flexibility={args.machine_flexibility}, secondary_time_multiplier="
+                 f"{args.secondary_time_multiplier})" if args.machine_flexibility else ""))
 
     # ---- Initialize environments ----
     vec_env, obs_shapes = build_env(args, ppo_cfg, run_dir, reward, scenario_generator)
@@ -326,6 +356,8 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
         shutil.copy2(args.scenario, run_dir / "scenario.json")
         print(f"Scenario: {args.scenario}")
     obs, infos = vec_env.reset()
+    watchdog.beat()
+    RUN_STATUS["phase"] = "collecting the first rollout"
 
     buffer = RolloutBuffer(
         rollout_length=ppo_cfg.rollout_length,
@@ -347,6 +379,8 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
     if not args.resume_from:
         num_updates = max(1, num_updates)   # unresumed runs always do at least one update
     global_step = resumed_global_step
+    RUN_STATUS["step"] = global_step
+    last_heartbeat = time.time()
     episodes_done = 0
     recent_episodes = deque(maxlen=20)
     start_time = time.time()
@@ -410,6 +444,7 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
 
                 buffer.add(obs, actions_np, log_probs_np, rewards, values_np, dones, bootstrap_values)
                 obs = next_obs
+                watchdog.beat()
                 episodes_done += log_episodes(writer, infos, global_step, recent_episodes, episode_csv)
 
             # Bootstrap value for GAE
@@ -516,6 +551,25 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
             if args.save_every > 0 and update % args.save_every == 0:
                 save_checkpoint(run_dir / f"checkpoint_step{global_step}.pt", net, optimizer,
                                 global_step, ppo_cfg, reward_name, row_caps)
+
+            # ---- Progress file, heartbeat messages, watchdog ----
+            watchdog.beat()
+            RUN_STATUS.update(step=global_step, phase=f"training (update {update}/{num_updates})")
+            eta_h = (ppo_cfg.total_timesteps - global_step) / sps / 3600 if sps > 0 else float("nan")
+            flows = [e["mean_flow_time"] for e in recent_episodes
+                     if isinstance(e.get("mean_flow_time"), float) and not math.isnan(e["mean_flow_time"])]
+            progress = {
+                "run_id": args.run_id, "label": label, "update": update, "num_updates": num_updates,
+                "global_step": global_step, "total_timesteps": ppo_cfg.total_timesteps,
+                "sps": round(sps, 2), "eta_hours": round(eta_h, 2), "episodes": episodes_done,
+                "recent_mean_flow": round(float(np.mean(flows)), 1) if flows else None,
+                "updated_at": datetime.now().isoformat(timespec="seconds"),
+            }
+            write_progress(run_dir, progress)
+            if update == 1 or time.time() - last_heartbeat >= args.notify_every_hours * 3600:
+                head = ":white_check_mark: **training started**" if update == 1 else ":hourglass: progress"
+                notify(f"{head} {label}: {progress_line(progress)}")
+                last_heartbeat = time.time()
     finally:
         # Save and shut Unity down even on Ctrl-C, so long runs keep their progress.
         save_checkpoint(ckpt_path, net, optimizer, global_step, ppo_cfg, reward_name, row_caps)
@@ -525,6 +579,10 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
             vec_env.close()
 
     elapsed = time.time() - start_time
+    watchdog.stop()
+    RUN_STATUS["phase"] = "finished"
+    notify(f":checkered_flag: **finished** {label}: step {global_step:,} of {ppo_cfg.total_timesteps:,} "
+           f"in {elapsed / 3600:.1f} h. Checkpoint: {ckpt_path}")
     print(f"\nCheckpoint saved to {ckpt_path}")
     print(f"Total training time: {elapsed:.1f}s")
     print(f"Average SPS: {(global_step - resumed_global_step) / elapsed:.0f}")
@@ -606,6 +664,11 @@ if __name__ == "__main__":
     parser.add_argument("--agv-handshake-duration", type=float, default=None,
                         help="With --scenario-generator, overrides AGV pickup/dropoff handshake "
                              "time (sim-seconds; prefab default 1.5)")
+    parser.add_argument("--machine-flexibility", type=float, default=0.0,
+                        help="With --scenario-generator: probability that a machine can also run each other "
+                             "operation type (0 = fully typed; see FJSSPConfig.MachineFlexibilityProbability)")
+    parser.add_argument("--secondary-time-multiplier", type=float, default=1.0,
+                        help="With --machine-flexibility: processing-time factor on a machine's secondary types")
     parser.add_argument("--sequential-envs", action="store_true",
                         help="Step Unity envs one after another instead of concurrently")
     parser.add_argument("--ent-coef", type=float, default=0.01, help="Entropy bonus coefficient")
@@ -615,6 +678,12 @@ if __name__ == "__main__":
                         help="torch.set_num_threads (0 = torch default); keep low when sharing a node with Unity players")
     parser.add_argument("--base-worker-id", type=int, default=0,
                         help="Unity port offset (5005 + id); change to run several trainings at once")
+    parser.add_argument("--stall-minutes", type=float, default=45.0,
+                        help="Exit with code 3 (after a webhook alert) when no env step or update happens for this "
+                             "long, startup included; 0 disables. See env/notify.py")
+    parser.add_argument("--notify-every-hours", type=float, default=6.0,
+                        help="Webhook progress message interval (plus one after the first update, and on finish, "
+                             "stop or crash). The webhook is $NOTIFY_WEBHOOK_URL or ~/.capstone_webhook; none = off")
     parser.add_argument("--obs-max-machines", type=int, default=0,
                         help="Observation machine rows (0 = fit the largest floor in the run's scenarios)")
     parser.add_argument("--obs-max-jobs", type=int, default=0,
@@ -643,4 +712,16 @@ if __name__ == "__main__":
         raise KeyboardInterrupt(f"received signal {signum}")
 
     signal.signal(signal.SIGTERM, _terminate)
-    train(cfg, args, device=args.device)
+    try:
+        train(cfg, args, device=args.device)
+    except KeyboardInterrupt as e:
+        # SIGTERM from Slurm (time limit / scancel) or Ctrl-C: train()'s finally already saved checkpoint.pt.
+        notify(f":pause_button: **stopped** {RUN_STATUS['label']} ({e}) at step {RUN_STATUS['step']:,} of "
+               f"{RUN_STATUS['total']:,}; checkpoint saved. Resubmit the same command to resume.")
+        raise
+    except BaseException:
+        import traceback
+        tail = "".join(traceback.format_exc().splitlines(keepends=True)[-12:])
+        notify(f":x: **crashed** {RUN_STATUS['label']} during {RUN_STATUS['phase']} at step "
+               f"{RUN_STATUS['step']:,}:\n```\n{tail}```")
+        raise

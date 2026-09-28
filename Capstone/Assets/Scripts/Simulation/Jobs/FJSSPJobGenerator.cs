@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Assets.Scripts.Simulation.Machines;
+using Assets.Scripts.Simulation.FactoryLayout;
 using Assets.Scripts.Simulation.Types;
 using Assets.Scripts.Simulation.Logging;
 
@@ -96,7 +97,7 @@ namespace Assets.Scripts.Simulation.Jobs
                     foreach (int machineId in machinesByType[opSequence[o]])
                     {
                         float procTime = SampleProcTime(opSequence[o], config);
-                        eligible[o][machineId] = procTime;
+                        eligible[o][machineId] = SecondaryAdjusted(machineId, opSequence[o], procTime);
                     }
                 }
 
@@ -148,7 +149,7 @@ namespace Assets.Scripts.Simulation.Jobs
             {
                 eligible[o] = new Dictionary<int, float>();
                 foreach (int machineId in machinesByType[opSequence[o]])
-                    eligible[o][machineId] = SampleProcTime(opSequence[o], config);
+                    eligible[o][machineId] = SecondaryAdjusted(machineId, opSequence[o], SampleProcTime(opSequence[o], config));
             }
 
             return new FJSSPJobDefinition
@@ -158,6 +159,17 @@ namespace Assets.Scripts.Simulation.Jobs
                 OperationSequence = opSequence,
                 EligibleMachinesPerOp = eligible,
             };
+        }
+
+        /// <summary>
+        /// A sampled processing time, scaled by the floor's secondary-capability multiplier when
+        /// <paramref name="machineId"/>'s primary type is not <paramref name="opType"/>
+        /// (FactoryLayoutManager.ProcessingTimeOn). Applied after sampling, so the random stream is unchanged.
+        /// </summary>
+        private static float SecondaryAdjusted(int machineId, MachineType opType, float procTime)
+        {
+            FactoryLayoutManager floor = FactoryLayoutManager.Instance;
+            return floor != null ? floor.ProcessingTimeOn(machineId, opType, procTime) : procTime;
         }
 
         /// <summary>

@@ -5,6 +5,7 @@ using UnityEngine;
 using Newtonsoft.Json.Linq;
 using Assets.Scripts.Simulation.Machines;
 using Assets.Scripts.Simulation.Types;
+using Assets.Scripts.Simulation.FactoryLayout;
 using Assets.Scripts.Simulation.Logging;
 
 namespace Assets.Scripts.Simulation.Jobs
@@ -125,7 +126,8 @@ namespace Assets.Scripts.Simulation.Jobs
         private static readonly string[] KnownKeys =
         {
             "name", "seed", "agvCount", "agvMoveSpeed", "agvHandshakeDuration", "dispatchingRule",
-            "jobs", "machineTypeLayout", "parkingMethod", "ioDocks", "reservationProtocol", "routingTrigger", "stochastic", "layout", "tiling"
+            "jobs", "machineTypeLayout", "parkingMethod", "ioDocks", "reservationProtocol", "routingTrigger", "stochastic", "layout", "tiling",
+            "machineFlexibilityProbability", "secondaryTimeMultiplier"
         };
 
         private static FJSSPConfig BuildConfig(string json, string fileName,
@@ -217,6 +219,8 @@ namespace Assets.Scripts.Simulation.Jobs
                 routingTrigger = RoutingTriggerParser.Validated(root["routingTrigger"]?.Value<string>()),
                 Layout = LayoutSpec.FromJson(root["layout"]),
                 Tiling = TilingSpec.FromJson(root["tiling"]),
+                MachineFlexibilityProbability = root["machineFlexibilityProbability"]?.Value<float>() ?? 0f,
+                SecondaryTimeMultiplier = root["secondaryTimeMultiplier"]?.Value<float>() ?? 1f,
                 parkingMethod = root["parkingMethod"] != null
                     ? ConfigOverrides.ValidatedParkingMethod(root["parkingMethod"].Value<string>())
                     : "lane",
@@ -331,7 +335,22 @@ namespace Assets.Scripts.Simulation.Jobs
                     opSequence[o] = type;
                     eligible[o] = new Dictionary<int, float>();
 
-                    if (!machinesByType.TryGetValue(type, out var idList) || idList.Count == 0)
+                    // Machine flexibility (FJSSPConfig.MachineFlexibilityProbability): machines may carry secondary
+                    // capabilities. machineIndex always counts only machines whose PRIMARY type this is, so
+                    // flexibility never shifts which machine "Weld[1]" means. "allowSecondary" (default true for
+                    // "any", false for index arrays; never for a single pinned index) also admits every machine
+                    // with this type as a secondary capability, at "secondaryDuration" (default: the op's scalar
+                    // duration, or the mean of its duration array) x secondaryTimeMultiplier (ProcessingTimeOn).
+                    // Without flexibility (or outside a built floor) there are no secondary machines.
+                    FactoryLayoutManager floor = FactoryLayoutManager.Instance;
+                    machinesByType.TryGetValue(type, out var capableIds);
+                    List<int> idList = capableIds;
+                    if (floor != null && capableIds != null)
+                    {
+                        List<int> primaryIds = floor.PrimaryMachinesOfType(type);
+                        if (primaryIds.Count > 0) idList = primaryIds;
+                    }
+                    if (idList == null || idList.Count == 0)
                     {
                         SimLogger.LogError($"[ScenarioLoader] Job {jobId} op {o}: no runtime " +
                                             $"machines of type {type} exist on the floor.");
@@ -343,6 +362,8 @@ namespace Assets.Scripts.Simulation.Jobs
                         || (idxToken.Type == JTokenType.String
                             && string.Equals((string)idxToken, "any", StringComparison.OrdinalIgnoreCase));
 
+                    bool allowSecondary = rawOp["allowSecondary"]?.Value<bool>() ?? isAny;
+
                     if (isAny)
                     {
                         // All-of-type eligibility, same convention FJSSPJobGenerator uses —
@@ -351,6 +372,8 @@ namespace Assets.Scripts.Simulation.Jobs
                         float duration = durationToken.Value<float>();
                         foreach (int machineId in idList)
                             eligible[o][machineId] = duration;
+                        if (allowSecondary)
+                            AddSecondaryMachines(eligible[o], rawOp, duration, type, capableIds, floor);
                     }
                     else if (idxToken.Type == JTokenType.Array)
                     {
@@ -391,6 +414,12 @@ namespace Assets.Scripts.Simulation.Jobs
                             }
                             eligible[o][idList[idx]] = durations != null ? durations[k].Value<float>() : uniformDuration;
                         }
+                        if (allowSecondary && eligible[o].Count > 0)
+                        {
+                            float mean = 0f;
+                            foreach (float d in eligible[o].Values) mean += d;
+                            AddSecondaryMachines(eligible[o], rawOp, mean / eligible[o].Count, type, capableIds, floor);
+                        }
                     }
                     else
                     {
@@ -420,6 +449,21 @@ namespace Assets.Scripts.Simulation.Jobs
 
             SimLogger.Low($"[ScenarioLoader] Loaded {jobs.Length} hand-crafted jobs.");
             return jobs;
+        }
+
+        /// <summary>
+        /// Adds every machine with <paramref name="type"/> as a secondary capability (capable but not already
+        /// eligible) at the op's secondary time: "secondaryDuration" if given, else <paramref name="defaultBase"/>,
+        /// scaled by FactoryLayoutManager.ProcessingTimeOn. No-op without a built floor or without flexibility.
+        /// </summary>
+        private static void AddSecondaryMachines(Dictionary<int, float> eligible, JObject rawOp, float defaultBase,
+                                                 MachineType type, List<int> capableIds, FactoryLayoutManager floor)
+        {
+            if (floor == null || capableIds == null) return;
+            float baseDuration = rawOp["secondaryDuration"]?.Value<float>() ?? defaultBase;
+            foreach (int machineId in capableIds)
+                if (!eligible.ContainsKey(machineId))
+                    eligible[machineId] = floor.ProcessingTimeOn(machineId, type, baseDuration);
         }
     }
 }

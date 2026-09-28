@@ -356,6 +356,11 @@ def main(argv=None):
     parser.add_argument("--episode-duration-seconds", type=float, default=0.0,
                         help="With --scenario-generator, cap each episode at this many sim-seconds "
                              "(steady-state mode); 0 runs the scenario to its natural length")
+    parser.add_argument("--machine-flexibility", type=float, default=0.0,
+                        help="With --scenario-generator: probability that a machine can also run each other "
+                             "operation type (0 = fully typed; see FJSSPConfig.MachineFlexibilityProbability)")
+    parser.add_argument("--secondary-time-multiplier", type=float, default=1.0,
+                        help="With --machine-flexibility: processing-time factor on a machine's secondary types")
     parser.add_argument("--decision-log", action="store_true",
                         help="Also write decisions.csv: every decision's chosen rule, plus the "
                              "action probabilities for checkpoints")
@@ -386,7 +391,9 @@ def main(argv=None):
     if args.scenario_generator:
         from scenarios import REGISTRY
         duration = args.episode_duration_seconds if args.episode_duration_seconds > 0 else None
-        scenario_generator = REGISTRY[args.scenario_generator](duration)
+        scenario_generator = REGISTRY[args.scenario_generator](
+            duration, machine_flexibility=args.machine_flexibility,
+            secondary_time_multiplier=args.secondary_time_multiplier)
 
     seeds = parse_seeds(args.seeds)
     if max(seeds) >= TRAIN_SEED_LOW:

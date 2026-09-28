@@ -89,6 +89,15 @@ class RandomizedParams:
     machine_speed_spread: float = 0.0                    # fixed per-machine factor, log-uniform in [1/(1+x), 1+x]
     op_machine_spread: float = 0.30                      # per-op, per-machine factor uniform in [1-x, 1+x]
     skew_weight: float = 2.5
+    # Machine flexibility (FJSSPConfig): each machine can also run each other type with this probability (drawn in
+    # Unity from the scenario seed), at secondaryDuration x secondary_time_multiplier. 0 = fully typed, and the
+    # scenario is then unchanged from before these fields existed.
+    machine_flexibility: float = 0.0
+    secondary_time_multiplier: float = 1.0
+    # Write the per-op opt-in ("allowSecondary" + "secondaryDuration") even at machine_flexibility 0, so one set of
+    # files serves a flexibility sweep through the player's -flex / -flexmult overrides (at -flex 0 the instance
+    # runs exactly like the typed one). Implied by machine_flexibility > 0.
+    secondary_ops: bool = False
     burst_window_seconds: float = 60.0
 
     agv_seconds_per_move: float = 64.0                   # measured: AGV busy time per transport move
@@ -181,7 +190,12 @@ def randomized_scenario(seed: int, params: RandomizedParams = DEFAULT_PARAMS) ->
                 d = base * math.exp(rng.gauss(0.0, p.op_sigma) - p.op_sigma ** 2 / 2.0)
                 durations = [round(d * speed[mtype][m] * rng.uniform(1.0 - p.op_machine_spread, 1.0 + p.op_machine_spread), 2)
                              for m in range(k)]
-                ops.append({"machineType": mtype, "machineIndex": list(range(k)), "duration": durations})
+                op = {"machineType": mtype, "machineIndex": list(range(k)), "duration": durations}
+                if p.machine_flexibility > 0 or p.secondary_ops:
+                    # A generalist runs the op at its nominal length (no per-machine affinity) x the multiplier.
+                    op["allowSecondary"] = True
+                    op["secondaryDuration"] = round(d, 2)
+                ops.append(op)
             jobs.append({"id": len(jobs), "arrivalTime": round(arrival, 2), "operations": ops})
 
         phases.append({"name": f"{kind}_{len(phases)}", "kind": kind, "start": round(t, 2),
@@ -201,6 +215,8 @@ def randomized_scenario(seed: int, params: RandomizedParams = DEFAULT_PARAMS) ->
         "reservationProtocol": p.reservation_protocol,
         "parkingMethod": p.parking_method,
         "routingTrigger": p.routing_trigger,
+        **({"machineFlexibilityProbability": p.machine_flexibility,
+            "secondaryTimeMultiplier": p.secondary_time_multiplier} if p.machine_flexibility > 0 else {}),
         "jobs": jobs,
         "_phases": phases,
         "_meta": {

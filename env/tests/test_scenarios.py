@@ -167,3 +167,53 @@ def test_randomized_warmup_rule_rotates():
 
 def test_registry_has_randomized():
     assert REGISTRY["randomized"](5400.0)(7) == randomized_generator(5400.0)(7)
+
+
+# ── Machine flexibility (2026-09-27) ──
+
+_SCENARIO_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+                             "linux_server", "BatchConfigs", "Scenarios")
+
+
+def test_flexibility_zero_reproduces_saved_instances():
+    """@brief At the default (0) the generator still builds the rnd_load instances every sweep used."""
+    for s in (0, 5):
+        path = os.path.join(_SCENARIO_DIR, f"rnd_load_s{s}.json")
+        if not os.path.isfile(path):
+            pytest.skip(f"{path} not present")
+        with open(path) as f:
+            saved = json.load(f)
+        sc = randomized_scenario(s)
+        assert sc["jobs"] == saved["jobs"]
+        assert "machineFlexibilityProbability" not in sc
+
+
+def test_flexibility_adds_keys_without_changing_the_instance():
+    import dataclasses
+    flex = dataclasses.replace(DEFAULT_PARAMS, machine_flexibility=0.3, secondary_time_multiplier=1.25)
+    base, sc = randomized_scenario(3), randomized_scenario(3, flex)
+    assert sc["machineFlexibilityProbability"] == 0.3 and sc["secondaryTimeMultiplier"] == 1.25
+    assert len(sc["jobs"]) == len(base["jobs"])
+    for jb, jf in zip(base["jobs"], sc["jobs"]):
+        assert jb["arrivalTime"] == jf["arrivalTime"]
+        for ob, of in zip(jb["operations"], jf["operations"]):
+            assert of["allowSecondary"] is True and of["secondaryDuration"] > 0
+            assert {k: v for k, v in of.items() if k not in ("allowSecondary", "secondaryDuration")} == ob
+            # The nominal length sits inside the per-machine affinity band (±30%).
+            assert min(ob["duration"]) / 1.31 <= of["secondaryDuration"] <= max(ob["duration"]) / 0.69
+
+
+def test_registry_passes_flexibility():
+    sc = REGISTRY["randomized"](5400.0, machine_flexibility=0.5, secondary_time_multiplier=1.5)(2)
+    assert sc["machineFlexibilityProbability"] == 0.5 and sc["secondaryTimeMultiplier"] == 1.5
+    comp = REGISTRY["compound"](3000.0, machine_flexibility=0.2)(1)
+    assert comp["machineFlexibilityProbability"] == 0.2 and comp["secondaryTimeMultiplier"] == 1.0
+    assert "machineFlexibilityProbability" not in REGISTRY["compound"](3000.0)(1)
+
+
+def test_secondary_ops_without_a_level():
+    """@brief secondary_ops writes the per-op opt-in only, so the player's -flex override sets the level."""
+    import dataclasses
+    sc = randomized_scenario(1, dataclasses.replace(DEFAULT_PARAMS, secondary_ops=True))
+    assert "machineFlexibilityProbability" not in sc
+    assert all(op["allowSecondary"] for job in sc["jobs"] for op in job["operations"])

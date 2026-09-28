@@ -22,6 +22,14 @@ Usage (from linux_server/):
 import argparse, json, os, subprocess, sys, time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+# Discord / Slack webhook messages (env/notify.py, URL from ~/.capstone_webhook). Stdlib only, never raises; without
+# the module or a URL, notifications are simply off.
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "env"))
+try:
+    from notify import notify
+except ImportError:
+    def notify(text, *args, **kwargs): return False
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 SCEN_DIR = os.path.join(HERE, "BatchConfigs", "Scenarios")
 RESULTS = None   # <exe dir>/Results: the player writes there (LoggingInit), so a second build keeps its own tree
@@ -104,14 +112,42 @@ def main():
         return rel, rc, ok, time.time() - t0
 
     done = 0
+    failed = []
     t_start = time.time()
+    job = os.environ.get("SLURM_ARRAY_JOB_ID") or os.environ.get("SLURM_JOB_ID")
+    where = f"job {job}, " if job else ""
+    label = f"{a.exp} shard {shard_i}/{shard_n} ({where}{os.uname().nodename})"
+    if not todo:
+        return
+    if shard_i == 0:
+        notify(f":arrow_forward: **sweep started** {a.exp}: {total_cells} runs over {shard_n} shard(s); "
+               f"this shard {len(todo)} to run, {a.workers} workers")
+
+    def _terminated(signum, _frame):
+        # Slurm time limit or scancel: report how far this shard got. Finished runs are kept; rerunning the same
+        # submit command skips them.
+        notify(f":pause_button: **sweep shard stopped** {label} (signal {signum}) after "
+               f"{(time.time() - t_start) / 3600:.1f} h: {done}/{len(todo)} done, {len(failed)} failed. "
+               f"Resubmit the same command to resume.")
+        os._exit(128 + signum)
+    import signal
+    signal.signal(signal.SIGTERM, _terminated)
+
     with ThreadPoolExecutor(a.workers) as pool:
         for fut in as_completed([pool.submit(run, x) for x in todo]):
             rel, rc, ok, dt = fut.result(); done += 1
+            if not ok:
+                failed.append(rel)
             eta = (time.time() - t_start) / done * (len(todo) - done) / 3600
             print(f"[Queue] {done}/{len(todo)} {'ok ' if ok else 'FAIL'} {dt/60:5.1f} min  {rel}  (eta {eta:.1f} h)",
                   flush=True)
-    print(f"[Queue] finished {a.exp} in {(time.time() - t_start) / 3600:.2f} h", flush=True)
+    hours = (time.time() - t_start) / 3600
+    print(f"[Queue] finished {a.exp} in {hours:.2f} h", flush=True)
+    icon = ":white_check_mark:" if not failed else ":x:"
+    detail = "" if not failed else " Failed: " + ", ".join(failed[:5]) + (" ..." if len(failed) > 5 else "") + \
+        " (see player.out in each run folder)."
+    notify(f"{icon} **sweep shard finished** {label} in {hours:.1f} h: {len(todo) - len(failed)}/{len(todo)} runs ok, "
+           f"{len(failed)} failed.{detail}")
 
 
 if __name__ == "__main__":

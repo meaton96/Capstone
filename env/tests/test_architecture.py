@@ -1366,3 +1366,23 @@ class TestEntropySchedule:
         assert abs(entropy_coef_at(cfg, 0) - 0.01) < 1e-12
         assert abs(entropy_coef_at(cfg, 500) - 0.0055) < 1e-12
         assert abs(entropy_coef_at(cfg, 5000) - 0.001) < 1e-12      # past the end stays at the final value
+
+
+def test_player_closed_when_startup_check_fails():
+    """@brief A failed startup check (here an 8-branch player) closes the player, so the process can exit
+    instead of hanging on its gRPC thread (rnd02, 2026-09-26)."""
+    from env_wrappers.unity_env import UnitySchedulingEnv
+    with patch("env_wrappers.unity_env.UnityEnvironment") as MockUnity, \
+         patch("env_wrappers.unity_env.EngineConfigurationChannel"):
+        spec = MagicMock()
+        obs_spec = MagicMock()
+        obs_spec.shape, obs_spec.name = (TOTAL_OBS_SIZE,), "VectorSensor"
+        spec.observation_specs = [obs_spec]
+        spec.action_spec.discrete_branches = (8,)
+        MockUnity.return_value.behavior_specs = {"SchedulingBehavior?team=0": spec}
+        try:
+            UnitySchedulingEnv(file_name=None)
+            assert False, "Expected RuntimeError"
+        except RuntimeError as e:
+            assert "action branches" in str(e)
+        MockUnity.return_value.close.assert_called_once()

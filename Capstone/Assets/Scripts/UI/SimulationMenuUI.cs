@@ -43,6 +43,21 @@ namespace Assets.Scripts.UI
                  "north, F-J = A-E with two-way aisles. Change it in the Inspector (also while playing), then " +
                  "press Spawn again to rebuild the floor with the new layout.")]
         [SerializeField] private LayoutChoice layoutChoice = LayoutChoice.D;
+
+        [Tooltip("Tiled floor (docs/features/TILED_LAYOUT_SCOPE.md): this many copies of the layout side by side, each " +
+                 "with its own belts, parking lane and AGVs; jobs stay in their home tile. 1 = one floor. Machines " +
+                 "per type and the AGV count must both divide by it, e.g. 7 tiles = 21 machines per type (105 " +
+                 "machines) and 35 or 49 AGVs. Needs Lane parking and Corner io docks. Press Spawn again to rebuild.")]
+        [SerializeField, Min(1)] private int tiles = 1;
+        [Tooltip("Tiled floors: which tile an arriving job enters.")]
+        [SerializeField] private ReleaseRule tileReleaseRule = ReleaseRule.RoundRobin;
+
+        [Tooltip("Probability that a machine can also run each other operation type (0 = every machine runs only its " +
+                 "own type). Sampled per machine from the seed; copied per tile position on tiled floors.")]
+        [SerializeField, Range(0f, 1f)] private float machineFlexibility = 0f;
+        [Tooltip("Processing-time factor when a machine runs an operation of a type other than its own (1 = as fast " +
+                 "as a dedicated machine).")]
+        [SerializeField, Min(0.01f)] private float secondaryTimeMultiplier = 1f;
         [SerializeField] private GameObject panel;
 
         // ── General parameters ────────────────────────────────────────────────
@@ -288,7 +303,7 @@ namespace Assets.Scripts.UI
                 selectedRule = (DispatchingRule)dispatchRuleDropdown.value;
             }
 
-            return new FJSSPConfig
+            var config = new FJSSPConfig
             {
                 Name = name,
                 Seed = ParseInt(seedInput, 42),
@@ -307,9 +322,16 @@ namespace Assets.Scripts.UI
                 parkingMethod = parkingMethodChoice.ToString().ToLowerInvariant(),
                 ioDocks = ioDocksChoice.ToString().ToLowerInvariant(),
                 Layout = LayoutSpec.FromPreset(layoutChoice.ToString()),
+                Tiling = tiles <= 1 ? TilingSpec.Single : TilingSpec.Single.WithTiles(tiles).WithRelease(tileReleaseRule),
+                MachineFlexibilityProbability = machineFlexibility,
+                SecondaryTimeMultiplier = secondaryTimeMultiplier,
                 preDispatchingMethod = "fixed",
 
             };
+            // Check here so a bad combination shows in the menu status instead of throwing mid-spawn.
+            config.Tiling.Validate(config.MachineTypeLayout, config.AGVCount, config.parkingMethod, config.ioDocks);
+            config.ValidateFlexibility();
+            return config;
         }
         private StochasticConfig BuildStochasticConfig()
         {

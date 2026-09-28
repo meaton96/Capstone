@@ -70,6 +70,10 @@ namespace Assets.Scripts.Simulation.Types
         public static int? Tiles;
         /// <summary>Tiled floors: which tile an arriving job enters ("roundRobin" | "leastWip").</summary>
         public static string ReleaseRule;
+        /// <summary>Machine flexibility probability [0, 1]; overrides every config's machineFlexibilityProbability.</summary>
+        public static float? MachineFlexibility;
+        /// <summary>Secondary-capability processing-time factor (> 0); overrides every config's secondaryTimeMultiplier.</summary>
+        public static float? SecondaryTimeMultiplier;
 
         /// <summary>Throws on an unknown parking method so a typo cannot silently run the default.</summary>
         public static string ValidatedParkingMethod(string value)

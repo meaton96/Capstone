@@ -176,20 +176,26 @@ class UnitySchedulingEnv:
             target_frame_rate=target_frame_rate,
         )
 
-        self.env.reset()
-        self.behavior_name = list(self.env.behavior_specs.keys())[0]
-        self.spec = self.env.behavior_specs[self.behavior_name]
-        self._policy_index, self._metrics_index = self._find_observation_indices(self.spec, self.obs_caps)
-        branches = tuple(self.spec.action_spec.discrete_branches)
-        if branches != ACTION_BRANCHES:
-            raise RuntimeError(
-                f"Unity action branches {branches} do not match env/config.py {ACTION_BRANCHES} (job head x "
-                f"machine head). Rebuild the player with the two-branch SchedulingAgent.")
-        if reward_fn is not None and self._metrics_index is None:
-            raise RuntimeError(
-                f"A reward function was given but the Unity build has no '{SENSOR_NAME}' "
-                "sensor. Rebuild the player with RewardMetricsSensor."
-            )
+        # Close the player if any startup check fails: otherwise its gRPC server thread keeps Python alive after
+        # the exception, and a Slurm job hangs until its time limit (rnd02, 2026-09-26: 25 h idle on 3 nodes).
+        try:
+            self.env.reset()
+            self.behavior_name = list(self.env.behavior_specs.keys())[0]
+            self.spec = self.env.behavior_specs[self.behavior_name]
+            self._policy_index, self._metrics_index = self._find_observation_indices(self.spec, self.obs_caps)
+            branches = tuple(self.spec.action_spec.discrete_branches)
+            if branches != ACTION_BRANCHES:
+                raise RuntimeError(
+                    f"Unity action branches {branches} do not match env/config.py {ACTION_BRANCHES} (job head x "
+                    f"machine head). Rebuild the player with the two-branch SchedulingAgent.")
+            if reward_fn is not None and self._metrics_index is None:
+                raise RuntimeError(
+                    f"A reward function was given but the Unity build has no '{SENSOR_NAME}' "
+                    "sensor. Rebuild the player with RewardMetricsSensor."
+                )
+        except BaseException:
+            self.env.close()
+            raise
 
         self.reward_fn = reward_fn
         self.env_id = env_id

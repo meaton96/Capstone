@@ -1574,7 +1574,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.UI.SimulationMenuUI
   agent: {fileID: 516692882}
   parkingMethodChoice: 2
+  ioDocksChoice: 0
   layoutChoice: 3
+  tiles: 7
+  tileReleaseRule: 0
+  machineFlexibility: 0
+  secondaryTimeMultiplier: 1
   panel: {fileID: 1280180071}
   jobCountInput: {fileID: 1149106291}
   machinesPerTypeInput: {fileID: 502604743}
@@ -8319,7 +8324,6 @@ MonoBehaviour:
   ioConveyorScale: {x: 0.05, y: 0.2, z: 0.4}
   incomingBeltOffset: {x: -2.5, y: 0.01, z: 1.5}
   outgoingBeltOffset: {x: -1, y: 0.01, z: -2}
-  MachineFlexibilityProbability: 0
   floorTransform: {fileID: 473100912}
   machineSpacingX: 6
   machineDepth: 1.5

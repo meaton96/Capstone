@@ -217,7 +217,8 @@ namespace Assets.Scripts.Simulation
          *        in machine-id order, zero-padded past the floor's machine count.
          * @details Features (all in [0, 1]):
          *   [0]  present (1 for a real machine; padding rows are all zero)
-         *   [1-5] primary type one-hot (Mill, Lathe, Weld, Inspect, Assemble)
+         *   [1-5] capability multi-hot (Mill, Lathe, Weld, Inspect, Assemble): every type the machine can run. Equals
+         *         the primary-type one-hot without machine flexibility (the meaning before 2026-09-27)
          *   [6]  busy (processing an operation)
          *   [7]  operational (0 while Failed or Repairing)
          *   [8]  remaining repair time, squashed (TimeScale)
@@ -274,8 +275,11 @@ namespace Assets.Scripts.Simulation
                 PhysicalMachine m = layout.Machines[i];
                 int b = i * MachineFeatures;
                 table[b + 0] = 1f;
-                int type = (int)m.PrimaryType;
-                if (type >= 0 && type < 5) table[b + 1 + type] = 1f;
+                foreach (MachineType cap in m.Capabilities)
+                {
+                    int type = (int)cap;
+                    if (type >= 0 && type < 5) table[b + 1 + type] = 1f;
+                }
                 table[b + 6] = m.IsIdle ? 0f : 1f;
                 table[b + 7] = m.IsAvailableForWork ? 1f : 0f;
                 table[b + 8] = Squash(m.RemainingRepairTime, TimeScale);

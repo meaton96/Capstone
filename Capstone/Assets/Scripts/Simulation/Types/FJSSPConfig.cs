@@ -84,7 +84,25 @@ namespace Assets.Scripts.Simulation.Types
         /// secondary capability during floor construction.
         /// @details 0 = fully typed (default, backward-compatible).
         ///          1 = fully flexible (every machine processes every operation type).
+        ///          Sampled once per machine (per tile position on a tiled floor, so tiles stay identical).
         public float MachineFlexibilityProbability = 0f;
+
+        /// @brief Processing-time factor for an operation run on a machine whose PRIMARY type differs from the
+        ///        operation's type (a secondary capability): duration = base duration x this.
+        /// @details 1 = a secondary capability is as fast as a dedicated machine (flexibility only adds
+        ///          capacity). Above 1 gives machine-dependent processing times, the standard FJSP form, where
+        ///          sending an op to an idle generalist trades speed for waiting. Only matters when
+        ///          MachineFlexibilityProbability &gt; 0.
+        public float SecondaryTimeMultiplier = 1f;
+
+        /// @brief Throws on an out-of-range flexibility setting (called by FactoryLayoutManager.BuildFloor).
+        public void ValidateFlexibility()
+        {
+            if (!(MachineFlexibilityProbability >= 0f && MachineFlexibilityProbability <= 1f))
+                throw new System.ArgumentException($"machineFlexibilityProbability must be in [0, 1] (got {MachineFlexibilityProbability}).");
+            if (!(SecondaryTimeMultiplier > 0f))
+                throw new System.ArgumentException($"secondaryTimeMultiplier must be > 0 (got {SecondaryTimeMultiplier}).");
+        }
 
         // ── Throughput timing ──
 
@@ -185,6 +203,7 @@ namespace Assets.Scripts.Simulation.Types
                 ProcTimeParams = new Dictionary<MachineType, (float mu, float sigma)>(ProcTimeParams),
                 Stochastic = Stochastic,
                 MachineFlexibilityProbability = MachineFlexibilityProbability,
+                SecondaryTimeMultiplier = SecondaryTimeMultiplier,
                 parkingMethod = parkingMethod,
                 ioDocks = ioDocks,
                 Layout = Layout,

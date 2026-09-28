@@ -1,31 +1,86 @@
---- Log Started: 9/21/2026 4:40:41 PM ---
-2026-09-21 16:40:42.190 [Agent] OnEpisodeBegin no-op — episode start is externally managed (CLI batch runner, or UI arm not yet pressed). Not a stall.
-2026-09-21 16:40:48.428 [SimulationMenu] Spawning factory with config: 20j_15m jobs=20 machines=15 agvs=3 stochastic=mf parkingMethod=lane layout=D preDispatchingMethod=fixed
-2026-09-21 16:40:48.429 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.005
-2026-09-21 16:40:48.432 [FactoryLayout] Distributed type layout (row x col):
+--- Log Started: 9/27/2026 9:02:29 PM ---
+2026-09-27 21:02:30.088 [Agent] OnEpisodeBegin no-op — episode start is externally managed (CLI batch runner, or UI arm not yet pressed). Not a stall.
+2026-09-27 21:02:31.920 [Error] [SimulationMenu] tiling: 15 machines cannot be split into 7 tiles evenly.
+2026-09-27 21:03:07.031 [Error] [SimulationMenu] tiling: the AGV count (3) must be a positive multiple of the tile count (7).
+2026-09-27 21:03:16.211 [SimulationMenu] Spawning factory with config: 20j_105m jobs=20 machines=105 agvs=49 stochastic=mf parkingMethod=lane layout=D preDispatchingMethod=fixed
+2026-09-27 21:03:16.212 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.005
+2026-09-27 21:03:16.217 [FactoryLayout] Distributed type layout (row x col):
   Row0: Mill, Lathe, Weld, Inspect
   Row1: Assemble, Mill, Lathe, Weld
   Row2: Inspect, Assemble, Mill, Lathe
-  Row3: Weld, Inspect, Assemble
+  Row3: Weld, Inspect, Assemble, Mill
   [OK] No two same-type machines share a row aisle.
 
-2026-09-21 16:40:48.451 [FactoryLayout] Distance matrix (15x15):
-       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
-2026-09-21 16:40:48.462 [FactoryLayout] Built aisle-based floor: 15 machines.
-2026-09-21 16:40:48.466 [TrafficZones] Built zone graph: 70 zones.
-2026-09-21 16:40:48.468 [AGVPool] Spawned fleet of 3 AGVs (single parking).
-2026-09-21 16:40:48.469 [SimulationMenu] Spawning factory with config: 20j_15m jobs=20 machines=15 agvs=3 stochastic=mf parkingMethod=lane layout=E preDispatchingMethod=fixed
-2026-09-21 16:40:48.469 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.005
-2026-09-21 16:40:48.470 [FactoryLayout] Distributed type layout (row x col):
-  Row0: Mill, Lathe, Weld, Inspect
-  Row1: Assemble, Mill, Lathe, Weld
-  Row2: Inspect, Assemble, Mill, Lathe
-  Row3: Weld, Inspect, Assemble
-  [OK] No two same-type machines share a row aisle.
-
-2026-09-21 16:40:48.481 [FactoryLayout] Distance matrix (15x15):
-       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14  
-2026-09-21 16:40:48.484 [FactoryLayout] Built aisle-based floor: 15 machines.
-2026-09-21 16:40:48.484 [TrafficZones] Built zone graph: 70 zones.
-2026-09-21 16:40:48.485 [AGVPool] Spawned fleet of 3 AGVs (single parking).
-2026-09-21 16:40:48.485 [Error] [SimulationMenu] Layout 'F' cannot run: two-way aisles are not built yet. Built layouts: A, B, C, D, E. See docs/LAYOUT_CONFIGURATION_SCOPE.md.
+2026-09-27 21:03:16.296 [FactoryLayout] Distance matrix (105x105):
+       M0     M1     M2     M3     M4     M5     M6     M7     M8     M9     M10    M11    M12    M13    M14    M15    M16    M17    M18    M19    M20    M21    M22    M23    M24    M25    M26    M27    M28    M29    M30    M31    M32    M33    M34    M35    M36    M37    M38    M39    M40    M41    M42    M43    M44    M45    M46    M47    M48    M49    M50    M51    M52    M53    M54    M55    M56    M57    M58    M59    M60    M61    M62    M63    M64    M65    M66    M67    M68    M69    M70    M71    M72    M73    M74    M75    M76    M77    M78    M79    M80    M81    M82    M83    M84    M85    M86    M87    M88    M89    M90    M91    M92    M93    M94    M95    M96    M97    M98    M99    M100   M101   M102   M103   M104 
+2026-09-27 21:03:16.380 [FactoryLayout] Built aisle-based floor: 105 machines in 7 tiles of 15 (7 AGVs each).
+2026-09-27 21:03:16.387 [TrafficZones] Built zone graph: 518 zones in 7 tiles.
+2026-09-27 21:03:16.391 [TrafficZones] Graph check: strongly connected (per tile)=True, misplaced docks=0, girth=20 (no deadlock below 10 AGVs under holdPrevious).
+2026-09-27 21:03:16.401 [AGVPool] Spawned fleet of 49 AGVs (single parking).
+2026-09-27 21:03:20.345 [Job Generator] Generating job definitions with config seed = 42
+2026-09-27 21:03:20.347 Generated Job 0: arrival=0.00, ops=3
+2026-09-27 21:03:20.347 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-27 21:03:20.347 Generated Job 17: arrival=0.00, ops=4
+2026-09-27 21:03:20.347 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-27 21:03:20.347 Generated Job 16: arrival=0.00, ops=4
+2026-09-27 21:03:20.347 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-27 21:03:20.348 Generated Job 15: arrival=0.00, ops=5
+2026-09-27 21:03:20.348 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-27 21:03:20.348 Generated Job 14: arrival=0.00, ops=5
+2026-09-27 21:03:20.348 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-27 21:03:20.348 Generated Job 13: arrival=0.00, ops=7
+2026-09-27 21:03:20.348 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-27 21:03:20.349 Generated Job 12: arrival=0.00, ops=4
+2026-09-27 21:03:20.349 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-27 21:03:20.349 Generated Job 11: arrival=0.00, ops=7
+2026-09-27 21:03:20.349 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-27 21:03:20.349 Generated Job 10: arrival=0.00, ops=4
+2026-09-27 21:03:20.349 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-27 21:03:20.350 Generated Job 9: arrival=0.00, ops=6
+2026-09-27 21:03:20.350 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-27 21:03:20.350 Generated Job 8: arrival=0.00, ops=7
+2026-09-27 21:03:20.350 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-27 21:03:20.350 Generated Job 7: arrival=0.00, ops=6
+2026-09-27 21:03:20.350 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-27 21:03:20.351 Generated Job 6: arrival=0.00, ops=7
+2026-09-27 21:03:20.351 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-27 21:03:20.351 Generated Job 5: arrival=0.00, ops=5
+2026-09-27 21:03:20.351 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-27 21:03:20.351 Generated Job 4: arrival=0.00, ops=3
+2026-09-27 21:03:20.351 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-27 21:03:20.352 Generated Job 3: arrival=0.00, ops=6
+2026-09-27 21:03:20.352 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-27 21:03:20.352 Generated Job 2: arrival=0.00, ops=4
+2026-09-27 21:03:20.352 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-27 21:03:20.352 Generated Job 1: arrival=0.00, ops=7
+2026-09-27 21:03:20.352 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-27 21:03:20.353 Generated Job 18: arrival=0.00, ops=6
+2026-09-27 21:03:20.353 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-27 21:03:20.353 Generated Job 19: arrival=0.00, ops=4
+2026-09-27 21:03:20.353 Assets.Scripts.Simulation.Jobs.FJSSPJobDefinition
+2026-09-27 21:03:20.356 [StochasticMgr] Initialized — seed=42 mode=[mf] WeibullK=1.5 λ_machine=2700 λ_agv=700 repairMu=4 repairSigma=0.5 arrivalLambda=0.005
+2026-09-27 21:03:20.356 [Orchestrator] Routing trigger: onTransport
+2026-09-27 21:03:20.357 [Orchestrator] Episode started: 20 jobs, 105 machines, stochastic=True, seed=-1 (queue index -1)
+2026-09-27 21:03:20.380 [Orchestrator] Academy.AutomaticSteppingEnabled -> True (RLDecisionDrainMode=False).
+2026-09-27 21:03:21.492 [Orchestrator] Machine 37 FAILED. RepairTime=67.5s
+2026-09-27 21:03:21.493 [EpisodeTracker] Machine 37 failed. Episode total failures=1
+2026-09-27 21:03:21.493 [PhysicalMachine] Machine [37] failure
+2026-09-27 21:03:21.494 [PhysicalMachine] Machine [37] begin repair
+2026-09-27 21:03:29.672 [Orchestrator] Machine 61 FAILED. RepairTime=67.6s
+2026-09-27 21:03:29.672 [EpisodeTracker] Machine 61 failed. Episode total failures=2
+2026-09-27 21:03:29.672 [PhysicalMachine] Machine [61] failure
+2026-09-27 21:03:29.672 [PhysicalMachine] Machine [61] begin repair
+2026-09-27 21:03:34.122 [Orchestrator] Machine 25 FAILED. RepairTime=32.8s
+2026-09-27 21:03:34.122 [EpisodeTracker] Machine 25 failed. Episode total failures=3
+2026-09-27 21:03:34.122 [PhysicalMachine] Machine [25] failure
+2026-09-27 21:03:34.123 [PhysicalMachine] Machine [25] begin repair
+2026-09-27 21:03:38.788 [Orchestrator] Machine 75 FAILED. RepairTime=55.0s
+2026-09-27 21:03:38.788 [EpisodeTracker] Machine 75 failed. Episode total failures=4
+2026-09-27 21:03:38.789 [PhysicalMachine] Machine [75] failure
+2026-09-27 21:03:38.789 [PhysicalMachine] Machine [75] begin repair
+2026-09-27 21:04:04.023 [Orchestrator] Machine 28 FAILED. RepairTime=49.5s
+2026-09-27 21:04:04.024 [EpisodeTracker] Machine 28 failed. Episode total failures=5
+2026-09-27 21:04:04.024 [PhysicalMachine] Machine [28] failure
+2026-09-27 21:04:04.024 [PhysicalMachine] Machine [28] begin repair
+2026-09-27 21:04:06.900 [Orchestrator] Machine 25 repair complete — returning to OPERATIONAL.
+2026-09-27 21:04:06.900 Machine [25] repair complete

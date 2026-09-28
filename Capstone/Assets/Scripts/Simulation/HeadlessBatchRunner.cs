@@ -178,6 +178,26 @@ namespace Assets.Scripts.Simulation
                     SimLogger.Low($"[BatchRunner] Release rule override: {ConfigOverrides.ReleaseRule}");
                 }
 
+                // Machine flexibility overrides (FJSSPConfig.MachineFlexibilityProbability / SecondaryTimeMultiplier).
+                string flexStr = GetCLIArg("-flex");
+                if (!string.IsNullOrEmpty(flexStr))
+                {
+                    if (!float.TryParse(flexStr, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float flex)
+                        || flex < 0f || flex > 1f)
+                        throw new ArgumentException($"Invalid -flex '{flexStr}': expected a probability in [0, 1].");
+                    ConfigOverrides.MachineFlexibility = flex;
+                    SimLogger.Low($"[BatchRunner] Machine flexibility override: {flex}");
+                }
+                string flexMultStr = GetCLIArg("-flexmult");
+                if (!string.IsNullOrEmpty(flexMultStr))
+                {
+                    if (!float.TryParse(flexMultStr, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float mult)
+                        || mult <= 0f)
+                        throw new ArgumentException($"Invalid -flexmult '{flexMultStr}': expected a number > 0.");
+                    ConfigOverrides.SecondaryTimeMultiplier = mult;
+                    SimLogger.Low($"[BatchRunner] Secondary time multiplier override: {mult}");
+                }
+
                 // Layout override (LayoutSpec name A-J), same single-point mechanism. Validated here so a typo
                 // or a layout that is not built yet aborts before any run.
                 string layoutStr = GetCLIArg("-layout");

@@ -46,5 +46,6 @@ exec python "$REPO/env/train.py" \
     --torch-threads "${TORCH_THREADS:-4}" \
     --save-every "${SAVE_EVERY:-25}" \
     --base-worker-id $(( 100 + TASK * 20 )) \
+    --stall-minutes "${STALL_MINUTES:-45}" \
     --results-dir "$REPO/results" --run-id "$RUN_ID" \
     "${RESUME[@]}"

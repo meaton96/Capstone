@@ -87,6 +87,11 @@ namespace Assets.Scripts.Simulation.Types
         public string JobScope = "tile";
         public string AgvAssignment = "tile";
         public string ReleaseRule = "roundRobin";
+        // Machine flexibility (FJSSPConfig.MachineFlexibilityProbability / SecondaryTimeMultiplier) and the realised
+        // mean number of operation types per machine (1 = fully typed; drawn per floor, so it varies around 1 + 4p).
+        public float MachineFlexibility;
+        public float SecondaryTimeMultiplier = 1f;
+        public float MeanCapabilitiesPerMachine = 1f;
         // Pre-dispatched AGVs found orphaned (job no longer claims them, e.g. its source machine
         // failed) and released by FlagHarvester.ReleaseOrphanedPreDispatches. Always 0 when the
         // legacy switch -legacyorphanpredispatch is set (reaper disabled).

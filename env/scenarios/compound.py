@@ -153,13 +153,34 @@ def compound_generator(episode_duration_seconds: Optional[float] = None,
     return _generate
 
 
+def with_flexibility(generator: Callable[[int], Dict], machine_flexibility: float = 0.0,
+                     secondary_time_multiplier: float = 1.0) -> Callable[[int], Dict]:
+    """@brief Wrap a seed -> scenario generator to set the floor's machine flexibility (top-level scenario keys).
+
+    @details Ops with "machineIndex": "any" then also run on machines with a secondary capability of their type
+    (ScenarioLoader "allowSecondary"); pinned ops stay pinned. 0 returns @p generator unchanged.
+    """
+    if not machine_flexibility:
+        return generator
+
+    def _generate(seed: int) -> Dict:
+        scenario = generator(seed)
+        scenario["machineFlexibilityProbability"] = float(machine_flexibility)
+        scenario["secondaryTimeMultiplier"] = float(secondary_time_multiplier)
+        return scenario
+    return _generate
+
+
 def _generator_for(variant: str):
     def _factory(episode_duration_seconds=None, random_warmup=False, warmup_dispatching_rule=None,
-                 agv_move_speed=None, agv_handshake_duration=None):
-        return compound_generator(episode_duration_seconds, random_warmup,
-                                   warmup_dispatching_rule, variant=variant,
-                                   agv_move_speed=agv_move_speed,
-                                   agv_handshake_duration=agv_handshake_duration)
+                 agv_move_speed=None, agv_handshake_duration=None,
+                 machine_flexibility=0.0, secondary_time_multiplier=1.0):
+        return with_flexibility(
+            compound_generator(episode_duration_seconds, random_warmup,
+                               warmup_dispatching_rule, variant=variant,
+                               agv_move_speed=agv_move_speed,
+                               agv_handshake_duration=agv_handshake_duration),
+            machine_flexibility, secondary_time_multiplier)
     return _factory
 
 
@@ -168,10 +189,16 @@ REGISTRY = {name: _generator_for(name) for name in _SCENARIO_FN_NAMES}
 
 
 def _randomized_factory(episode_duration_seconds=None, random_warmup=False, warmup_dispatching_rule=None,
-                        agv_move_speed=None, agv_handshake_duration=None):
-    from scenarios.randomized import randomized_generator
+                        agv_move_speed=None, agv_handshake_duration=None,
+                        machine_flexibility=0.0, secondary_time_multiplier=1.0):
+    import dataclasses
+    from scenarios.randomized import DEFAULT_PARAMS, randomized_generator
+    params = DEFAULT_PARAMS
+    if machine_flexibility:
+        params = dataclasses.replace(params, machine_flexibility=float(machine_flexibility),
+                                     secondary_time_multiplier=float(secondary_time_multiplier))
     return randomized_generator(episode_duration_seconds, random_warmup, warmup_dispatching_rule,
-                                agv_move_speed, agv_handshake_duration)
+                                agv_move_speed, agv_handshake_duration, params)
 
 
 ## @brief The randomized training family (scenarios/randomized.py): multi-op jobs over all machine types,

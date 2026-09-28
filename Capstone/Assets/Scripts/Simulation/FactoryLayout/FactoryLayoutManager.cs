@@ -49,11 +49,45 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         [SerializeField] private Vector3 incomingBeltOffset = new Vector3(-2f, 0.01f, 1.5f);
         [SerializeField] private Vector3 outgoingBeltOffset = new Vector3(-2f, 0.01f, 1.5f);
 
-        /// Probability [0,1] that a machine gains each non-primary type as a
-        /// secondary capability. 0 = single-type, backward compatible.
-        /// 1 = full flexibility (every machine handles every operation type).
-        [Range(0f, 1f)]
-        public float MachineFlexibilityProbability = 0f;
+        /// @brief Machine flexibility of the floor last built (FJSSPConfig.MachineFlexibilityProbability /
+        ///        SecondaryTimeMultiplier). Set by BuildFloor; read by ProcessingTimeOn and the results logger.
+        ///        (Replaces an Inspector field of the same purpose that nothing read.)
+        public float ActiveFlexibilityProbability { get; private set; }
+        public float ActiveSecondaryTimeMultiplier { get; private set; } = 1f;
+
+        /// @brief Realised flexibility: mean number of operation types per machine (1 = fully typed).
+        public float MeanCapabilitiesPerMachine
+        {
+            get
+            {
+                if (machines == null || machines.Length == 0) return 1f;
+                int total = 0, n = 0;
+                foreach (PhysicalMachine m in machines)
+                    if (m != null) { total += m.Capabilities.Count; n++; }
+                return n > 0 ? (float)total / n : 1f;
+            }
+        }
+
+        /// @brief Processing time of an @p opType operation with base duration @p baseDuration on machine
+        ///        @p machineId: the base duration on a machine whose primary type is @p opType, else base x
+        ///        ActiveSecondaryTimeMultiplier (a secondary capability). Job builders bake this into each
+        ///        job's eligibility table, so rules, the observation and processing all see the same time.
+        public float ProcessingTimeOn(int machineId, MachineType opType, float baseDuration)
+        {
+            PhysicalMachine m = GetMachine(machineId);
+            return m == null || m.PrimaryType == opType ? baseDuration : baseDuration * ActiveSecondaryTimeMultiplier;
+        }
+
+        /// @brief Machines whose PRIMARY type is @p type, in id order. Scenario pins (machineIndex k) index into
+        ///        this list, so a secondary capability elsewhere never shifts which machine "Weld[1]" means.
+        public List<int> PrimaryMachinesOfType(MachineType type)
+        {
+            var ids = new List<int>();
+            if (machines == null) return ids;
+            foreach (PhysicalMachine m in machines)
+                if (m != null && m.PrimaryType == type) ids.Add(m.MachineId);
+            return ids;
+        }
 
         // Per tile (index = tile; one entry on an untiled floor). The singular accessors are tile 0.
         private Vector3[] incomingBeltPositions = new Vector3[1];
@@ -259,6 +293,10 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             ActiveLayout = config.Layout ?? LayoutSpec.Default;
             ActiveLayout.EnsureBuildable();
 
+            config.ValidateFlexibility();
+            ActiveFlexibilityProbability = config.MachineFlexibilityProbability;
+            ActiveSecondaryTimeMultiplier = config.SecondaryTimeMultiplier;
+
             ActiveTiling = config.Tiling ?? TilingSpec.Single;
             ActiveTiling.Validate(config.MachineTypeLayout, config.AGVCount, config.parkingMethod, config.ioDocks);
             TileCount = ActiveTiling.Tiles;
@@ -355,6 +393,9 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             machines = new PhysicalMachine[machineCount];
             tileMachinesByType = new Dictionary<MachineType, List<int>>[TileCount];
             for (int t = 0; t < TileCount; t++) tileMachinesByType[t] = new Dictionary<MachineType, List<int>>();
+            // Capabilities are sampled for tile 0 and copied to the same position in every other tile, so a tiled
+            // floor stays k identical copies (tiles share their type pattern; checked below).
+            var tileZeroCaps = new HashSet<MachineType>[MachinesPerTile];
             for (int i = 0; i < machineCount; i++)
             {
                 int tile = i / MachinesPerTile, local = i % MachinesPerTile;
@@ -403,7 +444,15 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                     rotation = Quaternion.identity;
                 }
                 MachineType primary = distributedLayout[i];
-                HashSet<MachineType> caps = SampleCapabilities(primary, config, allTypes);
+                HashSet<MachineType> caps;
+                if (tile == 0)
+                    caps = tileZeroCaps[local] = SampleCapabilities(primary, config, allTypes);
+                else if (distributedLayout[local] == primary)
+                    caps = new HashSet<MachineType>(tileZeroCaps[local]);
+                else
+                    throw new InvalidOperationException(
+                        $"Tile {tile} position {local} is {primary} but tile 0 has {distributedLayout[local]} there; " +
+                        "tiles must share one type pattern to copy capabilities.");
 
                 PhysicalMachine pm = Instantiate(prefabToSpawn, worldPos, rotation, transform);
                 pm.gameObject.name = $"Machine_{i}_{primary}";
