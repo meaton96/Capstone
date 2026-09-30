@@ -1578,6 +1578,7 @@ MonoBehaviour:
   layoutChoice: 3
   tiles: 7
   tileReleaseRule: 0
+  linkedTiles: 1
   machineFlexibility: 0
   secondaryTimeMultiplier: 1
   panel: {fileID: 1280180071}

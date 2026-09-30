@@ -1,0 +1,197 @@
+"""
+@file test_config_safety.py
+@brief Thesis section 7.1 fixes: config schema/bounds, rejection instead of fallback, loopback gRPC,
+       and config hashes in the episode log.
+"""
+
+import copy
+import json
+import socket
+
+import pytest
+
+from channels.channels import EpisodeConfigChannel
+from channels.config_schema import (
+    ConfigValidationError, max_agv_count, validate_config, validate_scenario,
+)
+from env_wrappers.loopback import LoopbackRpcCommunicator
+from env_wrappers.unity_env import UnitySchedulingEnv
+from scenarios import compound_generator, randomized_generator
+
+SCENARIO = {
+    "name": "tiny",
+    "seed": 3,
+    "agvCount": 7,
+    "machineTypeLayout": ["Mill"] * 3 + ["Lathe"] * 3 + ["Weld"] * 3 + ["Inspect"] * 3 + ["Assemble"] * 3,
+    "reservationProtocol": "releasePrevious",
+    "jobs": [
+        {"id": 0, "arrivalTime": 0.0, "operations": [
+            {"machineType": "Mill", "machineIndex": "any", "duration": 40.0},
+            {"machineType": "Weld", "machineIndex": [0, 2], "duration": [50.0, 70.0]},
+            {"machineType": "Inspect", "machineIndex": 1, "duration": 20.0},
+        ]},
+    ],
+    "stochastic": {"machineFailuresEnabled": True, "weibullK": 1.5, "weibullLambda": 900.0},
+    "_comment": "underscore keys are comments",
+}
+
+CONFIG = {
+    "name": "30j_15m", "seed": 42, "jobCount": 30, "machinesPerType": 3,
+    "machineTypes": ["Mill", "Lathe", "Weld", "Inspect", "Assemble"],
+    "minProcTime": 15.0, "maxProcTime": 60.0, "minOpsPerJob": 4, "maxOpsPerJob": 6, "agvCount": 10,
+}
+
+
+def with_changes(base, **changes):
+    out = copy.deepcopy(base)
+    out.update(changes)
+    return out
+
+
+def errors_of(fn, item):
+    with pytest.raises(ConfigValidationError) as exc:
+        fn(item)
+    return exc.value.errors
+
+
+class TestSchema:
+    def test_valid_scenario_and_config_pass(self):
+        validate_scenario(SCENARIO)
+        validate_config(CONFIG)
+
+    @pytest.mark.parametrize("make", [
+        lambda: compound_generator(2700.0, random_warmup=True),
+        lambda: compound_generator(variant="compound_v2"),
+        lambda: randomized_generator(2700.0, random_warmup=True),
+    ])
+    def test_training_generators_pass(self, make):
+        generator = make()
+        for seed in range(10_000, 10_010):
+            validate_scenario(generator(seed))
+
+    def test_fleet_bound_depends_on_protocol_and_floor(self):
+        assert max_agv_count(15, "releasePrevious") == 15
+        assert max_agv_count(15, "holdPrevious") == 8
+        assert max_agv_count(105, "releasePrevious") == 105
+        assert max_agv_count(3, "holdPrevious") == 1
+        errs = errors_of(validate_scenario, with_changes(SCENARIO, agvCount=9, reservationProtocol="holdPrevious"))
+        assert any("gridlock-safe maximum 8" in e for e in errs)
+        errs = errors_of(validate_scenario, with_changes(SCENARIO, agvCount=16))
+        assert any("gridlock-safe maximum 15" in e for e in errs)
+        errs = errors_of(validate_config, with_changes(CONFIG, agvCount=0))
+        assert any("agvCount" in e for e in errs)
+
+    def test_unknown_keys_are_errors_not_ignored(self):
+        assert any("agvcount" in e for e in errors_of(validate_scenario, with_changes(SCENARIO, agvcount=5)))
+        s = with_changes(SCENARIO, stochastic={"machineFailuresEnabled": True, "weibulLambda": 450.0})
+        assert any("weibulLambda" in e for e in errors_of(validate_scenario, s))
+        assert any("maxArrivalTime" in e for e in errors_of(validate_config, with_changes(CONFIG, maxArrivalTime=0.0)))
+
+    def test_physical_bounds(self):
+        s = copy.deepcopy(SCENARIO)
+        s["jobs"][0]["operations"][0]["duration"] = -5.0
+        s["jobs"][0]["operations"][1]["machineIndex"] = [0, 3]
+        s["jobs"][0]["operations"][2]["machineType"] = "Drill"
+        s["stochastic"]["weibullLambda"] = 0.0
+        s["dispatchingRule"] = "SPT_FOO"
+        errs = errors_of(validate_scenario, s)
+        assert len(errs) == 5, errs      # every problem reported at once
+        errs = errors_of(validate_config, with_changes(CONFIG, minProcTime=60.0, maxProcTime=15.0,
+                                                       machineFlexibilityProbability=1.5))
+        assert len(errs) == 2, errs
+
+    def test_nan_and_bool_are_not_numbers(self):
+        errors_of(validate_config, with_changes(CONFIG, minProcTime=float("nan")))
+        errors_of(validate_scenario, with_changes(SCENARIO, agvCount=True))
+
+
+class TestChannelRejects:
+    def test_invalid_scenario_is_not_queued(self):
+        channel = EpisodeConfigChannel()
+        with pytest.raises(ConfigValidationError):
+            channel.queue_scenarios([SCENARIO, with_changes(SCENARIO, agvCount=99)])
+        assert channel.message_queue == []      # all or nothing: nothing reached Unity
+
+    def test_scenario_file_is_validated(self, tmp_path):
+        path = tmp_path / "bad.json"
+        path.write_text(json.dumps(with_changes(SCENARIO, layout="Z")))
+        channel = EpisodeConfigChannel()
+        with pytest.raises(ConfigValidationError):
+            channel.queue_scenarios([str(path)])
+        with pytest.raises(FileNotFoundError):
+            channel.queue_scenarios([str(tmp_path / "missing.json")])
+        assert channel.message_queue == []
+
+    def test_valid_items_are_sent(self):
+        channel = EpisodeConfigChannel()
+        channel.queue_scenarios([SCENARIO])
+        channel.send_config(CONFIG)
+        assert len(channel.message_queue) == 2
+
+    def test_invalid_config_is_not_sent(self):
+        channel = EpisodeConfigChannel()
+        with pytest.raises(ConfigValidationError):
+            channel.send_config(with_changes(CONFIG, machineTypes=["Mill", "Lathes"]))
+        assert channel.message_queue == []
+
+
+def _free_port() -> int:
+    with socket.socket() as s:
+        s.bind(("127.0.0.1", 0))
+        return s.getsockname()[1]
+
+
+def _non_loopback_ip():
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            s.connect(("192.0.2.1", 9))     # TEST-NET address: no packet is sent, only picks the outbound interface
+            ip = s.getsockname()[0]
+        return None if ip.startswith("127.") else ip
+    except OSError:
+        return None
+
+
+class TestLoopback:
+    def test_server_listens_on_loopback_only(self):
+        port = _free_port()
+        comm = LoopbackRpcCommunicator(worker_id=0, base_port=port, timeout_wait=1)
+        try:
+            assert comm.bound_addresses and all(
+                a.startswith(("127.0.0.1:", "[::1]:")) for a in comm.bound_addresses)
+            with socket.create_connection(("127.0.0.1", port), timeout=2):
+                pass
+            ip = _non_loopback_ip()
+            if ip is None:
+                pytest.skip("no non-loopback interface to test against")
+            with pytest.raises(OSError):
+                socket.create_connection((ip, port), timeout=2).close()
+        finally:
+            comm.close()
+
+
+class TestConfigHashInEpisodeLog:
+    def test_summary_carries_hashes_from_telemetry(self):
+        env = UnitySchedulingEnv.__new__(UnitySchedulingEnv)
+        env._episode_return, env._episode_length, env._episode_terms = 1.0, 3, {}
+        telemetry = {"events": [], "result": {"configHash": "abc", "instanceHash": "def", "appliedConfig": "x=1"}}
+        summary = env._episode_summary(None, interrupted=False, telemetry=telemetry)
+        assert (summary["config_hash"], summary["instance_hash"], summary["applied_config"]) == ("abc", "def", "x=1")
+        summary = env._episode_summary(None, interrupted=False, telemetry=None)   # player built before the fix
+        assert summary["config_hash"] is None
+
+    def test_train_logs_hash_and_applied_config(self, tmp_path):
+        import csv
+        import io
+        from collections import deque
+        from unittest.mock import MagicMock
+        from train import EPISODE_CSV_FIELDS, log_episodes
+
+        out = io.StringIO()
+        episode_csv = csv.DictWriter(out, fieldnames=EPISODE_CSV_FIELDS, extrasaction="ignore")
+        applied = io.StringIO()
+        episode = {"return": 1.0, "length": 2, "config_hash": "abc", "instance_hash": "def", "applied_config": "x=1"}
+        infos = [{"episode": episode}, {"episode": dict(episode, applied_config=None)}]
+        assert log_episodes(MagicMock(), infos, 10, deque(), episode_csv, applied) == 2
+        assert out.getvalue().count("abc,def") == 2
+        lines = applied.getvalue().splitlines()
+        assert len(lines) == 1 and json.loads(lines[0])["config"] == "x=1"

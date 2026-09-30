@@ -200,5 +200,19 @@ namespace Assets.Scripts.Simulation.Types
                     $"[Config] {where}: unknown key \"{prop.Name}\" ignored (typo? it will NOT take effect).");
             }
         }
+
+        /// <summary>
+        /// Strict form of <see cref="WarnUnknownTopLevel"/> for configs received from Python: throws on the first
+        /// unknown key instead of running without it. "_"-prefixed keys are still comments.
+        /// </summary>
+        public static void ThrowUnknown(JObject obj, IEnumerable<string> known, string where)
+        {
+            var knownSet = new HashSet<string>(known);
+            foreach (var prop in obj.Properties())
+            {
+                if (prop.Name.StartsWith("_") || knownSet.Contains(prop.Name)) continue;
+                throw new ArgumentException($"{where}: unknown key \"{prop.Name}\". Valid keys: {string.Join(", ", knownSet)}.");
+            }
+        }
     }
 }

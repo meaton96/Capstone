@@ -40,7 +40,6 @@ from typing import Callable, Dict, Iterable, Optional, Tuple, Union
 
 import numpy as np
 from mlagents_envs.base_env import ActionTuple
-from mlagents_envs.environment import UnityEnvironment
 from mlagents_envs.side_channel.engine_configuration_channel import (
     EngineConfigurationChannel,
 )
@@ -50,6 +49,7 @@ from config import (
     SPATIAL_LEN, GLOBAL_SCALARS, EVENT_FLAGS, ACTION_BRANCHES, ACTION_MASK_LEN, obs_total_size,
 )
 from channels.channels import EpisodeConfigChannel, EpisodeSeedChannel, EpisodeTelemetryChannel
+from env_wrappers.loopback import LoopbackUnityEnvironment
 from rewards import (
     SENSOR_NAME, LoadedReward, MetricsSnapshot, RewardContext, RewardFunction, load_reward,
 )
@@ -157,7 +157,8 @@ class UnitySchedulingEnv:
             additional_args += ["-logFile", str(Path(log_file).resolve())]
         additional_args += [str(arg) for arg in (extra_args or [])]
 
-        self.env = UnityEnvironment(
+        # Loopback-only gRPC (thesis section 7.1): upstream listens on every interface, unauthenticated.
+        self.env = LoopbackUnityEnvironment(
             file_name=file_name,
             side_channels=[
                 self.engine_channel,
@@ -331,9 +332,10 @@ class UnitySchedulingEnv:
         # frame, not a continuation of the one that just ended. terminal_obs is that ended
         # episode's own last observation — needed to bootstrap a truncated (not terminated)
         # episode's value estimate, since there is no real "next state" to bootstrap from.
-        info["episode"] = self._episode_summary(curr, interrupted=bool(terminal.interrupted[0]))
-        info["terminal_obs"] = self._extract_obs(terminal)
         info["telemetry"] = self.telemetry.pop_payload()
+        info["episode"] = self._episode_summary(curr, interrupted=bool(terminal.interrupted[0]),
+                                                telemetry=info["telemetry"])
+        info["terminal_obs"] = self._extract_obs(terminal)
         self.episodes_completed += 1
         if self.seed_rng is not None:
             # Unity already consumed a seed (and scenario, if any) for the episode that just
@@ -377,12 +379,20 @@ class UnitySchedulingEnv:
         self._episode_terms = {}
         return self._extract_obs(decision)
 
-    def _episode_summary(self, final: Optional[MetricsSnapshot], interrupted: bool) -> dict:
+    def _episode_summary(self, final: Optional[MetricsSnapshot], interrupted: bool,
+                         telemetry: Optional[dict] = None) -> dict:
+        result = (telemetry or {}).get("result") or {}
         summary = {
             "return": self._episode_return,
             "length": self._episode_length,
             "interrupted": interrupted,
             "reward_terms": dict(self._episode_terms),
+            # Hash of the config Unity actually applied, and of config + initial jobs (ConfigFingerprint.cs);
+            # None from a player built before 2026-09-29. applied_config is the canonical config text, only the
+            # first time this player applies a given hash (train.py appends it to applied_configs.jsonl).
+            "config_hash": result.get("configHash"),
+            "instance_hash": result.get("instanceHash"),
+            "applied_config": result.get("appliedConfig"),
         }
         if final is not None:
             exited = final.jobs_exited

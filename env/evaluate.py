@@ -258,6 +258,8 @@ def run_evaluation(env, policies: list, schedule: list, log=print, decision_writ
             "deadlock": episode["deadlock"],
             "timed_out": episode["timed_out"],
             "truncated": episode["truncated"],
+            "config_hash": episode.get("config_hash"),
+            "instance_hash": episode.get("instance_hash"),
         })
         log(f"[{len(rows):4d}/{total}] seed {seed:5d}  {policy.name:28s} "
             f"makespan {episode['makespan']:7.1f}  total flow {episode['total_flow_time']:8.1f}  "

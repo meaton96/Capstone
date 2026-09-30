@@ -92,6 +92,12 @@ namespace Assets.Scripts.Simulation.Types
         public float MachineFlexibility;
         public float SecondaryTimeMultiplier = 1f;
         public float MeanCapabilitiesPerMachine = 1f;
+        // Hash of the applied config (after CLI overrides) and of config + initial job set (ConfigFingerprint), so a
+        // row traces back to the exact scenario. ConfigCanonical is the config text, set only the first time its
+        // hash appears in this process (ResultsLogger writes it to applied_configs.jsonl).
+        public string ConfigHash = "";
+        public string InstanceHash = "";
+        public string ConfigCanonical;
         // Pre-dispatched AGVs found orphaned (job no longer claims them, e.g. its source machine
         // failed) and released by FlagHarvester.ReleaseOrphanedPreDispatches. Always 0 when the
         // legacy switch -legacyorphanpredispatch is set (reaper disabled).

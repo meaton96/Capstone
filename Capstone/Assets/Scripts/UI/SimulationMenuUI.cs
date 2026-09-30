@@ -51,6 +51,9 @@ namespace Assets.Scripts.UI
         [SerializeField, Min(1)] private int tiles = 1;
         [Tooltip("Tiled floors: which tile an arriving job enters.")]
         [SerializeField] private ReleaseRule tileReleaseRule = ReleaseRule.RoundRobin;
+        [Tooltip("Tiled floors: link the tiles (TILED_LAYOUT_SCOPE.md section 10). Seam bridges join the spines, any " +
+                 "AGV serves any tile and any job can use any machine (jobScope open, pooled AGVs).")]
+        [SerializeField] private bool linkedTiles = false;
 
         [Tooltip("Probability that a machine can also run each other operation type (0 = every machine runs only its " +
                  "own type). Sampled per machine from the seed; copied per tile position on tiled floors.")]
@@ -322,7 +325,9 @@ namespace Assets.Scripts.UI
                 parkingMethod = parkingMethodChoice.ToString().ToLowerInvariant(),
                 ioDocks = ioDocksChoice.ToString().ToLowerInvariant(),
                 Layout = LayoutSpec.FromPreset(layoutChoice.ToString()),
-                Tiling = tiles <= 1 ? TilingSpec.Single : TilingSpec.Single.WithTiles(tiles).WithRelease(tileReleaseRule),
+                Tiling = tiles <= 1 ? TilingSpec.Single
+                    : TilingSpec.Single.WithTiles(tiles).WithRelease(tileReleaseRule)
+                        .WithScope(linkedTiles ? "open" : null, null),
                 MachineFlexibilityProbability = machineFlexibility,
                 SecondaryTimeMultiplier = secondaryTimeMultiplier,
                 preDispatchingMethod = "fixed",

@@ -137,6 +137,29 @@ namespace Assets.Scripts.Simulation
         /// </summary>
         private Func<Dictionary<MachineType, List<int>>, FJSSPJobDefinition[]> _scenarioJobBuilder;
 
+        /// <summary>True while _scenarioJobBuilder is a strict builder for a scenario Python sent: a job it cannot
+        /// place rejects the config instead of being dropped.</summary>
+        private bool _scenarioFromPython;
+
+        /// <summary>Set once a Python config is rejected; the player is quitting and no episode starts.</summary>
+        private bool _configRejected;
+
+        /// <summary>Exit code of a player stopped by a rejected Python config.</summary>
+        public const int ConfigRejectedExitCode = 3;
+
+        /// <summary>Hash of the running episode's applied config, after CLI overrides (ConfigFingerprint).
+        /// Logged with every result (results.csv config_hash, telemetry configHash).</summary>
+        public string ConfigHash { get; private set; } = "";
+
+        /// <summary>Hash of the applied config plus the episode's initial job set: two episodes with the same
+        /// config but different seeds share ConfigHash and differ here.</summary>
+        public string InstanceHash { get; private set; } = "";
+
+        /// <summary>Canonical text of the config when ConfigHash is new in this process (written once to
+        /// applied_configs.jsonl / sent once over telemetry), else null.</summary>
+        private string _newConfigCanonical;
+        private readonly HashSet<string> _seenConfigHashes = new HashSet<string>();
+
         /// <summary>
         /// The current simulation configuration loaded for this episode.
         /// </summary>
@@ -466,6 +489,45 @@ namespace Assets.Scripts.Simulation
         }
 
         /// <summary>
+        /// A config Python sent, with CLI overrides applied, after ConfigValidator's physical-bounds check.
+        /// Throws with every broken bound listed; the caller rejects it (no default, no previous config).
+        /// </summary>
+        private static FJSSPConfig ValidatedPythonConfig(FJSSPConfig config)
+        {
+            config = ApplyConfigOverrides(config);
+            List<string> errors = ConfigValidator.Validate(config);
+            if (errors.Count > 0)
+                throw new ArgumentException(string.Join("; ", errors));
+            return config;
+        }
+
+        /// <summary>
+        /// Stops the player instead of running a config other than the one Python sent. Python then fails on the
+        /// closed connection; the reason is in the player log. In the Editor, play mode ends.
+        /// </summary>
+        private void RejectPythonConfig(string reason)
+        {
+            _configRejected = true;
+            SimLogger.LogError($"[Bridge] Python config REJECTED, stopping the player (exit code {ConfigRejectedExitCode}). " +
+                               $"No default or previous config is substituted. Reason: {reason}");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit(ConfigRejectedExitCode);
+#endif
+        }
+
+        /// <summary>Hashes the applied config and the initial job set of the episode that is starting.</summary>
+        private void UpdateFingerprints(FJSSPJobDefinition[] jobDefs)
+        {
+            string canonical = ConfigFingerprint.Canonical(currentConfig);
+            ConfigHash = ConfigFingerprint.Hash(canonical);
+            InstanceHash = ConfigFingerprint.Hash(canonical + "\n#jobs\n" + ConfigFingerprint.Canonical(jobDefs));
+            _newConfigCanonical = _seenConfigHashes.Add(ConfigHash) ? canonical : null;
+            SimLogger.Low($"[Orchestrator] config_hash={ConfigHash} instance_hash={InstanceHash}");
+        }
+
+        /// <summary>
         /// The single point where command-line overrides (ConfigOverrides) are applied to a config,
         /// so no batch / scenario / Python entry path can miss one. Mutates and returns the config.
         /// </summary>
@@ -503,6 +565,7 @@ namespace Assets.Scripts.Simulation
         {
             currentConfig = ApplyConfigOverrides(config);
             _scenarioJobBuilder = null;
+            _scenarioFromPython = false;
             IsFactoryReady = false;
             StochasticEventManager.Instance?.Initialize(config);
         }
@@ -549,31 +612,51 @@ namespace Assets.Scripts.Simulation
             _envStepWatch.Reset();
             _episodeGcStart = GC.CollectionCount(0);
 
+            // Configs from Python never fall back (thesis section 7.1): a message that failed to parse, a scenario that
+            // fails to load, or a config outside ConfigValidator's physical bounds stops the player.
+            if (_configRejected) return;
+            string rejection = EpisodeConfigChannel.Instance?.TakeRejection();
+            if (rejection != null)
+            {
+                RejectPythonConfig(rejection);
+                return;
+            }
+
             var pythonScenario = EpisodeConfigChannel.Instance?.ConsumeScenario();
             if (pythonScenario != null)
             {
-                var (scenarioConfig, buildJobs) =
-                    ScenarioLoader.LoadDeferredFromJson(pythonScenario.Json, pythonScenario.Name);
-                if (scenarioConfig != null)
+                try
                 {
-                    currentConfig = ApplyConfigOverrides(scenarioConfig);
+                    var (scenarioConfig, buildJobs) =
+                        ScenarioLoader.LoadDeferredFromJsonStrict(pythonScenario.Json, pythonScenario.Name);
+                    currentConfig = ValidatedPythonConfig(scenarioConfig);
                     _scenarioJobBuilder = buildJobs;
+                    _scenarioFromPython = true;
                     IsFactoryReady = false;
                     SimLogger.Low($"[Bridge] Applied Python scenario: {scenarioConfig.Name} " +
                                   $"({scenarioConfig.JobCount} jobs, {scenarioConfig.AGVCount} AGVs)");
                 }
-                else
+                catch (Exception ex)
                 {
-                    SimLogger.LogError($"[Bridge] Python scenario '{pythonScenario.Name}' failed to load; " +
-                                        "keeping the previous config.");
+                    RejectPythonConfig($"scenario '{pythonScenario.Name}': {ex.Message}");
+                    return;
                 }
             }
 
             var pythonConfig = EpisodeConfigChannel.Instance?.ConsumeConfig();
             if (pythonConfig != null)
             {
-                currentConfig = ApplyConfigOverrides(pythonConfig);
+                try
+                {
+                    currentConfig = ValidatedPythonConfig(pythonConfig);
+                }
+                catch (Exception ex)
+                {
+                    RejectPythonConfig($"config '{pythonConfig.Name}': {ex.Message}");
+                    return;
+                }
                 _scenarioJobBuilder = null;
+                _scenarioFromPython = false;
                 IsFactoryReady = false;
                 SimLogger.Low($"[Bridge] Applied Python config: {currentConfig.Name}");
             }
@@ -617,7 +700,15 @@ namespace Assets.Scripts.Simulation
             }
             else if (_scenarioJobBuilder != null)
             {
-                jobDefs = _scenarioJobBuilder(cachedMachinesByType);
+                try
+                {
+                    jobDefs = _scenarioJobBuilder(cachedMachinesByType);
+                }
+                catch (Exception ex) when (_scenarioFromPython)
+                {
+                    RejectPythonConfig($"scenario '{currentConfig.Name}' jobs: {ex.Message}");
+                    return;
+                }
             }
             else
             {
@@ -641,6 +732,8 @@ namespace Assets.Scripts.Simulation
                 else immediateJobs.Add(def);
             }
             _pendingScriptedArrivals.Sort((a, b) => a.ArrivalTime.CompareTo(b.ArrivalTime));
+
+            UpdateFingerprints(jobDefs);
 
             Jobs.Initialize(immediateJobs, spawnVisuals: true);
 
@@ -1368,7 +1461,10 @@ namespace Assets.Scripts.Simulation
                     decisions: decisionCount,
                     totalReward: 0.0,
                     ruleName: LastAppliedRule,
-                    stochasticTag: currentConfig.Stochastic?.Tag ?? "none"
+                    stochasticTag: currentConfig.Stochastic?.Tag ?? "none",
+                    configHash: ConfigHash,
+                    instanceHash: InstanceHash,
+                    appliedConfig: _newConfigCanonical
                 );
                 telemetry.Flush();
             }
@@ -1396,6 +1492,10 @@ namespace Assets.Scripts.Simulation
             record.DecisionRecords = new List<DecisionRecord>(_decisionLog);
 
             // Configuration snapshot fields
+            record.ConfigHash = ConfigHash;
+            record.InstanceHash = InstanceHash;
+            record.ConfigCanonical = _newConfigCanonical;
+            _newConfigCanonical = null;   // written / sent once per hash
             record.ParkingMethod = currentConfig.parkingMethod;
             record.IoDocks = currentConfig.ioDocks;
             record.PreDispatchingMethod = currentConfig.preDispatchingMethod;

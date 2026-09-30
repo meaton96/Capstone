@@ -97,7 +97,9 @@ namespace Assets.Scripts.Simulation.Channels
         /// </summary>
         public void RecordEpisodeResult(double makespan, int jobCount, int machineCount,
                                         int totalOps, int decisions, double totalReward,
-                                        string ruleName, string stochasticTag)
+                                        string ruleName, string stochasticTag,
+                                        string configHash = "", string instanceHash = "",
+                                        string appliedConfig = null)
         {
             _result = new EpisodeResult
             {
@@ -109,6 +111,9 @@ namespace Assets.Scripts.Simulation.Channels
                 totalReward = totalReward,
                 ruleName = ruleName,
                 stochasticTag = stochasticTag,
+                configHash = configHash,
+                instanceHash = instanceHash,
+                appliedConfig = appliedConfig,
             };
         }
 
@@ -164,6 +169,12 @@ namespace Assets.Scripts.Simulation.Channels
             public double totalReward;
             public string ruleName;
             public string stochasticTag;
+            /// <summary>FactoryOrchestrator.ConfigHash / InstanceHash of the episode (ConfigFingerprint).</summary>
+            public string configHash;
+            public string instanceHash;
+            /// <summary>Canonical text of the applied config, only the first time its hash is seen by this player
+            /// (null otherwise); Python writes it to applied_configs.jsonl.</summary>
+            public string appliedConfig;
         }
 
         [Serializable]

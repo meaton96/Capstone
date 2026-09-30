@@ -37,6 +37,7 @@ namespace Assets.Scripts.Simulation.Logging
         private static string _jobCompletionsFilename = "job_completions.csv";
         private static string _decisionLogFilename = "decision_log.csv";
         private static string _collisionsFilename = "agv_collisions.csv";
+        private static string _appliedConfigsFilename = "applied_configs.jsonl";
 
         public static void SetFilenameSuffix(string suffix)
         {
@@ -51,6 +52,7 @@ namespace Assets.Scripts.Simulation.Logging
             _jobCompletionsFilename = StripExt(_jobCompletionsFilename, ext) + suffix + ext;
             _decisionLogFilename = StripExt(_decisionLogFilename, ext) + suffix + ext;
             _collisionsFilename = StripExt(_collisionsFilename, ext) + suffix + ext;
+            _appliedConfigsFilename = StripExt(_appliedConfigsFilename, ".jsonl") + suffix + ".jsonl";
         }
 
         public static void SetSubdirectory(string subdir)
@@ -70,6 +72,7 @@ namespace Assets.Scripts.Simulation.Logging
         private static string JobCompletionsFilePath => BuildPath(_jobCompletionsFilename);
         private static string DecisionLogFilePath => BuildPath(_decisionLogFilename);
         private static string CollisionsFilePath => BuildPath(_collisionsFilename);
+        private static string AppliedConfigsFilePath => BuildPath(_appliedConfigsFilename);
 
         // ── Convenience: write all logs in one call ───────────────────────────
 
@@ -88,6 +91,17 @@ namespace Assets.Scripts.Simulation.Logging
             if (r.JobCompletionRecords.Count > 0) LogJobCompletions(r);
             if (r.DecisionRecords.Count > 0) LogDecisions(r);
             if (r.CollisionRecords.Count > 0) LogCollisions(r);
+            if (r.ConfigCanonical != null) LogAppliedConfig(r.ConfigHash, r.ConfigCanonical);
+        }
+
+        /// <summary>
+        /// applied_configs.jsonl - one line per distinct config_hash in results.csv: {"config_hash", "config"}, where
+        /// config is ConfigFingerprint's canonical text, so a hash in any result row can be turned back into the config.
+        /// </summary>
+        public static void LogAppliedConfig(string hash, string canonical)
+        {
+            string line = Newtonsoft.Json.JsonConvert.SerializeObject(new { config_hash = hash, config = canonical });
+            File.AppendAllText(AppliedConfigsFilePath, line + "\n");
         }
 
         /// <summary>
@@ -182,7 +196,8 @@ namespace Assets.Scripts.Simulation.Logging
                     "reservation_protocol," +
                     "layout_id,layout_belts,layout_aisles,floor_width,floor_depth," +
                     "io_docks,routing_trigger,tiles,machines_per_tile,job_scope,agv_assignment,release_rule," +
-                    "machine_flexibility,secondary_time_multiplier,mean_capabilities_per_machine"
+                    "machine_flexibility,secondary_time_multiplier,mean_capabilities_per_machine," +
+                    "config_hash,instance_hash"
                 );
 
             writer.WriteLine(
@@ -205,7 +220,8 @@ namespace Assets.Scripts.Simulation.Logging
                 $"{r.ReservationProtocol}," +
                 $"{r.LayoutId},{r.LayoutBelts},{r.LayoutAisles},{r.FloorWidth:F2},{r.FloorDepth:F2}," +
                 $"{r.IoDocks},{r.RoutingTrigger},{r.Tiles},{r.MachinesPerTile},{r.JobScope},{r.AgvAssignment},{r.ReleaseRule}," +
-                $"{r.MachineFlexibility:F3},{r.SecondaryTimeMultiplier:F3},{r.MeanCapabilitiesPerMachine:F3}"
+                $"{r.MachineFlexibility:F3},{r.SecondaryTimeMultiplier:F3},{r.MeanCapabilitiesPerMachine:F3}," +
+                $"{r.ConfigHash},{r.InstanceHash}"
             );
 
             Debug.Log($"[Results] {r.InstanceName} {r.RuleName} seed={r.Seed} " +

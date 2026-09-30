@@ -118,6 +118,29 @@ namespace Assets.Scripts.Simulation.Jobs
             }
         }
 
+        /// <summary>
+        /// Strict form of <see cref="LoadDeferredFromJson"/> for scenarios received from Python (thesis section 7.1):
+        /// throws instead of logging and falling back. Unknown keys, an unknown dispatchingRule, and (in the returned
+        /// job builder) an op that cannot be placed on the floor are errors here, where the lenient loaders skip them
+        /// and run a different scenario from the one sent.
+        /// </summary>
+        public static (FJSSPConfig config,
+                        Func<Dictionary<MachineType, List<int>>, FJSSPJobDefinition[]> buildJobs)
+            LoadDeferredFromJsonStrict(string json, string name)
+        {
+            FJSSPConfig config = BuildConfig(json, name, -1, -1, strict: true);
+            return (config, machinesByType => BuildJobs(json, machinesByType, strict: true));
+        }
+
+        /// <summary>Logs a scenario error, or throws it when loading strictly.</summary>
+        private static void ReportError(bool strict, string message)
+        {
+            if (strict) throw new System.IO.InvalidDataException(message);
+            SimLogger.LogError(message);
+        }
+
+        private static void ReportJobError(bool strict, string message) => ReportError(strict, message);
+
         // ─────────────────────────────────────────────────────────────────────
         //  Phase 1: config (runs before SpawnFactory, no runtime machine IDs yet)
         // ─────────────────────────────────────────────────────────────────────
@@ -131,21 +154,22 @@ namespace Assets.Scripts.Simulation.Jobs
         };
 
         private static FJSSPConfig BuildConfig(string json, string fileName,
-                                                 int seedOverride, int agvCountOverride)
+                                                 int seedOverride, int agvCountOverride, bool strict = false)
         {
             JObject root = JObject.Parse(json);
-            ConfigKeyCheck.WarnUnknownTopLevel(root, KnownKeys, $"scenario '{fileName}'");
+            if (strict) ConfigKeyCheck.ThrowUnknown(root, KnownKeys, $"scenario '{fileName}'");
+            else ConfigKeyCheck.WarnUnknownTopLevel(root, KnownKeys, $"scenario '{fileName}'");
             JArray jobsArray = (JArray)root["jobs"];
             if (jobsArray == null || jobsArray.Count == 0)
             {
-                SimLogger.LogError($"[ScenarioLoader] '{fileName}': no jobs array, or it's empty.");
+                ReportError(strict, $"[ScenarioLoader] '{fileName}': no jobs array, or it's empty.");
                 return null;
             }
 
             JArray layoutArray = (JArray)root["machineTypeLayout"];
             if (layoutArray == null || layoutArray.Count == 0)
             {
-                SimLogger.LogError($"[ScenarioLoader] '{fileName}': missing/empty machineTypeLayout — " +
+                ReportError(strict, $"[ScenarioLoader] '{fileName}': missing/empty machineTypeLayout — " +
                                     "hand-crafted scenarios must specify the floor explicitly so " +
                                     "machineIndex references (e.g. \"Weld\"[1]) are unambiguous.");
                 return null;
@@ -156,7 +180,7 @@ namespace Assets.Scripts.Simulation.Jobs
             {
                 if (!Enum.TryParse((string)layoutArray[i], ignoreCase: true, out MachineType t))
                 {
-                    SimLogger.LogError($"[ScenarioLoader] '{fileName}': unknown machine type " +
+                    ReportError(strict, $"[ScenarioLoader] '{fileName}': unknown machine type " +
                                         $"'{layoutArray[i]}' at machineTypeLayout[{i}].");
                     return null;
                 }
@@ -225,8 +249,8 @@ namespace Assets.Scripts.Simulation.Jobs
                     ? ConfigOverrides.ValidatedParkingMethod(root["parkingMethod"].Value<string>())
                     : "lane",
                 ioDocks = ConfigOverrides.ValidatedIoDocks(root["ioDocks"]?.Value<string>() ?? "corner"),
-                Stochastic = ReadStochastic(root),
-                dispatchingRule = ReadDispatchingRule(root),
+                Stochastic = ReadStochastic(root, strict),
+                dispatchingRule = ReadDispatchingRule(root, strict),
             };
         }
 
@@ -240,10 +264,20 @@ namespace Assets.Scripts.Simulation.Jobs
         /// StochasticConfig default), Stochastic stays null, identical to every scenario predating
         /// this field.
         /// </summary>
-        private static StochasticConfig ReadStochastic(JObject root)
+        /// <summary>Keys of the "stochastic" block (StochasticConfig fields, camelCase).</summary>
+        public static readonly string[] StochasticKeys =
+        {
+            "machineFailuresEnabled", "weibullK", "weibullLambda", "repairLogMu", "repairLogSigma",
+            "agvFailuresEnabled", "agvWeibullLambda", "agvRepairLogMu", "agvRepairLogSigma",
+            "dynamicArrivalsEnabled", "arrivalLambda", "dynamicJobCap", "burstArrivalsEnabled", "burstSizeMean",
+            "episodeDurationSeconds", "warmupSeconds",
+        };
+
+        public static StochasticConfig ReadStochastic(JObject root, bool strict = false)
         {
             var s = root["stochastic"] as JObject;
             if (s == null) return null;
+            if (strict) ConfigKeyCheck.ThrowUnknown(s, StochasticKeys, "\"stochastic\"");
 
             var defaults = new StochasticConfig();
             var cfg = new StochasticConfig
@@ -283,13 +317,14 @@ namespace Assets.Scripts.Simulation.Jobs
         /// (DispatchingRule.SRT_SRWT) when the scenario JSON doesn't specify one, matching every
         /// existing scenario that predates this field.
         /// </summary>
-        private static DispatchingRule ReadDispatchingRule(JObject root)
+        private static DispatchingRule ReadDispatchingRule(JObject root, bool strict)
         {
             string name = root["dispatchingRule"]?.Value<string>();
             if (name == null) return new FJSSPConfig().dispatchingRule;
 
             if (!Enum.TryParse(name, ignoreCase: true, out DispatchingRule rule))
             {
+                if (strict) throw new ArgumentException($"Unknown dispatchingRule '{name}'.");
                 SimLogger.LogError($"[ScenarioLoader] Unknown dispatchingRule '{name}' — " +
                                     "falling back to the default.");
                 return new FJSSPConfig().dispatchingRule;
@@ -302,7 +337,7 @@ namespace Assets.Scripts.Simulation.Jobs
         // ─────────────────────────────────────────────────────────────────────
 
         private static FJSSPJobDefinition[] BuildJobs(
-            string json, Dictionary<MachineType, List<int>> machinesByType)
+            string json, Dictionary<MachineType, List<int>> machinesByType, bool strict = false)
         {
             JObject root = JObject.Parse(json);
             JArray jobsArray = (JArray)root["jobs"];
@@ -327,7 +362,7 @@ namespace Assets.Scripts.Simulation.Jobs
 
                     if (!Enum.TryParse((string)rawOp["machineType"], ignoreCase: true, out MachineType type))
                     {
-                        SimLogger.LogError($"[ScenarioLoader] Job {jobId} op {o}: unknown machine " +
+                        ReportJobError(strict, $"[ScenarioLoader] Job {jobId} op {o}: unknown machine " +
                                             $"type '{rawOp["machineType"]}'.");
                         continue;
                     }
@@ -352,7 +387,7 @@ namespace Assets.Scripts.Simulation.Jobs
                     }
                     if (idList == null || idList.Count == 0)
                     {
-                        SimLogger.LogError($"[ScenarioLoader] Job {jobId} op {o}: no runtime " +
+                        ReportJobError(strict, $"[ScenarioLoader] Job {jobId} op {o}: no runtime " +
                                             $"machines of type {type} exist on the floor.");
                         continue;
                     }
@@ -395,7 +430,7 @@ namespace Assets.Scripts.Simulation.Jobs
                         JArray durations = durationToken.Type == JTokenType.Array ? (JArray)durationToken : null;
                         if (durations != null && durations.Count != indices.Count)
                         {
-                            SimLogger.LogError($"[ScenarioLoader] Job {jobId} op {o}: duration " +
+                            ReportJobError(strict, $"[ScenarioLoader] Job {jobId} op {o}: duration " +
                                                 $"array length ({durations.Count}) must match " +
                                                 $"machineIndex array length ({indices.Count}).");
                             continue;
@@ -407,7 +442,7 @@ namespace Assets.Scripts.Simulation.Jobs
                             int idx = indices[k].Value<int>();
                             if (idx < 0 || idx >= idList.Count)
                             {
-                                SimLogger.LogError($"[ScenarioLoader] Job {jobId} op {o}: " +
+                                ReportJobError(strict, $"[ScenarioLoader] Job {jobId} op {o}: " +
                                                     $"machineIndex {idx} out of range for {type} " +
                                                     $"(only {idList.Count} on the floor).");
                                 continue;
@@ -427,7 +462,7 @@ namespace Assets.Scripts.Simulation.Jobs
                         int idx = idxToken.Value<int>();
                         if (idx < 0 || idx >= idList.Count)
                         {
-                            SimLogger.LogError($"[ScenarioLoader] Job {jobId} op {o}: " +
+                            ReportJobError(strict, $"[ScenarioLoader] Job {jobId} op {o}: " +
                                                 $"machineIndex {idx} out of range for {type} " +
                                                 $"(only {idList.Count} on the floor).");
                             continue;

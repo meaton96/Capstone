@@ -727,7 +727,7 @@ class TestActionSpace:
     def test_legacy_player_refused(self):
         """@brief A player still built with one 8-way branch must fail at connect, not mid-training."""
         from env_wrappers.unity_env import UnitySchedulingEnv
-        with patch("env_wrappers.unity_env.UnityEnvironment") as MockUnity, \
+        with patch("env_wrappers.unity_env.LoopbackUnityEnvironment") as MockUnity, \
              patch("env_wrappers.unity_env.EngineConfigurationChannel"):
             spec = MagicMock()
             obs_spec = MagicMock()
@@ -801,7 +801,7 @@ class TestUnitySchedulingEnv:
         from env_wrappers.unity_env import UnitySchedulingEnv
         from rewards import METRIC_NAMES, SENSOR_NAME
 
-        with patch("env_wrappers.unity_env.UnityEnvironment") as MockUnity, \
+        with patch("env_wrappers.unity_env.LoopbackUnityEnvironment") as MockUnity, \
              patch("env_wrappers.unity_env.EngineConfigurationChannel"):
 
             mock_env_instance = MagicMock()
@@ -853,7 +853,7 @@ class TestUnitySchedulingEnv:
         from config import obs_total_size
         from env_wrappers.unity_env import UnitySchedulingEnv
         size = obs_total_size(15, 256)
-        with patch("env_wrappers.unity_env.UnityEnvironment") as MockUnity, \
+        with patch("env_wrappers.unity_env.LoopbackUnityEnvironment") as MockUnity, \
              patch("env_wrappers.unity_env.EngineConfigurationChannel"):
             spec = MagicMock()
             obs_spec = MagicMock()
@@ -1104,7 +1104,7 @@ class TestUnitySchedulingEnv:
         at startup if it cannot open the log file."""
         from env_wrappers.unity_env import UnitySchedulingEnv
 
-        with patch("env_wrappers.unity_env.UnityEnvironment") as MockUnity, \
+        with patch("env_wrappers.unity_env.LoopbackUnityEnvironment") as MockUnity, \
              patch("env_wrappers.unity_env.EngineConfigurationChannel"):
             mock_env_instance = MagicMock()
             mock_spec = MagicMock()
@@ -1372,7 +1372,7 @@ def test_player_closed_when_startup_check_fails():
     """@brief A failed startup check (here an 8-branch player) closes the player, so the process can exit
     instead of hanging on its gRPC thread (rnd02, 2026-09-26)."""
     from env_wrappers.unity_env import UnitySchedulingEnv
-    with patch("env_wrappers.unity_env.UnityEnvironment") as MockUnity, \
+    with patch("env_wrappers.unity_env.LoopbackUnityEnvironment") as MockUnity, \
          patch("env_wrappers.unity_env.EngineConfigurationChannel"):
         spec = MagicMock()
         obs_spec = MagicMock()

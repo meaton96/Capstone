@@ -119,12 +119,16 @@ def build_env(args, ppo_cfg, run_dir: Path, reward, scenario_generator=None):
 EPISODE_CSV_FIELDS = [
     "global_step", "env", "seed", "seed_index", "return", "length", "makespan",
     "mean_flow_time", "total_flow_time", "jobs_exited", "deadlock", "timed_out", "truncated",
+    "config_hash", "instance_hash",
 ]
 
 
 def log_episodes(writer: SummaryWriter, infos, global_step: int, recent: deque,
-                 episode_csv: csv.DictWriter = None) -> int:
+                 episode_csv: csv.DictWriter = None, applied_configs=None) -> int:
     """@brief Write every episode that finished this step to TensorBoard (and episodes.csv).
+
+    @param applied_configs  Open text file (applied_configs.jsonl): one line per config hash the first time a
+                            player applies it, so every config_hash in episodes.csv resolves to its config.
 
     @return Number of episodes that finished.
     """
@@ -138,6 +142,9 @@ def log_episodes(writer: SummaryWriter, infos, global_step: int, recent: deque,
         if episode_csv is not None:
             episode_csv.writerow({"global_step": global_step, "env": env_index,
                                   **{k: episode.get(k) for k in EPISODE_CSV_FIELDS[2:]}})
+        if applied_configs is not None and episode.get("applied_config"):
+            applied_configs.write(json.dumps({"config_hash": episode.get("config_hash"), "env": env_index,
+                                              "global_step": global_step, "config": episode["applied_config"]}) + "\n")
         for key in ("return", "length", "makespan", "mean_flow_time", "jobs_exited"):
             value = episode.get(key)
             if value is not None and not math.isnan(value):
@@ -412,10 +419,17 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
     episode_file_path = run_dir / "episodes.csv"
     resuming_existing_log = bool(args.resume_from) and episode_file_path.exists() \
         and episode_file_path.stat().st_size > 0
+    # A log resumed from before a column existed keeps its own header (new columns are dropped, not misaligned).
+    fieldnames = EPISODE_CSV_FIELDS
+    if resuming_existing_log:
+        with open(episode_file_path, newline="") as f:
+            fieldnames = next(csv.reader(f))
     episode_file = open(episode_file_path, "a" if args.resume_from else "w", newline="")
-    episode_csv = csv.DictWriter(episode_file, fieldnames=EPISODE_CSV_FIELDS)
+    episode_csv = csv.DictWriter(episode_file, fieldnames=fieldnames, extrasaction="ignore")
     if not resuming_existing_log:
         episode_csv.writeheader()
+    # Canonical text of every config Unity applied, keyed by the config_hash column of episodes.csv (thesis 7.1).
+    applied_configs_file = open(run_dir / "applied_configs.jsonl", "a" if args.resume_from else "w")
 
     try:
         for update in range(1, num_updates + 1):
@@ -445,7 +459,14 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
                 buffer.add(obs, actions_np, log_probs_np, rewards, values_np, dones, bootstrap_values)
                 obs = next_obs
                 watchdog.beat()
-                episodes_done += log_episodes(writer, infos, global_step, recent_episodes, episode_csv)
+                finished_now = log_episodes(writer, infos, global_step, recent_episodes, episode_csv,
+                                            applied_configs_file)
+                if finished_now:
+                    # On the cluster's parallel filesystem Python buffers a whole block (MBs), so without this
+                    # episodes.csv stays empty for days and its rows are lost if the job is hard-killed.
+                    episode_file.flush()
+                    applied_configs_file.flush()
+                episodes_done += finished_now
 
             # Bootstrap value for GAE
             with torch.no_grad():
@@ -575,6 +596,7 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
         save_checkpoint(ckpt_path, net, optimizer, global_step, ppo_cfg, reward_name, row_caps)
         writer.close()
         episode_file.close()
+        applied_configs_file.close()
         if args.unity and hasattr(vec_env, 'close'):
             vec_env.close()
 

@@ -1,0 +1,13 @@
+{
+ "run_id": "rnd02_s1",
+ "label": "rnd02_s1 (job 21787413_1 on skl-a-30.rc.rit.edu)",
+ "update": 126,
+ "num_updates": 3906,
+ "global_step": 96768,
+ "total_timesteps": 3000000,
+ "sps": 5.91,
+ "eta_hours": 136.52,
+ "episodes": 235,
+ "recent_mean_flow": 1732.4,
+ "updated_at": "2026-09-28T16:23:49"
+}
