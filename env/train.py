@@ -95,6 +95,9 @@ def build_env(args, ppo_cfg, run_dir: Path, reward, scenario_generator=None):
         obs_caps = row_caps_for(planned, args.obs_max_machines, args.obs_max_jobs)
         obs_shapes = shapes_for_caps(*obs_caps)
         print(f"Observation row caps: {obs_caps[0]} machines, {obs_caps[1]} jobs")
+        # Refuse a player whose files differ from its build manifest (thesis section 7.2).
+        from player_manifest import check_player
+        check_player(args.unity_path, args.allow_unverified_player, record_dir=run_dir)
         vec_env = VectorizedUnityEnv(
             num_envs=ppo_cfg.num_envs,
             file_name=args.unity_path,
@@ -655,6 +658,9 @@ if __name__ == "__main__":
                         help="Connect to Unity instead of using placeholder env")
     parser.add_argument("--unity-path", type=str, default=None,
                         help="Path to built Unity executable (None = Editor)")
+    parser.add_argument("--allow-unverified-player", action="store_true",
+                        help="Launch the player even if its files do not match its BUILD_MANIFEST.json "
+                             "(see env/player_manifest.py); the mismatch is recorded in player_manifest.json.")
     parser.add_argument("--time-scale", type=float, default=100.0,
                         help="Unity simulation speed multiplier")
     parser.add_argument("--reward-spec", type=str,

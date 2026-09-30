@@ -25,15 +25,16 @@ else
     "$UV" venv --python 3.10.12 "$VENV"
 fi
 
+# Install from the hash-locked env/requirements-rit.lock (regenerate with env/lock_requirements.sh): every package,
+# torch included, must match a recorded SHA-256 or the install fails. uv needs unsafe-best-match to see both the PyPI
+# and PyTorch CPU indexes; the hashes, not index order, decide what is installed.
+LOCK="$REPO/env/requirements-rit.lock"
 if [[ -n "$UV" ]]; then
-    PIP=("$UV" pip install --python "$VENV/bin/python")
+    "$UV" pip install --python "$VENV/bin/python" --require-hashes --no-deps \
+        --index-strategy unsafe-best-match -r "$LOCK"
 else
-    "$VENV/bin/python" -m pip install --upgrade pip
-    PIP=("$VENV/bin/python" -m pip install)
+    "$VENV/bin/python" -m pip install --require-hashes --no-deps -r "$LOCK"
 fi
-
-"${PIP[@]}" "torch==2.1.1+cpu" --index-url https://download.pytorch.org/whl/cpu
-"${PIP[@]}" -r "$REPO/env/requirements-rit.txt"
 
 echo "[setup] $("$VENV/bin/python" --version); running unit tests"
 cd "$REPO/env"

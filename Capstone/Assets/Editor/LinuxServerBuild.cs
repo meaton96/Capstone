@@ -52,6 +52,9 @@ namespace Assets.Scripts.Editor
             };
 
             BuildReport report = BuildPipeline.BuildPlayer(options);
+            // Provenance for the committed player (thesis section 7.2), checked by env/player_manifest.py.
+            if (report.summary.result == BuildResult.Succeeded)
+                BuildManifest.Write(outputPath);
             Debug.Log($"[LinuxServerBuild] {report.summary.result} -> {Path.GetFullPath(outputPath)} " +
                       $"({report.summary.totalErrors} errors, {report.summary.totalTime})");
 

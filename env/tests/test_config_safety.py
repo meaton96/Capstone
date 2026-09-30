@@ -230,3 +230,48 @@ class TestCheckpointLoading:
         with pytest.raises(pickle.UnpicklingError):
             load_checkpoint(path, "cpu")
         assert not (tmp_path / "PWNED_MARKER").exists()
+
+
+class TestPlayerManifest:
+    """env/player_manifest.py against a fake build folder with a manifest in BuildManifest.cs's format."""
+
+    @staticmethod
+    def make_build(root):
+        from player_manifest import included, sha256_file
+        files = {"capstone.x86_64": b"\x7fELF launcher", "UnityPlayer.so": b"engine",
+                 "capstone_Data/Managed/Simulation.dll": b"sim code",
+                 "capstone_Data/ML-Agents/Timers/SimulationGrid_timers.json": b"{}",
+                 "BatchConfigs/scenario.json": b"{}", "Results/results.csv": b"a,b"}
+        for rel, data in files.items():
+            (root / rel).parent.mkdir(parents=True, exist_ok=True)
+            (root / rel).write_bytes(data)
+        manifest = {"schema": 1, "source_commit": "abc123", "source_dirty": False, "built_at": "2026-09-30T00:00:00Z",
+                    "files": {rel: sha256_file(root / rel) for rel in sorted(files) if included(rel)}}
+        (root / "BUILD_MANIFEST.json").write_text(json.dumps(manifest))
+        return root / "capstone.x86_64"
+
+    def test_matching_player_is_verified_and_runtime_files_ignored(self, tmp_path):
+        from player_manifest import check_player
+        exe = self.make_build(tmp_path)
+        (tmp_path / "Results" / "new_run.csv").write_text("x")           # written by the player at runtime
+        (tmp_path / "capstone_Data/ML-Agents/Timers/SimulationGrid_timers.json").write_text('{"t": 1}')
+        summary = check_player(str(exe), record_dir=tmp_path)
+        assert summary["status"] == "verified" and summary["files"] == 3
+        assert summary["source_commit"] == "abc123"
+        assert json.loads((tmp_path / "player_manifest.json").read_text())["status"] == "verified"
+
+    def test_changed_or_extra_binary_is_refused(self, tmp_path):
+        from player_manifest import PlayerIntegrityError, check_player
+        exe = self.make_build(tmp_path)
+        (tmp_path / "capstone_Data/Managed/Simulation.dll").write_bytes(b"patched")
+        (tmp_path / "libevil.so").write_bytes(b"dropped in")
+        with pytest.raises(PlayerIntegrityError) as exc:
+            check_player(str(exe))
+        assert "changed: capstone_Data/Managed/Simulation.dll" in str(exc.value)
+        assert "extra (not in manifest): libevil.so" in str(exc.value)
+        assert check_player(str(exe), allow_unverified=True)["status"] == "mismatch_allowed"
+
+    def test_missing_manifest_is_reported_not_refused(self, tmp_path):
+        from player_manifest import check_player
+        (tmp_path / "capstone.x86_64").write_bytes(b"old build")
+        assert check_player(str(tmp_path / "capstone.x86_64"))["status"] == "no_manifest"
