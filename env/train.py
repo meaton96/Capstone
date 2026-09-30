@@ -212,6 +212,16 @@ def check_obs_schema(ckpt: dict, path) -> None:
         raise ValueError(f"{path}: observation layout differs ({detail}); the network cannot read it.")
 
 
+def load_checkpoint(path, device) -> dict:
+    """@brief Load a checkpoint as tensors and plain containers only (thesis section 7.2).
+
+    @details Plain torch.load unpickles arbitrary objects in the pinned PyTorch (the default only became
+    weights_only=True in 2.6), so a shared checkpoint could run code on the machine that loads it.
+    save_checkpoint writes only dicts, lists, numbers, strings and tensors, which weights_only accepts.
+    """
+    return torch.load(path, map_location=device, weights_only=True)
+
+
 def check_action_layout(ckpt: dict, path) -> None:
     """@brief Refuse a checkpoint trained on a different action space (see config.ACTION_LAYOUT).
 
@@ -229,7 +239,11 @@ def check_action_layout(ckpt: dict, path) -> None:
 
 def save_checkpoint(path: Path, net, optimizer, global_step: int, ppo_cfg: PPOConfig,
                     reward_name, row_caps):
-    """@brief Save network, optimizer, and config so a run can be resumed or evaluated."""
+    """@brief Save network, optimizer, and config so a run can be resumed or evaluated.
+
+    @details Keep every value a tensor, dict, list, tuple, str, number, bool or None: load_checkpoint uses
+    weights_only=True and refuses anything else (e.g. a Path or a dataclass instance).
+    """
     torch.save({
         "model_state_dict": net.state_dict(),
         "optimizer_state_dict": optimizer.state_dict(),
@@ -316,7 +330,7 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
 
     resumed_global_step = 0
     if args.resume_from:
-        ckpt = torch.load(args.resume_from, map_location=device)
+        ckpt = load_checkpoint(args.resume_from, device)
         check_obs_schema(ckpt, args.resume_from)
         check_action_layout(ckpt, args.resume_from)
         net.load_state_dict(ckpt["model_state_dict"])

@@ -156,8 +156,8 @@ class CheckpointPolicy:
         from models.network import SchedulingNetwork
 
         path = Path(path)
-        checkpoint = torch.load(path, map_location=device)
-        from train import check_action_layout, check_obs_schema
+        from train import check_action_layout, check_obs_schema, load_checkpoint
+        checkpoint = load_checkpoint(path, device)
         check_obs_schema(checkpoint, path)
         check_action_layout(checkpoint, path)
         self.net = SchedulingNetwork(EncoderConfig(), FusionConfig(), ActorCriticConfig()).to(device)

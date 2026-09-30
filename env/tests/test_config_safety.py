@@ -1,7 +1,7 @@
 """
 @file test_config_safety.py
-@brief Thesis section 7.1 fixes: config schema/bounds, rejection instead of fallback, loopback gRPC,
-       and config hashes in the episode log.
+@brief Thesis chapter 7 fixes: config schema/bounds, rejection instead of fallback, loopback gRPC,
+       config hashes in the episode log (7.1), and weights-only checkpoint loading (7.2).
 """
 
 import copy
@@ -195,3 +195,38 @@ class TestConfigHashInEpisodeLog:
         assert out.getvalue().count("abc,def") == 2
         lines = applied.getvalue().splitlines()
         assert len(lines) == 1 and json.loads(lines[0])["config"] == "x=1"
+
+
+class _Payload:
+    """Unpickling this runs code: the attack weights_only blocks."""
+
+    def __reduce__(self):
+        import os
+        return (os.system, ("touch PWNED_MARKER",))
+
+
+class TestCheckpointLoading:
+    def test_round_trip_through_save_checkpoint(self, tmp_path):
+        import torch
+        from config import PPOConfig
+        from train import load_checkpoint, save_checkpoint
+
+        net = torch.nn.Linear(3, 2)
+        opt = torch.optim.Adam(net.parameters())
+        path = tmp_path / "ckpt.pt"
+        save_checkpoint(path, net, opt, 123, PPOConfig(), "flow_time", (15, 64))
+        ckpt = load_checkpoint(path, "cpu")
+        assert ckpt["global_step"] == 123
+        assert torch.equal(ckpt["model_state_dict"]["weight"], net.weight)
+
+    def test_pickled_code_is_refused_not_run(self, tmp_path, monkeypatch):
+        import pickle
+        import torch
+        from train import load_checkpoint
+
+        monkeypatch.chdir(tmp_path)
+        path = tmp_path / "evil.pt"
+        torch.save({"model_state_dict": {}, "extra": _Payload()}, path)
+        with pytest.raises(pickle.UnpicklingError):
+            load_checkpoint(path, "cpu")
+        assert not (tmp_path / "PWNED_MARKER").exists()
