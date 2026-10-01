@@ -217,3 +217,40 @@ def test_secondary_ops_without_a_level():
     sc = randomized_scenario(1, dataclasses.replace(DEFAULT_PARAMS, secondary_ops=True))
     assert "machineFlexibilityProbability" not in sc
     assert all(op["allowSecondary"] for job in sc["jobs"] for op in job["operations"])
+
+
+# ── AGV breakdowns (scenarios.agv_failures) ─────────────────────────────────────────────────────────
+
+def test_agv_failures_keep_the_instance():
+    """@brief The breakdown block is added on top: same jobs and same machine-failure fields for a seed, so the
+    run is paired with the no-breakdown baseline on the same instance."""
+    from scenarios import AGV_FAILURE_DEFAULTS, with_agv_failures
+    base = REGISTRY["randomized"](5400.0)
+    wrapped = with_agv_failures(base)
+    for seed in range(6):
+        a, b = base(seed), wrapped(seed)
+        assert a["jobs"] == b["jobs"]
+        for key, value in (a.get("stochastic") or {}).items():
+            assert b["stochastic"][key] == value
+        for key, value in AGV_FAILURE_DEFAULTS.items():
+            assert b["stochastic"][key] == value
+        assert base(seed) == a      # the wrapper never mutates what the generator returns
+
+
+def test_agv_failures_on_instances_without_machine_failures():
+    """@brief Instances with machine failures off have no stochastic block; the wrapper creates one."""
+    from scenarios import with_agv_failures
+    base = REGISTRY["randomized"](None)
+    off = next(s for s in range(50) if not (base(s).get("stochastic") or {}).get("machineFailuresEnabled"))
+    block = with_agv_failures(base)(off)["stochastic"]
+    assert block["agvFailuresEnabled"] is True
+    assert not block.get("machineFailuresEnabled", False)
+
+
+def test_agv_failure_overrides_and_validation():
+    from channels.config_schema import validate_scenario
+    from scenarios import agv_failure_block, with_agv_failures
+    assert agv_failure_block({"agvWeibullLambda": 6000.0})["agvWeibullLambda"] == 6000.0
+    with pytest.raises(KeyError):
+        agv_failure_block({"weibullLambda": 6000.0})      # a machine field, not an AGV one
+    validate_scenario(with_agv_failures(REGISTRY["randomized"](5400.0))(0))

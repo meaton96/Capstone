@@ -268,7 +268,7 @@ namespace Assets.Scripts.Simulation.Jobs
         public static readonly string[] StochasticKeys =
         {
             "machineFailuresEnabled", "weibullK", "weibullLambda", "repairLogMu", "repairLogSigma",
-            "agvFailuresEnabled", "agvWeibullLambda", "agvRepairLogMu", "agvRepairLogSigma",
+            "agvFailuresEnabled", "agvWeibullK", "agvWeibullLambda", "agvRepairLogMu", "agvRepairLogSigma",
             "dynamicArrivalsEnabled", "arrivalLambda", "dynamicJobCap", "burstArrivalsEnabled", "burstSizeMean",
             "episodeDurationSeconds", "warmupSeconds",
         };
@@ -288,6 +288,7 @@ namespace Assets.Scripts.Simulation.Jobs
                 RepairLogMu = s["repairLogMu"]?.Value<float>() ?? defaults.RepairLogMu,
                 RepairLogSigma = s["repairLogSigma"]?.Value<float>() ?? defaults.RepairLogSigma,
                 AGVFailuresEnabled = s["agvFailuresEnabled"]?.Value<bool>() ?? defaults.AGVFailuresEnabled,
+                AGVWeibullK = s["agvWeibullK"]?.Value<float>() ?? defaults.AGVWeibullK,
                 AGVWeibullLambda = s["agvWeibullLambda"]?.Value<float>() ?? defaults.AGVWeibullLambda,
                 AGVRepairLogMu = s["agvRepairLogMu"]?.Value<float>() ?? defaults.AGVRepairLogMu,
                 AGVRepairLogSigma = s["agvRepairLogSigma"]?.Value<float>() ?? defaults.AGVRepairLogSigma,

@@ -115,9 +115,13 @@ namespace Assets.Scripts.Simulation.Types
         public int MachineFailureCount;
         public float MachineRepairTime;
 
-        // Phase 3: AGV failure totals
-        // public int   AGVFailureCount;
-        // public float AGVRepairTime;
+        // AGV breakdown totals (StochasticConfig.AGVFailuresEnabled; see AGVController, "Breakdowns")
+        public int AGVFailureCount;
+        public double AGVRepairTime;              // sim-seconds AGVs spent broken down (sum over AGVs)
+        public double AGVBlockedByFailureTime;    // sim-seconds other AGVs spent queued behind a broken AGV
+        public List<AGVFailureRecord> AGVFailureRecords = new List<AGVFailureRecord>();
+        /// <summary>Transport milestones of every AGV (agv_events.csv); only collected under "-destrace".</summary>
+        public List<AGVEventRecord> AGVEventRecords = new List<AGVEventRecord>();
 
         // Phase 4: dynamic arrival totals
         public int DynamicArrivals;           // total jobs injected by the Poisson clock this episode
@@ -328,11 +332,16 @@ namespace Assets.Scripts.Simulation.Types
         public double PathDepartureFromParking;  // part driven empty to the first pickup after leaving parking
         public int RerouteCount;         // RedirectDropoff calls (machine-failure reroutes)
         public int StallRecoveryCount;   // HandleZoneStall calls (suspected deadlock self-recoveries)
+        public int FailureCount;             // breakdowns (StochasticConfig.AGVFailuresEnabled)
+        public double TimeBroken;            // frozen for a repair; not in any of the time buckets above
+        public double TimeBlockedByFailure;  // the part of TimeWaitingRoute spent queued behind a broken AGV
+        public double CensoredOperatingAge;  // operating seconds into the life still running at episode end
+        public bool CensoredLifeIsResidual;  // that life is the episode's first (equilibrium residual) draw
 
         // Derived
         public double ProductiveTime => TimeTraveling + TimeLoading + TimeUnloading;
         public double TotalAccountedTime =>
-            TimeIdle + TimeWaitingRoute + TimeTraveling + TimeLoading + TimeUnloading;
+            TimeIdle + TimeWaitingRoute + TimeTraveling + TimeLoading + TimeUnloading + TimeBroken;
         public double CongestionFraction =>
             TotalAccountedTime > 0 ? TimeWaitingRoute / TotalAccountedTime : 0;
     }
@@ -500,6 +509,49 @@ namespace Assets.Scripts.Simulation.Types
 
         // Derived
         public float FlowTime => Completed ? ExitTime - ArrivalTime : -1f;
+    }
+
+    /// <summary>One AGV breakdown (agv_failures.csv). OperatingAge is the observed time to failure in
+    /// operating seconds: a draw from the equilibrium residual-life distribution when ResidualLife is true
+    /// (the first failure of the episode), otherwise from the full Weibull(k_agv, λ_agv), which is what a
+    /// validation test should compare each group against.</summary>
+    [System.Serializable]
+    public class AGVFailureRecord
+    {
+        public int AgvId;
+        public double SimTime;          // episode sim-time of the breakdown
+        public double OperatingAge;     // operating seconds since the last repair (or episode start)
+        public bool ResidualLife;       // first life of the episode (residual draw), not a full life
+        public float RepairDuration;    // sampled repair, sim-seconds
+        public string State;            // AGVState when it broke down
+        public string Zone;             // traffic zone it stopped in
+        public int JobId;               // job it carried or was heading for, -1 if none
+        public bool JobHandedBack;      // that job was released for another AGV (pickup / pre-pickup)
+    }
+
+    /// <summary>One transport milestone of one AGV (agv_events.csv, "-destrace"). Read by the event-based twin
+    /// (env/des_twin) to time each leg; CumPathLength and CumWaitRoute are the AGV's running totals, so the
+    /// difference between two rows is the distance driven and the time spent blocked on zone reservations.</summary>
+    [System.Serializable]
+    public class AGVEventRecord
+    {
+        public double SimTime;
+        public int AgvId;
+        public string Event;            // dispatch_idle, pickup, dropoff, park, ... (AGVController.TraceEvent)
+        public int JobId;               // -1 when none
+        public int SourceMachineId;     // -1: incoming belt or none
+        public int TargetMachineId;     // -1: outgoing belt or none; -2: not known yet (pre-dispatch)
+        public int ZoneId;              // zone the AGV holds as its current one
+        public float X, Z, Yaw;         // floor position and heading (degrees) at the event
+        public double CumPathLength;
+        public double CumWaitRoute;
+    }
+
+    /// <summary>AGV motion parameters, exported for the event-based twin (des_floor.json).</summary>
+    public struct AGVKinematics
+    {
+        public float MoveSpeed, TurnSpeed, PathTurnThreshold, AlignmentThreshold;
+        public float WaypointArrivalDist, DockArrivalDist, HandshakeDuration;
     }
 
     /// <summary>One contiguous body overlap between a pair of AGVs (see AGVCollisionMonitor).</summary>

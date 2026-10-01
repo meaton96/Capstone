@@ -210,9 +210,10 @@ namespace Assets.Scripts.Simulation.Types
             public float repairLogMu = 4.0f;
             public float repairLogSigma = 0.5f;
             public bool agvFailuresEnabled = false;
-            public float agvWeibullLambda = 700f;
-            public float agvRepairLogMu = 3.4f;
-            public float agvRepairLogSigma = 0.4f;
+            public float agvWeibullK = 1.5f;
+            public float agvWeibullLambda = 8400f;
+            public float agvRepairLogMu = 4.6f;
+            public float agvRepairLogSigma = 0.5f;
             public bool dynamicArrivalsEnabled = false;
             public float arrivalLambda = 0.003f;
             public int dynamicJobCap = 0;
@@ -313,6 +314,7 @@ namespace Assets.Scripts.Simulation.Types
                     RepairLogMu = raw.stochastic.repairLogMu,
                     RepairLogSigma = raw.stochastic.repairLogSigma,
                     AGVFailuresEnabled = raw.stochastic.agvFailuresEnabled,
+                    AGVWeibullK = raw.stochastic.agvWeibullK,
                     AGVWeibullLambda = raw.stochastic.agvWeibullLambda,
                     AGVRepairLogMu = raw.stochastic.agvRepairLogMu,
                     AGVRepairLogSigma = raw.stochastic.agvRepairLogSigma,

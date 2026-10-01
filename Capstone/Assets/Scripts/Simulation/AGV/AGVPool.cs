@@ -166,14 +166,22 @@ namespace Assets.Scripts.Simulation.AGV
             return Vector3.zero;
         }
 
-        /// @brief Locates the first unit that is currently in a strictly @c Idle state.
+        /// @brief Locates the first unit that is currently in a strictly @c Idle state (and not broken down).
         ///
         /// @return An @c AGVController instance if an idle unit exists; otherwise, @c null.
         public AGVController GetIdleAGV()
         {
             foreach (var agv in fleet)
-                if (agv.IsIdle) return agv;
+                if (agv.IsIdle && !agv.IsBroken) return agv;
             return null;
+        }
+
+        /// @brief The AGV with the given id (ids are fleet indices, see InitializeFleet), or null.
+        public AGVController GetById(int agvId)
+        {
+            if (agvId < 0 || agvId >= fleet.Count) return null;
+            AGVController agv = fleet[agvId];
+            return agv != null && agv.AgvId == agvId ? agv : null;
         }
 
         /// @brief True if @p agv may serve @p tile: any tile when @p tile is negative (untiled callers).
@@ -187,10 +195,10 @@ namespace Assets.Scripts.Simulation.AGV
         public AGVController GetAvailableAGV(int tile = -1)
         {
             foreach (var agv in fleet)
-                if (agv.IsIdle && Serves(agv, tile)) return agv;
+                if (agv.IsIdle && !agv.IsBroken && Serves(agv, tile)) return agv;
 
             foreach (var agv in fleet)
-                if (agv.State == AGVState.ReturningToParking && Serves(agv, tile)) return agv;
+                if (agv.State == AGVState.ReturningToParking && !agv.IsBroken && Serves(agv, tile)) return agv;
 
             return null;
         }
@@ -228,6 +236,7 @@ namespace Assets.Scripts.Simulation.AGV
 
             foreach (var agv in fleet)
             {
+                if (agv.IsBroken) continue;   // frozen for its repair (AGVController, "Breakdowns")
                 bool idle = agv.IsIdle;
                 bool returning = agv.State == AGVState.ReturningToParking;
                 if (!idle && !returning) continue;
@@ -258,13 +267,13 @@ namespace Assets.Scripts.Simulation.AGV
             return z?.ZoneId ?? -1;
         }
 
-        /// @brief True when some AGV can take a new transport now: Idle, or ReturningToParking (redirectable).
-        ///        The same two states GetNearestAvailableAGV chooses from, so a true result means it will
-        ///        return a unit.
+        /// @brief True when some AGV can take a new transport now: Idle, or ReturningToParking (redirectable),
+        ///        and not broken down. The same units GetNearestAvailableAGV chooses from, so a true result
+        ///        means it will return a unit.
         public bool AnyAvailableAGV(int tile = -1)
         {
             foreach (var agv in fleet)
-                if ((agv.IsIdle || agv.State == AGVState.ReturningToParking) && Serves(agv, tile)) return true;
+                if (agv.IsAvailableForDispatch && Serves(agv, tile)) return true;
             return false;
         }
 

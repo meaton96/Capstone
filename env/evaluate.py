@@ -27,6 +27,7 @@ python env/evaluate.py --unity-path linux_server/capstone.x86_64 --no-graphics \
 
 import argparse
 import csv
+import json
 import math
 import os
 import sys
@@ -258,6 +259,10 @@ def run_evaluation(env, policies: list, schedule: list, log=print, decision_writ
             "deadlock": episode["deadlock"],
             "timed_out": episode["timed_out"],
             "truncated": episode["truncated"],
+            "machine_failures": episode.get("machine_failures"),
+            "agv_failures": episode.get("agv_failures"),
+            "agv_repair_time": episode.get("agv_repair_time"),
+            "agv_blocked_by_failure_time": episode.get("agv_blocked_by_failure_time"),
             "config_hash": episode.get("config_hash"),
             "instance_hash": episode.get("instance_hash"),
         })
@@ -366,6 +371,10 @@ def main(argv=None):
                              "operation type (0 = fully typed; see FJSSPConfig.MachineFlexibilityProbability)")
     parser.add_argument("--secondary-time-multiplier", type=float, default=1.0,
                         help="With --machine-flexibility: processing-time factor on a machine's secondary types")
+    parser.add_argument("--agv-failures", nargs="?", const="{}", default=None, metavar="JSON",
+                        help="With --scenario-generator: add AGV breakdowns to every instance (same instance "
+                             "otherwise). Bare flag = scenarios.AGV_FAILURE_DEFAULTS; a JSON object overrides "
+                             "fields, e.g. '{\"agvWeibullLambda\": 6000, \"agvRepairLogMu\": 4.2}'")
     parser.add_argument("--decision-log", action="store_true",
                         help="Also write decisions.csv: every decision's chosen rule, plus the "
                              "action probabilities for checkpoints")
@@ -391,6 +400,8 @@ def main(argv=None):
 
     if args.scenario and args.scenario_generator:
         parser.error("--scenario and --scenario-generator are mutually exclusive")
+    if args.agv_failures is not None and not args.scenario_generator:
+        parser.error("--agv-failures needs --scenario-generator")
 
     scenario_generator = None
     if args.scenario_generator:
@@ -399,6 +410,16 @@ def main(argv=None):
         scenario_generator = REGISTRY[args.scenario_generator](
             duration, machine_flexibility=args.machine_flexibility,
             secondary_time_multiplier=args.secondary_time_multiplier)
+        if args.agv_failures is not None:
+            from scenarios import agv_failure_block, with_agv_failures
+            try:
+                overrides = json.loads(args.agv_failures)
+                if not isinstance(overrides, dict):
+                    raise ValueError("expected a JSON object")
+                print(f"AGV breakdowns on: {agv_failure_block(overrides)}")
+            except (ValueError, KeyError) as exc:
+                parser.error(f"--agv-failures: {exc}")
+            scenario_generator = with_agv_failures(scenario_generator, overrides)
 
     seeds = parse_seeds(args.seeds)
     if max(seeds) >= TRAIN_SEED_LOW:

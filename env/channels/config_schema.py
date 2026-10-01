@@ -30,7 +30,7 @@ CONFIG_KEYS = {
 ## @brief ScenarioLoader.StochasticKeys.
 STOCHASTIC_KEYS = {
     "machineFailuresEnabled", "weibullK", "weibullLambda", "repairLogMu", "repairLogSigma",
-    "agvFailuresEnabled", "agvWeibullLambda", "agvRepairLogMu", "agvRepairLogSigma",
+    "agvFailuresEnabled", "agvWeibullK", "agvWeibullLambda", "agvRepairLogMu", "agvRepairLogSigma",
     "dynamicArrivalsEnabled", "arrivalLambda", "dynamicJobCap", "burstArrivalsEnabled", "burstSizeMean",
     "episodeDurationSeconds", "warmupSeconds",
 }
@@ -240,6 +240,7 @@ def _check_stochastic(v: "_Checker", s: Dict[str, Any]) -> None:
         v.number(s, "repairLogSigma", minimum=0.0, where=w)
     v.number(s, "repairLogMu", where=w)
     if s.get("agvFailuresEnabled"):
+        v.number(s, "agvWeibullK", exclusive_min=0.0, where=w)
         v.number(s, "agvWeibullLambda", exclusive_min=0.0, where=w)
         v.number(s, "agvRepairLogSigma", minimum=0.0, where=w)
     v.number(s, "agvRepairLogMu", where=w)

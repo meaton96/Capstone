@@ -16,7 +16,8 @@ namespace Assets.Scripts.Simulation.Types
     ///     "repairLogMu": 4.0,
     ///     "repairLogSigma": 0.5,
     ///     "agvFailuresEnabled": false,
-    ///     "agvWeibullLambda": 700.0,
+    ///     "agvWeibullK": 1.5,
+    ///     "agvWeibullLambda": 8400.0,
     ///     "dynamicArrivalsEnabled": false,
     ///     "arrivalLambda": 0.005
     ///   }
@@ -64,26 +65,39 @@ namespace Assets.Scripts.Simulation.Types
 
         // ── AGV failures ──
 
-        /// @brief Enable Weibull-distributed AGV time-to-failure.
+        /// @brief Enable Weibull-distributed AGV breakdowns (see AGVController, "Breakdowns").
         ///
-        /// @details AGVs share @c WeibullK with machines but have their own scale parameter.
-        ///          AGVs fail more frequently due to higher mechanical stress from continuous movement.
+        /// @details A failed AGV stops where it is and keeps its zone reservations for the whole
+        ///          repair, so on one-way aisles every AGV queued behind it waits too. A job it was
+        ///          only on its way to collect is handed back for another AGV; a job it is carrying
+        ///          stays on board and is delivered after the repair.
+        ///
+        ///          Time to failure counts OPERATING time only (travelling, loading, unloading), not
+        ///          calendar time: a parked AGV, or one waiting for a zone, does not age. Machines,
+        ///          by contrast, age on calendar time (PhysicalMachine.TickTTF).
         public bool AGVFailuresEnabled = false;
 
-        /// @brief Weibull scale for AGV failures in simulation-seconds.
+        /// @brief Weibull shape for AGV time to failure (operating seconds). Separate from the
+        ///        machines' @c WeibullK so the two failure models can be set independently.
+        public float AGVWeibullK = 1.5f;
+
+        /// @brief Weibull scale for AGV time to failure, in operating seconds.
         ///
-        /// @details Typically lower than @c WeibullLambda since AGVs operate continuously.
-        ///          Default is ~78% of machine λ.
-        public float AGVWeibullLambda = 700.0f;
+        /// @details Mean TTF = λ Γ(1 + 1/k), ≈ 0.903 λ at k = 1.5: the default 8400 gives ~7,600
+        ///          operating seconds between failures, i.e. about 3 failures per 5,400 s window for
+        ///          7 AGVs at ~60% busy. Placeholder pending calibration against measured AGV
+        ///          operating time (docs/THESIS_GAP_PLAN_2026-09-30.md, D2).
+        public float AGVWeibullLambda = 8400.0f;
 
         /// @brief AGV repair log-normal μ.
         ///
-        /// @details AGV repairs are typically faster than machine repairs.
-        ///          Default real-space mean ≈ 30 sim-seconds.
-        public float AGVRepairLogMu = 3.4f;
+        /// @details A broken AGV blocks its aisle for the whole repair, so repairs are short
+        ///          (a fault reset, not a machine overhaul). Default μ = 4.6, σ = 0.5 gives a mean of
+        ///          exp(μ + σ²/2) ≈ 113 sim-seconds.
+        public float AGVRepairLogMu = 4.6f;
 
         /// @brief AGV repair log-normal σ.
-        public float AGVRepairLogSigma = 0.4f;
+        public float AGVRepairLogSigma = 0.5f;
 
         // ── Dynamic job arrivals ──
 

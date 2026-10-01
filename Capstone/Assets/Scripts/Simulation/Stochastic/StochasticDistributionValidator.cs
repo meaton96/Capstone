@@ -158,6 +158,88 @@ namespace Assets.Scripts.Simulation.Stochastic
 
             yield return null;
 
+            // Test 5: AGV full life, Weibull(k=1.5, λ=8400) operating seconds (after a repair)
+            // mean = λ Γ(1 + 1/k) ≈ 7583.1, std = λ sqrt(Γ(1 + 2/k) − Γ²(1 + 1/k)) ≈ 5148.7
+            {
+                var cfg = MakeConfig(agvFailures: true);
+                StochasticEventManager.Instance.Initialize(cfg);
+                System.Random rng = StochasticEventManager.Instance.CreateAGVStream(0);
+                SampleMoments(N, () => StochasticEventManager.Instance.SampleAGVTTF(rng), out double mean, out double std);
+                CheckStat("AGV Weibull(1.5,8400) mean", mean, 7583.1);
+                CheckStat("AGV Weibull(1.5,8400) std", std, 5148.7);
+            }
+
+            yield return null;
+
+            // Test 6: AGV residual life at episode start (equilibrium / forward-recurrence distribution)
+            // mean = E[T²] / (2 E[T]) = λ Γ(1 + 2/k) / (2 Γ(1 + 1/k)) ≈ 5539.4
+            // E[R²] = E[T³] / (3 E[T]) = λ² Γ(1 + 3/k) / (3 Γ(1 + 1/k)), std ≈ 4628.4
+            {
+                var cfg = MakeConfig(agvFailures: true);
+                StochasticEventManager.Instance.Initialize(cfg);
+                System.Random rng = StochasticEventManager.Instance.CreateAGVStream(0);
+                SampleMoments(N, () => StochasticEventManager.Instance.SampleAGVResidualTTF(rng), out double mean, out double std);
+                CheckStat("AGV residual life mean", mean, 5539.4);
+                CheckStat("AGV residual life std", std, 4628.4);
+            }
+
+            yield return null;
+
+            // Test 7: AGV repair, LogNormal(μ=4.6, σ=0.5): mean = exp(μ + σ²/2) ≈ 112.73,
+            // std = sqrt((exp(σ²) − 1) exp(2μ + σ²)) ≈ 60.08
+            {
+                var cfg = MakeConfig(agvFailures: true);
+                StochasticEventManager.Instance.Initialize(cfg);
+                System.Random rng = StochasticEventManager.Instance.CreateAGVStream(0);
+                SampleMoments(N, () => StochasticEventManager.Instance.SampleAGVRepair(rng), out double mean, out double std);
+                CheckStat("AGV LogNormal(4.6,0.5) mean", mean, 112.73);
+                CheckStat("AGV LogNormal(4.6,0.5) std", std, 60.08);
+            }
+
+            yield return null;
+
+            // Test 8: stream independence. AGV draws must not shift the machine failure stream (so turning AGV
+            // failures on leaves a seed's machine failures unchanged), each AGV's stream must be reproducible
+            // from (seed, id), and two AGVs must not share a stream.
+            {
+                var cfg = MakeConfig(machineFailures: true, agvFailures: true);
+                var sem = StochasticEventManager.Instance;
+
+                sem.Initialize(cfg);
+                float[] machinesAlone = new float[100];
+                for (int i = 0; i < 100; i++) machinesAlone[i] = sem.SampleMachineTTF();
+
+                sem.Initialize(cfg);
+                System.Random agvA = sem.CreateAGVStream(3);
+                float[] machinesInterleaved = new float[100];
+                float[] agv3 = new float[100];
+                for (int i = 0; i < 100; i++)
+                {
+                    agv3[i] = sem.SampleAGVTTF(agvA);
+                    machinesInterleaved[i] = sem.SampleMachineTTF();
+                }
+
+                sem.Initialize(cfg);
+                System.Random agvB = sem.CreateAGVStream(3);
+                System.Random agvOther = sem.CreateAGVStream(4);
+                bool reproducible = true, distinct = false;
+                for (int i = 0; i < 100; i++)
+                {
+                    if (Math.Abs(sem.SampleAGVTTF(agvB) - agv3[i]) > 1e-3f) reproducible = false;
+                    if (Math.Abs(sem.SampleAGVTTF(agvOther) - agv3[i]) > 1e-3f) distinct = true;
+                }
+
+                bool machineUnchanged = true;
+                for (int i = 0; i < 100; i++)
+                    if (Math.Abs(machinesAlone[i] - machinesInterleaved[i]) > 1e-4f) { machineUnchanged = false; break; }
+
+                Report("AGV draws leave the machine failure stream unchanged", machineUnchanged);
+                Report("Per-AGV stream reproducible from (seed, id)", reproducible);
+                Report("Different AGVs get different streams", distinct);
+            }
+
+            yield return null;
+
             // Report final results and exit with appropriate code.
             if (_passed)
             {
@@ -168,6 +250,30 @@ namespace Assets.Scripts.Simulation.Stochastic
             {
                 SimLogger.LogError("[DistValidator] One or more tests FAILED. See log for details.");
                 Application.Quit(1);
+            }
+        }
+
+        /// <summary>Mean and standard deviation of @p n draws from @p sample.</summary>
+        private static void SampleMoments(int n, Func<float> sample, out double mean, out double std)
+        {
+            double sum = 0, sumSq = 0;
+            for (int i = 0; i < n; i++)
+            {
+                double x = sample();
+                sum += x; sumSq += x * x;
+            }
+            mean = sum / n;
+            std = Math.Sqrt(Math.Max(0.0, sumSq / n - mean * mean));
+        }
+
+        /// <summary>Logs a PASS/FAIL line for a yes/no check.</summary>
+        private void Report(string label, bool ok)
+        {
+            if (ok) SimLogger.Low($"[DistValidator] PASS  {label}.");
+            else
+            {
+                SimLogger.LogError($"[DistValidator] FAIL  {label}.");
+                _passed = false;
             }
         }
 
@@ -234,6 +340,10 @@ namespace Assets.Scripts.Simulation.Stochastic
                     RepairLogMu = repairLogMu,
                     RepairLogSigma = repairLogSigma,
                     AGVFailuresEnabled = agvFailures,
+                    AGVWeibullK = 1.5f,
+                    AGVWeibullLambda = 8400f,
+                    AGVRepairLogMu = 4.6f,
+                    AGVRepairLogSigma = 0.5f,
                     DynamicArrivalsEnabled = dynamicArrivals,
                     ArrivalLambda = arrivalLambda,
                 }

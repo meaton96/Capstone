@@ -743,6 +743,9 @@ namespace Assets.Scripts.Simulation
                     currentConfig, _episodeSeed >= 0 ? _episodeSeed : currentConfig.Seed);
                 foreach (var machine in layoutManager.Machines)
                     machine.InitializeStochastic();
+                // After Initialize, so each AGV's breakdown stream derives from this episode's seed.
+                foreach (var agv in agvPool.AllAGVs)
+                    agv.InitializeStochastic();
             }
             _throughputWindowLength = currentConfig.ThroughputTimingWindow <= 0f ? 60f : currentConfig.ThroughputTimingWindow;
             _nextThroughputBoundary = _throughputWindowLength;   // first window closes at t = windowLength
@@ -792,6 +795,10 @@ namespace Assets.Scripts.Simulation
                 transportAvailable: _routeOnTransport ? tile => agvPool.AnyAvailableAGV(tile) : (Func<int, bool>)null,
                 estimateTravelSeconds: EstimateTravelSeconds
             );
+
+            // "-destrace": floor graph + resolved jobs for the event-based twin (env/des_twin).
+            DesTwinExport.Write(currentConfig, layoutManager, trafficZoneManager, agvPool, jobDefs,
+                                PreDispatchLeadTime, _episodeSeed);
 
             episodeActive = true;
             decisionCount = 0;
@@ -1450,6 +1457,16 @@ namespace Assets.Scripts.Simulation
             if (SimTime > lastBoundary)
                 _tracker.CloseThroughputWindow(lastBoundary, SimTime, WorkInProgress());
 
+            int agvFailures = 0;
+            double agvRepairTime = 0.0, agvBlockedByFailure = 0.0;
+            foreach (var agv in agvPool.AllAGVs)
+            {
+                AGVRecord ar = agv.GetRecord(SimTime);
+                agvFailures += ar.FailureCount;
+                agvRepairTime += ar.TimeBroken;
+                agvBlockedByFailure += ar.TimeBlockedByFailure;
+            }
+
             var telemetry = EpisodeTelemetryChannel.Instance;
             if (telemetry != null)
             {
@@ -1464,7 +1481,10 @@ namespace Assets.Scripts.Simulation
                     stochasticTag: currentConfig.Stochastic?.Tag ?? "none",
                     configHash: ConfigHash,
                     instanceHash: InstanceHash,
-                    appliedConfig: _newConfigCanonical
+                    appliedConfig: _newConfigCanonical,
+                    agvFailures: agvFailures,
+                    agvRepairTime: agvRepairTime,
+                    agvBlockedByFailureTime: agvBlockedByFailure
                 );
                 telemetry.Flush();
             }
@@ -1533,7 +1553,17 @@ namespace Assets.Scripts.Simulation
 
             // Collect AGV performance records
             foreach (var agv in agvPool.AllAGVs)
+            {
                 record.AGVRecords.Add(agv.GetRecord(record.Makespan));
+                record.AGVFailureRecords.AddRange(agv.FailureRecords);
+                record.AGVEventRecords.AddRange(agv.EventRecords);
+            }
+            // Time order across the fleet (stable, so one AGV's same-tick milestones keep their order).
+            if (record.AGVEventRecords.Count > 0)
+                record.AGVEventRecords = record.AGVEventRecords.OrderBy(e => e.SimTime).ToList();
+            record.AGVFailureCount = agvFailures;
+            record.AGVRepairTime = agvRepairTime;
+            record.AGVBlockedByFailureTime = agvBlockedByFailure;
 
             // Skip parking alcove (Capacity=64) — it's intentionally unconstrained and
             // would inflate the zone count without diagnostic value.
@@ -1623,6 +1653,11 @@ namespace Assets.Scripts.Simulation
                     TimeProcessingState = job.TimeProcessing,
                 });
             }
+
+            if (record.AGVFailureCount > 0)
+                SimLogger.Low($"[StochasticSummary] AGV failures={record.AGVFailureCount} " +
+                              $"AGV repair time={record.AGVRepairTime:F1}s " +
+                              $"time queued behind broken AGVs={record.AGVBlockedByFailureTime:F1}s");
 
             if (record.MachineFailureCount > 0)
             {

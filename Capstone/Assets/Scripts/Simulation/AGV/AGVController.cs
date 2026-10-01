@@ -6,6 +6,8 @@ using Assets.Scripts.Simulation.Machines;
 using Assets.Scripts.Simulation.FactoryLayout;
 using Assets.Scripts.Simulation.Logging;
 using Assets.Scripts.Simulation.Jobs;
+using Assets.Scripts.Simulation.Stochastic;
+using Assets.Scripts.Simulation.Channels;
 using TMPro;
 
 namespace Assets.Scripts.Simulation.AGV
@@ -86,6 +88,72 @@ namespace Assets.Scripts.Simulation.AGV
         /// </summary>
         public bool StalledFlag { get; private set; }
         public int StalledJobId { get; private set; } = -1;
+        /// <summary>Why StalledJobId was handed back: "zone stall" (HandleZoneStall) or "breakdown"
+        ///          (BreakDown). For FlagHarvester's log only; the job-side handling is the same.</summary>
+        public string JobReleaseReason { get; private set; } = "";
+
+        // ── Breakdowns (StochasticConfig.AGVFailuresEnabled) ─────────────────────
+        // A failed AGV freezes where it is: it keeps its state, its zone reservations and any job
+        // it carries, and does nothing until the repair is done. A job it was only on its way to
+        // collect (MovingToPickup / MovingToPrePickup) is handed back through StalledFlag so another
+        // AGV can take it, and the AGV heads to parking after the repair. Time to failure counts
+        // operating time only (the same ticks as TimeTraveling + TimeLoading + TimeUnloading).
+
+        /// <summary>True while this AGV is broken down and waiting out its repair.</summary>
+        public bool IsBroken => _broken;
+        /// <summary>True when the dispatcher may give this AGV a new transport: Idle, or
+        ///          ReturningToParking (redirectable), and not broken.</summary>
+        public bool IsAvailableForDispatch =>
+            !_broken && (State == AGVState.Idle || State == AGVState.ReturningToParking);
+        /// <summary>True while blocked on a zone whose chain of holders ends at a broken AGV.</summary>
+        public bool IsBlockedByFailure => waitingForZone && _blockedByFailure;
+        /// <summary>One row per breakdown this episode (agv_failures.csv).</summary>
+        public IReadOnlyList<AGVFailureRecord> FailureRecords => _failureRecords;
+
+        // ── DES twin trace (DesTwinExport.Enabled, "-destrace") ─────────────────────
+        // One row per transport milestone (agv_events.csv). Python's event-based twin (env/des_twin)
+        // uses these to time each leg against its own free-flow estimate, so the delay the zone
+        // reservations add (cum_wait) can be separated from the time the motion itself takes.
+
+        /// <summary>Transport milestones this episode (agv_events.csv); empty unless DesTwinExport.Enabled.</summary>
+        public IReadOnlyList<AGVEventRecord> EventRecords => _eventRecords;
+        private readonly List<AGVEventRecord> _eventRecords = new List<AGVEventRecord>();
+
+        /// <summary>Motion parameters the DES twin needs to reproduce free-flow travel (des_floor.json).</summary>
+        public AGVKinematics Kinematics => new AGVKinematics
+        {
+            MoveSpeed = moveSpeed,
+            TurnSpeed = turnSpeed,
+            PathTurnThreshold = pathTurnThreshold,
+            AlignmentThreshold = alignmentThreshold,
+            WaypointArrivalDist = waypointArrivalDist,
+            DockArrivalDist = dockArrivalDist,
+            HandshakeDuration = handshakeDuration,
+        };
+
+        /// <summary>Records one milestone. job is the job concerned (-1 for none); source is the machine it is
+        ///          collected from (-1 for the incoming belt or none); target is the machine it is bound for (-1
+        ///          for the outgoing belt or none, -2 while a pre-dispatch does not know it yet).</summary>
+        private void TraceEvent(string ev, int job, int source = -1, int target = -1)
+        {
+            if (!DesTwinExport.Enabled) return;
+            Vector3 p = transform.position;
+            _eventRecords.Add(new AGVEventRecord
+            {
+                SimTime = FactoryOrchestrator.Instance != null ? FactoryOrchestrator.Instance.SimTime : Time.fixedTime,
+                AgvId = AgvId,
+                Event = ev,
+                JobId = job,
+                SourceMachineId = source,
+                TargetMachineId = target,
+                ZoneId = currentZoneId,
+                X = p.x,
+                Z = p.z,
+                Yaw = transform.eulerAngles.y,
+                CumPathLength = _statTotalPathLength,
+                CumWaitRoute = _statTimeWaitingRoute,
+            });
+        }
 
         /// <summary>
         /// Transit duration (sim-seconds) of the most recently completed pickup→dropoff trip.
@@ -102,6 +170,7 @@ namespace Assets.Scripts.Simulation.AGV
             DeliveredMachineId = -1;
             StalledFlag = false;
             StalledJobId = -1;
+            JobReleaseReason = "";
         }
         /// <summary>
         /// Zeros all per-episode statistics. Called from Initialize() and from
@@ -126,6 +195,45 @@ namespace Assets.Scripts.Simulation.AGV
             _statTripAccumulator = 0.0;
             _statCurrentTripStart = 0.0;
             _blockStartTime = -1f;
+
+            _broken = false;
+            _repairRemaining = 0f;
+            _ttfRemaining = double.PositiveInfinity;   // armed by InitializeStochastic when AGV failures are on
+            _opAge = 0.0;
+            _firstLifeIsResidual = false;
+            _replanOnRepair = false;
+            _beginWaypointOnRepair = false;
+            _failRng = null;
+            _lastOperatingTotal = 0.0;
+            _blockedByFailure = false;
+            _stallExemptTime = 0.0;
+            _statFailureCount = 0;
+            _statTimeBroken = 0.0;
+            _statTimeBlockedByFailure = 0.0;
+            _failureRecords.Clear();
+            _eventRecords.Clear();
+        }
+
+        /// <summary>
+        /// Arms this AGV's breakdown clock for the episode. Called by FactoryOrchestrator after
+        /// StochasticEventManager.Initialize (so the per-AGV stream derives from this episode's seed)
+        /// and after ResetEpisodeStats. The first time to failure is a residual life drawn from the
+        /// equilibrium distribution (StochasticEventManager.SampleAGVResidualTTF), so the fleet starts
+        /// mid-life rather than brand new; every later one is a full life after a repair.
+        /// </summary>
+        public void InitializeStochastic()
+        {
+            StochasticEventManager sem = StochasticEventManager.Instance;
+            if (sem == null || !sem.AGVFailuresEnabled)
+            {
+                _failRng = null;
+                _ttfRemaining = double.PositiveInfinity;
+                return;
+            }
+            _failRng = sem.CreateAGVStream(AgvId);
+            _ttfRemaining = sem.SampleAGVResidualTTF(_failRng);
+            _opAge = 0.0;
+            _firstLifeIsResidual = true;
         }
 
         /// <summary>
@@ -153,6 +261,13 @@ namespace Assets.Scripts.Simulation.AGV
                 PathDepartureFromParking = _statPathDeparture,
                 RerouteCount = _statRerouteCount,
                 StallRecoveryCount = _statStallRecoveryCount,
+                FailureCount = _statFailureCount,
+                TimeBroken = _statTimeBroken,
+                TimeBlockedByFailure = _statTimeBlockedByFailure,
+                // The life still running at episode end, censored there. A broken AGV's next life has not
+                // started (its failed life is already in FailureRecords), so it contributes age 0.
+                CensoredOperatingAge = _broken ? 0.0 : _opAge,   // _opAge stays 0 when AGV failures are off
+                CensoredLifeIsResidual = !_broken && _firstLifeIsResidual,
             };
         }
 
@@ -217,6 +332,24 @@ namespace Assets.Scripts.Simulation.AGV
         private double _statCurrentTripStart;  // fixedTime when current trip began (set in DoPickup)
         private float _blockStartTime = -1f;  // fixedTime when zone blocking began
 
+        // Breakdown state (see "Breakdowns" above).
+        private bool _broken;
+        private float _repairRemaining;            // sim-seconds of repair left while broken
+        private float _brokenSince;                // fixedTime the current breakdown began
+        private double _ttfRemaining = double.PositiveInfinity;  // operating seconds to the next failure
+        private double _opAge;                     // operating seconds since the last repair (or episode start)
+        private bool _firstLifeIsResidual;         // the current life was the equilibrium residual draw
+        private bool _replanOnRepair;              // a job was handed back: head to parking once repaired
+        private bool _beginWaypointOnRepair;       // a route was (re)planned while broken: start it once repaired
+        private System.Random _failRng;            // this AGV's own breakdown stream
+        private double _lastOperatingTotal;        // TimeTraveling + TimeLoading + TimeUnloading at the last tick
+        private bool _blockedByFailure;            // last retry found a broken AGV at the end of the wait chain
+        private double _stallExemptTime;           // part of the current block spent waiting on a broken AGV
+        private int _statFailureCount;
+        private double _statTimeBroken;
+        private double _statTimeBlockedByFailure;  // waiting for a zone because of a broken AGV (part of TimeWaitingRoute)
+        private readonly List<AGVFailureRecord> _failureRecords = new List<AGVFailureRecord>();
+
 
         /// @brief Sets up the AGV identity and initializes navigation components.
         /// @param moveSpeed  Overrides the prefab's serialized moveSpeed when set (see
@@ -256,6 +389,7 @@ namespace Assets.Scripts.Simulation.AGV
         /// so the job can be re-dispatched by the scheduler.
         public void AbortTransit()
         {
+            TraceEvent("abort", CurrentJobId);
             if (State != AGVState.MovingToDropoff) return;
 
             if (loadedJobVisual != null)
@@ -277,6 +411,7 @@ namespace Assets.Scripts.Simulation.AGV
         /// returns to parking. The job will be re-dispatched by the scheduler.
         public void CancelPickup()
         {
+            TraceEvent("cancel", CurrentJobId);
             if (State != AGVState.MovingToPickup)
             {
                 SimLogger.Error($"[AGV {AgvId}] CancelPickup called in wrong state ({State}).");
@@ -305,6 +440,7 @@ namespace Assets.Scripts.Simulation.AGV
         /// @returns True if the AGV was released and is now heading to parking.
         public bool ReleaseOrphanedPrePickup()
         {
+            TraceEvent("orphan", PreDispatchedJobId);
             if (State != AGVState.MovingToPrePickup) return false;
 
             SimLogger.Medium($"[AGV {AgvId}] Pre-dispatch for job {PreDispatchedJobId} orphaned — " +
@@ -380,7 +516,7 @@ namespace Assets.Scripts.Simulation.AGV
                    $"cur={Z(currentZoneId)} prev={Z(previousZoneId)} " +
                    $"wantsZone={(waitingForZone ? Z(pendingZoneId) : "-")} blockedFor={blockedFor:F0}s " +
                    $"atPickupDock={atPickupDock} atDropoffDock={atDropoffDock} " +
-                   $"stalls={_statStallRecoveryCount}";
+                   $"stalls={_statStallRecoveryCount} broken={_broken} failures={_statFailureCount}";
         }
 
         /// @brief Route-level detail for overlap diagnostics: the zone ahead, the waypoint being driven to, and
@@ -438,6 +574,7 @@ namespace Assets.Scripts.Simulation.AGV
         /// TargetMachineId and no owning AGV forever.
         public bool RedirectDropoff(Vector3 newDropoffPos, PhysicalMachine newTarget, JobVisual visual)
         {
+            TraceEvent("redirect", CurrentJobId);
             if (State != AGVState.MovingToDropoff)
             {
                 SimLogger.Error($"[AGV {AgvId}] RedirectDropoff called in wrong state ({State}).");
@@ -519,6 +656,7 @@ namespace Assets.Scripts.Simulation.AGV
             }
 
             State = AGVState.MovingToPrePickup;
+            TraceEvent(_dispatchedFromIdle ? "predispatch_idle" : "predispatch_return", jobId, sourceMachine != null ? sourceMachine.MachineId : -1, -2);
             BeginNextWaypoint();
             SimLogger.High($"[AGV {AgvId}] Pre-dispatched for job {jobId} — heading to pickup zone.");
         }
@@ -540,6 +678,7 @@ namespace Assets.Scripts.Simulation.AGV
             PreDispatchedJobId = -1;
 
             State = AGVState.MovingToPickup;
+            TraceEvent("finalize", jobId, sourceMachine != null ? sourceMachine.MachineId : -1, targetMachine != null ? targetMachine.MachineId : -1);
             if (atPickupDock)
             {
                 pickupTimer = handshakeDuration;
@@ -603,6 +742,7 @@ namespace Assets.Scripts.Simulation.AGV
             }
 
             State = AGVState.MovingToPickup;
+            TraceEvent(_dispatchedFromIdle ? "dispatch_idle" : "dispatch_return", jobId, sourceMachine != null ? sourceMachine.MachineId : -1, targetMachine != null ? targetMachine.MachineId : -1);
             SimLogger.High($"[AGV] {AgvId} dispatched to pickup job {CurrentJobId} from machine {(targetMachine != null ? targetMachine.MachineId : -1)}");
             BeginNextWaypoint();
         }
@@ -611,6 +751,14 @@ namespace Assets.Scripts.Simulation.AGV
         private void FixedUpdate()
         {
             float dt = Time.fixedDeltaTime;
+            if (_broken)
+            {
+                // Frozen in place: no movement, no handshake progress, reservations kept.
+                TickRepair(dt);
+                navAgent.nextPosition = transform.position;
+                UpdateStatusLabel();
+                return;
+            }
             PollDeferredRelease();
 
             switch (State)
@@ -631,7 +779,7 @@ namespace Assets.Scripts.Simulation.AGV
                     UpdateMovement();
                     if (!waitingForZone && ReachedDock(pickupDock))
                     {
-                        if (!atPickupDock) { atPickupDock = true; AlignToDock(pickupDock); }
+                        if (!atPickupDock) { atPickupDock = true; TraceEvent("arrive_pickup", CurrentJobId, sourceMachine != null ? sourceMachine.MachineId : -1, targetMachine != null ? targetMachine.MachineId : -1); AlignToDock(pickupDock); }
                         if (IsFacingDock(pickupDock))
                         {
                             pickupTimer -= Time.fixedDeltaTime;
@@ -652,7 +800,7 @@ namespace Assets.Scripts.Simulation.AGV
                     UpdateMovement();
                     if (!waitingForZone && ReachedDock(dropoffDock))
                     {
-                        if (!atDropoffDock) { atDropoffDock = true; AlignToDock(dropoffDock); }
+                        if (!atDropoffDock) { atDropoffDock = true; TraceEvent("arrive_dropoff", CurrentJobId, -1, targetMachine != null ? targetMachine.MachineId : -1); AlignToDock(dropoffDock); }
                         if (IsFacingDock(dropoffDock))
                         {
                             dropoffTimer -= Time.fixedDeltaTime;
@@ -686,6 +834,7 @@ namespace Assets.Scripts.Simulation.AGV
                         if (!atPickupDock)
                         {
                             atPickupDock = true;
+                            TraceEvent("arrive_prepickup", PreDispatchedJobId, sourceMachine != null ? sourceMachine.MachineId : -1, -2);
                             AlignToDock(pickupDock);
                             SimLogger.High($"[AGV {AgvId}] At pre-pickup dock for job {PreDispatchedJobId}.");
                         }
@@ -693,8 +842,165 @@ namespace Assets.Scripts.Simulation.AGV
                     break;
             }
 
+            if (waitingForZone && _blockedByFailure)
+            {
+                _statTimeBlockedByFailure += dt;
+                _stallExemptTime += dt;   // waiting on a breakdown is not a deadlock (see TryResumeFromWait)
+            }
+            TickFailureClock();
+
             navAgent.nextPosition = transform.position;
             UpdateStatusLabel();
+        }
+
+        // ── Breakdowns ────────────────────────────────────────────────────────────
+
+        /// @brief Ages the AGV by the operating time this tick added and breaks it down when its time to
+        ///        failure runs out. Runs after the state machine, so a pickup or delivery finished this tick
+        ///        has already set its flag and changed State; BreakDown sees the post-tick state.
+        private void TickFailureClock()
+        {
+            double operating = _statTimeTraveling + _statTimeLoading + _statTimeUnloading;
+            double delta = operating - _lastOperatingTotal;
+            _lastOperatingTotal = operating;
+            if (delta <= 0.0 || double.IsPositiveInfinity(_ttfRemaining)) return;
+
+            _opAge += delta;
+            _ttfRemaining -= delta;
+            if (_ttfRemaining <= 0.0) BreakDown();
+        }
+
+        /// @brief Stops the AGV where it is for a lognormal repair. A job it carries stays on board; a job it
+        ///        was only going to collect is handed back (StalledFlag, harvested by
+        ///        FlagHarvester.HarvestStalledAGVs, the same path as a zone-stall recovery) and the AGV
+        ///        returns to parking after the repair.
+        private void BreakDown()
+        {
+            TraceEvent("breakdown", CurrentJobId >= 0 ? CurrentJobId : PreDispatchedJobId);
+            StochasticEventManager sem = StochasticEventManager.Instance;
+            float repair = sem != null && _failRng != null ? sem.SampleAGVRepair(_failRng) : 0f;
+            AGVState stateAtFailure = State;
+            int jobAtFailure = CurrentJobId >= 0 ? CurrentJobId : PreDispatchedJobId;
+            bool released = false;
+
+            switch (State)
+            {
+                case AGVState.MovingToPickup when CurrentJobId >= 0:
+                    StalledFlag = true;
+                    StalledJobId = CurrentJobId;
+                    JobReleaseReason = "breakdown";
+                    CurrentJobId = -1;
+                    loadedJobVisual = null;
+                    sourceMachine = null;
+                    targetMachine = null;
+                    atPickupDock = false;
+                    pickupZoneId = -1;
+                    State = AGVState.ReturningToParking;
+                    _replanOnRepair = true;
+                    released = true;
+                    break;
+
+                case AGVState.MovingToPrePickup:
+                    // Job still Processing at its source machine; only the pre-dispatch claim is released.
+                    StalledFlag = true;
+                    StalledJobId = PreDispatchedJobId;
+                    JobReleaseReason = "breakdown";
+                    PreDispatchedJobId = -1;
+                    sourceMachine = null;
+                    targetMachine = null;
+                    atPickupDock = false;
+                    pickupZoneId = -1;
+                    State = AGVState.ReturningToParking;
+                    _replanOnRepair = true;
+                    released = true;
+                    break;
+            }
+
+            _broken = true;
+            _repairRemaining = repair;
+            _brokenSince = Time.fixedTime;
+            _statFailureCount++;
+
+            string zoneName = currentZoneId >= 0 ? (trafficMgr?.GetZone(currentZoneId)?.Name ?? currentZoneId.ToString()) : "-";
+            _failureRecords.Add(new AGVFailureRecord
+            {
+                AgvId = AgvId,
+                SimTime = FactoryOrchestrator.Instance != null ? FactoryOrchestrator.Instance.SimTime : Time.fixedTime,
+                OperatingAge = _opAge,
+                ResidualLife = _firstLifeIsResidual,
+                RepairDuration = repair,
+                State = stateAtFailure.ToString(),
+                Zone = zoneName,
+                JobId = jobAtFailure,
+                JobHandedBack = released,
+            });
+            EpisodeTelemetryChannel.Instance?.RecordAGVFailure(AgvId, (float)_opAge, repair);
+            SimLogger.Medium($"[AGV {AgvId}] Breakdown after {_opAge:F0} operating-s in {stateAtFailure} at {zoneName} " +
+                             $"(job {jobAtFailure}{(released ? ", handed back" : "")}); repair {repair:F0}s.");
+        }
+
+        /// @brief Counts down the repair while broken.
+        private void TickRepair(float dt)
+        {
+            _statTimeBroken += dt;
+            _repairRemaining -= dt;
+            if (_repairRemaining <= 0f) CompleteRepair();
+        }
+
+        /// @brief Returns a repaired AGV to service as good as new, with a fresh full-life time to failure.
+        private void CompleteRepair()
+        {
+            _broken = false;
+            StochasticEventManager sem = StochasticEventManager.Instance;
+            _ttfRemaining = sem != null && _failRng != null ? sem.SampleAGVTTF(_failRng) : double.PositiveInfinity;
+            _opAge = 0.0;
+            _firstLifeIsResidual = false;
+
+            // Its own wait, if it broke while blocked, must not count toward HandleZoneStall.
+            if (waitingForZone) _stallExemptTime += Time.fixedTime - _brokenSince;
+
+            SimLogger.Medium($"[AGV {AgvId}] Repaired after {Time.fixedTime - _brokenSince:F0}s (state={State}).");
+
+            if (_replanOnRepair)
+            {
+                _replanOnRepair = false;
+                _beginWaypointOnRepair = false;
+                CancelCurrentRoute();
+                _blockStartTime = -1f;
+                _stallExemptTime = 0.0;
+                _blockedByFailure = false;
+                BeginParkingRoute();   // State is already ReturningToParking
+            }
+            else if (_beginWaypointOnRepair)
+            {
+                _beginWaypointOnRepair = false;
+                BeginNextWaypoint();
+            }
+        }
+
+        /// @brief True if the zone this AGV waits for is held by a broken AGV, or by an AGV that is itself
+        ///        waiting on a chain that ends at one (a queue behind a breakdown).
+        private bool WaitChainReachesBrokenAGV()
+        {
+            if (!waitingForZone || AGVPool.Instance == null) return false;
+            var fleet = AGVPool.Instance.AllAGVs;
+            AGVController cur = this;
+            for (int hop = 0; hop < fleet.Count; hop++)
+            {
+                TrafficZone zone = trafficMgr.GetZone(cur.pendingZoneId);
+                if (zone == null) return false;
+                AGVController next = null;
+                foreach (int id in zone.OccupantAgvIds)
+                {
+                    AGVController holder = AGVPool.Instance.GetById(id);
+                    if (holder == null || holder == cur) continue;
+                    if (holder._broken) return true;
+                    if (next == null && holder.waitingForZone) next = holder;
+                }
+                if (next == null || next == this) return false;
+                cur = next;
+            }
+            return false;
         }
 
 
@@ -725,6 +1031,7 @@ namespace Assets.Scripts.Simulation.AGV
             }
 
             PickedUpFlag = true;
+            TraceEvent("pickup", CurrentJobId, sourceMachine != null ? sourceMachine.MachineId : -1, targetMachine != null ? targetMachine.MachineId : -1);
             _statTotalTrips++;
             _statCurrentTripStart = Time.fixedTime;     // ← NEW
 
@@ -748,6 +1055,7 @@ namespace Assets.Scripts.Simulation.AGV
             else
                 FactoryLayoutManager.Instance.OutgoingBeltOf(BeltTile)?.TryEnqueue(CurrentJobId, loadedJobVisual);
 
+            TraceEvent("dropoff", CurrentJobId, -1, targetMachine != null ? targetMachine.MachineId : -1);
             DeliveredFlag = true;
             DeliveredJobId = CurrentJobId;
             DeliveredMachineId = targetMachine != null ? targetMachine.MachineId : -1;
@@ -789,6 +1097,7 @@ namespace Assets.Scripts.Simulation.AGV
             }
 
             int fromZone = fromZoneOverride == -2 ? currentZoneId : fromZoneOverride;
+            TraceEvent("return", -1);
             if (parkingZoneId < 0 || !PlanRoute(fromZone, parkingZoneId))
             {
                 SimLogger.Error($"[AGV {AgvId}] No route to parking — resetting in place.");
@@ -827,12 +1136,14 @@ namespace Assets.Scripts.Simulation.AGV
             pendingZoneId = -1;
             parkingZoneId = -1;
             State = AGVState.Idle;
+            TraceEvent("park", -1);
             onBecameIdle?.Invoke();
         }
 
         /// @brief Emergency recovery method to clear active job data and attempt a return to home.
         private void FullReset()
         {
+            TraceEvent("reset", CurrentJobId);
             SimLogger.Error($"[AGV {AgvId}] FullReset for job {CurrentJobId}.");
             CurrentJobId = -1;
             loadedJobVisual = null;
@@ -890,6 +1201,13 @@ namespace Assets.Scripts.Simulation.AGV
         /// @brief Logic for attempting to reserve and navigate into the next @c TrafficZone in the route.
         private void BeginNextWaypoint()
         {
+            if (_broken)
+            {
+                // A route planned while broken (e.g. FailureCoordinator redirecting the job it carries) starts
+                // after the repair; reserving the next zone now would hold it for the whole repair.
+                _beginWaypointOnRepair = true;
+                return;
+            }
             if (routeIndex < currentRoute.Count)
             {
                 int nextZoneId = currentRoute[routeIndex];
@@ -907,6 +1225,8 @@ namespace Assets.Scripts.Simulation.AGV
                     pendingZoneId = nextZoneId;
                     nextRetryTime = Time.fixedTime + reservationRetryInterval;
                     _blockStartTime = Time.fixedTime;
+                    _stallExemptTime = 0.0;
+                    _blockedByFailure = WaitChainReachesBrokenAGV();
                     return;
                 }
 
@@ -944,12 +1264,19 @@ namespace Assets.Scripts.Simulation.AGV
                 currentWaypoint = FlatY(zone.Centre);
                 waitingForZone = false;
                 pendingZoneId = -1;
+                _blockedByFailure = false;
+                _stallExemptTime = 0.0;
             }
 
             else
             {
                 nextRetryTime = Time.fixedTime + reservationRetryInterval;
-                if (_blockStartTime >= 0f && Time.fixedTime - _blockStartTime > zoneStallTimeoutSeconds)
+                // Time spent queued behind a broken AGV is excluded: that wait ends when the repair does, so it
+                // is not the circular wait HandleZoneStall exists to break (and its retreat can snap an AGV to
+                // parking, which would be a teleport here).
+                _blockedByFailure = WaitChainReachesBrokenAGV();
+                if (_blockStartTime >= 0f &&
+                    Time.fixedTime - _blockStartTime - _stallExemptTime > zoneStallTimeoutSeconds)
                     HandleZoneStall();
             }
         }
@@ -969,11 +1296,15 @@ namespace Assets.Scripts.Simulation.AGV
         /// the zone.
         private void HandleZoneStall()
         {
+            TraceEvent("stall", CurrentJobId >= 0 ? CurrentJobId : PreDispatchedJobId);
             SimLogger.Error($"[AGV {AgvId}] Zone {pendingZoneId} reservation stalled past " +
                              $"{zoneStallTimeoutSeconds:F0}s (state={State}) — likely circular-wait " +
                              $"deadlock. Releasing job and retreating.");
             _blockStartTime = -1f;
+            _stallExemptTime = 0.0;
+            _blockedByFailure = false;
             _statStallRecoveryCount++;
+            JobReleaseReason = "zone stall";
 
             switch (State)
             {
@@ -1252,6 +1583,12 @@ namespace Assets.Scripts.Simulation.AGV
             string jobStr = CurrentJobId >= 0 ? $"J{CurrentJobId}" : "-";
             string target = targetMachine != null ? $"M{targetMachine.MachineId}" : "belt";
             string waitStr = waitingForZone ? $" [BLOCKED z{pendingZoneId}]" : "";
+            if (_broken)
+            {
+                statusLabel.text = $"AGV{AgvId} [BROKEN {Mathf.Max(0f, _repairRemaining):F0}s]\n{jobStr}";
+                statusLabel.color = Color.magenta;
+                return;
+            }
 
             statusLabel.text = State switch
             {

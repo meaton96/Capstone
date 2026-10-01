@@ -100,6 +100,15 @@ class TestSchema:
                                                        machineFlexibilityProbability=1.5))
         assert len(errs) == 2, errs
 
+    def test_agv_failure_parameters(self):
+        good = {"agvFailuresEnabled": True, "agvWeibullK": 1.5, "agvWeibullLambda": 8400.0,
+                "agvRepairLogMu": 4.6, "agvRepairLogSigma": 0.5}
+        validate_scenario(with_changes(SCENARIO, stochastic=good))
+        validate_config(with_changes(CONFIG, stochastic=good))
+        bad = dict(good, agvWeibullK=0.0, agvWeibullLambda=-1.0, agvRepairLogSigma=-0.1)
+        errs = errors_of(validate_scenario, with_changes(SCENARIO, stochastic=bad))
+        assert len(errs) == 3, errs
+
     def test_nan_and_bool_are_not_numbers(self):
         errors_of(validate_config, with_changes(CONFIG, minProcTime=float("nan")))
         errors_of(validate_scenario, with_changes(SCENARIO, agvCount=True))

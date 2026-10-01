@@ -649,6 +649,15 @@ namespace Assets.Scripts.Simulation.Machines
                 secondaryIncomingConveyor.RemoveJob(jobId);
         }
 
+        /// @brief Incoming belts in PickIncomingBelt's preference order (primary first), for DesTwinExport.
+        public List<ConveyorBelt> IncomingBeltsInOrder()
+        {
+            var belts = new List<ConveyorBelt>();
+            if (incomingConveyor != null) belts.Add(incomingConveyor);
+            if (secondaryIncomingConveyor != null) belts.Add(secondaryIncomingConveyor);
+            return belts;
+        }
+
         /// @brief Picks the most appropriate incoming conveyor belt.
         ///
         /// @details Prefers @ref incomingConveyor, falls back to @ref secondaryIncomingConveyor.

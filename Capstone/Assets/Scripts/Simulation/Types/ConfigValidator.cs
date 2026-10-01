@@ -115,6 +115,7 @@ namespace Assets.Scripts.Simulation.Types
             }
             if (s.AGVFailuresEnabled)
             {
+                Check(Positive(s.AGVWeibullK), $"agvWeibullK must be > 0 (got {s.AGVWeibullK})");
                 Check(Positive(s.AGVWeibullLambda), $"agvWeibullLambda must be > 0 (got {s.AGVWeibullLambda})");
                 Check(NonNegative(s.AGVRepairLogSigma), $"agvRepairLogSigma must be >= 0 (got {s.AGVRepairLogSigma})");
             }

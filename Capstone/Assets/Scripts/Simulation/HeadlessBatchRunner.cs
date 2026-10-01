@@ -67,6 +67,10 @@ namespace Assets.Scripts.Simulation
             // Baseline decision-drain: when set, heuristic decisions drain per-frame instead of
             // one-per-frame. Valid ONLY for heuristic batch runs (no neural policy in the loop).
             bool baselineDrain = GetCLIArg("-baselinedrain") != null;
+            // Event-based twin export (Logging/DesTwinExport): des_floor.json, des_jobs.json, agv_events.csv.
+            DesTwinExport.Enabled = HasCLIFlag("-destrace");
+            if (DesTwinExport.Enabled)
+                SimLogger.Low("[BatchRunner] DES twin trace ENABLED (des_floor.json, des_jobs.json, agv_events.csv).");
             if (baselineDrain)
                 SimLogger.Low("[BatchRunner] Baseline drain mode ENABLED — heuristic decisions " +
                               "drain per frame (removes one-decision-per-frame throttle).");
@@ -788,6 +792,10 @@ namespace Assets.Scripts.Simulation
             }
             return result.Count > 0 ? result.ToArray() : AllRules;
         }
+
+        /// <summary>True if a value-less switch is present anywhere on the command line (GetCLIArg needs a
+        ///          following argument, so it misses a switch passed last).</summary>
+        private static bool HasCLIFlag(string key) => Array.IndexOf(Environment.GetCommandLineArgs(), key) >= 0;
 
         private static string GetCLIArg(string key)
         {

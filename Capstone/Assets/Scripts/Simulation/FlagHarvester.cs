@@ -258,8 +258,9 @@ namespace Assets.Scripts.Simulation
         }
 
         /// <summary>
-        /// Handles AGVs that self-recovered from a suspected traffic-zone deadlock
-        /// (AGVController.HandleZoneStall). The AGV has already released its own route and
+        /// Handles AGVs that handed a job back: a self-recovery from a suspected traffic-zone deadlock
+        /// (AGVController.HandleZoneStall), or a breakdown on the way to a pickup (AGVController.BreakDown;
+        /// that AGV is frozen in place rather than returning to parking, which changes nothing here). The AGV has already released its own route and
         /// zone reservations and begun returning to parking; this owns the JobData side —
         /// clearing the job's link to that AGV and, if the job was physically committed to it
         /// (WaitingForPickup or InTransit), returning it to NeedsRouting so a fresh AGV can be
@@ -295,7 +296,7 @@ namespace Assets.Scripts.Simulation
                             job.TransitionTo(JobState.WaitingForPickup, _simTimeRef);
                             job.AssignedAgvId = -1;
                             SimLogger.Medium($"[FlagHarvester] Job {job.JobId} returned to WaitingForPickup " +
-                                              $"(exit trip) — AGV {agv.AgvId} stalled on a traffic-zone reservation.");
+                                              $"(exit trip) — AGV {agv.AgvId} handed it back ({agv.JobReleaseReason}).");
                         }
                         else
                         {
@@ -303,7 +304,7 @@ namespace Assets.Scripts.Simulation
                             job.TargetMachineId = -1;
                             job.AssignedAgvId = -1;
                             SimLogger.Medium($"[FlagHarvester] Job {job.JobId} returned to NeedsRouting — " +
-                                              $"AGV {agv.AgvId} stalled on a traffic-zone reservation.");
+                                              $"AGV {agv.AgvId} handed it back ({agv.JobReleaseReason}).");
                         }
                     }
                 }

@@ -39,6 +39,10 @@ namespace Assets.Scripts.Editor
         [MenuItem("Build/Linux Server (ML-Agents) - linux_server_dev")]
         public static void BuildDev() => BuildTo(DevOutputPath);
 
+        /// <summary>Player for the event-based twin validation (env/des_twin), kept apart from the sweep players.</summary>
+        [MenuItem("Build/Linux Server (ML-Agents) - linux_server_des")]
+        public static void BuildDes() => BuildTo(Path.Combine("..", "linux_server_des", "capstone.x86_64"));
+
         private static void BuildTo(string outputPath)
         {
             var options = new BuildPlayerOptions

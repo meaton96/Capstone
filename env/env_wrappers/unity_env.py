@@ -382,6 +382,7 @@ class UnitySchedulingEnv:
     def _episode_summary(self, final: Optional[MetricsSnapshot], interrupted: bool,
                          telemetry: Optional[dict] = None) -> dict:
         result = (telemetry or {}).get("result") or {}
+        events = (telemetry or {}).get("events") or []
         summary = {
             "return": self._episode_return,
             "length": self._episode_length,
@@ -393,6 +394,12 @@ class UnitySchedulingEnv:
             "config_hash": result.get("configHash"),
             "instance_hash": result.get("instanceHash"),
             "applied_config": result.get("appliedConfig"),
+            # Disruptions this episode. AGV totals come from the result (None from a player built before AGV
+            # breakdowns existed); machine failures are counted from the telemetry events.
+            "machine_failures": sum(1 for e in events if e.get("type") == "machine_failure") if telemetry else None,
+            "agv_failures": result.get("agvFailures"),
+            "agv_repair_time": result.get("agvRepairTime"),
+            "agv_blocked_by_failure_time": result.get("agvBlockedByFailureTime"),
         }
         if final is not None:
             exited = final.jobs_exited

@@ -173,7 +173,8 @@ namespace Assets.Scripts.Simulation
                     if (!InBounds(gx, gy)) continue;
 
                     float val;
-                    if (agv.IsIdle) val = 0.25f;
+                    if (agv.IsBroken) val = 1.0f;   // broken down, blocking its zone (AGVController, "Breakdowns")
+                    else if (agv.IsIdle) val = 0.25f;
                     else if (agv.State == AGVState.ReturningToParking) val = 0.30f;
                     else if (agv.State == AGVState.MovingToPickup ||
                              agv.State == AGVState.MovingToPrePickup) val = 0.50f;

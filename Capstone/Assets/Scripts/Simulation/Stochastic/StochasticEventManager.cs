@@ -85,6 +85,17 @@ namespace Assets.Scripts.Simulation.Stochastic
         private const int ArrivalStreamSeedOffset = unchecked((int)0x9E3779B9); // golden-ratio constant, arbitrary but fixed
 
         /// <summary>
+        /// Offset for the per-AGV breakdown streams (see <see cref="CreateAGVStream"/>). Each AGV gets
+        /// its own stream so its k-th time to failure and repair are fixed by (episode seed, AGV id)
+        /// alone: they do not shift when another AGV fails earlier or later, and turning AGV failures on
+        /// draws nothing from <see cref="_rng"/>, so the machine failures for a seed are unchanged.
+        /// </summary>
+        private const int AGVStreamSeedOffset = unchecked((int)0x7F4A7C15);
+
+        /// <summary>Episode seed of the last <see cref="Initialize"/>; the per-AGV streams derive from it.</summary>
+        private int _seed;
+
+        /// <summary>
         /// Cached stochastic configuration. Null when no config has been loaded or when the
         /// current episode has stochastic features disabled.
         /// </summary>
@@ -120,6 +131,7 @@ namespace Assets.Scripts.Simulation.Stochastic
         {
             _cfg = config?.Stochastic;
             int seed = seedOverride ?? config?.Seed ?? 0;
+            _seed = seed;
             _rng = new System.Random(seed);
             _arrivalRng = new System.Random(seed ^ ArrivalStreamSeedOffset);
 
@@ -127,7 +139,7 @@ namespace Assets.Scripts.Simulation.Stochastic
                 SimLogger.Low($"[StochasticMgr] Initialized — seed={seed} " +
                               $"mode=[{_cfg.Tag}] " +
                               $"WeibullK={_cfg.WeibullK} λ_machine={_cfg.WeibullLambda} " +
-                              $"λ_agv={_cfg.AGVWeibullLambda} " +
+                              $"k_agv={_cfg.AGVWeibullK} λ_agv={_cfg.AGVWeibullLambda} " +
                               $"repairMu={_cfg.RepairLogMu} repairSigma={_cfg.RepairLogSigma} " +
                               $"arrivalLambda={_cfg.ArrivalLambda}");
             else
@@ -144,7 +156,7 @@ namespace Assets.Scripts.Simulation.Stochastic
         public float SampleMachineTTF()
         {
             if (!MachineFailuresEnabled) return float.MaxValue;
-            return SampleWeibull(_cfg.WeibullK, _cfg.WeibullLambda);
+            return SampleWeibull(_cfg.WeibullK, _cfg.WeibullLambda, _rng);
         }
 
         /// <summary>
@@ -155,29 +167,68 @@ namespace Assets.Scripts.Simulation.Stochastic
         public float SampleMachineRepair()
         {
             if (!MachineFailuresEnabled) return 0f;
-            return SampleLogNormal(_cfg.RepairLogMu, _cfg.RepairLogSigma);
+            return SampleLogNormal(_cfg.RepairLogMu, _cfg.RepairLogSigma, _rng);
         }
 
         /// <summary>
-        /// Samples the time-to-failure (TTF) for an AGV from a Weibull distribution
-        /// with shape parameter k and AGV-specific scale parameter λ_agv.
+        /// A new, independent breakdown stream for one AGV, derived from the episode seed and the AGV id.
+        /// Call once per AGV per episode (AGVController.InitializeStochastic), after <see cref="Initialize"/>.
         /// </summary>
-        /// <returns>A sample in simulation time units, or float.MaxValue if AGV failures are disabled.</returns>
-        public float SampleAGVTTF()
+        public System.Random CreateAGVStream(int agvId)
+        {
+            int mixed = unchecked(_seed * (int)0x9E3779B1 ^ (AGVStreamSeedOffset + agvId * 40503));
+            return new System.Random(mixed);
+        }
+
+        /// <summary>
+        /// Samples a full AGV time to failure, in operating seconds, from Weibull(k_agv, λ_agv): the life of
+        /// an AGV that has just been repaired (as good as new).
+        /// </summary>
+        /// <param name="rng">The AGV's own stream from <see cref="CreateAGVStream"/>.</param>
+        /// <returns>Operating seconds to the next failure, or float.MaxValue if AGV failures are disabled.</returns>
+        public float SampleAGVTTF(System.Random rng)
         {
             if (!AGVFailuresEnabled) return float.MaxValue;
-            return SampleWeibull(_cfg.WeibullK, _cfg.AGVWeibullLambda);
+            return SampleWeibull(_cfg.AGVWeibullK, _cfg.AGVWeibullLambda, rng);
         }
 
         /// <summary>
-        /// Samples the repair duration for an AGV from a LogNormal distribution
-        /// with AGV-specific parameters μ_agv and σ_agv.
+        /// Samples the REMAINING life of an AGV at episode start, assuming the fleet has been running long
+        /// enough for failures to be in steady state (the renewal process's equilibrium, or forward
+        /// recurrence, distribution). Its density is R(x) / E[T], where R is the Weibull survival function.
         /// </summary>
-        /// <returns>A sample in simulation time units, or 0f if AGV failures are disabled.</returns>
-        public float SampleAGVRepair()
+        /// <remarks>
+        /// Sampled as U × T*, where U ~ Uniform(0,1) and T* is the length-biased life (density t f(t) / E[T]).
+        /// For a Weibull, (T*/λ)^k ~ Gamma(1 + 1/k, 1), so T* = λ G^(1/k). The mean is E[T²] / (2 E[T]),
+        /// about 0.66 λ at k = 1.5. Drawing U × T with an ordinary (not length-biased) T, as the machines
+        /// do (PhysicalMachine.InitializeStochastic), gives a mean of 0.45 λ and so first failures that come
+        /// about 30% too early.
+        /// </remarks>
+        /// <param name="rng">The AGV's own stream from <see cref="CreateAGVStream"/>.</param>
+        /// <returns>Operating seconds to the first failure, or float.MaxValue if AGV failures are disabled.</returns>
+        public float SampleAGVResidualTTF(System.Random rng)
+        {
+            if (!AGVFailuresEnabled) return float.MaxValue;
+            float k = _cfg.AGVWeibullK, lambda = _cfg.AGVWeibullLambda;
+            if (k <= 0f || lambda <= 0f)
+            {
+                SimLogger.LogWarning("[StochasticMgr] SampleAGVResidualTTF: degenerate params, returning MaxValue.");
+                return float.MaxValue;
+            }
+            double g = SampleGamma(1.0 + 1.0 / k, rng);
+            double lengthBiased = lambda * Math.Pow(g, 1.0 / k);
+            return (float)(NextNonZeroUniform(rng) * lengthBiased);
+        }
+
+        /// <summary>
+        /// Samples an AGV repair duration (sim-seconds) from LogNormal(μ_agv, σ_agv).
+        /// </summary>
+        /// <param name="rng">The AGV's own stream from <see cref="CreateAGVStream"/>.</param>
+        /// <returns>Repair duration, or 0f if AGV failures are disabled.</returns>
+        public float SampleAGVRepair(System.Random rng)
         {
             if (!AGVFailuresEnabled) return 0f;
-            return SampleLogNormal(_cfg.AGVRepairLogMu, _cfg.AGVRepairLogSigma);
+            return SampleLogNormal(_cfg.AGVRepairLogMu, _cfg.AGVRepairLogSigma, rng);
         }
 
         /// <summary>
@@ -225,7 +276,7 @@ namespace Assets.Scripts.Simulation.Stochastic
         /// When k > 1, the failure rate increases over time (wear-out failures).
         /// When k < 1, the failure rate decreases over time (infant mortality).
         /// </remarks>
-        private float SampleWeibull(float k, float lambda)
+        private float SampleWeibull(float k, float lambda, System.Random rng)
         {
             if (k <= 0f || lambda <= 0f)
             {
@@ -233,7 +284,7 @@ namespace Assets.Scripts.Simulation.Stochastic
                 return float.MaxValue;
             }
 
-            double u = NextNonZeroUniform(_rng);
+            double u = NextNonZeroUniform(rng);
             double x = lambda * Math.Pow(-Math.Log(1.0 - u), 1.0 / k);
             return (float)x;
         }
@@ -249,7 +300,7 @@ namespace Assets.Scripts.Simulation.Stochastic
         /// Uses the Box-Muller transform to generate the underlying normal sample.
         /// Sigma is clamped to 0 if negative to prevent NaN outputs.
         /// </remarks>
-        private float SampleLogNormal(float mu, float sigma)
+        private float SampleLogNormal(float mu, float sigma, System.Random rng)
         {
             if (sigma < 0f)
             {
@@ -257,7 +308,7 @@ namespace Assets.Scripts.Simulation.Stochastic
                 sigma = 0f;
             }
 
-            double z = SampleStandardNormal(_rng);
+            double z = SampleStandardNormal(rng);
             double x = Math.Exp(mu + sigma * z);
             return (float)x;
         }
@@ -310,6 +361,29 @@ namespace Assets.Scripts.Simulation.Stochastic
                 p *= NextNonZeroUniform(_arrivalRng);
             } while (p > l);
             return k - 1;
+        }
+
+        /// <summary>
+        /// Generates a Gamma(shape, 1) variate for shape >= 1 with the Marsaglia-Tsang (2000) squeeze
+        /// method. Used only by <see cref="SampleAGVResidualTTF"/>, where shape = 1 + 1/k > 1.
+        /// </summary>
+        private double SampleGamma(double shape, System.Random rng)
+        {
+            double d = shape - 1.0 / 3.0;
+            double c = 1.0 / Math.Sqrt(9.0 * d);
+            while (true)
+            {
+                double x, v;
+                do
+                {
+                    x = SampleStandardNormal(rng);
+                    v = 1.0 + c * x;
+                } while (v <= 0.0);
+                v = v * v * v;
+                double u = NextNonZeroUniform(rng);
+                if (u < 1.0 - 0.0331 * x * x * x * x) return d * v;
+                if (Math.Log(u) < 0.5 * x * x + d * (1.0 - v + Math.Log(v))) return d * v;
+            }
         }
 
         /// <summary>

@@ -66,7 +66,8 @@ namespace Assets.Scripts.Simulation.Channels
             });
         }
 
-        /// <summary>Called by AGVController when Weibull failure fires (Phase 3).</summary>
+        /// <summary>Called by AGVController.BreakDown. ttf is the observed time to failure in OPERATING
+        /// seconds (not sim-time), matching how AGV failures age.</summary>
         public void RecordAGVFailure(int agvId, float observedTtf, float repairDuration)
         {
             _events.Add(new TelemetryEvent
@@ -99,7 +100,9 @@ namespace Assets.Scripts.Simulation.Channels
                                         int totalOps, int decisions, double totalReward,
                                         string ruleName, string stochasticTag,
                                         string configHash = "", string instanceHash = "",
-                                        string appliedConfig = null)
+                                        string appliedConfig = null,
+                                        int agvFailures = 0, double agvRepairTime = 0.0,
+                                        double agvBlockedByFailureTime = 0.0)
         {
             _result = new EpisodeResult
             {
@@ -114,6 +117,9 @@ namespace Assets.Scripts.Simulation.Channels
                 configHash = configHash,
                 instanceHash = instanceHash,
                 appliedConfig = appliedConfig,
+                agvFailures = agvFailures,
+                agvRepairTime = agvRepairTime,
+                agvBlockedByFailureTime = agvBlockedByFailureTime,
             };
         }
 
@@ -175,6 +181,11 @@ namespace Assets.Scripts.Simulation.Channels
             /// <summary>Canonical text of the applied config, only the first time its hash is seen by this player
             /// (null otherwise); Python writes it to applied_configs.jsonl.</summary>
             public string appliedConfig;
+            /// <summary>AGV breakdowns this episode, sim-seconds AGVs spent broken, and sim-seconds other AGVs
+            /// spent queued behind a broken one (AGVController, "Breakdowns").</summary>
+            public int agvFailures;
+            public double agvRepairTime;
+            public double agvBlockedByFailureTime;
         }
 
         [Serializable]
