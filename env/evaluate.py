@@ -387,9 +387,9 @@ def write_csv(path: Path, rows: list):
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Evaluate policies on reproducible instances")
     parser.add_argument("--unity-path", type=str, required=True)
-    parser.add_argument("--allow-unverified-player", action="store_true",
-                        help="Launch the player even if its files do not match its BUILD_MANIFEST.json "
-                             "(see env/player_manifest.py); the mismatch is recorded in player_manifest.json.")
+    # No effect since 2026-10-02, when the launch-time check against BUILD_MANIFEST.json was removed
+    # (see env/player_manifest.py); still accepted so older commands run.
+    parser.add_argument("--allow-unverified-player", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--seeds", type=str, default="0-19",
                         help="Evaluation seeds, e.g. '0-19' or '1,5,9' (keep below %d)" % TRAIN_SEED_LOW)
     parser.add_argument("--pdr", type=str, default="all",
@@ -537,10 +537,6 @@ def main(argv=None):
         planned = []
     obs_caps = row_caps_for(planned, args.obs_max_machines, args.obs_max_jobs)
     print(f"Observation row caps: {obs_caps[0]} machines, {obs_caps[1]} jobs")
-
-    # Refuse a player whose files differ from its build manifest (thesis section 7.2).
-    from player_manifest import check_player
-    check_player(args.unity_path, args.allow_unverified_player, record_dir=out)
 
     env = UnitySchedulingEnv(
         file_name=args.unity_path,

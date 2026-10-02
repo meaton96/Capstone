@@ -17,7 +17,8 @@ namespace Assets.Scripts.Editor
     /// Unity players are not bit-for-bit reproducible, so a committed build cannot be checked by rebuilding it.
     /// Instead the build records its provenance: the git commit it was built from, whether the project source had
     /// uncommitted changes (and a hash of those changes), the Unity version, and the SHA-256 of every file the
-    /// player loads. env/player_manifest.py checks a player against its manifest before training or evaluation.
+    /// player loads. env/player_manifest.py checks a player against its manifest when run by hand (training and
+    /// evaluation stopped checking on 2026-10-02).
     ///
     /// The player's files are an allowlist (Included): the executable, the shared libraries beside it, and
     /// capstone_Data/ except ML-Agents/, where the player writes timers at runtime. The libraries count because the

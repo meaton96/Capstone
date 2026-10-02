@@ -5,7 +5,11 @@
 The build script (Capstone/Assets/Editor/BuildManifest.cs) records the git commit a player was built
 from, whether the source had uncommitted changes, and the SHA-256 of every file the player loads.
 verify_player recomputes those hashes: a changed, missing, or extra file in the player means the
-binary is not the one the manifest describes, and training / evaluation refuse to launch it.
+binary is not the one the manifest describes.
+
+Nothing runs this check automatically since 2026-10-02. env/train.py and env/evaluate.py used to refuse a
+mismatched player, but the RIT cluster's copy can never match: slurm/sync_to_rit.sh runs slurm/patch_glibc.py,
+which edits UnityPlayer.so in place. Run the command line below by hand to check a local build.
 
 The player's files are an allowlist (included): the executable, the shared libraries beside it, and
 capstone_Data/ except ML-Agents/, where the player writes timers while it runs. The libraries count because
