@@ -1,0 +1,4 @@
+[Sweep] scenario=BatchConfigs/Scenarios/_mfsweep_shard0.json tag=verify_legacy agv=7 rules=SPT_SRWT SPT_SMPT repeats=10 workers=2 extra='-legacyorphanpredispatch'
+[Sweep] done agv7_SPT_SRWT
+[Sweep] done agv7_SPT_SMPT
+[Sweep] all cells finished -> ./Results/gridlock_sweep/verify_legacy

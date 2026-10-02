@@ -201,6 +201,48 @@ def two_machine_standoff(n_jobs=10, contested_type="Weld", indices=(0, 1),
     )
 
 
+def speed_trap_standoff(n_jobs=63, contested_type="Weld", indices=(0, 1),
+                         feeder_type="Mill", feeder_duration=20.0,
+                         mean_duration=40.0, cost_gap=1.5, seed=42):
+    """Same 2-machine-standoff shape as two_machine_standoff, but the cost
+    asymmetry is CONSISTENT across every job (index 0 is always cheaper) --
+    not two_machine_standoff v2's per-job-randomized 50/50 gap, and not v1's
+    degenerate identical-cost tie. Both of those designs accidentally let
+    -SMPT rules off the hook: v1's tie-break artifact isn't a real greedy
+    mistake, and v2's random 50/50 cheap-machine assignment self-balances
+    load across both machines even if SMPT always "correctly" picks the
+    cheaper one for that job. Here, SMPT's greedy per-job choice is
+    genuinely correct every single time (index 0 truly is cheaper for every
+    job) -- and that's exactly the trap: it funnels every job onto machine 0
+    while machine 1 sits idle, never noticing machine 0's queue is
+    saturating. n_jobs is sized so that funneled onto ONE machine alone,
+    utilization is ~1.4 (guaranteed unbounded backlog growth); balanced
+    across both, it's ~0.7 (comfortable) -- SRWT/MMUR rules should balance
+    load and stay near the comfortable number, -SMPT rules should not.
+    """
+    rng = random.Random(seed)
+    jobs = []
+    for i in range(n_jobs):
+        d = mean_duration * rng.uniform(0.85, 1.15)
+        ops = [
+            op(feeder_type, "any", feeder_duration),
+            op(contested_type, list(indices), [d, d * cost_gap]),
+        ]
+        jobs.append(job(i, 0.0, ops))
+    return scenario(
+        "speed_trap_standoff", jobs, seed=seed,
+        comment=(f"{n_jobs} jobs arrive at t=0, quick feeder op, then every job is "
+                 f"eligible for EXACTLY {contested_type}{list(indices)}, with index "
+                 f"{indices[0]} CONSISTENTLY {cost_gap}x cheaper than index "
+                 f"{indices[1]} for every job (not two_machine_standoff's per-job-"
+                 f"randomized gap). Tests whether a routing rule that greedily always "
+                 f"picks the genuinely-faster machine (SMPT) loses to one that balances "
+                 f"queue depth or utilization (SRWT/MMUR) once the faster machine "
+                 f"saturates -- a 'locally correct, globally wrong' trap, distinct from "
+                 f"two_machine_standoff's per-job speed-gap test."),
+    )
+
+
 def sparse_bottleneck_floor(n_jobs=15, seed=42):
     """Same shape of job as single_bottleneck/two_machine_standoff -- a batch
     that arrives together and needs Mill, then Weld, then Assemble -- but run
@@ -418,6 +460,34 @@ def _standoff_phase_jobs(rng, id_start, t0, duration, mean_duration=40.0,
     return jobs, n_jobs
 
 
+def _speed_trap_phase_jobs(rng, id_start, t0, duration, mean_duration=40.0,
+                            contested_type="Weld", indices=(0, 1), cost_gap=1.5,
+                            funneled_utilization=1.4):
+    """Streamed version of speed_trap_standoff() (see that function's docstring for the
+    mechanism) -- same 2-machine contest as _standoff_phase_jobs, but index[0] is
+    CONSISTENTLY cost_gap x cheaper for every job, never randomized/swapped. A routing rule
+    that greedily always picks the genuinely-cheaper machine (SMPT) is making the locally
+    correct choice every time, and that's the trap: it funnels the whole stream onto one
+    machine while the other sits idle, never noticing the queue it's building.
+
+    n_jobs is sized against funneled_utilization (>1.0 = if concentrated onto machine 0
+    alone, that machine is oversaturated for the whole phase -- guaranteed unbounded
+    backlog under -SMPT rules) rather than the balanced-capacity utilization
+    _standoff_phase_jobs uses, since here the two candidate machines are not
+    interchangeable by design -- one is unambiguously the "attractive" one.
+    """
+    n_jobs = max(1, int(funneled_utilization * duration / mean_duration))
+    jobs = []
+    interval = duration / n_jobs
+    for i in range(n_jobs):
+        t = t0 + i * interval
+        d = mean_duration * rng.uniform(0.85, 1.15)
+        jobs.append(job(id_start + i, t,
+                         [op("Mill", "any", 15.0),
+                          op(contested_type, list(indices), [d, d * cost_gap])]))
+    return jobs, n_jobs
+
+
 def _burst_phase_jobs(rng, id_start, t0, n_jobs=30, mean_duration=40.0,
                        bottleneck_type="Weld", index=1):
     """A deliberate shock -- every job lands in the same few seconds, unlike
@@ -551,6 +621,273 @@ def compound_scenario(seed=42):
     return s
 
 
+def compound_scenario_v2(seed=42):
+    """compound_scenario plus a new regime: speed_trap (see
+    speed_trap_standoff()/_speed_trap_phase_jobs docstrings). Every phase compound_scenario
+    had is unchanged and in the same order -- this is additive, not a replacement, so
+    compound_scenario stays available as-is for anything that already depends on it
+    (existing PDR baselines, prior training runs). speed_trap is inserted right after each
+    standoff (thematically closest: both are 2-machine routing contests, but standoff's
+    per-job-randomized cost gap happens to self-balance load under greedy-SMPT routing,
+    while speed_trap's consistent gap does not -- see speed_trap_standoff's docstring for
+    why that distinction turned out to matter empirically: SPT_SMPT loses to SRWT-family
+    rules by ~30-40% mean flow time here, the first tested regime in this scenario family
+    where it isn't at or near the top).
+
+    Timeline additions vs. compound_scenario (~15,855s total, 533 jobs):
+      ... quiet_3a, standoff_1, quiet_3b, speed_trap_1 ~1800s, quiet_3c, burst_1 ...
+      ... quiet_6a, standoff_2, quiet_6b, speed_trap_2 ~1800s, quiet_6c, quiet_7_cooldown
+
+    "_phases" metadata unchanged in shape/meaning from compound_scenario.
+    """
+    rng = random.Random(seed)
+    jobs = []
+    phases = []
+    jid = 0
+    t = 0.0
+
+    def record(name, t0, span, n):
+        phases.append({"name": name, "start": t0, "end": t0 + span, "n_jobs": n})
+
+    js, n = _quiet_phase_jobs(rng, jid, t, 400.0, n_jobs=15); jobs += js; jid += n
+    record("quiet_1", t, 400.0, n); t += 400.0 + 50.0
+
+    js, n = _bottleneck_phase_jobs(rng, jid, t, 1800.0); jobs += js; jid += n
+    record("bottleneck_1", t, 1800.0, n); t += 1800.0 + 50.0
+
+    js, n = _quiet_phase_jobs(rng, jid, t, 400.0, n_jobs=12); jobs += js; jid += n
+    record("quiet_2", t, 400.0, n); t += 400.0 + 50.0
+
+    js, n = _standoff_phase_jobs(rng, jid, t, 1800.0); jobs += js; jid += n
+    record("standoff_1", t, 1800.0, n); t += 1800.0 + 50.0
+
+    js, n = _quiet_phase_jobs(rng, jid, t, 400.0, n_jobs=12); jobs += js; jid += n
+    record("quiet_2b", t, 400.0, n); t += 400.0 + 50.0
+
+    js, n = _speed_trap_phase_jobs(rng, jid, t, 1800.0); jobs += js; jid += n
+    record("speed_trap_1", t, 1800.0, n); t += 1800.0 + 50.0
+
+    js, n = _quiet_phase_jobs(rng, jid, t, 400.0, n_jobs=12); jobs += js; jid += n
+    record("quiet_3", t, 400.0, n); t += 400.0 + 50.0
+
+    js, n = _burst_phase_jobs(rng, jid, t, n_jobs=30); jobs += js; jid += n
+    record("burst_1", t, 5.0, n); t += 300.0  # extra gap -- this one is meant to overflow
+
+    js, n = _quiet_phase_jobs(rng, jid, t, 400.0, n_jobs=12); jobs += js; jid += n
+    record("quiet_4", t, 400.0, n); t += 400.0 + 50.0
+
+    js, n, span = _starvation_phase_jobs(rng, jid, t, n_short=80); jobs += js; jid += n
+    record("starvation_1", t, span, n); t += span + 50.0
+
+    js, n = _quiet_phase_jobs(rng, jid, t, 400.0, n_jobs=12); jobs += js; jid += n
+    record("quiet_5", t, 400.0, n); t += 400.0 + 50.0
+
+    js, n = _bottleneck_phase_jobs(rng, jid, t, 1800.0); jobs += js; jid += n
+    record("bottleneck_2", t, 1800.0, n); t += 1800.0 + 50.0
+
+    js, n = _quiet_phase_jobs(rng, jid, t, 400.0, n_jobs=12); jobs += js; jid += n
+    record("quiet_6", t, 400.0, n); t += 400.0 + 50.0
+
+    js, n = _standoff_phase_jobs(rng, jid, t, 1800.0); jobs += js; jid += n
+    record("standoff_2", t, 1800.0, n); t += 1800.0 + 50.0
+
+    js, n = _quiet_phase_jobs(rng, jid, t, 400.0, n_jobs=12); jobs += js; jid += n
+    record("quiet_6b", t, 400.0, n); t += 400.0 + 50.0
+
+    js, n = _speed_trap_phase_jobs(rng, jid, t, 1800.0); jobs += js; jid += n
+    record("speed_trap_2", t, 1800.0, n); t += 1800.0 + 50.0
+
+    js, n = _quiet_phase_jobs(rng, jid, t, 400.0, n_jobs=15); jobs += js; jid += n
+    record("quiet_7_cooldown", t, 400.0, n); t += 400.0
+
+    s = scenario(
+        "compound_scenario_v2", jobs, seed=seed,
+        comment=(f"compound_scenario plus a new regime -- {len(jobs)} jobs across "
+                 f"{len(phases)} phases, ~{t:.0f}s total: quiet -> bottleneck -> quiet -> "
+                 f"standoff -> quiet -> speed_trap -> quiet -> burst -> quiet -> "
+                 f"starvation -> quiet -> bottleneck (repeat) -> quiet -> standoff "
+                 f"(repeat) -> quiet -> speed_trap (repeat) -> quiet_cooldown. speed_trap "
+                 f"is the first tested regime where SPT_SMPT (the rule that otherwise wins "
+                 f"or ties almost everywhere in compound_scenario) loses decisively to "
+                 f"SRWT-family routing -- see speed_trap_standoff()/_speed_trap_phase_jobs "
+                 f"for the mechanism. See _phases for exact start/end/n_jobs per phase."),
+    )
+    s["_phases"] = phases
+    return s
+
+
+# ─────────────────────────────────────────────────────────────────────────
+#  Scaled floors (E4: machine count x AGV ratio) -- docs/EXPERIMENT_PLAN_2026-09-23.md
+# ─────────────────────────────────────────────────────────────────────────
+# The 15-machine scenarios above pin phases to fixed machines (Weld[1], Weld[0,1]) and fix job counts. Scaling
+# to M machines keeps each regime's per-machine load: machines per type k = M/5, s = k/3 (the capacity ratio to the
+# 15-machine floor), g = round(s) "lanes". A 1-machine bottleneck becomes g independent single-machine bottlenecks
+# (Weld[1..g], each at the same utilisation, jobs still pinned so there is no routing choice); the 2-machine
+# standoff / speed-trap pool becomes 2g machines (Weld[0..2g-1]). Job counts scale with the same capacity, so
+# utilisation per machine is unchanged. At M=15 (s=1, g=1) every function reproduces the original scenario
+# EXACTLY (same jobs, same rng draws) -- checked by check_scaled_matches_original() -- so the 15-machine point
+# of an E4 sweep is directly comparable with the E1 data. For M not a multiple of 15, g is rounded, so the
+# per-machine load of the pinned phases is off by at most 1/(2g)-ish (e.g. M=100: g=7 vs the exact 6.67).
+
+TYPES = ["Mill", "Lathe", "Weld", "Inspect", "Assemble"]
+
+
+def scaled_floor(machines):
+    if machines % len(TYPES):
+        raise ValueError(f"machines={machines} must be a multiple of {len(TYPES)} (equal machines per type)")
+    return [t for t in TYPES for _ in range(machines // len(TYPES))]
+
+
+def _scale(machines):
+    """(s, g): capacity ratio to the 15-machine floor, and the number of parallel pinned 'lanes'."""
+    k = machines // len(TYPES)
+    s = k / MACHINES_PER_TYPE
+    g = max(1, round(s))
+    if 2 * g > k:
+        raise ValueError(f"machines={machines}: standoff pool of {2 * g} exceeds {k} Weld machines")
+    return s, g
+
+
+def _bottleneck_phase_scaled(rng, id_start, t0, duration, targets, mean_duration=55.0, utilization=0.85):
+    """g single-machine bottlenecks, each _bottleneck_phase_jobs' load, arrivals staggered across the lanes."""
+    n = max(1, int(utilization * duration / mean_duration))
+    interval = duration / n
+    jobs = []
+    for c, idx in enumerate(targets):
+        for i in range(n):
+            t = t0 + i * interval + c * interval / len(targets)
+            d = mean_duration * rng.uniform(0.7, 1.3)
+            jobs.append(job(id_start + len(jobs), t, [op("Mill", "any", 15.0), op("Weld", idx, d)]))
+    return jobs, len(jobs)
+
+
+def _standoff_phase_scaled(rng, id_start, t0, duration, pool, mean_duration=40.0, utilization=0.7, cost_gap=(1.3, 2.0)):
+    """_standoff_phase_jobs over a pool of any size: half of a job's candidates are cost_gap x dearer, chosen at random."""
+    m = len(pool)
+    n_jobs = max(1, int(utilization * duration * m / mean_duration))
+    interval = duration / n_jobs
+    jobs = []
+    for i in range(n_jobs):
+        d = mean_duration * rng.uniform(0.7, 1.3)
+        gap = rng.uniform(*cost_gap)
+        if m == 2:
+            durations = [d, d * gap] if rng.random() < 0.5 else [d * gap, d]
+        else:
+            cheap = set(rng.sample(range(m), m // 2))
+            durations = [d if k in cheap else d * gap for k in range(m)]
+        jobs.append(job(id_start + i, t0 + i * interval,
+                        [op("Mill", "any", 15.0), op("Weld", list(pool), durations)]))
+    return jobs, n_jobs
+
+
+def _speed_trap_phase_scaled(rng, id_start, t0, duration, pool, mean_duration=40.0, cost_gap=1.5,
+                             funneled_utilization=1.4):
+    """_speed_trap_phase_jobs over a pool: the first half is consistently cheaper; sized so funnelling onto it saturates it."""
+    m = len(pool)
+    n_cheap = m // 2
+    n_jobs = max(1, int(funneled_utilization * duration * n_cheap / mean_duration))
+    interval = duration / n_jobs
+    jobs = []
+    for i in range(n_jobs):
+        d = mean_duration * rng.uniform(0.85, 1.15)
+        durations = [d] * n_cheap + [d * cost_gap] * (m - n_cheap)
+        jobs.append(job(id_start + i, t0 + i * interval,
+                        [op("Mill", "any", 15.0), op("Weld", list(pool), durations)]))
+    return jobs, n_jobs
+
+
+# Phase order and quiet-phase sizes copied from compound_scenario / compound_scenario_v2 above.
+_TIMELINE_V1 = [("quiet", "quiet_1", 15), ("bottleneck", "bottleneck_1"), ("quiet", "quiet_2", 12),
+                ("standoff", "standoff_1"), ("quiet", "quiet_3", 12), ("burst", "burst_1"),
+                ("quiet", "quiet_4", 12), ("starvation", "starvation_1"), ("quiet", "quiet_5", 12),
+                ("bottleneck", "bottleneck_2"), ("quiet", "quiet_6", 12), ("standoff", "standoff_2"),
+                ("quiet", "quiet_7_cooldown", 15)]
+_TIMELINE_V2 = [("quiet", "quiet_1", 15), ("bottleneck", "bottleneck_1"), ("quiet", "quiet_2", 12),
+                ("standoff", "standoff_1"), ("quiet", "quiet_2b", 12), ("speed_trap", "speed_trap_1"),
+                ("quiet", "quiet_3", 12), ("burst", "burst_1"), ("quiet", "quiet_4", 12),
+                ("starvation", "starvation_1"), ("quiet", "quiet_5", 12), ("bottleneck", "bottleneck_2"),
+                ("quiet", "quiet_6", 12), ("standoff", "standoff_2"), ("quiet", "quiet_6b", 12),
+                ("speed_trap", "speed_trap_2"), ("quiet", "quiet_7_cooldown", 15)]
+
+
+def compound_scaled(machines, version=1, seed=42, agv_count=None):
+    """compound_scenario (version=1) or compound_scenario_v2 (version=2) on a floor of `machines` machines."""
+    s, g = _scale(machines)
+    rng = random.Random(seed)
+    timeline = _TIMELINE_V1 if version == 1 else _TIMELINE_V2
+    bn_targets = list(range(1, 1 + g))          # g=1 -> Weld[1], as in the original
+    pool = list(range(0, 2 * g))                # g=1 -> Weld[0,1]
+    jobs, phases, jid, t = [], [], 0, 0.0
+    for entry in timeline:
+        kind, name = entry[0], entry[1]
+        if kind == "quiet":
+            js, n = _quiet_phase_jobs(rng, jid, t, 400.0, n_jobs=max(1, int(round(entry[2] * s))))
+            span, adv = 400.0, (400.0 if name == "quiet_7_cooldown" else 450.0)
+        elif kind == "bottleneck":
+            js, n = _bottleneck_phase_scaled(rng, jid, t, 1800.0, bn_targets); span, adv = 1800.0, 1850.0
+        elif kind == "standoff":
+            js, n = _standoff_phase_scaled(rng, jid, t, 1800.0, pool); span, adv = 1800.0, 1850.0
+        elif kind == "speed_trap":
+            js, n = _speed_trap_phase_scaled(rng, jid, t, 1800.0, pool); span, adv = 1800.0, 1850.0
+        elif kind == "burst":
+            js, n = [], 0
+            for idx in bn_targets:
+                j2, n2 = _burst_phase_jobs(rng, jid + n, t, n_jobs=30, index=idx); js += j2; n += n2
+            span, adv = 5.0, 300.0
+        else:  # starvation: an independent long-job-starvation stream on each lane
+            js, n = [], 0
+            for idx in bn_targets:
+                j2, n2, span = _starvation_phase_jobs(rng, jid + n, t, n_short=80, index=idx); js += j2; n += n2
+            adv = span + 50.0
+        jobs += js; jid += n
+        phases.append({"name": name, "start": t, "end": t + span, "n_jobs": n})
+        t += adv
+    name = f"e4_compound{'_v2' if version == 2 else ''}_m{machines}"
+    out = scenario(
+        name, jobs, seed=seed, agv_count=agv_count or max(1, round(machines / 3)), floor=scaled_floor(machines),
+        comment=(f"E4 scaled {'compound_scenario_v2' if version == 2 else 'compound_scenario'} on {machines} machines "
+                 f"({machines // len(TYPES)} per type): {len(jobs)} jobs, ~{t:.0f}s, {len(phases)} phases. Same regimes "
+                 f"as the 15-machine scenario at the same per-machine load: {g} parallel single-machine bottleneck "
+                 f"lane(s) Weld{bn_targets}, a {len(pool)}-machine standoff/speed-trap pool Weld{pool}; quiet, burst "
+                 f"and starvation load scaled with capacity (x{s:.2f}). At 15 machines identical to the original."))
+    out["_phases"] = phases
+    return out
+
+
+def steady_scaled(machines, utilization=0.7, seed=42, agv_count=None, mean_duration=55.0, horizon=3600.0):
+    """The _mfsweep steady load on `machines` machines: evenly spaced jobs, Mill then any Weld, `utilization` across all
+    Weld machines. Regime-matched to _mfsweep_control (137 jobs at 15 machines), not byte-identical (fresh draws)."""
+    k = machines // len(TYPES)
+    n = max(1, int(utilization * k * horizon / mean_duration))
+    rng = random.Random(seed)
+    jobs = [job(i, i * horizon / n, [op("Mill", "any", 15.0),
+                                     op("Weld", "any", mean_duration * rng.uniform(0.7, 1.3))]) for i in range(n)]
+    return scenario(
+        f"e4_steady_m{machines}", jobs, seed=seed, agv_count=agv_count or max(1, round(machines / 3)),
+        floor=scaled_floor(machines),
+        comment=(f"E4 steady load on {machines} machines ({k} Weld): {n} jobs evenly spaced over {horizon:.0f}s, each "
+                 f"Mill then any Weld (~{mean_duration:.0f}s +-30%), utilisation {utilization} across the Weld machines "
+                 f"-- the _mfsweep_control regime scaled with capacity."))
+
+
+def check_scaled_matches_original():
+    """At 15 machines the scaled compound generators must reproduce compound_scenario / v2 exactly."""
+    for version, orig in ((1, compound_scenario()), (2, compound_scenario_v2())):
+        sc = compound_scaled(15, version)
+        assert sc["jobs"] == orig["jobs"], f"v{version}: scaled jobs differ from the original"
+        assert sc["_phases"] == orig["_phases"], f"v{version}: scaled phases differ from the original"
+        assert sc["machineTypeLayout"] == orig["machineTypeLayout"]
+    print("scaled compound generators reproduce compound_scenario[_v2] exactly at 15 machines")
+
+
+def write_scaled(machine_counts):
+    check_scaled_matches_original()
+    for m in machine_counts:
+        for s in (steady_scaled(m), compound_scaled(m, 1), compound_scaled(m, 2)):
+            write(os.path.join(OUT_DIR, f"{s['name']}.json"), s)
+            write(os.path.join(OUT_DIR, f"{s['name']}_fail.json"), with_failures(s))
+
+
 # ─────────────────────────────────────────────────────────────────────────
 
 def main():
@@ -558,15 +895,47 @@ def main():
         zero_contention(),
         single_bottleneck(),
         two_machine_standoff(),
+        speed_trap_standoff(),
         sparse_bottleneck_floor(),
         identical_batch(),
         bimodal_mix(),
         convoy_waves(),
         compound_scenario(),
+        compound_scenario_v2(),
     ]
     for s in generators:
         write(os.path.join(OUT_DIR, f"{s['name']}.json"), s)
+    # Failures-on variants of the phased scenarios, for the load-regime sweep (docs/EXPERIMENT_PLAN_2026-09-23.md
+    # E1). Same job stream; only machine failures differ (same Weibull/lognormal parameters as _mfsweep_shard0).
+    for s in (compound_scenario(), compound_scenario_v2()):
+        write(os.path.join(OUT_DIR, f"{s['name']}_fail.json"), with_failures(s))
+
+
+# Machine-failure block shared by every failures-on scenario (matches _mfsweep_shard0.json).
+FAILURES = {
+    "machineFailuresEnabled": True,
+    "weibullK": 1.5,
+    "weibullLambda": 900.0,
+    "repairLogMu": 4.0,
+    "repairLogSigma": 0.5,
+}
+
+
+def with_failures(s):
+    """Copy of scenario s with machine failures on. episodeDurationSeconds covers the last arrival plus drain."""
+    s = dict(s)
+    last = max(j["arrivalTime"] for j in s["jobs"])
+    s["stochastic"] = dict(FAILURES, episodeDurationSeconds=float(round(last * 2 + 5000, -3)))
+    s["name"] = s["name"] + "_fail"
+    s["_comment"] = s["_comment"] + " [FAILURES ON: Weibull k=1.5 lambda=900 s, lognormal repair mu=4.0 sigma=0.5.]"
+    return s
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--scaled", type=int, nargs="+", metavar="MACHINES",
+                    help="write only the E4 scaled scenarios (steady, compound, compound_v2, each +_fail) for these "
+                         "machine counts, e.g. --scaled 15 30 60 100; without it the standard set is regenerated")
+    args = ap.parse_args()
+    write_scaled(args.scaled) if args.scaled else main()

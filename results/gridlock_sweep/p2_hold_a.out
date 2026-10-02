@@ -1,0 +1,10 @@
+[Sweep] scenario=BatchConfigs/Scenarios/_mfsweep_shard0.json tag=b_hold_fail agv=8 9 rules=SPT_SRWT SPT_SMPT LRT_MMUR LPT_MMUR repeats=20 workers=8 extra='-reservation holdPrevious'
+[Sweep] done agv9_SPT_SMPT
+[Sweep] done agv9_LPT_MMUR
+[Sweep] done agv9_LRT_MMUR
+[Sweep] done agv9_SPT_SRWT
+[Sweep] done agv8_SPT_SRWT
+[Sweep] done agv8_LPT_MMUR
+[Sweep] done agv8_LRT_MMUR
+[Sweep] done agv8_SPT_SMPT
+[Sweep] all cells finished -> ./Results/gridlock_sweep/b_hold_fail

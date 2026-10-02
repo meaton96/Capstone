@@ -1,0 +1,2 @@
+timestamp,instance,rule,seed,agv_count,event_id,start_time,duration,agv_a,agv_b,min_centre_distance,zone_a,zone_b,state_a,state_b,a_x,a_z,b_x,b_z
+2026-09-20 20:34:02,mfsweep_shard0,LPT_MMUR,54,3,0,6407.78,0.06,1,2,1.126,BotSpine_Dock0,BotSpine_Dock0,ReturningToParking,ReturningToParking,-8.12,-14.00,-8.50,-15.07

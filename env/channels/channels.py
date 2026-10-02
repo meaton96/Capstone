@@ -29,6 +29,8 @@ import json
 from typing import Optional
 from mlagents_envs.side_channel.side_channel import SideChannel, IncomingMessage, OutgoingMessage
 
+from channels.config_schema import validate_config, validate_scenario
+
 
 class EpisodeConfigChannel(SideChannel):
     """
@@ -39,6 +41,10 @@ class EpisodeConfigChannel(SideChannel):
     Also carries scripted ScenarioLoader scenarios (see queue_scenarios): a queue, one item
     consumed per episode Unity starts, buffered ahead the same way EpisodeSeedChannel buffers
     seeds — Unity starts the next episode before Python sees the previous one end.
+
+    Everything sent is validated first (config_schema) and raises ConfigValidationError instead
+    of being sent: Unity rejects an invalid config by stopping the player, with no fallback to a
+    default or previous config (thesis section 7.1).
     """
 
     CHANNEL_ID = uuid.UUID("b1e2c3d4-f5a6-7890-bcde-f01234567891")
@@ -71,7 +77,6 @@ class EpisodeConfigChannel(SideChannel):
                 "maxProcTime": 60.0,
                 "minOpsPerJob": 4,
                 "maxOpsPerJob": 6,
-                "maxArrivalTime": 0.0,
                 "agvCount": 10,
                 "stochastic": {
                     "machineFailuresEnabled": True,
@@ -82,6 +87,7 @@ class EpisodeConfigChannel(SideChannel):
                 }
             })
         """
+        validate_config(config, name=f"config {config.get('name', '')!r}" if isinstance(config, dict) else "config")
         msg = OutgoingMessage()
         msg.write_string(json.dumps(config))
         super().queue_message_to_send(msg)
@@ -98,6 +104,13 @@ class EpisodeConfigChannel(SideChannel):
             clear: empty Unity's queue first.
         """
         encoded = [item if isinstance(item, str) else dict(item) for item in items]
+        for i, item in enumerate(encoded):
+            if isinstance(item, str):
+                with open(item) as f:   # Unity reads the same file; a missing one is an error there too
+                    scenario = json.load(f)
+                validate_scenario(scenario, name=f"scenario {i} ({item})")
+            else:
+                validate_scenario(item, name=f"scenario {i} ({item.get('name', 'inline')!r})")
         msg = OutgoingMessage()
         msg.write_string(json.dumps({"scenarios": encoded, "clear": bool(clear)}))
         super().queue_message_to_send(msg)

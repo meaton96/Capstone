@@ -47,6 +47,11 @@ namespace Assets.Scripts.Simulation
         /// heuristic headless runs (BaselineDrainMode) — null in interactive/RL mode.
         /// </summary>
         private Func<int> _getBaselineActionIndex;
+        private Func<int, bool> _transportAvailable;
+        /// <summary>(job, candidate machine) -> estimated loaded travel seconds, for TECT. Null = not wired.</summary>
+        private Func<JobData, int, float> _estimateTravelSeconds;
+        /// <summary>The episode's TECT travel price λ (FJSSPConfig.TravelPrice). Null = 0.</summary>
+        private Func<float> _travelPrice;
 
         /// <summary>
         /// Reference to the episode's live per-machine statistics (processing time, downtime),
@@ -84,8 +89,16 @@ namespace Assets.Scripts.Simulation
             Action incrementDecisionCount,
             EpisodeTracker tracker,
             Dictionary<int, double> machineProcessingStartTime,
-            Func<int> getBaselineActionIndex = null)
+            Func<int> getBaselineActionIndex = null,
+            Func<int, bool> transportAvailable = null,
+            Func<JobData, int, float> estimateTravelSeconds = null,
+            Func<float> travelPrice = null)
         {
+            _estimateTravelSeconds = estimateTravelSeconds;
+            _travelPrice = travelPrice;
+            // Null = RoutingTrigger.OnReady (route as soon as a job is ready). Otherwise routing is gated on it:
+            // see RoutingTrigger.OnTransport.
+            _transportAvailable = transportAvailable;
             _jobs = jobs;
             _layout = layout;
             _getSimTime = getSimTime;
@@ -102,7 +115,7 @@ namespace Assets.Scripts.Simulation
         /// _tracker, which only accumulates on operation completion) on top of the tracker's
         /// closed-operation total.
         /// </summary>
-        private float MachineUtilization(int machineId, double simTime)
+        public float MachineUtilization(int machineId, double simTime)
         {
             double busy = _tracker.ProcessingTimeSoFar(machineId);
             if (_machineProcessingStartTime.TryGetValue(machineId, out double opStart))
@@ -126,6 +139,8 @@ namespace Assets.Scripts.Simulation
             List<int> readyIds = _jobs.GetAllNeedingRouting();
             if (readyIds.Count > 0)
             {
+                // OnTransport gate, per home tile (an AGV only serves its own tile); evaluated once per tile.
+                var transportOpenByTile = new Dictionary<int, bool>();
                 var routableIds = new List<int>();
                 foreach (int jobId in readyIds)
                 {
@@ -153,21 +168,26 @@ namespace Assets.Scripts.Simulation
 
                     if (!anyAvailable)
                     {
-                        _jobs.DeferredJobIds.Add(jobId);
-                        SimLogger.Low($"[Orchestrator] Job {jobId}: all eligible machines " +
-                                      $"are Failed/Repairing. Deferring routing decision.");
+                        // Log only on first deferral: this runs every decision poll, so a pinned phase waiting
+                        // out a repair otherwise logs each job every tick (~1 MB / 10 s wall on compound + failures).
+                        if (_jobs.DeferredJobIds.Add(jobId))
+                            SimLogger.Low($"[Orchestrator] Job {jobId}: all eligible machines " +
+                                          $"are Failed/Repairing. Deferring routing decision.");
                     }
-                    else
+                    else if (TransportOpen(job.TileId, transportOpenByTile) || job.PreDispatchedAgvId >= 0)
                     {
                         routableIds.Add(jobId);
                     }
+                    // else: OnTransport and every AGV is busy -- the job waits in NeedsRouting and joins the
+                    // pool the rule ranks when an AGV frees up (a pre-dispatched job already has its AGV).
                 }
 
                 if (routableIds.Count > 0)
                 {
-                    int chosenJobId = SelectRoutingJobId(routableIds);
+                    int chosenJobId = SelectRoutingJobId(routableIds, out bool selectedByRule);
                     DecisionRequest decision = BuildRoutingDecision(_jobs.Get(chosenJobId));
                     decision.JobCandidateIds = routableIds.ToArray();
+                    decision.JobSelectedByRule = selectedByRule;
                     return decision;
                 }
             }
@@ -183,18 +203,33 @@ namespace Assets.Scripts.Simulation
             return null;
         }
 
+        private bool TransportOpen(int tile, Dictionary<int, bool> cache)
+        {
+            if (_transportAvailable == null) return true;
+            if (!cache.TryGetValue(tile, out bool open))
+                cache[tile] = open = _transportAvailable(_layout.AgvServiceTile(tile));
+            return open;
+        }
+
         /// <summary>
         /// Picks which of several simultaneously-routable jobs gets this routing decision, using
         /// job-priority scoring (DispatchingEngine.SelectRoutingJob) when a baseline rule is
         /// known; falls back to first-in-list (previous FIFO behaviour, unchanged) in RL-agent
         /// mode or when only one job is routable (no real choice either way).
         /// </summary>
-        private int SelectRoutingJobId(List<int> routableIds)
+        private int SelectRoutingJobId(List<int> routableIds, out bool selectedByRule)
         {
+            selectedByRule = true;
             if (routableIds.Count == 1) return routableIds[0];
 
             int actionIndex = _getBaselineActionIndex?.Invoke() ?? -1;
-            if (actionIndex < 0) return routableIds[0];
+            if (actionIndex < 0)
+            {
+                // No rule known yet (agent, or heuristic via Step): hand over the oldest routable job as a
+                // placeholder; FactoryOrchestrator.ExecuteRoutingDecision re-selects with the action's rule.
+                selectedByRule = false;
+                return routableIds[0];
+            }
 
             return DispatchingEngine.SelectRoutingJob(actionIndex, routableIds, _jobs, _getSimTime());
         }
@@ -209,7 +244,7 @@ namespace Assets.Scripts.Simulation
         /// A DecisionRequest containing routing options with candidate machine IDs, queue lengths,
         /// and processing times for the specified job.
         /// </returns>
-        public DecisionRequest BuildRoutingDecision(JobData job)
+        public DecisionRequest BuildRoutingDecision(JobData job, bool countsAsNewDecision = true)
         {
             var eligibleIds = new HashSet<int>(
                 job.EligibleMachinesPerOp[job.CurrentOpIndex].Keys);
@@ -219,8 +254,9 @@ namespace Assets.Scripts.Simulation
                 .Select(m => m.MachineId)
                 .ToList();
 
-            int currentDecisionCount = _getDecisionCount();
-            _incrementDecisionCount();
+            // countsAsNewDecision = false re-targets a decision already counted (Step-time job re-selection).
+            int currentDecisionCount = countsAsNewDecision ? _getDecisionCount() : _getDecisionCount() - 1;
+            if (countsAsNewDecision) _incrementDecisionCount();
             double simTime = _getSimTime();
 
             return new DecisionRequest
@@ -237,6 +273,9 @@ namespace Assets.Scripts.Simulation
                 CandidateQueueLengths = candidates.Select(id => _jobs.GetMachineLoad(id)).ToArray(),
                 CandidateJobTimes = candidates.Select(id => job.GetProcessingTime(id)).ToArray(),
                 CandidateUtilization = candidates.Select(id => MachineUtilization(id, simTime)).ToArray(),
+                CandidateTravelTimes = _estimateTravelSeconds == null ? null
+                    : candidates.Select(id => _estimateTravelSeconds(job, id)).ToArray(),
+                TravelPrice = _travelPrice?.Invoke() ?? 0f,
             };
         }
 

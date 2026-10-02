@@ -1,0 +1,16 @@
+timestamp,instance,rule,seed,makespan,machine_id,machine_type,ops_completed,time_processing,time_operational,utilization_rate,idle_time,idle_rate,availability_rate,failure_count,total_repair_time
+2026-09-19 17:43:50,mfsweep_control_nofail,SPT_SRWT,42,3444.72,0,Mill,6,90.12,3444.72,0.0262,3354.60,0.9738,1.0000,0,0.0
+2026-09-19 17:43:50,mfsweep_control_nofail,SPT_SRWT,42,3444.72,1,Lathe,0,0.00,3444.72,0.0000,3444.72,1.0000,1.0000,0,0.0
+2026-09-19 17:43:50,mfsweep_control_nofail,SPT_SRWT,42,3444.72,2,Weld,4,238.00,3444.72,0.0691,3206.72,0.9309,1.0000,0,0.0
+2026-09-19 17:43:50,mfsweep_control_nofail,SPT_SRWT,42,3444.72,3,Inspect,0,0.00,3444.72,0.0000,3444.72,1.0000,1.0000,0,0.0
+2026-09-19 17:43:50,mfsweep_control_nofail,SPT_SRWT,42,3444.72,4,Assemble,0,0.00,3444.72,0.0000,3444.72,1.0000,1.0000,0,0.0
+2026-09-19 17:43:50,mfsweep_control_nofail,SPT_SRWT,42,3444.72,5,Mill,5,75.10,3444.72,0.0218,3369.62,0.9782,1.0000,0,0.0
+2026-09-19 17:43:50,mfsweep_control_nofail,SPT_SRWT,42,3444.72,6,Lathe,0,0.00,3444.72,0.0000,3444.72,1.0000,1.0000,0,0.0
+2026-09-19 17:43:50,mfsweep_control_nofail,SPT_SRWT,42,3444.72,7,Weld,3,141.62,3444.72,0.0411,3303.10,0.9589,1.0000,0,0.0
+2026-09-19 17:43:50,mfsweep_control_nofail,SPT_SRWT,42,3444.72,8,Inspect,0,0.00,3444.72,0.0000,3444.72,1.0000,1.0000,0,0.0
+2026-09-19 17:43:50,mfsweep_control_nofail,SPT_SRWT,42,3444.72,9,Assemble,0,0.00,3444.72,0.0000,3444.72,1.0000,1.0000,0,0.0
+2026-09-19 17:43:50,mfsweep_control_nofail,SPT_SRWT,42,3444.72,10,Mill,2,30.04,3444.72,0.0087,3414.68,0.9913,1.0000,0,0.0
+2026-09-19 17:43:50,mfsweep_control_nofail,SPT_SRWT,42,3444.72,11,Lathe,0,0.00,3444.72,0.0000,3444.72,1.0000,1.0000,0,0.0
+2026-09-19 17:43:50,mfsweep_control_nofail,SPT_SRWT,42,3444.72,12,Weld,2,98.34,3444.72,0.0285,3346.38,0.9715,1.0000,0,0.0
+2026-09-19 17:43:50,mfsweep_control_nofail,SPT_SRWT,42,3444.72,13,Inspect,0,0.00,3444.72,0.0000,3444.72,1.0000,1.0000,0,0.0
+2026-09-19 17:43:50,mfsweep_control_nofail,SPT_SRWT,42,3444.72,14,Assemble,0,0.00,3444.72,0.0000,3444.72,1.0000,1.0000,0,0.0

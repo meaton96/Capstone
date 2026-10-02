@@ -66,7 +66,8 @@ namespace Assets.Scripts.Simulation.Channels
             });
         }
 
-        /// <summary>Called by AGVController when Weibull failure fires (Phase 3).</summary>
+        /// <summary>Called by AGVController.BreakDown. ttf is the observed time to failure in OPERATING
+        /// seconds (not sim-time), matching how AGV failures age.</summary>
         public void RecordAGVFailure(int agvId, float observedTtf, float repairDuration)
         {
             _events.Add(new TelemetryEvent
@@ -97,7 +98,14 @@ namespace Assets.Scripts.Simulation.Channels
         /// </summary>
         public void RecordEpisodeResult(double makespan, int jobCount, int machineCount,
                                         int totalOps, int decisions, double totalReward,
-                                        string ruleName, string stochasticTag)
+                                        string ruleName, string stochasticTag,
+                                        string configHash = "", string instanceHash = "",
+                                        string appliedConfig = null,
+                                        int agvFailures = 0, double agvRepairTime = 0.0,
+                                        double agvBlockedByFailureTime = 0.0,
+                                        int routedMoves = 0, int crossTileMoves = 0, int tilesCrossed = 0,
+                                        double agvIdleFraction = 0.0, int[] releaseCounts = null,
+                                        float travelPrice = 0f)
         {
             _result = new EpisodeResult
             {
@@ -109,6 +117,18 @@ namespace Assets.Scripts.Simulation.Channels
                 totalReward = totalReward,
                 ruleName = ruleName,
                 stochasticTag = stochasticTag,
+                configHash = configHash,
+                instanceHash = instanceHash,
+                appliedConfig = appliedConfig,
+                agvFailures = agvFailures,
+                agvRepairTime = agvRepairTime,
+                agvBlockedByFailureTime = agvBlockedByFailureTime,
+                routedMoves = routedMoves,
+                crossTileMoves = crossTileMoves,
+                tilesCrossed = tilesCrossed,
+                agvIdleFraction = agvIdleFraction,
+                releaseCounts = releaseCounts ?? new int[0],
+                travelPrice = travelPrice,
             };
         }
 
@@ -164,6 +184,26 @@ namespace Assets.Scripts.Simulation.Channels
             public double totalReward;
             public string ruleName;
             public string stochasticTag;
+            /// <summary>FactoryOrchestrator.ConfigHash / InstanceHash of the episode (ConfigFingerprint).</summary>
+            public string configHash;
+            public string instanceHash;
+            /// <summary>Canonical text of the applied config, only the first time its hash is seen by this player
+            /// (null otherwise); Python writes it to applied_configs.jsonl.</summary>
+            public string appliedConfig;
+            /// <summary>AGV breakdowns this episode, sim-seconds AGVs spent broken, and sim-seconds other AGVs
+            /// spent queued behind a broken one (AGVController, "Breakdowns").</summary>
+            public int agvFailures;
+            public double agvRepairTime;
+            public double agvBlockedByFailureTime;
+            /// <summary>Routing decisions after any warm-up, those sent to another tile, and tiles crossed summed over
+            /// them; share of fleet time parked idle (whole episode); jobs released per tile (empty untiled); the
+            /// episode's TECT travel price λ.</summary>
+            public int routedMoves;
+            public int crossTileMoves;
+            public int tilesCrossed;
+            public double agvIdleFraction;
+            public int[] releaseCounts;
+            public float travelPrice;
         }
 
         [Serializable]

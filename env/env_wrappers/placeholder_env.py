@@ -11,13 +11,14 @@ All observations are dicts of tensors:
 | Key              | Shape          | Description                       |
 |------------------|----------------|-----------------------------------|
 | factory_grid     | (3, 64, 64)    | Spatial occupancy grid            |
-| sched_matrix     | (3, 20, 16)    | Scheduling matrix image           |
-| global_scalars   | (10,)          | Normalized scalar features        |
-| distance_matrix  | (64,)          | Flattened pairwise distances      |
+| machine_table    | (100, 16)      | Per-machine features (padded)     |
+| job_table        | (256, 17)      | Per-active-job features (padded)  |
+| global_scalars   | (16,)          | Normalized scalar features        |
 | event_flags      | (6,)           | Binary event indicators           |
 
 @par Action Space
-Discrete(8) — one of 8 composite PDR rules.
+MultiDiscrete(ACTION_BRANCHES) — (job head, machine head), see config.py. obs["action_mask"]
+masks each head down to action 0 at random, as Unity does when a head cannot change a decision.
 
 @par Reward
 Synthetic shaped reward simulating makespan optimization.
@@ -30,7 +31,12 @@ from typing import Optional, Tuple
 
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from config import EnvConfig, SchedulingMatrixConfig, PDR_ACTIONS
+from config import (EnvConfig, PDR_ACTIONS, MACHINE_PRESENT_COL, MACHINE_CANDIDATE_COL,
+                    JOB_PRESENT_COL, JOB_CANDIDATE_COL, ACTION_BRANCHES, ACTION_MASK_LEN)
+
+## @brief Simulated seconds per decision reported in info["dt"]; the placeholder has no clock, so this is the
+##        median measured on rnd_load (2026-10-01), enough for the trainer's time discount to behave normally.
+NOMINAL_DECISION_SECONDS = 14.0
 
 
 class PlaceholderSchedulingEnv(gym.Env):
@@ -50,14 +56,11 @@ class PlaceholderSchedulingEnv(gym.Env):
     metadata = {"render_modes": ["human"]}
 
     def __init__(self, env_cfg: EnvConfig = None,
-                 sched_cfg: SchedulingMatrixConfig = None,
                  max_steps: int = 200, seed: Optional[int] = None):
         """@brief Construct the placeholder scheduling environment.
 
         @param env_cfg      Environment geometry/dimensions config.
                             Defaults to EnvConfig() if None.
-        @param sched_cfg    Scheduling-matrix dimensions config.
-                            Defaults to SchedulingMatrixConfig() if None.
         @param max_steps    Maximum steps per episode before truncation.
         @param seed         Optional RNG seed for reproducibility.
         """
@@ -65,13 +68,11 @@ class PlaceholderSchedulingEnv(gym.Env):
 
         ## @brief Environment geometry configuration.
         self.cfg = env_cfg or EnvConfig()
-        ## @brief Scheduling-matrix dimensions configuration.
-        self.sched_cfg = sched_cfg or SchedulingMatrixConfig()
         ## @brief Maximum steps per episode before truncation.
         self.max_steps = max_steps
 
-        ## @brief Action space: 8 composite PDR rules (Discrete).
-        self.action_space = spaces.Discrete(len(PDR_ACTIONS))
+        ## @brief Action space: (job head, machine head).
+        self.action_space = spaces.MultiDiscrete(list(ACTION_BRANCHES))
 
         ## @brief Dict observation space matching the thesis state-space spec.
         self.observation_space = spaces.Dict({
@@ -79,19 +80,19 @@ class PlaceholderSchedulingEnv(gym.Env):
                 0, 1, shape=(self.cfg.grid_channels, self.cfg.grid_size,
                              self.cfg.grid_size), dtype=np.float32
             ),
-            "sched_matrix": spaces.Box(
-                0, 1, shape=(self.sched_cfg.channels, self.sched_cfg.max_jobs,
-                             self.sched_cfg.max_cols), dtype=np.float32
+            "machine_table": spaces.Box(
+                0, 1, shape=(self.cfg.max_machines, self.cfg.machine_features), dtype=np.float32
+            ),
+            "job_table": spaces.Box(
+                0, 1, shape=(self.cfg.max_jobs, self.cfg.job_features), dtype=np.float32
             ),
             "global_scalars": spaces.Box(
                 0, 1, shape=(self.cfg.num_global_scalars,), dtype=np.float32
             ),
-            "distance_matrix": spaces.Box(
-                0, 1, shape=(self.cfg.distance_matrix_dim,), dtype=np.float32
-            ),
             "event_flags": spaces.Box(
                 0, 1, shape=(self.cfg.num_event_flags,), dtype=np.float32
             ),
+            "action_mask": spaces.Box(0, 1, shape=(ACTION_MASK_LEN,), dtype=np.float32),
         })
 
         ## @brief Current step count within the episode.
@@ -111,9 +112,8 @@ class PlaceholderSchedulingEnv(gym.Env):
         @details
         Builds each observation component with plausible random values:
           - **factory_grid**: sparse occupancy across machine, job, and AGV layers.
-          - **sched_matrix**: partial fill of job×machine assignment and processing-time channels.
-          - **global_scalars**: ten normalized features including progress and throughput.
-          - **distance_matrix**: uniform-random 8×8 flattened pairwise distances.
+          - **machine_table** / **job_table**: random features on this episode's present rows.
+          - **global_scalars**: uniform-random, element 0 = episode progress.
           - **event_flags**: sparse binary vector with 0–2 active events.
 
         @return Dict mapping observation keys to numpy arrays.
@@ -140,38 +140,23 @@ class PlaceholderSchedulingEnv(gym.Env):
             r, c = rng.integers(0, self.cfg.grid_size, size=2)
             factory_grid[2, r, c] = 1.0
 
-        # --- Scheduling matrix image ---
-        sched = np.zeros(
-            (self.sched_cfg.channels, self.sched_cfg.max_jobs,
-             self.sched_cfg.max_cols),
-            dtype=np.float32,
-        )
-        # Fill active job rows across machine-assignment and processing-time channels
-        for j in range(self._num_jobs):
-            for m in range(self._num_machines):
-                sched[0, j, m] = rng.uniform(0, 1)          # machine assignment
-                sched[1, j, m + self._num_machines] = (
-                    rng.uniform(0, 1)                         # processing time
-                )
-            # Channel 2 stays zeros as per diagram
+        # --- Machine table: present rows for this episode's floor, random features ---
+        machine_table = np.zeros((self.cfg.max_machines, self.cfg.machine_features), dtype=np.float32)
+        n_m = min(self._num_machines, self.cfg.max_machines)
+        machine_table[:n_m] = rng.uniform(0, 1, size=(n_m, self.cfg.machine_features))
+        machine_table[:n_m, MACHINE_PRESENT_COL] = 1.0
+        machine_table[:n_m, MACHINE_CANDIDATE_COL] = (rng.uniform(size=n_m) < 0.3).astype(np.float32)
+
+        # --- Job table: active jobs, random features ---
+        job_table = np.zeros((self.cfg.max_jobs, self.cfg.job_features), dtype=np.float32)
+        n_j = min(int(rng.integers(1, self._num_jobs + 1)), self.cfg.max_jobs)
+        job_table[:n_j] = rng.uniform(0, 1, size=(n_j, self.cfg.job_features))
+        job_table[:n_j, JOB_PRESENT_COL] = 1.0
+        job_table[:n_j, JOB_CANDIDATE_COL] = (rng.uniform(size=n_j) < 0.3).astype(np.float32)
 
         # --- Global scalars (all normalized 0-1) ---
-        progress = self._step_count / self.max_steps
-        global_scalars = np.array([
-            progress,                                 # sim_t_norm
-            rng.uniform(0.3, 1.0),                    # C_max_LB_norm
-            rng.uniform(0, 1),                        # #jobs_waiting_norm
-            rng.uniform(0, 1),                        # #jobs_active_norm
-            rng.uniform(0, 0.3),                      # #failures_norm
-            rng.uniform(0, 1),                        # throughput_rolling
-            rng.uniform(0, 1),                        # avg_queue_len_norm
-            min(1.0, self._step_count / 50),          # job_completion_rate
-            rng.uniform(0, 1),                        # time_since_last_event_norm
-            float(progress > 0.9),                    # overtime_flag
-        ], dtype=np.float32)
-
-        # --- Pairwise distance matrix (8×8 flattened → 64) ---
-        dist_mat = rng.uniform(0, 1, size=(64,)).astype(np.float32)
+        global_scalars = rng.uniform(0, 1, size=(self.cfg.num_global_scalars,)).astype(np.float32)
+        global_scalars[0] = self._step_count / self.max_steps
 
         # --- Event flags (sparse binary) ---
         event_flags = np.zeros(6, dtype=np.float32)
@@ -180,15 +165,24 @@ class PlaceholderSchedulingEnv(gym.Env):
             idxs = rng.choice(6, size=n_events, replace=False)
             event_flags[idxs] = 1.0
 
+        # --- Action mask: each head is masked down to action 0 half the time ---
+        action_mask = np.ones(ACTION_MASK_LEN, dtype=np.float32)
+        offset = 0
+        for size in ACTION_BRANCHES:
+            if rng.uniform() < 0.5:
+                action_mask[offset + 1:offset + size] = 0.0
+            offset += size
+
         return {
             "factory_grid": factory_grid,
-            "sched_matrix": sched,
+            "machine_table": machine_table,
+            "job_table": job_table,
             "global_scalars": global_scalars,
-            "distance_matrix": dist_mat,
             "event_flags": event_flags,
+            "action_mask": action_mask,
         }
 
-    def _compute_reward(self, action: int) -> float:
+    def _compute_reward(self, action) -> float:
         """@brief Compute a synthetic reward signal for the given action.
 
         @details
@@ -200,7 +194,7 @@ class PlaceholderSchedulingEnv(gym.Env):
         A small step penalty (−0.01) encourages the agent to finish
         episodes efficiently.
 
-        @param action  Index into PDR_ACTIONS (0–7).
+        @param action  (job head, machine head).
         @return Scalar reward value (float).
         """
         rng = self._rng
@@ -208,9 +202,10 @@ class PlaceholderSchedulingEnv(gym.Env):
         # Base reward: negative makespan delta (want to minimize)
         prev_makespan = self._makespan_estimate
 
-        ## @brief Per-action quality multipliers (higher = stronger reduction).
-        action_quality = [0.8, 0.7, 0.5, 0.75, 0.4, 0.45, 0.6, 0.65]
-        reduction = action_quality[action] * rng.uniform(0.5, 1.5)
+        ## @brief Per-head quality multipliers (higher = stronger reduction).
+        job_quality = [0.8, 0.7, 0.75, 0.4]
+        machine_quality = [1.0, 0.9, 0.7]
+        reduction = job_quality[action[0]] * machine_quality[action[1]] * rng.uniform(0.5, 1.5)
         self._makespan_estimate = max(0, prev_makespan - reduction + rng.normal(0, 0.3))
 
         reward = -(self._makespan_estimate - prev_makespan)  # positive when makespan decreases
@@ -248,10 +243,10 @@ class PlaceholderSchedulingEnv(gym.Env):
         }
         return obs, info
 
-    def step(self, action: int) -> Tuple[dict, float, bool, bool, dict]:
+    def step(self, action) -> Tuple[dict, float, bool, bool, dict]:
         """@brief Execute one scheduling decision and advance the environment.
 
-        @param action  Integer action index in [0, 7] selecting a PDR rule.
+        @param action  (job head, machine head).
         @return Tuple of (obs, reward, terminated, truncated, info).
                 - @c terminated is True when makespan reaches zero.
                 - @c truncated  is True when @ref _step_count reaches
@@ -260,6 +255,7 @@ class PlaceholderSchedulingEnv(gym.Env):
                   @c pdr_rule name.
         @throws AssertionError if @p action is outside the action space.
         """
+        action = np.asarray(action, dtype=np.int64)
         assert self.action_space.contains(action), f"Invalid action {action}"
         self._step_count += 1
 
@@ -271,9 +267,10 @@ class PlaceholderSchedulingEnv(gym.Env):
         truncated = self._step_count >= self.max_steps
 
         info = {
+            "dt": NOMINAL_DECISION_SECONDS,
             "step": self._step_count,
             "makespan_estimate": self._makespan_estimate,
-            "pdr_rule": PDR_ACTIONS[action],
+            "pdr_rule": PDR_ACTIONS[int(action[0]) * ACTION_BRANCHES[1] + int(action[1])],
         }
         return obs, reward, terminated, truncated, info
 
@@ -327,13 +324,13 @@ class VectorizedPlaceholderEnv:
         Automatically resets any environment whose episode has ended
         (terminated or truncated).
 
-        @param actions  Array-like of length @ref num_envs with integer
-                        actions for each environment.
+        @param actions  Array-like of shape (@ref num_envs, n_branches):
+                        (job head, machine head) for each environment.
         @return Tuple of (batched_obs, rewards, terminateds, truncateds, infos).
                 Each array has leading dimension @ref num_envs.
         """
         results = [
-            env.step(int(a)) for env, a in zip(self.envs, actions)
+            env.step(a) for env, a in zip(self.envs, actions)
         ]
         obs_list, rewards, terminateds, truncateds, infos = zip(*results)
 

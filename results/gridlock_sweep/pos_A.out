@@ -1,0 +1,4 @@
+[Sweep] scenario=BatchConfigs/Scenarios/_mfsweep_shard0.json tag=pos_A agv=7 rules=SPT_SRWT LRT_MMUR repeats=6 workers=2 extra=''
+[Sweep] done agv7_SPT_SRWT
+[Sweep] done agv7_LRT_MMUR
+[Sweep] all cells finished -> ./Results/gridlock_sweep/pos_A

@@ -1,0 +1,34 @@
+[Sweep] scenario=BatchConfigs/Scenarios/_mfsweep_shard0.json tag=fail agv=3 5 7 9 10 11 12 14 rules=SPT_SRWT SPT_SMPT LRT_MMUR LPT_MMUR repeats=30 workers=20 extra=''
+[Sweep] done agv10_SPT_SMPT
+[Sweep] done agv10_LPT_MMUR
+[Sweep] done agv7_SPT_SRWT
+[Sweep] done agv9_SPT_SRWT
+[Sweep] done agv10_LRT_MMUR
+[Sweep] done agv5_SPT_SRWT
+[Sweep] done agv10_SPT_SRWT
+[Sweep] done agv5_LRT_MMUR
+[Sweep] done agv5_LPT_MMUR
+[Sweep] done agv7_LRT_MMUR
+[Sweep] done agv7_LPT_MMUR
+[Sweep] done agv9_LRT_MMUR
+[Sweep] done agv9_LPT_MMUR
+[Sweep] done agv3_LRT_MMUR
+[Sweep] done agv3_LPT_MMUR
+[Sweep] done agv3_SPT_SRWT
+[Sweep] done agv3_SPT_SMPT
+[Sweep] done agv9_SPT_SMPT
+[Sweep] done agv7_SPT_SMPT
+[Sweep] done agv5_SPT_SMPT
+[Sweep] done agv11_SPT_SMPT
+[Sweep] done agv12_SPT_SRWT
+[Sweep] done agv12_SPT_SMPT
+[Sweep] done agv11_LRT_MMUR
+[Sweep] done agv14_SPT_SMPT
+[Sweep] done agv11_LPT_MMUR
+[Sweep] done agv12_LRT_MMUR
+[Sweep] done agv11_SPT_SRWT
+[Sweep] done agv14_SPT_SRWT
+[Sweep] done agv12_LPT_MMUR
+[Sweep] done agv14_LRT_MMUR
+[Sweep] done agv14_LPT_MMUR
+[Sweep] all cells finished -> ./Results/gridlock_sweep/fail

@@ -1,0 +1,22 @@
+[Sweep] scenario=BatchConfigs/Scenarios/_mfsweep_shard0.json tag=b_rel_fail agv=10 12 16 20 24 rules=SPT_SRWT SPT_SMPT LRT_MMUR LPT_MMUR repeats=10 workers=12 extra='-reservation releasePrevious'
+[Sweep] done agv10_SPT_SRWT
+[Sweep] done agv12_SPT_SRWT
+[Sweep] done agv16_SPT_SRWT
+[Sweep] done agv10_LRT_MMUR
+[Sweep] done agv10_LPT_MMUR
+[Sweep] done agv12_LRT_MMUR
+[Sweep] done agv12_LPT_MMUR
+[Sweep] done agv16_LRT_MMUR
+[Sweep] done agv16_LPT_MMUR
+[Sweep] done agv10_SPT_SMPT
+[Sweep] done agv16_SPT_SMPT
+[Sweep] done agv12_SPT_SMPT
+[Sweep] done agv20_SPT_SRWT
+[Sweep] done agv24_SPT_SRWT
+[Sweep] done agv20_LPT_MMUR
+[Sweep] done agv20_LRT_MMUR
+[Sweep] done agv20_SPT_SMPT
+[Sweep] done agv24_LPT_MMUR
+[Sweep] done agv24_LRT_MMUR
+[Sweep] done agv24_SPT_SMPT
+[Sweep] all cells finished -> ./Results/gridlock_sweep/b_rel_fail

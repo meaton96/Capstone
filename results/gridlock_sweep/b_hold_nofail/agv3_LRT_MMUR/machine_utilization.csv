@@ -1,0 +1,16 @@
+timestamp,instance,rule,seed,makespan,machine_id,machine_type,ops_completed,time_processing,time_operational,utilization_rate,idle_time,idle_rate,availability_rate,failure_count,total_repair_time
+2026-09-20 18:58:33,mfsweep_control_nofail,LRT_MMUR,42,5621.88,0,Mill,43,645.86,5621.88,0.1149,4976.02,0.8851,1.0000,0,0.0
+2026-09-20 18:58:33,mfsweep_control_nofail,LRT_MMUR,42,5621.88,1,Lathe,0,0.00,5621.88,0.0000,5621.88,1.0000,1.0000,0,0.0
+2026-09-20 18:58:33,mfsweep_control_nofail,LRT_MMUR,42,5621.88,2,Weld,44,2472.46,5621.88,0.4398,3149.42,0.5602,1.0000,0,0.0
+2026-09-20 18:58:33,mfsweep_control_nofail,LRT_MMUR,42,5621.88,3,Inspect,0,0.00,5621.88,0.0000,5621.88,1.0000,1.0000,0,0.0
+2026-09-20 18:58:33,mfsweep_control_nofail,LRT_MMUR,42,5621.88,4,Assemble,0,0.00,5621.88,0.0000,5621.88,1.0000,1.0000,0,0.0
+2026-09-20 18:58:33,mfsweep_control_nofail,LRT_MMUR,42,5621.88,5,Mill,70,1051.40,5621.88,0.1870,4570.48,0.8130,1.0000,0,0.0
+2026-09-20 18:58:33,mfsweep_control_nofail,LRT_MMUR,42,5621.88,6,Lathe,0,0.00,5621.88,0.0000,5621.88,1.0000,1.0000,0,0.0
+2026-09-20 18:58:33,mfsweep_control_nofail,LRT_MMUR,42,5621.88,7,Weld,49,2551.40,5621.88,0.4538,3070.48,0.5462,1.0000,0,0.0
+2026-09-20 18:58:33,mfsweep_control_nofail,LRT_MMUR,42,5621.88,8,Inspect,0,0.00,5621.88,0.0000,5621.88,1.0000,1.0000,0,0.0
+2026-09-20 18:58:33,mfsweep_control_nofail,LRT_MMUR,42,5621.88,9,Assemble,0,0.00,5621.88,0.0000,5621.88,1.0000,1.0000,0,0.0
+2026-09-20 18:58:33,mfsweep_control_nofail,LRT_MMUR,42,5621.88,10,Mill,24,360.48,5621.88,0.0641,5261.40,0.9359,1.0000,0,0.0
+2026-09-20 18:58:33,mfsweep_control_nofail,LRT_MMUR,42,5621.88,11,Lathe,0,0.00,5621.88,0.0000,5621.88,1.0000,1.0000,0,0.0
+2026-09-20 18:58:33,mfsweep_control_nofail,LRT_MMUR,42,5621.88,12,Weld,44,2448.42,5621.88,0.4355,3173.46,0.5645,1.0000,0,0.0
+2026-09-20 18:58:33,mfsweep_control_nofail,LRT_MMUR,42,5621.88,13,Inspect,0,0.00,5621.88,0.0000,5621.88,1.0000,1.0000,0,0.0
+2026-09-20 18:58:33,mfsweep_control_nofail,LRT_MMUR,42,5621.88,14,Assemble,0,0.00,5621.88,0.0000,5621.88,1.0000,1.0000,0,0.0

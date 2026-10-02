@@ -1,0 +1,8 @@
+timestamp,instance,rule,seed,makespan,agv_id,total_trips,mean_trip_duration,time_idle,time_waiting_route,time_traveling,time_loading,time_unloading,total_path_length,reroute_count,congestion_fraction,stall_recovery_count
+2026-09-20 19:00:16,mfsweep_control_nofail,SPT_SMPT,42,7611.46,0,97,26.19,1428.56,732.44,5083.10,194.48,172.86,14870.23,0,0.0962,0
+2026-09-20 19:00:16,mfsweep_control_nofail,SPT_SMPT,42,7611.46,1,71,24.38,2898.82,671.04,3768.54,137.02,136.02,11013.45,0,0.0882,0
+2026-09-20 19:00:16,mfsweep_control_nofail,SPT_SMPT,42,7611.46,2,47,24.38,4283.72,629.72,2513.56,88.74,95.70,7335.58,0,0.0827,0
+2026-09-20 19:00:16,mfsweep_control_nofail,SPT_SMPT,42,7611.46,3,53,24.21,4362.38,604.40,2437.86,95.62,111.18,7093.17,0,0.0794,0
+2026-09-20 19:00:16,mfsweep_control_nofail,SPT_SMPT,42,7611.46,4,49,24.75,4330.06,679.36,2407.30,90.98,103.74,7007.21,0,0.0893,0
+2026-09-20 19:00:16,mfsweep_control_nofail,SPT_SMPT,42,7611.46,5,42,25.34,4335.50,636.06,2474.88,79.68,85.32,7269.57,0,0.0836,0
+2026-09-20 19:00:16,mfsweep_control_nofail,SPT_SMPT,42,7611.46,6,52,24.97,4374.38,663.92,2372.38,91.80,108.96,6933.36,0,0.0872,0

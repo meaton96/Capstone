@@ -1,0 +1,16 @@
+timestamp,instance,rule,seed,makespan,machine_id,machine_type,has_secondary_belts,primary_side,pickup_belt_primary,pickup_belt_secondary,dropoff_belt_primary,dropoff_belt_secondary,dropoff_belt_full,dropoff_redundant,dropoff_double_placed,out_placed_primary,out_placed_secondary,out_belt_full,pickup_dock_north,pickup_dock_south,dropoff_dock_north,dropoff_dock_south
+2026-09-20 19:10:41,mfsweep_control_nofail,LRT_MMUR,42,13224.31,0,Mill,0,S,34,0,52,0,8,52,0,34,0,22,0,58,0,56
+2026-09-20 19:10:41,mfsweep_control_nofail,LRT_MMUR,42,13224.31,1,Lathe,0,S,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+2026-09-20 19:10:41,mfsweep_control_nofail,LRT_MMUR,42,13224.31,2,Weld,0,S,28,0,40,0,12,40,0,28,0,18,0,52,0,46
+2026-09-20 19:10:41,mfsweep_control_nofail,LRT_MMUR,42,13224.31,3,Inspect,0,S,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+2026-09-20 19:10:41,mfsweep_control_nofail,LRT_MMUR,42,13224.31,4,Assemble,1,N,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+2026-09-20 19:10:41,mfsweep_control_nofail,LRT_MMUR,42,13224.31,5,Mill,1,N,19,11,35,0,0,35,0,19,11,5,48,0,35,0
+2026-09-20 19:10:41,mfsweep_control_nofail,LRT_MMUR,42,13224.31,6,Lathe,1,N,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+2026-09-20 19:10:41,mfsweep_control_nofail,LRT_MMUR,42,13224.31,7,Weld,1,N,35,11,44,2,2,45,1,35,11,1,58,0,47,0
+2026-09-20 19:10:41,mfsweep_control_nofail,LRT_MMUR,42,13224.31,8,Inspect,1,N,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+2026-09-20 19:10:41,mfsweep_control_nofail,LRT_MMUR,42,13224.31,9,Assemble,1,N,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+2026-09-20 19:10:41,mfsweep_control_nofail,LRT_MMUR,42,13224.31,10,Mill,1,N,37,7,46,0,0,46,0,37,7,2,52,0,46,0
+2026-09-20 19:10:41,mfsweep_control_nofail,LRT_MMUR,42,13224.31,11,Lathe,1,N,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+2026-09-20 19:10:41,mfsweep_control_nofail,LRT_MMUR,42,13224.31,12,Weld,0,N,35,0,32,0,24,32,0,35,0,9,44,0,44,0
+2026-09-20 19:10:41,mfsweep_control_nofail,LRT_MMUR,42,13224.31,13,Inspect,0,N,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+2026-09-20 19:10:41,mfsweep_control_nofail,LRT_MMUR,42,13224.31,14,Assemble,0,N,0,0,0,0,0,0,0,0,0,0,0,0,0,0

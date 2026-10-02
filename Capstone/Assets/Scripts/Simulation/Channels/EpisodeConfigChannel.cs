@@ -7,6 +7,7 @@ using Assets.Scripts.Simulation.Types;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Assets.Scripts.Simulation.Machines;
+using Assets.Scripts.Simulation.Jobs;
 
 namespace Assets.Scripts.Simulation.Channels
 {
@@ -27,6 +28,11 @@ namespace Assets.Scripts.Simulation.Channels
     /// JSON object (an inline scenario) or a string (a path to a scenario file). "clear" empties
     /// the queue first. When the queue runs dry, FactoryOrchestrator keeps replaying the last
     /// scenario it consumed, so a single one-shot item behaves like the old sticky single-slot API.
+    ///
+    /// Nothing received here falls back silently (thesis section 7.1). A message that fails to parse, names an
+    /// unknown key, or queues a scenario file that does not exist is recorded as a rejection; FactoryOrchestrator
+    /// takes it at the next episode start and stops the player instead of running the default or previous config.
+    /// Physical bounds (ConfigValidator) are checked there, after CLI overrides are applied.
     /// </summary>
     public class EpisodeConfigChannel : SideChannel
     {
@@ -42,7 +48,18 @@ namespace Assets.Scripts.Simulation.Channels
             public string Json;
         }
 
+        /// <summary>Top-level keys of a config message (FJSSPConfig fields, camelCase).</summary>
+        private static readonly string[] ConfigKeys =
+        {
+            "name", "seed", "jobCount", "machinesPerType", "machineTypes", "minProcTime", "maxProcTime",
+            "minOpsPerJob", "maxOpsPerJob", "agvCount", "agvMoveSpeed", "agvHandshakeDuration",
+            "machineFlexibilityProbability", "secondaryTimeMultiplier", "parkingMethod", "ioDocks",
+            "reservationProtocol", "routingTrigger", "tiling", "preDispatchingMethod", "stochastic", "procTimeParams",
+            "travelPrice",
+        };
+
         private FJSSPConfig _pendingConfig = null;
+        private string _rejection = null;
         private readonly Queue<PendingScenario> _scenarioQueue = new Queue<PendingScenario>();
         private readonly object _lock = new object();
 
@@ -78,8 +95,28 @@ namespace Assets.Scripts.Simulation.Channels
             }
             catch (Exception ex)
             {
-                SimLogger.LogError($"[ConfigChannel] Failed to parse config JSON: {ex.Message}");
+                Reject($"config message rejected: {ex.Message}");
             }
+        }
+
+        /// <summary>
+        /// Returns and clears the first rejection recorded since the last call, or null if every message parsed.
+        /// FactoryOrchestrator checks this before consuming anything and stops the player on a non-null result.
+        /// </summary>
+        public string TakeRejection()
+        {
+            lock (_lock)
+            {
+                string r = _rejection;
+                _rejection = null;
+                return r;
+            }
+        }
+
+        private void Reject(string reason)
+        {
+            SimLogger.LogError($"[ConfigChannel] {reason}");
+            lock (_lock) { _rejection ??= reason; }
         }
 
         /// <summary>
@@ -110,9 +147,11 @@ namespace Assets.Scripts.Simulation.Channels
 
         private void ReadScenarioQueue(JArray items, bool clear)
         {
+            // All or nothing: skipping a bad item would shift every later scenario onto the wrong episode seed.
             var incoming = new List<PendingScenario>();
-            foreach (JToken item in items)
+            for (int i = 0; i < items.Count; i++)
             {
+                JToken item = items[i];
                 try
                 {
                     incoming.Add(item.Type == JTokenType.String
@@ -121,7 +160,8 @@ namespace Assets.Scripts.Simulation.Channels
                 }
                 catch (Exception ex)
                 {
-                    SimLogger.LogError($"[ConfigChannel] Skipping one queued scenario: {ex.Message}");
+                    Reject($"scenario queue rejected at item {i}: {ex.Message}");
+                    return;
                 }
             }
 
@@ -156,6 +196,7 @@ namespace Assets.Scripts.Simulation.Channels
         private static FJSSPConfig DeserialiseConfig(string json)
         {
             JObject root = JObject.Parse(json);
+            ConfigKeyCheck.ThrowUnknown(root, ConfigKeys, "config message");
 
             var cfg = new FJSSPConfig
             {
@@ -168,8 +209,16 @@ namespace Assets.Scripts.Simulation.Channels
                 MinOpsPerJob = root["minOpsPerJob"]?.Value<int>() ?? 3,
                 MaxOpsPerJob = root["maxOpsPerJob"]?.Value<int>() ?? 6,
                 AGVCount = root["agvCount"]?.Value<int>() ?? 5,
+                AGVMoveSpeed = root["agvMoveSpeed"]?.Value<float>(),
+                AGVHandshakeDuration = root["agvHandshakeDuration"]?.Value<float>(),
                 MachineFlexibilityProbability = root["machineFlexibilityProbability"]?.Value<float>() ?? 0f,
-                parkingMethod = root["parkingMethod"]?.Value<string>() ?? "single",
+                SecondaryTimeMultiplier = root["secondaryTimeMultiplier"]?.Value<float>() ?? 1f,
+                TravelPrice = root["travelPrice"]?.Value<float>() ?? 0f,
+                parkingMethod = ConfigOverrides.ValidatedParkingMethod(root["parkingMethod"]?.Value<string>() ?? "lane"),
+                ioDocks = ConfigOverrides.ValidatedIoDocks(root["ioDocks"]?.Value<string>() ?? "corner"),
+                reservationProtocol = ReservationProtocolParser.Validated(root["reservationProtocol"]?.Value<string>()),
+                routingTrigger = RoutingTriggerParser.Validated(root["routingTrigger"]?.Value<string>()),
+                Tiling = TilingSpec.FromJson(root["tiling"]),
                 preDispatchingMethod = root["preDispatchingMethod"]?.Value<string>() ?? "fixed",
             };
 
@@ -185,38 +234,21 @@ namespace Assets.Scripts.Simulation.Channels
                 cfg.MachineTypeLayout = layout;
             }
 
-            // Optional stochastic block
-            if (root["stochastic"] is JObject s)
-            {
-                cfg.Stochastic = new StochasticConfig
-                {
-                    MachineFailuresEnabled = s["machineFailuresEnabled"]?.Value<bool>() ?? false,
-                    WeibullK = s["weibullK"]?.Value<float>() ?? 1.5f,
-                    WeibullLambda = s["weibullLambda"]?.Value<float>() ?? 900f,
-                    RepairLogMu = s["repairLogMu"]?.Value<float>() ?? 4.0f,
-                    RepairLogSigma = s["repairLogSigma"]?.Value<float>() ?? 0.5f,
-                    AGVFailuresEnabled = s["agvFailuresEnabled"]?.Value<bool>() ?? false,
-                    AGVWeibullLambda = s["agvWeibullLambda"]?.Value<float>() ?? 700f,
-                    AGVRepairLogMu = s["agvRepairLogMu"]?.Value<float>() ?? 3.4f,
-                    AGVRepairLogSigma = s["agvRepairLogSigma"]?.Value<float>() ?? 0.4f,
-                    DynamicArrivalsEnabled = s["dynamicArrivalsEnabled"]?.Value<bool>() ?? false,
-                    ArrivalLambda = s["arrivalLambda"]?.Value<float>() ?? 0.005f,
-                };
-            }
+            // Optional stochastic block: same reader and keys as scenarios, strict (unknown keys throw).
+            // An all-default block reads as null, which runs identically to an empty StochasticConfig.
+            cfg.Stochastic = ScenarioLoader.ReadStochastic(root, strict: true);
 
             // Optional per-type proc time params
             if (root["procTimeParams"] is JObject ptp)
             {
                 foreach (var kvp in ptp)
                 {
-                    if (Enum.TryParse<MachineType>(kvp.Key, out var mt) &&
-                        kvp.Value is JObject p)
-                    {
-                        cfg.ProcTimeParams[mt] = (
-                            p["mu"].Value<float>(),
-                            p["sigma"].Value<float>()
-                        );
-                    }
+                    if (!Enum.TryParse<MachineType>(kvp.Key, out var mt) || !(kvp.Value is JObject p))
+                        throw new ArgumentException($"procTimeParams: unknown machine type or malformed entry \"{kvp.Key}\".");
+                    cfg.ProcTimeParams[mt] = (
+                        p["mu"].Value<float>(),
+                        p["sigma"].Value<float>()
+                    );
                 }
             }
 

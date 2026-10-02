@@ -1,0 +1,10 @@
+timestamp,instance,rule,seed,makespan,agv_id,total_trips,mean_trip_duration,time_idle,time_waiting_route,time_traveling,time_loading,time_unloading,total_path_length,reroute_count,congestion_fraction,stall_recovery_count,path_returning_to_parking,path_departure_from_parking
+2026-09-21 14:37:16,mfsweep_control_nofail,LRT_MMUR,42,3993.22,0,50,28.40,434.26,917.18,2449.48,89.60,102.68,7150.29,0,0.2297,0,2303.56,1164.10
+2026-09-21 14:37:16,mfsweep_control_nofail,LRT_MMUR,42,3993.22,1,54,28.27,355.90,904.38,2526.04,99.00,107.88,7366.87,0,0.2265,0,1843.38,1277.57
+2026-09-21 14:37:16,mfsweep_control_nofail,LRT_MMUR,42,3993.22,2,45,27.56,426.74,884.76,2507.04,86.60,88.06,7336.84,0,0.2216,0,2193.10,1320.97
+2026-09-21 14:37:16,mfsweep_control_nofail,LRT_MMUR,42,3993.22,3,45,30.43,497.80,991.38,2332.16,83.16,88.70,6825.98,0,0.2483,0,1882.16,1153.18
+2026-09-21 14:37:16,mfsweep_control_nofail,LRT_MMUR,42,3993.22,4,45,29.67,473.80,950.74,2394.10,86.66,87.90,6972.98,0,0.2381,0,1985.90,1612.24
+2026-09-21 14:37:16,mfsweep_control_nofail,LRT_MMUR,42,3993.22,5,46,29.26,502.78,997.10,2316.74,88.94,87.64,6750.66,0,0.2497,0,1823.08,1554.63
+2026-09-21 14:37:16,mfsweep_control_nofail,LRT_MMUR,42,3993.22,6,44,28.76,668.34,795.74,2359.20,84.32,85.60,6899.06,0,0.1993,0,2065.14,1560.79
+2026-09-21 14:37:16,mfsweep_control_nofail,LRT_MMUR,42,3993.22,7,41,28.71,829.40,775.22,2230.76,76.48,81.34,6552.56,0,0.1941,0,1886.01,1414.49
+2026-09-21 14:37:16,mfsweep_control_nofail,LRT_MMUR,42,3993.22,8,41,29.39,741.90,888.48,2204.12,78.24,80.46,6469.26,0,0.2225,0,1810.13,1433.11

@@ -1,0 +1,13 @@
+{
+ "run_id": "rnd02ent_s2",
+ "label": "rnd02ent_s2 (job 21790111_2 on spr-a-02.rc.rit.edu)",
+ "update": 281,
+ "num_updates": 3189,
+ "global_step": 766488,
+ "total_timesteps": 3000000,
+ "sps": 4.74,
+ "eta_hours": 130.81,
+ "episodes": 512,
+ "recent_mean_flow": 1813.8,
+ "updated_at": "2026-09-30T14:49:18"
+}

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Assets.Scripts.Simulation.Visuals;
 
 namespace Assets.Scripts.Simulation.Jobs
 {
@@ -15,7 +16,8 @@ namespace Assets.Scripts.Simulation.Jobs
     public class JobStore : MonoBehaviour
     {
         [Header("Visuals")]
-        [SerializeField] private JobVisual jobVisualPrefab;
+        // Prefab comes from VisualController (primitive or Kenney variant).
+        private static JobVisual JobVisualPrefab => VisualController.Instance.JobPrefab;
         [SerializeField] private Transform jobVisualContainer;
 
         private readonly List<JobData> allJobs = new List<JobData>();
@@ -44,6 +46,7 @@ namespace Assets.Scripts.Simulation.Jobs
             DestroyVisuals();
             allJobs.Clear();
             DeferredJobIds.Clear();
+            FactoryLayout.FactoryLayoutManager.Instance?.ResetJobTiling();
 
             foreach (var def in definitions)
             {
@@ -69,14 +72,15 @@ namespace Assets.Scripts.Simulation.Jobs
                     StateEntryTime = def.ArrivalTime,
                 };
 
-                if (spawnVisuals && jobVisualPrefab != null)
+                if (spawnVisuals && JobVisualPrefab != null)
                 {
-                    JobVisual vis = Instantiate(jobVisualPrefab, jobVisualContainer);
+                    JobVisual vis = Instantiate(JobVisualPrefab, jobVisualContainer);
                     vis.gameObject.name = $"JobVisual_{def.JobId}";
                     vis.Initialize(def.JobId, def.OperationSequence.Length);
                     jobData.Visual = vis;
                 }
 
+                FactoryLayout.FactoryLayoutManager.Instance?.AssignJobTile(jobData, allJobs);
                 allJobs.Add(jobData);
             }
             IsInitialized = true;
@@ -120,14 +124,15 @@ namespace Assets.Scripts.Simulation.Jobs
                 StateEntryTime = def.ArrivalTime,
             };
 
-            if (spawnVisuals && jobVisualPrefab != null)
+            if (spawnVisuals && JobVisualPrefab != null)
             {
-                JobVisual vis = Instantiate(jobVisualPrefab, jobVisualContainer);
+                JobVisual vis = Instantiate(JobVisualPrefab, jobVisualContainer);
                 vis.gameObject.name = $"JobVisual_{def.JobId}";
                 vis.Initialize(def.JobId, def.OperationSequence.Length);
                 jobData.Visual = vis;
             }
 
+            FactoryLayout.FactoryLayoutManager.Instance?.AssignJobTile(jobData, allJobs);
             allJobs.Add(jobData);
             return jobData;
         }
@@ -254,12 +259,14 @@ namespace Assets.Scripts.Simulation.Jobs
         /// </summary>
         /// <param name="machineId">The ID of the machine to evaluate.</param>
         /// <returns>
-        /// The sum of processing times for all jobs currently queued at the machine,
-        /// plus all jobs committed to the machine but not yet arrived.
+        /// The remaining time of the operation in process on the machine, plus the processing
+        /// times of all jobs queued there and of all jobs committed to it but not yet arrived.
         /// </returns>
         public float GetMachineLoad(int machineId)
         {
-            float load = 0f;
+            // In-process remainder: previously omitted, so a machine 1 s into a 400 s op looked as free as an
+            // idle one to SRWT, the observation's load feature and the failure redirect.
+            float load = FactoryLayout.FactoryLayoutManager.Instance?.GetMachine(machineId)?.RemainingProcessingTime ?? 0f;
             foreach (var job in allJobs)
             {
                 // Count jobs physically queued here
@@ -272,6 +279,31 @@ namespace Assets.Scripts.Simulation.Jobs
                     load += job.GetProcessingTime(machineId);
             }
             return load;
+        }
+
+        /// <summary>
+        /// GetMachineLoad for every machine in one pass over the jobs (for rules that need many machines' loads
+        /// per decision, e.g. PT+WINQ).
+        /// </summary>
+        /// <returns>Machine ID -> load, for every machine on the floor.</returns>
+        public Dictionary<int, float> GetAllMachineLoads()
+        {
+            var loads = new Dictionary<int, float>();
+            var layout = FactoryLayout.FactoryLayoutManager.Instance;
+            if (layout != null)
+                foreach (var m in layout.Machines) loads[m.MachineId] = m.RemainingProcessingTime;
+
+            foreach (var job in allJobs)
+            {
+                int m;
+                if (job.State == JobState.Queued) m = job.LocationMachineId;
+                else if (job.State == JobState.WaitingForPickup || job.State == JobState.InTransit) m = job.TargetMachineId;
+                else continue;
+                if (m < 0) continue;
+                loads.TryGetValue(m, out float cur);
+                loads[m] = cur + job.GetProcessingTime(m);
+            }
+            return loads;
         }
 
         /// <summary>

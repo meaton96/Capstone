@@ -1,0 +1,2 @@
+policy,kind,episodes,makespan_mean,makespan_std,total_flow_mean,mean_flow_time_mean,deadlocks,timeouts
+ckpt:rnd02_s2/checkpoint_step76800,checkpoint,20,5400.01806640625,0.0,74921.04609375,1488.7844834111206,0,0

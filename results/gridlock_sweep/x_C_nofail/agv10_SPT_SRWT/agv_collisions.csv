@@ -1,0 +1,14 @@
+timestamp,instance,rule,seed,agv_count,event_id,start_time,duration,agv_a,agv_b,min_centre_distance,zone_a,zone_b,state_a,state_b
+2026-09-20 11:48:58,mfsweep_control_nofail,SPT_SRWT,42,10,0,61.18,0.28,0,4,0.338,Parking_Alcove,Parking_Alcove,ReturningToParking,MovingToPrePickup
+2026-09-20 11:48:58,mfsweep_control_nofail,SPT_SRWT,42,10,1,114.88,0.30,3,6,0.482,Parking_Alcove,Parking_Alcove,ReturningToParking,MovingToPrePickup
+2026-09-20 11:48:58,mfsweep_control_nofail,SPT_SRWT,42,10,2,154.32,0.58,0,2,0.054,Parking_Alcove,Parking_Alcove,ReturningToParking,Idle
+2026-09-20 11:48:58,mfsweep_control_nofail,SPT_SRWT,42,10,3,165.44,0.30,2,4,0.380,BotSpine_CornerL,BotSpine_CornerL,MovingToPickup,ReturningToParking
+2026-09-20 11:48:58,mfsweep_control_nofail,SPT_SRWT,42,10,4,174.20,0.28,1,8,0.980,Parking_Alcove,BotSpine_Dock1,ReturningToParking,MovingToPickup
+2026-09-20 11:48:58,mfsweep_control_nofail,SPT_SRWT,42,10,5,175.10,2.30,1,4,0.000,Parking_Alcove,Parking_Alcove,ReturningToParking,MovingToPrePickup
+2026-09-20 11:48:58,mfsweep_control_nofail,SPT_SRWT,42,10,6,334.08,0.78,5,8,0.075,Parking_Alcove,Parking_Alcove,Idle,ReturningToParking
+2026-09-20 11:48:58,mfsweep_control_nofail,SPT_SRWT,42,10,7,340.74,0.28,1,5,0.165,Parking_Alcove,Parking_Alcove,ReturningToParking,MovingToPickup
+2026-09-20 11:48:58,mfsweep_control_nofail,SPT_SRWT,42,10,8,356.54,0.76,7,8,0.025,BotSpine_CornerL,BotSpine_CornerL,ReturningToParking,MovingToPickup
+2026-09-20 11:48:58,mfsweep_control_nofail,SPT_SRWT,42,10,9,360.72,0.42,3,7,0.981,Parking_Alcove,Parking_Alcove,Idle,ReturningToParking
+2026-09-20 11:48:58,mfsweep_control_nofail,SPT_SRWT,42,10,10,379.58,0.30,4,7,0.418,BotSpine_Transit0,BotSpine_Transit0,ReturningToParking,MovingToPickup
+2026-09-20 11:48:58,mfsweep_control_nofail,SPT_SRWT,42,10,11,608.66,0.48,2,8,0.933,BotSpine_Dock0,BotSpine_Dock0,ReturningToParking,MovingToPickup
+2026-09-20 11:48:58,mfsweep_control_nofail,SPT_SRWT,42,10,12,609.98,1.90,2,8,0.120,BotSpine_CornerL,BotSpine_CornerL,ReturningToParking,MovingToPickup

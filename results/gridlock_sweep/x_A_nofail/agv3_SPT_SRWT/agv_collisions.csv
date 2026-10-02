@@ -1,0 +1,5 @@
+timestamp,instance,rule,seed,agv_count,event_id,start_time,duration,agv_a,agv_b,min_centre_distance,zone_a,zone_b,state_a,state_b
+2026-09-20 11:38:13,mfsweep_control_nofail,SPT_SRWT,42,3,0,970.48,0.08,0,1,1.242,TopSpine_Seg4,TopSpine_Seg4,MovingToDropoff,MovingToDropoff
+2026-09-20 11:38:13,mfsweep_control_nofail,SPT_SRWT,42,3,1,1712.94,0.02,0,2,1.342,TopSpine_Seg4,TopSpine_Seg4,MovingToPickup,MovingToDropoff
+2026-09-20 11:38:13,mfsweep_control_nofail,SPT_SRWT,42,3,2,6162.72,0.76,1,2,0.015,Parking_Alcove,Parking_Alcove,Idle,ReturningToParking
+2026-09-20 11:38:13,mfsweep_control_nofail,SPT_SRWT,42,3,3,6170.82,1.70,0,1,0.012,BotSpine_Seg1,BotSpine_Seg1,ReturningToParking,MovingToPickup

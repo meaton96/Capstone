@@ -1,6 +1,8 @@
+using System.Linq;
 using Assets.Scripts.Simulation.Logging;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
+using Unity.MLAgents.Policies;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
 using Assets.Scripts.Simulation.Types;
@@ -10,8 +12,8 @@ namespace Assets.Scripts.Simulation
     /// @brief ML-Agents Agent subclass that drives job-shop scheduling decisions.
     ///
     /// @details Listens for DecisionRequest events from the @c SimulationBridge, 
-    /// collects fixed-width observation vectors, and maps discrete action indices 
-    /// to dispatching rules.
+    /// collects fixed-width observation vectors, and maps the two discrete action branches
+    /// (job head, machine head) to dispatching rules.
     public class SchedulingAgent : Agent
     {
         [Header("References")]
@@ -19,6 +21,7 @@ namespace Assets.Scripts.Simulation
         //  [SerializeField] private int maxCandidateSlots = 3;
 
         private ObservationBuilder _obsBuilder;
+        private BehaviorParameters _behavior;
 
         [Header("Observation Config")]
         // [SerializeField] private int maxQueueSlots = 10;
@@ -53,23 +56,47 @@ namespace Assets.Scripts.Simulation
         /// @brief Provides a baseline action based on a hardcoded dispatching rule.
         ///
         /// @param actionsOut The action buffer to be populated by the heuristic.
+        ///
+        /// @details Writes the rule's (job head, machine head) when both halves are in the RL heads, else
+        /// zeros. The branches are informational only: in heuristic mode OnActionReceived steps with the
+        /// configured rule's catalog index, so every catalog rule (and Random) still runs as a baseline.
         public override void Heuristic(in ActionBuffers actionsOut)
         {
-            if (heuristicRule == DispatchingRule.Random)
-            {
-                actionsOut.DiscreteActions.Array[0] = Random.Range(0, FactoryOrchestrator.ActionCount);
-            }
-            else
-            {
-                actionsOut.DiscreteActions.Array[0] = FactoryOrchestrator.Instance.GetRuleIndex(heuristicRule);
-            }
+            var discrete = actionsOut.DiscreteActions;
+            bool mapped = DispatchingEngine.TryHeadsForRule(heuristicRule, out int job, out int machine);
+            discrete[0] = mapped ? job : 0;
+            discrete[1] = mapped ? machine : 0;
         }
+
+        /// @brief Catalog index of the configured heuristic rule; Random draws one of the legacy rules per call.
+        private int HeuristicRuleIndex() => heuristicRule == DispatchingRule.Random
+            ? Random.Range(0, FactoryOrchestrator.ActionCount)
+            : FactoryOrchestrator.Instance.GetRuleIndex(heuristicRule);
 
         /// @brief Attaches the reward-metrics sensor before Agent.OnEnable collects sensor components.
         private void Awake()
         {
             if (GetComponent<RewardMetricsSensorComponent>() == null)
                 gameObject.AddComponent<RewardMetricsSensorComponent>();
+
+            // The scene serializes BehaviorParameters.VectorObservationSize; derive it from the builder so a
+            // schema change can't leave the two out of sync. Awake runs before Agent.OnEnable creates sensors.
+            _behavior = GetComponent<BehaviorParameters>();
+            var behavior = _behavior;
+            if (behavior != null && behavior.BrainParameters.VectorObservationSize != ObservationSize)
+            {
+                SimLogger.Low($"[Agent] VectorObservationSize {behavior.BrainParameters.VectorObservationSize} -> {ObservationSize} (ObservationBuilder schema).");
+                behavior.BrainParameters.VectorObservationSize = ObservationSize;
+            }
+
+            // Same for the action space: two discrete branches, job head x machine head (DispatchingEngine).
+            int[] branches = { DispatchingEngine.JobBranchSize, DispatchingEngine.MachineBranchSize };
+            if (behavior != null && !branches.SequenceEqual(behavior.BrainParameters.ActionSpec.BranchSizes ?? new int[0]))
+            {
+                SimLogger.Low($"[Agent] Action branches [{string.Join(",", behavior.BrainParameters.ActionSpec.BranchSizes ?? new int[0])}] " +
+                              $"-> [{string.Join(",", branches)}] (job head x machine head).");
+                behavior.BrainParameters.ActionSpec = ActionSpec.MakeDiscrete(branches);
+            }
         }
 
         /// @brief Subscribes to simulation events once every scene object has finished Awake.
@@ -195,18 +222,41 @@ namespace Assets.Scripts.Simulation
             for (int i = 0; i < ObservationSize; i++) sensor.AddObservation(0f);
         }
 
-        /// @brief Processes the discrete action index returned by the neural network.
+        /// @brief Masks every head that cannot change this decision's outcome down to its action 0.
+        ///
+        /// @details Python reads the masks (DecisionSteps.action_mask) and drops a masked head from the
+        /// log-probability and entropy, so the policy gradient only reaches heads the decision used.
+        /// See DispatchingEngine.HeadsThatMatter.
+        public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
+        {
+            DecisionRequest req = FactoryOrchestrator.Instance != null ? FactoryOrchestrator.Instance.CurrentDecision : null;
+            if (req == null || !FactoryOrchestrator.Instance.IsEpisodeActive) return;
+
+            var (jobMatters, machineMatters) = DispatchingEngine.HeadsThatMatter(req);
+            if (!jobMatters) MaskAllButFirst(actionMask, 0, DispatchingEngine.JobBranchSize);
+            if (!machineMatters) MaskAllButFirst(actionMask, 1, DispatchingEngine.MachineBranchSize);
+        }
+
+        private static void MaskAllButFirst(IDiscreteActionMask actionMask, int branch, int size)
+        {
+            for (int i = 1; i < size; i++) actionMask.SetActionEnabled(branch, i, false);
+        }
+
+        /// @brief Processes the (job head, machine head) action returned by the policy.
         ///
         /// @param actions The buffer containing the predicted actions.
         ///
-        /// @details Maps the action to a dispatching rule, steps the simulation via 
-        /// @c bridge.Step. No reward is assigned here: it is computed in Python (env/rewards)
-        /// from consecutive RewardMetricsSensor snapshots.
+        /// @details Maps the two heads to their catalog rule and steps the simulation. In heuristic mode the
+        /// configured rule is stepped directly (see Heuristic). No reward is assigned here: it is computed in
+        /// Python (env/rewards) from consecutive RewardMetricsSensor snapshots.
         public override void OnActionReceived(ActionBuffers actions)
         {
             if (!FactoryOrchestrator.Instance.IsWaitingForAction) return;
 
-            FactoryOrchestrator.Instance.Step(actions.DiscreteActions[0]);
+            int index = _behavior != null && _behavior.IsInHeuristicMode()
+                ? HeuristicRuleIndex()
+                : DispatchingEngine.IndexForHeads(actions.DiscreteActions[0], actions.DiscreteActions[1]);
+            FactoryOrchestrator.Instance.Step(index);
         }
     }
 }

@@ -22,10 +22,11 @@ a scenario_generator + seed_rng, a fresh seeded variant every episode — queued
 the seed above, one item per episode, buffered the same way. Long scenarios can opt into a
 steady-state time cap (a scenario's "stochastic": {"episodeDurationSeconds": N}); an episode cut
 short that way is truncated, not terminated: info["episode"]["truncated"] is set, and the info
-dict carries the truncated episode's own final observation as "terminal_obs" (Unity has already
+dict carries the truncated episode's last observation as "terminal_obs" (Unity has already
 auto-reset by the time step() returns, so obs/next_obs is the new episode's first frame — the
 value network still needs terminal_obs to bootstrap the truncated one correctly; see
-rollout_buffer.RolloutBuffer.add).
+rollout_buffer.RolloutBuffer.add). That is the observation of the episode's last decision, kept
+here in Python: the player's own terminal observation is all zeros (see step).
 
 Side channel usage:
   env.send_config(config_dict)      # applied on the next reset()
@@ -40,19 +41,18 @@ from typing import Callable, Dict, Iterable, Optional, Tuple, Union
 
 import numpy as np
 from mlagents_envs.base_env import ActionTuple
-from mlagents_envs.environment import UnityEnvironment
 from mlagents_envs.side_channel.engine_configuration_channel import (
     EngineConfigurationChannel,
 )
 
 from config import (
-    GRID_SIZE, GRID_CHANNELS, MAX_JOBS, MAX_MACHINES, SCHED_CHANNELS,
-    TOTAL_OBS_SIZE, SLICE_SPATIAL_END, SLICE_SCHED_END, SLICE_SCALARS_END,
-    SLICE_DIST_END, SLICE_FLAGS_END,
+    GRID_SIZE, GRID_CHANNELS, MAX_JOBS, JOB_FEATURES, MAX_MACHINES, MACHINE_FEATURES,
+    SPATIAL_LEN, GLOBAL_SCALARS, EVENT_FLAGS, ACTION_BRANCHES, ACTION_MASK_LEN, obs_total_size,
 )
 from channels.channels import EpisodeConfigChannel, EpisodeSeedChannel, EpisodeTelemetryChannel
+from env_wrappers.loopback import LoopbackUnityEnvironment
 from rewards import (
-    SENSOR_NAME, LoadedReward, MetricsSnapshot, RewardContext, RewardFunction, load_reward,
+    SENSOR_NAME, LoadedReward, MetricsSnapshot, RewardContext, RewardFunction, elapsed_sim_time, load_reward,
 )
 
 ## @brief Training seeds are drawn from [TRAIN_SEED_LOW, EpisodeSeedChannel.MAX_SEED);
@@ -64,32 +64,43 @@ TRAIN_SEED_LOW = 10_000
 SEED_BUFFER = 4
 
 
-def slice_obs(raw: np.ndarray) -> Dict[str, np.ndarray]:
-    """@brief Slice a flat observation vector into the five named streams."""
-    assert raw.shape[-1] == TOTAL_OBS_SIZE, (
-        f"Expected {TOTAL_OBS_SIZE} floats, got {raw.shape[-1]}"
+def action_mask_from(steps) -> np.ndarray:
+    """@brief obs["action_mask"] for the first agent in @p steps: 1 = enabled, branches concatenated.
+
+    @details ML-Agents reports masks as one (n_agents, branch_size) array per branch, True = masked. Terminal
+    steps carry no mask, and neither does a decision whose agent wrote none: every action is enabled then.
+    """
+    masks = getattr(steps, "action_mask", None)
+    if not masks:
+        return np.ones(ACTION_MASK_LEN, dtype=np.float32)
+    return np.concatenate([~np.asarray(m[0], dtype=bool) for m in masks]).astype(np.float32)
+
+
+def slice_obs(raw: np.ndarray, max_machines: int = MAX_MACHINES,
+              max_jobs: int = MAX_JOBS) -> Dict[str, np.ndarray]:
+    """@brief Slice a flat observation vector into the five named streams (schema v2, see config.py).
+
+    @param max_machines, max_jobs  The row caps the player was launched with (-obsmaxmachines / -obsmaxjobs).
+    """
+    expected = obs_total_size(max_machines, max_jobs)
+    assert raw.shape[-1] == expected, (
+        f"Expected {expected} floats (row caps {max_machines} machines / {max_jobs} jobs), got "
+        f"{raw.shape[-1]} -- player and env/config.py observation schemas differ (rebuild the player or "
+        f"sync config.py)"
     )
-
-    factory_grid = raw[..., :SLICE_SPATIAL_END].reshape(
-        *raw.shape[:-1], GRID_CHANNELS, GRID_SIZE, GRID_SIZE
-    )
-
-    sched_cols = 2 * MAX_MACHINES
-    sched_hwc = raw[..., SLICE_SPATIAL_END:SLICE_SCHED_END].reshape(
-        *raw.shape[:-1], MAX_JOBS, sched_cols, SCHED_CHANNELS
-    )
-    sched_matrix = np.moveaxis(sched_hwc, -1, -3)
-
-    global_scalars  = raw[..., SLICE_SCHED_END:SLICE_SCALARS_END]
-    distance_matrix = raw[..., SLICE_SCALARS_END:SLICE_DIST_END]
-    event_flags     = raw[..., SLICE_DIST_END:SLICE_FLAGS_END]
-
+    machines_end = SPATIAL_LEN + max_machines * MACHINE_FEATURES
+    jobs_end = machines_end + max_jobs * JOB_FEATURES
+    scalars_end = jobs_end + GLOBAL_SCALARS
+    lead = raw.shape[:-1]
     return {
-        "factory_grid":    factory_grid.astype(np.float32),
-        "sched_matrix":    sched_matrix.astype(np.float32),
-        "global_scalars":  global_scalars.astype(np.float32),
-        "distance_matrix": distance_matrix.astype(np.float32),
-        "event_flags":     event_flags.astype(np.float32),
+        "factory_grid": raw[..., :SPATIAL_LEN].reshape(
+            *lead, GRID_CHANNELS, GRID_SIZE, GRID_SIZE).astype(np.float32),
+        "machine_table": raw[..., SPATIAL_LEN:machines_end].reshape(
+            *lead, max_machines, MACHINE_FEATURES).astype(np.float32),
+        "job_table": raw[..., machines_end:jobs_end].reshape(
+            *lead, max_jobs, JOB_FEATURES).astype(np.float32),
+        "global_scalars": raw[..., jobs_end:scalars_end].astype(np.float32),
+        "event_flags": raw[..., scalars_end:scalars_end + EVENT_FLAGS].astype(np.float32),
     }
 
 
@@ -105,8 +116,13 @@ class UnitySchedulingEnv:
                  capture_frame_rate: Optional[int] = 60,
                  target_frame_rate: Optional[int] = -1,
                  extra_args: Optional[list] = None,
-                 scenario_generator: Optional[Callable[[int], dict]] = None):
+                 scenario_generator: Optional[Callable[[int], dict]] = None,
+                 obs_caps: Optional[Tuple[int, int]] = None):
         """
+        @param obs_caps        Observation row caps (machine rows, job rows), passed to the player as
+                               -obsmaxmachines / -obsmaxjobs. Pick them with config.obs_row_caps for the
+                               largest floor the run will see; None uses the defaults (MAX_MACHINES,
+                               MAX_JOBS), which fit every planned floor but pad small ones.
         @param reward_fn       Python reward function; None passes Unity's reward through.
         @param capture_frame_rate  Engine capture frame rate, as mlagents-learn sends. Without it Unity
                                    paces frames by wall-clock time and episodes simulated 2.9x slower
@@ -132,7 +148,8 @@ class UnitySchedulingEnv:
         self.seed_channel = EpisodeSeedChannel()
         self.telemetry = EpisodeTelemetryChannel()
 
-        additional_args = []
+        self.obs_caps = (MAX_MACHINES, MAX_JOBS) if obs_caps is None else (int(obs_caps[0]), int(obs_caps[1]))
+        additional_args = ["-obsmaxmachines", str(self.obs_caps[0]), "-obsmaxjobs", str(self.obs_caps[1])]
         if decision_drain:
             additional_args += ["-rldecisiondrain", "true"]
         if log_file is not None:
@@ -141,7 +158,8 @@ class UnitySchedulingEnv:
             additional_args += ["-logFile", str(Path(log_file).resolve())]
         additional_args += [str(arg) for arg in (extra_args or [])]
 
-        self.env = UnityEnvironment(
+        # Loopback-only gRPC (thesis section 7.1): upstream listens on every interface, unauthenticated.
+        self.env = LoopbackUnityEnvironment(
             file_name=file_name,
             side_channels=[
                 self.engine_channel,
@@ -160,15 +178,26 @@ class UnitySchedulingEnv:
             target_frame_rate=target_frame_rate,
         )
 
-        self.env.reset()
-        self.behavior_name = list(self.env.behavior_specs.keys())[0]
-        self.spec = self.env.behavior_specs[self.behavior_name]
-        self._policy_index, self._metrics_index = self._find_observation_indices(self.spec)
-        if reward_fn is not None and self._metrics_index is None:
-            raise RuntimeError(
-                f"A reward function was given but the Unity build has no '{SENSOR_NAME}' "
-                "sensor. Rebuild the player with RewardMetricsSensor."
-            )
+        # Close the player if any startup check fails: otherwise its gRPC server thread keeps Python alive after
+        # the exception, and a Slurm job hangs until its time limit (rnd02, 2026-09-26: 25 h idle on 3 nodes).
+        try:
+            self.env.reset()
+            self.behavior_name = list(self.env.behavior_specs.keys())[0]
+            self.spec = self.env.behavior_specs[self.behavior_name]
+            self._policy_index, self._metrics_index = self._find_observation_indices(self.spec, self.obs_caps)
+            branches = tuple(self.spec.action_spec.discrete_branches)
+            if branches != ACTION_BRANCHES:
+                raise RuntimeError(
+                    f"Unity action branches {branches} do not match env/config.py {ACTION_BRANCHES} (job head x "
+                    f"machine head). Rebuild the player with the two-branch SchedulingAgent.")
+            if reward_fn is not None and self._metrics_index is None:
+                raise RuntimeError(
+                    f"A reward function was given but the Unity build has no '{SENSOR_NAME}' "
+                    "sensor. Rebuild the player with RewardMetricsSensor."
+                )
+        except BaseException:
+            self.env.close()
+            raise
 
         self.reward_fn = reward_fn
         self.env_id = env_id
@@ -180,12 +209,13 @@ class UnitySchedulingEnv:
 
         self._pending_config = None
         self._prev_metrics: Optional[MetricsSnapshot] = None
+        self._last_obs: Optional[Dict[str, np.ndarray]] = None   # last decision of the running episode
         self._episode_return = 0.0
         self._episode_length = 0
         self._episode_terms: Dict[str, float] = {}
 
     @staticmethod
-    def _find_observation_indices(spec) -> Tuple[int, Optional[int]]:
+    def _find_observation_indices(spec, obs_caps: Tuple[int, int]) -> Tuple[int, Optional[int]]:
         """@brief Locate the policy observation and the reward-metrics sensor by name."""
         policy_index, metrics_index = None, None
         for i, obs_spec in enumerate(spec.observation_specs):
@@ -195,10 +225,11 @@ class UnitySchedulingEnv:
                 policy_index = i
 
         shape = None if policy_index is None else tuple(spec.observation_specs[policy_index].shape)
-        assert shape == (TOTAL_OBS_SIZE,), (
-            f"Unity VectorSensor size {shape} does not match "
-            f"expected ({TOTAL_OBS_SIZE},). Update BehaviorParameters "
-            f"Space Size in the Inspector to {TOTAL_OBS_SIZE}."
+        expected = obs_total_size(*obs_caps)
+        assert shape == (expected,), (
+            f"Unity VectorSensor size {shape} does not match the {expected} floats expected for row caps "
+            f"{obs_caps[0]} machines / {obs_caps[1]} jobs. A player built before 2026-09-27 ignores "
+            f"-obsmaxmachines / -obsmaxjobs: rebuild it."
         )
         return policy_index, metrics_index
 
@@ -263,8 +294,8 @@ class UnitySchedulingEnv:
         decision, _ = self.env.get_steps(self.behavior_name)
         return self._begin_episode(self._wait_for_decision(decision))
 
-    def step(self, action: int) -> Tuple[Dict[str, np.ndarray], float, bool, dict]:
-        """@brief Apply one scheduling action and advance to the next decision.
+    def step(self, action) -> Tuple[Dict[str, np.ndarray], float, bool, dict]:
+        """@brief Apply one scheduling action (job head, machine head) and advance to the next decision.
 
         @return (obs, reward, done, info). @c info["reward_terms"] holds this step's named
                 reward terms. When @c done is True the episode just ended: @c reward is its
@@ -275,7 +306,7 @@ class UnitySchedulingEnv:
         """
         self.env.set_actions(
             self.behavior_name,
-            ActionTuple(discrete=np.array([[action]], dtype=np.int32)),
+            ActionTuple(discrete=np.asarray(action, dtype=np.int32).reshape(1, len(ACTION_BRANCHES))),
         )
         self.env.step()
         decision, terminal = self.env.get_steps(self.behavior_name)
@@ -294,18 +325,23 @@ class UnitySchedulingEnv:
         for name, value in terms.items():
             self._episode_terms[name] = self._episode_terms.get(name, 0.0) + value
 
-        info = {"reward_terms": terms}
+        info = {"reward_terms": terms, "dt": elapsed_sim_time(self._prev_metrics, curr)}
         if not done:
             self._prev_metrics = curr
-            return self._extract_obs(decision), reward, False, info
+            self._last_obs = self._extract_obs(decision)
+            return self._last_obs, reward, False, info
 
         # Unity has already auto-reset by now: decision (if present) is the NEW episode's first
-        # frame, not a continuation of the one that just ended. terminal_obs is that ended
-        # episode's own last observation — needed to bootstrap a truncated (not terminated)
-        # episode's value estimate, since there is no real "next state" to bootstrap from.
-        info["episode"] = self._episode_summary(curr, interrupted=bool(terminal.interrupted[0]))
-        info["terminal_obs"] = self._extract_obs(terminal)
+        # frame, not a continuation of the one that just ended. terminal_obs stands in for the
+        # ended episode's final state, to bootstrap a truncated (not terminated) episode's value.
+        # The terminal step's own observation is useless for that: the player has already set
+        # episodeActive = false when it collects it, so SchedulingAgent.CollectObservations pads
+        # it with zeros. The last decision's observation (one decision before the cap) is used
+        # instead; it falls back to the padded one only if step() runs before reset().
         info["telemetry"] = self.telemetry.pop_payload()
+        info["episode"] = self._episode_summary(curr, interrupted=bool(terminal.interrupted[0]),
+                                                telemetry=info["telemetry"])
+        info["terminal_obs"] = self._last_obs if self._last_obs is not None else self._extract_obs(terminal)
         self.episodes_completed += 1
         if self.seed_rng is not None:
             # Unity already consumed a seed (and scenario, if any) for the episode that just
@@ -347,14 +383,40 @@ class UnitySchedulingEnv:
         self._episode_return = 0.0
         self._episode_length = 0
         self._episode_terms = {}
-        return self._extract_obs(decision)
+        self._last_obs = self._extract_obs(decision)
+        return self._last_obs
 
-    def _episode_summary(self, final: Optional[MetricsSnapshot], interrupted: bool) -> dict:
+    def _episode_summary(self, final: Optional[MetricsSnapshot], interrupted: bool,
+                         telemetry: Optional[dict] = None) -> dict:
+        result = (telemetry or {}).get("result") or {}
+        events = (telemetry or {}).get("events") or []
         summary = {
             "return": self._episode_return,
             "length": self._episode_length,
             "interrupted": interrupted,
             "reward_terms": dict(self._episode_terms),
+            # Hash of the config Unity actually applied, and of config + initial jobs (ConfigFingerprint.cs);
+            # None from a player built before 2026-09-29. applied_config is the canonical config text, only the
+            # first time this player applies a given hash (train.py appends it to applied_configs.jsonl).
+            "config_hash": result.get("configHash"),
+            "instance_hash": result.get("instanceHash"),
+            "applied_config": result.get("appliedConfig"),
+            # Disruptions this episode. AGV totals come from the result (None from a player built before AGV
+            # breakdowns existed); machine failures are counted from the telemetry events.
+            "machine_failures": sum(1 for e in events if e.get("type") == "machine_failure") if telemetry else None,
+            "agv_failures": result.get("agvFailures"),
+            "agv_repair_time": result.get("agvRepairTime"),
+            "agv_blocked_by_failure_time": result.get("agvBlockedByFailureTime"),
+            # Linked floors (None from a player built before 2026-10-02): routing decisions after any warm-up, those
+            # that sent the job to another tile and the tiles crossed summed over them, the share of fleet time
+            # parked idle (whole episode), jobs released per tile ("a;b;c", "" untiled), TECT's travel price.
+            "routed_moves": result.get("routedMoves"),
+            "cross_tile_moves": result.get("crossTileMoves"),
+            "tiles_crossed": result.get("tilesCrossed"),
+            "agv_idle_fraction": result.get("agvIdleFraction"),
+            "release_counts": (";".join(str(c) for c in result["releaseCounts"])
+                               if result.get("releaseCounts") is not None else None),
+            "travel_price": result.get("travelPrice"),
         }
         if final is not None:
             exited = final.jobs_exited
@@ -373,7 +435,9 @@ class UnitySchedulingEnv:
         return summary
 
     def _extract_obs(self, steps) -> Dict[str, np.ndarray]:
-        return slice_obs(steps.obs[self._policy_index][0])
+        obs = slice_obs(steps.obs[self._policy_index][0], *self.obs_caps)
+        obs["action_mask"] = action_mask_from(steps)
+        return obs
 
     def _extract_metrics(self, steps) -> Optional[MetricsSnapshot]:
         if self._metrics_index is None:
@@ -400,8 +464,10 @@ class VectorizedUnityEnv:
                  no_graphics: bool = False, decision_drain: bool = True,
                  log_dir: Optional[str] = None, train_seed: Optional[int] = None,
                  parallel: bool = True,
-                 scenario_generator: Optional[Callable[[int], dict]] = None):
+                 scenario_generator: Optional[Callable[[int], dict]] = None,
+                 obs_caps: Optional[Tuple[int, int]] = None):
         """
+        @param obs_caps     Observation row caps for every player (see UnitySchedulingEnv).
         @param reward_spec  Reward spec path or dict, or a @ref rewards.LoadedReward. Each env
                             gets its own reward instance. None passes Unity's reward through.
         @param log_dir      If set, instance i writes its player log to log_dir/Player-i.log.
@@ -436,6 +502,7 @@ class VectorizedUnityEnv:
                     env_id=i,
                     seed_rng=None if train_seed is None else np.random.default_rng([train_seed, i]),
                     scenario_generator=scenario_generator,
+                    obs_caps=obs_caps,
                 ))
         except BaseException:
             # Don't leave already-launched players running when a later one fails to start.
@@ -477,7 +544,7 @@ class VectorizedUnityEnv:
         self.global_step += self.num_envs
         for env in self.envs:
             env.global_step = self.global_step
-        results = self._map(lambda env, action: env.step(int(action)), self.envs, actions)
+        results = self._map(lambda env, action: env.step(action), self.envs, actions)
         obs_list, rewards, dones, infos = zip(*results)
         truncateds = [bool(info["episode"]["truncated"]) if done else False
                      for done, info in zip(dones, infos)]

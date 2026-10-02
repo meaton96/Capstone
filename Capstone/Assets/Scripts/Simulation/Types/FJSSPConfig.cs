@@ -66,13 +66,43 @@ namespace Assets.Scripts.Simulation.Types
         /// @brief Number of AGVs in the fleet for material transport.
         public int AGVCount;
 
+        /// @brief AGV travel speed (units/sim-second), overriding the AGV prefab's own
+        ///        serialized default (3.5) when set. Null = use the prefab's value.
+        /// @details Lets a config raise/lower physical transit time relative to job processing
+        ///          time — e.g. faster AGVs shrink inter-arrival gaps at a machine without
+        ///          changing the scripted job-generation rate, so decisions are less often
+        ///          degenerate (0-1 real candidates) purely because AGV transit spaced jobs out.
+        public float? AGVMoveSpeed = null;
+
+        /// @brief AGV pickup/dropoff handshake duration (sim-seconds), overriding the AGV
+        ///        prefab's own serialized default (1.5) when set. Null = use the prefab's value.
+        public float? AGVHandshakeDuration = null;
+
         // ── Flexibility ──
 
         /// @brief Probability [0,1] that a machine gains each non-primary type as a
         /// secondary capability during floor construction.
         /// @details 0 = fully typed (default, backward-compatible).
         ///          1 = fully flexible (every machine processes every operation type).
+        ///          Sampled once per machine (per tile position on a tiled floor, so tiles stay identical).
         public float MachineFlexibilityProbability = 0f;
+
+        /// @brief Processing-time factor for an operation run on a machine whose PRIMARY type differs from the
+        ///        operation's type (a secondary capability): duration = base duration x this.
+        /// @details 1 = a secondary capability is as fast as a dedicated machine (flexibility only adds
+        ///          capacity). Above 1 gives machine-dependent processing times, the standard FJSP form, where
+        ///          sending an op to an idle generalist trades speed for waiting. Only matters when
+        ///          MachineFlexibilityProbability &gt; 0.
+        public float SecondaryTimeMultiplier = 1f;
+
+        /// @brief Throws on an out-of-range flexibility setting (called by FactoryLayoutManager.BuildFloor).
+        public void ValidateFlexibility()
+        {
+            if (!(MachineFlexibilityProbability >= 0f && MachineFlexibilityProbability <= 1f))
+                throw new System.ArgumentException($"machineFlexibilityProbability must be in [0, 1] (got {MachineFlexibilityProbability}).");
+            if (!(SecondaryTimeMultiplier > 0f))
+                throw new System.ArgumentException($"secondaryTimeMultiplier must be > 0 (got {SecondaryTimeMultiplier}).");
+        }
 
         // ── Throughput timing ──
 
@@ -85,12 +115,40 @@ namespace Assets.Scripts.Simulation.Types
         /// @brief Default dispatching rule applied when no agent policy is active.
         public DispatchingRule dispatchingRule = DispatchingRule.SRT_SRWT;
 
+        /// @brief Price per second of loaded AGV travel in the TECT machine rule (λ):
+        ///        score = max(travel, queued work) + processing time + λ x travel.
+        /// @details 0 = plain TECT (default, unchanged). TECT treats a trip as free whenever the machine's queue is
+        ///          longer than the trip, but the AGV is busy for the whole trip; λ &gt; 0 charges for that, so a
+        ///          far machine has to save more queueing to be picked (large λ ≈ stay local). Applies to every
+        ///          TECT decision of the episode, warm-up included; other machine rules ignore it.
+        public float TravelPrice = 0f;
+
         // ── Parking method ──
 
-        /// @brief Strategy used for AGV parking assignments.
-        /// @details Controls how AGVs are assigned to parking spots when idle.
-        ///          Defaults to "single" (single parking zone per AGV type).
-        public string parkingMethod = "single";
+        /// @brief Parking layout: "lane" (default; reserved lane, one dedicated bay per AGV),
+        ///        "single" (one abstract alcove) or "multiple" (per-aisle alcoves).
+        public string parkingMethod = "lane";
+
+        /// @brief Input/output belt docks: "corner" (default; the belt docks on the corner zone of the loop, so a
+        ///        loading AGV blocks the corner) or "siding" (a two-zone one-way siding outside each side wall, so
+        ///        the corner stays free for through traffic) or "bypass" (input siding that wraps around the corner and
+        ///        merges into the top spine past it; output stays on its corner). See FactoryLayoutManager.IoDockMethod.
+        public string ioDocks = "corner";
+
+        /// @brief Factory layout (belt sides per row x aisle topology). Default legacy = today's floor, so a
+        ///        config that omits it is unchanged. Immutable, shared by reference across per-seed clones.
+        public LayoutSpec Layout = LayoutSpec.Default;
+
+        /// @brief AGV zone-reservation protocol: "releasePrevious" (default since 2026-09-26) or "holdPrevious".
+        ///        See ReservationProtocol. Validated at load by ReservationProtocolParser.
+        public string reservationProtocol = ReservationProtocolParser.Default;
+
+        /// @brief When routing decisions are made: "onTransport" (default) or "onReady" (legacy). See RoutingTrigger.
+        public string routingTrigger = RoutingTriggerParser.Default;
+
+        /// @brief Tiled floor: copies of the layout side by side, each with its own machines, belts, lane and AGVs
+        ///        (docs/features/TILED_LAYOUT_SCOPE.md). Default one tile = today's floor. Immutable, shared by reference.
+        public TilingSpec Tiling = TilingSpec.Single;
 
         // ── Pre-dispatching method ──
 
@@ -147,11 +205,20 @@ namespace Assets.Scripts.Simulation.Types
                 MinOpsPerJob = MinOpsPerJob,
                 MaxOpsPerJob = MaxOpsPerJob,
                 AGVCount = AGVCount,
+                AGVMoveSpeed = AGVMoveSpeed,
+                AGVHandshakeDuration = AGVHandshakeDuration,
                 dispatchingRule = dispatchingRule,
+                TravelPrice = TravelPrice,
                 ProcTimeParams = new Dictionary<MachineType, (float mu, float sigma)>(ProcTimeParams),
                 Stochastic = Stochastic,
                 MachineFlexibilityProbability = MachineFlexibilityProbability,
+                SecondaryTimeMultiplier = SecondaryTimeMultiplier,
                 parkingMethod = parkingMethod,
+                ioDocks = ioDocks,
+                Layout = Layout,
+                reservationProtocol = reservationProtocol,
+                routingTrigger = routingTrigger,
+                Tiling = Tiling,
                 preDispatchingMethod = preDispatchingMethod,
                 ThroughputTimingWindow = ThroughputTimingWindow,
             };

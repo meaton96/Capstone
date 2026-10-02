@@ -137,6 +137,29 @@ namespace Assets.Scripts.Simulation
         /// </summary>
         private Func<Dictionary<MachineType, List<int>>, FJSSPJobDefinition[]> _scenarioJobBuilder;
 
+        /// <summary>True while _scenarioJobBuilder is a strict builder for a scenario Python sent: a job it cannot
+        /// place rejects the config instead of being dropped.</summary>
+        private bool _scenarioFromPython;
+
+        /// <summary>Set once a Python config is rejected; the player is quitting and no episode starts.</summary>
+        private bool _configRejected;
+
+        /// <summary>Exit code of a player stopped by a rejected Python config.</summary>
+        public const int ConfigRejectedExitCode = 3;
+
+        /// <summary>Hash of the running episode's applied config, after CLI overrides (ConfigFingerprint).
+        /// Logged with every result (results.csv config_hash, telemetry configHash).</summary>
+        public string ConfigHash { get; private set; } = "";
+
+        /// <summary>Hash of the applied config plus the episode's initial job set: two episodes with the same
+        /// config but different seeds share ConfigHash and differ here.</summary>
+        public string InstanceHash { get; private set; } = "";
+
+        /// <summary>Canonical text of the config when ConfigHash is new in this process (written once to
+        /// applied_configs.jsonl / sent once over telemetry), else null.</summary>
+        private string _newConfigCanonical;
+        private readonly HashSet<string> _seenConfigHashes = new HashSet<string>();
+
         /// <summary>
         /// The current simulation configuration loaded for this episode.
         /// </summary>
@@ -161,6 +184,11 @@ namespace Assets.Scripts.Simulation
         /// Number of dispatch decisions made during the current episode.
         /// </summary>
         private int decisionCount;
+
+        /// <summary>Routing decisions executed this episode (after any warm-up, like decisionCount), how many sent the
+        /// job to a machine in another tile than the one it was in, and the tile distance summed over those
+        /// (results.csv / telemetry; 0 cross-tile moves on an untiled floor).</summary>
+        private int _routedMoves, _crossTileMoves, _tilesCrossed;
 
         /// <summary>
         /// Total number of dispatch decisions made in the current episode.
@@ -198,6 +226,13 @@ namespace Assets.Scripts.Simulation
         /// Elapsed simulation time since episode start.
         /// </summary>
         public double SimTime => _simTime;
+
+        /// <summary>
+        /// Cumulative utilization (busy / operational time so far) of a machine as of now — the same
+        /// signal the MMUR rules route on. 0 before the episode's decision coordinator exists.
+        /// </summary>
+        public float MachineUtilization(int machineId) =>
+            _decisions != null ? _decisions.MachineUtilization(machineId, _simTime) : 0f;
 
         /// <summary>
         /// The current FJSSP configuration for this episode.
@@ -250,6 +285,9 @@ namespace Assets.Scripts.Simulation
         /// Manages decision requests and coordinates dispatch/routing decisions.
         /// </summary>
         private DecisionCoordinator _decisions;
+
+        /// <summary>This episode's RoutingTrigger is OnTransport (set at StartEpisode from the config).</summary>
+        private bool _routeOnTransport = true;
 
         // ── Scripted arrivals (jobs with an explicit ArrivalTime > 0 in the initial batch,
         //    from a hand-crafted scenario or a jittered generated batch) ───────────────────
@@ -327,21 +365,25 @@ namespace Assets.Scripts.Simulation
         private const double MAX_EPISODE_SIM_SECONDS = 100_000.0;
 
         /// <summary>
-        /// Deadlock watchdog: if zero AGVs anywhere in the traffic-zone network complete a
-        /// zone entry (TrafficZone.TraversalCount, summed across all zones) for this many
-        /// consecutive sim-seconds while jobs remain incomplete, the episode is declared
-        /// deadlocked and terminated immediately instead of running to MAX_EPISODE_SIM_SECONDS.
-        /// A circular-wait deadlock in TrafficZoneManager.TryReserve never self-resolves (no
-        /// AGV in the cycle can ever move), so ANY sustained system-wide stall is conclusive —
-        /// no legitimate congestion (even the heaviest surviving runs) goes this long without
-        /// a traversal completing somewhere in the network.
+        /// Gridlock watchdog: if the plant makes no PRODUCTIVE progress for this many consecutive
+        /// sim-seconds while jobs remain incomplete, the episode is declared deadlocked and
+        /// terminated instead of running to MAX_EPISODE_SIM_SECONDS. Productive progress is an AGV
+        /// delivery or a machine finishing an operation (FlagHarvester.ProgressCount).
+        ///
+        /// This deliberately does NOT watch zone entries (TrafficZone.TraversalCount). Stall
+        /// recovery (AGVController.RetreatFromStall) re-reserves the previous zone every
+        /// zoneStallTimeoutSeconds, and each successful reservation bumps that counter, so a fully
+        /// gridlocked fleet kept the old watchdog fed forever: 0 of 120 gridlocked runs in the
+        /// 2026-09-19 sweep ever tripped it, 61 of them sat idle to the 20,000 s cap.
         /// </summary>
         private const double DEADLOCK_STALL_SECONDS = 3_000.0;
 
-        private int _lastZoneTraversalTotal = -1;
-        private double _lastTraversalChangeSimTime;
+        private int _lastProgressCount = -1;
+        private double _lastProgressChangeSimTime;
         private bool _deadlockDetected;
         private double _deadlockSimTime = -1.0;
+        private double _firstStallSimTime = -1.0;
+        private AGVCollisionMonitor _collisions = new AGVCollisionMonitor();
 
         /// <summary>
         /// Set when the episode ends because it hit its deliberate steady-state time cap
@@ -396,6 +438,13 @@ namespace Assets.Scripts.Simulation
             {
                 ResultsLogger.SetSubdirectory(_decisionLogDir);
                 SimLogger.Low($"[Orchestrator] Writing decision_log.csv to {ResultsLogger.OutputDirectory}.");
+            }
+            // Same for the event-based twin's export (-destrace), used under ML-Agents by the observation parity
+            // check (env/des_twin/parity.py): des_floor.json / des_jobs.json land next to the decision log.
+            if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "-destrace") >= 0)
+            {
+                DesTwinExport.Enabled = true;
+                SimLogger.Low($"[Orchestrator] DES twin export ENABLED (-destrace), to {ResultsLogger.OutputDirectory}.");
             }
             if (RLDecisionDrainMode && BaselineDrainMode)
                 SimLogger.LogWarning("[Orchestrator] Both RLDecisionDrainMode and BaselineDrainMode " +
@@ -452,14 +501,86 @@ namespace Assets.Scripts.Simulation
         }
 
         /// <summary>
+        /// A config Python sent, with CLI overrides applied, after ConfigValidator's physical-bounds check.
+        /// Throws with every broken bound listed; the caller rejects it (no default, no previous config).
+        /// </summary>
+        private static FJSSPConfig ValidatedPythonConfig(FJSSPConfig config)
+        {
+            config = ApplyConfigOverrides(config);
+            List<string> errors = ConfigValidator.Validate(config);
+            if (errors.Count > 0)
+                throw new ArgumentException(string.Join("; ", errors));
+            return config;
+        }
+
+        /// <summary>
+        /// Stops the player instead of running a config other than the one Python sent. Python then fails on the
+        /// closed connection; the reason is in the player log. In the Editor, play mode ends.
+        /// </summary>
+        private void RejectPythonConfig(string reason)
+        {
+            _configRejected = true;
+            SimLogger.LogError($"[Bridge] Python config REJECTED, stopping the player (exit code {ConfigRejectedExitCode}). " +
+                               $"No default or previous config is substituted. Reason: {reason}");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit(ConfigRejectedExitCode);
+#endif
+        }
+
+        /// <summary>Hashes the applied config and the initial job set of the episode that is starting.</summary>
+        private void UpdateFingerprints(FJSSPJobDefinition[] jobDefs)
+        {
+            string canonical = ConfigFingerprint.Canonical(currentConfig);
+            ConfigHash = ConfigFingerprint.Hash(canonical);
+            InstanceHash = ConfigFingerprint.Hash(canonical + "\n#jobs\n" + ConfigFingerprint.Canonical(jobDefs));
+            _newConfigCanonical = _seenConfigHashes.Add(ConfigHash) ? canonical : null;
+            SimLogger.Low($"[Orchestrator] config_hash={ConfigHash} instance_hash={InstanceHash}");
+        }
+
+        /// <summary>
+        /// The single point where command-line overrides (ConfigOverrides) are applied to a config,
+        /// so no batch / scenario / Python entry path can miss one. Mutates and returns the config.
+        /// </summary>
+        private static FJSSPConfig ApplyConfigOverrides(FJSSPConfig config)
+        {
+            if (config != null && ConfigOverrides.ReservationProtocol != null)
+                config.reservationProtocol = ConfigOverrides.ReservationProtocol;
+            if (config != null && ConfigOverrides.RoutingTrigger != null)
+                config.routingTrigger = ConfigOverrides.RoutingTrigger;
+            if (config != null && ConfigOverrides.ParkingMethod != null)
+                config.parkingMethod = ConfigOverrides.ParkingMethod;
+            if (config != null && ConfigOverrides.Layout != null)
+                config.Layout = LayoutSpec.FromPreset(ConfigOverrides.Layout);
+            if (config != null && ConfigOverrides.IoDocks != null)
+                config.ioDocks = ConfigOverrides.IoDocks;
+            if (config != null && ConfigOverrides.Tiles.HasValue)
+                config.Tiling = (config.Tiling ?? TilingSpec.Single).WithTiles(ConfigOverrides.Tiles.Value);
+            if (config != null && ConfigOverrides.ReleaseRule != null)
+                config.Tiling = (config.Tiling ?? TilingSpec.Single).WithRelease(TilingSpec.ParseRelease(ConfigOverrides.ReleaseRule),
+                                                                                  ConfigOverrides.ReleaseWeights);
+            if (config != null && (ConfigOverrides.JobScope != null || ConfigOverrides.AgvAssignment != null))
+                config.Tiling = (config.Tiling ?? TilingSpec.Single).WithScope(ConfigOverrides.JobScope, ConfigOverrides.AgvAssignment);
+            if (config != null && ConfigOverrides.MachineFlexibility.HasValue)
+                config.MachineFlexibilityProbability = ConfigOverrides.MachineFlexibility.Value;
+            if (config != null && ConfigOverrides.SecondaryTimeMultiplier.HasValue)
+                config.SecondaryTimeMultiplier = ConfigOverrides.SecondaryTimeMultiplier.Value;
+            if (config != null && ConfigOverrides.TravelPrice.HasValue)
+                config.TravelPrice = ConfigOverrides.TravelPrice.Value;
+            return config;
+        }
+
+        /// <summary>
         /// Loads a simulation configuration and initializes the stochastic event manager.
         /// Resets factory readiness so SpawnFactory must be called before starting an episode.
         /// </summary>
         /// <param name="config">The FJSSP configuration to load.</param>
         public void LoadConfig(FJSSPConfig config)
         {
-            currentConfig = config;
+            currentConfig = ApplyConfigOverrides(config);
             _scenarioJobBuilder = null;
+            _scenarioFromPython = false;
             IsFactoryReady = false;
             StochasticEventManager.Instance?.Initialize(config);
         }
@@ -506,31 +627,51 @@ namespace Assets.Scripts.Simulation
             _envStepWatch.Reset();
             _episodeGcStart = GC.CollectionCount(0);
 
+            // Configs from Python never fall back (thesis section 7.1): a message that failed to parse, a scenario that
+            // fails to load, or a config outside ConfigValidator's physical bounds stops the player.
+            if (_configRejected) return;
+            string rejection = EpisodeConfigChannel.Instance?.TakeRejection();
+            if (rejection != null)
+            {
+                RejectPythonConfig(rejection);
+                return;
+            }
+
             var pythonScenario = EpisodeConfigChannel.Instance?.ConsumeScenario();
             if (pythonScenario != null)
             {
-                var (scenarioConfig, buildJobs) =
-                    ScenarioLoader.LoadDeferredFromJson(pythonScenario.Json, pythonScenario.Name);
-                if (scenarioConfig != null)
+                try
                 {
-                    currentConfig = scenarioConfig;
+                    var (scenarioConfig, buildJobs) =
+                        ScenarioLoader.LoadDeferredFromJsonStrict(pythonScenario.Json, pythonScenario.Name);
+                    currentConfig = ValidatedPythonConfig(scenarioConfig);
                     _scenarioJobBuilder = buildJobs;
+                    _scenarioFromPython = true;
                     IsFactoryReady = false;
                     SimLogger.Low($"[Bridge] Applied Python scenario: {scenarioConfig.Name} " +
                                   $"({scenarioConfig.JobCount} jobs, {scenarioConfig.AGVCount} AGVs)");
                 }
-                else
+                catch (Exception ex)
                 {
-                    SimLogger.LogError($"[Bridge] Python scenario '{pythonScenario.Name}' failed to load; " +
-                                        "keeping the previous config.");
+                    RejectPythonConfig($"scenario '{pythonScenario.Name}': {ex.Message}");
+                    return;
                 }
             }
 
             var pythonConfig = EpisodeConfigChannel.Instance?.ConsumeConfig();
             if (pythonConfig != null)
             {
-                currentConfig = pythonConfig;
+                try
+                {
+                    currentConfig = ValidatedPythonConfig(pythonConfig);
+                }
+                catch (Exception ex)
+                {
+                    RejectPythonConfig($"config '{pythonConfig.Name}': {ex.Message}");
+                    return;
+                }
                 _scenarioJobBuilder = null;
+                _scenarioFromPython = false;
                 IsFactoryReady = false;
                 SimLogger.Low($"[Bridge] Applied Python config: {currentConfig.Name}");
             }
@@ -574,7 +715,15 @@ namespace Assets.Scripts.Simulation
             }
             else if (_scenarioJobBuilder != null)
             {
-                jobDefs = _scenarioJobBuilder(cachedMachinesByType);
+                try
+                {
+                    jobDefs = _scenarioJobBuilder(cachedMachinesByType);
+                }
+                catch (Exception ex) when (_scenarioFromPython)
+                {
+                    RejectPythonConfig($"scenario '{currentConfig.Name}' jobs: {ex.Message}");
+                    return;
+                }
             }
             else
             {
@@ -599,6 +748,8 @@ namespace Assets.Scripts.Simulation
             }
             _pendingScriptedArrivals.Sort((a, b) => a.ArrivalTime.CompareTo(b.ArrivalTime));
 
+            UpdateFingerprints(jobDefs);
+
             Jobs.Initialize(immediateJobs, spawnVisuals: true);
 
             if (currentConfig.Stochastic != null && currentConfig.Stochastic.AnyEnabled)
@@ -607,11 +758,15 @@ namespace Assets.Scripts.Simulation
                     currentConfig, _episodeSeed >= 0 ? _episodeSeed : currentConfig.Seed);
                 foreach (var machine in layoutManager.Machines)
                     machine.InitializeStochastic();
+                // After Initialize, so each AGV's breakdown stream derives from this episode's seed.
+                foreach (var agv in agvPool.AllAGVs)
+                    agv.InitializeStochastic();
             }
             _throughputWindowLength = currentConfig.ThroughputTimingWindow <= 0f ? 60f : currentConfig.ThroughputTimingWindow;
             _nextThroughputBoundary = _throughputWindowLength;   // first window closes at t = windowLength
             _tracker.Reset();
             _machineProcessingStartTime.Clear();
+            foreach (var machine in layoutManager.Machines) machine.ResetHandoffStats();
 
             _flags = new FlagHarvester();
             _flags.Initialize(Jobs, agvPool, layoutManager, _tracker, _machineProcessingStartTime);
@@ -633,6 +788,9 @@ namespace Assets.Scripts.Simulation
                 refreshLabels: _flags.RefreshMachineLabels
             );
 
+            _routeOnTransport = RoutingTriggerParser.Parse(currentConfig.routingTrigger) == RoutingTrigger.OnTransport;
+            SimLogger.Low($"[Orchestrator] Routing trigger: {currentConfig.routingTrigger}");
+
             _decisions = new DecisionCoordinator();
             _decisions.Initialize(
                 Jobs, layoutManager,
@@ -648,11 +806,19 @@ namespace Assets.Scripts.Simulation
                 // Execute-time choice, an accepted minor inconsistency specific to the Random PDR.
                 getBaselineActionIndex: () => (BaselineDrainMode || InWarmup)
                     ? (_baselineRuleIsRandom ? UnityEngine.Random.Range(0, DispatchingEngine.ActionCount) : _baselineRuleIndex)
-                    : -1
+                    : -1,
+                transportAvailable: _routeOnTransport ? tile => agvPool.AnyAvailableAGV(tile) : (Func<int, bool>)null,
+                estimateTravelSeconds: EstimateTravelSeconds,
+                travelPrice: () => currentConfig?.TravelPrice ?? 0f
             );
+
+            // "-destrace": floor graph + resolved jobs for the event-based twin (env/des_twin).
+            DesTwinExport.Write(currentConfig, layoutManager, trafficZoneManager, agvPool, jobDefs,
+                                PreDispatchLeadTime, _episodeSeed);
 
             episodeActive = true;
             decisionCount = 0;
+            _routedMoves = _crossTileMoves = _tilesCrossed = 0;
             _decisionLog.Clear();
             IsWaitingForAction = false;
             _simTime = 0.0;
@@ -663,10 +829,12 @@ namespace Assets.Scripts.Simulation
                               $"{currentConfig.dispatchingRule} before the agent takes over.");
 
             // ── Arm deadlock watchdog ────────────────────────────────────────────
-            _lastZoneTraversalTotal = -1;
-            _lastTraversalChangeSimTime = 0.0;
+            _lastProgressCount = -1;
+            _lastProgressChangeSimTime = 0.0;
             _deadlockDetected = false;
             _deadlockSimTime = -1.0;
+            _firstStallSimTime = -1.0;
+            _collisions = new AGVCollisionMonitor();
             _truncatedByTimeLimit = false;
 
             // ── Arm Poisson arrival clock ──────────────────────────────────────
@@ -752,14 +920,19 @@ namespace Assets.Scripts.Simulation
                 return;
             }
 
+            CheckFirstStall();
+            _collisions.Tick(agvPool.AllAGVs, SimTime, Time.fixedDeltaTime,
+                             pos => trafficZoneManager.GetZoneAtPosition(pos)?.Name);
+
             if (CheckForDeadlock())
             {
                 _deadlockDetected = true;
                 _deadlockSimTime = SimTime;
-                SimLogger.Error($"[Orchestrator] Deadlock detected — no AGV completed a traffic-zone " +
-                                 $"entry anywhere in the network for {DEADLOCK_STALL_SECONDS:F0}s " +
-                                 $"(stalled since {_lastTraversalChangeSimTime:F0}s, now {SimTime:F0}s). " +
+                SimLogger.Error($"[Orchestrator] Deadlock detected — no delivery or operation completion " +
+                                 $"for {DEADLOCK_STALL_SECONDS:F0}s " +
+                                 $"(last progress at {_lastProgressChangeSimTime:F0}s, now {SimTime:F0}s). " +
                                  $"Terminating early instead of running to timeout.");
+                DumpTrafficSnapshot("watchdog fired");
                 FinaliseEpisode();
                 return;
             }
@@ -771,7 +944,8 @@ namespace Assets.Scripts.Simulation
             _flags.HarvestMachineFlags();
             _flags.HarvestAGVFlags();
             _flags.HarvestStalledAGVs();
-            _flags.HarvestAlmostDoneFlags(PreDispatchLeadTime);
+            _flags.ReleaseOrphanedPreDispatches();
+            _flags.HarvestAlmostDoneFlags(PreDispatchLeadTime, yieldToWaitingJobs: _routeOnTransport);
             _flags.AssignAGVs();
 
             if (_warmupActive && !InWarmup)
@@ -782,6 +956,7 @@ namespace Assets.Scripts.Simulation
                 // which aren't the agent's and would pollute both.
                 _warmupActive = false;
                 decisionCount = 0;
+                _routedMoves = _crossTileMoves = _tilesCrossed = 0;
                 _decisionLog.Clear();
                 SimLogger.Low($"[Orchestrator] Warm-up complete at {SimTime:F0}s — RL agent now in " +
                               "control (decisionCount and decision log reset).");
@@ -837,27 +1012,93 @@ namespace Assets.Scripts.Simulation
         }
 
         /// <summary>
-        /// True once the system-wide sum of TrafficZone.TraversalCount has gone unchanged for
-        /// DEADLOCK_STALL_SECONDS while jobs remain incomplete. A summed, network-wide signal
-        /// is used (rather than watching any single zone or AGV) because heavy-but-resolving
-        /// congestion routinely stalls individual zones for a while — only a true circular-wait
-        /// deadlock stops EVERY zone in the network from ever admitting another AGV.
+        /// True once FlagHarvester.ProgressCount (deliveries + operation completions) has gone
+        /// unchanged for DEADLOCK_STALL_SECONDS while jobs remain incomplete. A network-wide
+        /// productive-output signal is used (rather than watching any zone or AGV) because
+        /// heavy-but-resolving congestion routinely stalls individual zones for a while, and
+        /// because movement counters are fed by stall recovery itself — see DEADLOCK_STALL_SECONDS.
+        /// While every known job has exited (arrivals still pending) the clock is held at "now",
+        /// so a long arrival gap cannot trip the watchdog the moment the next job appears.
         /// </summary>
         private bool CheckForDeadlock()
         {
-            if (Jobs.AreAllExited()) return false;
+            if (_flags == null) return false;
 
-            int total = 0;
-            foreach (var zone in trafficZoneManager.Zones) total += zone.TraversalCount;
-
-            if (total != _lastZoneTraversalTotal)
+            if (Jobs.AreAllExited())
             {
-                _lastZoneTraversalTotal = total;
-                _lastTraversalChangeSimTime = SimTime;
+                _lastProgressChangeSimTime = SimTime;
                 return false;
             }
 
-            return (SimTime - _lastTraversalChangeSimTime) > DEADLOCK_STALL_SECONDS;
+            int progress = _flags.ProgressCount;
+            if (progress != _lastProgressCount)
+            {
+                _lastProgressCount = progress;
+                _lastProgressChangeSimTime = SimTime;
+                return false;
+            }
+
+            return (SimTime - _lastProgressChangeSimTime) > DEADLOCK_STALL_SECONDS;
+        }
+
+        /// <summary>
+        /// Records the sim-time of the first AGV zone-stall recovery (gridlock onset) and dumps a
+        /// snapshot of who holds what at that moment, which is the cleanest picture of the jam:
+        /// by the time the watchdog fires the fleet has been shuffled by hundreds of recoveries.
+        /// </summary>
+        private void CheckFirstStall()
+        {
+            if (_firstStallSimTime >= 0.0) return;
+            foreach (var agv in agvPool.AllAGVs)
+            {
+                if (agv.StallRecoveryCount <= 0) continue;
+                _firstStallSimTime = SimTime;
+                DumpTrafficSnapshot("first stall recovery");
+                return;
+            }
+        }
+
+        /// <summary>
+        /// Logs every AGV's state and every occupied traffic zone. Grep the sim log for
+        /// "[GridlockSnapshot]". Pre-dispatched AGVs are cross-checked against their job so an
+        /// orphaned claim (job no longer names the AGV) is called out explicitly.
+        /// </summary>
+        private void DumpTrafficSnapshot(string reason)
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine($"[GridlockSnapshot] {reason} at sim={SimTime:F0}s seed={_episodeSeed}");
+
+            foreach (var agv in agvPool.AllAGVs)
+            {
+                sb.Append("  ").Append(agv.DebugSummary());
+                if (agv.IsPreDispatched)
+                {
+                    JobData pj = Jobs.Get(agv.PreDispatchedJobId);
+                    if (pj == null) sb.Append(" [preJob missing]");
+                    else
+                    {
+                        PhysicalMachine src = layoutManager.GetMachine(pj.LocationMachineId >= 0 ? pj.LocationMachineId : pj.TargetMachineId);
+                        sb.Append($" [preJob state={pj.State} jobClaimsAgv={pj.PreDispatchedAgvId}" +
+                                  $"{(pj.PreDispatchedAgvId != agv.AgvId ? " ORPHANED" : "")}" +
+                                  $" srcMachine={(src != null ? src.MachineId : -1)}" +
+                                  $" srcHealth={(src != null ? src.HealthState.ToString() : "?")}]");
+                    }
+                }
+                sb.AppendLine();
+            }
+
+            sb.Append("  occupied zones:");
+            foreach (var zone in trafficZoneManager.Zones)
+                if (!zone.IsEmpty)
+                    sb.Append($" {zone.Name}[{string.Join(",", zone.OccupantAgvIds)}]");
+            sb.AppendLine();
+
+            sb.Append("  non-operational machines:");
+            foreach (var m in layoutManager.Machines)
+                if (m.HealthState != MachineHealthState.Operational)
+                    sb.Append($" M{m.MachineId}={m.HealthState}");
+
+            SimLogger.Error(sb.ToString());
         }
 
         /// <summary>
@@ -1035,6 +1276,19 @@ namespace Assets.Scripts.Simulation
         }
 
         /// <summary>
+        /// Loaded AGV travel estimate for the TECT rule: zone-graph path length from the job's current location
+        /// (its machine, or its tile's incoming belt) to the candidate machine, divided by AGV speed. Ignores
+        /// congestion, handshakes and the empty trip to the pickup (the same for every candidate).
+        /// </summary>
+        private float EstimateTravelSeconds(JobData job, int machineId)
+        {
+            float speed = agvPool.AllAGVs.Count > 0 ? agvPool.AllAGVs[0].MoveSpeed : 0f;
+            if (speed <= 0f) return 0f;
+            float len = trafficZoneManager.EstimatePathLength(job.LocationMachineId, job.TileId, machineId);
+            return len == float.MaxValue ? float.MaxValue : len / speed;
+        }
+
+        /// <summary>
         /// Executes a single simulation step given an action index from the agent.
         /// Applies the dispatch or routing decision and returns the result. No reward is computed
         /// here — see <see cref="WriteRewardMetrics"/>.
@@ -1060,13 +1314,43 @@ namespace Assets.Scripts.Simulation
         /// <param name="actionIndex">The action index encoding the machine selection.</param>
         private void ExecuteRoutingDecision(int actionIndex)
         {
+            // Job half of the rule. When no rule was known at assembly time (agent, or heuristic via
+            // Step), JobId is only the oldest routable job; apply the action's job-priority rule now so
+            // routing uses both halves of the rule, as heuristic-drain mode already did. Before this, the
+            // routed job was always the oldest one in these modes, for PDR sweeps and the agent alike.
+            DecisionRequest req = CurrentDecision;
+            if (!req.JobSelectedByRule && req.JobCandidateIds != null && req.JobCandidateIds.Length > 1)
+            {
+                int jobId = DispatchingEngine.SelectRoutingJob(actionIndex, new List<int>(req.JobCandidateIds), Jobs, SimTime);
+                JobData picked = jobId >= 0 ? Jobs.Get(jobId) : null;
+                if (picked != null && jobId != req.JobId && picked.State == JobState.NeedsRouting)
+                {
+                    DecisionRequest rebuilt = _decisions.BuildRoutingDecision(picked, countsAsNewDecision: false);
+                    if (rebuilt.CandidateMachineIds.Length > 0)
+                    {
+                        rebuilt.JobCandidateIds = req.JobCandidateIds;
+                        rebuilt.JobSelectedByRule = true;
+                        CurrentDecision = rebuilt;
+                    }
+                }
+            }
+
             int chosenMachineId = DispatchingEngine.SelectMachine(actionIndex, CurrentDecision);
             LogRoutingDecision(chosenMachineId);
             JobData job = Jobs.Get(CurrentDecision.JobId);
             if (job == null) return;
 
+            CountRoutedMove(job, chosenMachineId);
             job.TargetMachineId = chosenMachineId;
             job.TransitionTo(JobState.WaitingForPickup, SimTime);
+
+            // OnTransport: the decision was offered because an AGV is free, so the routed job takes it now
+            // (nearest free unit). Otherwise several decisions drained in one tick would all count the same AGV.
+            if (_routeOnTransport && job.PreDispatchedAgvId < 0)
+            {
+                _flags.TryAssignAgv(job);
+                return;
+            }
 
             if (job.PreDispatchedAgvId >= 0)
             {
@@ -1075,7 +1359,8 @@ namespace Assets.Scripts.Simulation
                 {
                     PhysicalMachine targetMachine = layoutManager.GetMachine(chosenMachineId);
                     Vector3 dropoffPos = targetMachine != null
-                        ? targetMachine.GetDropoffPosition() : layoutManager.OutgoingBeltPosition;
+                        ? targetMachine.GetDropoffPosition() : layoutManager.OutgoingBeltPositionOf(layoutManager.ExitTileOf(job));
+                    preAgv.BeltTile = layoutManager.ExitTileOf(job);
                     preAgv.FinalizePreDispatch(job.JobId, dropoffPos, targetMachine, job.Visual);
                     job.AssignedAgvId = preAgv.AgvId;
                     job.PreDispatchedAgvId = -1;
@@ -1083,6 +1368,19 @@ namespace Assets.Scripts.Simulation
                 }
                 job.PreDispatchedAgvId = -1;
             }
+        }
+
+        /// <summary>Counts a routed move and whether it leaves the job's current tile (its machine's tile, or its home
+        /// tile while it waits on the input belt).</summary>
+        private void CountRoutedMove(JobData job, int machineId)
+        {
+            _routedMoves++;
+            if (layoutManager.TileCount <= 1) return;
+            int from = job.LocationMachineId >= 0 ? layoutManager.TileOfMachine(job.LocationMachineId) : job.TileId;
+            int to = layoutManager.TileOfMachine(machineId);
+            if (from == to) return;
+            _crossTileMoves++;
+            _tilesCrossed += Math.Abs(to - from);
         }
 
         /// <summary>
@@ -1151,12 +1449,12 @@ namespace Assets.Scripts.Simulation
             int[] queuedIds = req.QueuedJobIds ?? Array.Empty<int>();
             int count = queuedIds.Length;
             var remainingWork = new float[count];
-            var arrivalTimes = new float[count];
+            var queueEntryTimes = new float[count];
             for (int i = 0; i < count; i++)
             {
                 JobData qJob = Jobs.Get(queuedIds[i]);
                 remainingWork[i] = DispatchingEngine.GetRemainingWork(queuedIds[i], Jobs);
-                arrivalTimes[i] = qJob?.ArrivalTime ?? -1f;
+                queueEntryTimes[i] = qJob != null ? (float)qJob.StateEntryTime : -1f;
             }
             _decisionLog.Add(new DecisionRecord
             {
@@ -1170,7 +1468,7 @@ namespace Assets.Scripts.Simulation
                 CandidateIds = string.Join("|", queuedIds),
                 CandidateStatA = string.Join("|", req.QueuedDurations ?? Array.Empty<double>()),
                 CandidateStatB = string.Join("|", remainingWork),
-                CandidateStatC = string.Join("|", arrivalTimes),
+                CandidateStatC = string.Join("|", queueEntryTimes),
             });
         }
 
@@ -1191,6 +1489,21 @@ namespace Assets.Scripts.Simulation
             if (SimTime > lastBoundary)
                 _tracker.CloseThroughputWindow(lastBoundary, SimTime, WorkInProgress());
 
+            int agvFailures = 0;
+            double agvRepairTime = 0.0, agvBlockedByFailure = 0.0, agvIdleTime = 0.0, agvAccountedTime = 0.0;
+            foreach (var agv in agvPool.AllAGVs)
+            {
+                AGVRecord ar = agv.GetRecord(SimTime);
+                agvFailures += ar.FailureCount;
+                agvRepairTime += ar.TimeBroken;
+                agvBlockedByFailure += ar.TimeBlockedByFailure;
+                agvIdleTime += ar.TimeIdle;
+                agvAccountedTime += ar.TotalAccountedTime;
+            }
+            // Share of fleet time parked with no assignment (whole episode, warm-up included).
+            double agvIdleFraction = agvAccountedTime > 0.0 ? agvIdleTime / agvAccountedTime : 0.0;
+            int[] releaseCounts = layoutManager.TileCount > 1 ? (int[])layoutManager.ReleaseCounts.Clone() : new int[0];
+
             var telemetry = EpisodeTelemetryChannel.Instance;
             if (telemetry != null)
             {
@@ -1202,7 +1515,19 @@ namespace Assets.Scripts.Simulation
                     decisions: decisionCount,
                     totalReward: 0.0,
                     ruleName: LastAppliedRule,
-                    stochasticTag: currentConfig.Stochastic?.Tag ?? "none"
+                    stochasticTag: currentConfig.Stochastic?.Tag ?? "none",
+                    configHash: ConfigHash,
+                    instanceHash: InstanceHash,
+                    appliedConfig: _newConfigCanonical,
+                    agvFailures: agvFailures,
+                    agvRepairTime: agvRepairTime,
+                    agvBlockedByFailureTime: agvBlockedByFailure,
+                    routedMoves: _routedMoves,
+                    crossTileMoves: _crossTileMoves,
+                    tilesCrossed: _tilesCrossed,
+                    agvIdleFraction: agvIdleFraction,
+                    releaseCounts: releaseCounts,
+                    travelPrice: currentConfig.TravelPrice
                 );
                 telemetry.Flush();
             }
@@ -1230,16 +1555,64 @@ namespace Assets.Scripts.Simulation
             record.DecisionRecords = new List<DecisionRecord>(_decisionLog);
 
             // Configuration snapshot fields
+            record.ConfigHash = ConfigHash;
+            record.InstanceHash = InstanceHash;
+            record.ConfigCanonical = _newConfigCanonical;
+            _newConfigCanonical = null;   // written / sent once per hash
             record.ParkingMethod = currentConfig.parkingMethod;
+            record.IoDocks = currentConfig.ioDocks;
             record.PreDispatchingMethod = currentConfig.preDispatchingMethod;
 
             // Deadlock watchdog outcome — see CheckForDeadlock
             record.DeadlockDetected = _deadlockDetected;
             record.DeadlockSimTime = _deadlockDetected ? _deadlockSimTime : -1.0;
+            record.FirstStallSimTime = _firstStallSimTime;
+            _collisions.Finish(SimTime);
+            record.AgvCollisionEvents = _collisions.OverlapEvents;
+            record.AgvCollisionPairSeconds = _collisions.OverlapPairSeconds;
+            record.AgvClearanceEvents = _collisions.ClearanceEvents;
+            record.AgvClearancePairSeconds = _collisions.ClearancePairSeconds;
+            record.AgvParkingOverlapEvents = _collisions.ParkingOverlapEvents;
+            record.AgvMinCentreDistance = _collisions.MinCentreDistance == float.MaxValue ? -1f : _collisions.MinCentreDistance;
+            record.CollisionRecords = _collisions.Events;
+            record.ReservationProtocol = currentConfig.reservationProtocol;
+            record.RoutingTrigger = currentConfig.routingTrigger;
+            LayoutSpec layoutSpec = currentConfig.Layout ?? LayoutSpec.Default;
+            record.LayoutId = layoutSpec.Id;
+            record.LayoutBelts = layoutSpec.DescribeBelts(layoutManager.LayoutRows);
+            record.LayoutAisles = layoutSpec.AislesString;
+            record.FloorWidth = layoutManager.FloorSize.x;
+            record.FloorDepth = layoutManager.FloorSize.y;
+            TilingSpec tiling = currentConfig.Tiling ?? TilingSpec.Single;
+            record.Tiles = tiling.Tiles;
+            record.MachinesPerTile = layoutManager.MachinesPerTile;
+            record.JobScope = tiling.JobScope;
+            record.AgvAssignment = tiling.AgvAssignment;
+            record.ReleaseRule = tiling.ReleaseString;
+            record.ReleaseWeights = tiling.ReleaseWeightsString;
+            record.ReleaseCounts = string.Join(";", releaseCounts);
+            record.RoutedMoves = _routedMoves;
+            record.CrossTileMoves = _crossTileMoves;
+            record.TilesCrossed = _tilesCrossed;
+            record.TravelPrice = currentConfig.TravelPrice;
+            record.MachineFlexibility = layoutManager.ActiveFlexibilityProbability;
+            record.SecondaryTimeMultiplier = layoutManager.ActiveSecondaryTimeMultiplier;
+            record.MeanCapabilitiesPerMachine = layoutManager.MeanCapabilitiesPerMachine;
+            record.OrphanPreDispatchesReleased = _flags != null ? _flags.OrphanPreDispatchesReleased : 0;
 
             // Collect AGV performance records
             foreach (var agv in agvPool.AllAGVs)
+            {
                 record.AGVRecords.Add(agv.GetRecord(record.Makespan));
+                record.AGVFailureRecords.AddRange(agv.FailureRecords);
+                record.AGVEventRecords.AddRange(agv.EventRecords);
+            }
+            // Time order across the fleet (stable, so one AGV's same-tick milestones keep their order).
+            if (record.AGVEventRecords.Count > 0)
+                record.AGVEventRecords = record.AGVEventRecords.OrderBy(e => e.SimTime).ToList();
+            record.AGVFailureCount = agvFailures;
+            record.AGVRepairTime = agvRepairTime;
+            record.AGVBlockedByFailureTime = agvBlockedByFailure;
 
             // Skip parking alcove (Capacity=64) — it's intentionally unconstrained and
             // would inflate the zone count without diagnostic value.
@@ -1329,6 +1702,11 @@ namespace Assets.Scripts.Simulation
                     TimeProcessingState = job.TimeProcessing,
                 });
             }
+
+            if (record.AGVFailureCount > 0)
+                SimLogger.Low($"[StochasticSummary] AGV failures={record.AGVFailureCount} " +
+                              $"AGV repair time={record.AGVRepairTime:F1}s " +
+                              $"time queued behind broken AGVs={record.AGVBlockedByFailureTime:F1}s");
 
             if (record.MachineFailureCount > 0)
             {

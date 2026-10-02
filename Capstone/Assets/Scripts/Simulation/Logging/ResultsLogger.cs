@@ -29,24 +29,34 @@ namespace Assets.Scripts.Simulation.Logging
 
         private static string _filename = "results.csv";
         private static string _machineFilename = "machine_utilization.csv";
+        private static string _machineHandoffFilename = "machine_handoffs.csv";
         private static string _agvFilename = "agv_performance.csv";
         private static string _segmentFilename = "segment_congestion.csv";
         private static string _jobOpsFilename = "job_operations.csv";
         private static string _throughputFilename = "throughput.csv";
         private static string _jobCompletionsFilename = "job_completions.csv";
         private static string _decisionLogFilename = "decision_log.csv";
+        private static string _collisionsFilename = "agv_collisions.csv";
+        private static string _agvFailuresFilename = "agv_failures.csv";
+        private static string _agvEventsFilename = "agv_events.csv";
+        private static string _appliedConfigsFilename = "applied_configs.jsonl";
 
         public static void SetFilenameSuffix(string suffix)
         {
             const string ext = ".csv";
             _filename = StripExt(_filename, ext) + suffix + ext;
             _machineFilename = StripExt(_machineFilename, ext) + suffix + ext;
+            _machineHandoffFilename = StripExt(_machineHandoffFilename, ext) + suffix + ext;
             _agvFilename = StripExt(_agvFilename, ext) + suffix + ext;
             _segmentFilename = StripExt(_segmentFilename, ext) + suffix + ext;
             _jobOpsFilename = StripExt(_jobOpsFilename, ext) + suffix + ext;
             _throughputFilename = StripExt(_throughputFilename, ext) + suffix + ext;
             _jobCompletionsFilename = StripExt(_jobCompletionsFilename, ext) + suffix + ext;
             _decisionLogFilename = StripExt(_decisionLogFilename, ext) + suffix + ext;
+            _collisionsFilename = StripExt(_collisionsFilename, ext) + suffix + ext;
+            _agvFailuresFilename = StripExt(_agvFailuresFilename, ext) + suffix + ext;
+            _agvEventsFilename = StripExt(_agvEventsFilename, ext) + suffix + ext;
+            _appliedConfigsFilename = StripExt(_appliedConfigsFilename, ".jsonl") + suffix + ".jsonl";
         }
 
         public static void SetSubdirectory(string subdir)
@@ -58,12 +68,17 @@ namespace Assets.Scripts.Simulation.Logging
 
         private static string FilePath => BuildPath(_filename);
         private static string MachineFilePath => BuildPath(_machineFilename);
+        private static string MachineHandoffFilePath => BuildPath(_machineHandoffFilename);
         private static string AGVFilePath => BuildPath(_agvFilename);
         private static string SegmentFilePath => BuildPath(_segmentFilename);
         private static string JobOpsFilePath => BuildPath(_jobOpsFilename);
         private static string ThroughputFilePath => BuildPath(_throughputFilename);
         private static string JobCompletionsFilePath => BuildPath(_jobCompletionsFilename);
         private static string DecisionLogFilePath => BuildPath(_decisionLogFilename);
+        private static string CollisionsFilePath => BuildPath(_collisionsFilename);
+        private static string AGVFailuresFilePath => BuildPath(_agvFailuresFilename);
+        private static string AGVEventsFilePath => BuildPath(_agvEventsFilename);
+        private static string AppliedConfigsFilePath => BuildPath(_appliedConfigsFilename);
 
         // ── Convenience: write all logs in one call ───────────────────────────
 
@@ -74,12 +89,97 @@ namespace Assets.Scripts.Simulation.Logging
         {
             LogEpisode(r);
             LogMachineUtilization(r);
+            if (r.MachineHandoffRecords.Count > 0) LogMachineHandoffs(r);
             if (r.AGVRecords.Count > 0) LogAGVPerformance(r);
             if (r.SegmentRecords.Count > 0) LogSegmentCongestion(r);
             if (r.JobOperationRecords.Count > 0) LogJobOperations(r);
             if (r.ThroughputRecords.Count > 0) LogThroughput(r);
             if (r.JobCompletionRecords.Count > 0) LogJobCompletions(r);
             if (r.DecisionRecords.Count > 0) LogDecisions(r);
+            if (r.CollisionRecords.Count > 0) LogCollisions(r);
+            if (r.AGVFailureRecords.Count > 0) LogAGVFailures(r);
+            if (r.AGVEventRecords.Count > 0) LogAGVEvents(r);
+            if (r.ConfigCanonical != null) LogAppliedConfig(r.ConfigHash, r.ConfigCanonical);
+        }
+
+        /// <summary>
+        /// applied_configs.jsonl - one line per distinct config_hash in results.csv: {"config_hash", "config"}, where
+        /// config is ConfigFingerprint's canonical text, so a hash in any result row can be turned back into the config.
+        /// </summary>
+        public static void LogAppliedConfig(string hash, string canonical)
+        {
+            string line = Newtonsoft.Json.JsonConvert.SerializeObject(new { config_hash = hash, config = canonical });
+            File.AppendAllText(AppliedConfigsFilePath, line + "\n");
+        }
+
+        /// <summary>
+        /// agv_failures.csv - one row per AGV breakdown (AGVController.BreakDown). operating_age is the observed
+        /// time to failure in operating seconds; residual_life marks the first failure of the episode, drawn from
+        /// the equilibrium residual-life distribution rather than the full Weibull.
+        /// </summary>
+        public static void LogAGVFailures(EpisodeRecord r)
+        {
+            bool fileExists = File.Exists(AGVFailuresFilePath);
+            using var writer = new StreamWriter(AGVFailuresFilePath, append: true);
+            if (!fileExists)
+                writer.WriteLine(
+                    "timestamp,instance,rule,seed,agv_count,agv_weibull_k,agv_weibull_lambda," +
+                    "agv_repair_log_mu,agv_repair_log_sigma," +
+                    "agv_id,sim_time,operating_age,residual_life,repair_duration,state,zone,job_id,job_handed_back");
+            string ts = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            StochasticConfig s = r.Stochastic;
+            foreach (var f in r.AGVFailureRecords)
+                writer.WriteLine(
+                    $"{ts},{r.InstanceName},{r.RuleName},{r.Seed},{r.AGVCount}," +
+                    $"{(s?.AGVWeibullK ?? 0f):F3},{(s?.AGVWeibullLambda ?? 0f):F1}," +
+                    $"{(s?.AGVRepairLogMu ?? 0f):F3},{(s?.AGVRepairLogSigma ?? 0f):F3}," +
+                    $"{f.AgvId},{f.SimTime:F2},{f.OperatingAge:F2},{(f.ResidualLife ? 1 : 0)},{f.RepairDuration:F2}," +
+                    $"{f.State},{f.Zone},{f.JobId},{(f.JobHandedBack ? 1 : 0)}");
+        }
+
+        /// <summary>
+        /// agv_events.csv - one row per AGV transport milestone ("-destrace", AGVController.TraceEvent), in time
+        /// order. Consumed by env/des_twin to compare each leg with its free-flow (no other AGVs) duration.
+        /// </summary>
+        public static void LogAGVEvents(EpisodeRecord r)
+        {
+            bool fileExists = File.Exists(AGVEventsFilePath);
+            using var writer = new StreamWriter(AGVEventsFilePath, append: true);
+            if (!fileExists)
+                writer.WriteLine(
+                    "instance,rule,seed,agv_count,sim_time,agv_id,event,job_id,source_machine,target_machine," +
+                    "zone_id,x,z,yaw,cum_path_length,cum_wait_route");
+            var ic = System.Globalization.CultureInfo.InvariantCulture;
+            foreach (var e in r.AGVEventRecords)
+                writer.WriteLine(string.Format(ic,
+                    "{0},{1},{2},{3},{4:F2},{5},{6},{7},{8},{9},{10},{11:F3},{12:F3},{13:F2},{14:F3},{15:F2}",
+                    r.InstanceName, r.RuleName, r.Seed, r.AGVCount, e.SimTime, e.AgvId, e.Event, e.JobId,
+                    e.SourceMachineId, e.TargetMachineId, e.ZoneId, e.X, e.Z, e.Yaw, e.CumPathLength, e.CumWaitRoute));
+        }
+
+        /// <summary>Full path of a file in the run's output directory (used by DesTwinExport).</summary>
+        public static string PathFor(string filename) => BuildPath(filename);
+
+        /// <summary>
+        /// agv_collisions.csv - one row per contiguous AGV-AGV body overlap (AGVCollisionMonitor).
+        /// zone_a/zone_b are the traffic zones each AGV was in when the overlap began.
+        /// </summary>
+        public static void LogCollisions(EpisodeRecord r)
+        {
+            bool fileExists = File.Exists(CollisionsFilePath);
+            using var writer = new StreamWriter(CollisionsFilePath, append: true);
+            if (!fileExists)
+                writer.WriteLine(
+                    "timestamp,instance,rule,seed,agv_count,event_id,start_time,duration," +
+                    "agv_a,agv_b,min_centre_distance,zone_a,zone_b,state_a,state_b," +
+                    "a_x,a_z,b_x,b_z");
+            string ts = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            foreach (var c in r.CollisionRecords)
+                writer.WriteLine(
+                    $"{ts},{r.InstanceName},{r.RuleName},{r.Seed},{r.AGVCount},{c.EventId}," +
+                    $"{c.StartTime:F2},{c.Duration:F2},{c.AgvA},{c.AgvB},{c.MinCentreDistance:F3}," +
+                    $"{c.ZoneA},{c.ZoneB},{c.StateA},{c.StateB}," +
+                    $"{c.PosAx:F2},{c.PosAz:F2},{c.PosBx:F2},{c.PosBz:F2}");
         }
         // ── Throughput log (throughput.csv) ───────────────────────────────────
 
@@ -129,6 +229,7 @@ namespace Assets.Scripts.Simulation.Logging
             float meanTtfTheory = weibullLambda > 0f ? weibullLambda * 0.9027f : 0f;
             float repairLogMu = hasMf ? r.Stochastic.RepairLogMu : 0f;
             float repairLogSig = hasMf ? r.Stochastic.RepairLogSigma : 0f;
+            bool hasAgvF = r.Stochastic != null && r.Stochastic.AGVFailuresEnabled;
 
             bool fileExists = File.Exists(FilePath);
             using var writer = new StreamWriter(FilePath, append: true);
@@ -145,7 +246,18 @@ namespace Assets.Scripts.Simulation.Logging
                     "mean_interarrival_realised,last_arrival_sim_time," +
                     "mean_flow_time,p95_flow_time,max_flow_time,mean_transport_wait,jobs_censored," +
                     "mean_flow_time_penalized,p95_flow_time_penalized,max_flow_time_penalized," +
-                    "deadlock_detected,deadlock_sim_time"
+                    "deadlock_detected,deadlock_sim_time," +
+                    "first_stall_sim_time,orphan_predispatch_released," +
+                    "agv_collision_events,agv_collision_pair_seconds,agv_clearance_events," +
+                    "agv_clearance_pair_seconds,agv_parking_overlap_events,agv_min_centre_distance," +
+                    "reservation_protocol," +
+                    "layout_id,layout_belts,layout_aisles,floor_width,floor_depth," +
+                    "io_docks,routing_trigger,tiles,machines_per_tile,job_scope,agv_assignment,release_rule," +
+                    "machine_flexibility,secondary_time_multiplier,mean_capabilities_per_machine," +
+                    "config_hash,instance_hash," +
+                    "agv_failures_enabled,agv_weibull_k,agv_weibull_lambda,agv_repair_log_mu,agv_repair_log_sigma," +
+                    "agv_failures,agv_repair_time,agv_blocked_by_failure_time," +
+                    "travel_price,release_weights,release_counts,routed_moves,cross_tile_moves,tiles_crossed"
                 );
 
             writer.WriteLine(
@@ -161,7 +273,19 @@ namespace Assets.Scripts.Simulation.Logging
                 $"{r.RealisedMeanInterarrival:F1},{r.LastDynamicArrivalTime:F1}," +
                 $"{r.MeanFlowTime:F2},{r.P95FlowTime:F2},{r.MaxFlowTime:F2},{r.MeanTransportWait:F2},{r.JobsCensored}," +
                 $"{r.MeanFlowTimePenalized:F2},{r.P95FlowTimePenalized:F2},{r.MaxFlowTimePenalized:F2}," +
-                $"{(r.DeadlockDetected ? 1 : 0)},{r.DeadlockSimTime:F1}"
+                $"{(r.DeadlockDetected ? 1 : 0)},{r.DeadlockSimTime:F1}," +
+                $"{r.FirstStallSimTime:F1},{r.OrphanPreDispatchesReleased}," +
+                $"{r.AgvCollisionEvents},{r.AgvCollisionPairSeconds:F2},{r.AgvClearanceEvents}," +
+                $"{r.AgvClearancePairSeconds:F2},{r.AgvParkingOverlapEvents},{r.AgvMinCentreDistance:F3}," +
+                $"{r.ReservationProtocol}," +
+                $"{r.LayoutId},{r.LayoutBelts},{r.LayoutAisles},{r.FloorWidth:F2},{r.FloorDepth:F2}," +
+                $"{r.IoDocks},{r.RoutingTrigger},{r.Tiles},{r.MachinesPerTile},{r.JobScope},{r.AgvAssignment},{r.ReleaseRule}," +
+                $"{r.MachineFlexibility:F3},{r.SecondaryTimeMultiplier:F3},{r.MeanCapabilitiesPerMachine:F3}," +
+                $"{r.ConfigHash},{r.InstanceHash}," +
+                $"{(hasAgvF ? 1 : 0)},{(hasAgvF ? r.Stochastic.AGVWeibullK : 0f):F2},{(hasAgvF ? r.Stochastic.AGVWeibullLambda : 0f):F1}," +
+                $"{(hasAgvF ? r.Stochastic.AGVRepairLogMu : 0f):F3},{(hasAgvF ? r.Stochastic.AGVRepairLogSigma : 0f):F3}," +
+                $"{r.AGVFailureCount},{r.AGVRepairTime:F1},{r.AGVBlockedByFailureTime:F1}," +
+                $"{r.TravelPrice:F3},{r.ReleaseWeights},{r.ReleaseCounts},{r.RoutedMoves},{r.CrossTileMoves},{r.TilesCrossed}"
             );
 
             Debug.Log($"[Results] {r.InstanceName} {r.RuleName} seed={r.Seed} " +
@@ -202,6 +326,41 @@ namespace Assets.Scripts.Simulation.Logging
             }
         }
 
+        /// <summary>
+        /// Appends one row per machine per episode to machine_handoffs.csv: which belt (primary/secondary)
+        /// and which dock side (north = +z) AGV handoffs used. Answers whether the second belt pair of
+        /// interior machines is ever exercised.
+        /// </summary>
+        public static void LogMachineHandoffs(EpisodeRecord r)
+        {
+            bool fileExists = File.Exists(MachineHandoffFilePath);
+            using var writer = new StreamWriter(MachineHandoffFilePath, append: true);
+
+            if (!fileExists)
+                writer.WriteLine(
+                    "timestamp,instance,rule,seed,makespan," +
+                    "machine_id,machine_type,has_secondary_belts,primary_side," +
+                    "pickup_belt_primary,pickup_belt_secondary," +
+                    "dropoff_belt_primary,dropoff_belt_secondary,dropoff_belt_full,dropoff_redundant,dropoff_double_placed," +
+                    "out_placed_primary,out_placed_secondary,out_belt_full," +
+                    "pickup_dock_north,pickup_dock_south,dropoff_dock_north,dropoff_dock_south"
+                );
+
+            string ts = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            foreach (var m in r.MachineHandoffRecords)
+            {
+                writer.WriteLine(
+                    $"{ts}," +
+                    $"{r.InstanceName},{r.RuleName},{r.Seed},{r.Makespan:F2}," +
+                    $"{m.MachineId},{m.MachineType},{(m.HasSecondaryBelts ? 1 : 0)},{(m.PrimaryBeltsNorth ? "N" : "S")}," +
+                    $"{m.PickupBeltPrimary},{m.PickupBeltSecondary}," +
+                    $"{m.DropoffBeltPrimary},{m.DropoffBeltSecondary},{m.DropoffBeltFull},{m.DropoffRedundant},{m.DropoffDoublePlaced}," +
+                    $"{m.OutPlacedPrimary},{m.OutPlacedSecondary},{m.OutBeltFull}," +
+                    $"{m.PickupDockNorth},{m.PickupDockSouth},{m.DropoffDockNorth},{m.DropoffDockSouth}"
+                );
+            }
+        }
+
         // ── AGV performance log (new) ─────────────────────────────────────────
 
         /// <summary>
@@ -223,7 +382,9 @@ namespace Assets.Scripts.Simulation.Logging
                     "agv_id,total_trips,mean_trip_duration," +
                     "time_idle,time_waiting_route,time_traveling," +
                     "time_loading,time_unloading," +
-                    "total_path_length,reroute_count,congestion_fraction,stall_recovery_count"
+                    "total_path_length,reroute_count,congestion_fraction,stall_recovery_count," +
+                    "path_returning_to_parking,path_departure_from_parking," +
+                    "failures,time_broken,time_blocked_by_failure,censored_operating_age,censored_life_is_residual"
                 );
 
             string ts = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
@@ -235,7 +396,10 @@ namespace Assets.Scripts.Simulation.Logging
                     $"{a.AgvId},{a.TotalTrips},{a.MeanTripDuration:F2}," +
                     $"{a.TimeIdle:F2},{a.TimeWaitingRoute:F2},{a.TimeTraveling:F2}," +
                     $"{a.TimeLoading:F2},{a.TimeUnloading:F2}," +
-                    $"{a.TotalPathLength:F2},{a.RerouteCount},{a.CongestionFraction:F4},{a.StallRecoveryCount}"
+                    $"{a.TotalPathLength:F2},{a.RerouteCount},{a.CongestionFraction:F4},{a.StallRecoveryCount}," +
+                    $"{a.PathReturningToParking:F2},{a.PathDepartureFromParking:F2}," +
+                    $"{a.FailureCount},{a.TimeBroken:F2},{a.TimeBlockedByFailure:F2}," +
+                    $"{a.CensoredOperatingAge:F2},{(a.CensoredLifeIsResidual ? 1 : 0)}"
                 );
             }
         }

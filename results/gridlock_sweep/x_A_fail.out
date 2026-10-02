@@ -1,0 +1,18 @@
+[Sweep] scenario=BatchConfigs/Scenarios/_mfsweep_shard0.json tag=x_A_fail agv=3 7 9 10 12 16 20 24 rules=SPT_SRWT LRT_MMUR repeats=10 workers=5 extra=''
+[Sweep] done agv7_SPT_SRWT
+[Sweep] done agv9_SPT_SRWT
+[Sweep] done agv7_LRT_MMUR
+[Sweep] done agv3_SPT_SRWT
+[Sweep] done agv3_LRT_MMUR
+[Sweep] done agv10_SPT_SRWT
+[Sweep] done agv9_LRT_MMUR
+[Sweep] done agv10_LRT_MMUR
+[Sweep] done agv12_SPT_SRWT
+[Sweep] done agv12_LRT_MMUR
+[Sweep] done agv16_SPT_SRWT
+[Sweep] done agv20_SPT_SRWT
+[Sweep] done agv24_SPT_SRWT
+[Sweep] done agv16_LRT_MMUR
+[Sweep] done agv20_LRT_MMUR
+[Sweep] done agv24_LRT_MMUR
+[Sweep] all cells finished -> ./Results/gridlock_sweep/x_A_fail

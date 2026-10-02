@@ -8,10 +8,17 @@ namespace Assets.Scripts.Simulation.Types
     ///          - SPT (Shortest Processing Time): favours quick completions, reducing WIP.
     ///          - LPT (Longest Processing Time): defers long operations, useful for throughput.
     ///          - SRT/LRT (Shortest/Longest Remaining Time): uses cumulative remaining work.
-    ///          - FIFO_SRWT: FIFO/FCFS — arrival order, oldest job first.
+    ///          - FIFO: first in, first out — the job that entered its current queue (the machine's queue,
+    ///            or the pool of jobs waiting to be routed) earliest.
     ///          - MMUR (Minimum Machine Utilization): routes to the candidate machine with the
     ///            lowest cumulative utilization ratio so far this episode — a longer-horizon,
     ///            workload-history signal, distinct from SRWT's instantaneous queued workload.
+    ///          - ECT (Earliest Completion Time): routes to the candidate minimising queued work
+    ///            (incl. the in-process remainder) + this job's processing time there.
+    ///          - TECT: ECT with AGV travel: max(zone-graph travel time, queued work) + processing time,
+    ///            plus λ x travel when the config sets a travel price λ (FJSSPConfig.TravelPrice; default 0).
+    ///          - PTWINQ: job priority = processing time + least queued work among the machines
+    ///            eligible for the job's next operation (Holthaus &amp; Rajendran PT+WINQ).
     ///          - Random: unweighted random selection (useful for exploration).
     public enum DispatchingRule
     {
@@ -43,14 +50,28 @@ namespace Assets.Scripts.Simulation.Types
         /// @details Equivalent to @c most_work_remaining in job_shop_lib. Favors heavy jobs.
         LRT_MMUR,
 
-        /// @brief FIFO/FCFS — arrival order, oldest job first.
-        /// @details Equivalent to @c first_come_first_served in job_shop_lib. Was previously
-        ///          implemented backwards (picked newest arrival) despite this doc comment and
-        ///          the DispatchingEngine inline comment both saying "longest waiting" -- fixed.
+        /// @brief FIFO — the job that has waited longest in its current queue.
+        /// @details The queue is the machine's queue at a dispatch decision and the routing pool at a
+        ///          routing decision (DispatchingEngine.RankJobs, by JobData.StateEntryTime). Until 2026-10-02
+        ///          it ranked by time since shop arrival instead (first in system, first served).
         FIFO_SRWT,
 
         /// @brief Random — unweighted random selection of queued jobs.
         /// @details Useful for exploration or baseline comparison.
         Random,
+
+        // ── Full job-rule x machine-rule catalog (2026-09-26) ─────────────────────────────────
+        // Baseline-only: the RL action space is still the 9 rules above (DispatchingEngine.ActionToRule).
+        // Appended after Random so serialized int values of the members above are unchanged.
+        // Every name is JOB_MACHINE; DispatchingEngine splits it into its two halves.
+        //   Job:     SPT, LPT, SRT, LRT, FIFO, PTWINQ (processing time + least work in the next op's queue)
+        //   Machine: SMPT, SRWT, MMUR, ECT (least queued work + own processing time),
+        //            TECT (ECT with travel: max(travel, queued work) + own processing time)
+        SPT_MMUR, SPT_ECT, SPT_TECT,
+        LPT_SRWT, LPT_ECT, LPT_TECT,
+        SRT_MMUR, SRT_ECT, SRT_TECT,
+        LRT_SMPT, LRT_SRWT, LRT_ECT, LRT_TECT,
+        FIFO_SMPT, FIFO_MMUR, FIFO_ECT, FIFO_TECT,
+        PTWINQ_SMPT, PTWINQ_SRWT, PTWINQ_MMUR, PTWINQ_ECT, PTWINQ_TECT,
     }
 }

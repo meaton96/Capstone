@@ -5,6 +5,7 @@ using UnityEngine;
 using Assets.Scripts.Simulation.Machines;
 using Assets.Scripts.Simulation.Logging;
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
 namespace Assets.Scripts.Simulation.Types
 {
@@ -77,7 +78,9 @@ namespace Assets.Scripts.Simulation.Types
             try
             {
                 JsonConfig raw = JsonUtility.FromJson<JsonConfig>(json);
-                return Convert(raw);
+                JObject obj = JObject.Parse(json);
+                ConfigKeyCheck.WarnUnknownTopLevel(obj, KnownKeys, $"config '{raw?.name}'");
+                return Convert(raw, obj);
             }
             catch (Exception ex)
             {
@@ -101,7 +104,27 @@ namespace Assets.Scripts.Simulation.Types
                     var single = ParseSingle(json);
                     return single != null ? new[] { single } : Array.Empty<FJSSPConfig>();
                 }
-                return wrapper.configs.Select(Convert).Where(c => c != null).ToArray();
+
+                // Raw objects, index-aligned with wrapper.configs: JsonUtility cannot read the "layout"
+                // block (or report unknown keys), so those come from Newtonsoft.
+                JObject root = JObject.Parse(json);
+                var rawConfigs = (JArray)root["configs"];
+                var result = new List<FJSSPConfig>();
+                for (int i = 0; i < wrapper.configs.Length; i++)
+                {
+                    JObject obj = rawConfigs[i] as JObject;
+                    ConfigKeyCheck.WarnUnknownTopLevel(obj, KnownKeys, $"config #{i} '{wrapper.configs[i]?.name}'");
+                    FJSSPConfig cfg;
+                    try { cfg = Convert(wrapper.configs[i], obj); }
+                    catch (Exception ex)
+                    {
+                        // Fail fast: one bad config aborts the whole batch before any run starts, instead of
+                        // silently dropping it (which would skew a sweep) or failing hours in.
+                        throw new ArgumentException($"config #{i} '{wrapper.configs[i]?.name}': {ex.Message}", ex);
+                    }
+                    if (cfg != null) result.Add(cfg);
+                }
+                return result.ToArray();
             }
             catch (Exception ex)
             {
@@ -109,6 +132,10 @@ namespace Assets.Scripts.Simulation.Types
                 return Array.Empty<FJSSPConfig>();
             }
         }
+
+        /// <summary>Top-level keys a config may carry: every JsonConfig field, plus the batch wrapper's "configs" and "layout".</summary>
+        private static readonly string[] KnownKeys =
+            typeof(JsonConfig).GetFields().Select(f => f.Name).Concat(new[] { "configs", "layout" }).ToArray();
 
         // ── Internal JSON data classes (JsonUtility-compatible) ──
 
@@ -135,9 +162,19 @@ namespace Assets.Scripts.Simulation.Types
             public int maxOpsPerJob = 7;
             public float maxArrivalTime = 0f;
             public int agvCount = 3;
+            // 0 = unset (use the AGV prefab's own default) -- JsonUtility can't deserialize
+            // nullable value types, so this mirrors maxArrivalTime's 0-means-unset convention
+            // rather than FJSSPConfig.AGVMoveSpeed's float? directly.
+            public float agvMoveSpeed = 0f;
+            public float agvHandshakeDuration = 0f;
             public float machineFlexibilityProbability = 0f;
+            public float secondaryTimeMultiplier = 1f;
+            public float travelPrice = 0f;
             public float throughputTimingWindow = 0f;
-            public string parkingMethod = "single";
+            public string parkingMethod = "lane";
+            public string ioDocks = "corner";
+            public string reservationProtocol = null;   // null = ReservationProtocolParser.Default
+            public string routingTrigger = null;
             public string preDispatchingMethod = "fixed";
             public JsonStochasticConfig stochastic = null;
 
@@ -174,9 +211,10 @@ namespace Assets.Scripts.Simulation.Types
             public float repairLogMu = 4.0f;
             public float repairLogSigma = 0.5f;
             public bool agvFailuresEnabled = false;
-            public float agvWeibullLambda = 700f;
-            public float agvRepairLogMu = 3.4f;
-            public float agvRepairLogSigma = 0.4f;
+            public float agvWeibullK = 1.5f;
+            public float agvWeibullLambda = 8400f;
+            public float agvRepairLogMu = 4.6f;
+            public float agvRepairLogSigma = 0.5f;
             public bool dynamicArrivalsEnabled = false;
             public float arrivalLambda = 0.003f;
             public int dynamicJobCap = 0;
@@ -192,7 +230,7 @@ namespace Assets.Scripts.Simulation.Types
         ///          the layout by repeating each type machinesPerType times.
         /// @param raw  Parsed JSON config data.
         /// @returns     Runtime FJSSPConfig, or null if raw is null.
-        private static FJSSPConfig Convert(JsonConfig raw)
+        private static FJSSPConfig Convert(JsonConfig raw, JObject rawObj)
         {
             if (raw == null) return null;
 
@@ -250,10 +288,21 @@ namespace Assets.Scripts.Simulation.Types
                 MinOpsPerJob = raw.minOpsPerJob,
                 MaxOpsPerJob = raw.maxOpsPerJob,
                 AGVCount = raw.agvCount,
+                AGVMoveSpeed = raw.agvMoveSpeed > 0f ? raw.agvMoveSpeed : (float?)null,
+                AGVHandshakeDuration = raw.agvHandshakeDuration > 0f ? raw.agvHandshakeDuration : (float?)null,
                 MachineFlexibilityProbability = raw.machineFlexibilityProbability,
+                SecondaryTimeMultiplier = raw.secondaryTimeMultiplier,
+                TravelPrice = raw.travelPrice,
                 ThroughputTimingWindow = raw.throughputTimingWindow,
                 ProcTimeParams = procTimeParams,
                 parkingMethod = raw.parkingMethod,
+                ioDocks = ConfigOverrides.ValidatedIoDocks(raw.ioDocks),
+                // "layout" block: read with Newtonsoft (JsonUtility cannot), validated against this config's
+                // own machine grid so a bad layout aborts at load time, not mid-sweep.
+                Layout = LayoutSpec.FromJson(rawObj?["layout"]),
+                reservationProtocol = ReservationProtocolParser.Validated(raw.reservationProtocol),
+                routingTrigger = RoutingTriggerParser.Validated(raw.routingTrigger),
+                Tiling = TilingSpec.FromJson(rawObj?["tiling"]),
                 preDispatchingMethod = raw.preDispatchingMethod ?? "fixed",
             };
 
@@ -267,6 +316,7 @@ namespace Assets.Scripts.Simulation.Types
                     RepairLogMu = raw.stochastic.repairLogMu,
                     RepairLogSigma = raw.stochastic.repairLogSigma,
                     AGVFailuresEnabled = raw.stochastic.agvFailuresEnabled,
+                    AGVWeibullK = raw.stochastic.agvWeibullK,
                     AGVWeibullLambda = raw.stochastic.agvWeibullLambda,
                     AGVRepairLogMu = raw.stochastic.agvRepairLogMu,
                     AGVRepairLogSigma = raw.stochastic.agvRepairLogSigma,

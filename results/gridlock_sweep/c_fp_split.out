@@ -1,0 +1,6 @@
+[Sweep] scenario=BatchConfigs/Scenarios/_mfsweep_control.json tag=c_fp_split agv=7 rules=SPT_SRWT SPT_SMPT LRT_MMUR LPT_MMUR repeats=1 workers=4 extra='-reservation holdPrevious'
+[Sweep] done agv7_SPT_SRWT
+[Sweep] done agv7_LPT_MMUR
+[Sweep] done agv7_LRT_MMUR
+[Sweep] done agv7_SPT_SMPT
+[Sweep] all cells finished -> ./Results/gridlock_sweep/c_fp_split

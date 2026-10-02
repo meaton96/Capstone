@@ -1,0 +1,16 @@
+timestamp,instance,rule,seed,makespan,machine_id,machine_type,ops_completed,time_processing,time_operational,utilization_rate,idle_time,idle_rate,availability_rate,failure_count,total_repair_time
+2026-09-20 19:01:08,mfsweep_control_nofail,SPT_SRWT,42,3787.30,0,Mill,68,1021.36,3787.30,0.2697,2765.94,0.7303,1.0000,0,0.0
+2026-09-20 19:01:08,mfsweep_control_nofail,SPT_SRWT,42,3787.30,1,Lathe,0,0.00,3787.30,0.0000,3787.30,1.0000,1.0000,0,0.0
+2026-09-20 19:01:08,mfsweep_control_nofail,SPT_SRWT,42,3787.30,2,Weld,60,3202.16,3787.30,0.8455,585.14,0.1545,1.0000,0,0.0
+2026-09-20 19:01:08,mfsweep_control_nofail,SPT_SRWT,42,3787.30,3,Inspect,0,0.00,3787.30,0.0000,3787.30,1.0000,1.0000,0,0.0
+2026-09-20 19:01:08,mfsweep_control_nofail,SPT_SRWT,42,3787.30,4,Assemble,0,0.00,3787.30,0.0000,3787.30,1.0000,1.0000,0,0.0
+2026-09-20 19:01:08,mfsweep_control_nofail,SPT_SRWT,42,3787.30,5,Mill,62,931.24,3787.30,0.2459,2856.06,0.7541,1.0000,0,0.0
+2026-09-20 19:01:08,mfsweep_control_nofail,SPT_SRWT,42,3787.30,6,Lathe,0,0.00,3787.30,0.0000,3787.30,1.0000,1.0000,0,0.0
+2026-09-20 19:01:08,mfsweep_control_nofail,SPT_SRWT,42,3787.30,7,Weld,52,2873.30,3787.30,0.7587,914.00,0.2413,1.0000,0,0.0
+2026-09-20 19:01:08,mfsweep_control_nofail,SPT_SRWT,42,3787.30,8,Inspect,0,0.00,3787.30,0.0000,3787.30,1.0000,1.0000,0,0.0
+2026-09-20 19:01:08,mfsweep_control_nofail,SPT_SRWT,42,3787.30,9,Assemble,0,0.00,3787.30,0.0000,3787.30,1.0000,1.0000,0,0.0
+2026-09-20 19:01:08,mfsweep_control_nofail,SPT_SRWT,42,3787.30,10,Mill,7,105.14,3787.30,0.0278,3682.16,0.9722,1.0000,0,0.0
+2026-09-20 19:01:08,mfsweep_control_nofail,SPT_SRWT,42,3787.30,11,Lathe,0,0.00,3787.30,0.0000,3787.30,1.0000,1.0000,0,0.0
+2026-09-20 19:01:08,mfsweep_control_nofail,SPT_SRWT,42,3787.30,12,Weld,25,1396.82,3787.30,0.3688,2390.48,0.6312,1.0000,0,0.0
+2026-09-20 19:01:08,mfsweep_control_nofail,SPT_SRWT,42,3787.30,13,Inspect,0,0.00,3787.30,0.0000,3787.30,1.0000,1.0000,0,0.0
+2026-09-20 19:01:08,mfsweep_control_nofail,SPT_SRWT,42,3787.30,14,Assemble,0,0.00,3787.30,0.0000,3787.30,1.0000,1.0000,0,0.0

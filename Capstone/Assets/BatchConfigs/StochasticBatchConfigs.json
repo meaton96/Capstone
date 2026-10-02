@@ -104,7 +104,7 @@
         "weibullLambda": 900.0,
         "repairLogMu": 4.0,
         "repairLogSigma": 0.5,
-        "agvFailuresEnabled": true,
+        "agvFailuresEnabled": false,
         "agvWeibullLambda": 700.0,
         "agvRepairLogMu": 3.4,
         "agvRepairLogSigma": 0.4,

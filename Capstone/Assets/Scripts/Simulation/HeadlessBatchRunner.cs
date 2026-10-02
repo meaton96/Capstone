@@ -67,6 +67,10 @@ namespace Assets.Scripts.Simulation
             // Baseline decision-drain: when set, heuristic decisions drain per-frame instead of
             // one-per-frame. Valid ONLY for heuristic batch runs (no neural policy in the loop).
             bool baselineDrain = GetCLIArg("-baselinedrain") != null;
+            // Event-based twin export (Logging/DesTwinExport): des_floor.json, des_jobs.json, agv_events.csv.
+            DesTwinExport.Enabled = HasCLIFlag("-destrace");
+            if (DesTwinExport.Enabled)
+                SimLogger.Low("[BatchRunner] DES twin trace ENABLED (des_floor.json, des_jobs.json, agv_events.csv).");
             if (baselineDrain)
                 SimLogger.Low("[BatchRunner] Baseline drain mode ENABLED — heuristic decisions " +
                               "drain per frame (removes one-decision-per-frame throttle).");
@@ -120,6 +124,132 @@ namespace Assets.Scripts.Simulation
             {
                 agvCountOverride = parsedAgv;
                 SimLogger.Low($"[BatchRunner] AGV count override: {agvCountOverride}");
+            }
+
+            // CLI overrides that select a variant of the simulation are validated up front. A bad value
+            // must end the process (exit 1): an exception here is only logged by Unity and would leave a
+            // batch-mode worker idling forever, stalling a whole sweep.
+            try
+            {
+                // Reservation protocol override (applied to every config by FactoryOrchestrator.ApplyConfigOverrides).
+                // Validated here so a typo aborts before any run instead of silently using the default.
+                string reservationStr = GetCLIArg("-reservation");
+                if (!string.IsNullOrEmpty(reservationStr))
+                {
+                    ReservationProtocolParser.Parse(reservationStr);
+                    ConfigOverrides.ReservationProtocol = reservationStr;
+                    SimLogger.Low($"[BatchRunner] Reservation protocol override: {reservationStr}");
+                }
+
+                // Routing trigger override ("onTransport" | "onReady"), same single-point mechanism.
+                string routingStr = GetCLIArg("-routingtrigger");
+                if (!string.IsNullOrEmpty(routingStr))
+                {
+                    RoutingTriggerParser.Parse(routingStr);
+                    ConfigOverrides.RoutingTrigger = routingStr;
+                    SimLogger.Low($"[BatchRunner] Routing trigger override: {routingStr}");
+                }
+
+                // Parking method override ("single" | "multiple" | "lane"), same single-point mechanism.
+                string parkingStr = GetCLIArg("-parking");
+                if (!string.IsNullOrEmpty(parkingStr))
+                {
+                    ConfigOverrides.ParkingMethod = ConfigOverrides.ValidatedParkingMethod(parkingStr);
+                    SimLogger.Low($"[BatchRunner] Parking method override: {ConfigOverrides.ParkingMethod}");
+                }
+
+                // I/O belt dock override ("corner" | "siding"), same single-point mechanism.
+                string ioDocksStr = GetCLIArg("-iodocks");
+                if (!string.IsNullOrEmpty(ioDocksStr))
+                {
+                    ConfigOverrides.IoDocks = ConfigOverrides.ValidatedIoDocks(ioDocksStr);
+                    SimLogger.Low($"[BatchRunner] I/O docks override: {ConfigOverrides.IoDocks}");
+                }
+
+                // Tiled floor overrides (TilingSpec): tile count and release rule, same single-point mechanism.
+                string tilesStr = GetCLIArg("-tiles");
+                if (!string.IsNullOrEmpty(tilesStr))
+                {
+                    if (!int.TryParse(tilesStr, out int tiles) || tiles < 1)
+                        throw new ArgumentException($"Invalid -tiles '{tilesStr}': expected an integer >= 1.");
+                    ConfigOverrides.Tiles = tiles;
+                    SimLogger.Low($"[BatchRunner] Tiles override: {tiles}");
+                }
+                string releaseStr = GetCLIArg("-releaserule");
+                if (!string.IsNullOrEmpty(releaseStr))
+                {
+                    ConfigOverrides.ReleaseRule = TilingSpec.ReleaseToString(TilingSpec.ParseRelease(releaseStr));
+                    SimLogger.Low($"[BatchRunner] Release rule override: {ConfigOverrides.ReleaseRule}");
+                }
+                // "-releaseweights 3,2,1,1,1,1,1" (one per tile) implies "-releaserule weighted".
+                string weightsStr = GetCLIArg("-releaseweights");
+                if (!string.IsNullOrEmpty(weightsStr))
+                {
+                    ConfigOverrides.ReleaseWeights = TilingSpec.ParseWeights(weightsStr);
+                    ConfigOverrides.ReleaseRule = TilingSpec.ReleaseToString(ReleaseRule.Weighted);
+                    SimLogger.Low($"[BatchRunner] Release weights override: {string.Join(",", ConfigOverrides.ReleaseWeights)}");
+                }
+
+                // TECT travel price λ (FJSSPConfig.TravelPrice).
+                string priceStr = GetCLIArg("-travelprice");
+                if (!string.IsNullOrEmpty(priceStr))
+                {
+                    if (!float.TryParse(priceStr, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float price)
+                        || !(price >= 0f) || float.IsInfinity(price))
+                        throw new ArgumentException($"Invalid -travelprice '{priceStr}': expected a number >= 0.");
+                    ConfigOverrides.TravelPrice = price;
+                    SimLogger.Low($"[BatchRunner] Travel price override: {price}");
+                }
+                // Linked tiles (TilingSpec.AgvsPooled / JobsOpen): "-jobscope open" alone implies "-agvassignment pooled".
+                string scopeStr = GetCLIArg("-jobscope");
+                if (!string.IsNullOrEmpty(scopeStr))
+                {
+                    ConfigOverrides.JobScope = TilingSpec.ParseJobScope(scopeStr) ? "open" : "tile";
+                    SimLogger.Low($"[BatchRunner] Job scope override: {ConfigOverrides.JobScope}");
+                }
+                string assignStr = GetCLIArg("-agvassignment");
+                if (!string.IsNullOrEmpty(assignStr))
+                {
+                    ConfigOverrides.AgvAssignment = TilingSpec.ParseAgvAssignment(assignStr) ? "pooled" : "tile";
+                    SimLogger.Low($"[BatchRunner] AGV assignment override: {ConfigOverrides.AgvAssignment}");
+                }
+
+                // Machine flexibility overrides (FJSSPConfig.MachineFlexibilityProbability / SecondaryTimeMultiplier).
+                string flexStr = GetCLIArg("-flex");
+                if (!string.IsNullOrEmpty(flexStr))
+                {
+                    if (!float.TryParse(flexStr, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float flex)
+                        || flex < 0f || flex > 1f)
+                        throw new ArgumentException($"Invalid -flex '{flexStr}': expected a probability in [0, 1].");
+                    ConfigOverrides.MachineFlexibility = flex;
+                    SimLogger.Low($"[BatchRunner] Machine flexibility override: {flex}");
+                }
+                string flexMultStr = GetCLIArg("-flexmult");
+                if (!string.IsNullOrEmpty(flexMultStr))
+                {
+                    if (!float.TryParse(flexMultStr, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float mult)
+                        || mult <= 0f)
+                        throw new ArgumentException($"Invalid -flexmult '{flexMultStr}': expected a number > 0.");
+                    ConfigOverrides.SecondaryTimeMultiplier = mult;
+                    SimLogger.Low($"[BatchRunner] Secondary time multiplier override: {mult}");
+                }
+
+                // Layout override (LayoutSpec name A-J), same single-point mechanism. Validated here so a typo
+                // or a layout that is not built yet aborts before any run.
+                string layoutStr = GetCLIArg("-layout");
+                if (!string.IsNullOrEmpty(layoutStr))
+                {
+                    ConfigOverrides.Layout = LayoutSpec.FromPreset(layoutStr).Id;
+                    SimLogger.Low($"[BatchRunner] Layout override: {ConfigOverrides.Layout}");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                SimLogger.LogError($"[BatchRunner] Invalid command-line override: {ex.Message}");
+                enabled = false;
+                Application.Quit(1);
+                return;
             }
 
             // Repeats
@@ -681,6 +811,10 @@ namespace Assets.Scripts.Simulation
             }
             return result.Count > 0 ? result.ToArray() : AllRules;
         }
+
+        /// <summary>True if a value-less switch is present anywhere on the command line (GetCLIArg needs a
+        ///          following argument, so it misses a switch passed last).</summary>
+        private static bool HasCLIFlag(string key) => Array.IndexOf(Environment.GetCommandLineArgs(), key) >= 0;
 
         private static string GetCLIArg(string key)
         {

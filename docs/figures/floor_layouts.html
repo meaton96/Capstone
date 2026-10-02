@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Factory Floor Layouts</title>
+<style>
+:root{
+  --bg:#f7f6f2; --card:#ffffff; --ink:#1d1f23; --muted:#5f6670; --line:#d9d6ce;
+  --floor:#eeece6; --aisle:#e2dfd6; --machine:#3b4552; --machine-ink:#ffffff; --empty:#cfcbc1;
+  --in:#2f6fd0; --out:#d9721c; --arrow:#8a8578; --park:#7a5bb5; --bay:#e6def5;
+  --lane:#a9a395; --lc:#178a7e; --wall:#6d6a62; --bridge:#d6cfb8;
+  --good:#2e8b57; --bad:#c0392b; --accent:#1d1f23;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15171a; --card:#1e2125; --ink:#eceae4; --muted:#a3a8b0; --line:#34383e;
+    --floor:#24282d; --aisle:#2d3238; --machine:#aeb8c4; --machine-ink:#15171a; --empty:#3a3f46;
+    --in:#6aa2f2; --out:#f0a05a; --arrow:#8d8a83; --park:#b39ae6; --bay:#352d47;
+    --lane:#5d626a; --lc:#4cc7b8; --wall:#8d8a83; --bridge:#3b3a33;
+    --good:#5cc28a; --bad:#e8776b; --accent:#eceae4;
+  }
+}
+:root[data-theme="dark"]{
+    --bg:#15171a; --card:#1e2125; --ink:#eceae4; --muted:#a3a8b0; --line:#34383e;
+    --floor:#24282d; --aisle:#2d3238; --machine:#aeb8c4; --machine-ink:#15171a; --empty:#3a3f46;
+    --in:#6aa2f2; --out:#f0a05a; --arrow:#8d8a83; --park:#b39ae6; --bay:#352d47;
+    --lane:#5d626a; --lc:#4cc7b8; --wall:#8d8a83; --bridge:#3b3a33;
+    --good:#5cc28a; --bad:#e8776b; --accent:#eceae4;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:1180px;margin:0 auto;padding:28px 16px 60px}
+h1{font-size:26px;margin:0 0 4px}
+h2{font-size:19px;margin:40px 0 10px}
+p{margin:6px 0 12px;max-width:80ch}
+code{font-size:13px}
+.muted{color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:10px 22px;margin:14px 0 6px;font-size:13.5px}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.sw{width:16px;height:10px;border-radius:2px;display:inline-block}
+.sw.dash{height:0;border-top:2px dashed var(--lane);border-radius:0}
+.sw.lc{height:0;border-top:2px solid var(--lc);border-radius:0;position:relative}
+.sw.wall{height:0;border-top:2px solid var(--wall);border-radius:0}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.tabgroups{margin:16px 0 12px}
+.tabgroup{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:6px 0}
+.tabgroup > small{width:150px;color:var(--muted);font-size:12.5px}
+button.tab{font:inherit;font-size:14px;padding:6px 12px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;cursor:pointer}
+button.tab[aria-selected="true"]{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.feature{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:22px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;align-items:start}
+.feature svg{width:100%;height:auto;display:block;max-height:760px}
+.feature h3{margin:0 0 6px;font-size:20px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.stat{border:1px solid var(--line);border-radius:8px;padding:9px 11px}
+.stat b{display:block;font-size:21px;font-variant-numeric:tabular-nums}
+.stat small{color:var(--muted);font-size:12.5px;display:block;line-height:1.35}
+.badge{display:inline-block;font-size:12px;padding:2px 8px;border-radius:99px;border:1px solid currentColor;margin-left:6px;vertical-align:middle}
+.matrix{display:grid;grid-template-columns:110px repeat(5,minmax(0,1fr));gap:10px;align-items:end}
+.matrix .colh{font-size:12.5px;color:var(--muted);text-align:center;align-self:end}
+.matrix .colh b{display:block;color:var(--ink);font-size:13.5px}
+.matrix .rowh{font-size:13px;align-self:center}
+.matrix .rowh b{display:block}
+.matrix .rowh small{color:var(--muted)}
+.mini{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px;cursor:pointer;height:100%;display:flex;flex-direction:column;justify-content:flex-end}
+.mini:hover{border-color:var(--muted)}
+.mini.sel{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.mini svg{height:auto;display:block;margin:0 auto}
+.mini h4{margin:0 0 4px;font-size:13.5px}
+.mini p{font-size:12px;margin:4px 0 0;color:var(--muted)}
+table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font-weight:600;color:var(--muted);font-size:12.5px;text-transform:uppercase;letter-spacing:.03em}
+td.best{font-weight:700;color:var(--good)}
+td.ref{color:var(--muted)}
+tr.sel td{background:color-mix(in srgb,var(--in) 10%,transparent)}
+.bar{height:8px;border-radius:4px;background:var(--in);display:inline-block;vertical-align:middle;margin-left:8px}
+.bar.bad{background:var(--bad)}
+.tablewrap{overflow-x:auto;margin-top:8px}
+.controls{display:flex;flex-wrap:wrap;gap:14px 24px;margin:12px 0}
+.controls label{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.controls .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.controls .seg button{font:inherit;font-size:13.5px;padding:5px 11px;border:0;border-right:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.controls .seg button:last-child{border-right:0}
+.controls .seg button[aria-pressed="true"]{background:var(--accent);color:var(--bg)}
+.tilebox{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;overflow-x:auto}
+.tilebox svg{display:block;width:100%;min-width:720px;height:auto}
+.note{font-size:13px;color:var(--muted);margin-top:8px}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+footer{margin-top:34px;font-size:12.5px;color:var(--muted)}
+@media (max-width:900px){.feature,.cols2{grid-template-columns:1fr}.matrix{grid-template-columns:repeat(5,minmax(0,1fr))}.matrix .rowh,.matrix .corner{grid-column:1/-1}.tabgroup > small{width:100%}}
+@media print{.tabs,.controls{display:none}body{background:#fff}}
+/* export mode: one diagram, nothing else (used to render thesis figures) */
+body.export{background:#ffffff;margin:0}
+body.export main{display:none}
+body.export #exportHost{display:block}
+#exportHost{display:none;line-height:0}
+#exportHost svg{display:block}
+#exportHost .legend{line-height:1.4;margin:0;padding:10px 14px;font-size:15px;color:#1d1f23}
+</style>
+</head>
+<body>
+<div id="exportHost"></div>
+<main>
+<h1>Factory floor layouts A–O and tiled floors</h1>
+<p class="muted">Every layout puts 15 machines on the same 4 × 4 grid, with the same machine positions, jobs and random seeds. Two things change. The <b>belt pattern</b> (which side of each machine its input and output belts face) has five options, the columns below. The <b>aisle topology</b> has three options, the rows: one-way everywhere (A–E), two-way row aisles (F–J), or a two-way perimeter around one-way rows (K–O). Tiled floors then place copies of one layout side by side.</p>
+
+<div class="legend" id="legend"></div>
+
+<h2>Layout detail</h2>
+<div class="tabgroups" id="tabs"></div>
+<div class="feature" id="feature"></div>
+
+<h2>All fifteen layouts</h2>
+<p class="muted">Each column has one belt pattern and each row one aisle topology, so F, K (and G, L ...) share A's (and B's ...) belts. Drawn to a common scale: two-way rows make the floor deeper, and a two-way perimeter makes it wider and deeper. Click a floor to open it above.</p>
+<div class="matrix" id="matrix"></div>
+
+<h2>Results</h2>
+<p class="muted">Each family was first tested in its own sweep, so the tables use different settings. The last tab has all 15 layouts on the same footing. That is the RL training distribution (<code>rnd_load</code>), which is machine-bound, and there the layouts differ by no more than about 4%.</p>
+<div class="tabs" id="restabs"></div>
+<p class="note" id="rescaption"></p>
+<div class="tablewrap"><table id="results"></table></div>
+
+<h2>Tiled floors</h2>
+<p class="muted">Floors with more than 15 machines are built as tiles: complete copies of one 15-machine layout placed west to east with a 3-unit seam between them. Every tile has its own loop, input belt, output belt and parking lane. Because every tile's loop runs clockwise, the right vertical of one tile (southbound) runs next to the left vertical of the next tile (northbound), so the seam has no crossings.</p>
+<div class="controls" id="tilecontrols"></div>
+<div class="tilebox" id="tilebox"></div>
+<p class="note" id="tilenote"></p>
+
+<div class="cols2">
+  <div>
+    <h3 style="font-size:16px;margin:18px 0 4px">Isolated tiles vs one large floor</h3>
+    <p class="muted" style="font-size:13.5px">Steady load, SPT_SRWT, layout D, about 1 AGV per 3 machines, failures off.</p>
+    <div class="tablewrap"><table id="tiletbl1"></table></div>
+  </div>
+  <div>
+    <h3 style="font-size:16px;margin:18px 0 4px">Linked 7-tile floor by tile layout</h3>
+    <p class="muted" style="font-size:13.5px"><code>e4_steady_m105</code>, 49 AGVs, SPT_TECT, failures off.</p>
+    <div class="tablewrap"><table id="tiletbl2"></table></div>
+  </div>
+</div>
+<h3 style="font-size:16px;margin:22px 0 4px">Scale sweep: isolated → linked (mean flow, s)</h3>
+<p class="muted" style="font-size:13.5px">Steady load, layout D, 7 AGVs per tile. Isolated tiles stay flat as the floor grows. A linked floor stays close to that only with the travel-aware TECT rule.</p>
+<div class="tablewrap"><table id="tiletbl3"></table></div>
+
+<footer>Sources: docs/features/LAYOUT_CONFIGURATION_SCOPE.md §16 (A–E), §19 (F–J), §20 (K–O); docs/features/TILED_LAYOUT_SCOPE.md §9–10; docs/experiments/E4_E6_LINKED_PERIMETER_findings_0928.md §2, §5, §6 (AGVR); docs/experiments/E1_E2_findings.md §6b. The diagrams are schematic, but they follow the zone graphs built by <code>TrafficZoneManager</code>: lane directions, which lane each dock sits on, lane changes, belt and parking positions, and seam bridges. Proportions are approximate. Real floors are 26.5 × 47 (A–E), 26.5 × 56 (F–J) and 33.5 × 55 (K–O) units.</footer>
+</main>
+
+<script>
+// ───────────────────────── data ─────────────────────────
+const PATTERNS = {
+  A:{name:"Original", belts:r=> r===0?["S","S"]:["N","N"], short:"row 0 south, others north"},
+  B:{name:"All north", belts:()=>["N","N"], short:"all north"},
+  C:{name:"All south", belts:()=>["S","S"], short:"all south"},
+  D:{name:"Passthrough N→S", belts:()=>["N","S"], short:"in north, out south"},
+  E:{name:"Passthrough S→N", belts:()=>["S","N"], short:"in south, out north"}
+};
+const FAMILIES = {
+  one:  {label:"One-way", sub:"A–E", ids:"ABCDE", floor:"26.5 × 47"},
+  rows: {label:"Two-way rows", sub:"F–J", ids:"FGHIJ", floor:"26.5 × 56"},
+  perim:{label:"Two-way perimeter", sub:"K–O", ids:"KLMNO", floor:"33.5 × 55"}
+};
+// AGVR (rnd_load_s0-8, 9 seeds, releasePrevious, machine-bound): mean flow, % vs D
+const AGVR = {
+  A:[2602,"+0.3",2642,"+2.6",2599,"-0.6",2605,"-0.4"], B:[2586,"-0.3",2616,"+1.7",2564,"-1.8",2600,"-0.6"],
+  C:[2673,"+3.0",2685,"+4.1",2602,"-0.2",2610,"-0.2"], D:[2596,"",2585,"",2616,"",2619,""],
+  E:[2573,"-0.5",2603,"+1.1",2574,"-1.1",2578,"-1.2"], F:[2625,"+1.1",2636,"+2.0",2615,"+0.3",2597,"-0.6"],
+  G:[2601,"+0.3",2611,"+1.3",2583,"-1.2",2572,"-1.7"], H:[2637,"+1.7",2648,"+2.9",2621,"+0.6",2628,"+0.9"],
+  I:[2600,"+0.5",2589,"+0.6",2570,"-1.5",2608,"-0.0"], J:[2596,"+0.1",2590,"+0.6",2585,"-0.9",2575,"-1.2"],
+  K:[2630,"+1.4",2636,"+2.7",2653,"+1.6",2642,"+1.3"], L:[2632,"+1.5",2649,"+2.8",2603,"-0.2",2603,"-0.5"],
+  M:[2654,"+2.2",2646,"+2.6",2629,"+0.6",2604,"-0.4"], N:[2600,"+0.5",2638,"+2.5",2622,"+0.7",2590,"-0.9"],
+  O:[2673,"+3.1",2665,"+3.7",2610,"+0.0",2619,"+0.2"]
+};
+// §19: F-J vs D, _mfsweep_control, failures off, holdPrevious, 1 seed
+const TW = {cols:["D","F","G","H","I","J"], rows:[
+  ["SPT_SRWT",5,[182.0,217.2,187.7,216.0,189.7,186.4]],["SPT_SRWT",7,[181.8,200.7,182.3,198.5,188.9,188.8]],
+  ["SPT_SRWT",9,[192.8,206.2,184.7,208.5,200.1,192.0]],["SPT_SRWT",15,[196.8,209.2,186.2,216.0,205.4,196.1]],
+  ["LRT_MMUR",5,[301.3,299.3,277.7,312.3,295.6,257.0]],["LRT_MMUR",7,[288.0,269.6,252.7,284.6,269.6,247.5]],
+  ["LRT_MMUR",9,[288.8,257.2,274.3,302.3,281.7,250.8]],["LRT_MMUR",15,[290.2,271.9,274.6,310.8,305.2,244.6]]]};
+// §20.2: K-O (v2, safe entries) vs D and J, _mfsweep_control, failures off, releasePrevious, 1 seed
+const PERIM = {cols:["D","J","K","L","M","N","O"], rows:[
+  ["SPT_SRWT",3,[1276,1076,1657,1970,1854,1636,2246]],["SPT_SRWT",5,[180.7,171.8,269.3,412.5,264.7,224.6,494.5]],
+  ["SPT_SRWT",7,[175.4,169.7,207.2,202.6,197.6,189.0,207.2]],["SPT_SRWT",9,[182.0,174.8,210.0,209.5,198.7,195.7,213.9]],
+  ["SPT_SRWT",15,[184.7,172.2,211.0,214.8,207.5,200.3,215.8]],["LRT_MMUR",5,[299.6,251.0,394.2,452.4,387.2,366.4,607.4]],
+  ["LRT_MMUR",7,[265.7,237.9,290.6,307.0,312.0,260.5,306.9]],["LRT_MMUR",9,[270.1,241.1,318.7,328.2,307.3,292.4,299.5]],
+  ["LRT_MMUR",15,[280.8,240.1,321.8,328.5,330.0,287.3,314.6]]]};
+// §16: A-E, failures on, holdPrevious, 500 runs
+const AE = {
+  A:{flow:470, dead:31, off7:221, fleet:[0,16,15]}, B:{flow:377, dead:14, off7:195, fleet:[0,8,6]},
+  C:{flow:420, dead:5, off7:201, fleet:[0,2,3]},    D:{flow:373, dead:9, off7:184, fleet:[0,6,3]},
+  E:{flow:458, dead:6, off7:208, fleet:[0,2,4]}
+};
+
+const LAYOUTS = {
+  A:{fam:"one", base:"A",
+     desc:"Row 0 faces south and every other row faces north, so each machine is loaded and unloaded from one aisle. The bottom spine carries no dock traffic. This is the floor every result before 2026-09-21 was run on.",
+     note:"Not viable near 1:1. It deadlocked in 75% of runs at 15 AGVs under holdPrevious."},
+  B:{fam:"one", base:"B",
+     desc:"Every machine faces north. Row 0 now docks on the top spine, so the top spine becomes a working aisle.",
+     note:"Second-fastest of A–E, and it travels the least distance."},
+  C:{fam:"one", base:"C",
+     desc:"Every machine faces south. The last row docks on the bottom spine, next to the parking gateway.",
+     note:"Fewest deadlocks at every fleet size under holdPrevious, but about 13% slower than D."},
+  D:{fam:"one", base:"D", chosen:true,
+     desc:"Material enters from the north and leaves to the south. A machine's dropoff and pickup happen on different aisles, which spreads traffic across the floor.",
+     note:"The default layout since 2026-09-22. It is the fastest of A–E at 5–9 AGVs and ties C at 1:1. It is also the tile used for every tiled floor."},
+  E:{fam:"one", base:"E",
+     desc:"The mirror of D: material enters from the south and leaves to the north.",
+     note:"Nearly as deadlock-resistant as C, but among the slowest of A–E."},
+  F:{fam:"rows", base:"A",
+     desc:"A's belt pattern on two-way row aisles. Each row aisle is two stacked one-way lanes: the north lane runs west and the south lane runs east. The perimeter stays one-way. A dock is served only from the lane beside it.",
+     note:"Slower than D with SRWT (by 10–19%). Helps MMUR by up to 11%."},
+  G:{fam:"rows", base:"B",
+     desc:"North-facing belts on two-way rows. Every dock sits on the south (eastbound) lane of the aisle above its machine, so each aisle has one dock lane and one lane that is only for through traffic.",
+     note:"Matches D with SRWT and beats it by up to 12% with MMUR. One of the two strongest two-way layouts."},
+  H:{fam:"rows", base:"C",
+     desc:"South-facing belts on two-way rows. Docks sit on the north (westbound) lane of the aisle below, so again one dock lane and one through lane per aisle.",
+     note:"The weakest of F–J. Slower than D with both rules at most fleet sizes."},
+  I:{fam:"rows", base:"D",
+     desc:"D's passthrough pattern on two-way rows. Inputs dock on the eastbound lane above a machine and outputs on the westbound lane below it, so both lanes of every aisle carry docks.",
+     note:"Between D and J: a small loss with SRWT and a small gain with MMUR."},
+  J:{fam:"rows", base:"E",
+     desc:"E's passthrough pattern (input south, output north) on two-way rows. Both lanes of every aisle carry docks.",
+     note:"The best layout overall: best or tied almost everywhere in E1_rel3 (9 AGVs over all scenarios: J 581, G 592, C 612, D 621 s), and up to 16% faster than D with MMUR.", best:true},
+  K:{fam:"perim", base:"A",
+     desc:"A's belt pattern with one-way rows inside a two-way perimeter. The outer lane is the usual clockwise loop (belts, parking, seam bridges). The inner lane, next to the machines, runs counter-clockwise and serves the row ends and the spine docks.",
+     note:"Slower than D at every fleet size. The cost is longer paths, not congestion."},
+  L:{fam:"perim", base:"B",
+     desc:"North-facing belts inside a two-way perimeter. Row 0 docks on the inner (westbound) top lane.",
+     note:"18–26% slower than D at 7 AGVs."},
+  M:{fam:"perim", base:"C",
+     desc:"South-facing belts inside a two-way perimeter. The last row docks on the inner (eastbound) bottom lane.",
+     note:"Slower than D with both rules."},
+  N:{fam:"perim", base:"D",
+     desc:"D's passthrough pattern inside a two-way perimeter. Row 0 inputs dock on the inner top lane and last-row outputs on the inner bottom lane.",
+     note:"The best of K–O, but still 8–9% behind D with SRWT. On a linked 7-tile floor it is 3.8 times slower than D."},
+  O:{fam:"perim", base:"E",
+     desc:"E's pattern inside a two-way perimeter.",
+     note:"Among the slowest of K–O. On rnd_load, O and C (the south-facing belt patterns) are the only layouts that are consistently slower than D, by 3–4% with SPT_ECT."}
+};
+
+function statsFor(id){
+  const L=LAYOUTS[id], ag=AGVR[id];
+  const agv = `<div class="stat"><b>${ag[0]} s</b><small>rnd_load, SPT_ECT, 7 AGVs, 9 seeds${ag[1]?` (${ag[1]}% vs D)`:" (reference)"}. Machine-bound, so differences are mostly noise.</small></div>`;
+  const floor = `<div class="stat"><b>${FAMILIES[L.fam].floor}</b><small>floor size (units), one tile</small></div>`;
+  if(L.fam==="one"){
+    const a=AE[id];
+    return `<div class="stat"><b>${a.flow} s</b><small>mean flow, 5–9 AGVs, failures on, both rules (holdPrevious)</small></div>
+     <div class="stat"><b style="color:${a.dead>20?'var(--bad)':'inherit'}">${a.dead} / 100</b><small>runs deadlocked, 5–15 AGVs (holdPrevious)</small></div>
+     <div class="stat"><b>${a.off7} s</b><small>mean flow, 7 AGVs, failures off (SRWT)</small></div>
+     <div class="stat"><b>${a.fleet[1]} · ${a.fleet[2]}</b><small>deadlocks / 20 at 12 · 15 AGVs (0 under releasePrevious)</small></div>${agv}${floor}`;
+  }
+  const T = L.fam==="rows"?TW:PERIM, ci=T.cols.indexOf(id), di=T.cols.indexOf("D");
+  const cell=(rule,n)=>{const r=T.rows.find(x=>x[0]===rule&&x[1]===n);const v=r[2][ci],d=r[2][di];const pct=(v/d-1)*100;
+    return [v, `${pct>=0?"+":""}${pct.toFixed(0)}% vs D (${d})`, pct];};
+  const s7=cell("SPT_SRWT",7), m7=cell("LRT_MMUR",7), m15=cell("LRT_MMUR",15), s15=cell("SPT_SRWT",15);
+  const col=p=>p<-1?'var(--good)':p>5?'var(--bad)':'inherit';
+  const proto = L.fam==="rows"?"holdPrevious":"releasePrevious";
+  return `<div class="stat"><b style="color:${col(s7[2])}">${s7[0]} s</b><small>SPT_SRWT, 7 AGVs: ${s7[1]}</small></div>
+   <div class="stat"><b style="color:${col(m7[2])}">${m7[0]} s</b><small>LRT_MMUR, 7 AGVs: ${m7[1]}</small></div>
+   <div class="stat"><b style="color:${col(s15[2])}">${s15[0]} s</b><small>SPT_SRWT, 15 AGVs: ${s15[1]}</small></div>
+   <div class="stat"><b style="color:${col(m15[2])}">${m15[0]} s</b><small>LRT_MMUR, 15 AGVs: ${m15[1]}</small></div>${agv}${floor}
+   <small class="muted" style="grid-column:1/-1">Top four: mean flow on <code>_mfsweep_control</code>, failures off, ${proto}, 1 seed. 0 deadlocks or collisions from 3 to 15 AGVs.</small>`;
+}
+
+// ───────────────────────── geometry ─────────────────────────
+const COLS=4, ROWS=4, N=15, MW=4, MD=3, SX=6, LANE=3;
+const geomCache={};
+function geom(id){
+  if(geomCache[id]) return geomCache[id];
+  const fam=LAYOUTS[id].fam, perim=fam==="perim", rows=fam==="rows";
+  const VW=perim?2*LANE:LANE, SH=perim?2*LANE:LANE, AH=rows?2*LANE:LANE;
+  const X0=VW+0.5, W=X0+SX*(COLS-1)+MW+2+VW;
+  const top=[0.5,0.5+SH], rowY=[], aisles=[];
+  let y=top[1]+0.5;
+  for(let r=0;r<ROWS;r++){rowY.push(y); y+=MD+0.5; if(r<ROWS-1){aisles.push([y,y+AH]); y+=AH+0.5;}}
+  const bot=[y,y+SH];
+  const aisleDir=a=>a%2===0?"W":"E";
+  // horizontal lanes: {y0,y1,dir,kind}
+  const hl=[];
+  if(perim){hl.push({y0:top[0],y1:top[0]+LANE,dir:"E",kind:"outer"},{y0:top[0]+LANE,y1:top[1],dir:"W",kind:"inner"},
+                    {y0:bot[0],y1:bot[0]+LANE,dir:"E",kind:"inner"},{y0:bot[0]+LANE,y1:bot[1],dir:"W",kind:"outer"});}
+  else {hl.push({y0:top[0],y1:top[1],dir:"E",kind:"spine"},{y0:bot[0],y1:bot[1],dir:"W",kind:"spine"});}
+  aisles.forEach((b,a)=>{
+    if(rows){hl.push({y0:b[0],y1:b[0]+LANE,dir:"W",kind:"row"},{y0:b[0]+LANE,y1:b[1],dir:"E",kind:"row"});}
+    else hl.push({y0:b[0],y1:b[1],dir:aisleDir(a),kind:"row"});
+  });
+  // vertical lanes: {x0,x1,dir}
+  const vl = perim ? [{x0:0,x1:LANE,dir:"N"},{x0:LANE,x1:2*LANE,dir:"S"},{x0:W-2*LANE,x1:W-LANE,dir:"N"},{x0:W-LANE,x1:W,dir:"S"}]
+                   : [{x0:0,x1:LANE,dir:"N"},{x0:W-LANE,x1:W,dir:"S"}];
+  // the band a machine side docks on (the lane beside the machine)
+  function dockBand(r,side){
+    if(side==="N"){
+      if(r===0) return perim?[top[0]+LANE,top[1]]:top;
+      const b=aisles[r-1]; return rows?[b[0]+LANE,b[1]]:b;
+    }
+    if(r===ROWS-1) return perim?[bot[0],bot[0]+LANE]:bot;
+    const b=aisles[r]; return rows?[b[0],b[0]+LANE]:b;
+  }
+  const g={id,fam,perim,rows,VW,SH,AH,X0,W,top,bot,rowY,aisles,aisleDir,hl,vl,dockBand,
+    colX:c=>X0+SX*c, gapX:[...Array(COLS-1).keys()].map(c=>X0+SX*c+MW+1)};
+  g.parkY=bot[1]+2.2; g.H=g.parkY+5.8;
+  return geomCache[id]=g;
+}
+const MAXW=Math.max(...Object.keys(LAYOUTS).map(id=>geom(id).W));
+const MAXH=Math.max(...Object.keys(LAYOUTS).map(id=>geom(id).H));
+
+// ───────────────────────── drawing ─────────────────────────
+const NS="http://www.w3.org/2000/svg";
+function el(tag,attrs,parent,text){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;if(parent)parent.appendChild(e);return e;}
+function arrow(g,x,y,dir,size,fill){
+  const s=size||0.9, d={E:[1,0],W:[-1,0],N:[0,-1],S:[0,1]}[dir], px=-d[1], py=d[0];
+  const tip=[x+d[0]*s,y+d[1]*s], b1=[x-d[0]*s+px*s*0.75,y-d[1]*s+py*s*0.75], b2=[x-d[0]*s-px*s*0.75,y-d[1]*s-py*s*0.75];
+  el("polygon",{points:[tip,b1,b2].map(p=>p.map(v=>+v.toFixed(3)).join(",")).join(" "),fill:fill||"var(--arrow)"},g);
+}
+// a lane change: short horizontal arrow from lane centre x1 to lane centre x2 at height y
+function laneChange(g,x1,x2,y){
+  const dir=x2>x1?1:-1;
+  el("line",{x1,y1:y,x2:x2-dir*0.7,y2:y,stroke:"var(--lc)","stroke-width":0.32,"stroke-linecap":"round"},g);
+  arrow(g,x2-dir*0.45,y,dir>0?"E":"W",0.5,"var(--lc)");
+}
+let uid=0;
+/** Draws one 15-machine floor into group `g` (floor origin at 0,0). Returns its geometry. */
+function drawFloor(g,id,{labels=true,bays=7,walls=null,outLabel=false}={}){
+  const G=geom(id), P=PATTERNS[LAYOUTS[id].base], W=G.W, myid="p"+(uid++);
+  el("rect",{x:0,y:0,width:W,height:G.bot[1]+0.5,fill:"var(--floor)",rx:0.6},g);
+  // aisle surfaces
+  el("rect",{x:0,y:G.top[0],width:W,height:G.SH,fill:"var(--aisle)"},g);
+  el("rect",{x:0,y:G.bot[0],width:W,height:G.SH,fill:"var(--aisle)"},g);
+  G.aisles.forEach(b=>el("rect",{x:0,y:b[0],width:W,height:b[1]-b[0],fill:"var(--aisle)"},g));
+  el("rect",{x:0,y:G.top[0],width:G.VW,height:G.bot[1]-G.top[0],fill:"var(--aisle)"},g);
+  el("rect",{x:W-G.VW,y:G.top[0],width:G.VW,height:G.bot[1]-G.top[0],fill:"var(--aisle)"},g);
+  // lane dividers
+  const dash={stroke:"var(--lane)","stroke-width":0.14,"stroke-dasharray":"0.6 0.45",fill:"none"};
+  if(G.rows) G.aisles.forEach(b=>el("line",{x1:G.VW,y1:b[0]+LANE,x2:W-G.VW,y2:b[0]+LANE,...dash},g));
+  if(G.perim) el("rect",{x:LANE,y:G.top[0]+LANE,width:W-2*LANE,height:G.bot[1]-G.top[0]-2*LANE,...dash},g);
+  // docks (under machines and arrows)
+  const defs=el("defs",{},g);
+  const pat=el("pattern",{id:"both"+myid,width:1.2,height:1.2,patternUnits:"userSpaceOnUse",patternTransform:"rotate(45)"},defs);
+  el("rect",{width:0.6,height:1.2,fill:"var(--in)"},pat); el("rect",{x:0.6,width:0.6,height:1.2,fill:"var(--out)"},pat);
+  for(let i=0;i<N;i++){
+    const r=Math.floor(i/COLS), c=i%COLS, [inS,outS]=P.belts(r);
+    const x=G.colX(c)+0.3, w=MW-0.6;
+    const sides = inS===outS ? [[inS,"both"]] : [[inS,"in"],[outS,"out"]];
+    sides.forEach(([side,role])=>{
+      const b=G.dockBand(r,side);
+      const fill = role==="in"?"var(--in)":role==="out"?"var(--out)":`url(#both${myid})`;
+      const y0 = side==="N" ? b[1]-1.5 : b[0]+0.15;
+      el("rect",{x,y:y0,width:w,height:1.35,fill,opacity:0.45,rx:0.25},g);
+    });
+  }
+  // direction arrows: horizontal lanes in the gaps between machine columns, verticals beside each machine row
+  G.hl.forEach(l=>{const y=(l.y0+l.y1)/2; G.gapX.forEach(x=>arrow(g,x,y,l.dir,0.55));});
+  G.vl.forEach(l=>{const x=(l.x0+l.x1)/2; G.rowY.forEach(ry=>arrow(g,x,ry+MD/2,l.dir,0.55));});
+  // lane changes on the two-way perimeter (TrafficZoneManager.BuildPerimeterTwoWayGraph)
+  if(G.perim){
+    const lo=LANE/2, li=LANE*1.5, ro=W-LANE/2, ri=W-LANE*1.5;
+    const exitsL=[], exitsR=[];
+    G.aisles.forEach((b,a)=>{const y=(b[0]+b[1])/2;
+      if(G.aisleDir(a)==="W"){laneChange(g,li,lo,y);exitsL.push(a);} else {laneChange(g,ri,ro,y);exitsR.push(a);} });
+    laneChange(g,lo,li,G.bot[0]+LANE/2);           // SW crossover, outer -> inner
+    laneChange(g,ro,ri,G.top[0]+LANE*1.5);         // NE crossover, outer -> inner
+    // safe entries: right vertical above every right exit, left vertical below every left exit
+    G.aisles.forEach((b,a)=>{const y=(b[0]+b[1])/2;
+      if(G.aisleDir(a)==="W" && exitsR.every(e=>a<e)) laneChange(g,ro,ri,y);
+      if(G.aisleDir(a)==="E" && exitsL.every(e=>a>e)) laneChange(g,lo,li,y);});
+  }
+  // machines and belts
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const i=r*COLS+c, x=G.colX(c), y=G.rowY[r];
+    if(i>=N){el("rect",{x,y,width:MW,height:MD,fill:"none",stroke:"var(--empty)","stroke-dasharray":"0.4 0.3","stroke-width":0.12,rx:0.3},g);continue;}
+    el("rect",{x,y,width:MW,height:MD,fill:"var(--machine)",rx:0.3},g);
+    if(labels) el("text",{x:x+MW/2,y:y+MD/2+0.4,"text-anchor":"middle","font-size":1.1,fill:"var(--machine-ink)","font-weight":600},g,"M"+i);
+    const [inS,outS]=P.belts(r);
+    const beltY=s=> s==="N"? y-0.55 : y+MD-0.05;
+    if(inS===outS){
+      el("rect",{x:x+0.35,y:beltY(inS),width:1.5,height:0.6,fill:"var(--in)",rx:0.12},g);
+      el("rect",{x:x+MW-1.85,y:beltY(outS),width:1.5,height:0.6,fill:"var(--out)",rx:0.12},g);
+    }else{
+      el("rect",{x:x+0.6,y:beltY(inS),width:MW-1.2,height:0.6,fill:"var(--in)",rx:0.12},g);
+      el("rect",{x:x+0.6,y:beltY(outS),width:MW-1.2,height:0.6,fill:"var(--out)",rx:0.12},g);
+    }
+  }
+  // plant input belt (north-west, outer top lane) and output belt (south-east, outer bottom lane)
+  // (the corner zones LeftVert_TopConn / RightVert_BotConn, on the outer lane of a two-way perimeter)
+  el("rect",{x:0.4,y:G.top[0]+0.4,width:LANE-0.8,height:LANE-0.8,fill:"none",stroke:"var(--in)","stroke-width":0.3,rx:0.25},g);
+  el("rect",{x:W-LANE+0.4,y:G.bot[1]-LANE+0.4,width:LANE-0.8,height:LANE-0.8,fill:"none",stroke:"var(--out)","stroke-width":0.3,rx:0.25},g);
+  if(labels){
+    el("text",{x:0.2,y:-0.7,"font-size":1.15,fill:"var(--in)","font-weight":600},g,"▼ raw jobs in");
+    el("text",{x:W-0.2,y:-0.7,"text-anchor":"end","font-size":1.15,fill:"var(--muted)"},g,"top spine →");
+  }
+  if(labels || outLabel){
+    // in the empty machine slot, just above the output corner
+    const sx=G.colX(COLS-1)+MW/2, sy=G.rowY[ROWS-1];
+    el("text",{x:sx,y:sy+1.25,"text-anchor":"middle","font-size":1.0,fill:"var(--out)","font-weight":600},g,"finished");
+    el("text",{x:sx,y:sy+2.45,"text-anchor":"middle","font-size":1.0,fill:"var(--out)","font-weight":600},g,"out ↘");
+  }
+  // parking lane: one bay per AGV, enter bottom-right, exit bottom-left
+  const ly=G.parkY;
+  el("rect",{x:0,y:ly,width:W,height:2.3,fill:"none",stroke:"var(--park)","stroke-width":0.2,rx:0.4},g);
+  const span=W-2*G.VW-2, step=span/Math.max(bays,1);
+  for(let k=0;k<bays;k++){const bx=G.VW+1+step*(k+0.5)-0.9; el("rect",{x:bx,y:ly+(k%2?2.55:-1.75),width:1.8,height:1.2,fill:"var(--bay)",stroke:"var(--park)","stroke-width":0.1,rx:0.2},g);}
+  [0.78,0.5,0.22].forEach(f=>arrow(g,W*f,ly+1.15,"W",0.5));
+  el("line",{x1:W-LANE/2,y1:G.bot[1],x2:W-LANE/2,y2:ly,stroke:"var(--park)","stroke-width":0.2},g);
+  el("line",{x1:LANE/2,y1:ly,x2:LANE/2,y2:G.bot[1],stroke:"var(--park)","stroke-width":0.2},g);
+  if(labels) el("text",{x:W/2,y:ly+5.2,"text-anchor":"middle","font-size":1.15,fill:"var(--park)"},g,"parking lane: one bay per AGV, enter right, exit left");
+  // walls (tiles only): openings in a wall are [y0,y1] ranges
+  if(walls){
+    const ws={stroke:"var(--wall)","stroke-width":0.35,"stroke-linecap":"square"}, yb=G.bot[1]+0.5;
+    el("line",{x1:0,y1:0,x2:W,y2:0,...ws},g);
+    el("line",{x1:0,y1:yb,x2:W,y2:yb,...ws},g);
+    const side=(x,gaps)=>{let y=0;[...gaps].sort((a,b)=>a[0]-b[0]).forEach(([a,b])=>{if(a>y)el("line",{x1:x,y1:y,x2:x,y2:a,...ws},g);y=b;});if(y<yb)el("line",{x1:x,y1:y,x2:x,y2:yb,...ws},g);};
+    side(0,walls.left||[]); side(W,walls.right||[]);
+  }
+  return G;
+}
+
+function floorSvg(id,{labels=true,scaleTo=null}={}){
+  const G=geom(id);
+  const vbW=(scaleTo?scaleTo.w:G.W)+1, vbH=(scaleTo?scaleTo.h:G.H)+3.2;
+  const svg=el("svg",{viewBox:`-0.5 -3.2 ${vbW} ${vbH}`,role:"img","aria-label":`Layout ${id}: ${FAMILIES[LAYOUTS[id].fam].label}, ${PATTERNS[LAYOUTS[id].base].name}`});
+  // centre a smaller floor inside a common-scale box
+  const g=el("g",{transform:scaleTo?`translate(${(scaleTo.w-G.W)/2},${scaleTo.h-G.H})`:""},svg);
+  drawFloor(g,id,{labels});
+  return svg;
+}
+
+/** The lanes the seam bridges join: the whole spine on D/J tiles, only the outer ring on K-O tiles. */
+function bridgedLanes(G){
+  return G.perim ? {top:[G.top[0],G.top[0]+LANE], bot:[G.bot[1]-LANE,G.bot[1]]} : {top:G.top, bot:G.bot};
+}
+function tilesSvg(id,n,linked,{labels=true}={}){
+  const G=geom(id), SEAM=3, TW=n*G.W+(n-1)*SEAM, vbH=G.H+3.2;
+  const svg=el("svg",{viewBox:`-0.5 -3.2 ${TW+1} ${vbH}`,role:"img","aria-label":`${n} ${linked?"linked":"isolated"} tiles of layout ${id}`});
+  const br=bridgedLanes(G);
+  for(let t=0;t<n;t++){
+    const ox=t*(G.W+SEAM), g=el("g",{transform:`translate(${ox},0)`},svg);
+    const walls = linked ? {left:t>0?[br.top,br.bot]:[], right:t<n-1?[br.top,br.bot]:[]} : {};
+    drawFloor(g,id,{labels:false,bays:7,walls,outLabel:labels});
+    if(labels){
+      el("text",{x:0.2,y:-0.75,"font-size":1.25,fill:"var(--in)","font-weight":600},g,"▼ in");
+      el("text",{x:G.W/2,y:-0.75,"text-anchor":"middle","font-size":1.35,fill:"var(--ink)","font-weight":700},g,`tile ${t}`);
+    }
+    if(linked && t<n-1){
+      const sx=ox+G.W;
+      [[br.top,"E"],[br.bot,"W"]].forEach(([b,dir])=>{
+        el("rect",{x:sx-0.2,y:b[0],width:SEAM+0.4,height:b[1]-b[0],fill:"var(--aisle)"},svg);
+        el("rect",{x:sx,y:b[0]+0.25,width:SEAM,height:b[1]-b[0]-0.5,fill:"var(--bridge)",rx:0.3},svg);
+        arrow(svg,sx+SEAM/2,(b[0]+b[1])/2,dir,0.6,"var(--lc)");
+      });
+    }
+  }
+  return svg;
+}
+
+// ───────────────────────── legend ─────────────────────────
+const LEGEND=[["var(--in)","Input belt / dropoff dock"],["var(--out)","Output belt / pickup dock"],["var(--machine)","Machine"],
+  ["var(--aisle)","One-way lane (arrows give the direction)"],["dash","Divider between two one-way lanes"],
+  ["lc","Lane change (two-way perimeter) / seam bridge"],["var(--park)","Parking lane"],["wall","Tile wall"]];
+function legendHtml(){
+  return LEGEND.map(([c,t])=>{const cls=c==="dash"?"sw dash":c==="lc"?"sw lc":c==="wall"?"sw wall":"sw";
+    return `<span><i class="${cls}" ${c.startsWith("var")?`style="background:${c}"`:""}></i>${t}</span>`;}).join("");
+}
+
+// ───────────────────────── export mode ─────────────────────────
+// ?export=floor&id=D | ?export=tiles&id=D&n=7&mode=linked | ?export=legend ; &s=<px per unit>
+const Q=new URLSearchParams(location.search);
+if(Q.get("export")){
+  document.documentElement.setAttribute("data-theme","light");
+  document.body.classList.add("export");
+  const host=document.getElementById("exportHost"), kind=Q.get("export"), s=+(Q.get("s")||24);
+  let svg;
+  if(kind==="floor") svg=floorSvg(Q.get("id")||"D");
+  else if(kind==="tiles") svg=tilesSvg(Q.get("id")||"D",+(Q.get("n")||7),Q.get("mode")==="linked");
+  if(svg){
+    const vb=svg.getAttribute("viewBox").split(" ").map(Number);
+    const w=Math.ceil(vb[2]*s), h=Math.ceil(vb[3]*s);
+    svg.setAttribute("width",w); svg.setAttribute("height",h);
+    host.appendChild(svg); document.body.setAttribute("data-size",`${w}x${h}`);
+  }else if(kind==="legend"){
+    const d=document.createElement("div"); d.className="legend"; d.style.width="760px"; d.innerHTML=legendHtml(); host.appendChild(d);
+    document.body.setAttribute("data-size","760x96");
+  }
+}
+
+// ───────────────────────── page ─────────────────────────
+document.getElementById("legend").innerHTML=legendHtml();
+const tabs=document.getElementById("tabs"), feat=document.getElementById("feature"), matrix=document.getElementById("matrix");
+let current="D";
+try{const s=localStorage.getItem("layoutTab");if(s&&LAYOUTS[s])current=s;}catch(e){}
+
+function select(id){
+  current=id; try{localStorage.setItem("layoutTab",id);}catch(e){}
+  tabs.querySelectorAll("button.tab").forEach(b=>b.setAttribute("aria-selected",b.dataset.id===id));
+  matrix.querySelectorAll(".mini").forEach(m=>m.classList.toggle("sel",m.dataset.id===id));
+  const L=LAYOUTS[id], F=FAMILIES[L.fam], P=PATTERNS[L.base];
+  feat.innerHTML="";
+  const left=document.createElement("div"); left.appendChild(floorSvg(id)); feat.appendChild(left);
+  const right=document.createElement("div");
+  const badge = L.chosen?'<span class="badge" style="color:var(--in)">default</span>':L.best?'<span class="badge" style="color:var(--good)">best overall</span>':'';
+  right.innerHTML=`<h3>Layout ${id}${badge}</h3>
+   <p class="muted" style="margin-top:0">${F.label} aisles · belts ${P.short} (pattern ${L.base}${L.base!==id?`, as in layout ${L.base}`:""})</p>
+   <p>${L.desc}</p>
+   <div class="stats">${statsFor(id)}</div>
+   <p class="muted">${L.note}</p>`;
+  feat.appendChild(right);
+  document.querySelectorAll("#results tr[data-id]").forEach(tr=>tr.classList.toggle("sel",tr.dataset.id===id));
+}
+
+Object.entries(FAMILIES).forEach(([fk,F])=>{
+  const row=document.createElement("div"); row.className="tabgroup";
+  row.innerHTML=`<small>${F.label} (${F.sub})</small>`;
+  [...F.ids].forEach(id=>{
+    const b=document.createElement("button"); b.className="tab"; b.textContent=`${id} · ${PATTERNS[LAYOUTS[id].base].name}`;
+    b.dataset.id=id; b.setAttribute("role","tab"); b.onclick=()=>select(id); row.appendChild(b);
+  });
+  tabs.appendChild(row);
+});
+
+// matrix: columns = belt pattern, rows = aisle topology
+matrix.innerHTML=`<div class="corner"></div>`+Object.entries(PATTERNS).map(([k,P])=>`<div class="colh"><b>${P.name}</b>${P.short}</div>`).join("");
+Object.entries(FAMILIES).forEach(([fk,F])=>{
+  const h=document.createElement("div"); h.className="rowh"; h.innerHTML=`<b>${F.label}</b><small>${F.sub} · ${F.floor}</small>`; matrix.appendChild(h);
+  [...F.ids].forEach(id=>{
+    const m=document.createElement("div"); m.className="mini"; m.dataset.id=id;
+    m.onclick=()=>{select(id);feat.scrollIntoView({behavior:"smooth",block:"start"});};
+    m.innerHTML=`<h4>${id}</h4>`;
+    const svg=floorSvg(id,{labels:false,scaleTo:{w:MAXW,h:MAXH}}); svg.style.width="100%"; m.appendChild(svg);
+    const ag=AGVR[id]; const p=document.createElement("p"); p.textContent=`rnd_load ${ag[1]?ag[1]+"% vs D":"reference"}`; m.appendChild(p);
+    matrix.appendChild(m);
+  });
+});
+
+// results tables
+const restabs=document.getElementById("restabs"), tbl=document.getElementById("results"), cap=document.getElementById("rescaption");
+const fmt=v=>v>=1000?Math.round(v).toLocaleString("en-US"):(Number.isInteger(v)?v:v.toFixed(1));
+function sweepTable(T){
+  const head=`<thead><tr><th>Rule</th><th>AGVs</th>${T.cols.map(c=>`<th>${c}</th>`).join("")}</tr></thead>`;
+  return head+"<tbody>"+T.rows.map(([rule,n,v])=>{const m=Math.min(...v);
+    return `<tr><td>${rule}</td><td>${n}</td>${v.map((x,i)=>`<td class="${x===m?"best":T.cols[i]==="D"?"ref":""}">${fmt(x)}</td>`).join("")}</tr>`;}).join("")+"</tbody>";
+}
+const RESULTS={
+  ae:{label:"A–E · failures on",
+      cap:"500 runs: 5 layouts × 5 fleet sizes (5, 7, 9, 12, 15 AGVs) × 2 dispatching rules × 10 seeds. Parking lane, holdPrevious (the protocol at the time), Weibull machine failures. 0 AGV collisions in all 500 runs. Under releasePrevious, the default since 2026-09-26, no layout deadlocks at any fleet size up to 15.",
+      html:()=>{const maxFlow=Math.max(...Object.values(AE).map(a=>a.flow));
+        return `<thead><tr><th>Layout</th><th>Flow 5–9 AGVs (s)</th><th>Deadlocked 5–9</th><th>at 12 AGVs</th><th>at 15 AGVs</th><th>Total / 100</th></tr></thead><tbody>`+
+        Object.entries(AE).map(([id,a])=>`<tr data-id="${id}"><td><b>${id}</b> ${PATTERNS[id].name}</td>
+          <td>${a.flow}<span class="bar" style="width:${Math.round(a.flow/maxFlow*90)}px"></span></td>
+          <td>${a.fleet[0]}/60</td><td>${a.fleet[1]}/20</td><td>${a.fleet[2]}/20</td>
+          <td>${a.dead}<span class="bar bad" style="width:${a.dead*2.5}px"></span></td></tr>`).join("")+"</tbody>";}},
+  fj:{label:"F–J vs D",
+      cap:"Mean flow time (s). _mfsweep_control, failures off, holdPrevious, lane parking, 1 seed (deterministic). 0 deadlocks, stalls or collisions in all 60 two-way runs. Best in row in green.",
+      html:()=>sweepTable(TW)},
+  ko:{label:"K–O vs D and J",
+      cap:"Mean flow time (s). _mfsweep_control, failures off, releasePrevious, lane parking, 1 seed. K–O are the built version (v2, with safe entries). 144 runs, 0 collisions, deadlocks or unfinished jobs. Best in row in green.",
+      html:()=>sweepTable(PERIM)},
+  all:{label:"All 15 · rnd_load",
+      cap:"AGVR: mean flow (s) over rnd_load_s0–8 (9 seeds), releasePrevious, failures on, with the paired per-seed difference from D. The paired per-seed sd is 3–5%, so nearly every difference is inside seed noise. Only C and O with SPT_ECT are consistently slower.",
+      html:()=>`<thead><tr><th>Layout</th><th>SPT_ECT @7</th><th>SPT_ECT @12</th><th>SRT_TECT @7</th><th>SRT_TECT @12</th></tr></thead><tbody>`+
+        Object.entries(AGVR).map(([id,a])=>`<tr data-id="${id}"><td><b>${id}</b> <span class="muted">${FAMILIES[LAYOUTS[id].fam].label.toLowerCase()}, ${PATTERNS[LAYOUTS[id].base].short}</span></td>`+
+          [0,2,4,6].map(i=>`<td>${fmt(a[i])} <span class="muted">${a[i+1]?`(${a[i+1]}%)`:""}</span></td>`).join("")+"</tr>").join("")+"</tbody>"}
+};
+let curRes="ae";
+try{const s=localStorage.getItem("layoutResTab");if(s&&RESULTS[s])curRes=s;}catch(e){}
+function selectRes(k){
+  curRes=k; try{localStorage.setItem("layoutResTab",k);}catch(e){}
+  restabs.querySelectorAll("button").forEach(b=>b.setAttribute("aria-selected",b.dataset.k===k));
+  cap.textContent=RESULTS[k].cap; tbl.innerHTML=RESULTS[k].html();
+  tbl.querySelectorAll("tr[data-id]").forEach(tr=>tr.classList.toggle("sel",tr.dataset.id===current));
+}
+Object.entries(RESULTS).forEach(([k,R])=>{const b=document.createElement("button");b.className="tab";b.textContent=R.label;b.dataset.k=k;b.onclick=()=>selectRes(k);restabs.appendChild(b);});
+
+// tiled floors
+const tileState={mode:"linked",id:"D",n:7};
+try{const s=JSON.parse(localStorage.getItem("layoutTiles")||"null");if(s&&LAYOUTS[s.id])Object.assign(tileState,s);}catch(e){}
+const TILE_NOTES={
+  isolated:"Isolated tiles (phase 1): each tile has its own AGVs (7 here, the 1:2 knee) and its own jobs, and the walls are closed. A 7-tile floor behaves like 7 copies of one 15-machine floor: per-tile mean flow is 179–185 s.",
+  linked:"Linked tiles: seam bridges join every tile's top spine (eastbound) and bottom spine (westbound) to its neighbour's, the walls open at the spines, any AGV serves any tile, and a job can use any machine. Each AGV still parks in its home tile. The result is one coupled 105-machine floor with a single eastbound and a single westbound east–west lane. The girth stays 20.",
+  perim:" On K–O tiles only the outer ring is bridged. The inner lanes stay inside their tile, so the floor still has no westbound top lane."
+};
+const RUN={ "D-isolated":"run: TILE7_pilot, E4S_tiled", "D-linked":"run: LINK7_smoke, E4S_linked", "J-linked":"run: LINK7_perim", "N-linked":"run: LINK7_perim" };
+function renderTiles(){
+  try{localStorage.setItem("layoutTiles",JSON.stringify(tileState));}catch(e){}
+  const box=document.getElementById("tilebox"); box.innerHTML="";
+  const svg=tilesSvg(tileState.id,tileState.n,tileState.mode==="linked"); box.appendChild(svg);
+  svg.style.minWidth=Math.max(720,tileState.n*240)+"px";
+  const key=`${tileState.id}-${tileState.mode}`;
+  document.getElementById("tilenote").textContent=TILE_NOTES[tileState.mode]+(tileState.mode==="linked"&&geom(tileState.id).perim?TILE_NOTES.perim:"")+
+    (RUN[key]?` (${RUN[key]})`:" (This combination has not been run; the drawing only shows the geometry.)");
+  document.querySelectorAll("#tilecontrols button").forEach(b=>b.setAttribute("aria-pressed",String(tileState[b.dataset.k])===b.dataset.v));
+}
+const ctl=document.getElementById("tilecontrols");
+[["mode","Mode",[["isolated","Isolated"],["linked","Linked"]]],["id","Tile layout",[["D","D"],["J","J"],["N","N"]]],["n","Tiles",[["2","2"],["3","3"],["7","7"]]]]
+ .forEach(([k,lab,opts])=>{const l=document.createElement("label");l.textContent=lab;const seg=document.createElement("span");seg.className="seg";
+  opts.forEach(([v,t])=>{const b=document.createElement("button");b.textContent=t;b.dataset.k=k;b.dataset.v=v;
+    b.onclick=()=>{tileState[k]=k==="n"?+v:v;renderTiles();};seg.appendChild(b);});l.appendChild(seg);ctl.appendChild(l);});
+
+document.getElementById("tiletbl1").innerHTML=`<thead><tr><th>Floor</th><th>AGVs</th><th>Mean / p95 flow</th><th>Makespan</th></tr></thead><tbody>
+ <tr><td>1 floor, 100 machines</td><td>33</td><td>4,799 / 7,942</td><td>9,375</td></tr>
+ <tr><td>7 isolated tiles, 105</td><td>35</td><td class="best">181 / 225</td><td>3,776</td></tr>
+ <tr><td>7 isolated tiles, 105</td><td>49</td><td>181 / 213</td><td>3,787</td></tr></tbody>`;
+document.getElementById("tiletbl2").innerHTML=`<thead><tr><th>Tile layout</th><th>Floor</th><th>Mean flow</th><th>Cross-tile moves</th></tr></thead><tbody>
+ <tr><td>D (isolated, ref.)</td><td>203.5 × 47</td><td class="ref">175.0</td><td>0%</td></tr>
+ <tr><td>D</td><td>203.5 × 47</td><td class="best">199.5</td><td>42%</td></tr>
+ <tr><td>J, two-way rows</td><td>203.5 × 56</td><td>200.1</td><td>34%</td></tr>
+ <tr><td>N, two-way perimeter</td><td>252.5 × 55</td><td style="color:var(--bad)">761.9</td><td>39%</td></tr></tbody>`;
+document.getElementById("tiletbl3").innerHTML=`<thead><tr><th>Rule</th><th>15 (1 tile)</th><th>30</th><th>60</th><th>90</th><th>105 machines</th></tr></thead><tbody>
+ <tr><td>SPT_TECT</td><td>175</td><td>174 → 183</td><td>174 → 195</td><td>175 → 201</td><td>175 → 200</td></tr>
+ <tr><td>SPT_SRWT</td><td>175</td><td>175 → 206</td><td>176 → 912</td><td>176 → 1,555</td><td>177 → 1,855</td></tr></tbody>`;
+
+if(!Q.get("export")){ select(current); selectRes(curRes); renderTiles(); }
+</script>
+</body>
+</html>

@@ -271,6 +271,23 @@ namespace Assets.Scripts.Simulation
                     FailureCount = _failureCount.TryGetValue(mid, out int fc) ? fc : 0,
                     RepairTime = _repairTime.TryGetValue(mid, out float rt) ? rt : 0f,
                 });
+
+                var h = machine.Handoffs;
+                record.MachineHandoffRecords.Add(new MachineHandoffRecord
+                {
+                    MachineId = mid,
+                    MachineType = machine.PrimaryType.ToString(),
+                    HasSecondaryBelts = machine.HasSecondaryBelts,
+                    PrimaryBeltsNorth = machine.PrimaryBeltsNorth,
+                    PickupBeltPrimary = h.PickupBeltPrimary, PickupBeltSecondary = h.PickupBeltSecondary,
+                    DropoffBeltPrimary = h.DropoffBeltPrimary, DropoffBeltSecondary = h.DropoffBeltSecondary,
+                    DropoffBeltFull = h.DropoffBeltFull,
+                    DropoffRedundant = h.DropoffRedundant, DropoffDoublePlaced = h.DropoffDoublePlaced,
+                    OutPlacedPrimary = h.OutPlacedPrimary, OutPlacedSecondary = h.OutPlacedSecondary,
+                    OutBeltFull = h.OutBeltFull,
+                    PickupDockNorth = h.PickupDockNorth, PickupDockSouth = h.PickupDockSouth,
+                    DropoffDockNorth = h.DropoffDockNorth, DropoffDockSouth = h.DropoffDockSouth,
+                });
             }
 
             record.ThroughputRecords.AddRange(_throughputWindows);
