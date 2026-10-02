@@ -9,15 +9,11 @@ cd env && python -m pytest tests/test_rewards.py -v
 """
 
 import json
-import os
 import re
-import sys
 from pathlib import Path
 
 import numpy as np
 import pytest
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from rewards import (
     METRIC_NAMES, SCHEMA_VERSION, MetricsSnapshot, RewardContext, load_reward, resolve,

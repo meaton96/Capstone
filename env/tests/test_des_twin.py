@@ -18,12 +18,9 @@ import json
 import math
 import os
 import random
-import sys
 from types import SimpleNamespace
 
 import pytest
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from des_twin import Floor, TwinConfig, run_twin
 from des_twin.legs import compare_legs

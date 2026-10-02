@@ -17,12 +17,9 @@ Tests cover:
 @par Running
 @code{.sh}
 python -m pytest tests/test_architecture.py -v
-# or without pytest:
-python tests/test_architecture.py
 @endcode
 """
 
-import sys
 import os
 import tempfile
 from unittest.mock import MagicMock, patch
@@ -30,8 +27,6 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 import torch
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config import (
     EncoderConfig, FusionConfig, ActorCriticConfig,

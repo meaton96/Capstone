@@ -3,9 +3,11 @@
 @brief Compare trained checkpoints and fixed PDR rules on the same reproducible instances.
 
 @details
-Every (policy, seed) pair is one episode. All seeds are queued in Unity up front, and
-Unity reports which queue position each episode consumed (episode_seed_index), so each
-episode is attributed to exactly one policy even though episodes roll over inside Unity.
+Every (policy, seed) pair is one episode. Seeds (and scenario variants) are queued in Unity
+in schedule order, a few episodes ahead of the running one (inline scenarios are large, and
+queueing a whole schedule at once can exceed gRPC's 4 MB message cap), and Unity reports
+which queue position each episode consumed (episode_seed_index), so each episode is
+attributed to exactly one policy even though episodes roll over inside Unity.
 The episode already running when evaluation starts (index -1) is discarded.
 
 PDR baselines run as constant-action policies through the same wrapper and decision path
@@ -42,7 +44,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from config import (ActorCriticConfig, FusionConfig, PDR_ACTIONS, pdr_action,
                     ACTION_BRANCHES, JOB_HEAD_RULES, MACHINE_HEAD_RULES)
-from env_wrappers.unity_env import TRAIN_SEED_LOW, UnitySchedulingEnv
+from env_wrappers.unity_env import SEED_BUFFER, TRAIN_SEED_LOW, UnitySchedulingEnv
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -201,6 +203,8 @@ def run_evaluation(env, policies: list, schedule: list, log=print, decision_writ
     @param env              A @ref UnitySchedulingEnv (or anything with queue_seeds /
                             queue_scenarios / reset / step / current_metrics).
     @param schedule         List of (policy index, seed); position i is queue index i in Unity.
+                            Items are queued incrementally, SEED_BUFFER ahead of the running
+                            episode, never all at once.
     @param decision_writer  Optional csv.DictWriter (fields @ref DECISION_FIELDS) receiving one
                             row per decision of every scheduled episode.
     @param scenario_generator  Optional seed -> scenario dict (see scenarios/); when set, each
@@ -209,15 +213,27 @@ def run_evaluation(env, policies: list, schedule: list, log=print, decision_writ
     @return One row dict per completed episode, in schedule order.
     """
     total = len(schedule)
-    seeds = [seed for _, seed in schedule]
-    env.queue_seeds(seeds, clear=True)
-    if scenario_generator is not None:
-        env.queue_scenarios([scenario_generator(seed) for seed in seeds], clear=True)
+    queued = 0   # schedule items sent to Unity so far; item i is Unity queue index i
+
+    def top_up(consumed: int):
+        """Keep SEED_BUFFER items queued beyond the @p consumed ones Unity has started. Queues are
+        cleared only on the first call, so Unity's index keeps counting from schedule position 0."""
+        nonlocal queued
+        end = min(total, consumed + SEED_BUFFER)
+        if end <= queued and queued > 0:
+            return
+        seeds = [seed for _, seed in schedule[queued:end]]
+        env.queue_seeds(seeds, clear=queued == 0)
+        if scenario_generator is not None:
+            env.queue_scenarios([scenario_generator(seed) for seed in seeds], clear=queued == 0)
+        queued = end
+
+    top_up(0)
     obs = env.reset()
     if env.current_metrics is None:
         raise RuntimeError("This Unity build has no reward-metrics sensor; rebuild the player.")
 
-    rows, discarded, start, episode_step = [], 0, time.time(), 0
+    rows, discarded, start, episode_step, consumed = [], 0, time.time(), 0, 0
     while len(rows) < total:
         metrics = env.current_metrics
         index = int(metrics.episode_seed_index)
@@ -233,6 +249,11 @@ def run_evaluation(env, policies: list, schedule: list, log=print, decision_writ
         if not done:
             continue
         episode_step = 0
+        # Unity has already started the next episode, consuming queue index started_index; refill
+        # now so the following items arrive (with the next step) before this new episode ends.
+        started_index = int(env.current_metrics.episode_seed_index)
+        consumed = max(consumed, started_index + 1)
+        top_up(consumed)
 
         episode = info["episode"]
         index = episode["seed_index"]

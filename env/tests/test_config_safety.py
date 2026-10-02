@@ -1,12 +1,13 @@
 """
 @file test_config_safety.py
 @brief Thesis chapter 7 fixes: config schema/bounds, rejection instead of fallback, loopback gRPC,
-       config hashes in the episode log (7.1), and weights-only checkpoint loading (7.2).
+       config hashes in the episode log (7.1), weights-only checkpoint loading and the player manifest (7.2).
 """
 
 import ast
 import copy
 import json
+import re
 import socket
 from pathlib import Path
 
@@ -252,44 +253,101 @@ class TestCheckpointLoading:
         assert not (tmp_path / "PWNED_MARKER").exists()
 
 
+BUILD_MANIFEST_CS = Path(__file__).resolve().parents[2] / "Capstone" / "Assets" / "Editor" / "BuildManifest.cs"
+
+
 class TestPlayerManifest:
     """env/player_manifest.py against a fake build folder with a manifest in BuildManifest.cs's format."""
 
-    @staticmethod
-    def make_build(root):
-        from player_manifest import included, sha256_file
-        files = {"capstone.x86_64": b"\x7fELF launcher", "UnityPlayer.so": b"engine",
-                 "capstone_Data/Managed/Simulation.dll": b"sim code",
-                 "capstone_Data/ML-Agents/Timers/SimulationGrid_timers.json": b"{}",
-                 "BatchConfigs/scenario.json": b"{}", "Results/results.csv": b"a,b"}
-        for rel, data in files.items():
+    PLAYER = {"capstone.x86_64": b"\x7fELF launcher", "UnityPlayer.so": b"engine", "libdecor-0.so.0": b"wayland",
+              "libdecor-cairo.so": b"wayland", "capstone_Data/Managed/Simulation.dll": b"sim code"}
+    # Written by the player while it runs, or kept beside it but never loaded.
+    RUNTIME = {"capstone_Data/ML-Agents/Timers/SimulationGrid_timers.json": b"{}",
+               "BatchConfigs/scenario.json": b"{}", "Results/results.csv": b"a,b",
+               "Capstone_BurstDebugInformation_DoNotShip/Data/Plugins/lib_burst_generated.txt": b"symbols"}
+    # Helper scripts and logs, as in linux_server/ on 2026-10-02.
+    HELPERS = {"slurm/oracle.sbatch": b"#!/bin/bash", "logs/smoke_heads_run1.out": b"ok",
+               "run_batch.sh": b"#!/bin/bash", "run_experiment_queue.py": b"print()", "repro_compare.py": b"print()",
+               "run_agvr_0929.log": b"log"}
+
+    @classmethod
+    def make_build(cls, root, schema=2):
+        """Schema 1 lists the helpers too, as BuildManifest.cs did before 2026-10-02."""
+        from player_manifest import sha256_file
+        for rel, data in {**cls.PLAYER, **cls.RUNTIME, **cls.HELPERS}.items():
             (root / rel).parent.mkdir(parents=True, exist_ok=True)
             (root / rel).write_bytes(data)
-        manifest = {"schema": 1, "source_commit": "abc123", "source_dirty": False, "built_at": "2026-09-30T00:00:00Z",
-                    "files": {rel: sha256_file(root / rel) for rel in sorted(files) if included(rel)}}
+        listed = {**cls.PLAYER, **cls.HELPERS} if schema == 1 else cls.PLAYER
+        manifest = {"schema": schema, "executable": "capstone.x86_64", "source_commit": "abc123",
+                    "source_dirty": False, "built_at": "2026-10-02T00:00:00Z",
+                    "files": {rel: sha256_file(root / rel) for rel in sorted(listed)}}
         (root / "BUILD_MANIFEST.json").write_text(json.dumps(manifest))
         return root / "capstone.x86_64"
 
-    def test_matching_player_is_verified_and_runtime_files_ignored(self, tmp_path):
+    def test_allowlist_is_the_player_files(self):
+        from player_manifest import included
+        assert {rel for rel in {**self.PLAYER, **self.RUNTIME, **self.HELPERS} if included(rel)} == set(self.PLAYER)
+        # The executable's RUNPATH is $ORIGIN, so a library beside it is loaded before the system's.
+        assert included("libm.so.6") and included("libstdc++.so.6.0.30")
+        assert not included("UnityPlayer.so.orig") and not included("slurm/libx.so")
+
+    def test_matching_player_is_verified_and_other_files_ignored(self, tmp_path):
         from player_manifest import check_player
         exe = self.make_build(tmp_path)
         (tmp_path / "Results" / "new_run.csv").write_text("x")           # written by the player at runtime
         (tmp_path / "capstone_Data/ML-Agents/Timers/SimulationGrid_timers.json").write_text('{"t": 1}')
+        (tmp_path / "slurm/oracle.sbatch").write_text("#!/bin/bash\n# edited after the build")
+        (tmp_path / "slurm/setup_rit_python.sh").write_text("#!/bin/bash")
+        (tmp_path / "run_agvr_0929.log").unlink()
         summary = check_player(str(exe), record_dir=tmp_path)
-        assert summary["status"] == "verified" and summary["files"] == 3
-        assert summary["source_commit"] == "abc123"
+        assert summary["status"] == "verified" and summary["files"] == len(self.PLAYER)
+        assert summary["source_commit"] == "abc123" and summary["skipped_entries"] == 0
         assert json.loads((tmp_path / "player_manifest.json").read_text())["status"] == "verified"
 
-    def test_changed_or_extra_binary_is_refused(self, tmp_path):
+    def test_old_manifest_checks_only_player_entries(self, tmp_path):
+        from player_manifest import PlayerIntegrityError, check_player
+        exe = self.make_build(tmp_path, schema=1)
+        (tmp_path / "slurm/oracle.sbatch").write_text("#!/bin/bash\n# edited after the build")
+        (tmp_path / "run_agvr_0929.log").unlink()
+        summary = check_player(str(exe))
+        assert summary["status"] == "verified" and summary["manifest_schema"] == 1
+        assert summary["files"] == len(self.PLAYER) and summary["skipped_entries"] == len(self.HELPERS)
+        (tmp_path / "UnityPlayer.so").write_bytes(b"patched")
+        with pytest.raises(PlayerIntegrityError, match="changed: UnityPlayer.so"):
+            check_player(str(exe))
+
+    def test_changed_missing_or_extra_player_file_is_refused(self, tmp_path):
         from player_manifest import PlayerIntegrityError, check_player
         exe = self.make_build(tmp_path)
         (tmp_path / "capstone_Data/Managed/Simulation.dll").write_bytes(b"patched")
-        (tmp_path / "libevil.so").write_bytes(b"dropped in")
+        (tmp_path / "libdecor-cairo.so").unlink()
+        (tmp_path / "libm.so.6").write_bytes(b"dropped in")
+        (tmp_path / "capstone_Data/Managed/Simulation.dll.config").write_text("<configuration/>")   # Mono reads it
         with pytest.raises(PlayerIntegrityError) as exc:
             check_player(str(exe))
         assert "changed: capstone_Data/Managed/Simulation.dll" in str(exc.value)
-        assert "extra (not in manifest): libevil.so" in str(exc.value)
+        assert "missing: libdecor-cairo.so" in str(exc.value)
+        assert "extra (not in manifest): libm.so.6" in str(exc.value)
+        assert "extra (not in manifest): capstone_Data/Managed/Simulation.dll.config" in str(exc.value)
         assert check_player(str(exe), allow_unverified=True)["status"] == "mismatch_allowed"
+
+    def test_other_program_in_the_folder_is_refused(self, tmp_path):
+        from player_manifest import PlayerIntegrityError, check_player
+        exe = self.make_build(tmp_path)
+        (tmp_path / "other.x86_64").write_bytes(b"\x7fELF not built by Unity")
+        assert check_player(str(exe))["status"] == "verified"           # not part of the player
+        with pytest.raises(PlayerIntegrityError, match="not the player executable: other.x86_64"):
+            check_player(str(tmp_path / "other.x86_64"))
+
+    @pytest.mark.skipif(not BUILD_MANIFEST_CS.exists(), reason="C# sources not present (e.g. on the cluster)")
+    def test_allowlist_matches_build_manifest_cs(self):
+        import player_manifest as pm
+        src = BUILD_MANIFEST_CS.read_text()
+        assert re.search(r'Executable = "([^"]+)"', src).group(1) == pm.EXECUTABLE
+        assert re.search(r'DataDir = "([^"]+)"', src).group(1) == pm.DATA_DIR
+        assert re.search(r'RuntimeDir = "([^"]+)"', src).group(1) == pm.RUNTIME_DIR
+        assert re.search(r'SharedLibrary = new Regex\(@"([^"]+)"\)', src).group(1) == pm.SHARED_LIBRARY.pattern
+        assert int(re.search(r"Schema = (\d+);", src).group(1)) == pm.SCHEMA
 
     def test_missing_manifest_is_reported_not_refused(self, tmp_path):
         from player_manifest import check_player

@@ -10,15 +10,12 @@ cd env && python -m pytest tests/test_evaluate.py -v
 
 import csv
 import io
-import os
-import sys
 
 import numpy as np
 import pytest
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from config import ACTION_BRANCHES, ACTION_MASK_LEN, PDR_ACTIONS
+from env_wrappers.unity_env import SEED_BUFFER
 from evaluate import (
     DECISION_FIELDS, ConstantPolicy, decision_row, parse_seeds, resolve_pdr_names, run_evaluation, summarize,
 )
@@ -26,27 +23,48 @@ from rewards import MetricsSnapshot
 
 
 class FakeEnv:
-    """@brief Mimics UnitySchedulingEnv episode rollover and the seed queue.
+    """@brief Mimics UnitySchedulingEnv episode rollover and the seed/scenario queues.
 
     @details The episode running at reset is unseeded (index -1); each later episode
-    consumes the next queued seed. Episodes last @p length steps and report
-    makespan = seed * 10 + the last action's flat index (job * 3 + machine), so attribution is checkable.
+    consumes the next queued seed (and scenario, if any were queued). Like the real side
+    channels, queue messages only reach "Unity" with the next reset() or step(). Episodes
+    last @p length steps and report makespan = seed * 10 + the last action's flat index
+    (job * 3 + machine), so attribution is checkable. The episode index counts items
+    consumed since the last clear.
     """
 
     def __init__(self, length=2):
         self.length = length
-        self.queue, self.consumed = [], 0
+        self.queue, self.scenario_queue, self.consumed = [], [], 0
+        self.pending = []            # messages not yet delivered to Unity
+        self.queued_seeds = []       # every queue_seeds(seeds, clear) call, for assertions
         self.queued_scenarios = []   # every queue_scenarios(items, clear) call, for assertions
+        self.max_ahead = 0           # most items ever waiting in Unity's seed queue
+        self.scenario = None
 
     def queue_seeds(self, seeds, clear=False):
-        if clear:
-            self.queue, self.consumed = [], 0
-        self.queue += list(seeds)
+        self.queued_seeds.append((list(seeds), clear))
+        self.pending.append(("seeds", list(seeds), clear))
 
     def queue_scenarios(self, items, clear=False):
         self.queued_scenarios.append((list(items), clear))
+        self.pending.append(("scenarios", list(items), clear))
+
+    def _deliver(self):
+        for kind, items, clear in self.pending:
+            if kind == "seeds":
+                if clear:
+                    self.queue, self.consumed = [], 0
+                self.queue += items
+            else:
+                if clear:
+                    self.scenario_queue = []
+                self.scenario_queue += items
+        self.pending = []
+        self.max_ahead = max(self.max_ahead, len(self.queue))
 
     def reset(self):
+        self._deliver()
         self._start(-1, -1)
         return {}
 
@@ -58,6 +76,7 @@ class FakeEnv:
         return MetricsSnapshot.from_dict({"episode_seed": self.seed, "episode_seed_index": self.index})
 
     def step(self, action):
+        self._deliver()
         self.t += 1
         if self.t < self.length:
             return {}, 0.0, False, {}
@@ -65,12 +84,16 @@ class FakeEnv:
             "seed": self.seed, "seed_index": self.index, "makespan": self.seed * 10 + action[0] * ACTION_BRANCHES[1] + action[1],
             "mean_flow_time": 1.0, "total_flow_time": 2.0, "return": -1.0, "length": self.length,
             "jobs_exited": 15, "deadlock": False, "timed_out": False, "truncated": False,
+            "scenario": self.scenario,
         }
+        # Unity auto-resets immediately, with whatever is queued right now.
         if self.queue:
             self._start(self.queue.pop(0), self.consumed)
+            self.scenario = self.scenario_queue.pop(0) if self.scenario_queue else None
             self.consumed += 1
         else:
             self._start(-1, -1)
+            self.scenario = None
         return {}, -1.0, True, {"episode": episode}
 
 
@@ -109,16 +132,61 @@ def test_run_evaluation_attributes_episodes_to_policies():
 
 def test_run_evaluation_queues_matching_scenarios_when_generator_given():
     """@brief With a scenario_generator, each queued seed's scenario variant must be queued too,
-    in the same order, cleared together with the seed queue."""
+    in the same order and in the same batches, cleared together with the seed queue."""
     policies = [ConstantPolicy((1, 0), "A")]
     schedule = [(0, seed) for seed in (11, 22, 33)]
     generator = lambda seed: {"name": f"variant-{seed}", "seed": seed}  # noqa: E731
     env = FakeEnv()
     run_evaluation(env, policies, schedule, log=lambda *_: None, scenario_generator=generator)
-    assert len(env.queued_scenarios) == 1
-    items, clear = env.queued_scenarios[0]
-    assert items == [generator(seed) for _, seed in schedule]
-    assert clear is True
+    assert [items for items, _ in env.queued_scenarios] == [
+        [generator(seed) for seed in seeds] for seeds, _ in env.queued_seeds]
+    assert [clear for _, clear in env.queued_scenarios] == [clear for _, clear in env.queued_seeds]
+    assert sum((items for items, _ in env.queued_scenarios), []) == [generator(seed) for _, seed in schedule]
+    assert env.queued_scenarios[0][1] is True
+
+
+def test_run_evaluation_queues_incrementally_and_keeps_attribution():
+    """@brief A long schedule is never queued at once (inline scenarios overflowed gRPC's 4 MB
+    cap): the queues are cleared once, then topped up in schedule order a few items ahead of
+    the running episode, and every episode still runs under its scheduled policy, seed and
+    scenario variant."""
+    # One policy per (job head, machine head) pair; its flat index is the makespan offset.
+    policies = [ConstantPolicy(divmod(flat, ACTION_BRANCHES[1]), f"P{flat}")
+                for flat in range(ACTION_BRANCHES[0] * ACTION_BRANCHES[1])]
+    schedule = [(p, seed) for seed in range(20) for p in range(len(policies))]
+    generator = lambda seed: {"name": f"variant-{seed}"}  # noqa: E731
+    env = FakeEnv(length=3)
+    rows = run_evaluation(env, policies, schedule, log=lambda *_: None, scenario_generator=generator)
+
+    assert [(r["policy"], r["seed"], r["makespan"]) for r in rows] == [
+        (f"P{p}", seed, seed * 10 + p) for p, seed in schedule]
+    assert [r["seed_index"] for r in rows] == list(range(len(schedule)))
+    # Only the first call clears; the concatenation of all calls is the schedule, in order.
+    assert [clear for _, clear in env.queued_seeds] == [True] + [False] * (len(env.queued_seeds) - 1)
+    assert sum((seeds for seeds, _ in env.queued_seeds), []) == [seed for _, seed in schedule]
+    assert max(len(items) for items, _ in env.queued_scenarios) <= SEED_BUFFER
+    assert env.max_ahead <= SEED_BUFFER
+    # Unity never ran dry: only the startup episode was unseeded.
+    assert len(env.queued_seeds) > 1
+
+
+def test_run_evaluation_scenario_follows_its_seed():
+    """@brief The scenario each episode actually ran with is the one generated for its seed."""
+    schedule = [(0, seed) for seed in range(10)]
+    env = FakeEnv(length=1)   # shortest episodes: the buffer must still stay ahead
+    seen = []
+    original_step = env.step
+
+    def step(action):
+        obs, reward, done, info = original_step(action)
+        if done and info["episode"]["seed_index"] >= 0:
+            seen.append((info["episode"]["seed"], info["episode"]["scenario"]))
+        return obs, reward, done, info
+
+    env.step = step
+    run_evaluation(env, [ConstantPolicy((0, 0), "A")], schedule, log=lambda *_: None,
+                   scenario_generator=lambda seed: {"seed": seed})
+    assert seen == [(seed, {"seed": seed}) for _, seed in schedule]
 
 
 def test_run_evaluation_queues_no_scenarios_without_generator():

@@ -17,12 +17,9 @@ import copy
 import json
 import math
 import os
-import sys
 
 import numpy as np
 import pytest
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config import ACTION_MASK_LEN, JOB_HEAD_RULES, MACHINE_HEAD_RULES, obs_shapes
 from des_twin import Floor, TwinConfig, run_twin

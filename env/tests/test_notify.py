@@ -12,9 +12,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import pytest
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-import notify  # noqa: E402
+import notify
 
 ENV_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

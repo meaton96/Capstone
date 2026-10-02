@@ -7,6 +7,19 @@ from, whether the source had uncommitted changes, and the SHA-256 of every file 
 verify_player recomputes those hashes: a changed, missing, or extra file in the player means the
 binary is not the one the manifest describes, and training / evaluation refuse to launch it.
 
+The player's files are an allowlist (included): the executable, the shared libraries beside it, and
+capstone_Data/ except ML-Agents/, where the player writes timers while it runs. The libraries count because
+the executable's RUNPATH is $ORIGIN, so the loader looks in the player folder before the system folders and
+a library dropped there would be loaded. Nothing else in the folder is part of the player (runner scripts,
+slurm/, logs/, Results/, BatchConfigs/, Burst's *_DoNotShip debug output), and editing it does not
+invalidate the build.
+
+Manifests written before 2026-10-02 (schema 1) hashed every file in the folder except Results/,
+BatchConfigs/, __pycache__/, *_DoNotShip/ and ML-Agents/, so they also list helper scripts and logs.
+Only their allowlisted entries are compared. The old rule covered everything the allowlist covers, so
+those entries are what a schema-2 manifest of the same build would list, and existing builds verify
+without a rebuild.
+
 A player without a manifest (built before 2026-09-30) is reported, not refused.
 
 Command line:  python env/player_manifest.py linux_server/capstone.x86_64
@@ -14,14 +27,20 @@ Command line:  python env/player_manifest.py linux_server/capstone.x86_64
 
 import hashlib
 import json
+import re
 import sys
+from itertools import chain
 from pathlib import Path
 from typing import Optional
 
 MANIFEST_NAME = "BUILD_MANIFEST.json"
-## @brief Keep in step with BuildManifest.cs: build-folder entries that are not part of the player.
-EXCLUDED_TOP = {MANIFEST_NAME, "Results", "BatchConfigs", "__pycache__"}
-EXCLUDED_PREFIXES = ("capstone_Data/ML-Agents/",)
+## @brief Manifest format written by BuildManifest.cs; schema 1 (before 2026-10-02) hashed the whole folder.
+SCHEMA = 2
+## @brief Keep in step with BuildManifest.cs: the player's own files (see included).
+EXECUTABLE = "capstone.x86_64"
+DATA_DIR = "capstone_Data/"
+RUNTIME_DIR = "capstone_Data/ML-Agents/"                    # written by the player while it runs
+SHARED_LIBRARY = re.compile(r"^[^/]+\.so(\.[0-9]+)*$")      # top level: UnityPlayer.so, libdecor-0.so.0, ...
 
 
 class PlayerIntegrityError(RuntimeError):
@@ -29,10 +48,17 @@ class PlayerIntegrityError(RuntimeError):
 
 
 def included(rel_path: str) -> bool:
-    top = rel_path.split("/")[0]
-    if top in EXCLUDED_TOP or top.endswith("_DoNotShip"):
-        return False
-    return not rel_path.startswith(EXCLUDED_PREFIXES)
+    """@brief Whether @p rel_path (relative to the player folder, '/'-separated) is one of the player's files."""
+    if rel_path.startswith(DATA_DIR):
+        return not rel_path.startswith(RUNTIME_DIR)
+    return rel_path == EXECUTABLE or SHARED_LIBRARY.match(rel_path) is not None
+
+
+def player_files(build_dir: Path) -> set:
+    """@brief The player's files present in @p build_dir. Only the top level and capstone_Data/ are walked,
+    so the result folders running players write into are never scanned."""
+    paths = chain(build_dir.iterdir(), (build_dir / DATA_DIR).rglob("*"))
+    return {rel for rel in (p.relative_to(build_dir).as_posix() for p in paths if p.is_file()) if included(rel)}
 
 
 def sha256_file(path: Path) -> str:
@@ -47,8 +73,9 @@ def verify_player(executable: str) -> dict:
     """@brief Verify the player folder containing @p executable against its manifest.
 
     @return Summary: status "verified" (with source_commit, source_dirty, built_at, unity_version, files,
-            manifest_sha256) or "no_manifest".
-    @throws PlayerIntegrityError listing every changed, missing and extra file.
+            manifest_schema, skipped_entries, manifest_sha256) or "no_manifest".
+    @throws PlayerIntegrityError listing every changed, missing and extra file, or if @p executable is not
+            the player's executable.
     """
     build_dir = Path(executable).resolve().parent
     manifest_path = build_dir / MANIFEST_NAME
@@ -56,11 +83,16 @@ def verify_player(executable: str) -> dict:
         return {"status": "no_manifest", "build_dir": str(build_dir)}
 
     manifest = json.loads(manifest_path.read_text())
+    schema = manifest.get("schema", 1)
     expected = manifest["files"]
-    actual = {p.relative_to(build_dir).as_posix() for p in build_dir.rglob("*") if p.is_file()}
-    actual = {p for p in actual if included(p)}
+    if schema < 2:              # the whole folder was hashed: compare only the player's own entries
+        expected = {rel: digest for rel, digest in expected.items() if included(rel)}
+    actual = player_files(build_dir)
 
     problems = []
+    exe = Path(executable).resolve().name
+    if not included(exe):       # another program in the folder, which the allowlist does not cover
+        problems.append(f"not the player executable: {exe}")
     for rel, digest in sorted(expected.items()):
         path = build_dir / rel
         if not path.is_file():
@@ -82,6 +114,8 @@ def verify_player(executable: str) -> dict:
         "built_at": manifest.get("built_at"),
         "unity_version": manifest.get("unity_version"),
         "files": len(expected),
+        "manifest_schema": schema,
+        "skipped_entries": len(manifest["files"]) - len(expected),     # schema 1: helper files, not checked
         "manifest_sha256": sha256_file(manifest_path),
     }
 
@@ -104,8 +138,10 @@ def check_player(executable: Optional[str], allow_unverified: bool = False, reco
 
     if summary["status"] == "verified":
         dirty = " + uncommitted changes" if summary["source_dirty"] else ""
+        skipped = (f" (old-format manifest: {summary['skipped_entries']} entries for non-player files skipped)"
+                   if summary["skipped_entries"] else "")
         print(f"[player] verified {summary['files']} files against {MANIFEST_NAME}: commit "
-              f"{summary['source_commit']}{dirty}, built {summary['built_at']}")
+              f"{summary['source_commit']}{dirty}, built {summary['built_at']}{skipped}")
     elif summary["status"] == "no_manifest":
         print(f"[player] WARNING: {summary['build_dir']} has no {MANIFEST_NAME} (built before 2026-09-30); "
               "rebuild it to make the player verifiable.")

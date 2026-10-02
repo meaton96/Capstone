@@ -10,11 +10,8 @@ cd env && python -m pytest tests/test_scenarios.py -v
 
 import json
 import os
-import sys
 
 import pytest
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from scenarios import REGISTRY, compound_generator, compound_variant
 
