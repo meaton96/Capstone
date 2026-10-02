@@ -1,0 +1,81 @@
+{
+  "seed": 8,
+  "segment_seconds": 900.0,
+  "episode_duration_seconds": 5400.0,
+  "schedule": [
+    "SRT-TECT",
+    "SRT-TECT",
+    "SRT-ECT",
+    "SRT-ECT",
+    "SRT-ECT",
+    "SRT-ECT"
+  ],
+  "stages": [
+    {
+      "stage": 1,
+      "chosen": "SRT-TECT",
+      "return": -184.69276690100892,
+      "total_flow_time": 88920.5390625,
+      "mean_flow_time": 1270.2934151785714,
+      "jobs_exited": 70.0
+    },
+    {
+      "stage": 2,
+      "chosen": "SRT-TECT",
+      "return": -184.69276690100892,
+      "total_flow_time": 88920.5390625,
+      "mean_flow_time": 1270.2934151785714,
+      "jobs_exited": 70.0
+    },
+    {
+      "stage": 3,
+      "chosen": "SRT-ECT",
+      "return": -184.2957200260088,
+      "total_flow_time": 92602.6015625,
+      "mean_flow_time": 1286.147243923611,
+      "jobs_exited": 72.0
+    },
+    {
+      "stage": 4,
+      "chosen": "SRT-ECT",
+      "return": -184.2957200260088,
+      "total_flow_time": 92602.6015625,
+      "mean_flow_time": 1286.147243923611,
+      "jobs_exited": 72.0
+    },
+    {
+      "stage": 5,
+      "chosen": "SRT-ECT",
+      "return": -184.2957200260088,
+      "total_flow_time": 92602.6015625,
+      "mean_flow_time": 1286.147243923611,
+      "jobs_exited": 72.0
+    },
+    {
+      "stage": 6,
+      "chosen": "SRT-ECT",
+      "return": -184.2957200260088,
+      "total_flow_time": 92602.6015625,
+      "mean_flow_time": 1286.147243923611,
+      "jobs_exited": 72.0
+    }
+  ],
+  "best_fixed_pair": "SRT-TECT",
+  "best_fixed_return": -184.69276690100892,
+  "oracle_return": -184.2957200260088,
+  "gain_vs_best_fixed_pct": -0.21497694883358953,
+  "fixed_returns": {
+    "SPT-ECT": -205.17551690100856,
+    "SPT-TECT": -205.98068877600875,
+    "SPT-SRWT": -213.61570440100888,
+    "SRT-ECT": -189.96353252600875,
+    "SRT-TECT": -184.69276690100892,
+    "SRT-SRWT": -198.71204815100864,
+    "PTWINQ-ECT": -202.43372002600867,
+    "PTWINQ-TECT": -200.14243877600887,
+    "PTWINQ-SRWT": -216.28156377600882,
+    "FIFO-ECT": -220.55325127600887,
+    "FIFO-TECT": -221.09070440100874,
+    "FIFO-SRWT": -233.43964190100874
+  }
+}

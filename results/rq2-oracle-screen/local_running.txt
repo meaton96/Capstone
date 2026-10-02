@@ -1,0 +1,14 @@
+agv10 1
+agv3 1
+agv4 1
+agv5 1
+agvf1500 0
+amax1 1
+base-w 1
+flex-p3-m125 0
+flex-p5-m125 0
+mf-heavy 0
+mf-off 0
+ops-short 1
+util-hi 1
+util-lo 1

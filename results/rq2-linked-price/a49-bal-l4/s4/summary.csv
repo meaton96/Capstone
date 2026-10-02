@@ -1,0 +1,2 @@
+policy,kind,episodes,makespan_mean,makespan_std,total_flow_mean,mean_flow_time_mean,deadlocks,timeouts,makespan_gap_pct,flow_gap_pct
+SRT-TECT,pdr,1,10800.015625,0.0,1487671.875,1271.514423076923,0,0,0.0,0.0

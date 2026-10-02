@@ -1,0 +1,81 @@
+{
+  "seed": 16,
+  "segment_seconds": 900.0,
+  "episode_duration_seconds": 5400.0,
+  "schedule": [
+    "SRT-ECT",
+    "SRT-TECT",
+    "SRT-TECT",
+    "PTWINQ-ECT",
+    "SRT-ECT",
+    "SPT-SRWT"
+  ],
+  "stages": [
+    {
+      "stage": 1,
+      "chosen": "SRT-ECT",
+      "return": -153.216126250241,
+      "total_flow_time": 124682.546875,
+      "mean_flow_time": 2011.008820564516,
+      "jobs_exited": 62.0
+    },
+    {
+      "stage": 2,
+      "chosen": "SRT-TECT",
+      "return": -153.202110625241,
+      "total_flow_time": 124668.5234375,
+      "mean_flow_time": 2010.7826360887098,
+      "jobs_exited": 62.0
+    },
+    {
+      "stage": 3,
+      "chosen": "SRT-TECT",
+      "return": -153.202110625241,
+      "total_flow_time": 124668.5234375,
+      "mean_flow_time": 2010.7826360887098,
+      "jobs_exited": 62.0
+    },
+    {
+      "stage": 4,
+      "chosen": "PTWINQ-ECT",
+      "return": -151.94942312524108,
+      "total_flow_time": 139526.515625,
+      "mean_flow_time": 2146.5617788461536,
+      "jobs_exited": 65.0
+    },
+    {
+      "stage": 5,
+      "chosen": "SRT-ECT",
+      "return": -151.94942312524108,
+      "total_flow_time": 139526.515625,
+      "mean_flow_time": 2146.5617788461536,
+      "jobs_exited": 65.0
+    },
+    {
+      "stage": 6,
+      "chosen": "SPT-SRWT",
+      "return": -151.9486887502411,
+      "total_flow_time": 139525.78125,
+      "mean_flow_time": 2146.550480769231,
+      "jobs_exited": 65.0
+    }
+  ],
+  "best_fixed_pair": "SRT-ECT",
+  "best_fixed_return": -153.216126250241,
+  "oracle_return": -151.9486887502411,
+  "gain_vs_best_fixed_pct": -0.8272219974611805,
+  "fixed_returns": {
+    "SPT-ECT": -165.11709500024108,
+    "SPT-TECT": -171.05315750024099,
+    "SPT-SRWT": -178.873173125241,
+    "SRT-ECT": -153.216126250241,
+    "SRT-TECT": -156.51607937524096,
+    "SRT-SRWT": -164.11593875024093,
+    "PTWINQ-ECT": -172.16361062524092,
+    "PTWINQ-TECT": -180.03839187524093,
+    "PTWINQ-SRWT": -173.48382937524096,
+    "FIFO-ECT": -171.03639187524084,
+    "FIFO-TECT": -175.30887625024093,
+    "FIFO-SRWT": -176.213188750241
+  }
+}

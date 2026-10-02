@@ -14,7 +14,7 @@ seed) and to the reference rule, on total flow and mean flow, plus jobs exited a
 
 The reference is the best fixed pair on average for these baselines (lowest mean gap to the per-seed best on
 total flow; SPT-ECT on the D / 7-AGV set), unless --reference names one. Against it, per policy, on total flow
-(the RQ3 metric, docs/WIP/RUNNING_EXPERIMENTS.md "GEN"):
+(the RQ3 metric, docs/WIP/FUTURE_EXPERIMENTS.md "rq3-gen"):
   median   median per-seed gap, policy / reference - 1, with a bootstrap 95% CI over seeds;
   p_better one-sided Wilcoxon signed-rank p that the gaps sit below 0 (p_worse: above 0);
   verdict  "better" if p_better < alpha, "worse" if p_worse < alpha, otherwise "n.s.".
@@ -28,7 +28,8 @@ from scipy.stats import wilcoxon
 
 REPO = Path(__file__).resolve().parents[2]
 BASELINES = REPO / "results" / "eval_pdr12_heads" / "episodes_all.csv"
-FLOOR_COLUMNS = ("agv_count", "layout")
+FLOOR_COLUMNS = ("agv_count", "layout", "tiles", "job_scope", "agv_assignment", "release_rule", "release_weights",
+                 "scenario_travel_price")
 
 
 def best_on_average(base):

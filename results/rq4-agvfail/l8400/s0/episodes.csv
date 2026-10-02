@@ -1,0 +1,4 @@
+policy,kind,seed,seed_index,makespan,mean_flow_time,total_flow_time,return,decisions,jobs_exited,deadlock,timed_out,truncated,machine_failures,agv_failures,agv_repair_time,agv_blocked_by_failure_time,config_hash,instance_hash,agv_count,layout
+SPT-ECT,pdr,0,0,5400.01806640625,1944.8768601190477,122527.2421875,-146.80984500003976,358,63.0,False,False,True,0,2,200.69992074742913,392.85984486714005,0831d899ce0abf64,ba47e03f66190c4c,7,D
+SRT-TECT,pdr,0,1,5400.01806640625,1740.906754032258,107936.21875,-137.59051687503984,358,62.0,False,False,True,0,3,300.09988149628043,673.3997340872884,0831d899ce0abf64,ba47e03f66190c4c,7,D
+FIFO-SRWT,pdr,0,2,5400.01806640625,2461.976041666667,147718.5625,-176.38011062503978,346,60.0,False,False,True,0,3,300.09988149628043,434.71982833743095,0831d899ce0abf64,ba47e03f66190c4c,7,D

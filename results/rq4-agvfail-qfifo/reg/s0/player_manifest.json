@@ -1,0 +1,5 @@
+{
+ "status": "mismatch_allowed",
+ "build_dir": "/home/ubuntupc/Documents/Github/Capstone/linux_server",
+ "error": "/home/ubuntupc/Documents/Github/Capstone/linux_server does not match its BUILD_MANIFEST.json (commit fa4426b3b76c9359a3e7a12f9d7eadf36f8d7387):\n  - changed: slurm/oracle.sbatch"
+}

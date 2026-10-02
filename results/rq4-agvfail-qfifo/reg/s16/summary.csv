@@ -1,0 +1,4 @@
+policy,kind,episodes,makespan_mean,makespan_std,total_flow_mean,mean_flow_time_mean,deadlocks,timeouts,makespan_gap_pct,flow_gap_pct
+FIFO-ECT,pdr,1,5400.01806640625,0.0,160503.453125,2469.2838942307694,0,0,0.0,0.0
+FIFO-TECT,pdr,1,5400.01806640625,0.0,166971.578125,2529.8723958333335,0,0,0.0,4.029897721242563
+FIFO-SRWT,pdr,1,5400.01806640625,0.0,170151.71875,2617.71875,0,0,0.0,6.011251120862761

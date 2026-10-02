@@ -1,5 +1,9 @@
 # 12 head-rule baselines via evaluate.py (2026-09-27)
 
+> **Correction (2026-10-02):** the headroom and ranking figures here are on total flow of *exited* jobs, a censored
+> metric the PPO reward does not optimize. On the reward's metric the best pair is SRT-TECT with 0.4% headroom, and
+> the simulated switching oracle finds ~1%. See `../../docs/experiments/HEADROOM_METRIC_CORRECTION_1002.md`.
+
 These are the fixed-rule baselines for the two-head action space (`docs/features/DECISION_POINTS.md` §1). They were
 run through `evaluate.py`, the same path `rnd02` checkpoints will be scored on.
 

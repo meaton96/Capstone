@@ -1,0 +1,194 @@
+== Integrity
+group
+p0 m1          108
+p0.15 m1       108
+p0.3 m1        108
+p0.5 m1        108
+p0.15 m1.25    108
+p0.3 m1.25     108
+p0.5 m1.25     108
+jobs censored 0, deadlocks 0, AGV collisions 0, parking overlaps 0, duplicate cells 0
+agvCount: ['7']
+layout_id: ['D']
+reservation_protocol: ['releasePrevious']
+parking_method: ['lane']
+routing_trigger: ['onTransport']
+tiles: ['1']
+ops matched to a machine: min 1.000
+ECT recomputed from the logged routing stats = the logged choice: min 1.000 over the 252 ECT cells
+             capabilities/machine  eligible/op  machine failures  makespan
+group                                                                     
+p0 m1                        1.00         3.00             31.58  20440.10
+p0.15 m1                     1.45         4.33             30.70  19847.27
+p0.3 m1                      2.10         6.24             27.69  18073.40
+p0.5 m1                      2.91         8.71             27.16  17477.05
+p0.15 m1.25                  1.45         4.33             31.66  20433.62
+p0.3 m1.25                   2.10         6.24             29.21  19029.85
+p0.5 m1.25                   2.91         8.71             29.21  18907.44
+
+== Mean flow time (s, time in system of every job), mean over 9 seeds
+group         p0 m1  p0.15 m1  p0.3 m1  p0.5 m1  p0.15 m1.25  p0.3 m1.25  p0.5 m1.25
+rule                                                                                
+SPT_TECT     2591.0    2360.0   2058.0   1947.0       2565.0      2443.0      2479.0
+SPT_ECT      2596.0    2349.0   2060.0   1940.0       2540.0      2457.0      2423.0
+SRT_ECT      2614.0    2311.0   1960.0   1840.0       2471.0      2285.0      2248.0
+SRT_TECT     2616.0    2315.0   1970.0   1821.0       2487.0      2276.0      2301.0
+PTWINQ_ECT   2626.0    2324.0   2098.0   1903.0       2576.0      2448.0      2445.0
+PTWINQ_TECT  2641.0    2364.0   2046.0   1924.0       2584.0      2446.0      2456.0
+SRT_SRWT     2807.0    2583.0   2199.0   2051.0       2735.0      2713.0      2787.0
+SPT_SRWT     2835.0    2641.0   2345.0   2209.0       2861.0      2913.0      3102.0
+PTWINQ_SRWT  2841.0    2624.0   2311.0   2191.0       2895.0      2876.0      3073.0
+FIFO_ECT     3057.0    2591.0   2167.0   1965.0       2778.0      2546.0      2537.0
+FIFO_TECT    3062.0    2591.0   2143.0   1975.0       2780.0      2521.0      2592.0
+FIFO_SRWT    3340.0    2885.0   2434.0   2259.0       3164.0      3089.0      3258.0
+
+== Gap to the per-seed best of the 12 pairs (%, mean over seeds); [seeds won]
+group          p0 m1 p0.15 m1  p0.3 m1  p0.5 m1 p0.15 m1.25 p0.3 m1.25 p0.5 m1.25
+rule                                                                             
+SRT_ECT      4.2 [2]  1.3 [3]  1.4 [5]  1.5 [3]     2.3 [3]    1.4 [4]    0.6 [7]
+SRT_TECT         4.4  1.4 [2]  2.0 [4]  0.6 [6]     2.5 [3]    1.1 [3]    2.7 [1]
+SPT_ECT      3.2 [1]  2.7 [1]      6.5  6.5 [1]     4.7 [1]        8.6    7.6 [1]
+PTWINQ_ECT   4.7 [1]  1.7 [1]      8.3  4.8 [1]     6.3 [2]        8.2        8.6
+PTWINQ_TECT  5.1 [2]  3.3 [1]      5.5      5.8         6.3    8.0 [1]        9.1
+SPT_TECT     3.1 [3]  3.6 [1]      6.3      7.1         5.7    7.8 [1]       10.1
+FIFO_ECT        21.2     13.0     11.7      8.0        14.4       12.2       12.4
+FIFO_TECT       21.8     12.5     10.5      8.4        14.3       11.5       15.0
+SRT_SRWT        12.2     13.0     13.9     13.1        13.5       20.6       25.1
+PTWINQ_SRWT     13.4     15.0     19.5     20.5        19.9       27.5       37.1
+SPT_SRWT        13.2     15.3     21.1     21.4        18.7       29.2       38.5
+FIFO_SRWT       32.6     25.9     25.5     24.3        30.6       36.7       45.4
+
+per group: best pair on average (its gap = static headroom), worst pair's gap, per-seed best vs p0
+  p0 m1        best SPT_TECT      3.1%   worst FIFO_SRWT     32.6%   per-seed best vs p0   +0.0%
+  p0.15 m1     best SRT_ECT       1.3%   worst FIFO_SRWT     25.9%   per-seed best vs p0   -9.5%
+  p0.3 m1      best SRT_ECT       1.4%   worst FIFO_SRWT     25.5%   per-seed best vs p0  -22.8%
+  p0.5 m1      best SRT_TECT      0.6%   worst FIFO_SRWT     24.3%   per-seed best vs p0  -27.6%
+  p0.15 m1.25  best SRT_ECT       2.3%   worst FIFO_SRWT     30.6%   per-seed best vs p0   -4.1%
+  p0.3 m1.25   best SRT_TECT      1.1%   worst FIFO_SRWT     36.7%   per-seed best vs p0  -10.3%
+  p0.5 m1.25   best SRT_ECT       0.6%   worst FIFO_SRWT     45.4%   per-seed best vs p0  -10.8%
+
+== Change vs p0 on the same (rule, seed), mean over seeds (%)
+group         p0.15 m1  p0.3 m1  p0.5 m1  p0.15 m1.25  p0.3 m1.25  p0.5 m1.25
+rule                                                                         
+SRT_ECT          -12.0    -24.8    -29.5         -5.9       -12.8       -13.9
+SRT_TECT         -12.0    -24.5    -30.2         -5.7       -13.1       -12.2
+SPT_ECT           -9.9    -20.3    -25.2         -2.8        -5.6        -7.0
+PTWINQ_ECT       -11.9    -20.1    -27.5         -2.5        -7.2        -7.3
+PTWINQ_TECT      -10.9    -22.6    -27.0         -2.9        -7.7        -7.3
+SPT_TECT          -9.1    -20.4    -24.7         -1.7        -6.2        -4.6
+FIFO_ECT         -15.5    -28.7    -35.3         -9.4       -16.9       -17.1
+FIFO_TECT        -16.2    -29.8    -35.5         -9.9       -17.9       -15.7
+SRT_SRWT          -8.6    -21.6    -27.0         -2.9        -3.5        -0.5
+PTWINQ_SRWT       -8.1    -18.7    -23.0          1.5         1.0         7.9
+SPT_SRWT          -7.4    -17.3    -22.1          0.8         2.6         9.5
+FIFO_SRWT        -13.9    -26.8    -32.0         -5.4        -7.4        -2.1
+all 12 pairs     -11.3    -23.0    -28.3         -3.9        -7.9        -5.9
+
+== Head contrasts per group: mean over seeds of flow(A)/flow(B)-1, pooled over the other head
+   (mean [min, max] over the 9 seeds, seeds with A worse, two-sided Wilcoxon p; n = 9, smallest p 0.004)
+  SRT vs SPT (machine ECT/TECT)
+    p0 m1          +1.2% [-5, +9] 5/9 p=0.570
+    p0.15 m1       -1.7% [-5, +0] 1/9 p=0.020
+    p0.3 m1        -4.3% [-10, -1] 0/9 p=0.004
+    p0.5 m1        -5.3% [-12, +0] 1/9 p=0.008
+    p0.15 m1.25    -2.5% [-11, +2] 3/9 p=0.074
+    p0.3 m1.25     -6.2% [-15, -1] 0/9 p=0.004
+    p0.5 m1.25     -6.3% [-15, -0] 0/9 p=0.004
+  PTWINQ vs SPT (ECT/TECT)
+    p0 m1          +1.7% [-4, +8] 6/9 p=0.301
+    p0.15 m1       -0.5% [-3, +3] 4/9 p=0.652
+    p0.3 m1        +0.4% [-2, +4] 5/9 p=0.734
+    p0.5 m1        -1.4% [-5, +1] 3/9 p=0.055
+    p0.15 m1.25    +1.1% [-6, +6] 6/9 p=0.359
+    p0.3 m1.25     -0.0% [-4, +5] 3/9 p=0.910
+    p0.5 m1.25     +0.1% [-2, +2] 4/9 p=1.000
+  FIFO vs SPT (ECT/TECT)
+    p0 m1         +17.9% [+8, +31] 9/9 p=0.004
+    p0.15 m1       +9.4% [+4, +20] 9/9 p=0.004
+    p0.3 m1        +4.4% [+1, +8] 9/9 p=0.004
+    p0.5 m1        +1.3% [-2, +4] 7/9 p=0.098
+    p0.15 m1.25    +8.7% [+4, +14] 9/9 p=0.004
+    p0.3 m1.25     +3.3% [-1, +7] 8/9 p=0.008
+    p0.5 m1.25     +4.5% [-1, +9] 8/9 p=0.012
+  TECT vs ECT (all job rules)
+    p0 m1          +0.3% [-2, +5] 4/9 p=1.000
+    p0.15 m1       +0.5% [-2, +3] 7/9 p=0.098
+    p0.3 m1        -0.7% [-5, +3] 4/9 p=0.496
+    p0.5 m1        +0.3% [-3, +4] 6/9 p=0.652
+    p0.15 m1.25    +0.3% [-2, +3] 4/9 p=0.496
+    p0.3 m1.25     -0.4% [-4, +3] 4/9 p=0.359
+    p0.5 m1.25     +1.8% [-1, +4] 8/9 p=0.027
+  SRWT vs ECT (all job rules)
+    p0 m1          +8.8% [+5, +14] 9/9 p=0.004
+    p0.15 m1      +12.1% [+10, +14] 9/9 p=0.004
+    p0.3 m1       +12.2% [+7, +17] 9/9 p=0.004
+    p0.5 m1       +13.9% [+10, +18] 9/9 p=0.004
+    p0.15 m1.25   +13.0% [+6, +20] 9/9 p=0.004
+    p0.3 m1.25    +19.6% [+14, +24] 9/9 p=0.004
+    p0.5 m1.25    +27.3% [+18, +40] 9/9 p=0.004
+
+== Lever size per group: mean spread (worst/best - 1) across one head with the other fixed (%)
+  p0 m1        job head  20.4 (without FIFO, ECT/TECT only  6.5)   machine head   9.9 (ECT vs TECT only  2.3)
+  p0.15 m1     job head  12.5 (without FIFO, ECT/TECT only  3.7)   machine head  13.1 (ECT vs TECT only  2.2)
+  p0.3 m1      job head  10.1 (without FIFO, ECT/TECT only  6.1)   machine head  14.3 (ECT vs TECT only  2.9)
+  p0.5 m1      job head   8.7 (without FIFO, ECT/TECT only  6.2)   machine head  15.2 (ECT vs TECT only  2.5)
+  p0.15 m1.25  job head  13.9 (without FIFO, ECT/TECT only  6.2)   machine head  14.2 (ECT vs TECT only  2.5)
+  p0.3 m1.25   job head  12.0 (without FIFO, ECT/TECT only  8.8)   machine head  21.3 (ECT vs TECT only  2.5)
+  p0.5 m1.25   job head  13.7 (without FIFO, ECT/TECT only  9.0)   machine head  28.1 (ECT vs TECT only  3.0)
+
+== Routing: processing paid above the fastest eligible machine (%) / share of ops on a secondary machine (%)
+group            p0 m1   p0.15 m1    p0.3 m1    p0.5 m1 p0.15 m1.25 p0.3 m1.25 p0.5 m1.25
+machine_rule                                                                             
+ECT           10.4 / 0  11.4 / 16  12.2 / 36  12.3 / 52   14.3 / 12  18.7 / 27  21.0 / 37
+SRWT          17.2 / 0  18.5 / 18  18.9 / 39  18.9 / 58   22.0 / 16  28.3 / 37  33.8 / 56
+TECT          10.7 / 0  11.5 / 16  12.1 / 37  12.3 / 52   14.2 / 11  18.4 / 26  21.4 / 38
+ECT and SRWT pick the same machine (% of routing decisions with 2+ candidates, in the ECT runs' states): p0 m1 79  p0.15 m1 78  p0.3 m1 77  p0.5 m1 77  p0.15 m1.25 76  p0.3 m1.25 74  p0.5 m1.25 69
+
+== Where the time goes: mean per job (s) for the best pairs and SRWT, by group
+  SPT_ECT
+             routing  pickup  transit  queued  processing    flow
+group                                                            
+p0 m1           21.0    75.0     88.0  1430.0       983.0  2596.0
+p0.15 m1        22.0    73.0     87.0  1188.0       979.0  2349.0
+p0.3 m1         18.0    72.0     87.0   895.0       987.0  2060.0
+p0.5 m1         20.0    73.0     87.0   774.0       986.0  1940.0
+p0.15 m1.25     20.0    74.0     88.0  1338.0      1020.0  2540.0
+p0.3 m1.25      18.0    74.0     87.0  1217.0      1062.0  2457.0
+p0.5 m1.25      18.0    74.0     87.0  1167.0      1077.0  2423.0
+  SRT_ECT
+             routing  pickup  transit  queued  processing    flow
+group                                                            
+p0 m1           20.0    75.0     88.0  1452.0       979.0  2614.0
+p0.15 m1        19.0    73.0     87.0  1151.0       981.0  2311.0
+p0.3 m1         18.0    72.0     86.0   800.0       985.0  1960.0
+p0.5 m1         18.0    72.0     86.0   673.0       990.0  1840.0
+p0.15 m1.25     21.0    73.0     88.0  1273.0      1017.0  2471.0
+p0.3 m1.25      17.0    73.0     86.0  1054.0      1055.0  2285.0
+p0.5 m1.25      18.0    73.0     87.0   996.0      1074.0  2248.0
+  SPT_SRWT
+             routing  pickup  transit  queued  processing    flow
+group                                                            
+p0 m1           23.0    75.0     88.0  1609.0      1041.0  2835.0
+p0.15 m1        21.0    74.0     87.0  1412.0      1047.0  2641.0
+p0.3 m1         19.0    73.0     87.0  1115.0      1051.0  2345.0
+p0.5 m1         19.0    73.0     88.0   982.0      1047.0  2209.0
+p0.15 m1.25     21.0    75.0     88.0  1589.0      1088.0  2861.0
+p0.3 m1.25      19.0    75.0     89.0  1584.0      1145.0  2913.0
+p0.5 m1.25      19.0    77.0     89.0  1717.0      1200.0  3102.0
+
+== Tail: p95 flow time (s), mean over seeds
+group      p0 m1  p0.15 m1  p0.3 m1  p0.5 m1  p0.15 m1.25  p0.3 m1.25  p0.5 m1.25
+rule                                                                             
+SPT_ECT   7041.0    5831.0   4707.0   4217.0       6552.0      5645.0      5696.0
+SPT_TECT  6992.0    5835.0   4654.0   4381.0       6474.0      5649.0      5771.0
+SRT_ECT   7835.0    6425.0   4685.0   4263.0       7256.0      5648.0      5593.0
+SRT_TECT  7686.0    6554.0   4721.0   4107.0       6998.0      5693.0      5720.0
+FIFO_ECT  6258.0    5382.0   4110.0   3766.0       5759.0      4718.0      4766.0
+SPT_SRWT  7589.0    6585.0   5403.0   5043.0       7412.0      6884.0      7557.0
+
+== Machine utilization (mean over machines / SD across machines), selected rules
+  SPT_ECT   p0 m1: 0.67/0.08  p0.15 m1: 0.70/0.10  p0.3 m1: 0.76/0.08  p0.5 m1: 0.77/0.06  p0.15 m1.25: 0.70/0.09  p0.3 m1.25: 0.78/0.06  p0.5 m1.25: 0.80/0.04
+  SRT_ECT   p0 m1: 0.64/0.08  p0.15 m1: 0.66/0.11  p0.3 m1: 0.74/0.08  p0.5 m1: 0.77/0.05  p0.15 m1.25: 0.67/0.09  p0.3 m1.25: 0.76/0.07  p0.5 m1.25: 0.79/0.05
+  SPT_SRWT  p0 m1: 0.67/0.10  p0.15 m1: 0.70/0.11  p0.3 m1: 0.77/0.09  p0.5 m1: 0.80/0.07  p0.15 m1.25: 0.69/0.11  p0.3 m1.25: 0.79/0.08  p0.5 m1.25: 0.81/0.06
+
+wrote /home/ubuntupc/Documents/Github/Capstone/results/rq3-flex/cells_all.csv and /home/ubuntupc/Documents/Github/Capstone/results/rq3-flex/gaps.csv

@@ -1,0 +1,56 @@
+[10-02 11:41] starting, 16 workers, segment 1800s, seeds: 0 1 2 3 4 5 6 7
+[10-02 12:42] ok   route-long s0 seed 0: best fixed SRT-ECT -115.811, oracle -115.659 (-0.13%), schedule ['SRT-ECT', 'SRT-SRWT', 'SRT-SRWT']
+[10-02 12:59] ok   ops-long s0 seed 0: best fixed SRT-ECT -120.800, oracle -120.800 (+0.00%), schedule ['SRT-ECT', 'SRT-ECT', 'SRT-ECT']
+[10-02 13:15] ok   util-lo s0 seed 0: best fixed SPT-TECT -66.137, oracle -66.137 (+0.00%), schedule ['SPT-TECT', 'SPT-TECT', 'SPT-TECT']
+[10-02 13:19] ok   agv3 s0 seed 0: best fixed SRT-ECT -130.770, oracle -130.770 (+0.00%), schedule ['SRT-ECT', 'SRT-ECT', 'SRT-ECT']
+[10-02 13:21] ok   aff-0 s0 seed 0: best fixed SRT-ECT -246.317, oracle -246.317 (+0.00%), schedule ['SRT-ECT', 'SRT-ECT', 'SRT-ECT']
+[10-02 13:22] ok   agv4 s0 seed 0: best fixed SRT-ECT -128.815, oracle -128.791 (-0.02%), schedule ['SRT-ECT', 'SRT-ECT', 'SRT-TECT']
+[10-02 13:25] ok   agv5 s0 seed 0: best fixed SRT-ECT -128.658, oracle -128.658 (+0.00%), schedule ['SRT-ECT', 'SRT-ECT', 'SRT-ECT']
+[10-02 13:29] ok   op-var s0 seed 0: best fixed SRT-ECT -124.214, oracle -124.214 (+0.00%), schedule ['SRT-ECT', 'SRT-ECT', 'SRT-ECT']
+[10-02 13:29] ok   skew s0 seed 0: best fixed SRT-ECT -128.245, oracle -128.245 (+0.00%), schedule ['SRT-ECT', 'SRT-ECT', 'SRT-ECT']
+[10-02 13:29] ok   amax1 s0 seed 0: best fixed PTWINQ-ECT -128.674, oracle -128.674 (+0.00%), schedule ['PTWINQ-ECT', 'PTWINQ-ECT', 'PTWINQ-ECT']
+[10-02 13:29] ok   base-w s0 seed 0: best fixed PTWINQ-ECT -128.674, oracle -128.674 (+0.00%), schedule ['PTWINQ-ECT', 'PTWINQ-ECT', 'PTWINQ-ECT']
+[10-02 13:30] ok   aff-hi s0 seed 0: best fixed SRT-TECT -107.282, oracle -107.282 (+0.00%), schedule ['SRT-TECT', 'SRT-TECT', 'SRT-TECT']
+[10-02 13:30] ok   flex-p3-m1 s0 seed 0: best fixed SRT-TECT -129.406, oracle -129.405 (-0.00%), schedule ['SRT-TECT', 'SRT-ECT', 'SRT-ECT']
+[10-02 13:36] ok   agv10 s0 seed 0: best fixed SRT-ECT -128.449, oracle -128.449 (+0.00%), schedule ['SRT-ECT', 'SRT-ECT', 'SRT-ECT']
+[10-02 13:43] ok   util-hi s0 seed 0: best fixed SRT-ECT -288.622, oracle -285.282 (-1.16%), schedule ['SRT-ECT', 'SRT-SRWT', 'SRT-ECT']
+Terminated                 for seed in $SEEDS;
+do
+    for reg in $REGIMES;
+    do
+        echo "$idx $reg $seed"; idx=$((idx + 1));
+    done;
+done | xargs -P "$WORKERS" -L 1 bash -c 'run_one "$@"' _
+[10-02 13:56] all done
+    regime  seeds  best_pair  static_%  switch_%  total_%  total_min_%  total_max_%  seeds_total>2%  spread_% oracle_job_rules
+   util-hi      1    SRT-ECT       0.0      1.16     1.16         1.16         1.16               0     13.96         SRT 100%
+route-long      1    SRT-ECT       0.0      0.13     0.13         0.13         0.13               0     11.30         SRT 100%
+      agv4      1    SRT-ECT       0.0      0.02     0.02         0.02         0.02               0      8.86         SRT 100%
+flex-p3-m1      1   SRT-TECT       0.0      0.00     0.00         0.00         0.00               0     10.83         SRT 100%
+     aff-0      1    SRT-ECT       0.0      0.00     0.00         0.00         0.00               0     10.71         SRT 100%
+    aff-hi      1   SRT-TECT       0.0      0.00     0.00         0.00         0.00               0     29.64         SRT 100%
+     agv10      1    SRT-ECT       0.0      0.00     0.00         0.00         0.00               0     12.70         SRT 100%
+      agv3      1    SRT-ECT       0.0      0.00     0.00         0.00         0.00               0      8.90         SRT 100%
+      agv5      1    SRT-ECT       0.0      0.00     0.00         0.00         0.00               0     10.89         SRT 100%
+     amax1      1 PTWINQ-ECT       0.0      0.00     0.00         0.00         0.00               0     12.31      PTWINQ 100%
+    base-w      1 PTWINQ-ECT       0.0      0.00     0.00         0.00         0.00               0     12.31      PTWINQ 100%
+    op-var      1    SRT-ECT       0.0      0.00     0.00         0.00         0.00               0     14.96         SRT 100%
+  ops-long      1    SRT-ECT       0.0      0.00     0.00         0.00         0.00               0      5.46         SRT 100%
+      skew      1    SRT-ECT       0.0      0.00     0.00         0.00         0.00               0     12.47         SRT 100%
+   util-lo      1   SPT-TECT       0.0      0.00     0.00         0.00         0.00               0      6.47         SPT 100%
+[10-02 13:56] ok   ops-short s0 seed 0: best fixed SPT-TECT -73.829, oracle -73.829 (+0.00%), schedule ['SPT-TECT', 'SPT-TECT', 'SPT-TECT']
+[10-02 14:30] ok   util-hi s1 seed 1: best fixed PTWINQ-ECT -54.655, oracle -54.463 (-0.35%), schedule ['PTWINQ-ECT', 'SRT-ECT', 'SRT-ECT']
+[10-02 14:31] ok   flex-p3-m125 s0 seed 0: best fixed SRT-ECT -129.984, oracle -129.454 (-0.41%), schedule ['SRT-ECT', 'SRT-ECT', 'PTWINQ-ECT']
+[10-02 14:33] ok   util-lo s1 seed 1: best fixed SPT-TECT -46.623, oracle -46.553 (-0.15%), schedule ['SPT-TECT', 'SPT-TECT', 'SPT-ECT']
+[10-02 14:45] ok   flex-p5-m125 s0 seed 0: best fixed PTWINQ-TECT -128.584, oracle -127.670 (-0.71%), schedule ['PTWINQ-TECT', 'SRT-ECT', 'PTWINQ-ECT']
+[10-02 14:57] ok   mf-off s0 seed 0: best fixed PTWINQ-ECT -128.674, oracle -128.674 (+0.00%), schedule ['PTWINQ-ECT', 'PTWINQ-ECT', 'PTWINQ-ECT']
+[10-02 15:00] ok   agvf1500 s0 seed 0: best fixed SRT-ECT -131.415, oracle -130.498 (-0.70%), schedule ['SRT-ECT', 'SRT-ECT', 'SRT-SRWT']
+[10-02 15:01] ok   lay-J s0 seed 0: best fixed SRT-TECT -129.014, oracle -129.014 (+0.00%), schedule ['SRT-TECT', 'SRT-TECT', 'SRT-TECT']
+[10-02 15:09] ok   mf-heavy s0 seed 0: best fixed SRT-SRWT -258.342, oracle -258.152 (-0.07%), schedule ['SRT-SRWT', 'SRT-ECT', 'SRT-ECT']
+[10-02 15:24] ok   agv3 s1 seed 1: best fixed SRT-TECT -157.030, oracle -155.715 (-0.84%), schedule ['SRT-TECT', 'SRT-ECT', 'SRT-ECT']
+[10-02 15:27] ok   agv4 s1 seed 1: best fixed PTWINQ-ECT -166.353, oracle -162.237 (-2.47%), schedule ['PTWINQ-ECT', 'SRT-ECT', 'SRT-SRWT']
+[10-02 15:30] ok   agv5 s1 seed 1: best fixed SRT-TECT -159.562, oracle -159.562 (+0.00%), schedule ['SRT-TECT', 'SRT-TECT', 'SRT-ECT']
+[10-02 15:31] ok   base-w s1 seed 1: best fixed SRT-ECT -157.987, oracle -157.987 (+0.00%), schedule ['SRT-ECT', 'SRT-ECT', 'SRT-ECT']
+[10-02 15:38] ok   amax1 s1 seed 1: best fixed SRT-ECT -194.682, oracle -191.606 (-1.58%), schedule ['SRT-ECT', 'SRT-TECT', 'SRT-TECT']
+[10-02 15:43] ok   agv10 s1 seed 1: best fixed SRT-TECT -158.544, oracle -158.352 (-0.12%), schedule ['SRT-TECT', 'SRT-ECT', 'SRT-ECT']
+[10-02 15:47] ok   ops-short s1 seed 1: best fixed SRT-TECT -48.559, oracle -48.268 (-0.60%), schedule ['SRT-TECT', 'SPT-TECT', 'SPT-TECT']

@@ -1,0 +1,11 @@
+{
+ "status": "verified",
+ "build_dir": "/home/ubuntupc/Documents/Github/Capstone/linux_server",
+ "source_commit": "fa4426b3b76c9359a3e7a12f9d7eadf36f8d7387",
+ "source_dirty": true,
+ "source_diff_sha256": "622215127f754b69334ee490843554b0e6fe0925a34b66db0adc8e756072d844",
+ "built_at": "2026-10-02T20:13:33Z",
+ "unity_version": "6000.3.15f1",
+ "files": 217,
+ "manifest_sha256": "8b3357987aaf14388af0e00159e1f598dd0d30f853c7c54c633322c31d1da043"
+}
