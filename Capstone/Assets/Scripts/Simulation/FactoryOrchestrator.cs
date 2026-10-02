@@ -434,6 +434,13 @@ namespace Assets.Scripts.Simulation
                 ResultsLogger.SetSubdirectory(_decisionLogDir);
                 SimLogger.Low($"[Orchestrator] Writing decision_log.csv to {ResultsLogger.OutputDirectory}.");
             }
+            // Same for the event-based twin's export (-destrace), used under ML-Agents by the observation parity
+            // check (env/des_twin/parity.py): des_floor.json / des_jobs.json land next to the decision log.
+            if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "-destrace") >= 0)
+            {
+                DesTwinExport.Enabled = true;
+                SimLogger.Low($"[Orchestrator] DES twin export ENABLED (-destrace), to {ResultsLogger.OutputDirectory}.");
+            }
             if (RLDecisionDrainMode && BaselineDrainMode)
                 SimLogger.LogWarning("[Orchestrator] Both RLDecisionDrainMode and BaselineDrainMode " +
                                       "are set -- BaselineDrainMode takes priority and RL drain will " +

@@ -10,6 +10,10 @@ FactoryOrchestrator.FixedUpdate's order (heuristic drain mode, "-baselinedrain")
   5. decision drain         (routing before dispatch, as DecisionCoordinator.FindNextDecision)
   6. scripted arrivals      (TickScriptedArrivals: a job arriving at tick k is routed from tick k + 1)
 
+With a fixed rule (run / run_twin) every decision is drained with it, as "-baselinedrain". Agent mode
+(Twin.agent_decisions, used by env_wrappers/twin_env.py) stops at each decision after the warm-up, as the player's
+"-rldecisiondrain": the generator yields a Decision (Unity's DecisionRequest) and takes the rule halves to apply.
+
 Machines and AGVs act after the orchestrator in a tick, so work started at tick k runs from tick k and a flag
 raised at tick m is harvested at m + 1. Machine failures, AGV failures and multi-tile floors are not modelled:
 compare only against Unity runs without them.
@@ -17,6 +21,8 @@ compare only against Unity runs without them.
 import heapq
 import math
 from dataclasses import dataclass
+
+import numpy as np
 
 from .floor import Floor
 from .motion import Kinematics, f32_countdown, handshake_done, heading, plan_leg
@@ -28,11 +34,34 @@ TRANSPORTS = ("instant", "geometric", "kinematic")
 
 @dataclass
 class TwinConfig:
-    rule: str
+    rule: str                      # fixed rule; in agent mode the warm-up rule
     transport: str = "kinematic"
     agv_count: int = None          # None: the exported fleet; fewer uses its first n AGVs and bays
     routing_trigger: str = None    # None: as exported ("onTransport" / "onReady")
     max_sim_seconds: float = 500000.0
+    warmup_seconds: float = 0.0    # Stochastic.WarmupSeconds: decisions before it use `rule` (agent mode)
+    episode_duration_seconds: float = 0.0   # Stochastic.EpisodeDurationSeconds: truncate after warm-up + this
+
+
+@dataclass
+class Decision:
+    """DecisionRequest as the agent sees it (agent mode). Routing: `job` is the oldest routable job, a placeholder
+    the job half re-selects among `job_candidates` unless `selected_by_rule`; `machines` are its candidates.
+    Dispatch: `machine` picks from `queue`."""
+    kind: str                      # "routing" / "dispatch"
+    job: int = -1
+    job_candidates: tuple = ()
+    selected_by_rule: bool = True
+    machines: tuple = ()
+    machine: int = -1
+    queue: tuple = ()
+
+    def heads_that_matter(self):
+        """DispatchingEngine.HeadsThatMatter: (job head, machine head) can change the outcome."""
+        if self.kind == "dispatch":
+            return len(self.queue) > 1, False
+        pool = not self.selected_by_rule and len(self.job_candidates) > 1
+        return pool, pool or len(self.machines) > 1
 
 
 class Job:
@@ -127,7 +156,19 @@ class Twin:
         self.decision_rows = []
         self.trace = []                # (time, agv, event, job) at agent ticks, as agv_events.csv
         self.timed_out = False
+        self.truncated = False
         self.makespan = None
+        self.agent = False
+        # FixedUpdate ends the episode at the first tick with SimTime > warm-up end + cap, before harvesting
+        self.cap_tick = None
+        if cfg.episode_duration_seconds > 0:
+            limit = cfg.warmup_seconds + cfg.episode_duration_seconds
+            k = math.floor(limit / self.dt) + 1
+            while k > 1 and (k - 1) * self.dt > limit:
+                k -= 1
+            while k * self.dt <= limit:
+                k += 1
+            self.cap_tick = k
 
     # ── Clock ───────────────────────────────────────────────────────────────────────────────────
 
@@ -137,9 +178,32 @@ class Twin:
             heapq.heappush(self._heap, tick)
 
     def run(self):
+        """Runs the episode with the fixed rule (cfg.rule) at every decision."""
+        for _ in self._events():
+            raise RuntimeError("a fixed-rule run never stops for a decision")
+        return self
+
+    def agent_decisions(self):
+        """Agent mode: a generator that yields a Decision at each decision after the warm-up and takes the rule
+        halves to apply, gen.send((job_rule, machine_rule)), e.g. ("SPT", "ECT"). Between the yield and the send
+        the twin's state is the one the decision is made in (for the observation). Ends with the episode."""
+        self.agent = True
+        return self._events()
+
+    @property
+    def in_warmup(self):
+        return self.now < self.cfg.warmup_seconds
+
+    @property
+    def done(self):
+        return self.makespan is not None
+
+    def _events(self):
         self._wake(1)
         for job in self.pending:
             self._wake(max(1, math.ceil(job.arrival / self.dt - 1e-9)))
+        if self.cap_tick is not None:
+            self._wake(self.cap_tick)
         max_tick = int(self.cfg.max_sim_seconds / self.dt)
         while self._heap:
             k = heapq.heappop(self._heap)
@@ -149,12 +213,14 @@ class Twin:
                 self.k, self.now = max_tick, max_tick * self.dt
                 break
             self.k, self.now = k, k * self.dt
-            if self._tick(k):
+            if self.cap_tick is not None and k >= self.cap_tick:
+                self.truncated = True
+                break
+            if (yield from self._tick(k)):
                 self.makespan = self.now
                 break
         if self.makespan is None:
             self.makespan = self.now
-        return self
 
     def _tick(self, k):
         for m in self.machines:
@@ -171,7 +237,7 @@ class Twin:
                     waiting = self._any_waiting_for_transport()
                 self._almost_done(m, waiting)
         self._assign_agvs()
-        while self._next_decision():
+        while (yield from self._next_decision()):
             pass
         added = False
         while self.pending_i < len(self.pending) and self.pending[self.pending_i].arrival <= self.now + 1e-9:
@@ -487,20 +553,36 @@ class Twin:
             open_ = not self.on_transport or any(self._available(a) for a in self.agvs)
             routable = [j for j in ready if open_ or j.pre_agv >= 0]
             if routable:
-                self._route(routable)
+                yield from self._route(routable)
                 return True
         for m in self.machines:
             if m.idle and any(j.state == QUEUED and j.location == m.id for j in self._live()):
-                self._dispatch_decision(m)
+                yield from self._dispatch_decision(m)
                 return True
         return False
+
+    def _rule_for(self, make_decision):
+        """The rule halves for this decision: the fixed rule, or (agent mode, after the warm-up) the agent's."""
+        if not self.agent or self.in_warmup:
+            return self.job_rule, self.machine_rule
+        rule = yield make_decision()
+        job_rule, machine_rule = (r.upper() for r in rule)
+        parse_rule(f"{job_rule}_{machine_rule}")
+        return job_rule, machine_rule
+
+    def candidate_machines(self, job):
+        """BuildRoutingDecision: the job's eligible machines in floor order (all operational in the twin)."""
+        return [m.id for m in self.machines if m.id in job.ops[job.cur_op]]
 
     def _route(self, routable):
         self.decisions += 1
         ids = [j.id for j in routable]
-        jid = rank_jobs(self.job_rule, ids, self, lambda i: self.jobs[i].min_proc())
+        job_rule, machine_rule = yield from self._rule_for(lambda: Decision(
+            "routing", job=ids[0], job_candidates=tuple(ids), selected_by_rule=len(ids) == 1,
+            machines=tuple(self.candidate_machines(routable[0]))))
+        jid = rank_jobs(job_rule, ids, self, lambda i: self.jobs[i].min_proc())
         job = self.jobs[jid]
-        cands = [m.id for m in self.machines if m.id in job.ops[job.cur_op]]
+        cands = self.candidate_machines(job)
         times = [job.proc(mid) for mid in cands]
         loads = [self.machine_load(mid) for mid in cands]
         utils = [self.utilization(self.mach[mid]) for mid in cands]
@@ -509,7 +591,7 @@ class Twin:
         else:
             speed = self.floor.agv["speed"]
             travel = [f32(self.floor.estimate_path_length(job.location, mid) / speed) for mid in cands]
-        mid = select_machine(self.machine_rule, cands, times, loads, utils, travel)
+        mid = select_machine(machine_rule, cands, times, loads, utils, travel)
         self.decision_rows.append((self.now, "routing", job.id, mid, len(cands), len(ids)))
         job.op_rows.append({"job": job.id, "op": job.cur_op, "machine": mid, "routed": self.now,
                             "from": job.location, "queued": None, "start": None, "end": None})
@@ -532,7 +614,8 @@ class Twin:
     def _dispatch_decision(self, m):
         self.decisions += 1
         queue = [j.id for j in self._live() if j.state == QUEUED and j.location == m.id]
-        jid = rank_jobs(self.job_rule, queue, self, lambda i: self.jobs[i].proc(m.id))
+        job_rule, _ = yield from self._rule_for(lambda: Decision("dispatch", machine=m.id, queue=tuple(queue)))
+        jid = rank_jobs(job_rule, queue, self, lambda i: self.jobs[i].proc(m.id))
         job = self.jobs[jid]
         self.decision_rows.append((self.now, "dispatch", m.id, jid, len(queue), 0))
         job.op_rows[-1]["start"] = self.now
@@ -576,6 +659,58 @@ class Twin:
             "machine_util_mean": sum(m.busy for m in self.machines) / (len(self.machines) * self.makespan)
             if self.makespan else 0.0,
         }
+
+    def metrics(self):
+        """RewardMetrics.Fill (env/rewards/metrics.py names) for the current state, as float32 like the sensor.
+        AGV travel time is the non-idle time (handshakes included) and there are no route waits or zone blocks:
+        the twin has no reservations."""
+        jobs = self.order                 # AllJobs: arrived jobs only
+        n_state = [0] * 6
+        t_state = [0.0] * 6
+        flow = tis = 0.0
+        exited = ops_total = ops_done = 0
+        for j in jobs:
+            ops_total += j.total_ops
+            ops_done += j.completed_ops
+            for s in range(5):
+                t_state[s] += j.t_state[s]
+            if j.state == EXITED:
+                exited += 1
+                f = j.exit_time - j.arrival
+                flow += f
+                tis += f
+            else:
+                n_state[j.state] += 1
+                t_state[j.state] += max(0.0, self.now - j.since)
+                tis += max(0.0, self.now - j.arrival)
+        idle_agvs = 0
+        idle_time = 0.0
+        for a in self.agvs:
+            idle_time += a.idle_time
+            if self._status(a) == "idle":
+                idle_agvs += 1
+                idle_time += max(0.0, self.now - a.idle_since)
+        n_agv = len(self.agvs)
+        values = {
+            "sim_time": self.now, "episode_active": 0.0 if self.done else 1.0, "decision_count": self.decisions,
+            "jobs_total": len(jobs), "jobs_exited": exited, "wip": len(jobs) - exited,
+            "ops_total": ops_total, "ops_completed": ops_done,
+            "flow_time_exited_sum": flow, "time_in_system_sum": tis,
+            "jobs_needs_routing": n_state[NEEDS_ROUTING], "jobs_waiting_pickup": n_state[WAITING_PICKUP],
+            "jobs_in_transit": n_state[IN_TRANSIT], "jobs_queued": n_state[QUEUED],
+            "jobs_processing": n_state[PROCESSING],
+            "time_needs_routing_sum": t_state[NEEDS_ROUTING], "time_waiting_pickup_sum": t_state[WAITING_PICKUP],
+            "time_in_transit_sum": t_state[IN_TRANSIT], "time_queued_sum": t_state[QUEUED],
+            "time_processing_sum": t_state[PROCESSING],
+            "machines_total": len(self.machines), "machines_busy": sum(not m.idle for m in self.machines),
+            "agvs_total": n_agv, "agvs_idle": idle_agvs,
+            "agv_time_traveling_sum": n_agv * self.now - idle_time, "agv_time_idle_sum": idle_time,
+            "agv_trips_total": sum(a.trips for a in self.agvs),
+            "timed_out": float(self.timed_out),
+            "all_jobs_exited": float(len(jobs) > 0 and exited == len(jobs)),
+            "truncated": float(self.truncated),
+        }
+        return {k: float(np.float32(v)) for k, v in values.items()}
 
     def job_rows(self):
         return [{"job_id": j.id, "arrival_time": j.arrival, "exit_time": j.exit_time,

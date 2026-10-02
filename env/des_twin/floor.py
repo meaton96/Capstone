@@ -45,6 +45,9 @@ class Machine:
     pickup_pos: tuple
     dropoff_pos: tuple
     in_belts: list    # [(input_pos, capacity)] in PickIncomingBelt's preference order
+    pos3: tuple = None          # transform.position (x, y, z); observation exports only
+    cell: tuple = None          # its spatial-grid cell (gx, gy), as ObservationBuilder.WorldToGrid computes it
+    capabilities: tuple = None  # every MachineType it can run (primary first)
 
 
 class Floor:
@@ -71,12 +74,20 @@ class Floor:
         self.zone_by_id = {z.id: z for z in self.zones}
         self.machines = [Machine(m["id"], m["type"], m["tile"], list(m["zones"]), list(m["pickup_zones"]),
                                  tuple(m["pickup_pos"]), tuple(m["dropoff_pos"]),
-                                 [(tuple(b["input_pos"]), int(b["capacity"])) for b in m["in_belts"]])
+                                 [(tuple(b["input_pos"]), int(b["capacity"])) for b in m["in_belts"]],
+                                 tuple(m["pos3"]) if "pos3" in m else None,
+                                 tuple(m["cell"]) if "cell" in m else None,
+                                 tuple(m["capabilities"]) if "capabilities" in m else None)
                          for m in data["machines"]]
         self.machine_by_id = {m.id: m for m in self.machines}
         t = data["tiles"][0]
         self.incoming_key, self.outgoing_key = t["incoming_key"], t["outgoing_key"]
         self.incoming_pos, self.outgoing_pos = tuple(t["incoming_pos"]), tuple(t["outgoing_pos"])
+        # Observation frame (exports from players built after 2026-10-01): grid centre / half extents and floor
+        # size of ObservationBuilder.BuildSpatialOccupancyGrid, the incoming belt's 3D position and grid cell.
+        self.obs_frame = data.get("obs")
+        self.incoming_pos3 = tuple(t["incoming_pos3"]) if "incoming_pos3" in t else None
+        self.incoming_cell = tuple(t["incoming_cell"]) if "incoming_cell" in t else None
         self.agvs = data["agvs"]
         self._routes = {}
         self._hops = {}

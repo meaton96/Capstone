@@ -22,10 +22,11 @@ a scenario_generator + seed_rng, a fresh seeded variant every episode — queued
 the seed above, one item per episode, buffered the same way. Long scenarios can opt into a
 steady-state time cap (a scenario's "stochastic": {"episodeDurationSeconds": N}); an episode cut
 short that way is truncated, not terminated: info["episode"]["truncated"] is set, and the info
-dict carries the truncated episode's own final observation as "terminal_obs" (Unity has already
+dict carries the truncated episode's last observation as "terminal_obs" (Unity has already
 auto-reset by the time step() returns, so obs/next_obs is the new episode's first frame — the
 value network still needs terminal_obs to bootstrap the truncated one correctly; see
-rollout_buffer.RolloutBuffer.add).
+rollout_buffer.RolloutBuffer.add). That is the observation of the episode's last decision, kept
+here in Python: the player's own terminal observation is all zeros (see step).
 
 Side channel usage:
   env.send_config(config_dict)      # applied on the next reset()
@@ -208,6 +209,7 @@ class UnitySchedulingEnv:
 
         self._pending_config = None
         self._prev_metrics: Optional[MetricsSnapshot] = None
+        self._last_obs: Optional[Dict[str, np.ndarray]] = None   # last decision of the running episode
         self._episode_return = 0.0
         self._episode_length = 0
         self._episode_terms: Dict[str, float] = {}
@@ -326,16 +328,20 @@ class UnitySchedulingEnv:
         info = {"reward_terms": terms}
         if not done:
             self._prev_metrics = curr
-            return self._extract_obs(decision), reward, False, info
+            self._last_obs = self._extract_obs(decision)
+            return self._last_obs, reward, False, info
 
         # Unity has already auto-reset by now: decision (if present) is the NEW episode's first
-        # frame, not a continuation of the one that just ended. terminal_obs is that ended
-        # episode's own last observation — needed to bootstrap a truncated (not terminated)
-        # episode's value estimate, since there is no real "next state" to bootstrap from.
+        # frame, not a continuation of the one that just ended. terminal_obs stands in for the
+        # ended episode's final state, to bootstrap a truncated (not terminated) episode's value.
+        # The terminal step's own observation is useless for that: the player has already set
+        # episodeActive = false when it collects it, so SchedulingAgent.CollectObservations pads
+        # it with zeros. The last decision's observation (one decision before the cap) is used
+        # instead; it falls back to the padded one only if step() runs before reset().
         info["telemetry"] = self.telemetry.pop_payload()
         info["episode"] = self._episode_summary(curr, interrupted=bool(terminal.interrupted[0]),
                                                 telemetry=info["telemetry"])
-        info["terminal_obs"] = self._extract_obs(terminal)
+        info["terminal_obs"] = self._last_obs if self._last_obs is not None else self._extract_obs(terminal)
         self.episodes_completed += 1
         if self.seed_rng is not None:
             # Unity already consumed a seed (and scenario, if any) for the episode that just
@@ -377,7 +383,8 @@ class UnitySchedulingEnv:
         self._episode_return = 0.0
         self._episode_length = 0
         self._episode_terms = {}
-        return self._extract_obs(decision)
+        self._last_obs = self._extract_obs(decision)
+        return self._last_obs
 
     def _episode_summary(self, final: Optional[MetricsSnapshot], interrupted: bool,
                          telemetry: Optional[dict] = None) -> dict:

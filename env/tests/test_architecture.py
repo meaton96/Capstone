@@ -1072,11 +1072,13 @@ class TestUnitySchedulingEnv:
 
     def test_truncated_episode_reports_flag_and_terminal_obs(self):
         """@brief A truncated (time-limit) episode end must set info["episode"]["truncated"] and
-        carry the ended episode's own last observation as info["terminal_obs"] — distinct from
-        obs/next_obs, which by then is already the next episode's first frame (Unity auto-resets)."""
+        carry the ended episode's last decision observation as info["terminal_obs"] — distinct from
+        obs/next_obs, which by then is already the next episode's first frame (Unity auto-resets),
+        and from the terminal step's own observation, which the player pads with zeros."""
         from rewards import MetricsSnapshot
 
         ended_obs = np.full(TOTAL_OBS_SIZE, 0.7, dtype=np.float32)
+        padded_obs = np.zeros(TOTAL_OBS_SIZE, dtype=np.float32)
         next_obs = np.full(TOTAL_OBS_SIZE, 0.1, dtype=np.float32)
 
         def steps(obs_vec, truncated=0):
@@ -1087,7 +1089,7 @@ class TestUnitySchedulingEnv:
 
         env, _ = self._make_env([
             (steps(ended_obs), _empty_steps()),
-            (steps(next_obs), steps(ended_obs, truncated=1)),
+            (steps(next_obs), steps(padded_obs, truncated=1)),
         ], with_metrics=True)
 
         env.reset()
@@ -1095,8 +1097,8 @@ class TestUnitySchedulingEnv:
 
         assert done
         assert info["episode"]["truncated"] is True
-        # terminal_obs is the ENDED episode's own last observation (uniformly 0.7 here), not
-        # the next episode's first frame that obs/next_obs already carries (uniformly 0.1).
+        # terminal_obs is the ENDED episode's last decision (uniformly 0.7 here), not the zero-padded
+        # terminal step, nor the next episode's first frame that obs/next_obs already carries (0.1).
         np.testing.assert_allclose(info["terminal_obs"]["global_scalars"], 0.7)
 
     def test_log_file_passed_as_absolute_path(self):

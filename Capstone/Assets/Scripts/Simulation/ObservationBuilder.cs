@@ -117,16 +117,7 @@ namespace Assets.Scripts.Simulation
             float[] grid = new float[SpatialLength];
 
             FactoryLayoutManager layout = FactoryLayoutManager.Instance;
-            if (layout == null || layout.Machines == null) return grid;
-
-            Vector2 floorSize = layout.FloorSize;
-            Vector3 floorCentre = layout.GridOrigin;
-            float halfW = floorSize.x / 2f;
-            float halfD = floorSize.y / 2f;
-
-            // GridOrigin is the top-left of the machine area; compute the actual centre.
-            float centreX = floorCentre.x + ((layout.LayoutCols - 1) * layout.MachineSpacingX) / 2f;
-            float centreZ = floorCentre.z - ((layout.LayoutRows - 1) * layout.RowPitch) / 2f;
+            if (!TryGridFrame(layout, out float centreX, out float centreZ, out float halfW, out float halfD)) return grid;
 
             // Channel 0: Machines
             foreach (PhysicalMachine m in layout.Machines)
@@ -186,6 +177,35 @@ namespace Assets.Scripts.Simulation
             }
 
             return grid;
+        }
+
+        /**
+         * @brief The spatial grid's frame: floor centre and half extents (x, z). False before the floor is built.
+         * @details GridOrigin is the top-left of the machine area, so the centre is offset by half the machine
+         *          grid. Exported for the event-based twin (DesTwinExport), which builds the same grid.
+         */
+        public static bool TryGridFrame(FactoryLayoutManager layout, out float centreX, out float centreZ,
+                                        out float halfW, out float halfD)
+        {
+            centreX = centreZ = halfW = halfD = 0f;
+            if (layout == null || layout.Machines == null) return false;
+
+            Vector2 floorSize = layout.FloorSize;
+            Vector3 floorCentre = layout.GridOrigin;
+            halfW = floorSize.x / 2f;
+            halfD = floorSize.y / 2f;
+            centreX = floorCentre.x + ((layout.LayoutCols - 1) * layout.MachineSpacingX) / 2f;
+            centreZ = floorCentre.z - ((layout.LayoutRows - 1) * layout.RowPitch) / 2f;
+            return true;
+        }
+
+        /** @brief Grid cell (gx, gy) of a world position, as the spatial grid places it; (-1, -1) without a floor. */
+        public static Vector2Int GridCellOf(FactoryLayoutManager layout, Vector3 worldPos)
+        {
+            if (!TryGridFrame(layout, out float cx, out float cz, out float hw, out float hd))
+                return new Vector2Int(-1, -1);
+            WorldToGrid(worldPos, cx, cz, hw, hd, out int gx, out int gy);
+            return new Vector2Int(gx, gy);
         }
 
         /**
@@ -627,7 +647,7 @@ namespace Assets.Scripts.Simulation
          * @param gx Output grid X index, clamped to valid range.
          * @param gy Output grid Y index, clamped to valid range.
          */
-        private void WorldToGrid(Vector3 worldPos, float centreX, float centreZ,
+        private static void WorldToGrid(Vector3 worldPos, float centreX, float centreZ,
                                   float halfW, float halfD, out int gx, out int gy)
         {
             float nx = (worldPos.x - centreX + halfW) / (2f * halfW);

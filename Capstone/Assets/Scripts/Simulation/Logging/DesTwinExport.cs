@@ -34,6 +34,13 @@ namespace Assets.Scripts.Simulation.Logging
 
         private static float[] XZ(Vector3 v) => new[] { R(v.x), R(v.z) };
         private static float R(float f) => (float)System.Math.Round(f, 4);
+        // Observation frame: unrounded, so the twin's grid cells and distances match ObservationBuilder's.
+        private static float[] XYZ(Vector3 v) => new[] { v.x, v.y, v.z };
+        private static int[] Cell(FactoryLayoutManager layout, Vector3 v)
+        {
+            Vector2Int c = ObservationBuilder.GridCellOf(layout, v);
+            return new[] { c.x, c.y };
+        }
 
         /// <summary>Writes des_floor.json and des_jobs.json for the episode that is starting.</summary>
         public static void Write(FJSSPConfig config, FactoryLayoutManager layout, TrafficZoneManager traffic,
@@ -95,6 +102,11 @@ namespace Assets.Scripts.Simulation.Logging
                     input_pos = XZ(b.InputEndPosition),
                     capacity = b.Capacity,
                 }).ToArray(),
+                // Observation (des_twin.observation): machine position, its grid cell, every capability.
+                pos3 = XYZ(m.transform.position),
+                cell = Cell(layout, m.transform.position),
+                capabilities = m.Capabilities.OrderBy(c => c == m.PrimaryType ? 0 : 1).ThenBy(c => (int)c)
+                                .Select(c => c.ToString()).ToArray(),
             }).ToArray();
 
             var tiles = Enumerable.Range(0, layout.TileCount).Select(t => new
@@ -106,7 +118,17 @@ namespace Assets.Scripts.Simulation.Logging
                 outgoing_zone = traffic.GetZoneIdForDock(TrafficZoneManager.OutgoingDockKey(t)),
                 incoming_pos = XZ(layout.IncomingBeltPositionOf(t)),
                 outgoing_pos = XZ(layout.OutgoingBeltPositionOf(t)),
+                incoming_pos3 = XYZ(layout.IncomingBeltPositionOf(t)),
+                incoming_cell = Cell(layout, layout.IncomingBeltPositionOf(t)),
             }).ToArray();
+
+            ObservationBuilder.TryGridFrame(layout, out float gcx, out float gcz, out float ghw, out float ghd);
+            var obs = new
+            {
+                grid_centre = new[] { gcx, gcz },
+                grid_half = new[] { ghw, ghd },
+                floor_size = new[] { layout.FloorSize.x, layout.FloorSize.y },
+            };
 
             var agvs = pool.AllAGVs.Select(a =>
             {
@@ -136,6 +158,7 @@ namespace Assets.Scripts.Simulation.Logging
                 reservation_protocol = config.reservationProtocol,
                 fixed_dt = Time.fixedDeltaTime,
                 pre_dispatch_lead = preDispatchLeadTime,
+                obs,
                 parking_bayed = traffic.ParkingIsBayed,
                 agv = new
                 {

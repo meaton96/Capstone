@@ -81,7 +81,36 @@ def build_env(args, ppo_cfg, run_dir: Path, reward, scenario_generator=None):
     """
     obs_shapes = dict(OBS_SHAPES)
 
-    if args.unity:
+    if args.twin:
+        # Event-based twin (env/des_twin): same interface, episodes simulated in this process.
+        from env_wrappers.twin_env import VectorizedTwinEnv
+        from scenarios import row_caps_for
+        if args.scenario:
+            planned = [args.scenario]
+        elif scenario_generator is not None:
+            planned = [scenario_generator(10_000 + i) for i in range(8)]
+        else:
+            raise ValueError("--twin needs --scenario or --scenario-generator (the twin has no default job set)")
+        obs_caps = row_caps_for(planned, args.obs_max_machines, args.obs_max_jobs)
+        obs_shapes = shapes_for_caps(*obs_caps)
+        print(f"Observation row caps: {obs_caps[0]} machines, {obs_caps[1]} jobs")
+        scenario = None
+        if args.scenario:
+            with open(args.scenario) as f:
+                scenario = json.load(f)
+        vec_env = VectorizedTwinEnv(
+            num_envs=ppo_cfg.num_envs,
+            floor=args.twin,
+            transport=args.twin_transport,
+            reward_spec=reward,
+            train_seed=None if args.train_seed < 0 else args.train_seed,
+            scenario_generator=scenario_generator,
+            scenario=scenario,
+            obs_caps=obs_caps,
+            instant_fleet=args.twin_instant_fleet,
+        )
+        shutil.copy2(args.twin, run_dir / "des_floor.json")
+    elif args.unity:
         from env_wrappers.unity_env import TRAIN_SEED_LOW, VectorizedUnityEnv
         from scenarios import row_caps_for
         # Row caps fit the floors this run will see, so a small floor isn't padded to the largest one.
@@ -165,8 +194,9 @@ def compute_truncation_bootstrap(net, truncateds: np.ndarray, infos, device: str
 
     @details Unity has already auto-reset a done env by the time step() returns, so obs/next_obs
     is the new episode's first frame — not the state to bootstrap the ended (truncated) one from.
-    info["terminal_obs"] (Unity backend only) carries that ended episode's own last observation
-    instead; this is the only place it's used (see rollout_buffer.RolloutBuffer.add /
+    info["terminal_obs"] (Unity and twin backends) carries that ended episode's last decision
+    observation instead (before 2026-10-01 the Unity wrapper passed the player's zero-padded terminal
+    observation, so every truncated run bootstrapped from V(zeros)); this is the only place it's used (see rollout_buffer.RolloutBuffer.add /
     compute_gae). The placeholder backend has no "terminal_obs", so its truncations get no
     correction (0, the same as before this existed) — a reasonable fallback, not the backend this
     was built for. A per-env loop is fine here: truncation is rare (only at a scenario's
@@ -305,7 +335,7 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
                         status=lambda: f"Last phase: {RUN_STATUS['phase']}, step {RUN_STATUS['step']:,}.")
 
     reward = None
-    if args.unity:
+    if args.unity or args.twin:
         from rewards import load_reward
         reward = load_reward(args.reward_spec)
         reward.archive(run_dir)
@@ -342,14 +372,14 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
         ckpt_reward = ckpt.get("reward")
         print(f"\nResumed from {args.resume_from} at step {resumed_global_step:,} "
               f"(checkpoint reward: {ckpt_reward})")
-        if args.unity and ckpt_reward is not None and ckpt_reward != reward.name:
+        if (args.unity or args.twin) and ckpt_reward is not None and ckpt_reward != reward.name:
             print(f"[WARNING] --reward-spec is '{reward.name}' but the checkpoint was trained "
                   f"with '{ckpt_reward}' -- continuing anyway, but this changes the objective "
                   "mid-training.")
 
     # ---- Scripted scenario: a fixed file, a generator of fresh seeded variants, or neither ----
     scenario_generator = None
-    if args.unity and args.scenario_generator:
+    if (args.unity or args.twin) and args.scenario_generator:
         if args.scenario:
             raise ValueError("--scenario and --scenario-generator are mutually exclusive")
         if args.train_seed < 0:
@@ -375,8 +405,9 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
     # ---- Initialize environments ----
     vec_env, obs_shapes = build_env(args, ppo_cfg, run_dir, reward, scenario_generator)
     row_caps = (obs_shapes["machine_table"][0], obs_shapes["job_table"][0])
-    if args.unity and args.scenario:
-        vec_env.load_scenario_all(args.scenario)
+    if (args.unity or args.twin) and args.scenario:
+        if args.unity:
+            vec_env.load_scenario_all(args.scenario)
         shutil.copy2(args.scenario, run_dir / "scenario.json")
         print(f"Scenario: {args.scenario}")
     obs, infos = vec_env.reset()
@@ -415,7 +446,8 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
         # -- that file already exists from the original run and still means "untrained".
         save_checkpoint(run_dir / "checkpoint_init.pt", net, optimizer, 0, ppo_cfg, reward_name, row_caps)
 
-    backend = "Unity" if args.unity else "Placeholder"
+    backend = (f"twin ({args.twin_transport}, {args.twin})" if args.twin
+               else "Unity" if args.unity else "Placeholder")
     print(f"\nBackend: {backend}")
     print(f"Run directory: {run_dir}")
     if args.resume_from:
@@ -614,7 +646,7 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
         writer.close()
         episode_file.close()
         applied_configs_file.close()
-        if args.unity and hasattr(vec_env, 'close'):
+        if (args.unity or args.twin) and hasattr(vec_env, 'close'):
             vec_env.close()
 
     elapsed = time.time() - start_time
@@ -661,6 +693,15 @@ if __name__ == "__main__":
     parser.add_argument("--allow-unverified-player", action="store_true",
                         help="Launch the player even if its files do not match its BUILD_MANIFEST.json "
                              "(see env/player_manifest.py); the mismatch is recorded in player_manifest.json.")
+    parser.add_argument("--twin", type=str, default=None, metavar="DES_FLOOR_JSON",
+                        help="Train on the event-based twin (env/des_twin) instead of Unity: the floor exported by a "
+                             "player with -destrace (built after 2026-10-01) for the layout and fleet size trained "
+                             "on. Needs --scenario or --scenario-generator; failures and flexibility are refused")
+    parser.add_argument("--twin-transport", type=str, default="kinematic",
+                        choices=["instant", "geometric", "kinematic"],
+                        help="Twin transport model: instant (DES-0), geometric (DES-1g) or kinematic (DES-1k)")
+    parser.add_argument("--twin-instant-fleet", type=int, default=None,
+                        help="AGVs a DES-0 observation reports, parked and idle (default: the floor's fleet)")
     parser.add_argument("--time-scale", type=float, default=100.0,
                         help="Unity simulation speed multiplier")
     parser.add_argument("--reward-spec", type=str,
@@ -732,6 +773,8 @@ if __name__ == "__main__":
                         help="Observation job rows (0 = 256 per 15 machines of the largest floor)")
 
     args = parser.parse_args()
+    if args.twin and args.unity:
+        parser.error("--twin and --unity are mutually exclusive")
 
     cfg = PPOConfig(
         total_timesteps=args.total_timesteps,
