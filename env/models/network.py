@@ -20,6 +20,14 @@ from models.actor_critic import FusionHead, ActorCritic
 from config import EncoderConfig, FusionConfig, ActorCriticConfig
 
 
+def encoder_config_for(state_dict: dict) -> EncoderConfig:
+    """@brief EncoderConfig matching a saved model: BatchNorm buffers (running_mean) mean a checkpoint from before
+    2026-10-01, built with grid_norm="batch"; anything else uses the current default (GroupNorm)."""
+    if any(k.endswith("running_mean") for k in state_dict):
+        return EncoderConfig(grid_norm="batch")
+    return EncoderConfig()
+
+
 class SchedulingNetwork(nn.Module):
     """@brief End-to-end DRL network for job-shop scheduling.
 
@@ -50,7 +58,7 @@ class SchedulingNetwork(nn.Module):
 
         @param encoder_cfg  Encoder dimension config.
                             Defaults to EncoderConfig() if None.
-        @param fusion_cfg   Fusion-head config (hidden dim, dropout, noise).
+        @param fusion_cfg   Fusion-head config (hidden and output dims).
                             Defaults to FusionConfig() if None.
         @param ac_cfg       Actor-critic config (hidden dim, num actions).
                             Defaults to ActorCriticConfig() if None.
@@ -59,6 +67,8 @@ class SchedulingNetwork(nn.Module):
         encoder_cfg = encoder_cfg or EncoderConfig()
         fusion_cfg = fusion_cfg or FusionConfig()
         ac_cfg = ac_cfg or ActorCriticConfig()
+        ## @brief Encoder config the network was built with (saved in checkpoints).
+        self.encoder_cfg = encoder_cfg
 
         ## @brief Multi-modal encoder producing a 560-D concatenated embedding.
         self.encoder = MultiModalEncoder(encoder_cfg)
@@ -76,6 +86,20 @@ class SchedulingNetwork(nn.Module):
             hidden_dim=ac_cfg.hidden_dim,
             branches=ac_cfg.action_branches,
         )
+
+    def train(self, mode: bool = True):
+        """@brief Set train/eval mode, but keep any BatchNorm (legacy grid_norm="batch") on its running statistics.
+
+        @details PPO collects rollouts in eval mode and updates in train mode. In train mode BatchNorm normalizes
+        with minibatch statistics, so the update would score actions with a different network than the one that
+        chose them (ratio != 1 before any weight change). Pinning it to running statistics makes both phases the
+        same function; the statistics then stay as loaded. New networks use GroupNorm and are unaffected.
+        """
+        super().train(mode)
+        for m in self.modules():
+            if isinstance(m, nn.modules.batchnorm._BatchNorm):
+                m.eval()
+        return self
 
     def forward(self, obs: dict):
         """@brief Full forward pass through encoder, fusion, and actor-critic.

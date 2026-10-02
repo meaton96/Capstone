@@ -11,7 +11,7 @@ first value is the schema version, so running against a stale build fails loudly
 """
 
 from collections.abc import Mapping
-from typing import Iterator
+from typing import Iterator, Optional
 
 import numpy as np
 
@@ -139,3 +139,14 @@ class MetricsSnapshot(Mapping):
 
     def to_array(self) -> np.ndarray:
         return self._values.copy()
+
+
+def elapsed_sim_time(prev: Optional["MetricsSnapshot"], curr: Optional["MetricsSnapshot"]) -> Optional[float]:
+    """@brief Simulated seconds between two snapshots (Δτ of one decision step), or None when either is missing.
+
+    @details The trainer discounts each step by gamma_s ** Δτ (PPOConfig.discount_horizon_s), so the env
+    wrappers report this in info["dt"].
+    """
+    if prev is None or curr is None:
+        return None
+    return max(curr.sim_time - prev.sim_time, 0.0)

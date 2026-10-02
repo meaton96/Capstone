@@ -28,6 +28,7 @@ import tempfile
 from unittest.mock import MagicMock, patch
 
 import numpy as np
+import pytest
 import torch
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -43,7 +44,7 @@ from models.encoder import CNNSPPFEncoder, SPPF, MLPEncoder, MultiModalEncoder, 
 from models.actor_critic import FusionHead, ActorHead, CriticHead, ActorCritic
 from models.network import SchedulingNetwork
 from env_wrappers.unity_env import slice_obs
-from config import obs_shapes as obs_shapes_for
+from config import obs_shapes as obs_shapes_for, PPOConfig
 from rollout_buffer import RolloutBuffer
 
 
@@ -382,6 +383,39 @@ class TestSchedulingNetwork:
         assert torch.allclose(val1, val2, atol=1e-6)
         os.unlink(f.name)
 
+    @pytest.mark.parametrize("grid_norm", ["group", "batch"])
+    def test_rollout_and_update_modes_compute_the_same_function(self, grid_norm):
+        """@brief PPO acts in eval mode and re-scores in train mode on minibatches; with no weight change the
+        ratio must be 1. BatchNorm in train mode broke this (minibatch statistics); GroupNorm and pinned legacy
+        BatchNorm must not."""
+        from config import EncoderConfig
+        torch.manual_seed(0)
+        net = SchedulingNetwork(EncoderConfig(grid_norm=grid_norm))
+        obs = make_dummy_obs(8)
+        net.eval()
+        with torch.no_grad():
+            actions, log_probs, values = net.act(obs)
+        net.train()
+        with torch.no_grad():
+            half = {k: v[:4] for k, v in obs.items()}
+            new_lp, new_v, _ = net.evaluate(half, actions[:4])
+        assert torch.allclose(new_lp, log_probs[:4], atol=1e-5)
+        assert torch.allclose(new_v, values[:4], atol=1e-5)
+
+    def test_default_grid_norm_is_group_with_no_batchnorm(self):
+        net = SchedulingNetwork()
+        assert net.encoder_cfg.grid_norm == "group"
+        assert not any(isinstance(m, torch.nn.modules.batchnorm._BatchNorm) for m in net.modules())
+
+    def test_encoder_config_for_detects_legacy_batchnorm_checkpoints(self):
+        """@brief Checkpoints from before 2026-10-01 (BatchNorm) must still load, e.g. rnd02 in evaluate.py."""
+        from config import EncoderConfig
+        from models.network import encoder_config_for
+        legacy = SchedulingNetwork(EncoderConfig(grid_norm="batch")).state_dict()
+        assert encoder_config_for(legacy).grid_norm == "batch"
+        assert encoder_config_for(SchedulingNetwork().state_dict()).grid_norm == "group"
+        SchedulingNetwork(encoder_config_for(legacy)).load_state_dict(legacy)   # strict load succeeds
+
 
 # ============================================================
 #  3. Rollout buffer tests
@@ -507,6 +541,83 @@ class TestRolloutBuffer:
         )
         buf.compute_gae(last_values=np.array([10.0], dtype=np.float32))
         np.testing.assert_allclose(buf.advantages[0], [1.0 + 0.99 * 10.0 - 0.5], atol=1e-5)
+
+    @staticmethod
+    def _fill(buf, rewards, values, dones, dts=None, bootstrap_values=None):
+        for t in range(len(rewards)):
+            buf.add(
+                {"global_scalars": np.zeros((1, 10), dtype=np.float32)},
+                np.array([0]), np.array([0.0], dtype=np.float32),
+                np.array([rewards[t]], dtype=np.float32), np.array([values[t]], dtype=np.float32),
+                np.array([dones[t]], dtype=np.float32),
+                bootstrap_values=None if bootstrap_values is None
+                else np.array([bootstrap_values[t]], dtype=np.float32),
+                dts=None if dts is None else np.array([dts[t]], dtype=np.float32),
+            )
+
+    def test_time_discount_with_unit_steps_matches_per_decision(self):
+        """@brief gamma_per_second = gamma with every dt = 1 s must reproduce per-decision GAE exactly."""
+        rewards, values, dones = [1.0, -2.0, 0.5, 3.0], [0.5, 0.1, -0.3, 2.0], [0.0, 1.0, 0.0, 0.0]
+        old = RolloutBuffer(4, 1, {"global_scalars": (10,)}, gamma=0.99, gae_lambda=0.95)
+        self._fill(old, rewards, values, dones)
+        new = RolloutBuffer(4, 1, {"global_scalars": (10,)}, gamma=0.5, gae_lambda=0.95,
+                            gamma_per_second=0.99)
+        self._fill(new, rewards, values, dones, dts=[1.0] * 4)
+        last = np.array([4.0], dtype=np.float32)
+        old.compute_gae(last)
+        new.compute_gae(last)
+        np.testing.assert_allclose(new.advantages, old.advantages, atol=1e-6)
+        np.testing.assert_allclose(new.returns, old.returns, atol=1e-6)
+
+    def test_time_discount_uses_each_steps_elapsed_time(self):
+        """@brief Uneven dt: step t is discounted by gamma_s ** dt[t] in the bootstrap and the GAE recursion."""
+        gs, lam = 0.999, 0.95
+        rewards, values, dts = [1.0, 2.0], [0.5, 0.25], [10.0, 300.0]
+        buf = RolloutBuffer(2, 1, {"global_scalars": (10,)}, gamma=0.99, gae_lambda=lam, gamma_per_second=gs)
+        self._fill(buf, rewards, values, [0.0, 0.0], dts=dts)
+        buf.compute_gae(last_values=np.array([10.0], dtype=np.float32))
+        g0, g1 = gs ** 10.0, gs ** 300.0
+        delta1 = 2.0 + g1 * 10.0 - 0.25
+        delta0 = 1.0 + g0 * 0.25 - 0.5
+        np.testing.assert_allclose(buf.advantages[1], [delta1], rtol=1e-5)
+        np.testing.assert_allclose(buf.advantages[0], [delta0 + g0 * lam * delta1], rtol=1e-5)
+
+    def test_time_discount_applies_to_truncation_bootstrap(self):
+        """@brief A truncated step bootstraps V(terminal_obs) with that step's own gamma_s ** dt."""
+        gs = 0.999
+        buf = RolloutBuffer(1, 1, {"global_scalars": (10,)}, gamma=0.99, gae_lambda=0.95, gamma_per_second=gs)
+        self._fill(buf, [1.0], [0.5], [1.0], dts=[50.0], bootstrap_values=[7.0])
+        buf.compute_gae(last_values=np.array([10.0], dtype=np.float32))
+        np.testing.assert_allclose(buf.advantages[0], [1.0 + gs ** 50.0 * 7.0 - 0.5], rtol=1e-5)
+
+    def test_time_discount_requires_dts(self):
+        buf = RolloutBuffer(1, 1, {"global_scalars": (10,)}, gamma=0.99, gae_lambda=0.95, gamma_per_second=0.999)
+        with pytest.raises(ValueError, match="no dts"):
+            self._fill(buf, [1.0], [0.5], [0.0])
+
+
+class TestDiscountConfig:
+    """@brief PPOConfig.discount_horizon_s -> gamma_s, and the trainer's per-step durations."""
+
+    def test_default_is_time_discount_with_3000_s_horizon(self):
+        cfg = PPOConfig()
+        assert cfg.discount_horizon_s == 3000.0
+        assert cfg.gamma_per_second == pytest.approx(1 - 1 / 3000)
+
+    def test_none_means_per_decision(self):
+        assert PPOConfig(discount_horizon_s=None).gamma_per_second is None
+
+    def test_step_durations_rejects_a_missing_dt(self):
+        from train import step_durations
+        np.testing.assert_allclose(step_durations([{"dt": 12.5}, {"dt": 0.0}]), [12.5, 0.0])
+        with pytest.raises(RuntimeError, match="info\\['dt'\\]"):
+            step_durations([{"dt": 12.5}, {"dt": None}])
+
+    def test_elapsed_sim_time(self):
+        from rewards import MetricsSnapshot, elapsed_sim_time
+        a, b = MetricsSnapshot.from_dict({"sim_time": 100.0}), MetricsSnapshot.from_dict({"sim_time": 113.5})
+        assert elapsed_sim_time(a, b) == pytest.approx(13.5)
+        assert elapsed_sim_time(None, b) is None
 
 
 # ============================================================

@@ -27,6 +27,18 @@ import torch.nn.functional as F
 from typing import List
 
 
+def norm2d(kind: str, channels: int) -> nn.Module:
+    """@brief Grid-CNN normalization layer: "group" -> GroupNorm(8 groups), "batch" -> BatchNorm2d (legacy).
+
+    @details See EncoderConfig.grid_norm for why BatchNorm is legacy only.
+    """
+    if kind == "group":
+        return nn.GroupNorm(min(8, channels), channels)
+    if kind == "batch":
+        return nn.BatchNorm2d(channels)
+    raise ValueError(f"Unknown grid_norm {kind!r} (expected 'group' or 'batch')")
+
+
 class SPPF(nn.Module):
     """@brief Spatial Pyramid Pooling – Fast (YOLOv5-style).
 
@@ -38,13 +50,14 @@ class SPPF(nn.Module):
     """
 
     def __init__(self, in_channels: int, out_channels: int,
-                 pool_sizes: List[int] = None):
+                 pool_sizes: List[int] = None, norm: str = "group"):
         """@brief Construct the SPPF module.
 
         @param in_channels   Number of input feature-map channels.
         @param out_channels  Number of output feature-map channels after
                              the expand convolution.
         @param pool_sizes    List of max-pool kernel sizes (default [5, 9, 13]).
+        @param norm          Normalization kind, see @ref norm2d.
         """
         super().__init__()
 
@@ -55,7 +68,7 @@ class SPPF(nn.Module):
         ## @brief 1×1 conv that halves channels before pooling.
         self.conv_reduce = nn.Sequential(
             nn.Conv2d(in_channels, mid, 1, bias=False),
-            nn.BatchNorm2d(mid),
+            norm2d(norm, mid),
             nn.SiLU(inplace=True),
         )
 
@@ -71,7 +84,7 @@ class SPPF(nn.Module):
         ## @brief 1×1 conv that projects concatenated branches to @p out_channels.
         self.conv_expand = nn.Sequential(
             nn.Conv2d(concat_channels, out_channels, 1, bias=False),
-            nn.BatchNorm2d(out_channels),
+            norm2d(norm, out_channels),
             nn.SiLU(inplace=True),
         )
 
@@ -93,7 +106,7 @@ class CNNSPPFEncoder(nn.Module):
     """@brief CNN backbone + SPPF head → global average pool → flat embedding.
 
     @details
-    Three convolutional blocks (with BatchNorm, SiLU, and 2× max-pool
+    Three convolutional blocks (with GroupNorm, SiLU, and 2× max-pool
     down-sampling in the first two) feed into an SPPF module.  The
     resulting spatial features are globally average-pooled and projected
     to @p out_dim via a linear layer with LayerNorm.
@@ -102,12 +115,13 @@ class CNNSPPFEncoder(nn.Module):
     """
 
     def __init__(self, in_channels: int, out_dim: int,
-                 pool_sizes: List[int] = None):
+                 pool_sizes: List[int] = None, norm: str = "group"):
         """@brief Construct the CNN-SPPF encoder.
 
         @param in_channels  Number of input image channels (e.g. 3).
         @param out_dim      Dimensionality of the output embedding vector.
         @param pool_sizes   Kernel sizes forwarded to @ref SPPF.
+        @param norm         Normalization kind, see @ref norm2d.
         """
         super().__init__()
 
@@ -115,22 +129,22 @@ class CNNSPPFEncoder(nn.Module):
         self.backbone = nn.Sequential(
             # Block 1
             nn.Conv2d(in_channels, 32, 3, padding=1, bias=False),
-            nn.BatchNorm2d(32),
+            norm2d(norm, 32),
             nn.SiLU(inplace=True),
             nn.MaxPool2d(2),
             # Block 2
             nn.Conv2d(32, 64, 3, padding=1, bias=False),
-            nn.BatchNorm2d(64),
+            norm2d(norm, 64),
             nn.SiLU(inplace=True),
             nn.MaxPool2d(2),
             # Block 3
             nn.Conv2d(64, 128, 3, padding=1, bias=False),
-            nn.BatchNorm2d(128),
+            norm2d(norm, 128),
             nn.SiLU(inplace=True),
         )
 
         ## @brief SPPF module for multi-scale spatial aggregation.
-        self.sppf = SPPF(128, 128, pool_sizes=pool_sizes)
+        self.sppf = SPPF(128, 128, pool_sizes=pool_sizes, norm=norm)
 
         ## @brief Global average pool + linear projection to @p out_dim.
         self.head = nn.Sequential(
@@ -299,6 +313,7 @@ class MultiModalEncoder(nn.Module):
             in_channels=3,
             out_dim=cfg.factory_cnn_out,
             pool_sizes=cfg.sppf_pool_sizes,
+            norm=cfg.grid_norm,
         )
 
         ## @brief Set encoder for the machine table (→ 128-D).

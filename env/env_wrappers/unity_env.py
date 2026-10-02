@@ -52,7 +52,7 @@ from config import (
 from channels.channels import EpisodeConfigChannel, EpisodeSeedChannel, EpisodeTelemetryChannel
 from env_wrappers.loopback import LoopbackUnityEnvironment
 from rewards import (
-    SENSOR_NAME, LoadedReward, MetricsSnapshot, RewardContext, RewardFunction, load_reward,
+    SENSOR_NAME, LoadedReward, MetricsSnapshot, RewardContext, RewardFunction, elapsed_sim_time, load_reward,
 )
 
 ## @brief Training seeds are drawn from [TRAIN_SEED_LOW, EpisodeSeedChannel.MAX_SEED);
@@ -325,7 +325,7 @@ class UnitySchedulingEnv:
         for name, value in terms.items():
             self._episode_terms[name] = self._episode_terms.get(name, 0.0) + value
 
-        info = {"reward_terms": terms}
+        info = {"reward_terms": terms, "dt": elapsed_sim_time(self._prev_metrics, curr)}
         if not done:
             self._prev_metrics = curr
             self._last_obs = self._extract_obs(decision)

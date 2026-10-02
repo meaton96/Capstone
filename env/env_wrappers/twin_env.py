@@ -29,7 +29,7 @@ from des_twin import Floor
 from des_twin.engine import Twin, TwinConfig
 from des_twin.observation import ObservationBuilder
 from des_twin.scenario import episode_settings, resolve_jobs
-from rewards import LoadedReward, MetricsSnapshot, RewardContext, RewardFunction, load_reward
+from rewards import LoadedReward, MetricsSnapshot, RewardContext, RewardFunction, elapsed_sim_time, load_reward
 
 ## @brief Same split as env_wrappers.unity_env (kept in sync by tests/test_twin_env.py): seeds below are evaluation.
 TRAIN_SEED_LOW = 10_000
@@ -161,7 +161,7 @@ class TwinSchedulingEnv:
         for name, value in terms.items():
             self._episode_terms[name] = self._episode_terms.get(name, 0.0) + value
 
-        info = {"reward_terms": terms}
+        info = {"reward_terms": terms, "dt": elapsed_sim_time(self._prev_metrics, curr)}
         if not done:
             self._prev_metrics = curr
             self._last_obs = self._obs()

@@ -34,6 +34,10 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import (EnvConfig, PDR_ACTIONS, MACHINE_PRESENT_COL, MACHINE_CANDIDATE_COL,
                     JOB_PRESENT_COL, JOB_CANDIDATE_COL, ACTION_BRANCHES, ACTION_MASK_LEN)
 
+## @brief Simulated seconds per decision reported in info["dt"]; the placeholder has no clock, so this is the
+##        median measured on rnd_load (2026-10-01), enough for the trainer's time discount to behave normally.
+NOMINAL_DECISION_SECONDS = 14.0
+
 
 class PlaceholderSchedulingEnv(gym.Env):
     """@brief Synthetic environment that mimics the Unity factory sim's interface.
@@ -263,6 +267,7 @@ class PlaceholderSchedulingEnv(gym.Env):
         truncated = self._step_count >= self.max_steps
 
         info = {
+            "dt": NOMINAL_DECISION_SECONDS,
             "step": self._step_count,
             "makespan_estimate": self._makespan_estimate,
             "pdr_rule": PDR_ACTIONS[int(action[0]) * ACTION_BRANCHES[1] + int(action[1])],

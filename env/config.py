@@ -173,6 +173,12 @@ class EncoderConfig:
     global_mlp_out: int = 32
     event_embed_out: int = 16
     sppf_pool_sizes: List[int] = field(default_factory=lambda: [5, 9, 13])
+    ## @brief Normalization in the grid CNN: "group" (GroupNorm, 8 groups; the default since 2026-10-01) or
+    ##        "batch" (BatchNorm, every checkpoint before that). BatchNorm normalized rollouts (eval mode, running
+    ##        statistics) and PPO updates (train mode, minibatch statistics) differently, so the PPO ratio was not
+    ##        1 before any weight changed; GroupNorm behaves the same in both. "batch" is kept only to load old
+    ##        checkpoints, and SchedulingNetwork pins it to running statistics in both modes.
+    grid_norm: str = "group"
 
     @property
     def concat_dim(self) -> int:
@@ -207,7 +213,13 @@ class PPOConfig:
     """@brief PPO training hyperparameters."""
 
     lr: float = 3e-4
+    ## @brief Per-decision discount; used only when discount_horizon_s is None.
     gamma: float = 0.99
+    ## @brief Discount over simulated time (SMDP form): a transition spanning Δτ seconds is discounted by
+    ##        gamma_s ** Δτ, with gamma_s = 1 - 1/discount_horizon_s. 3000 s covers a job's whole stay
+    ##        (mean flow ~1,500 s on rnd_load); the old per-decision 0.99 was ~1,370 s and varied 2x
+    ##        between instances. None = per-decision gamma (all runs before 2026-10-01).
+    discount_horizon_s: Optional[float] = 3000.0
     gae_lambda: float = 0.95
     clip_epsilon: float = 0.2
     entropy_coef: float = 0.01
@@ -221,6 +233,15 @@ class PPOConfig:
     rollout_length: int = 128
     num_envs: int = 8
     total_timesteps: int = 1_000_000
+
+    @property
+    def gamma_per_second(self) -> Optional[float]:
+        """@brief gamma_s for discounting over simulated time, or None for per-decision gamma."""
+        if self.discount_horizon_s is None:
+            return None
+        if self.discount_horizon_s <= 1.0:
+            raise ValueError(f"discount_horizon_s must be > 1 s, got {self.discount_horizon_s}")
+        return 1.0 - 1.0 / self.discount_horizon_s
 
 
 ## @brief Fixed-rule baselines reachable through the RL action space: every (job head, machine head) pair,

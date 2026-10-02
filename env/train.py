@@ -52,7 +52,7 @@ from config import (
     EncoderConfig, FusionConfig, ActorCriticConfig, PPOConfig, OBS_SHAPES, OBS_LAYOUT,
     ACTION_BRANCHES, ACTION_LAYOUT, obs_shapes as shapes_for_caps,
 )
-from models.network import SchedulingNetwork
+from models.network import SchedulingNetwork, encoder_config_for
 from notify import Watchdog, notify, run_label
 from rollout_buffer import RolloutBuffer
 
@@ -218,6 +218,21 @@ def compute_truncation_bootstrap(net, truncateds: np.ndarray, infos, device: str
     return bootstrap
 
 
+def step_durations(infos) -> np.ndarray:
+    """@brief Simulated seconds each env's step took (info["dt"]), for discounting over simulated time.
+
+    @details Every backend reports it: Unity and twin from the reward-metrics sim_time, the placeholder a
+    nominal constant. It is None only when the Unity wrapper has no metrics snapshot (no reward function),
+    which cannot train with time discounting, so that is an error rather than a silent per-decision fallback.
+    """
+    dts = [info.get("dt") for info in infos]
+    if any(dt is None for dt in dts):
+        raise RuntimeError("Discounting over simulated time needs info['dt'] from every env, but a step "
+                           "returned none (Unity without a reward spec?). Pass --discount-horizon-s 0 to "
+                           "discount per decision instead.")
+    return np.asarray(dts, dtype=np.float32)
+
+
 def entropy_coef_at(ppo_cfg: PPOConfig, global_step: int) -> float:
     """@brief Entropy coefficient at global_step: constant, or linear decay to entropy_coef_final."""
     if ppo_cfg.entropy_coef_final is None:
@@ -286,7 +301,7 @@ def save_checkpoint(path: Path, net, optimizer, global_step: int, ppo_cfg: PPOCo
         "action_layout": dict(ACTION_LAYOUT),
         "obs_row_caps": {"max_machines": row_caps[0], "max_jobs": row_caps[1]},   # informational only
         "config": {
-            "encoder": EncoderConfig().__dict__,
+            "encoder": dict((getattr(net, "encoder_cfg", None) or EncoderConfig()).__dict__),
             "fusion": FusionConfig().__dict__,
             "actor_critic": ActorCriticConfig().__dict__,
             "ppo": ppo_cfg.__dict__,
@@ -348,8 +363,15 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
         np.random.seed(args.train_seed)
 
     # ---- Initialize network ----
+    # A resumed checkpoint decides the grid normalization (BatchNorm before 2026-10-01, GroupNorm after).
+    ckpt = load_checkpoint(args.resume_from, device) if args.resume_from else None
+    encoder_cfg = encoder_config_for(ckpt["model_state_dict"]) if ckpt else EncoderConfig()
+    if encoder_cfg.grid_norm == "batch":
+        print("\n[NOTE] the checkpoint's grid CNN uses BatchNorm (before 2026-10-01). It now stays on its running "
+              "statistics during updates too, so its statistics are frozen; the old runs normalized updates with "
+              "minibatch statistics.")
     net = SchedulingNetwork(
-        encoder_cfg=EncoderConfig(),
+        encoder_cfg=encoder_cfg,
         fusion_cfg=FusionConfig(),
         ac_cfg=ActorCriticConfig(),
     ).to(device)
@@ -363,7 +385,6 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
 
     resumed_global_step = 0
     if args.resume_from:
-        ckpt = load_checkpoint(args.resume_from, device)
         check_obs_schema(ckpt, args.resume_from)
         check_action_layout(ckpt, args.resume_from)
         net.load_state_dict(ckpt["model_state_dict"])
@@ -372,6 +393,11 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
         ckpt_reward = ckpt.get("reward")
         print(f"\nResumed from {args.resume_from} at step {resumed_global_step:,} "
               f"(checkpoint reward: {ckpt_reward})")
+        ckpt_horizon = ckpt.get("config", {}).get("ppo", {}).get("discount_horizon_s")   # absent = per-decision (before 10-01)
+        if ckpt_horizon != ppo_cfg.discount_horizon_s:
+            print(f"[WARNING] the checkpoint was trained with discount_horizon_s={ckpt_horizon} "
+                  f"(None = per-decision gamma) but this run uses {ppo_cfg.discount_horizon_s} -- "
+                  "continuing anyway, but this changes the objective mid-training.")
         if (args.unity or args.twin) and ckpt_reward is not None and ckpt_reward != reward.name:
             print(f"[WARNING] --reward-spec is '{reward.name}' but the checkpoint was trained "
                   f"with '{ckpt_reward}' -- continuing anyway, but this changes the objective "
@@ -422,7 +448,13 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
         gae_lambda=ppo_cfg.gae_lambda,
         device=device,
         action_shape=(len(ACTION_BRANCHES),),
+        gamma_per_second=ppo_cfg.gamma_per_second,
     )
+    if ppo_cfg.gamma_per_second is None:
+        print(f"Discount: gamma = {ppo_cfg.gamma} per decision")
+    else:
+        print(f"Discount: gamma_s = {ppo_cfg.gamma_per_second:.6f} per simulated second "
+              f"(horizon {ppo_cfg.discount_horizon_s:,.0f} s)")
     writer = SummaryWriter(log_dir=str(run_dir))
 
     # ---- Training loop ----
@@ -504,8 +536,9 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
                 )
                 dones = np.logical_or(terminateds, truncateds).astype(np.float32)
                 bootstrap_values = compute_truncation_bootstrap(net, truncateds, infos, device)
+                dts = step_durations(infos) if ppo_cfg.gamma_per_second is not None else None
 
-                buffer.add(obs, actions_np, log_probs_np, rewards, values_np, dones, bootstrap_values)
+                buffer.add(obs, actions_np, log_probs_np, rewards, values_np, dones, bootstrap_values, dts)
                 obs = next_obs
                 watchdog.beat()
                 finished_now = log_episodes(writer, infos, global_step, recent_episodes, episode_csv,
@@ -755,6 +788,9 @@ if __name__ == "__main__":
     parser.add_argument("--sequential-envs", action="store_true",
                         help="Step Unity envs one after another instead of concurrently")
     parser.add_argument("--ent-coef", type=float, default=0.01, help="Entropy bonus coefficient")
+    parser.add_argument("--discount-horizon-s", type=float, default=PPOConfig.discount_horizon_s,
+                        help="Discount over simulated time: gamma_s = 1 - 1/H per second (SMDP). "
+                             "0 = per-decision gamma 0.99, as in every run before 2026-10-01")
     parser.add_argument("--ent-coef-final", type=float, default=None,
                         help="If set, decay the entropy coefficient linearly to this value over --total-timesteps")
     parser.add_argument("--torch-threads", type=int, default=0,
@@ -784,6 +820,7 @@ if __name__ == "__main__":
         lr=args.lr,
         entropy_coef=args.ent_coef,
         entropy_coef_final=args.ent_coef_final,
+        discount_horizon_s=args.discount_horizon_s if args.discount_horizon_s > 0 else None,
     )
     if args.torch_threads > 0:
         torch.set_num_threads(args.torch_threads)

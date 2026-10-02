@@ -314,6 +314,25 @@ def test_env_episode_reward_is_total_flow_time(floor_path):
     assert obs["action_mask"].shape == (ACTION_MASK_LEN,)      # already the next episode's first decision
 
 
+def test_env_reports_each_steps_simulated_duration(floor_path):
+    """info["dt"] (the trainer's time discount) tiles the episode: the steps' durations sum to the time from the
+    first decision to the end."""
+    from env_wrappers.twin_env import TwinSchedulingEnv
+    reward = load_reward(os.path.join(REWARDS, "flow_time.json"))
+    env = TwinSchedulingEnv(floor_path, reward_fn=reward.build(), scenario=dict(_scenario(), agvCount=3),
+                            obs_caps=(15, 64))
+    env.reset()
+    start = env._prev_metrics.sim_time
+    dts = []
+    while True:
+        _, _, done, info = env.step((0, 0))
+        dts.append(info["dt"])
+        if done:
+            break
+    assert all(dt >= 0 for dt in dts) and max(dts) > 0
+    assert sum(dts) == pytest.approx(info["episode"]["makespan"] - start, rel=1e-6)
+
+
 def test_env_refuses_a_mismatched_floor(floor_path):
     from env_wrappers.twin_env import TwinSchedulingEnv
     env = TwinSchedulingEnv(floor_path, scenario=dict(_scenario(), agvCount=7), obs_caps=(15, 64))

@@ -10,7 +10,7 @@ yields randomised mini-batches for the PPO update epochs.
 
 import torch
 import numpy as np
-from typing import Generator
+from typing import Generator, Optional
 
 
 class RolloutBuffer:
@@ -28,7 +28,7 @@ class RolloutBuffer:
     def __init__(self, rollout_length: int, num_envs: int,
                  obs_shapes: dict, gamma: float = 0.99,
                  gae_lambda: float = 0.95, device: str = "cpu",
-                 action_shape: tuple = ()):
+                 action_shape: tuple = (), gamma_per_second: Optional[float] = None):
         """@brief Construct the rollout buffer and pre-allocate storage.
 
         @param rollout_length  Number of environment steps per rollout.
@@ -36,12 +36,14 @@ class RolloutBuffer:
         @param obs_shapes      Dict mapping observation keys to their
                                per-environment shapes (excluding the
                                batch dimension).
-        @param gamma           Discount factor for future rewards.
+        @param gamma           Discount factor per decision (used when @p gamma_per_second is None).
         @param gae_lambda      Lambda parameter for GAE smoothing.
         @param device          Torch device string used when yielding
                                mini-batch tensors.
         @param action_shape    Per-step action shape: () for one discrete
                                action, (n_branches,) for a branched action.
+        @param gamma_per_second  If set, discount over simulated time instead (SMDP form): step t
+                               is discounted by gamma_per_second ** dts[t]. See compute_gae.
         """
         ## @brief Number of environment steps collected per rollout.
         self.rollout_length = rollout_length
@@ -49,6 +51,8 @@ class RolloutBuffer:
         self.num_envs = num_envs
         ## @brief Discount factor γ.
         self.gamma = gamma
+        ## @brief Discount per simulated second, or None to discount per decision.
+        self.gamma_per_second = gamma_per_second
         ## @brief GAE smoothing parameter λ.
         self.gae_lambda = gae_lambda
         ## @brief Torch device for mini-batch tensors.
@@ -83,6 +87,9 @@ class RolloutBuffer:
         ##        deliberate time-limit cutoff) rather than a real terminal — see compute_gae.
         ##        0 everywhere else.
         self.bootstrap_values = np.zeros((rollout_length, num_envs), dtype=np.float32)
+        ## @brief Simulated seconds from this step's decision to the next one (Δτ). Used only with
+        ##        gamma_per_second; 1.0 is a neutral filler otherwise.
+        self.dts = np.ones((rollout_length, num_envs), dtype=np.float32)
 
         # ---- Computed after rollout ----
 
@@ -92,7 +99,7 @@ class RolloutBuffer:
         ##        @ref compute_gae.
         self.returns = np.zeros((rollout_length, num_envs), dtype=np.float32)
 
-    def add(self, obs: dict, actions, log_probs, rewards, values, dones, bootstrap_values=None):
+    def add(self, obs: dict, actions, log_probs, rewards, values, dones, bootstrap_values=None, dts=None):
         """@brief Store one timestep of data from all parallel environments.
 
         @param obs        Observation dict with arrays of shape (num_envs, ...).
@@ -107,7 +114,11 @@ class RolloutBuffer:
                                  truncation (see train.py); compute_gae discounts and applies it
                                  there and ignores it everywhere else, including real terminations,
                                  so 0 (the default) is a safe filler for every other case.
+        @param dts        Simulated seconds this step took, shape (num_envs,). Required when the
+                          buffer discounts over simulated time; ignored otherwise.
         """
+        if self.gamma_per_second is not None and dts is None:
+            raise ValueError("RolloutBuffer discounts over simulated time but add() got no dts")
         for key in self.obs_buffers:
             self.obs_buffers[key][self.pos] = obs[key]
         self.actions[self.pos] = actions
@@ -116,6 +127,7 @@ class RolloutBuffer:
         self.values[self.pos] = values
         self.dones[self.pos] = dones
         self.bootstrap_values[self.pos] = 0.0 if bootstrap_values is None else bootstrap_values
+        self.dts[self.pos] = 1.0 if dts is None else dts
         self.pos += 1
 
     def compute_gae(self, last_values: np.ndarray):
@@ -139,21 +151,31 @@ class RolloutBuffer:
         zeroed-out @c next_values term there, the standard TimeLimit-bootstrap correction (as in
         SB3/CleanRL) generalized to an auto-resetting env.
 
+        Discounting. Decisions are not evenly spaced in simulated time, while the reward already
+        integrates over the time between them, so this is a semi-MDP. With @ref gamma_per_second
+        set, each step uses its own discount g_t = gamma_per_second ** dts[t] in the bootstrap term
+        and the GAE recursion (λ stays per decision); otherwise g_t = @ref gamma for every step.
+
         @param last_values  Bootstrap values V(s_T) for the observation that
                             follows the final stored step, shape (num_envs,).
         """
         gae = np.zeros(self.num_envs, dtype=np.float32)
+        if self.gamma_per_second is None:
+            discounts = np.full_like(self.dts, self.gamma)
+        else:
+            discounts = np.power(self.gamma_per_second, self.dts, dtype=np.float64).astype(np.float32)
         for t in reversed(range(self.rollout_length)):
             next_values = last_values if t == self.rollout_length - 1 else self.values[t + 1]
             next_nonterminal = 1.0 - self.dones[t]
+            g = discounts[t]
 
             delta = (
                 self.rewards[t]
-                + self.gamma * next_values * next_nonterminal
-                + self.gamma * self.bootstrap_values[t]
+                + g * next_values * next_nonterminal
+                + g * self.bootstrap_values[t]
                 - self.values[t]
             )
-            gae = delta + self.gamma * self.gae_lambda * next_nonterminal * gae
+            gae = delta + g * self.gae_lambda * next_nonterminal * gae
             self.advantages[t] = gae
 
         self.returns = self.advantages + self.values

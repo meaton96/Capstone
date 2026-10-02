@@ -40,7 +40,7 @@ import torch
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from config import (ActorCriticConfig, EncoderConfig, FusionConfig, PDR_ACTIONS, pdr_action,
+from config import (ActorCriticConfig, FusionConfig, PDR_ACTIONS, pdr_action,
                     ACTION_BRANCHES, JOB_HEAD_RULES, MACHINE_HEAD_RULES)
 from env_wrappers.unity_env import TRAIN_SEED_LOW, UnitySchedulingEnv
 
@@ -154,14 +154,15 @@ class CheckpointPolicy:
     kind = "checkpoint"
 
     def __init__(self, path, device: str = "cpu", deterministic: bool = True):
-        from models.network import SchedulingNetwork
+        from models.network import SchedulingNetwork, encoder_config_for
 
         path = Path(path)
         from train import check_action_layout, check_obs_schema, load_checkpoint
         checkpoint = load_checkpoint(path, device)
         check_obs_schema(checkpoint, path)
         check_action_layout(checkpoint, path)
-        self.net = SchedulingNetwork(EncoderConfig(), FusionConfig(), ActorCriticConfig()).to(device)
+        self.net = SchedulingNetwork(encoder_config_for(checkpoint["model_state_dict"]), FusionConfig(),
+                                     ActorCriticConfig()).to(device)
         self.net.load_state_dict(checkpoint["model_state_dict"])
         self.net.eval()
         self.device = device
