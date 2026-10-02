@@ -14,6 +14,10 @@ namespace Assets.Scripts.Editor
     ///   ~/Unity/Hub/Editor/6000.3.15f1/Editor/Unity -batchmode -quit -nographics \
     ///       -projectPath Capstone -buildTarget Linux64 -standaloneBuildSubtarget Server \
     ///       -executeMethod Assets.Scripts.Editor.LinuxServerBuild.Build -logFile build.log
+    /// While a sweep runs many players, the per-user inotify limit (128) can be used up; script compilation then
+    /// fails with "Can't find file /tmp/ilpp.sock-..." (the IL post-processor cannot start) although Unity exits 0.
+    /// Prefix the command with DOTNET_USE_POLLING_FILE_WATCHER=1 DOTNET_hostBuilder__reloadConfigOnChange=false,
+    /// and check the log for "[LinuxServerBuild] Succeeded".
     public static class LinuxServerBuild
     {
         /// @brief Output executable, relative to the Unity project folder.

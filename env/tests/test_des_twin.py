@@ -19,6 +19,7 @@ import math
 import os
 import random
 import sys
+from types import SimpleNamespace
 
 import pytest
 
@@ -245,6 +246,17 @@ def test_rank_and_select_tie_to_first_candidate():
     assert select_machine("TECT", c, t, [f32(0), f32(0)], [f32(0)] * 2, [f32(30), f32(5)]) == 9
 
 
+def test_fifo_ranks_by_queue_entry_not_shop_arrival():
+    """@brief FIFO takes the job that joined its current queue first, not the one longest in the shop."""
+    sim = SimpleNamespace(now=100.0, jobs={
+        1: SimpleNamespace(arrival=0.0, since=60.0),     # longest in the shop, joined the queue last
+        2: SimpleNamespace(arrival=30.0, since=40.0),
+        3: SimpleNamespace(arrival=50.0, since=40.0),    # same entry as job 2: the first candidate wins
+    })
+    assert rank_jobs("FIFO", [1, 2, 3], sim, None) == 2
+    assert rank_jobs("FIFO", [1, 3, 2], sim, None) == 3
+
+
 # ── Engine ──────────────────────────────────────────────────────────────────────────────────────────
 
 def _jobs(*specs):
@@ -261,6 +273,16 @@ def test_instant_transport_is_a_plain_job_shop():
     assert rows[1]["flow_time"] == pytest.approx(5.0, abs=0.1)
     assert rows[0]["flow_time"] == pytest.approx(15.0, abs=0.1)
     assert tw.summary()["agv_count"] == 0
+
+
+def test_fifo_dispatches_the_first_job_into_the_machine_queue():
+    """@brief Job 2 joins machine 1's queue at ~5 s and job 0 (in the shop since 0 s) at ~10 s. When machine 1
+    frees at ~30 s, FIFO starts job 2 first; ranking by shop arrival would have started job 0."""
+    jobs = _jobs((0.0, [[(0, 10.0)], [(1, 5.0)]]), (0.0, [[(1, 30.0)]]), (5.0, [[(1, 5.0)]]))
+    tw = run_twin(synthetic_floor(), jobs, TwinConfig("FIFO_ECT", "instant"))
+    start = {(r["job"], r["op"]): r["start"] for r in tw.op_rows()}
+    assert start[(2, 0)] == pytest.approx(30.0, abs=0.1)
+    assert start[(0, 1)] == pytest.approx(35.0, abs=0.1)
 
 
 @pytest.mark.parametrize("transport", ["geometric", "kinematic"])

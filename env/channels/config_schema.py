@@ -16,7 +16,7 @@ from typing import Any, Dict, List
 SCENARIO_KEYS = {
     "name", "seed", "agvCount", "agvMoveSpeed", "agvHandshakeDuration", "dispatchingRule",
     "jobs", "machineTypeLayout", "parkingMethod", "ioDocks", "reservationProtocol", "routingTrigger",
-    "stochastic", "layout", "tiling", "machineFlexibilityProbability", "secondaryTimeMultiplier",
+    "stochastic", "layout", "tiling", "machineFlexibilityProbability", "secondaryTimeMultiplier", "travelPrice",
 }
 
 ## @brief EpisodeConfigChannel.ConfigKeys (top level of a generated-config message).
@@ -25,6 +25,7 @@ CONFIG_KEYS = {
     "minOpsPerJob", "maxOpsPerJob", "agvCount", "agvMoveSpeed", "agvHandshakeDuration",
     "machineFlexibilityProbability", "secondaryTimeMultiplier", "parkingMethod", "ioDocks",
     "reservationProtocol", "routingTrigger", "tiling", "preDispatchingMethod", "stochastic", "procTimeParams",
+    "travelPrice",
 }
 
 ## @brief ScenarioLoader.StochasticKeys.
@@ -35,7 +36,7 @@ STOCHASTIC_KEYS = {
     "episodeDurationSeconds", "warmupSeconds",
 }
 
-TILING_KEYS = {"tiles", "machinesPerTile", "jobScope", "agvAssignment", "releaseRule", "seamGap"}
+TILING_KEYS = {"tiles", "machinesPerTile", "jobScope", "agvAssignment", "releaseRule", "releaseWeights", "seamGap"}
 
 MACHINE_TYPES = ("Mill", "Lathe", "Weld", "Inspect", "Assemble")
 LAYOUTS = tuple("ABCDEFGHIJKLMNO")
@@ -148,6 +149,7 @@ def _check_common(v: "_Checker", cfg: Dict[str, Any], machine_count: int) -> Non
     v.number(cfg, "agvHandshakeDuration", minimum=0.0)
     v.number(cfg, "machineFlexibilityProbability", minimum=0.0, maximum=1.0)
     v.number(cfg, "secondaryTimeMultiplier", exclusive_min=0.0)
+    v.number(cfg, "travelPrice", minimum=0.0)
     v.choice(cfg, "reservationProtocol", {"holdprevious", "releaseprevious"})
     v.choice(cfg, "routingTrigger", {"ontransport", "onready"})
     v.choice(cfg, "parkingMethod", {"single", "multiple", "lane"})
@@ -277,9 +279,21 @@ def _check_tiling(v: "_Checker", tiling: Any) -> int:
     v.number(tiling, "seamGap", minimum=0.0, where="tiling.")
     v.choice(tiling, "jobScope", {"tile", "open"}, where="tiling.")
     v.choice(tiling, "agvAssignment", {"tile", "pooled"}, where="tiling.")
-    v.choice(tiling, "releaseRule", {"roundrobin", "leastwip"}, where="tiling.")
+    v.choice(tiling, "releaseRule", {"roundrobin", "leastwip", "weighted"}, where="tiling.")
     tiles = tiling.get("tiles", 1)
-    return tiles if _is_int(tiles) and tiles >= 1 else 1
+    tiles = tiles if _is_int(tiles) and tiles >= 1 else 1
+    weighted = str(tiling.get("releaseRule", "")).strip().lower() == "weighted"
+    weights = tiling.get("releaseWeights")
+    if weights is not None:
+        if not weighted:
+            v.fail("tiling.releaseWeights needs releaseRule \"weighted\"")
+        elif not isinstance(weights, list) or len(weights) != tiles:
+            v.fail(f"tiling.releaseWeights must be a list with one weight per tile ({tiles}), got {weights!r}")
+        elif not all(_is_number(w) and w > 0 for w in weights):
+            v.fail(f"tiling.releaseWeights must all be finite numbers > 0 (got {weights!r})")
+    elif weighted:
+        v.fail(f"tiling.releaseRule \"weighted\" needs releaseWeights, one per tile ({tiles})")
+    return tiles
 
 
 def _machine_type(value: Any):

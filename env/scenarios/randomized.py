@@ -31,6 +31,14 @@ Weld machines, so 12 of 15 machines are background and a policy trained on them 
   so rerouting around a failure pays off). Availability ≈ 91%.
 - **Floor:** 15 machines (3 per type), 7 AGVs, layout D, releasePrevious, lane parking, set in the scenario
   JSON so they do not depend on player CLI overrides.
+- **Tiled / linked floors (`tiles` > 1):** `tiles` copies of that floor side by side (TilingSpec). Load is
+  floor-average, so arrival rates scale with the floor. Each op is eligible on its type's machine at every tile
+  position, with the per-machine affinity times copied per tile position (tiles stay identical, like machine
+  capabilities); with `job_scope` "tile" the player keeps only the home tile's machines, with "open" (needs
+  `agv_assignment` "pooled") any machine on the floor. `agv_count` is the whole fleet: 7 per tile is 7 * tiles.
+  `release_rule` "weighted" with `release_weights` loads tiles unevenly (one weight per tile).
+- **TECT travel price (`travel_price`, λ):** TECT scores a machine max(travel, queue) + p + λ x travel; 0 is plain
+  TECT. Applies to every TECT decision of the episode, warm-up included.
 
 Every instance is a pure function of its seed. `_phases` lists the segments (for random warm-up cutoffs and
 analysis); `_meta` records the per-episode draws.
@@ -103,6 +111,14 @@ class RandomizedParams:
     agv_seconds_per_move: float = 64.0                   # measured: AGV busy time per transport move
     agv_max_utilization: float = 0.75
 
+    # Tiled / linked floor (module docstring). tiles = 1 writes no "tiling" block, so the instance is unchanged.
+    tiles: int = 1
+    job_scope: str = "tile"                              # "open": any machine on the floor (needs "pooled")
+    agv_assignment: str = "tile"                         # "pooled": linked spines, any AGV serves any tile
+    release_rule: str = "roundRobin"                     # "leastWip" | "weighted" (needs release_weights)
+    release_weights: Tuple[float, ...] = ()              # one per tile, for release_rule "weighted"
+    travel_price: float = 0.0                            # TECT's λ; 0 = plain TECT, no key written
+
     failure_probability: float = 2.0 / 3.0
     failures: Dict = field(default_factory=lambda: {
         "machineFailuresEnabled": True, "weibullK": 1.5, "weibullLambda": 7200.0,
@@ -126,6 +142,49 @@ def _op_types(rng: random.Random, n: int, weights: List[float]) -> List[str]:
     return out
 
 
+def _tiling_block(p: RandomizedParams) -> Optional[Dict]:
+    """@brief The scenario's "tiling" object for p.tiles > 1 (None for one tile).
+
+    @throws ValueError on a combination the player would refuse (open jobs without a pooled fleet, a fleet that does
+            not divide over the tiles, weights that do not match the tiles).
+    """
+    if not isinstance(p.tiles, int) or p.tiles < 1:
+        raise ValueError(f"tiles must be an integer >= 1 (got {p.tiles!r})")
+    if p.tiles == 1:
+        return None
+    if p.job_scope not in ("tile", "open") or p.agv_assignment not in ("tile", "pooled"):
+        raise ValueError(f"job_scope must be tile|open and agv_assignment tile|pooled "
+                         f"(got {p.job_scope!r}, {p.agv_assignment!r})")
+    if p.job_scope == "open" and p.agv_assignment != "pooled":
+        raise ValueError('job_scope "open" needs agv_assignment "pooled"')
+    if p.agv_count % p.tiles != 0:
+        raise ValueError(f"agv_count {p.agv_count} must be a multiple of tiles {p.tiles} (the whole fleet, "
+                         f"e.g. 7 per tile = {7 * p.tiles})")
+    block = {"tiles": p.tiles, "jobScope": p.job_scope, "agvAssignment": p.agv_assignment,
+             "releaseRule": p.release_rule}
+    if p.release_rule.lower() == "weighted":
+        if len(p.release_weights) != p.tiles or not all(w > 0 for w in p.release_weights):
+            raise ValueError(f"release_weights needs {p.tiles} weights > 0 (got {list(p.release_weights)})")
+        block["releaseWeights"] = [float(w) for w in p.release_weights]
+    elif p.release_weights:
+        raise ValueError('release_weights needs release_rule "weighted"')
+    return block
+
+
+def params_with_overrides(overrides: Dict, base: Optional[RandomizedParams] = None) -> RandomizedParams:
+    """@brief @p base (default DEFAULT_PARAMS) with JSON-style overrides applied (lists become tuples).
+
+    @throws ValueError naming any key that is not a RandomizedParams field.
+    """
+    import dataclasses
+    base = base or DEFAULT_PARAMS
+    names = {f.name for f in dataclasses.fields(base)}
+    unknown = sorted(set(overrides) - names)
+    if unknown:
+        raise ValueError(f"unknown RandomizedParams fields {unknown}")
+    return dataclasses.replace(base, **{k: tuple(v) if isinstance(v, list) else v for k, v in overrides.items()})
+
+
 def randomized_scenario(seed: int, params: RandomizedParams = DEFAULT_PARAMS) -> Dict:
     """@brief One seeded instance (ScenarioLoader schema), without episode cap or warm-up.
 
@@ -133,9 +192,10 @@ def randomized_scenario(seed: int, params: RandomizedParams = DEFAULT_PARAMS) ->
     @param params  Generator knobs (RandomizedParams).
     """
     p = params
+    tiling = _tiling_block(p)
     rng = random.Random(seed)
     k = p.machines_per_type
-    n_machines = k * len(TYPES)
+    n_machines = k * len(TYPES) * p.tiles
 
     op_mean = _log_uniform(rng, *p.op_mean_seconds)
     s = 1.0 + p.machine_speed_spread
@@ -190,7 +250,9 @@ def randomized_scenario(seed: int, params: RandomizedParams = DEFAULT_PARAMS) ->
                 d = base * math.exp(rng.gauss(0.0, p.op_sigma) - p.op_sigma ** 2 / 2.0)
                 durations = [round(d * speed[mtype][m] * rng.uniform(1.0 - p.op_machine_spread, 1.0 + p.op_machine_spread), 2)
                              for m in range(k)]
-                op = {"machineType": mtype, "machineIndex": list(range(k)), "duration": durations}
+                # Machine index i of a type is tile i // k (the player numbers machines tile by tile), so copying
+                # the k times per tile gives every tile position the same time.
+                op = {"machineType": mtype, "machineIndex": list(range(k * p.tiles)), "duration": durations * p.tiles}
                 if p.machine_flexibility > 0 or p.secondary_ops:
                     # A generalist runs the op at its nominal length (no per-machine affinity) x the multiplier.
                     op["allowSecondary"] = True
@@ -210,11 +272,13 @@ def randomized_scenario(seed: int, params: RandomizedParams = DEFAULT_PARAMS) ->
         "name": "randomized",
         "seed": seed,
         "agvCount": p.agv_count,
-        "machineTypeLayout": [t_ for t_ in TYPES for _ in range(k)],
+        "machineTypeLayout": [t_ for t_ in TYPES for _ in range(k * p.tiles)],
         "layout": p.layout,
         "reservationProtocol": p.reservation_protocol,
         "parkingMethod": p.parking_method,
         "routingTrigger": p.routing_trigger,
+        **({"tiling": tiling} if tiling else {}),
+        **({"travelPrice": float(p.travel_price)} if p.travel_price > 0 else {}),
         **({"machineFlexibilityProbability": p.machine_flexibility,
             "secondaryTimeMultiplier": p.secondary_time_multiplier} if p.machine_flexibility > 0 else {}),
         "jobs": jobs,

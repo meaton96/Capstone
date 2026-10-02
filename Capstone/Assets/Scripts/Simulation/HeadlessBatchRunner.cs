@@ -181,6 +181,25 @@ namespace Assets.Scripts.Simulation
                     ConfigOverrides.ReleaseRule = TilingSpec.ReleaseToString(TilingSpec.ParseRelease(releaseStr));
                     SimLogger.Low($"[BatchRunner] Release rule override: {ConfigOverrides.ReleaseRule}");
                 }
+                // "-releaseweights 3,2,1,1,1,1,1" (one per tile) implies "-releaserule weighted".
+                string weightsStr = GetCLIArg("-releaseweights");
+                if (!string.IsNullOrEmpty(weightsStr))
+                {
+                    ConfigOverrides.ReleaseWeights = TilingSpec.ParseWeights(weightsStr);
+                    ConfigOverrides.ReleaseRule = TilingSpec.ReleaseToString(ReleaseRule.Weighted);
+                    SimLogger.Low($"[BatchRunner] Release weights override: {string.Join(",", ConfigOverrides.ReleaseWeights)}");
+                }
+
+                // TECT travel price λ (FJSSPConfig.TravelPrice).
+                string priceStr = GetCLIArg("-travelprice");
+                if (!string.IsNullOrEmpty(priceStr))
+                {
+                    if (!float.TryParse(priceStr, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float price)
+                        || !(price >= 0f) || float.IsInfinity(price))
+                        throw new ArgumentException($"Invalid -travelprice '{priceStr}': expected a number >= 0.");
+                    ConfigOverrides.TravelPrice = price;
+                    SimLogger.Low($"[BatchRunner] Travel price override: {price}");
+                }
                 // Linked tiles (TilingSpec.AgvsPooled / JobsOpen): "-jobscope open" alone implies "-agvassignment pooled".
                 string scopeStr = GetCLIArg("-jobscope");
                 if (!string.IsNullOrEmpty(scopeStr))

@@ -102,7 +102,10 @@ namespace Assets.Scripts.Simulation.Channels
                                         string configHash = "", string instanceHash = "",
                                         string appliedConfig = null,
                                         int agvFailures = 0, double agvRepairTime = 0.0,
-                                        double agvBlockedByFailureTime = 0.0)
+                                        double agvBlockedByFailureTime = 0.0,
+                                        int routedMoves = 0, int crossTileMoves = 0, int tilesCrossed = 0,
+                                        double agvIdleFraction = 0.0, int[] releaseCounts = null,
+                                        float travelPrice = 0f)
         {
             _result = new EpisodeResult
             {
@@ -120,6 +123,12 @@ namespace Assets.Scripts.Simulation.Channels
                 agvFailures = agvFailures,
                 agvRepairTime = agvRepairTime,
                 agvBlockedByFailureTime = agvBlockedByFailureTime,
+                routedMoves = routedMoves,
+                crossTileMoves = crossTileMoves,
+                tilesCrossed = tilesCrossed,
+                agvIdleFraction = agvIdleFraction,
+                releaseCounts = releaseCounts ?? new int[0],
+                travelPrice = travelPrice,
             };
         }
 
@@ -186,6 +195,15 @@ namespace Assets.Scripts.Simulation.Channels
             public int agvFailures;
             public double agvRepairTime;
             public double agvBlockedByFailureTime;
+            /// <summary>Routing decisions after any warm-up, those sent to another tile, and tiles crossed summed over
+            /// them; share of fleet time parked idle (whole episode); jobs released per tile (empty untiled); the
+            /// episode's TECT travel price λ.</summary>
+            public int routedMoves;
+            public int crossTileMoves;
+            public int tilesCrossed;
+            public double agvIdleFraction;
+            public int[] releaseCounts;
+            public float travelPrice;
         }
 
         [Serializable]

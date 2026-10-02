@@ -150,7 +150,7 @@ namespace Assets.Scripts.Simulation.Jobs
         {
             "name", "seed", "agvCount", "agvMoveSpeed", "agvHandshakeDuration", "dispatchingRule",
             "jobs", "machineTypeLayout", "parkingMethod", "ioDocks", "reservationProtocol", "routingTrigger", "stochastic", "layout", "tiling",
-            "machineFlexibilityProbability", "secondaryTimeMultiplier"
+            "machineFlexibilityProbability", "secondaryTimeMultiplier", "travelPrice"
         };
 
         private static FJSSPConfig BuildConfig(string json, string fileName,
@@ -245,6 +245,7 @@ namespace Assets.Scripts.Simulation.Jobs
                 Tiling = TilingSpec.FromJson(root["tiling"]),
                 MachineFlexibilityProbability = root["machineFlexibilityProbability"]?.Value<float>() ?? 0f,
                 SecondaryTimeMultiplier = root["secondaryTimeMultiplier"]?.Value<float>() ?? 1f,
+                TravelPrice = root["travelPrice"]?.Value<float>() ?? 0f,
                 parkingMethod = root["parkingMethod"] != null
                     ? ConfigOverrides.ValidatedParkingMethod(root["parkingMethod"].Value<string>())
                     : "lane",

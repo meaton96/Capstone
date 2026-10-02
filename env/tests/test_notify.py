@@ -10,11 +10,21 @@ import sys
 import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
+import pytest
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import notify  # noqa: E402
 
 ENV_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+@pytest.fixture(autouse=True)
+def no_real_webhook(monkeypatch, tmp_path):
+    """@brief No test posts to the real webhook ($NOTIFY_WEBHOOK_URL or ~/.capstone_webhook); a test that needs one
+    sets its own (a local capture server or a temp file)."""
+    monkeypatch.delenv("NOTIFY_WEBHOOK_URL", raising=False)
+    monkeypatch.setattr(notify, "WEBHOOK_FILE", tmp_path / "no_webhook")
 
 
 def _capture_server():
@@ -78,10 +88,16 @@ def test_watchdog_exits_a_stalled_process():
     assert received and "STALLED" in received[0][1]["text"] and "phase X" in received[0][1]["text"]
 
 
-def test_watchdog_quiet_while_beating():
+def test_watchdog_quiet_while_beating(monkeypatch):
+    """@brief Regular beats keep the watchdog quiet. If one is late anyway (heavy CPU load), the test fails instead
+    of the watchdog exiting the whole pytest process with code 3."""
+    exits = []
+    monkeypatch.setattr(os, "_exit", exits.append)
     w = notify.Watchdog(0.02, "busy-run", check_seconds=0.1)
     import time
     for _ in range(20):          # 2 s of beats, well past the 1.2 s limit
         w.beat()
         time.sleep(0.1)
-    w.stop()                     # reaching here means the process was not killed
+    w.stop()
+    w._thread.join(timeout=5)    # done before monkeypatch restores os._exit
+    assert exits == []

@@ -30,7 +30,7 @@ namespace Assets.Scripts.Simulation
             DispatchingRule.SRT_SRWT,   // Shortest Remaining Time - Server
             DispatchingRule.SRT_SMPT,   // Shortest Remaining Time - Machine
             DispatchingRule.LRT_MMUR,   // Longest Remaining Time - Machine
-            DispatchingRule.FIFO_SRWT,  // FIFO/FCFS (arrival order) - Server
+            DispatchingRule.FIFO_SRWT,  // FIFO (longest in its current queue) - Server
             DispatchingRule.Random
             // NOTE: Random must stay last -- Resolve draws Random.Range(0, ActionToRule.Length - 1),
             // which relies on this position to exclude itself.
@@ -161,7 +161,7 @@ namespace Assets.Scripts.Simulation
         /// <param name="actionIndex">RL action or catalog index (see RuleForIndex).</param>
         /// <param name="machineId">ID of the machine that needs a job assigned.</param>
         /// <param name="jobs">Reference to the JobStore containing all job data.</param>
-        /// <param name="simTime">Current simulation time, used for time-based rules such as SDT.</param>
+        /// <param name="simTime">Current simulation time, used for time-based rules such as FIFO.</param>
         /// <returns>The selected job ID, or -1 if no dispatchable jobs are available for the machine.</returns>
         public static int SelectJob(int actionIndex, int machineId, JobStore jobs, double simTime)
         {
@@ -176,20 +176,20 @@ namespace Assets.Scripts.Simulation
 
         /// <summary>
         /// Selects which job gets the next routing decision, when multiple jobs are simultaneously
-        /// ready (state NeedsRouting) — the job-priority half of a rule (SPT/LPT/SRT/LRT/SDT/PTWINQ),
+        /// ready (state NeedsRouting) — the job-priority half of a rule (SPT/LPT/SRT/LRT/FIFO/PTWINQ),
         /// applied at the point of routing-eligibility rather than only at machine-side dispatch.
         /// </summary>
         /// <remarks>
         /// Machine-agnostic proxies replace SelectJob's per-machine stats, since the target
         /// machine hasn't been chosen yet at this point: SPT/LPT/PTWINQ use the job's minimum processing
         /// time across its eligible machines for the current op (GetMinEligibleProcTime) in place
-        /// of processing time at one specific machine; SRT/LRT/SDT reuse GetRemainingWork and the
-        /// wait-time formula unchanged, since neither depends on a specific machine.
+        /// of processing time at one specific machine; SRT/LRT/FIFO reuse GetRemainingWork and the
+        /// time-in-queue formula unchanged, since neither depends on a specific machine.
         /// </remarks>
         /// <param name="actionIndex">RL action or catalog index (see RuleForIndex).</param>
         /// <param name="readyJobIds">IDs of jobs currently ready for a routing decision (has &gt;=1 available eligible machine).</param>
         /// <param name="jobs">Reference to the JobStore containing all job data.</param>
-        /// <param name="simTime">Current simulation time, used for SDT.</param>
+        /// <param name="simTime">Current simulation time, used for FIFO.</param>
         /// <returns>The selected job ID, or -1 if readyJobIds is empty.</returns>
         public static int SelectRoutingJob(int actionIndex, List<int> readyJobIds, JobStore jobs, double simTime)
         {
@@ -216,10 +216,12 @@ namespace Assets.Scripts.Simulation
                 // Shortest / longest remaining work across all remaining operations
                 case JobRule.SRT: return ArgMin(ids, id => GetRemainingWork(id, jobs));
                 case JobRule.LRT: return ArgMax(ids, id => GetRemainingWork(id, jobs));
-                // FIFO/FCFS — prioritize jobs that have been waiting the longest (arrival order).
-                // Was ArgMin here (picked newest arrival, the opposite of "SDT"/FIFO as documented
-                // in Types/DispatchingRule.cs and this method's own original comment) -- fixed.
-                case JobRule.FIFO: return ArgMax(ids, id => (float)(simTime - jobs.Get(id).ArrivalTime));
+                // FIFO — the job that has waited longest in its current queue. StateEntryTime is when the job entered
+                // its current state, which for these candidates is the queue they are in: Queued at this machine
+                // (dispatch) or NeedsRouting in the routing pool (routing). A job sent back to the pool (machine
+                // failure, AGV hand-back) rejoins it at the back. Until 2026-10-02 this ranked by time since shop
+                // arrival (ArrivalTime), i.e. first in system, first served.
+                case JobRule.FIFO: return ArgMax(ids, id => (float)(simTime - jobs.Get(id).StateEntryTime));
                 // PT+WINQ — processing time plus the least queued work among the machines that can take the
                 // job's next operation (0 on its last op): favours short jobs headed for idle machines.
                 case JobRule.PTWINQ:
@@ -293,7 +295,9 @@ namespace Assets.Scripts.Simulation
                     return candidates[ArgMinIdx(ect)];
                 }
                 // Travel-aware earliest completion: the job can start once it has arrived AND the machine has
-                // cleared its queue. Without travel estimates (null) this is plain ECT.
+                // cleared its queue. Without travel estimates (null) this is plain ECT. With a travel price λ > 0 the
+                // trip is also charged as AGV time the rest of the floor loses (+ λ x travel), so a far machine has to
+                // save more queueing to be chosen; λ = 0 leaves the score exactly as before.
                 case MachineRule.TECT:
                 {
                     var ect = new float[candidates.Length];
@@ -301,6 +305,8 @@ namespace Assets.Scripts.Simulation
                     {
                         float travel = req.CandidateTravelTimes != null ? req.CandidateTravelTimes[i] : 0f;
                         ect[i] = Math.Max(travel, req.CandidateQueueLengths[i]) + req.CandidateJobTimes[i];
+                        if (req.TravelPrice > 0f && travel < float.MaxValue)
+                            ect[i] += req.TravelPrice * travel;
                     }
                     return candidates[ArgMinIdx(ect)];
                 }

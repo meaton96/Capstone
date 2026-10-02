@@ -290,3 +290,79 @@ def test_floor_override_validation():
     validate_scenario(with_floor(REGISTRY["randomized"](5400.0), 9, "J")(0))
     with pytest.raises(ConfigValidationError):       # above the gridlock-safe fleet for 15 machines
         validate_scenario(with_floor(REGISTRY["randomized"](5400.0), 16)(0))
+
+
+# ── Tiled / linked floors and TECT's travel price (scenarios/randomized.py; evaluate.py --params) ─────────
+
+LINKED = {"tiles": 7, "job_scope": "open", "agv_assignment": "pooled", "agv_count": 49}
+
+
+def test_one_tile_writes_no_tiling_or_price():
+    """@brief The defaults leave the instance exactly as before these fields existed."""
+    sc = randomized_scenario(2)
+    assert "tiling" not in sc and "travelPrice" not in sc
+    assert len(sc["machineTypeLayout"]) == 15
+    assert all(op["machineIndex"] == [0, 1, 2] for job in sc["jobs"] for op in job["operations"])
+
+
+def test_linked_floor_scales_the_floor_and_copies_times_per_tile():
+    from channels.config_schema import validate_scenario
+    from scenarios.randomized import params_with_overrides
+    params = params_with_overrides(LINKED)
+    sc = randomized_scenario(4, params)
+    assert sc["tiling"] == {"tiles": 7, "jobScope": "open", "agvAssignment": "pooled", "releaseRule": "roundRobin"}
+    assert sc["agvCount"] == 49
+    assert len(sc["machineTypeLayout"]) == 105
+    assert all(sc["machineTypeLayout"].count(t) == 21 for t in TYPES)
+    for job in sc["jobs"][:50]:
+        for op in job["operations"]:
+            assert op["machineIndex"] == list(range(21))
+            assert op["duration"] == op["duration"][:3] * 7       # tile position k has the same time in every tile
+    # Load is floor-average, so seven tiles get about seven times the arrivals of one.
+    one, seven = summarize(randomized_scenario(4)), summarize(sc)
+    assert 5.0 < seven["jobs"] / one["jobs"] < 9.0
+    assert abs(seven["mean_utilization"] - one["mean_utilization"]) < 0.25
+    validate_scenario(sc)
+
+
+def test_weighted_release_and_travel_price_keys():
+    from channels.config_schema import validate_scenario
+    from scenarios.randomized import params_with_overrides
+    params = params_with_overrides({**LINKED, "release_rule": "weighted",
+                                    "release_weights": [3, 2, 1, 1, 1, 1, 1], "travel_price": 4})
+    sc = randomized_scenario(1, params)
+    assert sc["tiling"]["releaseRule"] == "weighted"
+    assert sc["tiling"]["releaseWeights"] == [3.0, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+    assert sc["travelPrice"] == 4.0
+    assert sc["jobs"] == randomized_scenario(1, params_with_overrides(LINKED))["jobs"]   # same instance
+    validate_scenario(sc)
+
+
+def test_linked_floor_param_errors():
+    from scenarios.randomized import params_with_overrides
+    bad = [
+        {**LINKED, "agv_assignment": "tile"},                                   # open jobs need a pooled fleet
+        {**LINKED, "agv_count": 50},                                            # fleet must divide over the tiles
+        {**LINKED, "release_rule": "weighted", "release_weights": [1, 2]},      # one weight per tile
+        {**LINKED, "release_weights": [1] * 7},                                 # weights without "weighted"
+        {"tiles": 0},
+    ]
+    for overrides in bad:
+        with pytest.raises(ValueError):
+            randomized_scenario(0, params_with_overrides(overrides))
+    with pytest.raises(ValueError):
+        params_with_overrides({"tile": 7})                                      # typo: unknown field
+    assert params_with_overrides({"utilization": [1.0, 1.5]}).utilization == (1.0, 1.5)
+
+
+def test_schema_checks_release_weights_and_travel_price():
+    from channels.config_schema import ConfigValidationError, validate_scenario
+    from scenarios.randomized import params_with_overrides
+    sc = randomized_scenario(0, params_with_overrides(LINKED))
+    for change in ({"travelPrice": -1.0},
+                   {"tiling": {**sc["tiling"], "releaseRule": "weighted"}},                       # no weights
+                   {"tiling": {**sc["tiling"], "releaseRule": "weighted", "releaseWeights": [1, 1]}},
+                   {"tiling": {**sc["tiling"], "releaseWeights": [1] * 7}},                       # not weighted
+                   {"tiling": {**sc["tiling"], "releaseRule": "weighted", "releaseWeights": [1, 0, 1, 1, 1, 1, 1]}}):
+        with pytest.raises(ConfigValidationError):
+            validate_scenario({**sc, **change})

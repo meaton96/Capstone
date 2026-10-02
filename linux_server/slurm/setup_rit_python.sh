@@ -38,4 +38,4 @@ fi
 
 echo "[setup] $("$VENV/bin/python" --version); running unit tests"
 cd "$REPO/env"
-"$VENV/bin/python" -m pytest tests -q --ignore=tests/test_channels.py
+"$VENV/bin/python" -m pytest tests -q

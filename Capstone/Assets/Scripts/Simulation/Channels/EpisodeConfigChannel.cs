@@ -55,6 +55,7 @@ namespace Assets.Scripts.Simulation.Channels
             "minOpsPerJob", "maxOpsPerJob", "agvCount", "agvMoveSpeed", "agvHandshakeDuration",
             "machineFlexibilityProbability", "secondaryTimeMultiplier", "parkingMethod", "ioDocks",
             "reservationProtocol", "routingTrigger", "tiling", "preDispatchingMethod", "stochastic", "procTimeParams",
+            "travelPrice",
         };
 
         private FJSSPConfig _pendingConfig = null;
@@ -212,6 +213,7 @@ namespace Assets.Scripts.Simulation.Channels
                 AGVHandshakeDuration = root["agvHandshakeDuration"]?.Value<float>(),
                 MachineFlexibilityProbability = root["machineFlexibilityProbability"]?.Value<float>() ?? 0f,
                 SecondaryTimeMultiplier = root["secondaryTimeMultiplier"]?.Value<float>() ?? 1f,
+                TravelPrice = root["travelPrice"]?.Value<float>() ?? 0f,
                 parkingMethod = ConfigOverrides.ValidatedParkingMethod(root["parkingMethod"]?.Value<string>() ?? "lane"),
                 ioDocks = ConfigOverrides.ValidatedIoDocks(root["ioDocks"]?.Value<string>() ?? "corner"),
                 reservationProtocol = ReservationProtocolParser.Validated(root["reservationProtocol"]?.Value<string>()),

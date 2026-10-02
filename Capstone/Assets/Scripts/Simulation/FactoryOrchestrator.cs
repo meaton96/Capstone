@@ -185,6 +185,11 @@ namespace Assets.Scripts.Simulation
         /// </summary>
         private int decisionCount;
 
+        /// <summary>Routing decisions executed this episode (after any warm-up, like decisionCount), how many sent the
+        /// job to a machine in another tile than the one it was in, and the tile distance summed over those
+        /// (results.csv / telemetry; 0 cross-tile moves on an untiled floor).</summary>
+        private int _routedMoves, _crossTileMoves, _tilesCrossed;
+
         /// <summary>
         /// Total number of dispatch decisions made in the current episode.
         /// </summary>
@@ -553,13 +558,16 @@ namespace Assets.Scripts.Simulation
             if (config != null && ConfigOverrides.Tiles.HasValue)
                 config.Tiling = (config.Tiling ?? TilingSpec.Single).WithTiles(ConfigOverrides.Tiles.Value);
             if (config != null && ConfigOverrides.ReleaseRule != null)
-                config.Tiling = (config.Tiling ?? TilingSpec.Single).WithRelease(TilingSpec.ParseRelease(ConfigOverrides.ReleaseRule));
+                config.Tiling = (config.Tiling ?? TilingSpec.Single).WithRelease(TilingSpec.ParseRelease(ConfigOverrides.ReleaseRule),
+                                                                                  ConfigOverrides.ReleaseWeights);
             if (config != null && (ConfigOverrides.JobScope != null || ConfigOverrides.AgvAssignment != null))
                 config.Tiling = (config.Tiling ?? TilingSpec.Single).WithScope(ConfigOverrides.JobScope, ConfigOverrides.AgvAssignment);
             if (config != null && ConfigOverrides.MachineFlexibility.HasValue)
                 config.MachineFlexibilityProbability = ConfigOverrides.MachineFlexibility.Value;
             if (config != null && ConfigOverrides.SecondaryTimeMultiplier.HasValue)
                 config.SecondaryTimeMultiplier = ConfigOverrides.SecondaryTimeMultiplier.Value;
+            if (config != null && ConfigOverrides.TravelPrice.HasValue)
+                config.TravelPrice = ConfigOverrides.TravelPrice.Value;
             return config;
         }
 
@@ -800,7 +808,8 @@ namespace Assets.Scripts.Simulation
                     ? (_baselineRuleIsRandom ? UnityEngine.Random.Range(0, DispatchingEngine.ActionCount) : _baselineRuleIndex)
                     : -1,
                 transportAvailable: _routeOnTransport ? tile => agvPool.AnyAvailableAGV(tile) : (Func<int, bool>)null,
-                estimateTravelSeconds: EstimateTravelSeconds
+                estimateTravelSeconds: EstimateTravelSeconds,
+                travelPrice: () => currentConfig?.TravelPrice ?? 0f
             );
 
             // "-destrace": floor graph + resolved jobs for the event-based twin (env/des_twin).
@@ -809,6 +818,7 @@ namespace Assets.Scripts.Simulation
 
             episodeActive = true;
             decisionCount = 0;
+            _routedMoves = _crossTileMoves = _tilesCrossed = 0;
             _decisionLog.Clear();
             IsWaitingForAction = false;
             _simTime = 0.0;
@@ -946,6 +956,7 @@ namespace Assets.Scripts.Simulation
                 // which aren't the agent's and would pollute both.
                 _warmupActive = false;
                 decisionCount = 0;
+                _routedMoves = _crossTileMoves = _tilesCrossed = 0;
                 _decisionLog.Clear();
                 SimLogger.Low($"[Orchestrator] Warm-up complete at {SimTime:F0}s — RL agent now in " +
                               "control (decisionCount and decision log reset).");
@@ -1329,6 +1340,7 @@ namespace Assets.Scripts.Simulation
             JobData job = Jobs.Get(CurrentDecision.JobId);
             if (job == null) return;
 
+            CountRoutedMove(job, chosenMachineId);
             job.TargetMachineId = chosenMachineId;
             job.TransitionTo(JobState.WaitingForPickup, SimTime);
 
@@ -1356,6 +1368,19 @@ namespace Assets.Scripts.Simulation
                 }
                 job.PreDispatchedAgvId = -1;
             }
+        }
+
+        /// <summary>Counts a routed move and whether it leaves the job's current tile (its machine's tile, or its home
+        /// tile while it waits on the input belt).</summary>
+        private void CountRoutedMove(JobData job, int machineId)
+        {
+            _routedMoves++;
+            if (layoutManager.TileCount <= 1) return;
+            int from = job.LocationMachineId >= 0 ? layoutManager.TileOfMachine(job.LocationMachineId) : job.TileId;
+            int to = layoutManager.TileOfMachine(machineId);
+            if (from == to) return;
+            _crossTileMoves++;
+            _tilesCrossed += Math.Abs(to - from);
         }
 
         /// <summary>
@@ -1424,12 +1449,12 @@ namespace Assets.Scripts.Simulation
             int[] queuedIds = req.QueuedJobIds ?? Array.Empty<int>();
             int count = queuedIds.Length;
             var remainingWork = new float[count];
-            var arrivalTimes = new float[count];
+            var queueEntryTimes = new float[count];
             for (int i = 0; i < count; i++)
             {
                 JobData qJob = Jobs.Get(queuedIds[i]);
                 remainingWork[i] = DispatchingEngine.GetRemainingWork(queuedIds[i], Jobs);
-                arrivalTimes[i] = qJob?.ArrivalTime ?? -1f;
+                queueEntryTimes[i] = qJob != null ? (float)qJob.StateEntryTime : -1f;
             }
             _decisionLog.Add(new DecisionRecord
             {
@@ -1443,7 +1468,7 @@ namespace Assets.Scripts.Simulation
                 CandidateIds = string.Join("|", queuedIds),
                 CandidateStatA = string.Join("|", req.QueuedDurations ?? Array.Empty<double>()),
                 CandidateStatB = string.Join("|", remainingWork),
-                CandidateStatC = string.Join("|", arrivalTimes),
+                CandidateStatC = string.Join("|", queueEntryTimes),
             });
         }
 
@@ -1465,14 +1490,19 @@ namespace Assets.Scripts.Simulation
                 _tracker.CloseThroughputWindow(lastBoundary, SimTime, WorkInProgress());
 
             int agvFailures = 0;
-            double agvRepairTime = 0.0, agvBlockedByFailure = 0.0;
+            double agvRepairTime = 0.0, agvBlockedByFailure = 0.0, agvIdleTime = 0.0, agvAccountedTime = 0.0;
             foreach (var agv in agvPool.AllAGVs)
             {
                 AGVRecord ar = agv.GetRecord(SimTime);
                 agvFailures += ar.FailureCount;
                 agvRepairTime += ar.TimeBroken;
                 agvBlockedByFailure += ar.TimeBlockedByFailure;
+                agvIdleTime += ar.TimeIdle;
+                agvAccountedTime += ar.TotalAccountedTime;
             }
+            // Share of fleet time parked with no assignment (whole episode, warm-up included).
+            double agvIdleFraction = agvAccountedTime > 0.0 ? agvIdleTime / agvAccountedTime : 0.0;
+            int[] releaseCounts = layoutManager.TileCount > 1 ? (int[])layoutManager.ReleaseCounts.Clone() : new int[0];
 
             var telemetry = EpisodeTelemetryChannel.Instance;
             if (telemetry != null)
@@ -1491,7 +1521,13 @@ namespace Assets.Scripts.Simulation
                     appliedConfig: _newConfigCanonical,
                     agvFailures: agvFailures,
                     agvRepairTime: agvRepairTime,
-                    agvBlockedByFailureTime: agvBlockedByFailure
+                    agvBlockedByFailureTime: agvBlockedByFailure,
+                    routedMoves: _routedMoves,
+                    crossTileMoves: _crossTileMoves,
+                    tilesCrossed: _tilesCrossed,
+                    agvIdleFraction: agvIdleFraction,
+                    releaseCounts: releaseCounts,
+                    travelPrice: currentConfig.TravelPrice
                 );
                 telemetry.Flush();
             }
@@ -1553,6 +1589,12 @@ namespace Assets.Scripts.Simulation
             record.JobScope = tiling.JobScope;
             record.AgvAssignment = tiling.AgvAssignment;
             record.ReleaseRule = tiling.ReleaseString;
+            record.ReleaseWeights = tiling.ReleaseWeightsString;
+            record.ReleaseCounts = string.Join(";", releaseCounts);
+            record.RoutedMoves = _routedMoves;
+            record.CrossTileMoves = _crossTileMoves;
+            record.TilesCrossed = _tilesCrossed;
+            record.TravelPrice = currentConfig.TravelPrice;
             record.MachineFlexibility = layoutManager.ActiveFlexibilityProbability;
             record.SecondaryTimeMultiplier = layoutManager.ActiveSecondaryTimeMultiplier;
             record.MeanCapabilitiesPerMachine = layoutManager.MeanCapabilitiesPerMachine;

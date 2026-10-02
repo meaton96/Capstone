@@ -4,9 +4,11 @@
        config hashes in the episode log (7.1), and weights-only checkpoint loading (7.2).
 """
 
+import ast
 import copy
 import json
 import socket
+from pathlib import Path
 
 import pytest
 
@@ -58,6 +60,15 @@ class TestSchema:
     def test_valid_scenario_and_config_pass(self):
         validate_scenario(SCENARIO)
         validate_config(CONFIG)
+
+    def test_channel_roundtrip_config_passes(self):
+        """@brief The manual round-trip script's CONFIG matches the schema (it once failed it with 16 errors).
+        Parsed, not imported: that script launches a player, and pytest must never run it."""
+        source = (Path(__file__).resolve().parents[1] / "scripts" / "channel_roundtrip.py").read_text()
+        nodes = [n for n in ast.parse(source).body if isinstance(n, ast.Assign)
+                 and any(isinstance(t, ast.Name) and t.id == "CONFIG" for t in n.targets)]
+        assert len(nodes) == 1, "channel_roundtrip.py must define CONFIG once, as a top-level literal"
+        validate_config(ast.literal_eval(nodes[0].value))
 
     @pytest.mark.parametrize("make", [
         lambda: compound_generator(2700.0, random_warmup=True),

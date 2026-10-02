@@ -169,6 +169,7 @@ namespace Assets.Scripts.Simulation.Types
             public float agvHandshakeDuration = 0f;
             public float machineFlexibilityProbability = 0f;
             public float secondaryTimeMultiplier = 1f;
+            public float travelPrice = 0f;
             public float throughputTimingWindow = 0f;
             public string parkingMethod = "lane";
             public string ioDocks = "corner";
@@ -291,6 +292,7 @@ namespace Assets.Scripts.Simulation.Types
                 AGVHandshakeDuration = raw.agvHandshakeDuration > 0f ? raw.agvHandshakeDuration : (float?)null,
                 MachineFlexibilityProbability = raw.machineFlexibilityProbability,
                 SecondaryTimeMultiplier = raw.secondaryTimeMultiplier,
+                TravelPrice = raw.travelPrice,
                 ThroughputTimingWindow = raw.throughputTimingWindow,
                 ProcTimeParams = procTimeParams,
                 parkingMethod = raw.parkingMethod,

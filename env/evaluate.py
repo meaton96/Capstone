@@ -264,6 +264,12 @@ def run_evaluation(env, policies: list, schedule: list, log=print, decision_writ
             "agv_failures": episode.get("agv_failures"),
             "agv_repair_time": episode.get("agv_repair_time"),
             "agv_blocked_by_failure_time": episode.get("agv_blocked_by_failure_time"),
+            "routed_moves": episode.get("routed_moves"),
+            "cross_tile_moves": episode.get("cross_tile_moves"),
+            "tiles_crossed": episode.get("tiles_crossed"),
+            "agv_idle_fraction": episode.get("agv_idle_fraction"),
+            "release_counts": episode.get("release_counts"),
+            "travel_price": episode.get("travel_price"),
             "config_hash": episode.get("config_hash"),
             "instance_hash": episode.get("instance_hash"),
         })
@@ -330,6 +336,21 @@ def print_summary(summary: list):
     print("gap% = mean per-seed gap to the best PDR rule on that seed (lower is better).")
 
 
+def floor_fields(scenario: dict) -> dict:
+    """@brief The floor a generated scenario runs on, as episodes.csv columns (fleet, layout, tiling, TECT price)."""
+    tiling = scenario.get("tiling") or {}
+    return {
+        "agv_count": scenario.get("agvCount"),
+        "layout": scenario.get("layout"),
+        "tiles": tiling.get("tiles", 1),
+        "job_scope": tiling.get("jobScope", "tile"),
+        "agv_assignment": tiling.get("agvAssignment", "tile"),
+        "release_rule": tiling.get("releaseRule", "roundRobin"),
+        "release_weights": ";".join(f"{w:g}" for w in tiling.get("releaseWeights", [])),
+        "scenario_travel_price": scenario.get("travelPrice", 0.0),
+    }
+
+
 def write_csv(path: Path, rows: list):
     if not rows:
         return
@@ -372,6 +393,14 @@ def main(argv=None):
                              "operation type (0 = fully typed; see FJSSPConfig.MachineFlexibilityProbability)")
     parser.add_argument("--secondary-time-multiplier", type=float, default=1.0,
                         help="With --machine-flexibility: processing-time factor on a machine's secondary types")
+    parser.add_argument("--params", type=str, default=None, metavar="JSON",
+                        help="With --scenario-generator randomized: RandomizedParams overrides (env/scenarios/"
+                             "randomized.py), e.g. a linked 7-tile floor '{\"tiles\": 7, \"job_scope\": \"open\", "
+                             "\"agv_assignment\": \"pooled\", \"agv_count\": 49}' or TECT's travel price "
+                             "'{\"travel_price\": 4}'. Applied after --machine-flexibility")
+    parser.add_argument("--random-warmup", action="store_true",
+                        help="With --scenario-generator: start each episode mid-stream after a heuristic warm-up "
+                             "(the training distribution; the warm-up cutoff is drawn from the seed)")
     parser.add_argument("--agv-failures", nargs="?", const="{}", default=None, metavar="JSON",
                         help="With --scenario-generator: add AGV breakdowns to every instance (same instance "
                              "otherwise). Bare flag = scenarios.AGV_FAILURE_DEFAULTS; a JSON object overrides "
@@ -412,14 +441,33 @@ def main(argv=None):
         parser.error("--agv-failures needs --scenario-generator")
     if (args.agvs is not None or args.layout is not None) and not args.scenario_generator:
         parser.error("--agvs / --layout need --scenario-generator")
+    if (args.params is not None or args.random_warmup) and not args.scenario_generator:
+        parser.error("--params / --random-warmup need --scenario-generator")
+    if args.params is not None and args.scenario_generator != "randomized":
+        parser.error("--params applies to the randomized generator only")
 
     scenario_generator = None
     if args.scenario_generator:
         from scenarios import REGISTRY
         duration = args.episode_duration_seconds if args.episode_duration_seconds > 0 else None
-        scenario_generator = REGISTRY[args.scenario_generator](
-            duration, machine_flexibility=args.machine_flexibility,
-            secondary_time_multiplier=args.secondary_time_multiplier)
+        if args.params is not None:
+            from scenarios.randomized import params_with_overrides, randomized_generator
+            try:
+                overrides = json.loads(args.params)
+                if not isinstance(overrides, dict):
+                    raise ValueError("expected a JSON object")
+                if args.machine_flexibility:
+                    overrides = {"machine_flexibility": args.machine_flexibility,
+                                 "secondary_time_multiplier": args.secondary_time_multiplier, **overrides}
+                params = params_with_overrides(overrides)
+            except ValueError as exc:
+                parser.error(f"--params: {exc}")
+            print(f"Generator overrides: {overrides}")
+            scenario_generator = randomized_generator(duration, random_warmup=args.random_warmup, params=params)
+        else:
+            scenario_generator = REGISTRY[args.scenario_generator](
+                duration, random_warmup=args.random_warmup, machine_flexibility=args.machine_flexibility,
+                secondary_time_multiplier=args.secondary_time_multiplier)
         if args.agv_failures is not None:
             from scenarios import agv_failure_block, with_agv_failures
             try:
@@ -499,11 +547,11 @@ def main(argv=None):
                               decision_writer=decision_writer, scenario_generator=scenario_generator)
     finally:
         env.close()
-        # Record each episode's floor so per-condition runs (--agvs / --layout) stay self-describing.
+        # Record each episode's floor so per-condition runs (--agvs / --layout / --params) stay self-describing.
         if scenario_generator is not None:
-            floor_by_seed = {seed: (s.get("agvCount"), s.get("layout")) for seed, s in zip(seeds, planned)}
+            floor_by_seed = {seed: floor_fields(s) for seed, s in zip(seeds, planned)}
             for row in rows:
-                row["agv_count"], row["layout"] = floor_by_seed.get(row["seed"], (None, None))
+                row.update(floor_by_seed.get(row["seed"], {}))
         write_csv(out / "episodes.csv", rows)
         if decision_file is not None:
             decision_file.close()

@@ -115,6 +115,14 @@ namespace Assets.Scripts.Simulation.Types
         /// @brief Default dispatching rule applied when no agent policy is active.
         public DispatchingRule dispatchingRule = DispatchingRule.SRT_SRWT;
 
+        /// @brief Price per second of loaded AGV travel in the TECT machine rule (λ):
+        ///        score = max(travel, queued work) + processing time + λ x travel.
+        /// @details 0 = plain TECT (default, unchanged). TECT treats a trip as free whenever the machine's queue is
+        ///          longer than the trip, but the AGV is busy for the whole trip; λ &gt; 0 charges for that, so a
+        ///          far machine has to save more queueing to be picked (large λ ≈ stay local). Applies to every
+        ///          TECT decision of the episode, warm-up included; other machine rules ignore it.
+        public float TravelPrice = 0f;
+
         // ── Parking method ──
 
         /// @brief Parking layout: "lane" (default; reserved lane, one dedicated bay per AGV),
@@ -200,6 +208,7 @@ namespace Assets.Scripts.Simulation.Types
                 AGVMoveSpeed = AGVMoveSpeed,
                 AGVHandshakeDuration = AGVHandshakeDuration,
                 dispatchingRule = dispatchingRule,
+                TravelPrice = TravelPrice,
                 ProcTimeParams = new Dictionary<MachineType, (float mu, float sigma)>(ProcTimeParams),
                 Stochastic = Stochastic,
                 MachineFlexibilityProbability = MachineFlexibilityProbability,

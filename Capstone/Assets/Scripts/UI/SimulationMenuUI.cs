@@ -326,7 +326,9 @@ namespace Assets.Scripts.UI
                 ioDocks = ioDocksChoice.ToString().ToLowerInvariant(),
                 Layout = LayoutSpec.FromPreset(layoutChoice.ToString()),
                 Tiling = tiles <= 1 ? TilingSpec.Single
-                    : TilingSpec.Single.WithTiles(tiles).WithRelease(tileReleaseRule)
+                    // The menu has no weights field: "weighted" here means equal weights (a deterministic round-robin).
+                    : TilingSpec.Single.WithTiles(tiles).WithRelease(tileReleaseRule,
+                        tileReleaseRule == ReleaseRule.Weighted ? Array.ConvertAll(new float[tiles], _ => 1f) : null)
                         .WithScope(linkedTiles ? "open" : null, null),
                 MachineFlexibilityProbability = machineFlexibility,
                 SecondaryTimeMultiplier = secondaryTimeMultiplier,

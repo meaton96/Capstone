@@ -407,6 +407,16 @@ class UnitySchedulingEnv:
             "agv_failures": result.get("agvFailures"),
             "agv_repair_time": result.get("agvRepairTime"),
             "agv_blocked_by_failure_time": result.get("agvBlockedByFailureTime"),
+            # Linked floors (None from a player built before 2026-10-02): routing decisions after any warm-up, those
+            # that sent the job to another tile and the tiles crossed summed over them, the share of fleet time
+            # parked idle (whole episode), jobs released per tile ("a;b;c", "" untiled), TECT's travel price.
+            "routed_moves": result.get("routedMoves"),
+            "cross_tile_moves": result.get("crossTileMoves"),
+            "tiles_crossed": result.get("tilesCrossed"),
+            "agv_idle_fraction": result.get("agvIdleFraction"),
+            "release_counts": (";".join(str(c) for c in result["releaseCounts"])
+                               if result.get("releaseCounts") is not None else None),
+            "travel_price": result.get("travelPrice"),
         }
         if final is not None:
             exited = final.jobs_exited

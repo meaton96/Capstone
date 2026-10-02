@@ -129,7 +129,7 @@ To verify the ML-Agents environment and the Python-side logic:
    ```bash
    pytest env
    ```
-   *Note: as of this writing `env/tests/test_architecture.py` and `env/tests/test_channels.py` have pre-existing issues unrelated to Docker vs. native (a stale `env.channels` import, and a module-level Unity-launch script masquerading as a pytest test) — see the connectivity smoke test below for the actually-verified round-trip check.*
+   *Note: the suite never launches a Unity player. The side-channel round trip against a real player (config sent, telemetry back) is a manual script that starts one player and closes only that one: `python env/scripts/channel_roundtrip.py --unity-path linux_server/capstone.x86_64`.*
 
 **On Windows/macOS (or Linux via Docker):**
 1. Clone the repository.

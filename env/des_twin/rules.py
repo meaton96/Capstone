@@ -49,7 +49,8 @@ def rank_jobs(job_rule, ids, sim, proc_time):
     if job_rule == "LRT":
         return _argmax(ids, lambda j: sim.remaining_work(j))
     if job_rule == "FIFO":
-        return _argmax(ids, lambda j: f32(sim.now - sim.jobs[j].arrival))
+        # time in the current queue: Job.since is when the job entered its state (JobData.StateEntryTime)
+        return _argmax(ids, lambda j: f32(sim.now - sim.jobs[j].since))
     if job_rule == "PTWINQ":
         loads = sim.all_machine_loads()
         return _argmin(ids, lambda j: f32(proc_time(j) + sim.work_in_next_queue(j, loads)))

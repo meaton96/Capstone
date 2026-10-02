@@ -50,6 +50,8 @@ namespace Assets.Scripts.Simulation
         private Func<int, bool> _transportAvailable;
         /// <summary>(job, candidate machine) -> estimated loaded travel seconds, for TECT. Null = not wired.</summary>
         private Func<JobData, int, float> _estimateTravelSeconds;
+        /// <summary>The episode's TECT travel price λ (FJSSPConfig.TravelPrice). Null = 0.</summary>
+        private Func<float> _travelPrice;
 
         /// <summary>
         /// Reference to the episode's live per-machine statistics (processing time, downtime),
@@ -89,9 +91,11 @@ namespace Assets.Scripts.Simulation
             Dictionary<int, double> machineProcessingStartTime,
             Func<int> getBaselineActionIndex = null,
             Func<int, bool> transportAvailable = null,
-            Func<JobData, int, float> estimateTravelSeconds = null)
+            Func<JobData, int, float> estimateTravelSeconds = null,
+            Func<float> travelPrice = null)
         {
             _estimateTravelSeconds = estimateTravelSeconds;
+            _travelPrice = travelPrice;
             // Null = RoutingTrigger.OnReady (route as soon as a job is ready). Otherwise routing is gated on it:
             // see RoutingTrigger.OnTransport.
             _transportAvailable = transportAvailable;
@@ -271,6 +275,7 @@ namespace Assets.Scripts.Simulation
                 CandidateUtilization = candidates.Select(id => MachineUtilization(id, simTime)).ToArray(),
                 CandidateTravelTimes = _estimateTravelSeconds == null ? null
                     : candidates.Select(id => _estimateTravelSeconds(job, id)).ToArray(),
+                TravelPrice = _travelPrice?.Invoke() ?? 0f,
             };
         }
 

@@ -141,6 +141,11 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         /// <summary>Machines of each primary type in each tile, ascending id: [tile][type].</summary>
         private Dictionary<MachineType, List<int>>[] tileMachinesByType = new Dictionary<MachineType, List<int>>[0];
         private int roundRobinNext;
+        /// <summary>Smooth weighted round-robin credit per tile (ReleaseRule.Weighted); reset with the job store.</summary>
+        private float[] releaseCredit = new float[0];
+        /// <summary>Jobs released into each tile since the job store was last filled (results.csv release_counts);
+        ///          empty on an untiled floor.</summary>
+        public int[] ReleaseCounts { get; private set; } = new int[0];
         public ParkingMethod ActiveParkingMethod { get; private set; }
         /// <summary>Layout (A-J) of the floor currently built; set at the start of BuildFloor.</summary>
         public LayoutSpec ActiveLayout { get; private set; } = LayoutSpec.Default;
@@ -1209,8 +1214,15 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             return result;
         }
 
-        /// @brief Resets the round-robin release counter; called when an episode's job store is (re)filled.
-        public void ResetJobTiling() => roundRobinNext = 0;
+        /// @brief Resets the release state (round-robin counter, weighted credits, per-tile counts); called when an
+        ///        episode's job store is (re)filled.
+        public void ResetJobTiling()
+        {
+            roundRobinNext = 0;
+            int n = TileCount > 1 ? TileCount : 0;
+            releaseCredit = new float[n];
+            ReleaseCounts = new int[n];
+        }
 
         /// @brief Gives a newly arrived job its home tile (TilingSpec.Release) and confines its operations to it.
         /// @details Each operation keeps the eligible machines that are in the home tile. An operation with none
@@ -1233,9 +1245,23 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 tile = 0;
                 for (int t = 1; t < TileCount; t++) if (wip[t] < wip[tile]) tile = t;
             }
+            else if (ActiveTiling.Release == ReleaseRule.Weighted)
+            {
+                // Smooth weighted round-robin: deterministic (no random draws, so no other stream moves), and every
+                // prefix of the arrival order is as close to the weights as whole jobs allow.
+                if (releaseCredit.Length != TileCount) releaseCredit = new float[TileCount];
+                IReadOnlyList<float> w = ActiveTiling.ReleaseWeights;
+                float total = 0f;
+                for (int t = 0; t < TileCount; t++) { releaseCredit[t] += w[t]; total += w[t]; }
+                tile = 0;
+                for (int t = 1; t < TileCount; t++) if (releaseCredit[t] > releaseCredit[tile]) tile = t;
+                releaseCredit[tile] -= total;
+            }
             else tile = roundRobinNext++ % TileCount;
 
             job.TileId = tile;
+            if (ReleaseCounts.Length != TileCount) ReleaseCounts = new int[TileCount];
+            ReleaseCounts[tile]++;
             if (JobsOpen) return;   // open jobs: the home tile is only the input belt; eligibility stays floor-wide
             var src = job.EligibleMachinesPerOp;
             var confined = new Dictionary<int, float>[src.Length];

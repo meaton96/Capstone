@@ -68,8 +68,12 @@ namespace Assets.Scripts.Simulation.Types
         public static string IoDocks;
         /// <summary>Tile count (TilingSpec.Tiles); overrides every config's tiling.tiles. Null = no override.</summary>
         public static int? Tiles;
-        /// <summary>Tiled floors: which tile an arriving job enters ("roundRobin" | "leastWip").</summary>
+        /// <summary>Tiled floors: which tile an arriving job enters ("roundRobin" | "leastWip" | "weighted").</summary>
         public static string ReleaseRule;
+        /// <summary>tiling.releaseWeights for every config (one per tile; needs release rule "weighted"). Null = keep.</summary>
+        public static float[] ReleaseWeights;
+        /// <summary>TECT travel price λ (FJSSPConfig.TravelPrice, >= 0); overrides every config's travelPrice.</summary>
+        public static float? TravelPrice;
         /// <summary>tiling.jobScope ("tile" | "open") for every config. Null = no override.</summary>
         public static string JobScope;
         /// <summary>tiling.agvAssignment ("tile" | "pooled") for every config. Null = no override.</summary>

@@ -78,6 +78,7 @@ namespace Assets.Scripts.Simulation.Types
                   $"agvMoveSpeed must be > 0 (got {cfg.AGVMoveSpeed})");
             Check(cfg.AGVHandshakeDuration == null || (Finite(cfg.AGVHandshakeDuration.Value) && cfg.AGVHandshakeDuration.Value >= 0f),
                   $"agvHandshakeDuration must be >= 0 (got {cfg.AGVHandshakeDuration})");
+            Check(Finite(cfg.TravelPrice) && cfg.TravelPrice >= 0f, $"travelPrice must be >= 0 (got {cfg.TravelPrice})");
 
             foreach (var kvp in cfg.ProcTimeParams)
             {

@@ -87,6 +87,16 @@ namespace Assets.Scripts.Simulation.Types
         public string JobScope = "tile";
         public string AgvAssignment = "tile";
         public string ReleaseRule = "roundRobin";
+        // Weighted release: the weights ("3;2;1", "" otherwise) and the jobs released into each tile ("" untiled).
+        public string ReleaseWeights = "";
+        public string ReleaseCounts = "";
+        // Routing decisions executed after any warm-up, those that sent the job to another tile, and the tiles
+        // crossed summed over them (0 cross-tile moves on an untiled floor).
+        public int RoutedMoves;
+        public int CrossTileMoves;
+        public int TilesCrossed;
+        // TECT travel price λ (FJSSPConfig.TravelPrice); 0 = plain TECT. Part of scenario identity for TECT rules.
+        public float TravelPrice;
         // Machine flexibility (FJSSPConfig.MachineFlexibilityProbability / SecondaryTimeMultiplier) and the realised
         // mean number of operation types per machine (1 = fully typed; drawn per floor, so it varies around 1 + 4p).
         public float MachineFlexibility;
@@ -449,8 +459,9 @@ namespace Assets.Scripts.Simulation.Types
     ///          Dispatch: CandidateIds = queued job IDs, ChosenId = the job picked, SubjectId =
     ///          the machine making the decision. CandidateStatA = per-candidate processing
     ///          duration (QueuedDurations), CandidateStatB = per-candidate total remaining work
-    ///          (DispatchingEngine.GetRemainingWork), CandidateStatC = per-candidate arrival time
-    ///          (for reconstructing FIFO's wait-time = simTime - arrival).
+    ///          (DispatchingEngine.GetRemainingWork), CandidateStatC = per-candidate time the job joined
+    ///          this queue (for reconstructing FIFO's time in queue = simTime - entry). Logs before
+    ///          2026-10-02 hold the shop arrival time here instead.
     public class DecisionRecord
     {
         public double SimTime;
