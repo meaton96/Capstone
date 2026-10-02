@@ -375,6 +375,13 @@ def main(argv=None):
                         help="With --scenario-generator: add AGV breakdowns to every instance (same instance "
                              "otherwise). Bare flag = scenarios.AGV_FAILURE_DEFAULTS; a JSON object overrides "
                              "fields, e.g. '{\"agvWeibullLambda\": 6000, \"agvRepairLogMu\": 4.2}'")
+    parser.add_argument("--agvs", type=int, default=None, metavar="N",
+                        help="With --scenario-generator: run every instance with N AGVs. The jobs are the "
+                             "generator's own (its arrival cap stays at its default fleet), so seeds stay "
+                             "paired across fleet sizes")
+    parser.add_argument("--layout", type=str, default=None, metavar="X",
+                        help="With --scenario-generator: run every instance on floor layout X (A-O); the "
+                             "jobs are unchanged")
     parser.add_argument("--decision-log", action="store_true",
                         help="Also write decisions.csv: every decision's chosen rule, plus the "
                              "action probabilities for checkpoints")
@@ -402,6 +409,8 @@ def main(argv=None):
         parser.error("--scenario and --scenario-generator are mutually exclusive")
     if args.agv_failures is not None and not args.scenario_generator:
         parser.error("--agv-failures needs --scenario-generator")
+    if (args.agvs is not None or args.layout is not None) and not args.scenario_generator:
+        parser.error("--agvs / --layout need --scenario-generator")
 
     scenario_generator = None
     if args.scenario_generator:
@@ -420,6 +429,14 @@ def main(argv=None):
             except (ValueError, KeyError) as exc:
                 parser.error(f"--agv-failures: {exc}")
             scenario_generator = with_agv_failures(scenario_generator, overrides)
+        if args.agvs is not None or args.layout is not None:
+            from scenarios import floor_override_fields, with_floor
+            try:
+                fields = floor_override_fields(args.agvs, args.layout)
+            except ValueError as exc:
+                parser.error(f"--agvs / --layout: {exc}")
+            print(f"Floor override: {fields}")
+            scenario_generator = with_floor(scenario_generator, args.agvs, args.layout)
 
     seeds = parse_seeds(args.seeds)
     if max(seeds) >= TRAIN_SEED_LOW:
@@ -481,6 +498,11 @@ def main(argv=None):
                               decision_writer=decision_writer, scenario_generator=scenario_generator)
     finally:
         env.close()
+        # Record each episode's floor so per-condition runs (--agvs / --layout) stay self-describing.
+        if scenario_generator is not None:
+            floor_by_seed = {seed: (s.get("agvCount"), s.get("layout")) for seed, s in zip(seeds, planned)}
+            for row in rows:
+                row["agv_count"], row["layout"] = floor_by_seed.get(row["seed"], (None, None))
         write_csv(out / "episodes.csv", rows)
         if decision_file is not None:
             decision_file.close()

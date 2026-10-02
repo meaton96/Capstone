@@ -254,3 +254,39 @@ def test_agv_failure_overrides_and_validation():
     with pytest.raises(KeyError):
         agv_failure_block({"weibullLambda": 6000.0})      # a machine field, not an AGV one
     validate_scenario(with_agv_failures(REGISTRY["randomized"](5400.0))(0))
+
+
+# ── Floor overrides (scenarios.floor_override; evaluate.py --agvs / --layout) ──────────────────────────
+
+def test_floor_override_changes_only_fleet_and_layout():
+    """@brief Seed N is the same job set in every condition of the RQ3 sweep: only agvCount and layout change,
+    and the arrival cap stays at the generator's own fleet."""
+    from scenarios import with_floor
+    base = REGISTRY["randomized"](5400.0)
+    for agvs, layout in ((5, None), (9, "j"), (None, "G")):
+        wrapped = with_floor(base, agvs, layout)
+        for seed in range(4):
+            a, b = base(seed), wrapped(seed)
+            changed = {k for k in set(a) | set(b) if a.get(k) != b.get(k)}
+            assert changed <= {"agvCount", "layout"}
+            assert b["agvCount"] == (agvs if agvs is not None else a["agvCount"])
+            assert b["layout"] == (layout.upper() if layout is not None else a["layout"])
+            assert base(seed) == a      # the wrapper never mutates what the generator returns
+
+
+def test_floor_override_composes_with_agv_failures():
+    from scenarios import with_agv_failures, with_floor
+    base = REGISTRY["randomized"](5400.0)
+    assert with_floor(with_agv_failures(base), 9, "J")(3) == with_agv_failures(with_floor(base, 9, "J"))(3)
+
+
+def test_floor_override_validation():
+    from channels.config_schema import ConfigValidationError, validate_scenario
+    from scenarios import floor_override_fields, with_floor
+    assert floor_override_fields() == {}
+    for agvs, layout in ((0, None), (True, None), (2.5, None), (None, "Z")):
+        with pytest.raises(ValueError):
+            floor_override_fields(agvs, layout)
+    validate_scenario(with_floor(REGISTRY["randomized"](5400.0), 9, "J")(0))
+    with pytest.raises(ConfigValidationError):       # above the gridlock-safe fleet for 15 machines
+        validate_scenario(with_floor(REGISTRY["randomized"](5400.0), 16)(0))
