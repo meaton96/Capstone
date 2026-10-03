@@ -10,6 +10,11 @@ namespace Assets.Scripts.Simulation
     /// with appropriate directory paths and verbosity levels. It handles cross-platform 
     /// directory resolution to ensure logs are written to persistent storage locations 
     /// outside of read-only application bundles.
+    ///
+    /// Runs before the orchestrator: its Awake applies "-decisionlogdir" on top of the Results path set
+    /// here, and running after it would reset that subdirectory (decision_log.csv and the -destrace export
+    /// then landed in the player's Results/).
+    [DefaultExecutionOrder(FactoryOrchestrator.ExecutionOrderOrchestrator - 100)]
     public class LoggingInitializer : MonoBehaviour
     {
         [Header("Logging Settings")]

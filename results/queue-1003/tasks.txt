@@ -1,0 +1,44 @@
+oracle|results/rq2-oracle-due|8|1116|{"due_date_allowance": 2.0}|
+oracle|results/rq2-oracle-due|9|1118|{"due_date_allowance": 2.0}|
+oracle|results/rq2-oracle-due|10|1120|{"due_date_allowance": 2.0}|
+oracle|results/rq2-oracle-due|11|1122|{"due_date_allowance": 2.0}|
+oracle|results/rq2-oracle-due|12|1124|{"due_date_allowance": 2.0}|
+oracle|results/rq2-oracle-due|13|1126|{"due_date_allowance": 2.0}|
+oracle|results/rq2-oracle-due|14|1128|{"due_date_allowance": 2.0}|
+oracle|results/rq2-oracle-due|15|1130|{"due_date_allowance": 2.0}|
+oracle|results/rq2-oracle-due|16|1132|{"due_date_allowance": 2.0}|
+oracle|results/rq2-oracle-due|17|1134|{"due_date_allowance": 2.0}|
+oracle|results/rq2-oracle-due|18|1136|{"due_date_allowance": 2.0}|
+oracle|results/rq2-oracle-due|19|1138|{"due_date_allowance": 2.0}|
+oracle|results/rq2-oracle-due-agv4|0|1200|{"due_date_allowance": 2.0}|--agvs 4
+oracle|results/rq2-oracle-due-l1500|0|1300|{"due_date_allowance": 2.0}|--agv-failures {"agvWeibullLambda":1500}
+oracle|results/rq2-oracle-due-utilhi|0|1400|{"due_date_allowance": 2.0, "utilization": [1.0, 1.8], "lull_utilization": [0.4, 0.7]}|
+oracle|results/rq2-oracle-due-agv4|1|1202|{"due_date_allowance": 2.0}|--agvs 4
+oracle|results/rq2-oracle-due-l1500|1|1302|{"due_date_allowance": 2.0}|--agv-failures {"agvWeibullLambda":1500}
+oracle|results/rq2-oracle-due-utilhi|1|1402|{"due_date_allowance": 2.0, "utilization": [1.0, 1.8], "lull_utilization": [0.4, 0.7]}|
+oracle|results/rq2-oracle-due-agv4|2|1204|{"due_date_allowance": 2.0}|--agvs 4
+oracle|results/rq2-oracle-due-l1500|2|1304|{"due_date_allowance": 2.0}|--agv-failures {"agvWeibullLambda":1500}
+oracle|results/rq2-oracle-due-utilhi|2|1404|{"due_date_allowance": 2.0, "utilization": [1.0, 1.8], "lull_utilization": [0.4, 0.7]}|
+oracle|results/rq2-oracle-due-agv4|3|1206|{"due_date_allowance": 2.0}|--agvs 4
+oracle|results/rq2-oracle-due-l1500|3|1306|{"due_date_allowance": 2.0}|--agv-failures {"agvWeibullLambda":1500}
+oracle|results/rq2-oracle-due-utilhi|3|1406|{"due_date_allowance": 2.0, "utilization": [1.0, 1.8], "lull_utilization": [0.4, 0.7]}|
+base|results/base-due-c2|0|1500|{"due_date_allowance": 2.0}|
+base|results/base-due-c2|1|1502|{"due_date_allowance": 2.0}|
+base|results/base-due-c2|2|1504|{"due_date_allowance": 2.0}|
+base|results/base-due-c2|3|1506|{"due_date_allowance": 2.0}|
+base|results/base-due-c2|4|1508|{"due_date_allowance": 2.0}|
+base|results/base-due-c2|5|1510|{"due_date_allowance": 2.0}|
+base|results/base-due-c2|6|1512|{"due_date_allowance": 2.0}|
+base|results/base-due-c2|7|1514|{"due_date_allowance": 2.0}|
+base|results/base-due-c2|8|1516|{"due_date_allowance": 2.0}|
+base|results/base-due-c2|9|1518|{"due_date_allowance": 2.0}|
+base|results/base-due-c2|10|1520|{"due_date_allowance": 2.0}|
+base|results/base-due-c2|11|1522|{"due_date_allowance": 2.0}|
+base|results/base-due-c2|12|1524|{"due_date_allowance": 2.0}|
+base|results/base-due-c2|13|1526|{"due_date_allowance": 2.0}|
+base|results/base-due-c2|14|1528|{"due_date_allowance": 2.0}|
+base|results/base-due-c2|15|1530|{"due_date_allowance": 2.0}|
+base|results/base-due-c2|16|1532|{"due_date_allowance": 2.0}|
+base|results/base-due-c2|17|1534|{"due_date_allowance": 2.0}|
+base|results/base-due-c2|18|1536|{"due_date_allowance": 2.0}|
+base|results/base-due-c2|19|1538|{"due_date_allowance": 2.0}|

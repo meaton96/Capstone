@@ -12,8 +12,9 @@ window_time_in_system). Failure-free seeds (0, 2, 4 of the default generator) ar
 
 @par Usage
 @code{.sh}
-.venv/bin/python results/rq2-oracle-due/analyze.py
+.venv/bin/python results/rq2-oracle-due/analyze.py [results/rq2-oracle-due-agv4]   # default: this folder
 @endcode
+The twin cross-check runs only for this folder (the regime variants are not the twin screen's instances).
 """
 import json
 from pathlib import Path
@@ -27,9 +28,12 @@ TWIN = REPO / "results/rq2-twin-due/tasks"
 pd.set_option("display.width", 220)
 
 
+DIR = HERE
+
+
 def load():
     rows, stages = [], []
-    for p in sorted(HERE.glob("s*/result.json")):
+    for p in sorted(DIR.glob("s*/result.json")):
         r = json.loads(p.read_text())
         fixed = {k: -v for k, v in r["fixed_returns"].items()}
         rows.append({"seed": r["seed"], "oracle": -r["oracle_return"], "schedule": "|".join(r["schedule"]),
@@ -41,6 +45,11 @@ def load():
 
 
 def main():
+    import sys
+    global DIR
+    if len(sys.argv) > 1:
+        DIR = Path(sys.argv[1]).resolve()
+    print(f"{DIR.name}: {len(list(DIR.glob('s*/result.json')))} seeds finished")
     df, stages = load()
     if df.empty:
         print("no finished seeds yet")
@@ -81,7 +90,7 @@ def main():
               f"{((oracle_tis['window_time_in_system'] / tis_best - 1) * 100).mean():+.2f}% (mean)")
 
     rows = []
-    failure_free = {0, 2, 4}        # default generator seeds without machine failures (the twin has none)
+    failure_free = {0, 2, 4} if DIR == HERE else set()   # seeds without machine failures; twin = this regime only
     for seed in df.index:
         if seed not in failure_free:
             continue
@@ -101,7 +110,7 @@ def main():
     if rows:
         print("\n== Twin cross-check (failure-free seeds; gain vs the seed's best fixed pair) ==")
         print(pd.DataFrame(rows).round(2).to_string(index=False))
-    out.to_csv(HERE / "per_seed.csv", float_format="%.4f")
+    out.to_csv(DIR / "per_seed.csv", float_format="%.4f")
 
 
 if __name__ == "__main__":
