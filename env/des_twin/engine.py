@@ -66,10 +66,11 @@ class Decision:
 
 class Job:
     __slots__ = ("id", "arrival", "ops", "types", "cur_op", "completed_ops", "state", "since", "t_state",
-                 "location", "target", "assigned_agv", "pre_agv", "exit_time", "op_rows")
+                 "location", "target", "assigned_agv", "pre_agv", "exit_time", "op_rows", "due", "op_due")
 
-    def __init__(self, jid, arrival, ops, types):
+    def __init__(self, jid, arrival, ops, types, due=None, op_due=None):
         self.id, self.arrival, self.ops, self.types = jid, arrival, ops, types
+        self.due, self.op_due = due, op_due      # due date and per-operation due dates; None = no due dates
         self.cur_op = self.completed_ops = 0
         self.state, self.since = NEEDS_ROUTING, arrival
         self.t_state = [0.0] * 6
@@ -141,7 +142,8 @@ class Twin:
         self.jobs, self.order, self.pending = {}, [], []
         for jd in jobs_data["jobs"]:
             ops = [{int(m): f32(d) for m, d in op["eligible"]} for op in jd["ops"]]
-            job = Job(int(jd["id"]), float(jd["arrival"]), ops, [op["type"] for op in jd["ops"]])
+            job = Job(int(jd["id"]), float(jd["arrival"]), ops, [op["type"] for op in jd["ops"]],
+                      jd.get("due"), jd.get("op_due"))
             self.jobs[job.id] = job
             if job.arrival > 0.0:
                 self.pending.append(job)
@@ -721,7 +723,9 @@ class Twin:
                  "total_operations": j.total_ops, "completed_ops": j.completed_ops,
                  "time_needs_routing": j.t_state[NEEDS_ROUTING], "time_waiting_pickup": j.t_state[WAITING_PICKUP],
                  "time_in_transit": j.t_state[IN_TRANSIT], "time_queued": j.t_state[QUEUED],
-                 "time_processing": j.t_state[PROCESSING]} for j in self.jobs.values()]
+                 "time_processing": j.t_state[PROCESSING], "due_date": j.due,
+                 "tardiness": (max(0.0, j.exit_time - j.due) if j.exit_time is not None and j.due is not None
+                               else None)} for j in self.jobs.values()]
 
     def op_rows(self):
         return [r for j in self.jobs.values() for r in j.op_rows]

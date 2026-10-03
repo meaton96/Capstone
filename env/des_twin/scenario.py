@@ -96,3 +96,25 @@ def episode_settings(scenario):
                                   "these off (e.g. RandomizedParams(failure_probability=0))")
     return (float(s.get("warmupSeconds", 0.0) or 0.0), float(s.get("episodeDurationSeconds", 0.0) or 0.0),
             scenario.get("dispatchingRule", "SRT_SRWT"))
+
+
+def assign_due_dates(jobs_data, allowance):
+    """Total-work-content (TWK) due dates (Blackstone, Phillips & Hogg 1982), the method of Rajendran & Holthaus
+    1999, Holthaus & Rajendran 1997 and Sels et al. 2012: d_i = r_i + c * TWK_i, with TWK_i the job's work content
+    estimated as the thesis's remaining work at arrival (fastest eligible machine per operation). Operation due
+    dates for MOD split the allowance in proportion to work (Baker & Kanet 1983): d_io = r_i + c * (work of
+    operations 0..o). Returns a copy of the des_jobs/1 dict with "due" and "op_due" on every job.
+
+    @param allowance  the allowance factor c (> 0); larger is looser."""
+    if not allowance > 0:
+        raise ValueError(f"allowance factor must be > 0 (got {allowance})")
+    out = dict(jobs_data)
+    out["jobs"] = []
+    for jd in jobs_data["jobs"]:
+        cum, op_due = 0.0, []
+        for op in jd["ops"]:
+            cum += min(float(np.float32(d)) for _, d in op["eligible"])
+            op_due.append(float(jd["arrival"]) + allowance * cum)
+        out["jobs"].append(dict(jd, due=op_due[-1], op_due=op_due))
+    out["due_date_allowance"] = float(allowance)
+    return out

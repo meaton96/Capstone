@@ -254,6 +254,70 @@ def test_fifo_ranks_by_queue_entry_not_shop_arrival():
     assert rank_jobs("FIFO", [1, 3, 2], sim, None) == 3
 
 
+# ── Due dates (rq2-twin-due; due-date rules are twin-only so far) ─────────────────────────────────────
+
+def _due_sim(now, jobs):
+    """jobs: id -> (due, remaining work, op due of the current op)."""
+    return SimpleNamespace(now=now, jobs={j: SimpleNamespace(due=d, op_due=[od], cur_op=0) for j, (d, _, od) in jobs.items()},
+                           remaining_work=lambda j: f32(jobs[j][1]))
+
+
+def test_assign_due_dates_is_twk():
+    """@brief d = r + c * sum of each op's fastest time; op due dates split the allowance by work."""
+    from des_twin.scenario import assign_due_dates
+    jobs = {"schema": "des_jobs/1", "jobs": [
+        {"id": 0, "arrival": 10.0, "ops": [{"type": "Mill", "eligible": [[0, 30.0], [1, 20.0]]},
+                                           {"type": "Lathe", "eligible": [[2, 50.0]]}]}]}
+    out = assign_due_dates(jobs, 3.0)
+    assert out["jobs"][0]["due"] == pytest.approx(10.0 + 3.0 * 70.0)
+    assert out["jobs"][0]["op_due"] == pytest.approx([10.0 + 3.0 * 20.0, 10.0 + 3.0 * 70.0])
+    assert "due" not in jobs["jobs"][0]                    # the input is not modified
+    with pytest.raises(ValueError):
+        assign_due_dates(jobs, 0.0)
+
+
+def test_due_date_rules():
+    """@brief Each rule on a hand-made queue at t = 100: job -> (due, remaining work, current op's due)."""
+    sim = _due_sim(100.0, {1: (400.0, 50.0, 300.0),     # early, little work
+                           2: (300.0, 250.0, 120.0),    # due sooner, much work: least slack, will be late
+                           3: (90.0, 30.0, 90.0)})      # already late, little work
+    p = {1: f32(20), 2: f32(60), 3: f32(25)}.__getitem__
+    assert rank_jobs("EDD", [1, 2, 3], sim, p) == 3
+    assert rank_jobs("SLACK", [1, 2, 3], sim, p) == 2     # slack 250, -50, -40
+    assert rank_jobs("CR", [1, 2, 3], sim, p) == 3        # (d - t) / w: 6.0, 0.8, -0.33
+    assert rank_jobs("MDD", [1, 2, 3], sim, p) == 3       # max(d, t + w): 400, 350, 130
+    assert rank_jobs("MOD", [1, 2, 3], sim, p) == 3       # max(d_op, t + p): 300, 160, 125
+    assert rank_jobs("ATC", [1, 2, 3], sim, p) == 3       # both late jobs have slack <= 0: shortest p wins
+    with pytest.raises(ValueError):
+        rank_jobs("EDD", [1, 2], SimpleNamespace(now=0.0, jobs={1: SimpleNamespace(due=None), 2: SimpleNamespace(due=None)}), p)
+
+
+def test_mdd_is_srt_when_all_late_and_edd_when_all_early():
+    """@brief MDD = max(d, t + w): every job late -> order by w (SRT); every job comfortably early -> order by d."""
+    late = _due_sim(1000.0, {1: (100.0, 80.0, 0.0), 2: (50.0, 60.0, 0.0), 3: (200.0, 70.0, 0.0)})
+    assert rank_jobs("MDD", [1, 2, 3], late, None) == rank_jobs("SRT", [1, 2, 3], late, None) == 2
+    early = _due_sim(0.0, {1: (900.0, 80.0, 0.0), 2: (700.0, 60.0, 0.0), 3: (500.0, 70.0, 0.0)})
+    assert rank_jobs("MDD", [1, 2, 3], early, None) == rank_jobs("EDD", [1, 2, 3], early, None) == 3
+
+
+def test_due_dates_leave_flow_rules_unchanged_and_report_tardiness():
+    """@brief Adding due dates changes nothing for a flow rule; a due-date rule runs and job rows carry tardiness."""
+    from des_twin.scenario import assign_due_dates
+    jobs = _jobs(*[(5.0 * i, [[(0, 12.0 + i), (1, 14.0)], [(1, 9.0 + 2 * i)]]) for i in range(6)])
+    due = assign_due_dates(jobs, 2.0)
+    plain = run_twin(synthetic_floor(), jobs, TwinConfig("SRT_ECT", "kinematic")).job_rows()
+    dated = run_twin(synthetic_floor(), due, TwinConfig("SRT_ECT", "kinematic")).job_rows()
+    assert [r["exit_time"] for r in plain] == [r["exit_time"] for r in dated]
+    assert all(r["due_date"] is None and r["tardiness"] is None for r in plain)
+    for r in dated:
+        assert r["tardiness"] == pytest.approx(max(0.0, r["exit_time"] - r["due_date"]))
+    for rule in ("EDD", "SLACK", "CR", "MDD", "MOD", "ATC"):
+        tw = run_twin(synthetic_floor(), due, TwinConfig(f"{rule}_ECT", "kinematic"))
+        assert tw.summary()["jobs_completed"] == 6 and not tw.timed_out
+    with pytest.raises(ValueError):
+        run_twin(synthetic_floor(), jobs, TwinConfig("EDD_ECT", "kinematic"))
+
+
 # ── Engine ──────────────────────────────────────────────────────────────────────────────────────────
 
 def _jobs(*specs):
