@@ -142,7 +142,7 @@ class EpisodeTelemetryChannel(SideChannel):
 
     def pop_payload(self) -> Optional[dict]:
         """
-        Returns and removes the most recent episode payload, or None if empty.
+        Returns and removes the oldest queued episode payload (FIFO), or None if empty.
         Call after done=True is returned by env.step().
 
         Returns dict with structure:

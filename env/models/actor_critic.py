@@ -13,9 +13,8 @@ The fusion head projects the concatenated encoder features down to a
 shared 256-D representation consumed by both the actor and critic
 networks.
 
-@note Sensor corruption (dropout, noise for sim-to-real transfer) is
-handled by @ref SensorCorruptionWrapper at the observation level, not
-inside the network.
+@note The network applies no sensor corruption (dropout, noise); none is
+implemented today (env_wrappers/sensor_corruption.py is commented out).
 """
 
 import torch

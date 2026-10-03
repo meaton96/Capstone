@@ -35,6 +35,12 @@ from rewards import LoadedReward, MetricsSnapshot, RewardContext, RewardFunction
 TRAIN_SEED_LOW = 10_000
 MAX_SEED = 1 << 24
 
+
+def instance_seed_rng(train_seed: int, env_index: int, seed_stream: int = 0) -> np.random.Generator:
+    """@brief Same as env_wrappers.unity_env.instance_seed_rng (kept in sync by tests/test_twin_env.py)."""
+    key = [train_seed, env_index] if seed_stream == 0 else [train_seed, env_index, seed_stream]
+    return np.random.default_rng(key)
+
 ## @brief Unity's FactoryOrchestrator.MAX_EPISODE_SIM_SECONDS: an episode past it ends as timed out.
 MAX_EPISODE_SIM_SECONDS = 100_000.0
 
@@ -98,6 +104,21 @@ class TwinSchedulingEnv:
         if agvs is not None and int(agvs) != len(self.floor.agvs):
             raise ValueError(f"scenario agvCount {agvs} but the floor export has {len(self.floor.agvs)} AGVs "
                              "(parking bays depend on the fleet size: export the floor at that size)")
+        # Keys the twin does not model: refuse values it would otherwise silently ignore (audit P4.2).
+        for key, field in (("agvMoveSpeed", "speed"), ("agvHandshakeDuration", "handshake")):
+            value = scenario.get(key)
+            if value is not None and float(value) != float(data["agv"][field]):
+                raise ValueError(f"scenario {key} {value} but the floor export's AGVs use {field} "
+                                 f"{data['agv'][field]} (the twin takes AGV motion from the export)")
+        if float(scenario.get("travelPrice") or 0.0) > 0:
+            raise ValueError(f"scenario travelPrice {scenario['travelPrice']}: the twin scores TECT without a "
+                             "travel price")
+        if scenario.get("ioDocks") not in (None, "corner"):
+            raise ValueError(f"scenario ioDocks {scenario['ioDocks']!r}: the twin only models the default corner "
+                             "docks (the floor export does not record its I/O docks)")
+        for key, field in (("routingTrigger", "routing_trigger"), ("reservationProtocol", "reservation_protocol")):
+            if scenario.get(key) is not None and data.get(field) and scenario[key] != data[field]:
+                raise ValueError(f"scenario {key} {scenario[key]!r} but the floor export used {data[field]!r}")
 
     def _new_twin(self):
         if self.seed_rng is not None:
@@ -220,7 +241,7 @@ class VectorizedTwinEnv:
     def __init__(self, num_envs: int, floor: Union[str, Path], transport: str = "kinematic", reward_spec=None,
                  train_seed: Optional[int] = None, scenario_generator: Optional[Callable[[int], dict]] = None,
                  scenario: Optional[dict] = None, obs_caps: Optional[Tuple[int, int]] = None,
-                 instant_fleet: Optional[int] = None):
+                 instant_fleet: Optional[int] = None, seed_stream: int = 0):
         if scenario_generator is not None and train_seed is None:
             raise ValueError("scenario_generator needs --train-seed, to draw the seed each variant is built from")
         loaded = None
@@ -229,7 +250,7 @@ class VectorizedTwinEnv:
         shared = Floor.load(floor)   # route / hop caches are pure functions of the floor: share them
         self.envs = [TwinSchedulingEnv(
             shared, transport=transport, reward_fn=loaded.build() if loaded is not None else None, env_id=i,
-            seed_rng=None if train_seed is None else np.random.default_rng([train_seed, i]),
+            seed_rng=None if train_seed is None else instance_seed_rng(train_seed, i, seed_stream),
             scenario_generator=scenario_generator, scenario=scenario, obs_caps=obs_caps,
             instant_fleet=instant_fleet) for i in range(num_envs)]
         self.num_envs = num_envs

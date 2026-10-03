@@ -169,7 +169,7 @@ class CheckpointPolicy:
         self.net.eval()
         self.device = device
         self.deterministic = deterministic
-        self.name = f"ckpt:{path.parent.name}/{path.stem}"
+        self.name = f"ckpt:{path.parent.name}/{path.stem}" + ("" if deterministic else "~sampled")
         ## @brief Per-head action probabilities from the latest call (for decision logging).
         self.last_probs = None
 
@@ -196,8 +196,21 @@ def build_policies(pdr_spec: str, checkpoints, device: str, deterministic: bool)
     return policies
 
 
+## @brief Simulated seconds one player may run before its float32 Time.fixedTime (exact to 2^17 = 131,072 s)
+##        perturbs AGV timers (same value as switch_oracle.PLAYER_SIM_BUDGET_S).
+PLAYER_SIM_BUDGET_S = 120_000.0
+## @brief Upper bound on the unseeded default-config episode a fresh player plays first.
+STARTUP_EPISODE_S = 700.0
+
+
+def planned_player_seconds(scenarios: list, episodes_per_scenario: int, window_seconds: float) -> float:
+    """@brief Simulated time one player covers: its startup episode plus, per episode, warm-up + window."""
+    per = [float((sc.get("stochastic") or {}).get("warmupSeconds") or 0.0) + window_seconds for sc in scenarios]
+    return STARTUP_EPISODE_S + episodes_per_scenario * sum(per)
+
+
 def run_evaluation(env, policies: list, schedule: list, log=print, decision_writer=None,
-                   scenario_generator=None) -> list:
+                   scenario_generator=None, scenario_dir=None) -> list:
     """@brief Play one episode per (policy index, seed) in @p schedule, in order.
 
     @param env              A @ref UnitySchedulingEnv (or anything with queue_seeds /
@@ -210,6 +223,9 @@ def run_evaluation(env, policies: list, schedule: list, log=print, decision_writ
     @param scenario_generator  Optional seed -> scenario dict (see scenarios/); when set, each
                                seed in @p schedule also queues that seed's scripted-scenario
                                variant, in lockstep with the seed queue.
+    @param scenario_dir     If set, each seed's scenario is written once to scenario_dir/s<seed>.json
+                            and queued as that path, not inline: Unity's gRPC receive limit is
+                            4 MiB per message, and a few linked-floor scenarios exceed it.
     @return One row dict per completed episode, in schedule order.
     """
     total = len(schedule)
@@ -225,8 +241,20 @@ def run_evaluation(env, policies: list, schedule: list, log=print, decision_writ
         seeds = [seed for _, seed in schedule[queued:end]]
         env.queue_seeds(seeds, clear=queued == 0)
         if scenario_generator is not None:
-            env.queue_scenarios([scenario_generator(seed) for seed in seeds], clear=queued == 0)
+            env.queue_scenarios([scenario_item(seed) for seed in seeds], clear=queued == 0)
         queued = end
+
+    def scenario_item(seed: int):
+        if scenario_dir is None:
+            return scenario_generator(seed)
+        path = Path(scenario_dir) / f"s{seed}.json"
+        if path not in written:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps(scenario_generator(seed)))
+            written.add(path)
+        return str(path)
+
+    written = set()
 
     top_up(0)
     obs = env.reset()
@@ -291,6 +319,10 @@ def run_evaluation(env, policies: list, schedule: list, log=print, decision_writ
             "agv_idle_fraction": episode.get("agv_idle_fraction"),
             "release_counts": episode.get("release_counts"),
             "travel_price": episode.get("travel_price"),
+            "input_buffer_capacity": episode.get("input_buffer_capacity"),
+            "output_buffer_capacity": episode.get("output_buffer_capacity"),
+            "output_blocked_machine_seconds": episode.get("output_blocked_machine_seconds"),
+            "buffer_wait_job_seconds": episode.get("buffer_wait_job_seconds"),
             "config_hash": episode.get("config_hash"),
             "instance_hash": episode.get("instance_hash"),
         })
@@ -300,18 +332,31 @@ def run_evaluation(env, policies: list, schedule: list, log=print, decision_writ
     return rows
 
 
-def summarize(rows: list) -> list:
+def _gap_pct(values, best):
+    """@brief Mean relative gap in percent; seeds whose best is 0 are skipped (None if none are left)."""
+    gaps = [(v - b) / abs(b) for v, b in zip(values, best) if b != 0]
+    return float(100 * np.mean(gaps)) if gaps else None
+
+
+def summarize(rows: list, scored: bool = True) -> list:
     """@brief Per-policy means, plus paired gaps against the best PDR rule on each seed.
 
     @details The gap for a policy is the mean over seeds of (policy − best PDR on that seed) /
-    best PDR on that seed, in percent: negative beats every rule on that instance, 0 matches
-    the per-seed oracle choice among the rules.
+    |best PDR on that seed|, in percent: negative beats every rule on that instance, 0 matches
+    the per-seed oracle choice among the rules. The best PDR comes from episodes that neither
+    deadlocked nor timed out (both stop the clock early).
+
+    The score is `return` (with a reward spec: time in system of every job, finished or not),
+    so its gap is on -return: > 0 is worse. Total flow and makespan are censored by jobs still
+    in the system (and, with random warm-up, count jobs that finished during the warm-up); their
+    gaps are kept for reference only. Rows sort by the return gap when @p scored, else by name.
     """
     best = {}
     for row in rows:
-        if row["kind"] == "pdr":
-            makespan, flow = best.get(row["seed"], (math.inf, math.inf))
-            best[row["seed"]] = (min(makespan, row["makespan"]), min(flow, row["total_flow_time"]))
+        if row["kind"] == "pdr" and not (row["deadlock"] or row["timed_out"]):
+            ret, makespan, flow = best.get(row["seed"], (-math.inf, math.inf, math.inf))
+            best[row["seed"]] = (max(ret, row["return"]), min(makespan, row["makespan"]),
+                                 min(flow, row["total_flow_time"]))
 
     by_policy = {}
     for row in rows:
@@ -324,37 +369,51 @@ def summarize(rows: list) -> list:
             "policy": name,
             "kind": policy_rows[0]["kind"],
             "episodes": len(policy_rows),
+            "return_mean": float(np.mean([r["return"] for r in policy_rows])) if scored else None,
+            "jobs_exited_mean": float(np.mean([r["jobs_exited"] for r in policy_rows])),
             "makespan_mean": float(makespans.mean()),
             "makespan_std": float(makespans.std()),
-            "total_flow_mean": float(np.mean([r["total_flow_time"] for r in policy_rows])),
-            "mean_flow_time_mean": float(np.mean([r["mean_flow_time"] for r in policy_rows])),
+            "total_flow_censored_mean": float(np.mean([r["total_flow_time"] for r in policy_rows])),
+            "mean_flow_time_censored_mean": float(np.mean([r["mean_flow_time"] for r in policy_rows])),
             "deadlocks": int(sum(bool(r["deadlock"]) for r in policy_rows)),
             "timeouts": int(sum(bool(r["timed_out"]) for r in policy_rows)),
         }
-        paired = [r for r in policy_rows if r["seed"] in best]
+        # Deadlocked / timed-out episodes stop the clock early, so they are counted above, not gapped.
+        paired = [r for r in policy_rows if r["seed"] in best and not (r["deadlock"] or r["timed_out"])]
         if paired:
-            entry["makespan_gap_pct"] = float(100 * np.mean(
-                [(r["makespan"] - best[r["seed"]][0]) / best[r["seed"]][0] for r in paired]))
-            entry["flow_gap_pct"] = float(100 * np.mean(
-                [(r["total_flow_time"] - best[r["seed"]][1]) / best[r["seed"]][1] for r in paired]))
+            ref = [best[r["seed"]] for r in paired]
+            entry["return_gap_pct"] = _gap_pct([-r["return"] for r in paired], [-b[0] for b in ref]) \
+                if scored else None
+            entry["makespan_gap_pct"] = _gap_pct([r["makespan"] for r in paired], [b[1] for b in ref])
+            entry["flow_censored_gap_pct"] = _gap_pct([r["total_flow_time"] for r in paired], [b[2] for b in ref])
         summary.append(entry)
-    return sorted(summary, key=lambda e: e["makespan_mean"])
+    if scored:
+        return sorted(summary, key=lambda e: (e.get("return_gap_pct") is None, e.get("return_gap_pct") or 0.0))
+    return sorted(summary, key=lambda e: e["policy"])
 
 
 def print_summary(summary: list):
     def gap(value):
         return f"{value:+7.2f}" if value is not None else " " * 7
 
-    header = (f"{'policy':30s} {'n':>4s} {'makespan':>17s} {'gap%':>7s} "
-              f"{'total flow':>11s} {'gap%':>7s} {'deadlk':>6s}")
+    scored = any(e.get("return_mean") is not None for e in summary)
+    header = (f"{'policy':30s} {'n':>4s} {'return':>10s} {'gap%':>7s} {'jobs out':>8s} "
+              f"{'total flow*':>11s} {'deadlk':>6s} {'timeout':>7s}")
     print()
     print(header)
     print("-" * len(header))
     for e in summary:
-        print(f"{e['policy']:30s} {e['episodes']:4d} {e['makespan_mean']:9.1f} ±{e['makespan_std']:6.1f} "
-              f"{gap(e.get('makespan_gap_pct'))} {e['total_flow_mean']:11.1f} {gap(e.get('flow_gap_pct'))} "
-              f"{e['deadlocks']:6d}")
-    print("gap% = mean per-seed gap to the best PDR rule on that seed (lower is better).")
+        ret = f"{e['return_mean']:10.2f}" if e.get("return_mean") is not None else " " * 10
+        print(f"{e['policy']:30s} {e['episodes']:4d} {ret} {gap(e.get('return_gap_pct'))} "
+              f"{e['jobs_exited_mean']:8.1f} {e['total_flow_censored_mean']:11.1f} "
+              f"{e['deadlocks']:6d} {e['timeouts']:7d}")
+    if scored:
+        print("gap% = mean per-seed gap in return to the best PDR rule on that seed (> 0 worse); "
+              "deadlocked / timed-out episodes are left out of it.")
+    else:
+        print("No --reward-spec: return is Unity's pass-through (0), so nothing is ranked.")
+    print("* total flow of exited jobs only (censored, read it with jobs out); with --random-warmup both also "
+          "count jobs that finished during the warm-up.")
 
 
 def floor_fields(scenario: dict) -> dict:
@@ -369,6 +428,8 @@ def floor_fields(scenario: dict) -> dict:
         "release_rule": tiling.get("releaseRule", "roundRobin"),
         "release_weights": ";".join(f"{w:g}" for w in tiling.get("releaseWeights", [])),
         "scenario_travel_price": scenario.get("travelPrice", 0.0),
+        "scenario_input_buffer_capacity": scenario.get("inputBufferCapacity", 0),
+        "scenario_output_buffer_capacity": scenario.get("outputBufferCapacity", 0),
     }
 
 
@@ -433,6 +494,11 @@ def main(argv=None):
     parser.add_argument("--layout", type=str, default=None, metavar="X",
                         help="With --scenario-generator: run every instance on floor layout X (A-O); the "
                              "jobs are unchanged")
+    parser.add_argument("--input-buffer", type=int, default=None, metavar="N",
+                        help="With --scenario-generator: machine input buffer size (0 = unbounded); same jobs")
+    parser.add_argument("--output-buffer", type=int, default=None, metavar="N",
+                        help="With --scenario-generator: machine output buffer size (0 = unbounded; a full "
+                             "buffer blocks the machine); same jobs")
     parser.add_argument("--decision-log", action="store_true",
                         help="Also write decisions.csv: every decision's chosen rule, plus the "
                              "action probabilities for checkpoints")
@@ -440,9 +506,21 @@ def main(argv=None):
                         help="Have Unity also write decision_log.csv (candidate counts, degenerate "
                              "flags) into --out; needs a player built with -decisionlogdir support")
     parser.add_argument("--stochastic-policy", action="store_true",
-                        help="Sample checkpoint actions instead of taking the argmax")
-    parser.add_argument("--reward-spec", type=str, default=None,
-                        help="Also report episode return under this reward spec")
+                        help="Sample checkpoint actions instead of taking the argmax (policy names get a "
+                             "'~sampled' suffix in the CSVs)")
+    parser.add_argument("--policy-seed", type=int, default=0,
+                        help="torch seed for --stochastic-policy sampling, so sampled runs are reproducible")
+    parser.add_argument("--warmup-dispatching-rule", type=str, default=None,
+                        help="As train.py: DispatchingRule driving the --random-warmup window")
+    parser.add_argument("--agv-move-speed", type=float, default=None,
+                        help="As train.py: with --scenario-generator, overrides AGV travel speed")
+    parser.add_argument("--agv-handshake-duration", type=float, default=None,
+                        help="As train.py: with --scenario-generator, overrides the AGV handshake time")
+    parser.add_argument("--reward-spec", type=str, default=str(REPO_ROOT / "env" / "config" / "rewards" / "flow_time.json"),
+                        help="Reward spec whose episode return is the score (default flow_time: time in system of "
+                             "every job); 'none' passes Unity's reward through (always 0) and ranks nothing")
+    parser.add_argument("--allow-clock-drift", action="store_true",
+                        help="Run even when one player would simulate past PLAYER_SIM_BUDGET_S (float32 clock)")
     parser.add_argument("--device", type=str, default="cpu")
     parser.add_argument("--out", type=str,
                         default=str(REPO_ROOT / "results" / f"eval-{datetime.now():%Y%m%d-%H%M%S}"))
@@ -462,6 +540,8 @@ def main(argv=None):
         parser.error("--agv-failures needs --scenario-generator")
     if (args.agvs is not None or args.layout is not None) and not args.scenario_generator:
         parser.error("--agvs / --layout need --scenario-generator")
+    if (args.input_buffer is not None or args.output_buffer is not None) and not args.scenario_generator:
+        parser.error("--input-buffer / --output-buffer need --scenario-generator")
     if (args.params is not None or args.random_warmup) and not args.scenario_generator:
         parser.error("--params / --random-warmup need --scenario-generator")
     if args.params is not None and args.scenario_generator != "randomized":
@@ -471,24 +551,24 @@ def main(argv=None):
     if args.scenario_generator:
         from scenarios import REGISTRY
         duration = args.episode_duration_seconds if args.episode_duration_seconds > 0 else None
+        extra = {}
         if args.params is not None:
-            from scenarios.randomized import params_with_overrides, randomized_generator
             try:
-                overrides = json.loads(args.params)
-                if not isinstance(overrides, dict):
+                extra["params_overrides"] = json.loads(args.params)
+                if not isinstance(extra["params_overrides"], dict):
                     raise ValueError("expected a JSON object")
-                if args.machine_flexibility:
-                    overrides = {"machine_flexibility": args.machine_flexibility,
-                                 "secondary_time_multiplier": args.secondary_time_multiplier, **overrides}
-                params = params_with_overrides(overrides)
+                print(f"Generator overrides: {extra['params_overrides']}")
             except ValueError as exc:
                 parser.error(f"--params: {exc}")
-            print(f"Generator overrides: {overrides}")
-            scenario_generator = randomized_generator(duration, random_warmup=args.random_warmup, params=params)
-        else:
+        # The same generator arguments as train.py, so a checkpoint is evaluated on its training distribution.
+        try:
             scenario_generator = REGISTRY[args.scenario_generator](
-                duration, random_warmup=args.random_warmup, machine_flexibility=args.machine_flexibility,
-                secondary_time_multiplier=args.secondary_time_multiplier)
+                duration, random_warmup=args.random_warmup, warmup_dispatching_rule=args.warmup_dispatching_rule,
+                agv_move_speed=args.agv_move_speed, agv_handshake_duration=args.agv_handshake_duration,
+                machine_flexibility=args.machine_flexibility,
+                secondary_time_multiplier=args.secondary_time_multiplier, **extra)
+        except ValueError as exc:
+            parser.error(f"--params: {exc}")
         if args.agv_failures is not None:
             from scenarios import agv_failure_block, with_agv_failures
             try:
@@ -507,11 +587,21 @@ def main(argv=None):
                 parser.error(f"--agvs / --layout: {exc}")
             print(f"Floor override: {fields}")
             scenario_generator = with_floor(scenario_generator, args.agvs, args.layout)
+        if args.input_buffer is not None or args.output_buffer is not None:
+            from scenarios import buffer_override_fields, with_buffers
+            try:
+                fields = buffer_override_fields(args.input_buffer, args.output_buffer)
+            except ValueError as exc:
+                parser.error(f"--input-buffer / --output-buffer: {exc}")
+            print(f"Machine buffers: {fields}")
+            scenario_generator = with_buffers(scenario_generator, args.input_buffer, args.output_buffer)
 
     seeds = parse_seeds(args.seeds)
     if max(seeds) >= TRAIN_SEED_LOW:
         print(f"Warning: seeds >= {TRAIN_SEED_LOW} can coincide with training instances.")
 
+    if args.stochastic_policy:
+        torch.manual_seed(args.policy_seed)
     policies = build_policies(args.pdr, args.checkpoint, args.device, not args.stochastic_policy)
     if not policies:
         parser.error("Nothing to evaluate: pass --checkpoint and/or --pdr")
@@ -523,7 +613,7 @@ def main(argv=None):
     print(f"Evaluating {len(policies)} policies × {len(seeds)} seeds = {len(schedule)} episodes -> {out}")
 
     reward_fn = None
-    if args.reward_spec:
+    if args.reward_spec and args.reward_spec.lower() != "none":
         from rewards import load_reward
         reward_fn = load_reward(args.reward_spec).build()
 
@@ -537,6 +627,15 @@ def main(argv=None):
         planned = []
     obs_caps = row_caps_for(planned, args.obs_max_machines, args.obs_max_jobs)
     print(f"Observation row caps: {obs_caps[0]} machines, {obs_caps[1]} jobs")
+    if scenario_generator is not None and args.episode_duration_seconds > 0:
+        sim_s = planned_player_seconds(planned, len(policies), args.episode_duration_seconds)
+        if sim_s > PLAYER_SIM_BUDGET_S:
+            message = (f"this run simulates about {sim_s:,.0f} s in one player, past the {PLAYER_SIM_BUDGET_S:,.0f} s "
+                       "budget: Unity's float32 clock perturbs AGV timers past 2^17 s (C# audit K1/H1). Split the "
+                       "seeds over several calls")
+            if not args.allow_clock_drift:
+                parser.error(message + ", or pass --allow-clock-drift.")
+            print(f"[WARNING] {message}.")
 
     env = UnitySchedulingEnv(
         file_name=args.unity_path,
@@ -561,7 +660,8 @@ def main(argv=None):
     try:
         # Flush each progress line so it still shows up when stdout is piped or redirected.
         rows = run_evaluation(env, policies, schedule, log=lambda line: print(line, flush=True),
-                              decision_writer=decision_writer, scenario_generator=scenario_generator)
+                              decision_writer=decision_writer, scenario_generator=scenario_generator,
+                              scenario_dir=out / "scenarios")
     finally:
         env.close()
         # Record each episode's floor so per-condition runs (--agvs / --layout / --params) stay self-describing.
@@ -573,7 +673,7 @@ def main(argv=None):
         if decision_file is not None:
             decision_file.close()
 
-    summary = summarize(rows)
+    summary = summarize(rows, scored=reward_fn is not None)
     write_csv(out / "summary.csv", summary)
     print_summary(summary)
 

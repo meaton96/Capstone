@@ -289,6 +289,37 @@ def test_floor_override_validation():
         validate_scenario(with_floor(REGISTRY["randomized"](5400.0), 16)(0))
 
 
+# ── Finite machine buffers (scenarios.buffers; evaluate.py / switch_oracle.py --input-buffer / --output-buffer) ──
+
+def test_buffer_override_changes_only_buffer_sizes():
+    """@brief Seed N is the same job set at every buffer size: only the two capacity keys are added."""
+    from scenarios import with_buffers
+    base = REGISTRY["randomized"](5400.0)
+    for inp, out in ((3, None), (None, 1), (2, 2), (0, 0)):
+        wrapped = with_buffers(base, inp, out)
+        for seed in range(3):
+            a, b = base(seed), wrapped(seed)
+            changed = {k for k in set(a) | set(b) if a.get(k) != b.get(k)}
+            assert changed <= {"inputBufferCapacity", "outputBufferCapacity"}
+            if inp is not None:
+                assert b["inputBufferCapacity"] == inp
+            if out is not None:
+                assert b["outputBufferCapacity"] == out
+            assert base(seed) == a
+
+
+def test_buffer_override_validation():
+    from channels.config_schema import ConfigValidationError, validate_scenario
+    from scenarios import buffer_override_fields, with_buffers
+    assert buffer_override_fields() == {}
+    for inp, out in ((-1, None), (None, -2), (True, None), (1.5, None)):
+        with pytest.raises(ValueError):
+            buffer_override_fields(inp, out)
+    validate_scenario(with_buffers(REGISTRY["randomized"](5400.0), 3, 1)(0))
+    with pytest.raises(ConfigValidationError):
+        validate_scenario({**REGISTRY["randomized"](5400.0)(0), "outputBufferCapacity": -1})
+
+
 # ── Tiled / linked floors and TECT's travel price (scenarios/randomized.py; evaluate.py --params) ─────────
 
 LINKED = {"tiles": 7, "job_scope": "open", "agv_assignment": "pooled", "agv_count": 49}

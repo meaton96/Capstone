@@ -17,6 +17,7 @@ SCENARIO_KEYS = {
     "name", "seed", "agvCount", "agvMoveSpeed", "agvHandshakeDuration", "dispatchingRule",
     "jobs", "machineTypeLayout", "parkingMethod", "ioDocks", "reservationProtocol", "routingTrigger",
     "stochastic", "layout", "tiling", "machineFlexibilityProbability", "secondaryTimeMultiplier", "travelPrice",
+    "inputBufferCapacity", "outputBufferCapacity",
 }
 
 ## @brief EpisodeConfigChannel.ConfigKeys (top level of a generated-config message).
@@ -25,7 +26,7 @@ CONFIG_KEYS = {
     "minOpsPerJob", "maxOpsPerJob", "agvCount", "agvMoveSpeed", "agvHandshakeDuration",
     "machineFlexibilityProbability", "secondaryTimeMultiplier", "parkingMethod", "ioDocks",
     "reservationProtocol", "routingTrigger", "tiling", "preDispatchingMethod", "stochastic", "procTimeParams",
-    "travelPrice",
+    "travelPrice", "inputBufferCapacity", "outputBufferCapacity",
 }
 
 ## @brief ScenarioLoader.StochasticKeys.
@@ -114,14 +115,16 @@ def validate_config(config: Dict[str, Any], name: str = "config") -> None:
     v.integer(config, "machinesPerType", minimum=1, required=True)
     v.number(config, "minProcTime", exclusive_min=0.0)
     v.number(config, "maxProcTime", exclusive_min=0.0)
-    if _is_number(config.get("minProcTime")) and _is_number(config.get("maxProcTime")) \
-            and config["maxProcTime"] < config["minProcTime"]:
-        v.fail("maxProcTime must be >= minProcTime")
+    # A missing bound takes C#'s default (ConfigLoader: 15-90 s, 3-7 ops), so check against that too:
+    # e.g. maxProcTime 10 alone fails ConfigValidator and stops the player.
+    lo, hi = config.get("minProcTime", 15.0), config.get("maxProcTime", 90.0)
+    if _is_number(lo) and _is_number(hi) and hi < lo:
+        v.fail(f"maxProcTime must be >= minProcTime ({hi} < {lo}; a missing one defaults to 15 / 90 s)")
     v.integer(config, "minOpsPerJob", minimum=1)
     v.integer(config, "maxOpsPerJob", minimum=1)
-    if _is_int(config.get("minOpsPerJob")) and _is_int(config.get("maxOpsPerJob")) \
-            and config["maxOpsPerJob"] < config["minOpsPerJob"]:
-        v.fail("maxOpsPerJob must be >= minOpsPerJob")
+    lo, hi = config.get("minOpsPerJob", 3), config.get("maxOpsPerJob", 7)
+    if _is_int(lo) and _is_int(hi) and hi < lo:
+        v.fail(f"maxOpsPerJob must be >= minOpsPerJob ({hi} < {lo}; a missing one defaults to 3 / 7)")
 
     ptp = config.get("procTimeParams")
     if ptp is not None:
@@ -150,6 +153,8 @@ def _check_common(v: "_Checker", cfg: Dict[str, Any], machine_count: int) -> Non
     v.number(cfg, "machineFlexibilityProbability", minimum=0.0, maximum=1.0)
     v.number(cfg, "secondaryTimeMultiplier", exclusive_min=0.0)
     v.number(cfg, "travelPrice", minimum=0.0)
+    v.integer(cfg, "inputBufferCapacity", minimum=0)
+    v.integer(cfg, "outputBufferCapacity", minimum=0)
     v.choice(cfg, "reservationProtocol", {"holdprevious", "releaseprevious"})
     v.choice(cfg, "routingTrigger", {"ontransport", "onready"})
     v.choice(cfg, "parkingMethod", {"single", "multiple", "lane"})

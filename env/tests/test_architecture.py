@@ -1094,8 +1094,9 @@ class TestUnitySchedulingEnv:
 
     def test_seed_rng_keeps_unity_seed_queue_filled(self):
         """@brief With a seed RNG, reset() replaces Unity's seed queue with a buffer of
-        training seeds and every finished episode tops it up by one; summaries report the
-        seed each episode actually used."""
+        training seeds and every finished episode tops it up by one. The unseeded episode
+        already running at reset (the player's default config) is played out inside reset()
+        and never returned (audit P1.2), so the first observation is the first seeded episode's."""
         from rewards import MetricsSnapshot
         from env_wrappers.unity_env import SEED_BUFFER, TRAIN_SEED_LOW
 
@@ -1119,13 +1120,12 @@ class TestUnitySchedulingEnv:
         assert first.kwargs["clear"] is True
         assert all(s >= TRAIN_SEED_LOW for s in first.args[0])
 
-        _, _, done, info = env.step((0, 0))
-        assert done
-        assert info["episode"]["seed"] == -1
+        # reset() already stepped through the unseeded episode's end and topped the queue up by one.
         top_up = env.seed_channel.queue_seeds.call_args_list[1]
         assert len(top_up.args[0]) == 1
         assert top_up.kwargs["clear"] is False
         assert env.current_metrics.episode_seed == 12345
+        assert env.episodes_completed == 0
 
     def test_scenario_generator_requires_seed_rng(self):
         """@brief scenario_generator needs a seed to build each variant from; fail fast,
@@ -1167,9 +1167,9 @@ class TestUnitySchedulingEnv:
         assert scenario_call.kwargs["clear"] is True
         # Each queued scenario was built from the matching queued seed, in the same order.
         assert [s["seed"] for s in scenario_call.args[0]] == list(seed_call.args[0])
-        assert generator.call_args_list == [((s,),) for s in seed_call.args[0]]
+        assert generator.call_args_list[:SEED_BUFFER] == [((s,),) for s in seed_call.args[0]]
 
-        env.step((0, 0))   # ends the unseeded episode; tops both queues up by exactly one
+        # reset() played out the unseeded episode, which topped both queues up by exactly one.
         seed_top_up = env.seed_channel.queue_seeds.call_args_list[1]
         scenario_top_up = env.config_channel.queue_scenarios.call_args_list[1]
         assert len(seed_top_up.args[0]) == 1 and len(scenario_top_up.args[0]) == 1

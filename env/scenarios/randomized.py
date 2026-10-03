@@ -19,7 +19,7 @@ Weld machines, so 12 of 15 machines are background and a policy trained on them 
 - **Load:** the arrival stream is a sequence of segments (20-60 min each), each with its own kind and
   target machine utilization, so queues build up and drain within an episode:
     - `balanced`: Poisson arrivals, uniform type mix
-    - `skewed`: one machine type gets 2.5x the op share (a bottleneck group with routing choice inside it)
+    - `skewed`: one machine type gets skew_weight 2.5 in the draw, about 2.0x the op share after the no-repeat rule (a bottleneck group with routing choice inside it)
     - `bimodal`: 70% short ops (0.4x mean) and 30% long ops (2.4x mean) — SPT-vs-starvation pressure
     - `burst`: the segment's whole job count arrives in the first 60 s, then nothing
     - `lull`: low utilization (0.2-0.4), recovery

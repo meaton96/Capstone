@@ -68,7 +68,7 @@ def obs_to_torch(obs: dict, device: str) -> dict:
     }
 
 
-def build_env(args, ppo_cfg, run_dir: Path, reward, scenario_generator=None):
+def build_env(args, ppo_cfg, run_dir: Path, reward, scenario_generator=None, seed_stream: int = 0):
     """@brief Factory function to create the appropriate vectorized env.
 
     @param args     Parsed CLI arguments (checked for --unity flag).
@@ -77,6 +77,7 @@ def build_env(args, ppo_cfg, run_dir: Path, reward, scenario_generator=None):
     @param reward   Loaded reward spec for the Unity backend.
     @param scenario_generator  Optional seed -> scenario callable (see scenarios/); each env
                                then gets a fresh scripted-scenario variant every episode.
+    @param seed_stream  Instance-seed stream: 0 fresh, the resumed global step on a resume.
     @return Tuple of (vec_env, obs_shapes_dict).
     """
     obs_shapes = dict(OBS_SHAPES)
@@ -108,6 +109,7 @@ def build_env(args, ppo_cfg, run_dir: Path, reward, scenario_generator=None):
             scenario=scenario,
             obs_caps=obs_caps,
             instant_fleet=args.twin_instant_fleet,
+            seed_stream=seed_stream,
         )
         shutil.copy2(args.twin, run_dir / "des_floor.json")
     elif args.unity:
@@ -137,6 +139,7 @@ def build_env(args, ppo_cfg, run_dir: Path, reward, scenario_generator=None):
             parallel=not args.sequential_envs,
             scenario_generator=scenario_generator,
             obs_caps=obs_caps,
+            seed_stream=seed_stream,
         )
     else:
         from env_wrappers.placeholder_env import VectorizedPlaceholderEnv
@@ -287,8 +290,11 @@ def save_checkpoint(path: Path, net, optimizer, global_step: int, ppo_cfg: PPOCo
     """@brief Save network, optimizer, and config so a run can be resumed or evaluated.
 
     @details Keep every value a tensor, dict, list, tuple, str, number, bool or None: load_checkpoint uses
-    weights_only=True and refuses anything else (e.g. a Path or a dataclass instance).
+    weights_only=True and refuses anything else (e.g. a Path or a dataclass instance). Written to a temp file and
+    renamed, so a kill mid-write never leaves a corrupt checkpoint for a resume to pick up.
     """
+    path = Path(path)
+    tmp = path.with_name(path.name + ".tmp")
     torch.save({
         "model_state_dict": net.state_dict(),
         "optimizer_state_dict": optimizer.state_dict(),
@@ -303,7 +309,8 @@ def save_checkpoint(path: Path, net, optimizer, global_step: int, ppo_cfg: PPOCo
             "actor_critic": ActorCriticConfig().__dict__,
             "ppo": ppo_cfg.__dict__,
         },
-    }, path)
+    }, tmp)
+    os.replace(tmp, path)
 
 
 ## @brief Live run status for the watchdog and the crash handler in __main__ (label, step, total, phase).
@@ -319,10 +326,12 @@ def write_progress(run_dir: Path, progress: dict) -> None:
 
 def progress_line(p: dict) -> str:
     """@brief One-line summary of a progress.json dict."""
-    flow = f", recent mean flow {p['recent_mean_flow']:.0f} s" if p.get("recent_mean_flow") is not None else ""
+    ret = f", recent return {p['recent_return']:.2f}" if p.get("recent_return") is not None else ""
+    flow = f", recent mean flow {p['recent_mean_flow']:.0f} s (exited jobs, censored)" \
+        if p.get("recent_mean_flow") is not None else ""
     return (f"step {p['global_step']:,}/{p['total_timesteps']:,} "
             f"({100 * p['global_step'] / max(p['total_timesteps'], 1):.1f}%), {p['sps']:.1f} SPS, "
-            f"ETA {p['eta_hours']:.1f} h, {p['episodes']} episodes{flow}")
+            f"ETA {p['eta_hours']:.1f} h, {p['episodes']} episodes{ret}{flow}")
 
 
 def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
@@ -353,15 +362,21 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
         reward.archive(run_dir)
         print(f"\nReward: {reward.name} ({reward.spec['entry']})")
 
+    # A resumed checkpoint decides the grid normalization (BatchNorm before 2026-10-01, GroupNorm after).
+    ckpt = load_checkpoint(args.resume_from, device) if args.resume_from else None
+    # A resume keys its instance seeds, action sampling and minibatch order on its resumed step; with the
+    # bare train seed every Slurm leg would replay the first leg's instances in order (audit P1.1).
+    seed_stream = int(ckpt["global_step"]) if ckpt else 0
+
     if args.train_seed >= 0:
         # Same seed -> same initial weights and minibatch order, so runs that differ only in
         # their reward start from an identical policy (GPU kernels can still add small noise).
-        torch.manual_seed(args.train_seed)
-        np.random.seed(args.train_seed)
+        rng_seed = args.train_seed if seed_stream == 0 else \
+            int(np.random.SeedSequence([args.train_seed, seed_stream]).generate_state(1)[0])
+        torch.manual_seed(rng_seed)
+        np.random.seed(rng_seed)
 
     # ---- Initialize network ----
-    # A resumed checkpoint decides the grid normalization (BatchNorm before 2026-10-01, GroupNorm after).
-    ckpt = load_checkpoint(args.resume_from, device) if args.resume_from else None
     encoder_cfg = encoder_config_for(ckpt["model_state_dict"]) if ckpt else EncoderConfig()
     if encoder_cfg.grid_norm == "batch":
         print("\n[NOTE] the checkpoint's grid CNN uses BatchNorm (before 2026-10-01). It now stays on its running "
@@ -409,11 +424,19 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
             raise ValueError("--scenario-generator needs --train-seed >= 0, to draw variant seeds")
         from scenarios import REGISTRY
         duration = args.episode_duration_seconds if args.episode_duration_seconds > 0 else None
+        extra = {}
+        if args.params is not None:
+            if args.scenario_generator != "randomized":
+                raise ValueError("--params applies to the randomized generator only")
+            extra["params_overrides"] = json.loads(args.params)
+            if not isinstance(extra["params_overrides"], dict):
+                raise ValueError("--params: expected a JSON object")
         scenario_generator = REGISTRY[args.scenario_generator](
             duration, random_warmup=args.random_warmup,
             warmup_dispatching_rule=args.warmup_dispatching_rule,
             agv_move_speed=args.agv_move_speed, agv_handshake_duration=args.agv_handshake_duration,
-            machine_flexibility=args.machine_flexibility, secondary_time_multiplier=args.secondary_time_multiplier)
+            machine_flexibility=args.machine_flexibility, secondary_time_multiplier=args.secondary_time_multiplier,
+            **extra)
         print(f"\nScenario generator: {args.scenario_generator}"
               + (f" (episode_duration_seconds={args.episode_duration_seconds})"
                  if args.episode_duration_seconds else "")
@@ -423,10 +446,11 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
               + (f" (agv_handshake_duration={args.agv_handshake_duration})"
                  if args.agv_handshake_duration else "")
               + (f" (machine_flexibility={args.machine_flexibility}, secondary_time_multiplier="
-                 f"{args.secondary_time_multiplier})" if args.machine_flexibility else ""))
+                 f"{args.secondary_time_multiplier})" if args.machine_flexibility else "")
+              + (f" (params {args.params})" if args.params else ""))
 
     # ---- Initialize environments ----
-    vec_env, obs_shapes = build_env(args, ppo_cfg, run_dir, reward, scenario_generator)
+    vec_env, obs_shapes = build_env(args, ppo_cfg, run_dir, reward, scenario_generator, seed_stream)
     row_caps = (obs_shapes["machine_table"][0], obs_shapes["job_table"][0])
     if (args.unity or args.twin) and args.scenario:
         if args.unity:
@@ -662,6 +686,8 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
                 "run_id": args.run_id, "label": label, "update": update, "num_updates": num_updates,
                 "global_step": global_step, "total_timesteps": ppo_cfg.total_timesteps,
                 "sps": round(sps, 2), "eta_hours": round(eta_h, 2), "episodes": episodes_done,
+                "recent_return": round(float(np.mean([e["return"] for e in recent_episodes])), 3)
+                if recent_episodes else None,
                 "recent_mean_flow": round(float(np.mean(flows)), 1) if flows else None,
                 "updated_at": datetime.now().isoformat(timespec="seconds"),
             }
@@ -753,6 +779,10 @@ if __name__ == "__main__":
                         choices=sorted(_SCENARIO_REGISTRY),
                         help="Generate a fresh seeded scripted-scenario variant every episode "
                              "(see env/scenarios); needs --train-seed >= 0")
+    parser.add_argument("--params", type=str, default=None, metavar="JSON",
+                        help="With --scenario-generator randomized: RandomizedParams overrides (env/scenarios/"
+                             "randomized.py), as in evaluate.py; e.g. '{\"failure_probability\": 0}' for --twin, "
+                             "which refuses machine-failure scenarios")
     parser.add_argument("--episode-duration-seconds", type=float, default=0.0,
                         help="With --scenario-generator, cap each episode at this many sim-seconds "
                              "(steady-state mode: in-flight jobs censored, episode truncated not "
@@ -766,7 +796,8 @@ if __name__ == "__main__":
                              "phase-aligned window instead of always phases 1-3")
     parser.add_argument("--warmup-dispatching-rule", type=str, default=None,
                         help="DispatchingRule name (e.g. SPT_SMPT) driving the --random-warmup "
-                             "window; defaults to the scenario's own default rule (SRT_SRWT) if unset")
+                             "window; unset: compound uses the scenario's own rule (SRT_SRWT), randomized "
+                             "rotates SPT_SMPT / SPT_SRWT / SRT_SRWT / SRT_SMPT by seed % 4")
     parser.add_argument("--agv-move-speed", type=float, default=None,
                         help="With --scenario-generator, overrides AGV travel speed (units/sim-"
                              "second; prefab default 3.5). Faster AGVs shrink physical transit "

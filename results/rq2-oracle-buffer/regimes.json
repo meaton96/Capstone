@@ -1,0 +1,12 @@
+{
+  "_comment": "rq2-oracle-buffer: switching-oracle headroom with finite machine buffers (FJSSPConfig.inputBufferCapacity / outputBufferCapacity, 0 = unbounded). Every regime: randomized generator, random warm-up, 5400 s agent window, layout D, 7 AGVs unless overridden; the jobs are identical across regimes (scenarios/buffers.py only sets the two keys). Input buffer = jobs queued at or routed to a machine (a full machine is not a routing candidate). Output buffer = finished jobs waiting for pickup (full -> the machine holds its next finished job and cannot start another op). Reference: on the randomized family at 7 AGVs about 17% of deliveries already arrive at a machine with 3+ jobs waiting (AGVF_check machine_handoffs.csv, belt capacity 3).",
+  "buf-inf":       {"what": "unbounded buffers on the new build (reference; must match rq2-oracle-screen base-w on non-FIFO pairs)", "args": []},
+  "in4":           {"what": "input buffer 4", "args": ["--input-buffer", "4"]},
+  "in3":           {"what": "input buffer 3 (the drawn belt length)", "args": ["--input-buffer", "3"]},
+  "in2":           {"what": "input buffer 2", "args": ["--input-buffer", "2"]},
+  "out2":          {"what": "output buffer 2 (blocking after service)", "args": ["--output-buffer", "2"]},
+  "out1":          {"what": "output buffer 1", "args": ["--output-buffer", "1"]},
+  "in3-out1":      {"what": "input 3, output 1", "args": ["--input-buffer", "3", "--output-buffer", "1"]},
+  "in2-out1":      {"what": "input 2, output 1 (tightest; deadlock risk)", "args": ["--input-buffer", "2", "--output-buffer", "1"]},
+  "in3-out1-agv5": {"what": "input 3, output 1, 5 AGVs (slower pickups make output blocking bite)", "args": ["--input-buffer", "3", "--output-buffer", "1", "--agvs", "5"]}
+}

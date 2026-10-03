@@ -112,6 +112,12 @@ class TestSchema:
                                                        machineFlexibilityProbability=1.5))
         assert len(errs) == 2, errs
 
+    def test_a_missing_bound_is_checked_against_the_csharp_default(self):
+        alone = {k: v for k, v in CONFIG.items() if k not in ("minProcTime", "maxOpsPerJob")}
+        errs = errors_of(validate_config, dict(alone, maxProcTime=10.0, minOpsPerJob=9))
+        assert len(errs) == 2 and "15" in errs[0] and "7" in errs[1], errs
+        validate_config(dict(alone, maxProcTime=20.0, minOpsPerJob=5))
+
     def test_agv_failure_parameters(self):
         good = {"agvFailuresEnabled": True, "agvWeibullK": 1.5, "agvWeibullLambda": 8400.0,
                 "agvRepairLogMu": 4.6, "agvRepairLogSigma": 0.5}

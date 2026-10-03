@@ -3,7 +3,8 @@
 @brief rq2-oracle-screen: headroom per regime from the switching-oracle runs.
 
 @details For each regime, over its finished seeds (time in system = -return of the flow_time reward):
-  - best_pair: the fixed pair with the lowest mean time in system (what a single rule would be chosen as);
+  - best_pair: the fixed pair with the lowest mean per-seed gap to the per-seed best (the quantity static_% reports;
+    what a single rule would be chosen as);
   - static_%: best_pair's mean gap to the per-seed best fixed pair (headroom from picking a pair per instance);
   - switch_%: the oracle's mean gain over the per-seed best fixed pair (headroom from switching within an episode);
   - total_%: the oracle's mean gain over best_pair (what an RL policy could at most hope to beat the best rule by,
@@ -41,7 +42,7 @@ def summarize(df: pd.DataFrame) -> pd.DataFrame:
         fixed.columns = [c[4:] for c in fixed.columns]
         per_seed_best = fixed.min(axis=1)
         per_seed_worst = fixed.max(axis=1)
-        best_pair = fixed.mean().idxmin()
+        best_pair = fixed.div(per_seed_best, axis=0).mean().idxmin()   # same quantity static_% reports
         static = (fixed[best_pair] / per_seed_best - 1) * 100
         switch = (1 - g["oracle"] / per_seed_best) * 100
         total = (1 - g["oracle"] / fixed[best_pair]) * 100

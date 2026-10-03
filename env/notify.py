@@ -31,8 +31,12 @@ WEBHOOK_FILE = Path.home() / ".capstone_webhook"
 def webhook_url() -> Optional[str]:
     """@brief The configured webhook URL, or None."""
     url = os.environ.get("NOTIFY_WEBHOOK_URL", "").strip()
-    if not url and WEBHOOK_FILE.is_file():
-        lines = WEBHOOK_FILE.read_text().strip().splitlines()
+    if not url:
+        try:
+            lines = WEBHOOK_FILE.read_text().strip().splitlines() if WEBHOOK_FILE.is_file() else []
+        except (OSError, UnicodeDecodeError) as e:   # unreadable file: notifications off, never a crash
+            print(f"[notify] cannot read {WEBHOOK_FILE}: {type(e).__name__}")
+            lines = []
         url = lines[0].strip() if lines else ""
     return url or None
 
@@ -47,18 +51,19 @@ def run_label(run_id: str) -> str:
 
 def notify(text: str, url: Optional[str] = None, timeout: float = 10.0) -> bool:
     """@brief Post @p text to the webhook. Returns True on success; never raises."""
-    url = url or webhook_url()
-    if not url:
-        return False
-    body = {"content": text[:1900]} if "discord.com/api/webhooks" in url or "discordapp.com/api/webhooks" in url \
-        else {"text": text[:3900]}
-    req = urllib.request.Request(url, data=json.dumps(body).encode(),
-                                 headers={"Content-Type": "application/json", "User-Agent": "capstone-train"})
     try:
+        url = url or webhook_url()
+        if not url:
+            return False
+        body = {"content": text[:1900]} if "discord.com/api/webhooks" in url or "discordapp.com/api/webhooks" in url \
+            else {"text": text[:3900]}
+        req = urllib.request.Request(url, data=json.dumps(body).encode(),
+                                     headers={"Content-Type": "application/json", "User-Agent": "capstone-train"})
         with urllib.request.urlopen(req, timeout=timeout):
             return True
-    except Exception as e:   # network down, blocked egress, bad URL: training must not care
-        print(f"[notify] post failed: {e}")
+    except Exception as e:   # network down, blocked egress, malformed URL: training (and the watchdog) must not care
+        # Only the type: the message of a URL error can contain the secret webhook URL, and this lands in Slurm logs.
+        print(f"[notify] post failed: {type(e).__name__}")
         return False
 
 
@@ -95,5 +100,7 @@ class Watchdog:
                 msg = (f":warning: **STALLED** {self.label}: no progress for {idle / 60:.0f} min "
                        f"(limit {self.stall_seconds / 60:.0f}). Exiting with code 3 so the job frees its node. {detail}")
                 print(f"[watchdog] {msg}", flush=True)
-                notify(msg)
-                os._exit(3)   # the main thread is stuck, so a normal exception would never be seen
+                try:
+                    notify(msg)
+                finally:
+                    os._exit(3)   # the main thread is stuck, so a normal exception would never be seen

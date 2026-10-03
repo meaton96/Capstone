@@ -21,10 +21,11 @@ for d in results/"$RUN"_s*; do
   python3 - "$f" "$age" "$flag" <<'PY'
 import json, sys
 p = json.load(open(sys.argv[1])); age, flag = sys.argv[2], sys.argv[3]
-flow = f", recent mean flow {p['recent_mean_flow']:.0f} s" if p.get("recent_mean_flow") is not None else ""
+ret = f", recent return {p['recent_return']:.2f}" if p.get("recent_return") is not None else ""
+flow = f", recent mean flow {p['recent_mean_flow']:.0f} s (censored)" if p.get("recent_mean_flow") is not None else ""
 print(f"=== {p['run_id']}: step {p['global_step']:,}/{p['total_timesteps']:,} "
       f"({100 * p['global_step'] / max(p['total_timesteps'], 1):.1f}%), {p['sps']:.1f} SPS, ETA {p['eta_hours']:.1f} h, "
-      f"{p['episodes']} episodes{flow}; updated {age} min ago{flag}")
+      f"{p['episodes']} episodes{ret}{flow}; updated {age} min ago{flag}")
 PY
 done
 REMOTE_EOF

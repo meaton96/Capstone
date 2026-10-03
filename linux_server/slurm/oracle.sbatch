@@ -3,9 +3,9 @@
 # Submit from the player folder to use (rq2-oracle-screen: ~/capstone/linux_server_oracle, the 09-30 player;
 # rq2-oracle-screen-qfifo: ~/capstone/linux_server_qfifo, the 10-02 strict-FIFO player), synced with
 # RIT_DEST=capstone/<folder> slurm/sync_to_rit.sh . TASKS = a file with one "regime seed" per line; task i runs
-# line i+1. EXP = results folder under ~/capstone/results (default rq2-oracle-screen); it needs regimes.json.
+# line i+1. EXP = results folder under ~/capstone/results (required); it needs regimes.json.
 # Example: sbatch --account=drl-scheduling --partition=sporc --time=0-05:00:00 --array=0-143%60 \
-#            --export=ALL,TASKS=$HOME/capstone/results/rq2-oracle-screen/tasks.txt slurm/oracle.sbatch
+#            --export=ALL,EXP=rq2-oracle-screen,TASKS=$HOME/capstone/results/rq2-oracle-screen/tasks.txt slurm/oracle.sbatch
 #SBATCH --job-name=oracle
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -17,7 +17,7 @@
 set -euo pipefail
 cd "${SLURM_SUBMIT_DIR:-$HOME/capstone/linux_server_oracle}"
 REPO="$(dirname "$PWD")"
-OUT="$REPO/results/${EXP:-rq2-oracle-screen}"
+OUT="$REPO/results/${EXP:?set EXP to the results folder (e.g. rq2-oracle-screen-qfifo); there is no default}"
 
 spack env activate default-ml-x86_64-25111401 2>/dev/null || true
 unset PYTHONPATH
@@ -36,5 +36,5 @@ echo "[oracle] $REGIME s$SEED on $(hostname), job ${SLURM_JOB_ID:-?}, task $TASK
 python "$REPO/env/switch_oracle.py" --unity-path "$PWD/capstone.x86_64" --seed "$SEED" \
     --scenario-generator randomized --random-warmup --episode-duration-seconds 5400 \
     --segment-seconds "${SEGMENT:-1800}" --reward-spec "$REPO/env/config/rewards/flow_time.json" \
-    --base-worker-id $(( 100 + (TASK % 400) * 2 )) --out "$DIR" "${EXTRA[@]}" > "$DIR/oracle.log" 2>&1
+    --base-worker-id $(( 2000 + (TASK % 400) * 2 )) --out "$DIR" "${EXTRA[@]}" > "$DIR/oracle.log" 2>&1
 tail -n 1 "$DIR/oracle.log"

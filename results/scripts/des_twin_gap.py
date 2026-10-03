@@ -23,6 +23,8 @@ import glob
 import os
 import sys
 from concurrent.futures import ProcessPoolExecutor
+from datetime import datetime
+from functools import partial
 
 import pandas as pd
 
@@ -32,11 +34,22 @@ sys.path.insert(0, os.path.join(ROOT, "env"))
 TRANSPORTS = ("instant", "geometric", "kinematic")
 
 
-def one_run(run_dir):
+## @brief Strict queue FIFO since this player build (linux_server/, 2026-10-02 16:13); env/des_twin/rules.py changed with
+##        it. A Unity FIFO run older than this used FIFO by time since shop arrival, so it can't be paired with the twin.
+STRICT_FIFO_SINCE = datetime(2026, 10, 2, 16, 13).timestamp()
+
+
+def old_fifo_runs(runs):
+    """Unity runs with a FIFO rule whose results predate the strict-FIFO build."""
+    return [r for r in runs if "FIFO" in os.path.basename(r).upper()
+            and os.path.getmtime(os.path.join(r, "results.csv")) < STRICT_FIFO_SINCE]
+
+
+def one_run(run_dir, twin_out="twin"):
     from des_twin.legs import compare_legs
     from des_twin.run import run_dir as twin_run
     try:
-        rows = twin_run(run_dir, TRANSPORTS)
+        rows = twin_run(run_dir, TRANSPORTS, out=twin_out)
     except Exception as ex:                      # a bad run must not stop the sweep analysis
         return {"run": run_dir, "error": f"{type(ex).__name__}: {ex}"}
     by = {r["transport"]: r for r in rows}
@@ -92,12 +105,22 @@ def main():
     ap.add_argument("--out", default=os.path.join(ROOT, "results", "des_twin"))
     ap.add_argument("--workers", type=int, default=16)
     ap.add_argument("--tag", default="G1")
+    ap.add_argument("--twin-out", default=None,
+                    help="per-run folder for the twin's outputs (default twin_<tag>; never overwrites another tag's)")
+    ap.add_argument("--allow-old-fifo", action="store_true",
+                    help="pair FIFO Unity runs from before the strict-FIFO build with today's (strict-FIFO) twin")
     a = ap.parse_args()
     runs = sorted(os.path.dirname(p) for p in glob.glob(os.path.join(a.sweep_dir, "*", "*", "*", "results.csv"))
                   if os.path.exists(os.path.join(os.path.dirname(p), "des_floor.json")))
     print(f"{len(runs)} Unity runs")
+    stale = old_fifo_runs(runs)
+    if stale and not a.allow_old_fifo:
+        sys.exit(f"{len(stale)} FIFO runs (e.g. {stale[0]}) predate the strict-FIFO build of 2026-10-02 16:13, but the "
+                 "twin now uses strict queue FIFO. Rerun them on the new build (twin-gap-qfifo), or pass "
+                 "--allow-old-fifo to pair them anyway.")
+    twin_out = a.twin_out or f"twin_{a.tag}"
     with ProcessPoolExecutor(a.workers) as pool:
-        rows = list(pool.map(one_run, runs, chunksize=2))
+        rows = list(pool.map(partial(one_run, twin_out=twin_out), runs, chunksize=2))
     os.makedirs(a.out, exist_ok=True)
     df = pd.DataFrame(rows)
     if "error" in df:

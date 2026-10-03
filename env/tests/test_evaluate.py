@@ -247,18 +247,60 @@ def test_decision_row_skips_masked_head_in_chosen_prob():
 
 
 def test_summarize_gaps_against_best_pdr_per_seed():
-    def row(policy, kind, seed, makespan, flow):
-        return {"policy": policy, "kind": kind, "seed": seed, "makespan": makespan,
-                "total_flow_time": flow, "mean_flow_time": flow / 15, "deadlock": False, "timed_out": False}
+    def row(policy, kind, seed, ret, flow, makespan=5400.0, deadlock=False):
+        return {"policy": policy, "kind": kind, "seed": seed, "makespan": makespan, "return": ret,
+                "jobs_exited": 50, "total_flow_time": flow, "mean_flow_time": flow / 50,
+                "deadlock": deadlock, "timed_out": False}
 
     rows = [
-        row("A", "pdr", 1, 100, 1000), row("B", "pdr", 1, 110, 900), row("C", "checkpoint", 1, 95, 950),
-        row("A", "pdr", 2, 200, 2000), row("B", "pdr", 2, 180, 2100), row("C", "checkpoint", 2, 190, 1900),
+        row("A", "pdr", 1, -100, 1000), row("B", "pdr", 1, -110, 900), row("C", "checkpoint", 1, -95, 950),
+        row("A", "pdr", 2, -200, 2000), row("B", "pdr", 2, -180, 2100), row("C", "checkpoint", 2, -190, 1900),
+        # A deadlock stops the clock early: its tiny return must not become seed 2's best, nor be gapped.
+        row("D", "pdr", 2, -10, 50, makespan=900, deadlock=True),
     ]
-    summary = {e["policy"]: e for e in summarize(rows)}
+    ordered = summarize(rows)
+    summary = {e["policy"]: e for e in ordered}
 
-    assert [e["policy"] for e in summarize(rows)] == ["C", "B", "A"]   # sorted by mean makespan
-    assert summary["C"]["makespan_gap_pct"] == pytest.approx(100 * (-5 / 100 + 10 / 180) / 2)
-    # Best PDR flow is 900 on seed 1 and 2000 on seed 2 (C's own 1900 is not a PDR result).
-    assert summary["C"]["flow_gap_pct"] == pytest.approx(100 * (50 / 900 - 100 / 2000) / 2)
-    assert summary["A"]["makespan_gap_pct"] == pytest.approx(100 * (0 + 20 / 180) / 2)
+    assert [e["policy"] for e in ordered] == ["C", "B", "A", "D"]   # by return gap; D has no clean episode
+    # Best PDR return is -100 on seed 1 and -180 on seed 2 (C's own -95 is not a PDR result).
+    assert summary["C"]["return_gap_pct"] == pytest.approx(100 * (-5 / 100 + 10 / 180) / 2)
+    assert summary["A"]["return_gap_pct"] == pytest.approx(100 * (0 + 20 / 180) / 2)
+    assert summary["B"]["return_gap_pct"] == pytest.approx(100 * (10 / 100 + 0) / 2)
+    assert "return_gap_pct" not in summary["D"] and summary["D"]["deadlocks"] == 1
+    # Censored flow is kept for reference, against the best clean PDR flow (900, 2000).
+    assert summary["C"]["flow_censored_gap_pct"] == pytest.approx(100 * (50 / 900 - 100 / 2000) / 2)
+    assert summary["C"]["return_mean"] == pytest.approx(-142.5)
+
+
+def test_summarize_survives_a_zero_best_and_unscored_runs():
+    rows = [{"policy": p, "kind": "pdr", "seed": 0, "makespan": 0.0, "return": 0.0, "jobs_exited": 0,
+             "total_flow_time": 0.0, "mean_flow_time": 0.0, "deadlock": False, "timed_out": False}
+            for p in ("B", "A")]
+    summary = summarize(rows, scored=False)
+    assert [e["policy"] for e in summary] == ["A", "B"]
+    assert summary[0]["return_mean"] is None and summary[0]["flow_censored_gap_pct"] is None
+
+
+def test_run_evaluation_queues_scenario_paths_with_a_scenario_dir(tmp_path):
+    """@brief Linked-floor scenarios run to MiBs each; four inline ones overflow Unity's 4 MiB gRPC limit,
+    so with a scenario_dir each seed's scenario is written once and only its path is queued."""
+    import json
+    big = lambda seed: {"seed": seed, "pad": "x" * (2 << 20)}  # noqa: E731  ~2 MiB, like a 7-tile floor
+    schedule = [(p, seed) for seed in (3, 4) for p in range(3)]   # every seed queued three times
+    env = FakeEnv()
+    run_evaluation(env, [ConstantPolicy((0, 0), "A")] * 3, schedule, log=lambda *_: None,
+                   scenario_generator=big, scenario_dir=tmp_path / "scenarios")
+    queued = sum((items for items, _ in env.queued_scenarios), [])
+    assert queued == [str(tmp_path / "scenarios" / f"s{seed}.json") for _, seed in schedule]
+    assert max(len(json.dumps(items)) for items, _ in env.queued_scenarios) < 4096
+    assert sorted(p.name for p in (tmp_path / "scenarios").iterdir()) == ["s3.json", "s4.json"]
+    assert json.loads((tmp_path / "scenarios" / "s4.json").read_text()) == big(4)
+
+
+def test_planned_player_seconds_counts_warmups():
+    from evaluate import PLAYER_SIM_BUDGET_S, planned_player_seconds
+    plain = [{"jobs": []}] * 20
+    assert planned_player_seconds(plain, 1, 5400.0) == pytest.approx(700 + 20 * 5400)
+    assert planned_player_seconds(plain, 1, 5400.0) <= PLAYER_SIM_BUDGET_S   # 20 seeds, one policy: fine
+    warm = [{"stochastic": {"warmupSeconds": 4000.0}}] * 20
+    assert planned_player_seconds(warm, 1, 5400.0) > PLAYER_SIM_BUDGET_S

@@ -283,6 +283,27 @@ def test_seed_split_matches_the_unity_wrapper():
     from channels.channels import EpisodeSeedChannel
     assert twin_env.TRAIN_SEED_LOW == unity_env.TRAIN_SEED_LOW
     assert twin_env.MAX_SEED == EpisodeSeedChannel.MAX_SEED
+    for stream in (0, 571_656):
+        a = twin_env.instance_seed_rng(7, 2, stream).integers(0, 1 << 24, 5)
+        b = unity_env.instance_seed_rng(7, 2, stream).integers(0, 1 << 24, 5)
+        assert (a == b).all()
+
+
+def test_seed_stream_zero_keeps_the_original_key_and_a_resume_draws_new_seeds():
+    import numpy as np
+    from env_wrappers.twin_env import instance_seed_rng
+    fresh = np.random.default_rng([7, 2]).integers(0, 1 << 24, 20)
+    assert (instance_seed_rng(7, 2, 0).integers(0, 1 << 24, 20) == fresh).all()
+    resumed = instance_seed_rng(7, 2, 571_656).integers(0, 1 << 24, 20)
+    assert len(set(fresh) & set(resumed)) == 0
+
+
+def test_vectorized_twin_passes_the_seed_stream(floor_path):
+    from env_wrappers.twin_env import VectorizedTwinEnv
+    a = VectorizedTwinEnv(2, floor_path, train_seed=3, scenario=_scenario(), obs_caps=(15, 64))
+    b = VectorizedTwinEnv(2, floor_path, train_seed=3, scenario=_scenario(), obs_caps=(15, 64), seed_stream=99)
+    draw = lambda v: [int(e.seed_rng.integers(0, 1 << 24)) for e in v.envs]
+    assert draw(a) != draw(b)
 
 
 def test_env_episode_reward_is_total_flow_time(floor_path):
@@ -358,3 +379,40 @@ def test_vectorized_env_with_the_randomized_generator(floor_path):
     for ep in finished:
         assert ep["truncated"] and ep["seed"] >= 10_000
         assert ep["makespan"] > 600.0
+
+
+def test_train_build_env_passes_the_resumed_step_as_seed_stream(floor_path, tmp_path):
+    import argparse
+    import train
+    scenario = tmp_path / "scenario.json"
+    scenario.write_text(json.dumps(_scenario()))
+    args = argparse.Namespace(twin=floor_path, scenario=str(scenario), obs_max_machines=0, obs_max_jobs=0,
+                              twin_transport="kinematic", train_seed=3, twin_instant_fleet=None)
+    cfg = argparse.Namespace(num_envs=2)
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+    draw = lambda v: [int(e.seed_rng.integers(0, 1 << 24)) for e in v.envs]
+    fresh, _ = train.build_env(args, cfg, run_dir, None)
+    resumed, _ = train.build_env(args, cfg, run_dir, None, seed_stream=1234)
+    assert draw(fresh) != draw(resumed)
+    from env_wrappers.twin_env import instance_seed_rng
+    resumed2, _ = train.build_env(args, cfg, run_dir, None, seed_stream=1234)
+    assert draw(resumed2) == [int(instance_seed_rng(3, i, 1234).integers(0, 1 << 24)) for i in range(2)]
+
+
+@pytest.mark.parametrize("extra", [{"agvMoveSpeed": 5.0}, {"agvHandshakeDuration": 0.5}, {"travelPrice": 1.0},
+                                   {"ioDocks": "siding"}, {"routingTrigger": "onCompletion"},
+                                   {"reservationProtocol": "holdPrevious"}])
+def test_env_refuses_scenario_keys_the_twin_does_not_model(floor_path, extra):
+    from env_wrappers.twin_env import TwinSchedulingEnv
+    env = TwinSchedulingEnv(floor_path, scenario=dict(_scenario(), agvCount=3, **extra), obs_caps=(15, 64))
+    with pytest.raises(ValueError, match=next(iter(extra))):
+        env.reset()
+
+
+def test_env_accepts_scenario_keys_that_match_the_export(floor_path):
+    from env_wrappers.twin_env import TwinSchedulingEnv
+    same = {"agvMoveSpeed": 3.5, "agvHandshakeDuration": 1.5, "travelPrice": 0.0, "ioDocks": "corner",
+            "routingTrigger": "onTransport", "reservationProtocol": "releasePrevious"}
+    env = TwinSchedulingEnv(floor_path, scenario=dict(_scenario(), agvCount=3, **same), obs_caps=(15, 64))
+    env.reset()

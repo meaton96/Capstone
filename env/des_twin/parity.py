@@ -144,6 +144,7 @@ def main(argv=None):
         col_stats = {}
         rows = []
         desync = None
+        end_differs = False
         i = 0
         while True:
             obs_t = builder.build(twin, dec)
@@ -176,6 +177,7 @@ def main(argv=None):
                 done_t = True
             if done_u or done_t:
                 if done_u != done_t:
+                    end_differs = True
                     print(f"episode end differs: Unity done={done_u}, twin done={done_t} after {i} decisions")
                 break
     finally:
@@ -206,7 +208,11 @@ def main(argv=None):
             print(f"  {s}[{c}]: {bad}/{n} decisions, max {mx:.3g}")
     else:
         print(f"every other column identical within {args.tol} at every compared decision")
-    ok = same_jobs and not strict_bad and masks_bad == 0 and (args.agvs > 1 or desync is None)
+    # A multi-AGV run may drift in time (desync), and then may end at a different decision too.
+    end_ok = not end_differs or (args.agvs > 1 and desync is not None)
+    if not end_ok:
+        print("EPISODE END MISMATCH: Unity and the twin ended at different decisions")
+    ok = same_jobs and not strict_bad and masks_bad == 0 and (args.agvs > 1 or desync is None) and end_ok
     print("PARITY", "PASSED" if ok else "FAILED")
     return 0 if ok else 1
 

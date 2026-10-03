@@ -282,7 +282,9 @@ class UnitySchedulingEnv:
 
         @details Only needed at startup (or to apply a new config immediately); episodes
         roll over on their own inside @ref step. The episode already running when Python
-        connects keeps going through reset and has no queued seed.
+        connects keeps going through reset and has no queued seed. With seed_rng set (training)
+        that unseeded episode, on the player's built-in default config, is played out with
+        action (0, 0) and discarded, so the first observation returned is a seeded episode's.
         """
         if self._pending_config is not None:
             self.config_channel.send_config(self._pending_config)
@@ -292,7 +294,23 @@ class UnitySchedulingEnv:
 
         self.env.reset()
         decision, _ = self.env.get_steps(self.behavior_name)
-        return self._begin_episode(self._wait_for_decision(decision))
+        obs = self._begin_episode(self._wait_for_decision(decision))
+        if self.seed_rng is not None:
+            obs = self._skip_unseeded_episodes(obs)
+        return obs
+
+    def _skip_unseeded_episodes(self, obs: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:
+        """@brief Play out episodes Unity started without a queued seed (index -1: the
+        AutoStartOnPlay default config) and drop them, so training never sees them (audit P1.2).
+        step()'s done path refills the seed queue, so the buffer stays at SEED_BUFFER."""
+        skipped = 0
+        while self.current_metrics is not None and self.current_metrics.episode_seed_index < 0:
+            obs, _, done, _ = self.step((0, 0))
+            skipped += int(done)
+            if skipped > 3:
+                raise RuntimeError("Unity keeps starting unseeded episodes; is the seed channel connected?")
+        self.episodes_completed = 0
+        return obs
 
     def step(self, action) -> Tuple[Dict[str, np.ndarray], float, bool, dict]:
         """@brief Apply one scheduling action (job head, machine head) and advance to the next decision.
@@ -370,11 +388,26 @@ class UnitySchedulingEnv:
         return self.reward_fn(self._prev_metrics, curr, ctx)
 
     def _wait_for_decision(self, decision):
-        """@brief Advance Unity (no actions pending) until the agent requests a decision."""
+        """@brief Advance Unity (no actions pending) until the agent requests a decision.
+
+        @details An episode can end before its first decision (e.g. the deadlock watchdog firing during a
+        long warm-up). Its terminal step is dropped here, so its telemetry payload is discarded too (otherwise
+        every later episode would be summarized with the previous one's), and in training the seed (and
+        scenario) it consumed is replaced so the queue stays SEED_BUFFER ahead.
+        """
         while len(decision) == 0:
             self.env.step()
-            decision, _ = self.env.get_steps(self.behavior_name)
+            decision, terminal = self.env.get_steps(self.behavior_name)
+            if len(terminal) > 0:
+                self._drop_decisionless_episode()
         return decision
+
+    def _drop_decisionless_episode(self):
+        self.telemetry.pop_payload()
+        print(f"[UnitySchedulingEnv {self.env_id}] an episode ended before its first decision; dropped it"
+              + (" and queued a replacement seed" if self.seed_rng is not None else ""), flush=True)
+        if self.seed_rng is not None:
+            self._refill_seeds_and_scenarios(1, clear=False)
 
     def _begin_episode(self, decision) -> Dict[str, np.ndarray]:
         self._prev_metrics = self._extract_metrics(decision)
@@ -417,6 +450,12 @@ class UnitySchedulingEnv:
             "release_counts": (";".join(str(c) for c in result["releaseCounts"])
                                if result.get("releaseCounts") is not None else None),
             "travel_price": result.get("travelPrice"),
+            # Finite machine buffers (None from a player built before 2026-10-02): sizes (0 = unbounded) and, since
+            # takeover, machine-seconds blocked by a full output buffer / job-seconds waiting on full input buffers.
+            "input_buffer_capacity": result.get("inputBufferCapacity"),
+            "output_buffer_capacity": result.get("outputBufferCapacity"),
+            "output_blocked_machine_seconds": result.get("outputBlockedMachineSeconds"),
+            "buffer_wait_job_seconds": result.get("bufferWaitJobSeconds"),
         }
         if final is not None:
             exited = final.jobs_exited
@@ -448,6 +487,13 @@ class UnitySchedulingEnv:
         self.env.close()
 
 
+def instance_seed_rng(train_seed: int, env_index: int, seed_stream: int = 0) -> np.random.Generator:
+    """@brief Per-env RNG that draws instance seeds. Stream 0 keeps the original [train_seed, i]
+    key (fresh runs unchanged); a resume passes its resumed step so it doesn't replay stream 0."""
+    key = [train_seed, env_index] if seed_stream == 0 else [train_seed, env_index, seed_stream]
+    return np.random.default_rng(key)
+
+
 class VectorizedUnityEnv:
     """@brief Manages multiple Unity instances for parallel data collection.
 
@@ -465,7 +511,7 @@ class VectorizedUnityEnv:
                  log_dir: Optional[str] = None, train_seed: Optional[int] = None,
                  parallel: bool = True,
                  scenario_generator: Optional[Callable[[int], dict]] = None,
-                 obs_caps: Optional[Tuple[int, int]] = None):
+                 obs_caps: Optional[Tuple[int, int]] = None, seed_stream: int = 0):
         """
         @param obs_caps     Observation row caps for every player (see UnitySchedulingEnv).
         @param reward_spec  Reward spec path or dict, or a @ref rewards.LoadedReward. Each env
@@ -479,6 +525,8 @@ class VectorizedUnityEnv:
                                    episode, built by calling this with that episode's drawn seed
                                    (each env draws from its own per-env RNG, so envs see different
                                    variants). Requires train_seed.
+        @param seed_stream  0 for a fresh run; a resume passes its resumed global step, so it draws
+                            new instance seeds instead of replaying the first launch's sequence.
         """
         if scenario_generator is not None and train_seed is None:
             raise ValueError("scenario_generator needs --train-seed, to draw the seed each variant is built from")
@@ -500,7 +548,7 @@ class VectorizedUnityEnv:
                     decision_drain=decision_drain,
                     log_file=None if log_dir is None else Path(log_dir) / f"Player-{i}.log",
                     env_id=i,
-                    seed_rng=None if train_seed is None else np.random.default_rng([train_seed, i]),
+                    seed_rng=None if train_seed is None else instance_seed_rng(train_seed, i, seed_stream),
                     scenario_generator=scenario_generator,
                     obs_caps=obs_caps,
                 ))

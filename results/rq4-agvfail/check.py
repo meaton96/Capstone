@@ -58,21 +58,28 @@ def dose(episodes: pd.DataFrame) -> None:
         if cur.empty:
             continue
         paired = cur.join(reg, rsuffix="_reg", how="inner")
+        # Returns are negative (time in system of every job): d_return > 0 means breakdowns made it worse.
+        paired["d_return"] = paired["return"] / paired["return_reg"] - 1
         paired["d_total_flow"] = paired.total_flow_time / paired.total_flow_time_reg - 1
         paired["d_mean_flow"] = paired.mean_flow_time / paired.mean_flow_time_reg - 1
         paired["d_jobs"] = paired.jobs_exited - paired.jobs_exited_reg
+        # Seeds on which each pair has the best return among the pairs run at this rate.
+        wins = cur["return"].groupby(level="seed").idxmax().map(lambda key: key[0]).value_counts()
         for policy, group in paired.groupby(level="policy"):
             rows.append({"variant": variant, "policy": policy, "n": len(group),
                          "agv_failures": group.agv_failures.mean(),
                          "repair_s": group.agv_repair_time.mean(),
                          "blocked_s": group.agv_blocked_by_failure_time.mean(),
-                         "d_total_flow_median": group.d_total_flow.median(),
-                         "d_total_flow_mean": group.d_total_flow.mean(),
-                         "d_mean_flow_median": group.d_mean_flow.median(),
+                         "d_return_mean": group.d_return.mean(),
+                         "d_return_median": group.d_return.median(),
+                         "best_seeds": int(wins.get(policy, 0)),
                          "d_jobs_mean": group.d_jobs.mean(),
+                         "d_total_flow_censored_mean": group.d_total_flow.mean(),
+                         "d_mean_flow_censored_median": group.d_mean_flow.median(),
                          "deadlocks": int(group.deadlock.astype(str).eq("True").sum())})
     if rows:
-        print("\n== dose-response, paired per seed vs reg (same build)")
+        print("\n== dose-response, paired per seed vs reg (same build). Ranked on return (d_return > 0 = worse);"
+              " flow of exited jobs is censored, read it with d_jobs.")
         print(pd.DataFrame(rows).to_string(index=False, float_format=lambda x: f"{x:.3f}"))
 
 

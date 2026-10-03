@@ -190,13 +190,17 @@ REGISTRY = {name: _generator_for(name) for name in _SCENARIO_FN_NAMES}
 
 def _randomized_factory(episode_duration_seconds=None, random_warmup=False, warmup_dispatching_rule=None,
                         agv_move_speed=None, agv_handshake_duration=None,
-                        machine_flexibility=0.0, secondary_time_multiplier=1.0):
+                        machine_flexibility=0.0, secondary_time_multiplier=1.0, params_overrides=None):
+    """@param params_overrides  RandomizedParams fields to override (train.py --params), applied after the
+                                flexibility arguments; ValueError on an unknown field."""
     import dataclasses
-    from scenarios.randomized import DEFAULT_PARAMS, randomized_generator
+    from scenarios.randomized import DEFAULT_PARAMS, params_with_overrides, randomized_generator
     params = DEFAULT_PARAMS
     if machine_flexibility:
         params = dataclasses.replace(params, machine_flexibility=float(machine_flexibility),
                                      secondary_time_multiplier=float(secondary_time_multiplier))
+    if params_overrides:
+        params = params_with_overrides(params_overrides, base=params)
     return randomized_generator(episode_duration_seconds, random_warmup, warmup_dispatching_rule,
                                 agv_move_speed, agv_handshake_duration, params)
 

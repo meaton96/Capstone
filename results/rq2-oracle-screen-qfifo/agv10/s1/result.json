@@ -1,0 +1,62 @@
+{
+  "seed": 1,
+  "regime": {
+    "generator": "randomized",
+    "params": null,
+    "random_warmup": true,
+    "agvs": 10,
+    "layout": null,
+    "agv_failures": null
+  },
+  "segment_seconds": 1800.0,
+  "episode_duration_seconds": 5400.0,
+  "schedule": [
+    "SRT-TECT",
+    "SRT-ECT",
+    "SRT-ECT"
+  ],
+  "stages": [
+    {
+      "stage": 1,
+      "chosen": "SRT-TECT",
+      "return": -158.54392968749988,
+      "total_flow_time": 184439.0,
+      "mean_flow_time": 1237.8456375838925,
+      "jobs_exited": 149.0
+    },
+    {
+      "stage": 2,
+      "chosen": "SRT-ECT",
+      "return": -158.35183593750003,
+      "total_flow_time": 179916.484375,
+      "mean_flow_time": 1223.921662414966,
+      "jobs_exited": 147.0
+    },
+    {
+      "stage": 3,
+      "chosen": "SRT-ECT",
+      "return": -158.35183593750003,
+      "total_flow_time": 179916.484375,
+      "mean_flow_time": 1223.921662414966,
+      "jobs_exited": 147.0
+    }
+  ],
+  "best_fixed_pair": "SRT-TECT",
+  "best_fixed_return": -158.54392968749988,
+  "oracle_return": -158.35183593750003,
+  "gain_vs_best_fixed_pct": -0.12116121404236457,
+  "fixed_returns": {
+    "SPT-ECT": -172.6441953125,
+    "SPT-TECT": -172.82110156250005,
+    "SPT-SRWT": -178.35763281250001,
+    "SRT-ECT": -161.15714843750013,
+    "SRT-TECT": -158.54392968749988,
+    "SRT-SRWT": -165.0534296875001,
+    "PTWINQ-ECT": -165.9303359375001,
+    "PTWINQ-TECT": -164.9048046874999,
+    "PTWINQ-SRWT": -169.2459296874999,
+    "FIFO-ECT": -183.9021953125,
+    "FIFO-TECT": -184.48655468750036,
+    "FIFO-SRWT": -185.48958593750012
+  }
+}

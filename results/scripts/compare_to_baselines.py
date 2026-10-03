@@ -1,25 +1,32 @@
-"""Score evaluate.py episodes (e.g. a trained checkpoint) against the saved 12 head-rule baselines.
+"""Score evaluate.py episodes (e.g. a trained checkpoint) against the 12 head-rule baselines, on episode return.
 
-The baselines are results/eval_pdr12_heads/episodes_all.csv (docs/experiments/EVAL_BASELINES_12HEAD_0927.md).
-The candidate run must use the same instances: --scenario-generator randomized --episode-duration-seconds 5400,
-seeds within 0-19, a two-branch player. For another condition (evaluate.py --agvs / --layout), pass that
-condition's own 12-pair run as --baselines.
+The default baselines are the clean-clock rq4-agvfail/reg runs (at most 24 episodes per player, so no float32-clock
+drift), with their FIFO rows replaced by rq4-agvfail-qfifo/reg (strict queue FIFO since 2026-10-02). Later
+--baselines files override earlier ones on (policy, seed). The candidate run must use the same instances:
+--scenario-generator randomized --episode-duration-seconds 5400, seeds within 0-19, a two-branch player, and the
+same --reward-spec as the baselines (flow_time), since the score is `return`. For another condition (evaluate.py
+--agvs / --layout), pass that condition's own 12-pair run as --baselines.
 
     python results/scripts/compare_to_baselines.py results/eval_rnd02/episodes.csv [more episodes.csv ...]
     python results/scripts/compare_to_baselines.py results/eval_rnd02_agv9/episodes.csv \
         --baselines results/eval_pdr12_heads_agv9/episodes.csv --csv results/eval_rnd02_agv9/compare.csv
 
-Per policy it prints the mean gap to the per-seed best baseline rule (negative = beats every fixed rule on that
-seed) and to the reference rule, on total flow and mean flow, plus jobs exited and seed wins.
+Scores are on `return` (time in system of every job, finished or not; CLAUDE.md "Measuring headroom and targets").
+Returns are negative, so gap = return / reference_return - 1 is positive when the policy is worse and negative when
+it is better. Total flow of exited jobs is censored (finishing fewer jobs lowers it): it is printed only next to
+jobs exited, never ranked on. Deadlocked or timed-out episodes stop the clock early, so they are left out of the
+gaps (baselines and candidates), counted, and a policy with any of them cannot get a "better" verdict.
 
-The reference is the best fixed pair on average for these baselines (lowest mean gap to the per-seed best on
-total flow; SPT-ECT on the D / 7-AGV set), unless --reference names one. Against it, per policy, on total flow
-(the RQ3 metric, docs/WIP/FUTURE_EXPERIMENTS.md "rq3-gen"):
-  median   median per-seed gap, policy / reference - 1, with a bootstrap 95% CI over seeds;
+Per policy it prints the mean return gap to the per-seed best baseline pair (negative = beats every fixed pair on
+that seed) and to the reference pair. The reference is the best pair on average (lowest mean return gap to the
+per-seed best), unless --reference names one. Against it, per policy:
+  median   median per-seed gap, with a bootstrap 95% CI over seeds;
   p_better one-sided Wilcoxon signed-rank p that the gaps sit below 0 (p_worse: above 0);
-  verdict  "better" if p_better < alpha, "worse" if p_worse < alpha, otherwise "n.s.".
+  verdict  "better" if p_better < alpha (and no deadlocked/timed-out episodes), "worse" if p_worse < alpha,
+           otherwise "n.s.".
 """
 import argparse
+import glob
 from pathlib import Path
 
 import numpy as np
@@ -27,15 +34,45 @@ import pandas as pd
 from scipy.stats import wilcoxon
 
 REPO = Path(__file__).resolve().parents[2]
-BASELINES = REPO / "results" / "eval_pdr12_heads" / "episodes_all.csv"
+BASELINES = [str(REPO / "results" / "rq4-agvfail" / "reg" / "s*" / "episodes.csv"),
+             str(REPO / "results" / "rq4-agvfail-qfifo" / "reg" / "s*" / "episodes.csv")]
 FLOOR_COLUMNS = ("agv_count", "layout", "tiles", "job_scope", "agv_assignment", "release_rule", "release_weights",
                  "scenario_travel_price")
+KEY = ["policy", "seed"]
+
+
+def clean(df):
+    """Episodes that ran to their cap or their last job: not deadlocked, not timed out."""
+    return ~(df["deadlock"].astype(bool) | df["timed_out"].astype(bool))
+
+
+def load_baselines(patterns):
+    """PDR episodes from each pattern in order; a later file replaces earlier rows with the same (policy, seed)."""
+    base = None
+    for pattern in patterns:
+        paths = sorted(glob.glob(pattern))
+        if not paths:
+            raise SystemExit(f"--baselines {pattern}: no files")
+        frame = pd.concat([pd.read_csv(p) for p in paths], ignore_index=True)
+        frame = frame[frame["kind"] == "pdr"]
+        if base is not None:
+            keep = ~base.set_index(KEY).index.isin(frame.set_index(KEY).index)
+            frame = pd.concat([base[keep], frame], ignore_index=True)
+        base = frame
+    if base.duplicated(KEY).any():
+        raise SystemExit("The baselines have more than one episode per (policy, seed).")
+    return base
+
+
+def return_gap(ret, ref):
+    """Relative gap on return; returns are negative, so > 0 is worse than the reference and < 0 better."""
+    return ret / ref - 1
 
 
 def best_on_average(base):
-    """The baseline pair with the lowest mean gap to the per-seed best on total flow."""
-    best = base.groupby("seed")["total_flow_time"].transform("min")
-    return (base["total_flow_time"] / best - 1).groupby(base["policy"]).mean().idxmin()
+    """The baseline pair with the lowest mean return gap to the per-seed best (max return)."""
+    best = base.groupby("seed")["return"].transform("max")
+    return return_gap(base["return"], best).groupby(base["policy"]).mean().idxmin()
 
 
 def check_same_floor(base, cand):
@@ -77,8 +114,9 @@ def paired_test(gaps, alpha, n_boot, rng):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("episodes", nargs="+", help="evaluate.py episodes.csv file(s) to score")
-    ap.add_argument("--baselines", default=str(BASELINES),
-                    help="12-pair episodes.csv on the same instances and floor (default: D, 7 AGVs)")
+    ap.add_argument("--baselines", nargs="+", default=BASELINES,
+                    help="12-pair episodes.csv files or globs on the same instances and floor; later ones override "
+                         "earlier (policy, seed) rows (default: rq4-agvfail/reg + rq4-agvfail-qfifo/reg, D, 7 AGVs)")
     ap.add_argument("--reference", default="auto",
                     help="reference pair, or 'auto' = best pair on average in --baselines (default)")
     ap.add_argument("--alpha", type=float, default=0.05, help="significance level of the one-sided tests")
@@ -87,12 +125,17 @@ def main():
     ap.add_argument("--csv", default=None, help="also write the per-policy table here (unformatted numbers)")
     a = ap.parse_args()
 
-    base = pd.read_csv(a.baselines)
-    base = base[base["kind"] == "pdr"]
+    base_all = load_baselines(a.baselines)
+    base = base_all[clean(base_all)]
+    if len(base) < len(base_all):
+        print(f"Note: {len(base_all) - len(base)} deadlocked/timed-out baseline episodes left out of the per-seed best.")
     cand = pd.concat([pd.read_csv(p) for p in a.episodes], ignore_index=True)
     cand = cand[cand["kind"] != "pdr"]          # PDR rows in the candidate run are ignored: the baselines cover them
     if cand.empty:
         raise SystemExit("No non-PDR episodes found in the given files.")
+    for name, df in (("baseline", base), ("candidate", cand)):
+        if (df["return"] == 0).all():
+            raise SystemExit(f"Every {name} return is 0: that run had no --reward-spec, so it cannot be scored.")
     check_same_floor(base, cand)
 
     missing = sorted(set(cand["seed"]) - set(base["seed"]))
@@ -106,50 +149,53 @@ def main():
     if set(cand["seed"]) - ref_seeds:
         raise SystemExit(f"Reference {reference} is missing seeds {sorted(set(cand['seed']) - ref_seeds)}.")
 
-    best = base.groupby("seed").agg(best_total=("total_flow_time", "min"), best_mean=("mean_flow_time", "min"))
-    ref = base[base["policy"] == reference].set_index("seed")[["total_flow_time", "mean_flow_time"]]
-    ref.columns = ["ref_total", "ref_mean"]
+    best = base.groupby("seed")["return"].max().rename("best_return")
+    ref = base[base["policy"] == reference].set_index("seed")["return"].rename("ref_return")
     c = cand.join(best, on="seed").join(ref, on="seed")
-    c["gap_best_total"] = c["total_flow_time"] / c["best_total"] - 1
-    c["gap_best_mean"] = c["mean_flow_time"] / c["best_mean"] - 1
-    c["gap_ref_total"] = c["total_flow_time"] / c["ref_total"] - 1
-    c["gap_ref_mean"] = c["mean_flow_time"] / c["ref_mean"] - 1
-    c["beats_all_total"] = c["gap_best_total"] < 0
+    c["ok"] = clean(c)
+    c["gap_best"] = return_gap(c["return"], c["best_return"]).where(c["ok"])
+    c["gap_ref"] = return_gap(c["return"], c["ref_return"]).where(c["ok"])
+    c["beats_all"] = c["gap_best"] < 0
+    c["dead_or_timeout"] = ~c["ok"]
 
     out = c.groupby("policy").agg(
         seeds=("seed", "nunique"),
-        total_vs_best=("gap_best_total", "mean"), total_vs_ref=("gap_ref_total", "mean"),
-        mean_vs_best=("gap_best_mean", "mean"), mean_vs_ref=("gap_ref_mean", "mean"),
-        jobs_exited=("jobs_exited", "mean"), seeds_beating_all=("beats_all_total", "sum"),
-        deadlocks=("deadlock", "sum"),
+        return_vs_best=("gap_best", "mean"), return_vs_ref=("gap_ref", "mean"),
+        seeds_beating_all=("beats_all", "sum"), dead_or_timeout=("dead_or_timeout", "sum"),
+        jobs_exited=("jobs_exited", "mean"), total_flow_censored=("total_flow_time", "mean"),
     )
     if (c.groupby("policy")["seed"].count() != out["seeds"]).any():
         print("Note: some policy has more than one episode per seed; the test below treats each as a pair.")
 
     rng = np.random.default_rng(a.rng_seed)
-    tests = pd.DataFrame({p: paired_test(g["gap_ref_total"], a.alpha, a.bootstrap, rng)
+    tests = pd.DataFrame({p: paired_test(g.loc[g["ok"], "gap_ref"], a.alpha, a.bootstrap, rng)
                           for p, g in c.groupby("policy")}).T
     out = out.join(tests.drop(columns="n"))
+    refused = (out["dead_or_timeout"] > 0) & (out["verdict"] == "better")
+    out.loc[refused, "verdict"] = "n.s. (deadlocks)"
     if a.csv:
         out.assign(reference=reference).to_csv(a.csv)
 
     shown = out.copy()
-    for col in ["total_vs_best", "total_vs_ref", "mean_vs_best", "mean_vs_ref", "median", "ci_lo", "ci_hi"]:
+    for col in ["return_vs_best", "return_vs_ref", "median", "ci_lo", "ci_hi"]:
         shown[col] = (100 * shown[col].astype(float)).map("{:+.1f}%".format)
     for col in ["p_better", "p_worse"]:
         shown[col] = shown[col].astype(float).map("{:.3g}".format)
     shown["jobs_exited"] = shown["jobs_exited"].map("{:.1f}".format)
+    shown["total_flow_censored"] = shown["total_flow_censored"].map("{:,.0f}".format)
     pd.set_option("display.width", 250)
     print(f"Reference: {reference} ({'best on average' if a.reference == 'auto' else 'given'}). "
-          f"*_vs_ref, median and CI are gaps to it on total flow; vs_best < 0 beats every fixed rule on that seed.\n")
+          "Gaps are on return (> 0 worse, < 0 better); return_vs_best < 0 beats every fixed pair on that seed. "
+          "Deadlocked/timed-out episodes are left out of the gaps.\n")
     print(shown.to_string())
 
-    base_best = base.groupby("seed")["total_flow_time"].transform("min")
-    ref_gap = (base["total_flow_time"] / base_best - 1)[base["policy"] == reference].mean()
+    base_best = base.groupby("seed")["return"].transform("max")
+    ref_gap = return_gap(base["return"], base_best)[base["policy"] == reference].mean()
     base_jobs = base.groupby("policy")["jobs_exited"].mean()
-    print(f"\nBaselines ({base['seed'].nunique()} seeds): {reference} total flow {100 * ref_gap:+.1f}% vs per-seed best; "
-          f"jobs exited {base_jobs.min():.1f}-{base_jobs.max():.1f} across rules. "
-          f"Verdict: one-sided Wilcoxon on the per-seed gaps to {reference}, alpha {a.alpha}.")
+    print(f"\nBaselines ({base['seed'].nunique()} seeds): {reference} return {100 * ref_gap:+.1f}% vs per-seed best; "
+          f"jobs exited {base_jobs.min():.1f}-{base_jobs.max():.1f} across pairs. "
+          f"Verdict: one-sided Wilcoxon on the per-seed return gaps to {reference}, alpha {a.alpha}. "
+          "Total flow is of exited jobs only (censored): read it with jobs exited, not as a score.")
 
 
 if __name__ == "__main__":

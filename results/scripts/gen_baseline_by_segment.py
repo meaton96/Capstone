@@ -29,6 +29,9 @@ def load(results, scen_dir, prefix="randomized"):
         cell = os.path.basename(os.path.dirname(path))          # agv7_SPT_SMPT_s3
         rule = "_".join(cell.split("_")[1:-1])
         seed = int(cell.rsplit("_s", 1)[1])
+        if rule in runs[seed]:
+            raise SystemExit(f"{path}: a second cell for seed {seed}, rule {rule} (several layouts or fleets under "
+                             "--results?); point --results at one condition")
         rows = list(csv.DictReader(open(path)))
         runs[seed][rule] = [(float(r["arrival_time"]), float(r["flow_time"]), r["completed"] == "1") for r in rows]
         if seed not in phases:
@@ -51,6 +54,9 @@ def main():
     ap.add_argument("--prefix", default="randomized", help="scenario name prefix (<prefix>_s<seed>)")
     ap.add_argument("--rules", nargs="*", help="only these rules (e.g. to compare sweeps over the same rule set)")
     ap.add_argument("--min-jobs", type=int, default=5, help="skip segments with fewer arrivals")
+    ap.add_argument("--legacy-segment-oracle", action="store_true",
+                    help="also print the retracted recombined 'segment oracle' (not a bound in either direction; "
+                         "measure switching headroom with env/switch_oracle.py)")
     a = ap.parse_args()
     runs, phases, meta = load(a.results, a.scenarios, a.prefix)
     if a.rules:
@@ -88,9 +94,18 @@ def main():
     for kind in ["ALL"] + sorted(k for k in seg_wins if k != "ALL"):
         print(f"{kind:9s} " + "  ".join(f"{r}:{n}" for r, n in seg_wins[kind].most_common()))
 
-    # Oracle: pick the best rule per segment (charging each segment's jobs to that rule's run) vs best single rule.
-    # Only an upper-bound hint: switching rules mid-episode changes later segments' state, which this ignores.
-    print("\n== Per-seed oracle (best rule per segment) vs best single rule, total flow of completed jobs")
+    # Retracted (docs/experiments/HEADROOM_METRIC_CORRECTION_1002.md): recombining fixed-rule segments ignores that
+    # switching changes later segments' state, and it sums censored flow, so it is not a bound in either direction.
+    if a.legacy_segment_oracle:
+        legacy_segment_oracle(runs, phases)
+
+    job_half_spread(runs)
+    load_profile(a.results, a.prefix, a.rules)
+
+
+def legacy_segment_oracle(runs, phases):
+    print("\n== RETRACTED: recombined per-segment 'oracle' vs best single rule, censored total flow. Not a headroom "
+          "figure; use env/switch_oracle.py.")
     for seed in sorted(runs):
         ph = phases[seed]
         rules = list(runs[seed])
@@ -103,9 +118,6 @@ def main():
         oracle = sum(min(v.values()) for v in seg_tot.values())
         best = min(tot, key=tot.get)
         print(f"s{seed}: best single {best} {tot[best]:.0f}, segment oracle {oracle:.0f} ({oracle / tot[best] - 1:+.1%})")
-
-    job_half_spread(runs)
-    load_profile(a.results, a.prefix, a.rules)
 
 
 def load_profile(results, prefix, rules=None):

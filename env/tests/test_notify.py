@@ -99,3 +99,18 @@ def test_watchdog_quiet_while_beating(monkeypatch):
     w.stop()
     w._thread.join(timeout=5)    # done before monkeypatch restores os._exit
     assert exits == []
+
+
+def test_malformed_url_never_raises_nor_prints_the_url(capsys):
+    secret = "hooks.example/services/T000/B000/SECRETTOKEN"   # no scheme: urllib raises ValueError
+    assert notify.notify("x", url=secret) is False
+    assert "SECRETTOKEN" not in capsys.readouterr().out
+
+
+def test_watchdog_still_exits_with_a_malformed_url():
+    code = ("import sys, time; sys.path.insert(0, %r); import notify; "
+            "w = notify.Watchdog(0.02, 'test-run', check_seconds=0.2); time.sleep(30)") % ENV_DIR
+    env = dict(os.environ, NOTIFY_WEBHOOK_URL="hooks.example/services/T000/B000/SECRETTOKEN")
+    proc = subprocess.run([sys.executable, "-c", code], env=env, timeout=20, capture_output=True, text=True)
+    assert proc.returncode == 3
+    assert "SECRETTOKEN" not in proc.stdout + proc.stderr
