@@ -391,19 +391,22 @@ class Twin:
     def _nearest_agv(self, src):
         pickup_zones = src.info.pickup_zones if src is not None else [self.incoming_zone]
         hops = self.floor.hops_to(pickup_zones)
-        best = {"idle": (None, math.inf), "returning": (None, math.inf)}
+        # Nearest over idle AND returning AGVs, idle winning ties (AGVPool.GetNearestAvailableAGV since 2026-10-03;
+        # before, any idle AGV beat a returning one).
+        best, best_d, best_idle = None, math.inf, False
         for a in self.agvs:
             st = self._status(a)
-            if st not in best:
+            if st not in ("idle", "returning"):
                 continue
             if st == "returning":
                 zone = a.leg.state_after(self.k - 1, self.kin)[3]
             else:
                 zone = a.zone if a.zone >= 0 else self.floor.zone_at(*a.pos)
             d = hops.get(zone, math.inf)
-            if best[st][0] is None or d < best[st][1]:
-                best[st] = (a, d)
-        return best["idle"][0] or best["returning"][0]
+            idle = st == "idle"
+            if best is None or d < best_d or (d == best_d and idle and not best_idle):
+                best, best_d, best_idle = a, d, idle
+        return best
 
     def _drive(self, a, route_to, final_pos, kind):
         pos, yaw, zone = self._pose(a, cancel=True)

@@ -309,6 +309,7 @@ def run_evaluation(env, policies: list, schedule: list, log=print, decision_writ
             "deadlock": episode["deadlock"],
             "timed_out": episode["timed_out"],
             "truncated": episode["truncated"],
+            "tick_error": episode.get("tick_error", False),
             "machine_failures": episode.get("machine_failures"),
             "agv_failures": episode.get("agv_failures"),
             "agv_repair_time": episode.get("agv_repair_time"),
@@ -353,7 +354,7 @@ def summarize(rows: list, scored: bool = True) -> list:
     """
     best = {}
     for row in rows:
-        if row["kind"] == "pdr" and not (row["deadlock"] or row["timed_out"]):
+        if row["kind"] == "pdr" and not (row["deadlock"] or row["timed_out"] or row.get("tick_error")):
             ret, makespan, flow = best.get(row["seed"], (-math.inf, math.inf, math.inf))
             best[row["seed"]] = (max(ret, row["return"]), min(makespan, row["makespan"]),
                                  min(flow, row["total_flow_time"]))
@@ -379,7 +380,7 @@ def summarize(rows: list, scored: bool = True) -> list:
             "timeouts": int(sum(bool(r["timed_out"]) for r in policy_rows)),
         }
         # Deadlocked / timed-out episodes stop the clock early, so they are counted above, not gapped.
-        paired = [r for r in policy_rows if r["seed"] in best and not (r["deadlock"] or r["timed_out"])]
+        paired = [r for r in policy_rows if r["seed"] in best and not (r["deadlock"] or r["timed_out"] or r.get("tick_error"))]
         if paired:
             ref = [best[r["seed"]] for r in paired]
             entry["return_gap_pct"] = _gap_pct([-r["return"] for r in paired], [-b[0] for b in ref]) \

@@ -87,7 +87,6 @@ namespace Assets.Scripts.Simulation.Logging
         /// </summary>
         public static void LogAll(EpisodeRecord r)
         {
-            LogEpisode(r);
             LogMachineUtilization(r);
             if (r.MachineHandoffRecords.Count > 0) LogMachineHandoffs(r);
             if (r.AGVRecords.Count > 0) LogAGVPerformance(r);
@@ -100,6 +99,9 @@ namespace Assets.Scripts.Simulation.Logging
             if (r.AGVFailureRecords.Count > 0) LogAGVFailures(r);
             if (r.AGVEventRecords.Count > 0) LogAGVEvents(r);
             if (r.ConfigCanonical != null) LogAppliedConfig(r.ConfigHash, r.ConfigCanonical);
+            // results.csv last: run_experiment_queue.py treats its existence as "cell done", so it must
+            // not appear before the other files are written (audit G6).
+            LogEpisode(r);
         }
 
         /// <summary>
@@ -258,7 +260,9 @@ namespace Assets.Scripts.Simulation.Logging
                     "agv_failures_enabled,agv_weibull_k,agv_weibull_lambda,agv_repair_log_mu,agv_repair_log_sigma," +
                     "agv_failures,agv_repair_time,agv_blocked_by_failure_time," +
                     "travel_price,release_weights,release_counts,routed_moves,cross_tile_moves,tiles_crossed," +
-                    "input_buffer_capacity,output_buffer_capacity,output_blocked_machine_seconds,buffer_wait_job_seconds"
+                    "input_buffer_capacity,output_buffer_capacity,output_blocked_machine_seconds,buffer_wait_job_seconds," +
+                    "tick_errors,decision_drain,job_rule_fallbacks," +
+                    "jobs_arrived,jobs_completed,timed_out,truncated,stall_recoveries,stall_snaps_to_parking"
                 );
 
             writer.WriteLine(
@@ -287,7 +291,10 @@ namespace Assets.Scripts.Simulation.Logging
                 $"{(hasAgvF ? r.Stochastic.AGVRepairLogMu : 0f):F3},{(hasAgvF ? r.Stochastic.AGVRepairLogSigma : 0f):F3}," +
                 $"{r.AGVFailureCount},{r.AGVRepairTime:F1},{r.AGVBlockedByFailureTime:F1}," +
                 $"{r.TravelPrice:F3},{r.ReleaseWeights},{r.ReleaseCounts},{r.RoutedMoves},{r.CrossTileMoves},{r.TilesCrossed}," +
-                $"{r.InputBufferCapacity},{r.OutputBufferCapacity},{r.OutputBlockedMachineSeconds:F1},{r.BufferWaitJobSeconds:F1}"
+                $"{r.InputBufferCapacity},{r.OutputBufferCapacity},{r.OutputBlockedMachineSeconds:F1},{r.BufferWaitJobSeconds:F1}," +
+                $"{r.TickErrors},{r.DecisionDrain},{r.JobRuleFallbacks}," +
+                $"{r.JobsArrived},{r.JobsCompleted},{(r.TimedOut ? 1 : 0)},{(r.Truncated ? 1 : 0)}," +
+                $"{System.Linq.Enumerable.Sum(r.AGVRecords, a => a.StallRecoveryCount)},{System.Linq.Enumerable.Sum(r.AGVRecords, a => a.StallSnapCount)}"
             );
 
             Debug.Log($"[Results] {r.InstanceName} {r.RuleName} seed={r.Seed} " +
@@ -386,7 +393,8 @@ namespace Assets.Scripts.Simulation.Logging
                     "time_loading,time_unloading," +
                     "total_path_length,reroute_count,congestion_fraction,stall_recovery_count," +
                     "path_returning_to_parking,path_departure_from_parking," +
-                    "failures,time_broken,time_blocked_by_failure,censored_operating_age,censored_life_is_residual"
+                    "failures,time_broken,time_blocked_by_failure,censored_operating_age,censored_life_is_residual," +
+                    "stall_snap_count,stall_snap_penalty_seconds"
                 );
 
             string ts = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
@@ -401,7 +409,7 @@ namespace Assets.Scripts.Simulation.Logging
                     $"{a.TotalPathLength:F2},{a.RerouteCount},{a.CongestionFraction:F4},{a.StallRecoveryCount}," +
                     $"{a.PathReturningToParking:F2},{a.PathDepartureFromParking:F2}," +
                     $"{a.FailureCount},{a.TimeBroken:F2},{a.TimeBlockedByFailure:F2}," +
-                    $"{a.CensoredOperatingAge:F2},{(a.CensoredLifeIsResidual ? 1 : 0)}"
+                    $"{a.CensoredOperatingAge:F2},{(a.CensoredLifeIsResidual ? 1 : 0)},{a.StallSnapCount},{a.StallSnapPenaltySeconds:F1}"
                 );
             }
         }
@@ -413,6 +421,9 @@ namespace Assets.Scripts.Simulation.Logging
         ///
         /// Key columns:
         ///   block_rate        — BlockEvents / (TraversalCount + BlockEvents)
+        ///   Since 10-02 (audit G4) block_events counts waits, not failed retries, and
+        ///   total_block_time includes every wait (stall, cancel, redispatch, open at episode end).
+        ///   Older segment_congestion.csv files are not comparable on these two columns.
         ///   mean_block_time   — how long each blockage lasts on average
         ///
         /// Sort by block_rate descending to find congestion hotspots.
@@ -505,7 +516,8 @@ namespace Assets.Scripts.Simulation.Logging
                     "sim_time,decision_index,decision_type,subject_id,chosen_id," +
                     "candidate_count,is_degenerate," +
                     "candidate_ids,candidate_stat_a,candidate_stat_b,candidate_stat_c," +
-                    "job_candidate_count,is_job_selection_degenerate,job_candidate_ids"
+                    "job_candidate_count,is_job_selection_degenerate,job_candidate_ids," +
+                    "action_job,action_machine,candidate_travel_times,travel_price"
                 );
 
             string ts = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
@@ -518,7 +530,8 @@ namespace Assets.Scripts.Simulation.Logging
                     $"{d.SubjectId},{d.ChosenId}," +
                     $"{d.CandidateCount},{(d.IsDegenerate ? 1 : 0)}," +
                     $"{d.CandidateIds},{d.CandidateStatA},{d.CandidateStatB},{d.CandidateStatC}," +
-                    $"{d.JobCandidateCount},{(d.IsJobSelectionDegenerate ? 1 : 0)},{d.JobCandidateIds}"
+                    $"{d.JobCandidateCount},{(d.IsJobSelectionDegenerate ? 1 : 0)},{d.JobCandidateIds}," +
+                    $"{d.ActionJob},{d.ActionMachine},{d.CandidateTravelTimes},{d.TravelPrice:F3}"
                 );
             }
         }

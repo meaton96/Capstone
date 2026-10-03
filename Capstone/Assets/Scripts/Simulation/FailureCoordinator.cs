@@ -126,6 +126,9 @@ namespace Assets.Scripts.Simulation
             int machineId = machine.MachineId;
             SimLogger.Medium($"[Orchestrator] Machine {machineId} FAILED. RepairTime={machine.SampledRepairDuration:F1}s");
 
+            // The interrupted operation's elapsed time is dropped, not added to busy time: utilization counts
+            // completed (and, at episode end, in-progress) work only; work lost to a failure is not busy
+            // (user decision 10-03, audit G10).
             _machineProcessingStartTime.Remove(machineId);
             _tracker.RecordMachineFailure(machineId, machine.SampledRepairDuration, _simTimeRef);
 

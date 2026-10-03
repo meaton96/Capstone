@@ -129,7 +129,7 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--top", type=int, default=5)
     ap.add_argument("--clean-only", action="store_true", help="exclude deadlocked episodes")
-    ap.add_argument("--base", default=None, help="results dir holding the tags (default linux_server/Results/gridlock_sweep)")
+    ap.add_argument("--base", default=None, help="results dir holding the tags (default linux_server/Results/outdated/gridlock_sweep)")
     a = ap.parse_args()
     global BASE
     if a.base: BASE = a.base

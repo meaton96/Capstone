@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """G: gap between the Unity floor and its event-based twin (env/des_twin), over a sweep run with -destrace.
 
-  python results/scripts/des_twin_gap.py linux_server_des/Results/G1 [--out results/des_twin] [--workers 16]
+  python results/scripts/des_twin_gap.py linux_server_des/Results/outdated/G1 [--out results/outdated/des_twin] [--workers 16]
 
 For every Unity run under the sweep directory (<scenario>/<layout>/agv<N>_<RULE>_s<seed>/) the twin is run with
 each transport model on the same floor and jobs:

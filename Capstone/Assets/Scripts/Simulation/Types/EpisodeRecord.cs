@@ -53,6 +53,18 @@ namespace Assets.Scripts.Simulation.Types
         public bool DeadlockDetected;
         public double DeadlockSimTime = -1.0;
 
+        // Exceptions caught in the orchestrator tick (audit H5). Nonzero means the episode was ended
+        // early as failed at the first error; treat the row like a deadlock, not a finished run.
+        public int TickErrors;
+
+        // Decision cadence: "baseline" (-baselinedrain: heuristic decisions drained per frame), "rl"
+        // (-rldecisiondrain) or "none" (one decision per frame). Recorded per row since audit G7.
+        public string DecisionDrain = "none";
+
+        // Routing decisions where the job rule picked a job that could not be routed (no candidate machine),
+        // so the focus (oldest routable) job was routed instead (audit E4).
+        public int JobRuleFallbacks;
+
         // Sim-time of the first AGV zone-stall recovery this episode (gridlock ONSET; the
         // watchdog only fires DEADLOCK_STALL_SECONDS later). -1 when no AGV ever stalled.
         public double FirstStallSimTime = -1.0;
@@ -191,14 +203,21 @@ namespace Assets.Scripts.Simulation.Types
         public List<JobCompletionRecord> JobCompletionRecords = new List<JobCompletionRecord>();
 
         // ── Derived flow-time summary (computed over completed jobs only) ────
-        public double MeanFlowTime => JobCompletionRecords.Count == 0 ? 0
+        // NaN, not 0, when no job finished (audit G9): 0.00 read as a perfect score in results.csv.
+        public double MeanFlowTime => JobCompletionRecords.Count == 0 ? double.NaN
             : Mean(JobCompletionRecords, r => r.Completed, r => r.FlowTime);
         public double P95FlowTime => Percentile(JobCompletionRecords, 0.95, penalized: false);
-        public double MaxFlowTime => JobCompletionRecords.Count == 0 ? 0
+        public double MaxFlowTime => JobCompletionRecords.Count == 0 ? double.NaN
             : MaxOf(JobCompletionRecords, r => r.Completed, r => r.FlowTime);
-        public double MeanTransportWait => JobCompletionRecords.Count == 0 ? 0
+        public double MeanTransportWait => JobCompletionRecords.Count == 0 ? double.NaN
             : Mean(JobCompletionRecords, r => r.Completed, r => r.TimeWaitingPickup + r.TimeInTransit);
         public int JobsCensored => JobCompletionRecords.Count(r => !r.Completed);
+        public int JobsArrived => JobCompletionRecords.Count;                  // one completion record per arrived job
+        public int JobsCompleted => JobCompletionRecords.Count(r => r.Completed);
+
+        // Episode end reason flags (audit G9; were only in the metrics channel, not results.csv).
+        public bool TimedOut;     // hit the MAX_EPISODE_SIM_SECONDS safety net
+        public bool Truncated;    // hit the deliberate steady-state cap (Stochastic.EpisodeDurationSeconds)
 
         // ── Penalized flow-time summary (computed over ALL arrived jobs; a censored job is charged
         // its time in system up to the end of the episode, Makespan - ArrivalTime) ──
@@ -211,10 +230,10 @@ namespace Assets.Scripts.Simulation.Types
         // toward the mean. These give a true picture of scheduler performance
         // (or lack thereof) that's comparable across runs with different
         // completion rates.
-        public double MeanFlowTimePenalized => JobCompletionRecords.Count == 0 ? 0
+        public double MeanFlowTimePenalized => JobCompletionRecords.Count == 0 ? double.NaN
             : JobCompletionRecords.Average(r => (double)CensoredFlow(r));
         public double P95FlowTimePenalized => Percentile(JobCompletionRecords, 0.95, penalized: true);
-        public double MaxFlowTimePenalized => JobCompletionRecords.Count == 0 ? 0
+        public double MaxFlowTimePenalized => JobCompletionRecords.Count == 0 ? double.NaN
             : JobCompletionRecords.Max(r => (double)CensoredFlow(r));
 
         /// <summary>Flow time of a finished job, or time in system up to the episode end for a censored one.</summary>
@@ -226,7 +245,7 @@ namespace Assets.Scripts.Simulation.Types
         {
             double sum = 0; int n = 0;
             foreach (var r in records) { if (!filter(r)) continue; sum += select(r); n++; }
-            return n > 0 ? sum / n : 0;
+            return n > 0 ? sum / n : double.NaN;
         }
 
         private static double MaxOf(List<JobCompletionRecord> records,
@@ -239,7 +258,7 @@ namespace Assets.Scripts.Simulation.Types
                 double v = select(r);
                 if (!any || v > best) { best = v; any = true; }
             }
-            return best;
+            return any ? best : double.NaN;
         }
 
         private double Percentile(List<JobCompletionRecord> records, double p, bool penalized)
@@ -250,7 +269,7 @@ namespace Assets.Scripts.Simulation.Types
                 if (r.Completed) flowTimes.Add(r.FlowTime);
                 else if (penalized) flowTimes.Add(CensoredFlow(r));
             }
-            if (flowTimes.Count == 0) return 0;
+            if (flowTimes.Count == 0) return double.NaN;
             flowTimes.Sort();
             int idx = (int)System.Math.Ceiling(p * flowTimes.Count) - 1;
             idx = System.Math.Clamp(idx, 0, flowTimes.Count - 1);
@@ -356,6 +375,8 @@ namespace Assets.Scripts.Simulation.Types
         public double PathDepartureFromParking;  // part driven empty to the first pickup after leaving parking
         public int RerouteCount;         // RedirectDropoff calls (machine-failure reroutes)
         public int StallRecoveryCount;   // HandleZoneStall calls (suspected deadlock self-recoveries)
+        public int StallSnapCount;       // of those, teleported to parking because no retreat was possible (C2)
+        public double StallSnapPenaltySeconds;   // out-of-service time charged for those snaps (estimated drive back)
         public int FailureCount;             // breakdowns (StochasticConfig.AGVFailuresEnabled)
         public double TimeBroken;            // frozen for a repair; not in any of the time buckets above
         public double TimeBlockedByFailure;  // the part of TimeWaitingRoute spent queued behind a broken AGV
@@ -387,8 +408,8 @@ namespace Assets.Scripts.Simulation.Types
         public string FlowDirection;        // East / West / North / South
 
         public int TraversalCount;       // successful zone entries by any AGV
-        public int BlockEvents;          // times TryReserve returned false
-        public float TotalBlockTime;       // cumulative sim-seconds AGVs waited here
+        public int BlockEvents;          // AGV waits that began here (one per wait, not per retry; since 10-02 G4)
+        public float TotalBlockTime;       // cumulative sim-seconds AGVs waited here, every wait incl. stalls/cancels/open at end
 
         // Derived
         public float MeanBlockTime =>
@@ -498,6 +519,15 @@ namespace Assets.Scripts.Simulation.Types
         public int JobCandidateCount;
         public bool IsJobSelectionDegenerate;
         public string JobCandidateIds = "";
+
+        // The resolved (job, machine) rule halves of the action that made this decision (audit G5). RL runs
+        // used to log only rule = rl_policy. "Random" is not resolved to the rule it resampled.
+        public string ActionJob = "";
+        public string ActionMachine = "";
+        // Routing rows: TECT inputs per machine candidate (same order as CandidateIds; travel seconds, the
+        // ECT penalty is TravelPrice x travel) and the episode's travel price. Empty/0 for dispatch rows.
+        public string CandidateTravelTimes = "";
+        public float TravelPrice;
     }
 
     // ── Per-job completion record ──

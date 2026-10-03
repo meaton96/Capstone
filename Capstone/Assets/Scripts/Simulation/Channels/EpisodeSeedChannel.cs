@@ -34,6 +34,7 @@ namespace Assets.Scripts.Simulation.Channels
         private readonly Queue<int> _seeds = new Queue<int>();
         private readonly object _lock = new object();
         private int _consumed;
+        private string _rejection;
 
         public EpisodeSeedChannel()
         {
@@ -74,7 +75,24 @@ namespace Assets.Scripts.Simulation.Channels
             }
             catch (Exception ex)
             {
+                // Only logging here let the episode run on an empty queue (seed -1) or on stale seeds,
+                // so an evaluation silently drifted off its instance list (audit E3). FactoryOrchestrator
+                // checks TakeRejection in StartEpisode and stops the player, like a rejected config.
                 SimLogger.LogError($"[SeedChannel] Failed to parse seed message: {ex.Message}");
+                lock (_lock) { _rejection ??= $"seed message rejected: {ex.Message}"; }
+            }
+        }
+
+        /// <summary>
+        /// Returns and clears the first rejection since the last call, or null if every message parsed.
+        /// </summary>
+        public string TakeRejection()
+        {
+            lock (_lock)
+            {
+                string r = _rejection;
+                _rejection = null;
+                return r;
             }
         }
 

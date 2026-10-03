@@ -225,6 +225,7 @@ class TwinSchedulingEnv:
             "deadlock": False,
             "timed_out": bool(final.timed_out),
             "truncated": bool(final.truncated),
+            "tick_error": False,
         }
 
     @property

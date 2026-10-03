@@ -27,6 +27,7 @@ namespace Assets.Scripts.Simulation.Machines
     ///      fresh TTF (age reset to zero post-repair) and returns to Operational.
     [RequireComponent(typeof(Collider))]
     [RequireComponent(typeof(Rigidbody))]
+    [DefaultExecutionOrder(FactoryOrchestrator.ExecutionOrderMachines)]   // after the orchestrator (H2)
     public class PhysicalMachine : MonoBehaviour
     {
         // ── Identity ─────────────────────────────────────────────────────────

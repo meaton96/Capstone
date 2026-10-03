@@ -76,6 +76,8 @@ namespace Assets.Scripts.Simulation
         private const float MachineCountScale = 100f; // machine count; was MaxMachines, pinned so the feature
                                                       // is unchanged when the row cap moves
 
+        private static bool _reportedNonFinite;   // Squash logs the first non-finite input only
+
         private const float NoiseStdDev = 0.02f;
         private const float DropoutRate = 0.05f;
 
@@ -216,6 +218,18 @@ namespace Assets.Scripts.Simulation
          */
         private static float Squash(double x, float scale)
         {
+            // NaN used to pass straight into the observation (x <= 0 is false for NaN), and +inf gave
+            // inf/inf = NaN (audit E6). Either means a broken input upstream: report it once, keep the obs finite.
+            if (double.IsNaN(x) || double.IsInfinity(x))
+            {
+                if (!_reportedNonFinite)
+                {
+                    _reportedNonFinite = true;
+                    Logging.SimLogger.Error($"[ObservationBuilder] Non-finite feature value {x} (scale {scale}); " +
+                                    "clamped. Further occurrences are not logged.");
+                }
+                return double.IsPositiveInfinity(x) ? 1f : 0f;
+            }
             if (x <= 0.0) return 0f;
             return (float)(x / (x + scale));
         }
@@ -509,10 +523,10 @@ namespace Assets.Scripts.Simulation
             float[] flags = new float[EventFlagLength];
 
             // [0] Dispatch decision flag.
-            flags[0] = req.Type == DecisionType.Dispatch ? 1f : 0f;
+            flags[0] = req?.Type == DecisionType.Dispatch ? 1f : 0f;   // null-safe like the other builders (audit E5)
 
             // [1] Routing decision flag.
-            flags[1] = req.Type == DecisionType.Routing ? 1f : 0f;
+            flags[1] = req?.Type == DecisionType.Routing ? 1f : 0f;
 
             // [2] At least one AGV is idle.
             if (AGVPool.Instance != null)

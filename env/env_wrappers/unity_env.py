@@ -470,6 +470,7 @@ class UnitySchedulingEnv:
                 deadlock=bool(final.deadlock),
                 timed_out=bool(final.timed_out),
                 truncated=bool(final.truncated),
+                tick_error=bool(final.tick_error),
             )
         return summary
 

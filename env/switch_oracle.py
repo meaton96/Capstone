@@ -183,7 +183,7 @@ def main(argv=None):
     # A candidate that deadlocks ends early, so its return covers less time and could look better than a run
     # that finished; with finite buffers that can happen. Rank feasible (non-deadlocked) runs first.
     def rank(r):
-        return (not (r.get("deadlock") or r.get("timed_out")), r["return"])
+        return (not (r.get("deadlock") or r.get("timed_out") or r.get("tick_error")), r["return"])
 
     prefix, all_rows, history = [], [], []
     start = time.time()
@@ -201,7 +201,7 @@ def main(argv=None):
         prefix.append(best["tail"])
 
     fields = ["stage", "prefix", "tail", "policy", "seed", "return", "total_flow_time", "mean_flow_time",
-              "jobs_exited", "makespan", "decisions", "deadlock", "timed_out", "truncated", "machine_failures",
+              "jobs_exited", "makespan", "decisions", "deadlock", "timed_out", "truncated", "tick_error", "machine_failures",
               "input_buffer_capacity", "output_buffer_capacity", "output_blocked_machine_seconds",
               "buffer_wait_job_seconds", "config_hash", "instance_hash"]
     with open(out / "stages.csv", "w", newline="") as f:

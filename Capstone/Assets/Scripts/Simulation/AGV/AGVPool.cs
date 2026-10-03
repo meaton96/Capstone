@@ -172,7 +172,7 @@ namespace Assets.Scripts.Simulation.AGV
         public AGVController GetIdleAGV()
         {
             foreach (var agv in fleet)
-                if (agv.IsIdle && !agv.IsBroken) return agv;
+                if (agv.IsIdle && !agv.IsOutOfService) return agv;
             return null;
         }
 
@@ -195,16 +195,16 @@ namespace Assets.Scripts.Simulation.AGV
         public AGVController GetAvailableAGV(int tile = -1)
         {
             foreach (var agv in fleet)
-                if (agv.IsIdle && !agv.IsBroken && Serves(agv, tile)) return agv;
+                if (agv.IsIdle && !agv.IsOutOfService && Serves(agv, tile)) return agv;
 
             foreach (var agv in fleet)
-                if (agv.State == AGVState.ReturningToParking && !agv.IsBroken && Serves(agv, tile)) return agv;
+                if (agv.State == AGVState.ReturningToParking && !agv.IsOutOfService && Serves(agv, tile)) return agv;
 
             return null;
         }
         // @brief Selects the available AGV with the fewest one-way zone hops to the pickup.
-        /// @details Prefers Idle units; falls back to the nearest ReturningToParking unit
-        ///          (redirectable mid-route) when none are idle. Uses zone-graph hop count
+        /// @details Nearest over Idle and ReturningToParking units (redirectable mid-route), Idle on a tie
+        ///          (until 2026-10-03 any Idle unit was preferred). Uses zone-graph hop count
         ///          rather than Euclidean distance — one-way aisles and aisle-exit parking
         ///          make straight-line distance a poor proxy for actual travel cost.
         /// @param pickupMachine The source machine (null = incoming belt).
@@ -231,12 +231,14 @@ namespace Assets.Scripts.Simulation.AGV
 
             Dictionary<int, int> hops = TrafficZoneManager.Instance.GetHopDistancesToNearest(pickupZones);
 
-            AGVController bestIdle = null; int bestIdleDist = int.MaxValue;
-            AGVController bestReturn = null; int bestReturnDist = int.MaxValue;
+            // Nearest unit over idle AND returning AGVs, idle winning ties (user decision 10-03). Until then any idle
+            // AGV beat a returning one, so a returning AGV passing the pickup drove on to parking while an idle one
+            // crossed the floor; a returning AGV got work only when none was idle.
+            AGVController best = null; int bestDist = int.MaxValue; bool bestIdle = false;
 
             foreach (var agv in fleet)
             {
-                if (agv.IsBroken) continue;   // frozen for its repair (AGVController, "Breakdowns")
+                if (agv.IsOutOfService) continue;   // broken down (AGVController, "Breakdowns") or serving a stall-snap penalty
                 bool idle = agv.IsIdle;
                 bool returning = agv.State == AGVState.ReturningToParking;
                 if (!idle && !returning) continue;
@@ -245,17 +247,13 @@ namespace Assets.Scripts.Simulation.AGV
                 int zone = ResolveZone(agv);
                 int d = (zone >= 0 && hops.TryGetValue(zone, out int hop)) ? hop : int.MaxValue;
 
-                if (idle)
+                if (best == null || d < bestDist || (d == bestDist && idle && !bestIdle))
                 {
-                    if (bestIdle == null || d < bestIdleDist) { bestIdle = agv; bestIdleDist = d; }
-                }
-                else
-                {
-                    if (bestReturn == null || d < bestReturnDist) { bestReturn = agv; bestReturnDist = d; }
+                    best = agv; bestDist = d; bestIdle = idle;
                 }
             }
 
-            return bestIdle ?? bestReturn;
+            return best;
         }
 
         /// @brief Resolves an AGV's current zone, falling back to a spatial lookup for idle

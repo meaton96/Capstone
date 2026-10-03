@@ -2,7 +2,7 @@
 """E1 figure: mean flow time of each phase kind of a compound scenario vs AGV count, failures off vs on.
 
 One small panel per phase kind (own y-scale: the kinds differ by 10x), two lines per panel, band = +-1 standard error
-over layouts x rules x seeds. Reads results/E1_runs.csv (analyze_load_sweep.py). 3-AGV points are off-chart by default
+over layouts x rules x seeds. Reads results/outdated/E1_runs.csv (analyze_load_sweep.py). 3-AGV points are off-chart by default
 (AGV-limited, flow 1000-2600 s would flatten every panel); --min-agv 3 keeps them.
 
 Usage: python3 results/scripts/plot_phase_vs_agv.py [--scenario compound_scenario_v2] [--protocol releasePrevious]
@@ -21,7 +21,7 @@ OFF, ON = "#2a78d6", "#eb6834"      # validated categorical slots 1-2 (dataviz p
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--csv", default="results/E1_runs.csv")
+    ap.add_argument("--csv", default="results/outdated/E1_runs.csv")
     ap.add_argument("--scenario", default="compound_scenario_v2")
     ap.add_argument("--protocol", default="releasePrevious")
     ap.add_argument("--min-agv", type=int, default=5)

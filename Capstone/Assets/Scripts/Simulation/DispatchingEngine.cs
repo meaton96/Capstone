@@ -143,6 +143,18 @@ namespace Assets.Scripts.Simulation
         public static int IndexForRule(DispatchingRule rule) => Array.IndexOf(AllRules, rule);
 
         /// <summary>
+        /// Names of an action's (job, machine) halves for the decision log (audit G5). Does not draw from
+        /// the random stream: Random is reported as "Random" for both halves, not as the rule it resampled.
+        /// </summary>
+        public static (string job, string machine) DescribeAction(int index)
+        {
+            if (index < 0 || index >= AllRules.Length) return ("?", "?");
+            DispatchingRule rule = AllRules[index];
+            if (!Halves.TryGetValue(rule, out var h)) return (rule.ToString(), rule.ToString());
+            return (h.job.ToString(), h.machine.ToString());
+        }
+
+        /// <summary>
         /// Resolves an index to its (job, machine) halves. Random re-samples one of the 8 legacy non-random
         /// rules per call, as before.
         /// </summary>
@@ -244,7 +256,16 @@ namespace Assets.Scripts.Simulation
             float best = float.MaxValue;
             foreach (int m in job.EligibleMachinesPerOp[next].Keys)
                 if (loads.TryGetValue(m, out float l) && l < best) best = l;
-            return best == float.MaxValue ? 0f : best;
+            if (best == float.MaxValue)
+            {
+                // GetAllMachineLoads has an entry for every machine on the floor, so this means the next
+                // operation's eligible machines are not on the floor at all: broken state, not "no queue"
+                // (audit A3). Keep 0 so the rule still ranks, but say so.
+                Logging.SimLogger.Error($"[DispatchingEngine] PTWINQ: job {job.JobId} op {next} has no eligible machine " +
+                                "on the floor; WINQ taken as 0.");
+                return 0f;
+            }
+            return best;
         }
 
         /// <summary>

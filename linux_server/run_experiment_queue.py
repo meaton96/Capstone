@@ -56,6 +56,8 @@ def main():
     ap.add_argument("--exe", default="./capstone.x86_64")
     ap.add_argument("--shard", default="0/1", help="i/N: run only every Nth cell of the (stable, longest-first) grid, so N "
                     "Slurm array tasks split one experiment across nodes; membership ignores which cells are already done")
+    ap.add_argument("--timeout-hours", type=float, default=24.0, help="kill a player that runs longer than this "
+                    "(a hung player otherwise holds a worker forever); 0 = no limit")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
     global RESULTS
@@ -107,7 +109,12 @@ def main():
                "-outputdir", rel, "-logFile", os.path.join(out, "sim.log")] + a.extra.split()
         t0 = time.time()
         with open(os.path.join(out, "player.out"), "w") as log:   # loader/crash errors land here, not in sim.log
-            rc = subprocess.run(cmd, cwd=os.path.dirname(exe), stdout=log, stderr=subprocess.STDOUT).returncode
+            try:
+                rc = subprocess.run(cmd, cwd=os.path.dirname(exe), stdout=log, stderr=subprocess.STDOUT,
+                                    timeout=a.timeout_hours * 3600 or None).returncode
+            except subprocess.TimeoutExpired:   # run() has already killed the player
+                log.write(f"\n[Queue] killed after --timeout-hours {a.timeout_hours}\n")
+                rc = -9
         ok = os.path.exists(os.path.join(out, "results.csv"))
         return rel, rc, ok, time.time() - t0
 

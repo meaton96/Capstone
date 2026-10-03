@@ -223,6 +223,7 @@ namespace Assets.Scripts.Simulation.Types
             public bool burstArrivalsEnabled = false;
             public float burstSizeMean = 1.0f;
             public double episodeDurationSeconds = 0.0;
+            public double warmupSeconds = 0.0;   // was missing, so batch configs silently ran without warm-up (audit F2)
         }
 
         // ── Conversion ──
@@ -310,6 +311,11 @@ namespace Assets.Scripts.Simulation.Types
                 preDispatchingMethod = raw.preDispatchingMethod ?? "fixed",
             };
 
+            // Nested keys: a typo inside "stochastic" was silently ignored (only top-level keys were checked).
+            if (rawObj?["stochastic"] is JObject stochObj)
+                ConfigKeyCheck.WarnUnknownTopLevel(stochObj, Jobs.ScenarioLoader.StochasticKeys,
+                                                   $"config '{raw.name}' \"stochastic\"");
+
             if (raw.stochastic != null)
             {
                 cfg.Stochastic = new StochasticConfig
@@ -330,6 +336,7 @@ namespace Assets.Scripts.Simulation.Types
                     BurstArrivalsEnabled = raw.stochastic.burstArrivalsEnabled,
                     BurstSizeMean = raw.stochastic.burstSizeMean,
                     EpisodeDurationSeconds = raw.stochastic.episodeDurationSeconds,
+                    WarmupSeconds = raw.stochastic.warmupSeconds,
                 };
             }
 

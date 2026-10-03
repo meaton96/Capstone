@@ -1,4 +1,4 @@
-"""Analyse the rq3-flex (FLEX_p<p>_m<m>) machine-flexibility sweep (docs/experiments/rq3-flex_findings_1002.md).
+"""Analyse the rq3-flex (FLEX_p<p>_m<m>) machine-flexibility sweep (docs/experiments/outdated/rq3-flex_findings_1002.md).
 
 Grid: the 12 head rule pairs x rnd_flex_s0-8 x flexibility p in {0, 0.15, 0.3, 0.5} x secondary-time multiplier
 m in {1.0, 1.25} (p = 0 once), layout D, 7 AGVs, releasePrevious, lane parking. 756 batch-runner cells, one run each.
@@ -8,7 +8,7 @@ time is the mean time in system of every job: the quantity the flow_time reward 
 flow of a 5,400 s window (docs/experiments/HEADROOM_METRIC_CORRECTION_1002.md). All rankings and gaps use it.
 Instances differ in job count (129-248), so gaps are per-seed ratios averaged over seeds.
 
-    .venv/bin/python results/scripts/analyze_flex.py [--results linux_server/Results] [--out results/rq3-flex]
+    .venv/bin/python results/scripts/analyze_flex.py [--results linux_server/Results] [--out results/outdated/rq3-flex]
 
 Writes <out>/cells_all.csv (one row per cell: results.csv columns plus flow components and routing statistics)
 and <out>/gaps.csv (mean gap to the per-seed best per rule and group), and prints the tables the findings use.

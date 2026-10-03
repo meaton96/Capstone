@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Assets.Scripts.Simulation.Machines;
 using Assets.Scripts.Simulation.FactoryLayout;
@@ -83,11 +84,12 @@ namespace Assets.Scripts.Simulation.Jobs
                     $"config seed = {config.Seed}");
 
             var jobs = new FJSSPJobDefinition[config.JobCount];
+            MachineType[] floorTypes = TypesOnFloor(machinesByType);
 
             for (int j = 0; j < config.JobCount; j++)
             {
                 int opCount = UnityEngine.Random.Range(config.MinOpsPerJob, config.MaxOpsPerJob + 1);
-                var opSequence = GenerateOpSequence(opCount);
+                var opSequence = GenerateOpSequence(opCount, floorTypes);
                 opCount = opSequence.Length;
 
                 var eligible = new Dictionary<int, float>[opCount];
@@ -141,7 +143,7 @@ namespace Assets.Scripts.Simulation.Jobs
             Dictionary<MachineType, List<int>> machinesByType)
         {
             int opCount = UnityEngine.Random.Range(config.MinOpsPerJob, config.MaxOpsPerJob + 1);
-            MachineType[] opSequence = GenerateOpSequence(opCount);
+            MachineType[] opSequence = GenerateOpSequence(opCount, TypesOnFloor(machinesByType));
             opCount = opSequence.Length;
 
             var eligible = new Dictionary<int, float>[opCount];
@@ -173,6 +175,19 @@ namespace Assets.Scripts.Simulation.Jobs
         }
 
         /// <summary>
+        /// Machine types that have at least one machine on this floor, in enum order. Op types are drawn
+        /// from these only: drawing from the full enum threw KeyNotFoundException on a floor missing a
+        /// type (audit F1). With every type present this is exactly AllTypes, so the draws are unchanged.
+        /// </summary>
+        private static MachineType[] TypesOnFloor(Dictionary<MachineType, List<int>> machinesByType)
+        {
+            var types = AllTypes.Where(t => machinesByType.TryGetValue(t, out var ids) && ids.Count > 0).ToArray();
+            if (types.Length == 0)
+                throw new InvalidOperationException("[Job Generator] The floor has no machines of any type.");
+            return types;
+        }
+
+        /// <summary>
         /// Constructs a randomized sequence of machine types for a job's operations.
         /// </summary>
         /// <param name="opCount">The desired number of operations in the sequence.</param>
@@ -183,7 +198,7 @@ namespace Assets.Scripts.Simulation.Jobs
         /// The final list is shuffled using Fisher-Yates and repaired to prevent consecutive
         /// duplicates of the same machine type.
         /// </remarks>
-        private static MachineType[] GenerateOpSequence(int opCount)
+        private static MachineType[] GenerateOpSequence(int opCount, MachineType[] types)
         {
             // opCount comes directly from the configured range — no floor at typeCount.
             // Draw each operation independently, avoiding consecutive duplicates.
@@ -196,7 +211,7 @@ namespace Assets.Scripts.Simulation.Jobs
                 MachineType picked;
                 do
                 {
-                    picked = AllTypes[UnityEngine.Random.Range(0, AllTypes.Length)];
+                    picked = types[UnityEngine.Random.Range(0, types.Length)];
                     retries++;
                 }
                 while (i > 0 && picked == sequence[i - 1] && retries < maxRetries);

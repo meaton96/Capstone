@@ -16,7 +16,7 @@ START = {"dispatch_idle": "pickup", "dispatch_return": "pickup", "predispatch_id
 END = {"pickup": "arrive_pickup", "prepickup": "arrive_prepickup", "dropoff": "arrive_dropoff", "park": "park"}
 # Events that end a leg early (it is replanned or abandoned): the leg is dropped.
 BREAK = {"dispatch_idle", "dispatch_return", "predispatch_idle", "predispatch_return", "cancel", "abort",
-         "redirect", "orphan", "stall", "breakdown", "reset"}
+         "redirect", "orphan", "stall", "snap", "breakdown", "reset"}
 
 
 def read_events(path):

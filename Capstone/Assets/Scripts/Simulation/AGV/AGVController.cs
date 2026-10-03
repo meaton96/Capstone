@@ -29,6 +29,7 @@ namespace Assets.Scripts.Simulation.AGV
     /// manages physical movement and sets status flags (@c PickedUpFlag, @c DeliveredFlag) 
     /// for a central supervisor to process, rather than triggering job state transitions directly.
     [RequireComponent(typeof(NavMeshAgent))]
+    [DefaultExecutionOrder(FactoryOrchestrator.ExecutionOrderAGVs)]   // after the orchestrator and machines (H2)
     public class AGVController : MonoBehaviour
     {
         [Header("Settings")]
@@ -104,7 +105,9 @@ namespace Assets.Scripts.Simulation.AGV
         /// <summary>True when the dispatcher may give this AGV a new transport: Idle, or
         ///          ReturningToParking (redirectable), and not broken.</summary>
         public bool IsAvailableForDispatch =>
-            !_broken && (State == AGVState.Idle || State == AGVState.ReturningToParking);
+            !IsOutOfService && (State == AGVState.Idle || State == AGVState.ReturningToParking);
+        /// <summary>True while broken down or serving a stall-snap travel penalty: not dispatchable.</summary>
+        public bool IsOutOfService => _broken || _snapPenaltyRemaining > 0.0;
         /// <summary>True while blocked on a zone whose chain of holders ends at a broken AGV.</summary>
         public bool IsBlockedByFailure => waitingForZone && _blockedByFailure;
         /// <summary>One row per breakdown this episode (agv_failures.csv).</summary>
@@ -191,6 +194,9 @@ namespace Assets.Scripts.Simulation.AGV
             _dispatchedFromIdle = false;
             _statRerouteCount = 0;
             _statStallRecoveryCount = 0;
+            _statStallSnapCount = 0;
+            _statStallSnapPenaltySeconds = 0.0;
+            _snapPenaltyRemaining = 0.0;
             _statTotalTrips = 0;
             _statTripAccumulator = 0.0;
             _statCurrentTripStart = 0.0;
@@ -262,6 +268,8 @@ namespace Assets.Scripts.Simulation.AGV
                 PathDepartureFromParking = _statPathDeparture,
                 RerouteCount = _statRerouteCount,
                 StallRecoveryCount = _statStallRecoveryCount,
+                StallSnapCount = _statStallSnapCount,
+                StallSnapPenaltySeconds = _statStallSnapPenaltySeconds,
                 FailureCount = _statFailureCount,
                 TimeBroken = _statTimeBroken,
                 TimeBlockedByFailure = _statTimeBlockedByFailure,
@@ -333,7 +341,10 @@ namespace Assets.Scripts.Simulation.AGV
         private double _statTotalPathLength;   // cumulative NavMesh distance
         private int _statRerouteCount;      // RedirectDropoff calls
         private int _statStallRecoveryCount; // HandleZoneStall calls (suspected deadlock self-recoveries)
-        private int _statTotalTrips;        // complete pickup→dropoff cycles
+        private int _statStallSnapCount;     // of those, recoveries that teleported to parking (no retreat possible; C2)
+        private double _statStallSnapPenaltySeconds;   // out-of-service time served for those snaps
+        private double _snapPenaltyRemaining;          // > 0 while serving a snap's travel penalty
+        private int _statTotalTrips;        // complete pickup→dropoff cycles, counted at dropoff (G13)
         private double _statTripAccumulator;   // sum of completed trip durations
         private double _statCurrentTripStart;  // SimNow when current trip began (set in DoPickup)
         private double _blockStartTime = -1.0;  // SimNow when zone blocking began
@@ -404,6 +415,7 @@ namespace Assets.Scripts.Simulation.AGV
             SimLogger.Low($"[AGV {AgvId}] AbortTransit — job {CurrentJobId} released at {transform.position}.");
 
             CurrentJobId = -1;
+            _statCurrentTripStart = 0;   // trip abandoned: not counted, not timed (G13)
             loadedJobVisual = null;
             sourceMachine = null;
             targetMachine = null;
@@ -427,6 +439,7 @@ namespace Assets.Scripts.Simulation.AGV
             SimLogger.Low($"[AGV {AgvId}] CancelPickup — abandoning pickup for job {CurrentJobId}.");
 
             CurrentJobId = -1;
+            _statCurrentTripStart = 0;   // trip abandoned: not counted, not timed (G13)
             loadedJobVisual = null;
             sourceMachine = null;
             targetMachine = null;
@@ -457,7 +470,7 @@ namespace Assets.Scripts.Simulation.AGV
             targetMachine = null;
             atPickupDock = false;
             pickupZoneId = -1;
-            _blockStartTime = -1.0;
+            CloseBlockWait();
 
             CancelCurrentRoute();
             State = AGVState.ReturningToParking;
@@ -564,6 +577,7 @@ namespace Assets.Scripts.Simulation.AGV
 
             currentRoute.Clear();
             routeIndex = 0;
+            CloseBlockWait();
             waitingForZone = false;
             pendingZoneId = -1;
             parkingZoneId = -1;
@@ -639,6 +653,7 @@ namespace Assets.Scripts.Simulation.AGV
             atDropoffDock = false;
             pickupTimer = handshakeDuration;
             dropoffTimer = handshakeDuration;
+            CloseBlockWait();
             waitingForZone = false;
             pendingZoneId = -1;
             PickedUpFlag = false;
@@ -725,6 +740,7 @@ namespace Assets.Scripts.Simulation.AGV
             atDropoffDock = false;
             pickupTimer = handshakeDuration;
             dropoffTimer = handshakeDuration;
+            CloseBlockWait();
             waitingForZone = false;
             pendingZoneId = -1;
             PickedUpFlag = false;
@@ -762,6 +778,22 @@ namespace Assets.Scripts.Simulation.AGV
                 // Frozen in place: no movement, no handshake progress, reservations kept.
                 TickRepair(dt);
                 navAgent.nextPosition = transform.position;
+                UpdateStatusLabel();
+                return;
+            }
+            if (_snapPenaltyRemaining > 0.0)
+            {
+                // Stall-snap travel penalty (see RetreatFromStall): parked but out of service for the time the
+                // drive back would have taken. Counted as travel; shown as ReturningToParking.
+                _snapPenaltyRemaining -= dt;
+                _statTimeTraveling += dt;
+                _statStallSnapPenaltySeconds += dt;
+                navAgent.nextPosition = transform.position;
+                if (_snapPenaltyRemaining <= 0.0)
+                {
+                    _snapPenaltyRemaining = 0.0;
+                    ArriveAtParking();
+                }
                 UpdateStatusLabel();
                 return;
             }
@@ -896,6 +928,7 @@ namespace Assets.Scripts.Simulation.AGV
                     StalledJobId = CurrentJobId;
                     JobReleaseReason = "breakdown";
                     CurrentJobId = -1;
+                    _statCurrentTripStart = 0;   // trip abandoned: not counted, not timed (G13)
                     loadedJobVisual = null;
                     sourceMachine = null;
                     targetMachine = null;
@@ -971,8 +1004,8 @@ namespace Assets.Scripts.Simulation.AGV
             {
                 _replanOnRepair = false;
                 _beginWaypointOnRepair = false;
+                CloseBlockWait();
                 CancelCurrentRoute();
-                _blockStartTime = -1.0;
                 _stallExemptTime = 0.0;
                 _blockedByFailure = false;
                 BeginParkingRoute();   // State is already ReturningToParking
@@ -1038,8 +1071,7 @@ namespace Assets.Scripts.Simulation.AGV
 
             PickedUpFlag = true;
             TraceEvent("pickup", CurrentJobId, sourceMachine != null ? sourceMachine.MachineId : -1, targetMachine != null ? targetMachine.MachineId : -1);
-            _statTotalTrips++;
-            _statCurrentTripStart = SimNow;     // ← NEW
+            _statCurrentTripStart = SimNow;     // trip counted at dropoff (audit G13), as in the DES twin
 
             State = AGVState.MovingToDropoff;
             atPickupDock = false;
@@ -1077,6 +1109,7 @@ namespace Assets.Scripts.Simulation.AGV
             {
                 LastTripDuration = (float)(SimNow - _statCurrentTripStart);
                 _statTripAccumulator += LastTripDuration;
+                _statTotalTrips++;
                 _statCurrentTripStart = 0;
             }
 
@@ -1114,6 +1147,31 @@ namespace Assets.Scripts.Simulation.AGV
             BeginNextWaypoint();
         }
 
+        /// @brief Seconds to drive from the current position via zone @p fromZone to @p parkPos along the zone
+        /// graph (zone centre to zone centre, over MoveSpeed). Straight-line distance if there is no route.
+        private double EstimateDriveSeconds(int fromZone, Vector3 parkPos)
+        {
+            if (moveSpeed <= 0f) return 0.0;
+            Vector3 here = transform.position;
+            TrafficZone parkZone = trafficMgr.GetZoneAtPosition(parkPos);
+            List<int> route = fromZone >= 0 && parkZone != null ? trafficMgr.GetRoute(fromZone, parkZone.ZoneId) : null;
+            float length = 0f;
+            if (route != null && route.Count > 0)
+            {
+                Vector3 p = FlatY(here);
+                foreach (int z in route)
+                {
+                    Vector3 c = FlatY(trafficMgr.GetZone(z).Centre);
+                    length += Vector3.Distance(p, c);
+                    p = c;
+                }
+                length += Vector3.Distance(p, FlatY(parkPos));
+            }
+            else
+                length = Vector3.Distance(FlatY(here), FlatY(parkPos));
+            return length / moveSpeed;
+        }
+
         /// @brief Checks if the AGV has physically arrived at its parking coordinate.
         private bool ReachedParking()
         {
@@ -1138,6 +1196,7 @@ namespace Assets.Scripts.Simulation.AGV
             else if (currentZoneId >= 0) { trafficMgr.Release(currentZoneId, AgvId); currentZoneId = -1; }
             currentRoute.Clear();
             routeIndex = 0;
+            CloseBlockWait();
             waitingForZone = false;
             pendingZoneId = -1;
             parkingZoneId = -1;
@@ -1152,6 +1211,7 @@ namespace Assets.Scripts.Simulation.AGV
             TraceEvent("reset", CurrentJobId);
             SimLogger.Error($"[AGV {AgvId}] FullReset for job {CurrentJobId}.");
             CurrentJobId = -1;
+            _statCurrentTripStart = 0;   // trip abandoned: not counted, not timed (G13)
             loadedJobVisual = null;
             sourceMachine = null;
             targetMachine = null;
@@ -1229,6 +1289,7 @@ namespace Assets.Scripts.Simulation.AGV
                 {
                     waitingForZone = true;
                     pendingZoneId = nextZoneId;
+                    trafficMgr.RecordBlockStart(nextZoneId);
                     nextRetryTime = SimNow + reservationRetryInterval;
                     _blockStartTime = SimNow;
                     _stallExemptTime = 0.0;
@@ -1252,6 +1313,19 @@ namespace Assets.Scripts.Simulation.AGV
             }
         }
 
+        /// @brief Ends the current zone wait, if one is open, and charges its duration to the zone
+        /// that blocked it. Called wherever a wait ends (reservation, stall, redispatch, cancel,
+        /// orphan release) and at episode end, so every wait is counted once (audit G4).
+        private void CloseBlockWait()
+        {
+            if (_blockStartTime >= 0.0 && pendingZoneId >= 0 && trafficMgr != null)
+                trafficMgr.RecordBlockTime(pendingZoneId, (float)(SimNow - _blockStartTime));
+            _blockStartTime = -1.0;
+        }
+
+        /// @brief Charges a wait still open at episode end (FactoryOrchestrator.FinaliseEpisode).
+        public void FlushBlockWait() => CloseBlockWait();
+
         /// @brief Polls the @c TrafficZoneManager for a previously blocked zone reservation.
         private void TryResumeFromWait()
         {
@@ -1259,12 +1333,7 @@ namespace Assets.Scripts.Simulation.AGV
 
             if (trafficMgr.TryReserve(pendingZoneId, AgvId))
             {
-                // Report block duration to zone manager for congestion logging  ← NEW
-                if (_blockStartTime >= 0f)
-                {
-                    trafficMgr.RecordBlockTime(pendingZoneId, (float)(SimNow - _blockStartTime));
-                    _blockStartTime = -1.0;
-                }
+                CloseBlockWait();
 
                 TrafficZone zone = trafficMgr.GetZone(pendingZoneId);
                 currentWaypoint = FlatY(zone.Centre);
@@ -1306,7 +1375,7 @@ namespace Assets.Scripts.Simulation.AGV
             SimLogger.Error($"[AGV {AgvId}] Zone {pendingZoneId} reservation stalled past " +
                              $"{zoneStallTimeoutSeconds:F0}s (state={State}) — likely circular-wait " +
                              $"deadlock. Releasing job and retreating.");
-            _blockStartTime = -1.0;
+            CloseBlockWait();
             _stallExemptTime = 0.0;
             _blockedByFailure = false;
             _statStallRecoveryCount++;
@@ -1319,6 +1388,7 @@ namespace Assets.Scripts.Simulation.AGV
                     StalledFlag = true;
                     StalledJobId = CurrentJobId;
                     CurrentJobId = -1;
+                    _statCurrentTripStart = 0;   // trip abandoned: not counted, not timed (G13)
                     loadedJobVisual = null;
                     sourceMachine = null;
                     targetMachine = null;
@@ -1330,6 +1400,7 @@ namespace Assets.Scripts.Simulation.AGV
                     StalledFlag = true;
                     StalledJobId = CurrentJobId;
                     CurrentJobId = -1;
+                    _statCurrentTripStart = 0;   // trip abandoned: not counted, not timed (G13)
                     loadedJobVisual = null;
                     sourceMachine = null;
                     targetMachine = null;
@@ -1362,6 +1433,7 @@ namespace Assets.Scripts.Simulation.AGV
         {
             currentRoute.Clear();
             routeIndex = 0;
+            CloseBlockWait();
             waitingForZone = false;
             pendingZoneId = -1;
             parkingZoneId = -1;
@@ -1386,12 +1458,24 @@ namespace Assets.Scripts.Simulation.AGV
 
             SimLogger.Error($"[AGV {AgvId}] Cannot retreat — previous zone also occupied. " +
                              $"Forcing release and snapping to parking.");
+            _statStallSnapCount++;   // the non-physical fallback; retreats = StallRecoveryCount - this (audit C2)
+            Vector3 parkPos = AGVPool.Instance.GetParkingPosition(AgvId);
+            // The snap itself is instant, but the AGV is then held out of service for the time the drive back
+            // to its bay would take (route length over speed, ignoring congestion), so a teleport does not
+            // hand back an AGV for free. Abstracts the multi-AGV recovery a real floor would need (10-03).
+            double penalty = EstimateDriveSeconds(currentZoneId, parkPos);
             trafficMgr.ReleaseAll(AgvId);
             currentZoneId = -1;
             previousZoneId = -1;
-            Vector3 parkPos = AGVPool.Instance.GetParkingPosition(AgvId);
             Vector3 pos = parkPos; pos.y = groundOffset;
             transform.position = pos;
+            if (penalty > 0.0)
+            {
+                _snapPenaltyRemaining = penalty;
+                State = AGVState.ReturningToParking;
+                TraceEvent("snap", -1);
+                return;
+            }
             ArriveAtParking();
         }
 

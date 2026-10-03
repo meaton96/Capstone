@@ -239,6 +239,17 @@ namespace Assets.Scripts.Simulation
                             PhysicalMachine targetMachine = _layout.GetMachine(machineId);
                             targetMachine.PlaceOnIncoming(jobId, job.Visual);
                             RefreshMachineLabels(machineId);
+
+                            // The machine failed in the tick this dropoff completed: HarvestFailureFlags
+                            // ran first and missed the job (still InTransit, AGV no longer
+                            // MovingToDropoff). Re-route it the way failure step 2 does for queued jobs
+                            // instead of leaving it on a broken machine for the whole repair (audit B3).
+                            if (targetMachine.HealthState != MachineHealthState.Operational)
+                            {
+                                job.TransitionTo(JobState.NeedsRouting, _simTimeRef);
+                                SimLogger.Medium($"[Failure] Job {jobId} delivered to machine {machineId} " +
+                                                 $"as it failed — re-routed.");
+                            }
                         }
                         job.AssignedAgvId = -1;
                     }

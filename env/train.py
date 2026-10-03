@@ -151,7 +151,7 @@ def build_env(args, ppo_cfg, run_dir: Path, reward, scenario_generator=None, see
 EPISODE_CSV_FIELDS = [
     "global_step", "env", "seed", "seed_index", "return", "length", "makespan",
     "mean_flow_time", "total_flow_time", "jobs_exited", "deadlock", "timed_out", "truncated",
-    "config_hash", "instance_hash",
+    "config_hash", "instance_hash", "tick_error",
 ]
 
 
@@ -181,7 +181,7 @@ def log_episodes(writer: SummaryWriter, infos, global_step: int, recent: deque,
             value = episode.get(key)
             if value is not None and not math.isnan(value):
                 writer.add_scalar(f"episode/{key}", value, global_step)
-        for key in ("deadlock", "timed_out", "truncated", "interrupted"):
+        for key in ("deadlock", "timed_out", "truncated", "interrupted", "tick_error"):
             if key in episode:
                 writer.add_scalar(f"episode/{key}", float(episode[key]), global_step)
         for name, total in episode.get("reward_terms", {}).items():

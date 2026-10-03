@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Thesis figure for twin-gap (G1): mean flow time against fleet size, Unity vs the event-based twins.
 
-  python results/scripts/plot_twin_gap.py [--cells results/des_twin/G1_cells.csv] [--out docs/Thesis/figures]
+  python results/scripts/plot_twin_gap.py [--cells results/outdated/des_twin/G1_cells.csv] [--out docs/Thesis/figures]
 
 Four panels (transport-bound compound on D and J, _mfsweep_control on D, machine-bound rnd_load_s0 on D), one line
 per model, log scale. Reads the output of des_twin_gap.py.

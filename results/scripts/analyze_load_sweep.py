@@ -14,7 +14,7 @@ Per run:
   phases      compound scenarios: mean flow of jobs arriving in each phase kind (bottleneck, standoff, ...)
 
 Usage (from repo root):
-  python results/scripts/analyze_load_sweep.py --exps E1_hold E1_rel --out results/E1_runs.csv
+  python results/scripts/analyze_load_sweep.py --exps E1_hold E1_rel --out results/outdated/E1_runs.csv
 """
 import argparse, glob, json, os, re
 import pandas as pd

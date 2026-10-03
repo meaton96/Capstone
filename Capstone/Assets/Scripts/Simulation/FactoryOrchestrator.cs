@@ -20,8 +20,18 @@ namespace Assets.Scripts.Simulation
     /// coordinates machine/AGV/job systems, and interfaces with the learning agent
     /// for dispatch decision-making.
     /// </summary>
+    /// Runs first in every FixedUpdate (audit H2/C3/G12: the order was never pinned). The orchestrator
+    /// harvests the flags machines and AGVs raised in the previous tick, then they act: a flag raised at
+    /// tick m is harvested at m + 1, which env/des_twin/engine.py models. Machines and AGVs only raise flags
+    /// and never read each other within a tick, so their relative order (pinned too) does not matter.
+    [DefaultExecutionOrder(ExecutionOrderOrchestrator)]
     public class FactoryOrchestrator : MonoBehaviour
     {
+        /// Script execution order: orchestrator, then machines, then AGVs (each FixedUpdate tick).
+        public const int ExecutionOrderOrchestrator = -100;
+        public const int ExecutionOrderMachines = -50;
+        public const int ExecutionOrderAGVs = -40;
+
 
         /// <summary>
         /// When true, heuristic (fixed-PDR) decisions are drained within a single frame
@@ -385,6 +395,10 @@ namespace Assets.Scripts.Simulation
         private int _lastProgressCount = -1;
         private double _lastProgressChangeSimTime;
         private bool _deadlockDetected;
+        /// Exceptions caught in FixedUpdate this episode (the first one ends the episode; audit H5).
+        private int _tickErrors;
+        /// Routing decisions where the job rule's pick could not be routed and the focus job was (audit E4).
+        private int _jobRuleFallbacks;
         private double _deadlockSimTime = -1.0;
         private double _firstStallSimTime = -1.0;
         private AGVCollisionMonitor _collisions = new AGVCollisionMonitor();
@@ -638,7 +652,8 @@ namespace Assets.Scripts.Simulation
             // Configs from Python never fall back (thesis section 7.1): a message that failed to parse, a scenario that
             // fails to load, or a config outside ConfigValidator's physical bounds stops the player.
             if (_configRejected) return;
-            string rejection = EpisodeConfigChannel.Instance?.TakeRejection();
+            string rejection = EpisodeConfigChannel.Instance?.TakeRejection()
+                               ?? EpisodeSeedChannel.Instance?.TakeRejection();
             if (rejection != null)
             {
                 RejectPythonConfig(rejection);
@@ -846,6 +861,8 @@ namespace Assets.Scripts.Simulation
             _lastProgressCount = -1;
             _lastProgressChangeSimTime = 0.0;
             _deadlockDetected = false;
+            _tickErrors = 0;
+            _jobRuleFallbacks = 0;
             _deadlockSimTime = -1.0;
             _firstStallSimTime = -1.0;
             _collisions = new AGVCollisionMonitor();
@@ -932,6 +949,30 @@ namespace Assets.Scripts.Simulation
         private void FixedUpdate()
         {
             if (!episodeActive) return;
+            try
+            {
+                TickEpisode();
+            }
+            catch (Exception ex)
+            {
+                // An exception used to skip the rest of the tick silently and the episode carried on
+                // from half-updated state (audit H5). Count it and end the episode as failed instead.
+                _tickErrors++;
+                SimLogger.Error($"[Orchestrator] Exception in tick {_episodeTicks} at {SimTime:F1}s — " +
+                                $"ending episode as failed: {ex}");
+                if (!episodeActive) return;   // the exception came from inside FinaliseEpisode
+                try { FinaliseEpisode(); }
+                catch (Exception fin)
+                {
+                    episodeActive = false;
+                    SimLogger.Error($"[Orchestrator] FinaliseEpisode also failed: {fin}");
+                }
+            }
+        }
+
+        /// One simulation tick of an active episode; FixedUpdate wraps it in the error guard.
+        private void TickEpisode()
+        {
 
             SyncAcademyManualStepping();
 
@@ -999,7 +1040,8 @@ namespace Assets.Scripts.Simulation
                 _warmupActive = false;
                 decisionCount = 0;
                 _routedMoves = _crossTileMoves = _tilesCrossed = 0;
-            _outputBlockedMachineSeconds = _bufferWaitJobSeconds = 0.0;
+                _jobRuleFallbacks = 0;
+                _outputBlockedMachineSeconds = _bufferWaitJobSeconds = 0.0;
                 _decisionLog.Clear();
                 SimLogger.Low($"[Orchestrator] Warm-up complete at {SimTime:F0}s — RL agent now in " +
                               "control (decisionCount and decision log reset).");
@@ -1367,20 +1409,30 @@ namespace Assets.Scripts.Simulation
             {
                 int jobId = DispatchingEngine.SelectRoutingJob(actionIndex, new List<int>(req.JobCandidateIds), Jobs, SimTime);
                 JobData picked = jobId >= 0 ? Jobs.Get(jobId) : null;
-                if (picked != null && jobId != req.JobId && picked.State == JobState.NeedsRouting)
+                if (jobId >= 0 && jobId != req.JobId)
                 {
-                    DecisionRequest rebuilt = _decisions.BuildRoutingDecision(picked, countsAsNewDecision: false);
-                    if (rebuilt.CandidateMachineIds.Length > 0)
+                    DecisionRequest rebuilt = picked != null && picked.State == JobState.NeedsRouting
+                        ? _decisions.BuildRoutingDecision(picked, countsAsNewDecision: false)
+                        : null;
+                    if (rebuilt != null && rebuilt.CandidateMachineIds.Length > 0)
                     {
                         rebuilt.JobCandidateIds = req.JobCandidateIds;
                         rebuilt.JobSelectedByRule = true;
                         CurrentDecision = rebuilt;
                     }
+                    else
+                    {
+                        // The rule's job cannot be routed now (no candidate machine, or no longer NeedsRouting),
+                        // so the focus job is routed instead. Used to happen silently (audit E4).
+                        _jobRuleFallbacks++;
+                        SimLogger.Medium($"[Orchestrator] Job rule picked job {jobId} but it has no candidate " +
+                                         $"machine; routing focus job {req.JobId} instead.");
+                    }
                 }
             }
 
             int chosenMachineId = DispatchingEngine.SelectMachine(actionIndex, CurrentDecision);
-            LogRoutingDecision(chosenMachineId);
+            LogRoutingDecision(chosenMachineId, actionIndex);
             JobData job = Jobs.Get(CurrentDecision.JobId);
             if (job == null) return;
 
@@ -1436,7 +1488,7 @@ namespace Assets.Scripts.Simulation
         {
             int machineId = CurrentDecision.MachineId;
             int chosenJobId = DispatchingEngine.SelectJob(actionIndex, machineId, Jobs, SimTime);
-            LogDispatchDecision(chosenJobId);
+            LogDispatchDecision(chosenJobId, actionIndex);
 
             JobData job = Jobs.Get(chosenJobId);
             if (job == null || job.State != JobState.Queued || job.LocationMachineId != machineId) return;
@@ -1459,9 +1511,10 @@ namespace Assets.Scripts.Simulation
         /// decision including the candidates.Length &lt;= 1 degenerate case DispatchingEngine
         /// short-circuits on, so the log can directly show how often the rule never actually ran.
         /// </summary>
-        private void LogRoutingDecision(int chosenMachineId)
+        private void LogRoutingDecision(int chosenMachineId, int actionIndex)
         {
             var req = CurrentDecision;
+            var (jobRule, machineRule) = DispatchingEngine.DescribeAction(actionIndex);
             int count = req.CandidateMachineIds?.Length ?? 0;
             int jobCandidateCount = req.JobCandidateIds?.Length ?? 0;
             _decisionLog.Add(new DecisionRecord
@@ -1480,6 +1533,12 @@ namespace Assets.Scripts.Simulation
                 JobCandidateCount = jobCandidateCount,
                 IsJobSelectionDegenerate = jobCandidateCount <= 1,
                 JobCandidateIds = string.Join("|", req.JobCandidateIds ?? Array.Empty<int>()),
+                ActionJob = jobRule,
+                ActionMachine = machineRule,
+                CandidateTravelTimes = req.CandidateTravelTimes != null
+                    ? string.Join("|", req.CandidateTravelTimes.Select(t => t.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)))
+                    : "",
+                TravelPrice = req.TravelPrice,
             });
         }
 
@@ -1487,9 +1546,10 @@ namespace Assets.Scripts.Simulation
         /// Records a dispatch decision (machine picks a queued job) to _decisionLog. Fires for
         /// every dispatch decision including the queue.Count &lt;= 1 degenerate case.
         /// </summary>
-        private void LogDispatchDecision(int chosenJobId)
+        private void LogDispatchDecision(int chosenJobId, int actionIndex)
         {
             var req = CurrentDecision;
+            var (jobRule, machineRule) = DispatchingEngine.DescribeAction(actionIndex);
             int[] queuedIds = req.QueuedJobIds ?? Array.Empty<int>();
             int count = queuedIds.Length;
             var remainingWork = new float[count];
@@ -1513,6 +1573,8 @@ namespace Assets.Scripts.Simulation
                 CandidateStatA = string.Join("|", req.QueuedDurations ?? Array.Empty<double>()),
                 CandidateStatB = string.Join("|", remainingWork),
                 CandidateStatC = string.Join("|", queueEntryTimes),
+                ActionJob = jobRule,
+                ActionMachine = machineRule,
             });
         }
 
@@ -1580,6 +1642,12 @@ namespace Assets.Scripts.Simulation
                 telemetry.Flush();
             }
 
+            // Close processing intervals still open at the end so utilization includes the operation in
+            // progress (audit G10); the live MachineUtilization already did, the logged figure did not.
+            foreach (var kv in _machineProcessingStartTime)
+                _tracker.AddProcessingTime(kv.Key, SimTime - kv.Value);
+            _machineProcessingStartTime.Clear();
+
             EpisodeRecord record = _tracker.Build(
                 config: currentConfig,
                 simTime: SimTime,
@@ -1613,6 +1681,11 @@ namespace Assets.Scripts.Simulation
 
             // Deadlock watchdog outcome — see CheckForDeadlock
             record.DeadlockDetected = _deadlockDetected;
+            record.TickErrors = _tickErrors;
+            record.TimedOut = SimTime > MAX_EPISODE_SIM_SECONDS;
+            record.Truncated = _truncatedByTimeLimit;
+            record.JobRuleFallbacks = _jobRuleFallbacks;
+            record.DecisionDrain = BaselineDrainMode ? "baseline" : RLDecisionDrainMode ? "rl" : "none";
             record.DeadlockSimTime = _deadlockDetected ? _deadlockSimTime : -1.0;
             record.FirstStallSimTime = _firstStallSimTime;
             _collisions.Finish(SimTime);
@@ -1655,6 +1728,7 @@ namespace Assets.Scripts.Simulation
             // Collect AGV performance records
             foreach (var agv in agvPool.AllAGVs)
             {
+                agv.FlushBlockWait();   // waits still open at episode end count toward zone block time (G4)
                 record.AGVRecords.Add(agv.GetRecord(record.Makespan));
                 record.AGVFailureRecords.AddRange(agv.FailureRecords);
                 record.AGVEventRecords.AddRange(agv.EventRecords);
@@ -1821,7 +1895,7 @@ namespace Assets.Scripts.Simulation
                                agvPool != null ? agvPool.AllAGVs : null,
                                trafficZoneManager != null ? trafficZoneManager.Zones : null,
                                _tracker, _deadlockDetected, SimTime > MAX_EPISODE_SIM_SECONDS,
-                               _episodeSeed, _episodeSeedIndex, _truncatedByTimeLimit);
+                               _episodeSeed, _episodeSeedIndex, _truncatedByTimeLimit, _tickErrors > 0);
         }
 
         /// <summary>

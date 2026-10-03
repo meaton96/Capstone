@@ -53,8 +53,8 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         public bool IsFull => OccupantAgvIds.Count >= Capacity;
         public bool IsEmpty => OccupantAgvIds.Count == 0;
         [NonSerialized] public int TraversalCount;   // successful TryReserve entries
-        [NonSerialized] public int BlockEvents;       // failed TryReserve calls (zone full)
-        [NonSerialized] public float TotalBlockTime;    // cumulative wait time reported by AGVs
+        [NonSerialized] public int BlockEvents;       // AGV waits that began on this zone (one per wait, not per retry)
+        [NonSerialized] public float TotalBlockTime;    // cumulative wait time, every wait (incl. stalls, cancels, open at episode end)
 
 
     }
@@ -127,6 +127,12 @@ namespace Assets.Scripts.Simulation.FactoryLayout
         /// directed links, and registers dock points for all machines and I/O belts.
         /// @pre FactoryLayoutManager must have already built the physical floor.
         /// @post The @ref zones list and lookup dictionaries are fully populated.
+        /// Exit code when the zone graph fails CheckZoneGraph (user decision D6, 10-02: every check is fatal).
+        public const int InvalidZoneGraphExitCode = 4;
+
+        /// Linked-floor tiles whose parking-lane exit corridor runs into a seam (audit D1); fatal in CheckZoneGraph.
+        private int _seamCorridorTiles;
+
         public void BuildZoneGraph()
         {
             zones.Clear();
@@ -136,6 +142,7 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             pathLengthCache.Clear();
             parkingZoneIds.Clear();
             nextZoneId = 0;
+            _seamCorridorTiles = 0;
 
             if (layoutManager == null || layoutManager.LayoutRows == 0)
             {
@@ -414,9 +421,44 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 }
             }
 
-            string msg = $"[TrafficZones] Graph check: strongly connected{(ranges.Count > 1 ? " (per tile)" : "")}={stronglyConnected}, misplaced docks={misplacedDocks}, " +
+            // (3) Zone centres inside another zone (audit D1). AGVs drive centre to centre, so a centre inside a
+            // second zone means two AGVs holding different reservations can stand on the same floor. Edge slivers
+            // where aisles meet (every layout, 0.25-0.75 m) are not counted. Known before D1: layout J's vertical
+            // gap zones sat inside its row zones (12 per floor, 0 recorded collisions); fixed 10-02 in
+            // BuildVerticalChain.
+            const float centreEps = 0.05f;
+            int centresInside = 0;
+            foreach (var za in zones)
+            {
+                if (za.Name == "Parking_Alcove") continue;
+                foreach (var zb in zones)
+                {
+                    if (ReferenceEquals(za, zb) || zb.Name == "Parking_Alcove") continue;
+                    if (Mathf.Abs(za.Centre.x - zb.Centre.x) >= zb.Size.x / 2f - centreEps ||
+                        Mathf.Abs(za.Centre.z - zb.Centre.z) >= zb.Size.z / 2f - centreEps) continue;
+                    if (centresInside++ < 10)
+                        SimLogger.Error($"[TrafficZones] Zone {za.Name}'s centre lies inside zone {zb.Name}.");
+                }
+            }
+
+            string msg = $"[TrafficZones] Graph check: strongly connected{(ranges.Count > 1 ? " (per tile)" : "")}={stronglyConnected}, misplaced docks={misplacedDocks}, zone centres inside another zone={centresInside}, " +
                          (girth == int.MaxValue ? "no cycle" : $"girth={girth} (no deadlock below {(girth + 1) / 2} AGVs under holdPrevious).");
-            if (!stronglyConnected || misplacedDocks > 0) SimLogger.Error(msg); else SimLogger.Medium(msg);
+            msg += $" Seam-corridor tiles={_seamCorridorTiles}.";
+            // D6 (user decision 10-02): any failed check stops the player. A floor with an unreachable zone, a
+            // dock outside its zone or two zones sharing floor would run, but its results would not mean what
+            // the layout claims, so no run is better than a wrong one.
+            if (stronglyConnected && misplacedDocks == 0 && centresInside == 0 && _seamCorridorTiles == 0)
+            {
+                SimLogger.Medium(msg);
+                return;
+            }
+            SimLogger.LogError($"{msg} Zone graph INVALID, stopping the player (exit code {InvalidZoneGraphExitCode}).");
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit(InvalidZoneGraphExitCode);
+#endif
+            throw new InvalidOperationException("Zone graph failed CheckZoneGraph: " + msg);
         }
 
         /// @brief Segments row aisles into discrete zones: one dock zone per machine column plus
@@ -573,17 +615,35 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             var chain = new List<int>();
             Vector3 floorCentre = layoutManager.TileOrigin;
 
+            // Gap zones per stretch (junction s to s+1), spaced centre to centre.
+            int[] segments = new int[numJunctions - 1];
+            float[] pitch = new float[numJunctions - 1];
+            for (int s = 0; s + 1 < numJunctions; s++)
+            {
+                float gap = zs[s] - zs[s + 1];
+                segments[s] = Mathf.Max(1, Mathf.FloorToInt(gap / MinVerticalPitch));
+                pitch[s] = gap / segments[s];
+            }
+
             for (int s = 0; s < numJunctions; s++)
             {
-                junctions[s] = AddVerticalZone($"{side}_{names[s]}", x, zs[s], heights[s], flow, floorCentre);
+                // A junction taller than the gap pitch (two-way rows, layouts F-J: 6 m) used to contain the centre
+                // of the neighbouring gap zone, so GetZoneAtPosition resolved an AGV standing in that gap zone to
+                // the junction (registered first). Clip the junction box on such a side to end where the gap zone
+                // begins, symmetrically so the centre (where AGVs drive) does not move. Centres, links and
+                // registration order are unchanged; layouts whose junctions never contained a gap centre keep
+                // their boxes exactly.
+                float half = heights[s] / 2f;
+                if (s > 0 && segments[s - 1] > 1 && half >= pitch[s - 1])
+                    half = Mathf.Min(half, pitch[s - 1] / 2f);
+                if (s + 1 < numJunctions && segments[s] > 1 && heights[s] / 2f >= pitch[s])
+                    half = Mathf.Min(half, pitch[s] / 2f);
+                junctions[s] = AddVerticalZone($"{side}_{names[s]}", x, zs[s], 2f * half, flow, floorCentre);
                 chain.Add(junctions[s]);
 
                 if (s == numJunctions - 1) break;
-                float gap = zs[s] - zs[s + 1];
-                int segments = Mathf.Max(1, Mathf.FloorToInt(gap / MinVerticalPitch));
-                float pitch = gap / segments;
-                for (int k = 1; k < segments; k++)
-                    chain.Add(AddVerticalZone($"{side}_Gap{s}_{k}", x, zs[s] - k * pitch, pitch, flow, floorCentre));
+                for (int k = 1; k < segments[s]; k++)
+                    chain.Add(AddVerticalZone($"{side}_Gap{s}_{k}", x, zs[s] - k * pitch[s], pitch[s], flow, floorCentre));
             }
             return (junctions, chain.ToArray());
         }
@@ -704,7 +764,19 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             }
             else if (layoutManager.ActiveParkingMethod == ParkingMethod.Lane)
             {
-                BuildParkingLane(layoutManager.LaneShapeOf(tile), leftVert, rightVert);
+                var laneShape = layoutManager.LaneShapeOf(tile);
+                // A fleet too big for the lane band routes its exit west of the left connector (LaneShapeOf). On a
+                // linked floor, west of tile t>0's connector is the seam, where the bottom bridge zones sit: the
+                // two sets of zones overlap, so two AGVs can hold the same floor under different reservations
+                // (audit D1; latent, >= ~17 AGVs per tile, no reported run came close). CheckZoneGraph counts it.
+                if (layoutManager.AgvsPooled && tile > 0 && laneShape.ExitCentres.Length > 0)
+                {
+                    _seamCorridorTiles++;
+                    SimLogger.Error($"[TrafficZones] Tile {tile}: the parking-lane exit corridor runs into the seam " +
+                                    $"of a linked floor (fleet too large for the lane band). Zones will overlap the " +
+                                    $"seam bridges; use fewer AGVs per tile or an unlinked floor.");
+                }
+                BuildParkingLane(laneShape, leftVert, rightVert);
             }
             else
             {
@@ -719,13 +791,14 @@ namespace Assets.Scripts.Simulation.FactoryLayout
                 int row = (i - first) / cols; int col = (i - first) % cols;
                 Vector3 machinePos = layoutManager.Machines[i].transform.position;
 
-                // Layout A registers docks on both sides wherever a zone exists (its interior machines carry an
-                // unused secondary belt pair). Other layouts register a dock only on a side that has a belt, so
-                // the hop-distance dispatch heuristic never seeds a dock nobody drives to, and the last row can
-                // dock on the bottom spine (layout C).
+                // Layout A registers a dock on each side that has a belt: interior machines (4-belt prefab) on
+                // both sides, row 0 (2-belt, turned 180 deg) on the south only, the last row on the north only.
+                // Before 10-02 (audit D2) row 0 also got a phantom top-spine dock with no belt. Other layouts
+                // register a dock only on a side that has a belt, so the hop-distance dispatch heuristic never
+                // seeds a dock nobody drives to, and the last row can dock on the bottom spine (layout C).
                 LayoutSpec layout = layoutManager.ActiveLayout;
                 bool southDock = layout.IsLegacy ? row < rowLaneN.Length : layout.HasBeltOn(row, 'S');
-                bool northDock = layout.IsLegacy || layout.HasBeltOn(row, 'N');
+                bool northDock = layout.IsLegacy ? row > 0 : layout.HasBeltOn(row, 'N');
 
                 var (inputSide, outputSide) = layout.BeltSides(row);
                 int southZone = -1, northZone = -1;
@@ -1036,18 +1109,24 @@ namespace Assets.Scripts.Simulation.FactoryLayout
             if (!zoneById.TryGetValue(zoneId, out TrafficZone zone)) return false;
             if (zone.OccupantAgvIds.Contains(agvId)) return true;   // re-entry, no stat change
 
-            if (zone.IsFull)
-            {
-                zone.BlockEvents++;    // ← NEW — zone was contended
-                return false;
-            }
+            if (zone.IsFull) return false;
 
             zone.OccupantAgvIds.Add(agvId);
             zone.TraversalCount++;     // ← NEW — successful entry
             return true;
         }
         /// <summary>
-        /// Called by AGVController when it finally acquires a previously-blocked zone.
+        /// Called by AGVController once when a wait for this zone begins (not on each retry).
+        /// </summary>
+        public void RecordBlockStart(int zoneId)
+        {
+            if (zoneById.TryGetValue(zoneId, out TrafficZone zone))
+                zone.BlockEvents++;
+        }
+
+        /// <summary>
+        /// Called by AGVController whenever a wait for this zone ends, however it ends
+        /// (acquired, stall recovery, redispatch, cancel) or at episode end. a previously-blocked zone.
         /// Accumulates the wait duration on the zone that caused the block.
         /// </summary>
         public void RecordBlockTime(int zoneId, float blockTime)

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """E1 phase split: how machine failures and the rule change flow time inside each phase kind of the compound
-scenarios. Reads the per-run table written by analyze_load_sweep.py (results/E1_runs.csv).
+scenarios. Reads the per-run table written by analyze_load_sweep.py (results/outdated/E1_runs.csv).
 
 Pinned phases (bottleneck, burst, starvation) send every job to one Weld machine, so with failures on their flow time
 partly measures repair time, not dispatch quality; quiet has no Weld op; standoff / speed_trap choose within a 2-machine
-pool. Usage: python3 results/scripts/phase_split.py [--csv results/E1_runs.csv] [--protocol releasePrevious] [--min-agv 7]
+pool. Usage: python3 results/scripts/phase_split.py [--csv results/outdated/E1_runs.csv] [--protocol releasePrevious] [--min-agv 7]
 """
 import argparse
 import pandas as pd
@@ -14,7 +14,7 @@ PH = ["flow_quiet", "flow_quiet_2b", "flow_bottleneck", "flow_standoff", "flow_s
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--csv", default="results/E1_runs.csv")
+    ap.add_argument("--csv", default="results/outdated/E1_runs.csv")
     ap.add_argument("--protocol", default="releasePrevious")
     ap.add_argument("--min-agv", type=int, default=7, help="skip AGV-limited fleets")
     a = ap.parse_args()

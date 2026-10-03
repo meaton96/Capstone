@@ -24,7 +24,7 @@ namespace Assets.Scripts.Simulation
     /// </summary>
     public static class RewardMetrics
     {
-        public const int SchemaVersion = 3;
+        public const int SchemaVersion = 4;
 
         public static readonly string[] Names =
         {
@@ -82,6 +82,10 @@ namespace Assets.Scripts.Simulation
                                            // "timed_out" (the MAX_EPISODE_SIM_SECONDS absolute safety net) and from
                                            // "deadlock"/"all_jobs_exited". RL training should still bootstrap the
                                            // value function past a truncated episode end; see env/rollout_buffer.py.
+
+            // v4
+            "tick_error",                 // the episode was ended early by an exception in the orchestrator tick
+                                           // (audit H5): a simulator failure, not a policy outcome.
         };
 
         public static int Count => Names.Length;
@@ -94,7 +98,7 @@ namespace Assets.Scripts.Simulation
                                 JobStore jobs, IReadOnlyList<PhysicalMachine> machines,
                                 IReadOnlyList<AGVController> agvs, IReadOnlyList<TrafficZone> zones,
                                 EpisodeTracker tracker, bool deadlock, bool timedOut,
-                                int episodeSeed, int episodeSeedIndex, bool truncated)
+                                int episodeSeed, int episodeSeedIndex, bool truncated, bool tickError)
         {
             int jobsTotal = 0, exited = 0, opsTotal = 0, opsDone = 0;
             int nRouting = 0, nWaiting = 0, nTransit = 0, nQueued = 0, nProcessing = 0;
@@ -223,6 +227,8 @@ namespace Assets.Scripts.Simulation
             buffer[i++] = episodeSeedIndex;
 
             buffer[i++] = truncated ? 1f : 0f;
+
+            buffer[i++] = tickError ? 1f : 0f;
 
             if (i != Count)
                 SimLogger.Error($"[RewardMetrics] Fill wrote {i} values but Names has {Count} — they are out of sync.");

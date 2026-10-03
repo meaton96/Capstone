@@ -66,7 +66,8 @@ namespace Assets.Scripts.Simulation
             string scenarioDirPath = GetCLIArg("-scenariodir");
             // Baseline decision-drain: when set, heuristic decisions drain per-frame instead of
             // one-per-frame. Valid ONLY for heuristic batch runs (no neural policy in the loop).
-            bool baselineDrain = GetCLIArg("-baselinedrain") != null;
+            // HasCLIFlag: GetCLIArg needs a following argument, so it missed the switch when passed last (audit G7).
+            bool baselineDrain = HasCLIFlag("-baselinedrain");
             // Event-based twin export (Logging/DesTwinExport): des_floor.json, des_jobs.json, agv_events.csv.
             DesTwinExport.Enabled = HasCLIFlag("-destrace");
             if (DesTwinExport.Enabled)
@@ -87,8 +88,27 @@ namespace Assets.Scripts.Simulation
             // ── Shared setup ─────────────────────────────────────────
 
             // Timescale
+            string unknown = FirstUnknownFlag();
+            if (unknown != null)
+            {
+                QuitWithError($"Unknown command-line flag '{unknown}' (typo?). Known flags: " +
+                              string.Join(" ", KnownFlags));
+                enabled = false;
+                return;
+            }
+
             string timeScaleStr = GetCLIArg("-timescale");
-            if (!string.IsNullOrEmpty(timeScaleStr) && float.TryParse(timeScaleStr, out float parsedScale))
+            float parsedScale = 100f;
+            if (!string.IsNullOrEmpty(timeScaleStr) &&
+                (!float.TryParse(timeScaleStr, System.Globalization.NumberStyles.Float,
+                                 System.Globalization.CultureInfo.InvariantCulture, out parsedScale) ||
+                 parsedScale <= 0f))
+            {
+                QuitWithError($"Invalid -timescale '{timeScaleStr}': expected a number > 0.");
+                enabled = false;
+                return;
+            }
+            if (!string.IsNullOrEmpty(timeScaleStr))
             {
                 Time.timeScale = parsedScale;
                 SimLogger.Low($"[BatchRunner] TimeScale set to {parsedScale}x via CLI.");
@@ -119,8 +139,17 @@ namespace Assets.Scripts.Simulation
 
             // AGV count override
             int agvCountOverride = -1;
+            int parsedAgv = -1;
             string agvCountStr = GetCLIArg("-agvcount");
-            if (!string.IsNullOrEmpty(agvCountStr) && int.TryParse(agvCountStr, out int parsedAgv))
+            if (!string.IsNullOrEmpty(agvCountStr) &&
+                (!int.TryParse(agvCountStr, System.Globalization.NumberStyles.Integer,
+                               System.Globalization.CultureInfo.InvariantCulture, out parsedAgv) || parsedAgv < 1))
+            {
+                QuitWithError($"Invalid -agvcount '{agvCountStr}': expected an integer >= 1.");
+                enabled = false;
+                return;
+            }
+            if (!string.IsNullOrEmpty(agvCountStr))
             {
                 agvCountOverride = parsedAgv;
                 SimLogger.Low($"[BatchRunner] AGV count override: {agvCountOverride}");
@@ -258,8 +287,15 @@ namespace Assets.Scripts.Simulation
             // Repeats
             int repeats = 1;
             string repeatsStr = GetCLIArg("-repeats");
-            if (!string.IsNullOrEmpty(repeatsStr))
-                int.TryParse(repeatsStr, out repeats);
+            if (!string.IsNullOrEmpty(repeatsStr) &&
+                (!int.TryParse(repeatsStr, System.Globalization.NumberStyles.Integer,
+                               System.Globalization.CultureInfo.InvariantCulture, out repeats) || repeats < 1))
+            {
+                // Used to leave repeats at 0: zero runs, exit code 0, no results (audit G7).
+                QuitWithError($"Invalid -repeats '{repeatsStr}': expected an integer >= 1.");
+                enabled = false;
+                return;
+            }
 
             // Disruption level
             StochasticDisruption disruption = StochasticDisruption.None;
@@ -269,7 +305,12 @@ namespace Assets.Scripts.Simulation
                 if (Enum.TryParse(disruptionStr, ignoreCase: true, out StochasticDisruption parsed))
                     disruption = parsed;
                 else
-                    SimLogger.LogWarning($"[BatchRunner] Unknown -disruption '{disruptionStr}'. Defaulting to none.");
+                {
+                    QuitWithError($"Unknown -disruption '{disruptionStr}'. Expected one of: " +
+                                  string.Join(", ", Enum.GetNames(typeof(StochasticDisruption))));
+                    enabled = false;
+                    return;
+                }
             }
 
             if (baselineDrain && FactoryOrchestrator.Instance != null)
@@ -366,6 +407,7 @@ namespace Assets.Scripts.Simulation
                                       $"config={runConfig.Name} rule={rule} seed={runConfig.Seed}");
 
                         yield return RunSingleEpisode(runConfig, rule);
+                        if (_aborted) yield break;   // RunSingleEpisode quit the player
 
                         completedRuns++;
                         LogProgress();
@@ -445,6 +487,7 @@ namespace Assets.Scripts.Simulation
                               $"({config.JobCount}j × {config.MachineTypeLayout.Length}m) ───");
 
                 yield return RunBenchmarkEpisodes(config, buildJobs, repeats);
+                if (_aborted) yield break;
             }
 
             float totalTime = Time.realtimeSinceStartup - startWall;
@@ -487,6 +530,7 @@ namespace Assets.Scripts.Simulation
             startWall = Time.realtimeSinceStartup;
 
             yield return RunBenchmarkEpisodes(config, buildJobs, repeats);
+            if (_aborted) yield break;
 
             float totalTime = Time.realtimeSinceStartup - startWall;
             SimLogger.Low($"[BatchRunner] Benchmark complete: {totalRuns} runs in {totalTime:F1}s");
@@ -538,6 +582,7 @@ namespace Assets.Scripts.Simulation
             startWall = Time.realtimeSinceStartup;
 
             yield return RunBenchmarkEpisodes(config, buildJobs, repeats);
+            if (_aborted) yield break;
 
             float totalTime = Time.realtimeSinceStartup - startWall;
             SimLogger.Low($"[BatchRunner] Scenario complete: {totalRuns} runs in {totalTime:F1}s");
@@ -621,6 +666,7 @@ namespace Assets.Scripts.Simulation
                               $"({config.JobCount}j × {config.MachineTypeLayout.Length}m) ───");
 
                 yield return RunBenchmarkEpisodes(config, buildJobs, repeats);
+                if (_aborted) yield break;
             }
 
             float totalTime = Time.realtimeSinceStartup - startWall;
@@ -687,17 +733,22 @@ namespace Assets.Scripts.Simulation
                         continue;
                     }
 
-                    if (agent != null)
-                        agent.ArmAndStart();
+                    if (agent != null && !TryOrQuit(agent.ArmAndStart, $"starting {runConfig.Name}/{rule}"))
+                        yield break;
 
+                    float startWait = Time.realtimeSinceStartup;
                     while (!FactoryOrchestrator.Instance.IsEpisodeActive)
+                    {
+                        if (StartTimedOut(startWait, $"{runConfig.Name}/{rule}")) yield break;
                         yield return null;
+                    }
 
                     while (FactoryOrchestrator.Instance.IsEpisodeActive)
                         yield return null;
 
-                    if (runResult != null)
-                        ResultsLogger.LogAll(runResult);
+                    if (runResult != null &&
+                        !TryOrQuit(() => ResultsLogger.LogAll(runResult), $"logging {runConfig.Name}/{rule}"))
+                        yield break;
 
                     FactoryOrchestrator.Instance.OnEpisodeFinished.RemoveListener(onFinish);
 
@@ -722,19 +773,25 @@ namespace Assets.Scripts.Simulation
             if (agent != null)
                 agent.SetHeuristicRule(rule);
 
-            FactoryOrchestrator.Instance.LoadConfig(config);
+            if (!TryOrQuit(() => FactoryOrchestrator.Instance.LoadConfig(config), $"loading {config.Name}/{rule}"))
+                yield break;
 
-            if (agent != null)
-                agent.ArmAndStart();
+            if (agent != null && !TryOrQuit(agent.ArmAndStart, $"starting {config.Name}/{rule}"))
+                yield break;
 
+            float startWait = Time.realtimeSinceStartup;
             while (!FactoryOrchestrator.Instance.IsEpisodeActive)
+            {
+                if (StartTimedOut(startWait, $"{config.Name}/{rule}")) yield break;
                 yield return null;
+            }
 
             while (FactoryOrchestrator.Instance.IsEpisodeActive)
                 yield return null;
 
-            if (runResult != null)
-                ResultsLogger.LogAll(runResult);
+            if (runResult != null &&
+                !TryOrQuit(() => ResultsLogger.LogAll(runResult), $"logging {config.Name}/{rule}"))
+                yield break;
 
             FactoryOrchestrator.Instance.OnEpisodeFinished.RemoveListener(onFinish);
 
@@ -753,6 +810,38 @@ namespace Assets.Scripts.Simulation
                 ? BrandimartLoader.LoadDeferred(jsonPath, agvCountOverride: agvCountOverride)
                 : BrandimartLoader.LoadDeferredWithStochastic(jsonPath, disruption,
                                                                agvCountOverride: agvCountOverride);
+        }
+
+        /// Runs one batch step; on an exception logs it and quits with exit code 1. An exception
+        /// escaping a coroutine only kills the coroutine, and the player then idles forever with no
+        /// output (audit G6). Callers `yield break` when this returns false.
+        private static bool TryOrQuit(Action action, string what)
+        {
+            try { action(); return true; }
+            catch (Exception e)
+            {
+                SimLogger.LogError($"[BatchRunner] Exception {what}: {e}. Quitting with exit code 1.");
+                _aborted = true;
+                Application.Quit(1);
+                return false;
+            }
+        }
+
+        /// Set when TryOrQuit/StartTimedOut has quit the player, so outer batch loops stop too.
+        private static bool _aborted;
+
+        /// Real seconds to wait for an armed episode to become active before giving up.
+        private const float EPISODE_START_TIMEOUT_SECONDS = 120f;
+
+        /// True (after logging and quitting with exit code 1) if the episode never started.
+        private static bool StartTimedOut(float since, string what)
+        {
+            if (Time.realtimeSinceStartup - since < EPISODE_START_TIMEOUT_SECONDS) return false;
+            SimLogger.LogError($"[BatchRunner] Episode {what} did not start within " +
+                               $"{EPISODE_START_TIMEOUT_SECONDS:F0}s. Quitting with exit code 1.");
+            _aborted = true;
+            Application.Quit(1);
+            return true;
         }
 
         private void LogProgress()
@@ -824,6 +913,47 @@ namespace Assets.Scripts.Simulation
                     SimLogger.LogWarning($"[BatchRunner] Unknown rule in -rules arg: '{token}'");
             }
             return result.Count > 0 ? result.ToArray() : AllRules;
+        }
+
+        /// Every flag the player reads (batch runner, logging, observation caps, visuals, validators).
+        /// Keep in sync when adding a flag: anything else starting with a single '-' aborts a batch run.
+        private static readonly string[] KnownFlags =
+        {
+            "-config", "-batchconfig", "-configname", "-benchmark", "-benchmarkdir", "-scenario", "-scenariodir",
+            "-baselinedrain", "-rldecisiondrain", "-destrace", "-timescale", "-rules", "-outputsuffix", "-outputdir",
+            "-agvcount", "-reservation", "-routingtrigger", "-parking", "-iodocks", "-tiles", "-releaserule",
+            "-releaseweights", "-travelprice", "-jobscope", "-agvassignment", "-flex", "-flexmult", "-layout",
+            "-inbuf", "-outbuf", "-repeats", "-disruption", "-loglevel", "-decisionlogdir", "-obsmaxjobs",
+            "-obsmaxmachines", "-kenneyvisuals", "-primitivevisuals", "-allowunsafefleet", "-validatestochastic",
+        };
+
+        /// Unity's own player flags that batch launches use (case-insensitive), plus prefixes of flag families.
+        private static readonly string[] UnityFlags =
+        {
+            "-batchmode", "-nographics", "-logfile", "-quit", "-executemethod", "-projectpath", "-popupwindow",
+            "-nolog", "-silent-crashes", "-disable-gpu-skinning", "-single-instance",
+        };
+        private static readonly string[] UnityFlagPrefixes = { "-screen-", "-force-", "-window-", "-monitor" };
+
+        /// First argument that looks like a single-dash flag but is not one the player or Unity knows, or null.
+        /// Unknown flags used to be ignored, so a typo silently ran the default variant (audit G7).
+        /// "--" flags (ML-Agents) and negative numbers are values, not checked.
+        private static string FirstUnknownFlag()
+        {
+            string[] args = Environment.GetCommandLineArgs();
+            for (int i = 1; i < args.Length; i++)
+            {
+                string a = args[i];
+                if (a.Length < 2 || a[0] != '-' || a[1] == '-' || !char.IsLetter(a[1])) continue;
+                if (Array.IndexOf(KnownFlags, a) >= 0) continue;
+                string lower = a.ToLowerInvariant();
+                if (Array.IndexOf(UnityFlags, lower) >= 0) continue;
+                bool prefixed = false;
+                foreach (string p in UnityFlagPrefixes) if (lower.StartsWith(p)) { prefixed = true; break; }
+                if (prefixed) continue;
+                return a;
+            }
+            return null;
         }
 
         /// <summary>True if a value-less switch is present anywhere on the command line (GetCLIArg needs a

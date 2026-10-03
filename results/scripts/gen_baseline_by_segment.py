@@ -10,7 +10,7 @@ Reads Results/<exp>/randomized_s<seed>/<layout>/agv<N>_<RULE>_s<seed>/job_comple
 in BatchConfigs/Scenarios.
 
 Usage:
-    python3 results/scripts/gen_baseline_by_segment.py --results linux_server/Results/gen_baseline \
+    python3 results/scripts/gen_baseline_by_segment.py --results linux_server/Results/outdated/gen_baseline \
         --scenarios linux_server/BatchConfigs/Scenarios
 """
 import argparse
