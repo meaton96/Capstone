@@ -19,6 +19,10 @@ namespace Assets.Scripts.Simulation.Types
     ///            plus λ x travel when the config sets a travel price λ (FJSSPConfig.TravelPrice; default 0).
     ///          - PTWINQ: job priority = processing time + least queued work among the machines
     ///            eligible for the job's next operation (Holthaus &amp; Rajendran PT+WINQ).
+    ///          - EDD / MDD / ATC (2026-10-03, due-date job rules; need per-job due dates, JobData.DueDate):
+    ///            EDD earliest due date; MDD modified due date max(d, t + remaining work) (Baker &amp; Bertrand);
+    ///            ATC apparent tardiness cost (1/p) exp(-max(0, d - t - remaining work) / (k p_mean)), k = 2
+    ///            (Vepsalainen &amp; Morton). A job without a due date counts as due at +infinity.
     ///          - Random: unweighted random selection (useful for exploration).
     public enum DispatchingRule
     {
@@ -73,5 +77,11 @@ namespace Assets.Scripts.Simulation.Types
         LRT_SMPT, LRT_SRWT, LRT_ECT, LRT_TECT,
         FIFO_SMPT, FIFO_MMUR, FIFO_ECT, FIFO_TECT,
         PTWINQ_SMPT, PTWINQ_SRWT, PTWINQ_MMUR, PTWINQ_ECT, PTWINQ_TECT,
+
+        // ── Due-date job rules (2026-10-03; rq2-twin-due, docs/Plans/PDR_RULE_SET_PLAN_2026-10-02.md §9) ──────────
+        // Appended so every value above keeps its int. Every job half x every machine half, as above.
+        EDD_SMPT, EDD_SRWT, EDD_MMUR, EDD_ECT, EDD_TECT,
+        MDD_SMPT, MDD_SRWT, MDD_MMUR, MDD_ECT, MDD_TECT,
+        ATC_SMPT, ATC_SRWT, ATC_MMUR, ATC_ECT, ATC_TECT,
     }
 }

@@ -44,8 +44,28 @@ class TestMetricsContract:
         assert int(match.group(1)) == SCHEMA_VERSION
 
     def test_wrong_length_rejected(self):
+        values = np.zeros(len(METRIC_NAMES) - 1)
+        values[0] = SCHEMA_VERSION
         with pytest.raises(ValueError, match="out of sync"):
-            MetricsSnapshot(np.zeros(len(METRIC_NAMES) - 1))
+            MetricsSnapshot(values)
+
+    def test_older_schema_reads_with_newer_metrics_missing(self):
+        """@brief A v4 player (no due-date metrics) is still read; using a v5 metric on it fails loudly."""
+        from rewards.metrics import SCHEMA_LENGTHS
+        values = np.zeros(SCHEMA_LENGTHS[4])
+        values[0], values[METRIC_NAMES.index("time_in_system_sum")] = 4, 123.0
+        snap = MetricsSnapshot(values)
+        assert snap.version == 4 and snap.time_in_system_sum == 123.0 and not snap.has("tardiness_sum")
+        assert list(snap)[-1] == "tick_error" and len(snap) == SCHEMA_LENGTHS[4]
+        with pytest.raises(KeyError, match="needs schema v5"):
+            snap["tardiness_sum"]
+        with pytest.raises(AttributeError, match="needs schema v5"):
+            snap.tardiness_sum
+        assert np.isnan(snap.to_array()[METRIC_NAMES.index("tardiness_sum")])
+
+    def test_all_zero_snapshot_rejected(self):
+        with pytest.raises(ValueError, match="all-zero"):
+            MetricsSnapshot(np.zeros(len(METRIC_NAMES)))
 
     def test_wrong_schema_rejected(self):
         values = np.zeros(len(METRIC_NAMES))
@@ -117,6 +137,37 @@ class TestShippedRewards:
 
         _, end = reward(prev, curr, RewardContext(done=True))
         assert end["failure"] == -params["failure_penalty"]
+
+    def test_tardiness_penalty_flow_weight_and_guard(self):
+        reward = load_reward(SPEC_DIR / "tardiness.json").build()
+        scale = reward.params["time_scale"]
+        prev = snap(tardiness_sum=100.0, time_in_system_sum=1000.0, jobs_total=5, jobs_with_due_date=5)
+        curr = snap(tardiness_sum=400.0, time_in_system_sum=1500.0, jobs_total=5, jobs_with_due_date=5, timed_out=1)
+        _, mid = reward(prev, curr, RewardContext(done=False))
+        assert mid == {"tardiness": pytest.approx(-300.0 / scale)}
+        _, end = reward(prev, curr, RewardContext(done=True))
+        assert end["failure"] == -reward.params["failure_penalty"]
+
+        mixed = load_reward({"entry": "rewards/functions/tardiness.py:TardinessReward",
+                             "params": {"flow_weight": 0.5}}).build()
+        _, terms = mixed(prev, curr, RewardContext())
+        assert terms["flow_time"] == pytest.approx(-0.5 * 500.0 / 1000.0)
+
+        no_due = snap(tardiness_sum=0.0, jobs_total=5, jobs_with_due_date=0, episode_seed=7)
+        with pytest.raises(ValueError, match="needs due dates"):
+            reward(no_due, no_due, RewardContext())
+        startup = snap(tardiness_sum=0.0, jobs_total=15, jobs_with_due_date=0, episode_seed=-1)   # player default
+        assert reward(startup, startup, RewardContext())[1] == {"tardiness": 0.0}
+
+    def test_window_outcomes(self):
+        from rewards import window_outcomes
+        first = snap(time_in_system_sum=1000.0, tardiness_sum=50.0)
+        final = snap(time_in_system_sum=4000.0, tardiness_sum=650.0, tardiness_exited_sum=300.0,
+                     jobs_exited_late=4, jobs_with_due_date=20)
+        out = window_outcomes(first, final)
+        assert out == {"window_time_in_system": 3000.0, "window_tardiness": 600.0, "tardiness_exited_sum": 300.0,
+                       "jobs_exited_late": 4, "jobs_with_due_date": 20}
+        assert set(window_outcomes(None, final).values()) == {None}
 
     def test_weighted_modes_and_schedule(self):
         spec = {

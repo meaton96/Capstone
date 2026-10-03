@@ -123,10 +123,11 @@ def main(argv=None):
             jobs = json.load(f)
 
         resolved = resolve_jobs(scenario, floor)
-        same_jobs = [(j["id"], np.float32(j["arrival"]), [[(m, np.float32(d)) for m, d in o["eligible"]]
-                                                          for o in j["ops"]]) for j in resolved["jobs"]] == \
-                    [(j["id"], np.float32(j["arrival"]), [[(m, np.float32(d)) for m, d in o["eligible"]]
-                                                          for o in j["ops"]]) for j in jobs["jobs"]]
+        def key(j):   # due: None when the job has none (exports from before due dates carry no "due")
+            due = j.get("due")
+            return (j["id"], np.float32(j["arrival"]), None if due is None else np.float32(due),
+                    [[(m, np.float32(d)) for m, d in o["eligible"]] for o in j["ops"]])
+        same_jobs = [key(j) for j in resolved["jobs"]] == [key(j) for j in jobs["jobs"]]
         print(f"scenario jobs resolved in Python == player's des_jobs.json: {same_jobs}")
         if jobs.get("instance") != scenario.get("name"):
             print(f"WARNING: the export is instance {jobs.get('instance')!r}, not the scenario {scenario.get('name')!r}")

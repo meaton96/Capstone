@@ -101,6 +101,7 @@ namespace Assets.Scripts.Simulation.Jobs
                 {
                     JobId = def.JobId,
                     ArrivalTime = def.ArrivalTime,
+                    DueDate = def.DueDate ?? float.PositiveInfinity,
                     OperationTypes = def.OperationSequence,
                     EligibleMachinesPerOp = def.EligibleMachinesPerOp,
                     TotalOperations = opCount,
@@ -152,6 +153,7 @@ namespace Assets.Scripts.Simulation.Jobs
             {
                 JobId = def.JobId,
                 ArrivalTime = def.ArrivalTime,
+                DueDate = def.DueDate ?? float.PositiveInfinity,
                 OperationTypes = def.OperationSequence,
                 EligibleMachinesPerOp = def.EligibleMachinesPerOp,
                 TotalOperations = opCount,

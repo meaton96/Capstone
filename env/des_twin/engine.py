@@ -142,8 +142,17 @@ class Twin:
         self.jobs, self.order, self.pending = {}, [], []
         for jd in jobs_data["jobs"]:
             ops = [{int(m): f32(d) for m, d in op["eligible"]} for op in jd["ops"]]
+            due, op_due = jd.get("due"), jd.get("op_due")
+            if due is not None and op_due is None:
+                # Operation due dates for MOD: the allowance split by work, as scenario.assign_due_dates does
+                # (d_io = r + (d - r) x work of ops 0..o / total work).
+                work = [float(min(op.values())) for op in ops]
+                total, cum, op_due = sum(work), 0.0, []
+                for w in work:
+                    cum += w
+                    op_due.append(float(jd["arrival"]) + (float(due) - float(jd["arrival"])) * (cum / total if total > 0 else 1.0))
             job = Job(int(jd["id"]), float(jd["arrival"]), ops, [op["type"] for op in jd["ops"]],
-                      jd.get("due"), jd.get("op_due"))
+                      None if due is None else float(due), op_due)
             self.jobs[job.id] = job
             if job.arrival > 0.0:
                 self.pending.append(job)
@@ -674,7 +683,22 @@ class Twin:
         t_state = [0.0] * 6
         flow = tis = 0.0
         exited = ops_total = ops_done = 0
+        tard = tard_exited = 0.0
+        late_open = late_exited = with_due = 0
         for j in jobs:
+            if j.due is not None:
+                with_due += 1
+                if j.state == EXITED:
+                    late = j.exit_time - j.due
+                    if late > 0:
+                        tard += late
+                        tard_exited += late
+                        late_exited += 1
+                else:
+                    late = self.now - j.due
+                    if late > 0:
+                        tard += late
+                        late_open += 1
             ops_total += j.total_ops
             ops_done += j.completed_ops
             for s in range(5):
@@ -714,6 +738,8 @@ class Twin:
             "timed_out": float(self.timed_out),
             "all_jobs_exited": float(len(jobs) > 0 and exited == len(jobs)),
             "truncated": float(self.truncated),
+            "tardiness_sum": tard, "tardiness_exited_sum": tard_exited, "jobs_late": late_open,
+            "jobs_exited_late": late_exited, "jobs_with_due_date": with_due,
         }
         return {k: float(np.float32(v)) for k, v in values.items()}
 

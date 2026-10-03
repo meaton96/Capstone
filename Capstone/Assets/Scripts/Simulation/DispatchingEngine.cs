@@ -46,7 +46,11 @@ namespace Assets.Scripts.Simulation
             .ToArray();
 
         /// <summary>Job-priority half of a rule: which job to take (dispatch) or route first.</summary>
-        private enum JobRule { SPT, LPT, SRT, LRT, FIFO, PTWINQ }
+        private enum JobRule { SPT, LPT, SRT, LRT, FIFO, PTWINQ, EDD, MDD, ATC }
+
+        /// <summary>ATC's look-ahead parameter k (Vepsalainen &amp; Morton 1987 report k of about 1.5-3); the same
+        /// constant as env/des_twin/rules.py ATC_K.</summary>
+        private const double AtcK = 2.0;
 
         /// <summary>Machine-selection half of a rule: which candidate machine to route a job to.</summary>
         private enum MachineRule { SMPT, SRWT, MMUR, ECT, TECT }
@@ -63,7 +67,8 @@ namespace Assets.Scripts.Simulation
         /// RL action branch 0 (job head): the job half the agent picks. Order is the Python contract
         /// (env/config.py JOB_HEAD_RULES); append only.
         /// </summary>
-        private static readonly JobRule[] JobHead = { JobRule.SPT, JobRule.SRT, JobRule.PTWINQ, JobRule.FIFO };
+        private static readonly JobRule[] JobHead =
+            { JobRule.SPT, JobRule.SRT, JobRule.PTWINQ, JobRule.FIFO, JobRule.EDD, JobRule.MDD, JobRule.ATC };
 
         /// <summary>
         /// RL action branch 1 (machine head): the machine half the agent picks. Order is the Python contract
@@ -241,6 +246,28 @@ namespace Assets.Scripts.Simulation
                     Dictionary<int, float> loads = jobs.GetAllMachineLoads();
                     return ArgMin(ids, id => procTime(id) + WorkInNextQueue(jobs.Get(id), loads));
                 }
+                // Due-date rules (ported from env/des_twin/rules.py, which the rq2-twin-due screen ran). d = due date
+                // (+infinity when the job has none), w = remaining work (SRT's quantity), t = simTime, p = procTime.
+                // Scores are doubles, as in the twin. EDD: earliest due date.
+                case JobRule.EDD: return ArgMinD(ids, id => jobs.Get(id).DueDate);
+                // MDD (modified due date, Baker & Bertrand): max(d, t + w) -- EDD while a job can still finish on
+                // time, SRT once it cannot.
+                case JobRule.MDD:
+                    return ArgMinD(ids, id => Math.Max((double)jobs.Get(id).DueDate, simTime + GetRemainingWork(id, jobs)));
+                // ATC (apparent tardiness cost, Vepsalainen & Morton), highest first: (1/p) exp(-max(0, d - t - w) /
+                // (k p_mean)), p_mean over the candidates. Without their waiting-time look-ahead in the slack.
+                case JobRule.ATC:
+                {
+                    double pSum = 0;
+                    foreach (int id in ids) pSum += procTime(id);
+                    double scale = AtcK * Math.Max(pSum / ids.Count, 1e-6);
+                    return ArgMaxD(ids, id =>
+                    {
+                        double p = Math.Max((double)procTime(id), 1e-6);
+                        double slack = jobs.Get(id).DueDate - simTime - GetRemainingWork(id, jobs);
+                        return Math.Exp(-Math.Max(0.0, slack) / scale) / p;
+                    });
+                }
                 default: return ids[UnityEngine.Random.Range(0, ids.Count)];
             }
         }
@@ -365,6 +392,22 @@ namespace Assets.Scripts.Simulation
         {
             int best = ids[0]; float bestS = float.MaxValue;
             foreach (int id in ids) { float s = score(id); if (s < bestS) { bestS = s; best = id; } }
+            return best;
+        }
+
+        /// <summary>ArgMin over double scores (the due-date rules); ties go to the first candidate.</summary>
+        private static int ArgMinD(List<int> ids, Func<int, double> score)
+        {
+            int best = ids[0]; double bestS = double.MaxValue;
+            foreach (int id in ids) { double s = score(id); if (s < bestS) { bestS = s; best = id; } }
+            return best;
+        }
+
+        /// <summary>ArgMax over double scores (ATC); ties go to the first candidate.</summary>
+        private static int ArgMaxD(List<int> ids, Func<int, double> score)
+        {
+            int best = ids[0]; double bestS = double.NegativeInfinity;
+            foreach (int id in ids) { double s = score(id); if (s > bestS) { bestS = s; best = id; } }
             return best;
         }
 

@@ -1818,6 +1818,7 @@ namespace Assets.Scripts.Simulation
                     Completed = completed,
                     ArrivalTime = job.ArrivalTime,
                     ExitTime = job.ExitTime,
+                    DueDate = job.DueDate,
                     TotalOperations = job.TotalOperations,
                     CompletedOps = job.CompletedOps,
                     WorkContent = workContent,

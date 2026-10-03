@@ -26,6 +26,7 @@ are summed into the reward and logged separately. Any numeric parameter may be a
 schedule over training steps (see @ref rewards.base.resolve).
 """
 
-from rewards.metrics import METRIC_NAMES, SCHEMA_VERSION, SENSOR_NAME, MetricsSnapshot, elapsed_sim_time
+from rewards.metrics import (METRIC_NAMES, SCHEMA_VERSION, SENSOR_NAME, MetricsSnapshot, elapsed_sim_time,
+                             window_outcomes)
 from rewards.base import RewardContext, RewardFunction, resolve
 from rewards.loader import LoadedReward, load_reward

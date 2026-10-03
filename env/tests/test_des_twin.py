@@ -288,8 +288,14 @@ def test_due_date_rules():
     assert rank_jobs("MDD", [1, 2, 3], sim, p) == 3       # max(d, t + w): 400, 350, 130
     assert rank_jobs("MOD", [1, 2, 3], sim, p) == 3       # max(d_op, t + p): 300, 160, 125
     assert rank_jobs("ATC", [1, 2, 3], sim, p) == 3       # both late jobs have slack <= 0: shortest p wins
-    with pytest.raises(ValueError):
-        rank_jobs("EDD", [1, 2], SimpleNamespace(now=0.0, jobs={1: SimpleNamespace(due=None), 2: SimpleNamespace(due=None)}), p)
+    # A job without a due date counts as due at +infinity (JobData.DueDate in C#): ranked last, ties to the first
+    nodue = SimpleNamespace(now=0.0, jobs={1: SimpleNamespace(due=None, op_due=None, cur_op=0),
+                                           2: SimpleNamespace(due=50.0, op_due=[50.0], cur_op=0),
+                                           3: SimpleNamespace(due=None, op_due=None, cur_op=0)},
+                            remaining_work=lambda j: f32(10))
+    assert rank_jobs("EDD", [1, 2, 3], nodue, p) == 2
+    assert rank_jobs("MDD", [1, 2, 3], nodue, p) == 2
+    assert rank_jobs("EDD", [1, 3], nodue, p) == 1
 
 
 def test_mdd_is_srt_when_all_late_and_edd_when_all_early():
@@ -314,8 +320,32 @@ def test_due_dates_leave_flow_rules_unchanged_and_report_tardiness():
     for rule in ("EDD", "SLACK", "CR", "MDD", "MOD", "ATC"):
         tw = run_twin(synthetic_floor(), due, TwinConfig(f"{rule}_ECT", "kinematic"))
         assert tw.summary()["jobs_completed"] == 6 and not tw.timed_out
-    with pytest.raises(ValueError):
-        run_twin(synthetic_floor(), jobs, TwinConfig("EDD_ECT", "kinematic"))
+    # Without due dates the due-date rules still run (every job due at +infinity: first candidate in list order)
+    assert run_twin(synthetic_floor(), jobs, TwinConfig("EDD_ECT", "kinematic")).summary()["jobs_completed"] == 6
+
+
+def test_scenario_due_dates_reach_the_twin_and_its_metrics():
+    """@brief A scenario's per-job "dueDate" is resolved (float32), MOD gets operation due dates split by work, and
+    the twin's reward metrics count tardiness exactly as the C# RewardMetrics v5 fields."""
+    from des_twin.engine import Twin
+    from des_twin.scenario import resolve_jobs
+    floor = synthetic_floor()
+    scenario = {"machineTypeLayout": ["Mill", "Mill"], "jobs": [
+        {"id": 0, "arrivalTime": 0.0, "dueDate": 15.0, "operations": [{"machineType": "Mill", "duration": 10.0},
+                                                                      {"machineType": "Mill", "duration": 30.0}]},
+        {"id": 1, "arrivalTime": 0.0, "operations": [{"machineType": "Mill", "duration": 5.0}]}]}
+    jobs = resolve_jobs(scenario, floor)
+    assert [j["due"] for j in jobs["jobs"]] == [15.0, None]
+    tw = Twin(floor, jobs, TwinConfig("SPT_ECT", "instant"))
+    assert tw.jobs[0].op_due == pytest.approx([15.0 * 10 / 40, 15.0])
+    assert tw.jobs[1].due is None and tw.jobs[1].op_due is None
+    tw.run()
+    m = tw.metrics()
+    rows = {r["job_id"]: r for r in tw.job_rows()}
+    assert m["jobs_with_due_date"] == 1
+    assert m["tardiness_sum"] == pytest.approx(max(0.0, rows[0]["exit_time"] - 15.0), abs=1e-3)
+    assert m["tardiness_exited_sum"] == pytest.approx(m["tardiness_sum"], abs=1e-3)
+    assert m["jobs_exited_late"] == (1 if rows[0]["exit_time"] > 15.0 else 0) and m["jobs_late"] == 0
 
 
 # ── Engine ──────────────────────────────────────────────────────────────────────────────────────────

@@ -203,7 +203,8 @@ def main(argv=None):
     fields = ["stage", "prefix", "tail", "policy", "seed", "return", "total_flow_time", "mean_flow_time",
               "jobs_exited", "makespan", "decisions", "deadlock", "timed_out", "truncated", "tick_error", "machine_failures",
               "input_buffer_capacity", "output_buffer_capacity", "output_blocked_machine_seconds",
-              "buffer_wait_job_seconds", "config_hash", "instance_hash"]
+              "buffer_wait_job_seconds", "window_time_in_system", "window_tardiness", "tardiness_exited_sum",
+              "jobs_exited_late", "jobs_with_due_date", "config_hash", "instance_hash"]
     with open(out / "stages.csv", "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
         writer.writeheader()

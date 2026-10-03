@@ -79,6 +79,13 @@ namespace Assets.Scripts.Simulation.Jobs
         /// <summary>Sim-time the job reached JobState.Exited. -1 if still in the system.</summary>
         public float ExitTime = -1f;
 
+        /// <summary>Due date (sim-seconds); +infinity when the job has none (FJSSPJobDefinition.DueDate null), so the
+        /// due-date rules rank such jobs last and the tardiness metrics count only jobs that have one.</summary>
+        public float DueDate = float.PositiveInfinity;
+
+        /// <summary>True when the job carries a due date.</summary>
+        public bool HasDueDate => !float.IsInfinity(DueDate);
+
         [Header("State Control")]
         /// <summary>Current lifecycle state of the job.</summary>
         public JobState State;

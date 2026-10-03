@@ -86,11 +86,13 @@ OBS_LAYOUT = {
 
 ## @brief Version of the action space; bump whenever a head's rules or order change. v1 was one 8-way branch
 ##        of composite rules (SPT-SMPT ... FIFO-SRWT); v2 (2026-09-26) is two branches, job head x machine
-##        head, chosen from the gen_rules0926 sweep (docs/features/DECISION_POINTS.md section 7).
-ACTION_SCHEMA_VERSION = 2
+##        head, chosen from the gen_rules0926 sweep (docs/features/DECISION_POINTS.md section 7). v3 (2026-10-03)
+##        appends the due-date job rules EDD, MDD, ATC (rq2-twin-due; they need jobs with due dates, else they
+##        rank every job as due at +infinity and keep the first candidate).
+ACTION_SCHEMA_VERSION = 3
 
 ## @brief Branch 0: which job (dispatch: from the machine's queue; routing: from the pool).
-JOB_HEAD_RULES = ["SPT", "SRT", "PTWINQ", "FIFO"]
+JOB_HEAD_RULES = ["SPT", "SRT", "PTWINQ", "FIFO", "EDD", "MDD", "ATC"]
 ## @brief Branch 1: which machine a routed job goes to.
 MACHINE_HEAD_RULES = ["ECT", "TECT", "SRWT"]
 ACTION_BRANCHES = (len(JOB_HEAD_RULES), len(MACHINE_HEAD_RULES))

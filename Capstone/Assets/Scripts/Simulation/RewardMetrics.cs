@@ -24,7 +24,7 @@ namespace Assets.Scripts.Simulation
     /// </summary>
     public static class RewardMetrics
     {
-        public const int SchemaVersion = 4;
+        public const int SchemaVersion = 5;
 
         public static readonly string[] Names =
         {
@@ -86,6 +86,14 @@ namespace Assets.Scripts.Simulation
             // v4
             "tick_error",                 // the episode was ended early by an exception in the orchestrator tick
                                            // (audit H5): a simulator failure, not a policy outcome.
+
+            // v5 (2026-10-03): due dates. Only jobs with a due date (JobData.HasDueDate) count; all 0 without them.
+            "tardiness_sum",              // time past the due date over all jobs, live: exited max(0, exit - due), open
+                                           // max(0, now - due) (integral of late WIP; what a tardiness reward sums)
+            "tardiness_exited_sum",       // exited jobs only: sum of max(0, exit - due)
+            "jobs_late",                  // open jobs already past their due date
+            "jobs_exited_late",           // exited jobs that left after their due date
+            "jobs_with_due_date",         // jobs in the system so far that carry a due date (0 = the scenario has none)
         };
 
         public static int Count => Names.Length;
@@ -103,6 +111,8 @@ namespace Assets.Scripts.Simulation
             int jobsTotal = 0, exited = 0, opsTotal = 0, opsDone = 0;
             int nRouting = 0, nWaiting = 0, nTransit = 0, nQueued = 0, nProcessing = 0;
             double flowExited = 0, timeInSystem = 0;
+            double tardiness = 0, tardinessExited = 0;
+            int jobsLate = 0, exitedLate = 0, withDueDate = 0;
             double tRouting = 0, tWaiting = 0, tTransit = 0, tQueued = 0, tProcessing = 0;
 
             if (jobs != null)
@@ -140,6 +150,21 @@ namespace Assets.Scripts.Simulation
                     else
                     {
                         timeInSystem += Math.Max(0.0, simTime - job.ArrivalTime);
+                    }
+
+                    if (job.HasDueDate)
+                    {
+                        withDueDate++;
+                        if (job.State == JobState.Exited)
+                        {
+                            double late = (double)job.ExitTime - job.DueDate;
+                            if (late > 0) { tardiness += late; tardinessExited += late; exitedLate++; }
+                        }
+                        else
+                        {
+                            double late = simTime - job.DueDate;
+                            if (late > 0) { tardiness += late; jobsLate++; }
+                        }
                     }
                 }
             }
@@ -229,6 +254,12 @@ namespace Assets.Scripts.Simulation
             buffer[i++] = truncated ? 1f : 0f;
 
             buffer[i++] = tickError ? 1f : 0f;
+
+            buffer[i++] = (float)tardiness;
+            buffer[i++] = (float)tardinessExited;
+            buffer[i++] = jobsLate;
+            buffer[i++] = exitedLate;
+            buffer[i++] = withDueDate;
 
             if (i != Count)
                 SimLogger.Error($"[RewardMetrics] Fill wrote {i} values but Names has {Count} — they are out of sync.");

@@ -218,7 +218,7 @@ def test_decision_log_records_every_decision_of_scheduled_episodes():
 def test_decision_row_includes_checkpoint_probabilities():
     class ProbabilisticPolicy:
         kind, name = "checkpoint", "P"
-        last_probs = [np.array([0.7, 0.3, 0.0, 0.0]), np.array([0.5, 0.25, 0.25])]
+        last_probs = [np.array([0.7, 0.3] + [0.0] * (ACTION_BRANCHES[0] - 2)), np.array([0.5, 0.25, 0.25])]
 
     metrics = MetricsSnapshot.from_dict({"sim_time": 12.5, "wip": 3})
     row = decision_row(ProbabilisticPolicy(), seed=1, seed_index=0, step=4, metrics=metrics, action=(0, 1))
@@ -236,7 +236,7 @@ def test_decision_row_skips_masked_head_in_chosen_prob():
     """@brief A head Unity masked (could not change the decision) does not scale the chosen action's probability."""
     class ProbabilisticPolicy:
         kind, name = "checkpoint", "P"
-        last_probs = [np.array([0.7, 0.3, 0.0, 0.0]), np.array([1.0, 0.0, 0.0])]
+        last_probs = [np.array([0.7, 0.3] + [0.0] * (ACTION_BRANCHES[0] - 2)), np.array([1.0, 0.0, 0.0])]
 
     mask = np.ones(ACTION_MASK_LEN)
     mask[ACTION_BRANCHES[0] + 1:] = 0.0

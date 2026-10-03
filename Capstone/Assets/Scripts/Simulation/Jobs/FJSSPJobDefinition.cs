@@ -38,5 +38,14 @@ namespace Assets.Scripts.Simulation.Jobs
         /// simulation seconds) that machine would take for the corresponding operation.
         /// </remarks>
         public Dictionary<int, float>[] EligibleMachinesPerOp;
+
+        /// <summary>
+        /// Due date in sim-seconds, or null when the job has none (the default). Set from the scenario's per-job
+        /// "dueDate" (env/scenarios/randomized.py writes total-work-content due dates when due_date_allowance &gt; 0).
+        /// Read by the due-date job rules (EDD, MDD, ATC) and the tardiness metrics. Left out of the instance hash
+        /// while null, so instances without due dates keep the hashes they had before due dates existed.
+        /// </summary>
+        [Types.FingerprintOmitIfNull]
+        public float? DueDate;
     }
 }

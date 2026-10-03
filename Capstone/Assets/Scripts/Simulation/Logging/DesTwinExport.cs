@@ -188,6 +188,7 @@ namespace Assets.Scripts.Simulation.Logging
                 {
                     id = j.JobId,
                     arrival = j.ArrivalTime,
+                    due = j.DueDate,          // null when the job has no due date (the twin then has none either)
                     ops = Enumerable.Range(0, j.EligibleMachinesPerOp.Length).Select(o => new
                     {
                         type = j.OperationSequence[o].ToString(),

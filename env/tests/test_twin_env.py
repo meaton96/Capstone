@@ -204,7 +204,8 @@ def test_metrics_track_flow_time(run_dir):
 
 def test_action_mask_is_heads_that_matter():
     def mask(job, mach):
-        return [1.0] + [float(job)] * 3 + [1.0] + [float(mach)] * 2
+        return ([1.0] + [float(job)] * (len(JOB_HEAD_RULES) - 1)
+                + [1.0] + [float(mach)] * (len(MACHINE_HEAD_RULES) - 1))
     assert action_mask(Decision("dispatch", machine=0, queue=(1,))).tolist() == mask(False, False)
     assert action_mask(Decision("dispatch", machine=0, queue=(1, 2))).tolist() == mask(True, False)
     one = Decision("routing", job=1, job_candidates=(1,), selected_by_rule=True, machines=(0,))

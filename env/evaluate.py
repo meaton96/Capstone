@@ -324,6 +324,13 @@ def run_evaluation(env, policies: list, schedule: list, log=print, decision_writ
             "output_buffer_capacity": episode.get("output_buffer_capacity"),
             "output_blocked_machine_seconds": episode.get("output_blocked_machine_seconds"),
             "buffer_wait_job_seconds": episode.get("buffer_wait_job_seconds"),
+            # Both objectives over the agent window, whatever the reward (rewards.metrics.window_outcomes); the due-date
+            # fields are None from a player older than reward metrics v5.
+            "window_time_in_system": episode.get("window_time_in_system"),
+            "window_tardiness": episode.get("window_tardiness"),
+            "tardiness_exited_sum": episode.get("tardiness_exited_sum"),
+            "jobs_exited_late": episode.get("jobs_exited_late"),
+            "jobs_with_due_date": episode.get("jobs_with_due_date"),
             "config_hash": episode.get("config_hash"),
             "instance_hash": episode.get("instance_hash"),
         })
@@ -431,6 +438,9 @@ def floor_fields(scenario: dict) -> dict:
         "scenario_travel_price": scenario.get("travelPrice", 0.0),
         "scenario_input_buffer_capacity": scenario.get("inputBufferCapacity", 0),
         "scenario_output_buffer_capacity": scenario.get("outputBufferCapacity", 0),
+        # Due dates: the generator's allowance c (RandomizedParams.due_date_allowance; 0 = none) and how many jobs carry one.
+        "scenario_due_date_allowance": ((scenario.get("_meta") or {}).get("params") or {}).get("due_date_allowance", 0.0),
+        "scenario_jobs_with_due_date": sum(1 for j in scenario.get("jobs", []) if j.get("dueDate") is not None),
     }
 
 

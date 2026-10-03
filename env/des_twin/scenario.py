@@ -77,7 +77,9 @@ def resolve_jobs(scenario, floor):
                     raise ValueError(f"job {jid} op {o}: machineIndex {i} out of range for {t} ({len(ids)})")
                 eligible = [[ids[i], _f32(dur)]]
             ops.append({"type": t, "eligible": eligible})
-        jobs.append({"id": jid, "arrival": _f32(raw.get("arrivalTime", 0.0)), "ops": ops})
+        due = raw.get("dueDate")
+        jobs.append({"id": jid, "arrival": _f32(raw.get("arrivalTime", 0.0)), "ops": ops,
+                     "due": None if due is None else _f32(due)})
 
     jobs.sort(key=lambda jd: (np.float32(jd["arrival"]), jd["id"]))
     return {"schema": "des_jobs/1", "instance": scenario.get("name"), "seed": scenario.get("seed", 42),

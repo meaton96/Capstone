@@ -394,3 +394,20 @@ def test_schema_checks_release_weights_and_travel_price():
                    {"tiling": {**sc["tiling"], "releaseRule": "weighted", "releaseWeights": [1, 0, 1, 1, 1, 1, 1]}}):
         with pytest.raises(ConfigValidationError):
             validate_scenario({**sc, **change})
+
+
+def test_randomized_due_dates_are_twk_and_leave_the_jobs_unchanged():
+    """@brief due_date_allowance c writes dueDate = arrival + c x (sum of each op's fastest time) on every job, draws
+    nothing random (same jobs at any c), and 0 writes none (instances unchanged from before due dates existed)."""
+    import dataclasses
+    plain = randomized_scenario(3)
+    dated = randomized_scenario(3, dataclasses.replace(DEFAULT_PARAMS, due_date_allowance=2.0))
+    assert all("dueDate" not in j for j in plain["jobs"])
+    assert [{k: v for k, v in j.items() if k != "dueDate"} for j in dated["jobs"]] == plain["jobs"]
+    for j in dated["jobs"]:
+        work = sum(min(op["duration"]) for op in j["operations"])
+        assert j["dueDate"] == pytest.approx(j["arrivalTime"] + 2.0 * work, abs=0.011)
+        assert j["dueDate"] >= j["arrivalTime"]
+    assert dated["_meta"]["params"]["due_date_allowance"] == 2.0
+    with pytest.raises(ValueError, match="due_date_allowance"):
+        randomized_scenario(3, dataclasses.replace(DEFAULT_PARAMS, due_date_allowance=-1.0))

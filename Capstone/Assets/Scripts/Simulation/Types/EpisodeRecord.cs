@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.Simulation.Types;
@@ -562,8 +563,14 @@ namespace Assets.Scripts.Simulation.Types
         public double TimeQueued;
         public double TimeProcessingState;
 
+        /// @brief Due date (sim-seconds); +infinity when the job has none (JobData.DueDate).
+        public float DueDate = float.PositiveInfinity;
+
         // Derived
         public float FlowTime => Completed ? ExitTime - ArrivalTime : -1f;
+        public bool HasDueDate => !float.IsInfinity(DueDate);
+        /// @brief max(0, exit - due) for a completed job with a due date, else -1.
+        public float Tardiness => Completed && HasDueDate ? Math.Max(0f, ExitTime - DueDate) : -1f;
     }
 
     /// <summary>One AGV breakdown (agv_failures.csv). OperatingAge is the observed time to failure in

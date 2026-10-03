@@ -19,6 +19,13 @@ namespace Assets.Scripts.Simulation.Types
     /// path, numbers in invariant round-trip format. Reflection rather than a hand-written list, so a field added to
     /// FJSSPConfig or StochasticConfig later is covered without touching this file.
     /// </remarks>
+    /// <summary>
+    /// Leaves a field out of <see cref="ConfigFingerprint.Canonical"/> while it is null, so adding an optional field
+    /// does not change the hash of every config or instance that does not use it (e.g. FJSSPJobDefinition.DueDate).
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field)]
+    public sealed class FingerprintOmitIfNullAttribute : Attribute { }
+
     public static class ConfigFingerprint
     {
         /// <summary>Hex characters kept from the SHA-256 digest (64 bits: collisions are not a concern here).</summary>
@@ -70,7 +77,11 @@ namespace Assets.Scripts.Simulation.Types
 
             Type type = value.GetType();
             foreach (FieldInfo f in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
-                Append(lines, Join(path, f.Name), f.GetValue(value), depth + 1);
+            {
+                object fv = f.GetValue(value);
+                if (fv == null && f.IsDefined(typeof(FingerprintOmitIfNullAttribute), false)) continue;
+                Append(lines, Join(path, f.Name), fv, depth + 1);
+            }
             foreach (PropertyInfo p in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
                 if (!p.CanRead || p.GetIndexParameters().Length > 0) continue;

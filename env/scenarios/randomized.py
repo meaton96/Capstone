@@ -39,6 +39,11 @@ Weld machines, so 12 of 15 machines are background and a policy trained on them 
   `release_rule` "weighted" with `release_weights` loads tiles unevenly (one weight per tile).
 - **TECT travel price (`travel_price`, λ):** TECT scores a machine max(travel, queue) + p + λ x travel; 0 is plain
   TECT. Applies to every TECT decision of the episode, warm-up included.
+- **Due dates (`due_date_allowance`, c):** with c > 0 every job gets "dueDate" = arrival + c x its work content
+  (sum over its ops of the fastest machine's time: total work content, Blackstone et al. 1982). 0 writes none, and
+  the instance is unchanged. No random draws, so the jobs are identical at any c. c = 2 leaves about half the jobs
+  late under SRT-ECT on the rnd_load family (rq2-twin-due); due-date rules (EDD, MDD, ATC) and the tardiness reward
+  (env/config/rewards/tardiness.json) need them.
 
 Every instance is a pure function of its seed. `_phases` lists the segments (for random warm-up cutoffs and
 analysis); `_meta` records the per-episode draws.
@@ -118,6 +123,7 @@ class RandomizedParams:
     release_rule: str = "roundRobin"                     # "leastWip" | "weighted" (needs release_weights)
     release_weights: Tuple[float, ...] = ()              # one per tile, for release_rule "weighted"
     travel_price: float = 0.0                            # TECT's λ; 0 = plain TECT, no key written
+    due_date_allowance: float = 0.0                      # TWK allowance c: dueDate = arrival + c x work; 0 = none
 
     failure_probability: float = 2.0 / 3.0
     failures: Dict = field(default_factory=lambda: {
@@ -192,6 +198,8 @@ def randomized_scenario(seed: int, params: RandomizedParams = DEFAULT_PARAMS) ->
     @param params  Generator knobs (RandomizedParams).
     """
     p = params
+    if not p.due_date_allowance >= 0:
+        raise ValueError(f"due_date_allowance must be >= 0 (got {p.due_date_allowance!r})")
     tiling = _tiling_block(p)
     rng = random.Random(seed)
     k = p.machines_per_type
@@ -258,7 +266,11 @@ def randomized_scenario(seed: int, params: RandomizedParams = DEFAULT_PARAMS) ->
                     op["allowSecondary"] = True
                     op["secondaryDuration"] = round(d, 2)
                 ops.append(op)
-            jobs.append({"id": len(jobs), "arrivalTime": round(arrival, 2), "operations": ops})
+            job = {"id": len(jobs), "arrivalTime": round(arrival, 2), "operations": ops}
+            if p.due_date_allowance > 0:
+                work = sum(min(op["duration"]) for op in ops)       # fastest machine per op (TWK)
+                job["dueDate"] = round(arrival + p.due_date_allowance * work, 2)
+            jobs.append(job)
 
         phases.append({"name": f"{kind}_{len(phases)}", "kind": kind, "start": round(t, 2),
                        "end": round(t + dur, 2), "n_jobs": len(arrivals), "utilization": round(u, 3),

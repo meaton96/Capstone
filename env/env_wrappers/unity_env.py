@@ -53,6 +53,7 @@ from channels.channels import EpisodeConfigChannel, EpisodeSeedChannel, EpisodeT
 from env_wrappers.loopback import LoopbackUnityEnvironment
 from rewards import (
     SENSOR_NAME, LoadedReward, MetricsSnapshot, RewardContext, RewardFunction, elapsed_sim_time, load_reward,
+    window_outcomes,
 )
 
 ## @brief Training seeds are drawn from [TRAIN_SEED_LOW, EpisodeSeedChannel.MAX_SEED);
@@ -209,6 +210,7 @@ class UnitySchedulingEnv:
 
         self._pending_config = None
         self._prev_metrics: Optional[MetricsSnapshot] = None
+        self._first_metrics: Optional[MetricsSnapshot] = None   # the agent window's first snapshot
         self._last_obs: Optional[Dict[str, np.ndarray]] = None   # last decision of the running episode
         self._episode_return = 0.0
         self._episode_length = 0
@@ -411,6 +413,7 @@ class UnitySchedulingEnv:
 
     def _begin_episode(self, decision) -> Dict[str, np.ndarray]:
         self._prev_metrics = self._extract_metrics(decision)
+        self._first_metrics = self._prev_metrics      # start of the agent window (window_outcomes)
         if self.reward_fn is not None and self._prev_metrics is not None:
             self.reward_fn.reset(self._prev_metrics)
         self._episode_return = 0.0
@@ -471,6 +474,7 @@ class UnitySchedulingEnv:
                 timed_out=bool(final.timed_out),
                 truncated=bool(final.truncated),
                 tick_error=bool(final.tick_error),
+                **window_outcomes(getattr(self, "_first_metrics", None), final),
             )
         return summary
 

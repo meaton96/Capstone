@@ -37,6 +37,7 @@ namespace Assets.Scripts.Simulation.Jobs
     ///     {
     ///       "id": 0,
     ///       "arrivalTime": 0.0,
+    ///       "dueDate": 600.0,               (optional; omit for no due date)
     ///       "operations": [
     ///         { "machineType": "Mill", "machineIndex": "any", "duration": 40.0 },
     ///         { "machineType": "Weld", "machineIndex": 1,     "duration": 60.0 }
@@ -357,6 +358,19 @@ namespace Assets.Scripts.Simulation.Jobs
                 nextAutoId = Mathf.Max(nextAutoId, jobId + 1);
                 float arrivalTime = rawJob["arrivalTime"]?.Value<float>() ?? 0f;
 
+                // Optional due date (sim-seconds, not before the arrival). Absent or null = no due date.
+                float? dueDate = null;
+                JToken dueToken = rawJob["dueDate"];
+                if (dueToken != null && dueToken.Type != JTokenType.Null)
+                {
+                    float d = dueToken.Value<float>();
+                    if (float.IsNaN(d) || float.IsInfinity(d) || d < arrivalTime)
+                        ReportJobError(strict, $"[ScenarioLoader] Job {jobId}: dueDate {d} must be a finite time at " +
+                                               $"or after its arrivalTime {arrivalTime}; ignored.");
+                    else
+                        dueDate = d;
+                }
+
                 JArray rawOps = (JArray)rawJob["operations"];
                 var opSequence = new MachineType[rawOps.Count];
                 var eligible = new Dictionary<int, float>[rawOps.Count];
@@ -482,6 +496,7 @@ namespace Assets.Scripts.Simulation.Jobs
                 {
                     JobId = jobId,
                     ArrivalTime = arrivalTime,
+                    DueDate = dueDate,
                     OperationSequence = opSequence,
                     EligibleMachinesPerOp = eligible,
                 };

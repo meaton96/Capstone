@@ -4,8 +4,10 @@ A rule is "<JOB>_<MACHINE>": the job half ranks jobs (a machine's queue, or the 
 routed) and the machine half picks the machine a routed job goes to. Scores are float32 and ties go to the
 first candidate, as in the C# ArgMin/ArgMax, so equal-score cases resolve the same way.
 
-Due-date job rules (EDD, SLACK, CR, MDD, MOD, ATC) exist only here, for the rq2-twin-due screen (2026-10-02); they
-are not in DispatchingEngine.cs yet. They need due dates on the jobs (scenario.assign_due_dates) and raise without.
+Due-date job rules: EDD, MDD and ATC are ported to DispatchingEngine.cs (2026-10-03, same formulas, double scores);
+SLACK, CR and MOD exist only here (rq2-twin-due screen). Due dates come from the scenario's per-job "dueDate"
+(resolve_jobs) or scenario.assign_due_dates. A job without one counts as due at +infinity, as JobData.DueDate in C#:
+the rules rank it last.
 """
 import math
 
@@ -67,10 +69,9 @@ def rank_jobs(job_rule, ids, sim, proc_time):
 
 
 def _due(sim, j):
+    """Job j's due date; +infinity when it has none (JobData.DueDate)."""
     due = sim.jobs[j].due
-    if due is None:
-        raise ValueError(f"job {j} has no due date: due-date rules need scenario.assign_due_dates")
-    return due
+    return math.inf if due is None else due
 
 
 def _rank_due(job_rule, ids, sim, proc_time):
@@ -97,8 +98,8 @@ def _rank_due(job_rule, ids, sim, proc_time):
     if job_rule == "MOD":
         def mod(j):
             job = sim.jobs[j]
-            _due(sim, j)
-            return max(job.op_due[job.cur_op], t + float(proc_time(j)))
+            op_due = math.inf if job.op_due is None else job.op_due[job.cur_op]
+            return max(op_due, t + float(proc_time(j)))
         return _argmin(ids, mod)
     if job_rule == "ATC":
         p_mean = sum(float(proc_time(j)) for j in ids) / len(ids)

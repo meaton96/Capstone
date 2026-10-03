@@ -262,8 +262,28 @@ namespace Assets.Scripts.Simulation.Logging
                     "travel_price,release_weights,release_counts,routed_moves,cross_tile_moves,tiles_crossed," +
                     "input_buffer_capacity,output_buffer_capacity,output_blocked_machine_seconds,buffer_wait_job_seconds," +
                     "tick_errors,decision_drain,job_rule_fallbacks," +
-                    "jobs_arrived,jobs_completed,timed_out,truncated,stall_recoveries,stall_snaps_to_parking"
+                    "jobs_arrived,jobs_completed,timed_out,truncated,stall_recoveries,stall_snaps_to_parking," +
+                    "jobs_with_due_date,mean_tardiness,pct_tardy,max_tardiness"
                 );
+
+            // Due dates (2026-10-03): over completed jobs that carry one; empty when the episode has none.
+            int dueDone = 0, late = 0, withDue = 0;
+            double tardSum = 0, tardMax = 0;
+            foreach (var j in r.JobCompletionRecords)
+            {
+                if (!j.HasDueDate) continue;
+                withDue++;
+                if (!j.Completed) continue;
+                dueDone++;
+                double t = j.Tardiness;
+                tardSum += t;
+                if (t > 0) late++;
+                if (t > tardMax) tardMax = t;
+            }
+            string ci(double v) => v.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+            string dueCols = dueDone > 0
+                ? $"{withDue},{ci(tardSum / dueDone)},{ci(100.0 * late / dueDone)},{ci(tardMax)}"
+                : $"{withDue},,,";
 
             writer.WriteLine(
                 $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}," +
@@ -294,7 +314,8 @@ namespace Assets.Scripts.Simulation.Logging
                 $"{r.InputBufferCapacity},{r.OutputBufferCapacity},{r.OutputBlockedMachineSeconds:F1},{r.BufferWaitJobSeconds:F1}," +
                 $"{r.TickErrors},{r.DecisionDrain},{r.JobRuleFallbacks}," +
                 $"{r.JobsArrived},{r.JobsCompleted},{(r.TimedOut ? 1 : 0)},{(r.Truncated ? 1 : 0)}," +
-                $"{System.Linq.Enumerable.Sum(r.AGVRecords, a => a.StallRecoveryCount)},{System.Linq.Enumerable.Sum(r.AGVRecords, a => a.StallSnapCount)}"
+                $"{System.Linq.Enumerable.Sum(r.AGVRecords, a => a.StallRecoveryCount)},{System.Linq.Enumerable.Sum(r.AGVRecords, a => a.StallSnapCount)}," +
+                dueCols
             );
 
             Debug.Log($"[Results] {r.InstanceName} {r.RuleName} seed={r.Seed} " +
@@ -558,7 +579,8 @@ namespace Assets.Scripts.Simulation.Logging
                     "timestamp,instance,rule,seed,makespan," +
                     "job_id,is_dynamic,completed,arrival_time,exit_time,flow_time," +
                     "total_operations,completed_ops,work_content," +
-                    "time_needs_routing,time_waiting_pickup,time_in_transit,time_queued,time_processing"
+                    "time_needs_routing,time_waiting_pickup,time_in_transit,time_queued,time_processing," +
+                    "due_date,tardiness"
                 );
 
             string ts = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
@@ -571,7 +593,8 @@ namespace Assets.Scripts.Simulation.Logging
                     $"{j.ArrivalTime:F1},{j.ExitTime:F1},{j.FlowTime:F1}," +
                     $"{j.TotalOperations},{j.CompletedOps},{j.WorkContent:F1}," +
                     $"{j.TimeNeedsRouting:F1},{j.TimeWaitingPickup:F1},{j.TimeInTransit:F1}," +
-                    $"{j.TimeQueued:F1},{j.TimeProcessingState:F1}"
+                    $"{j.TimeQueued:F1},{j.TimeProcessingState:F1}," +
+                    (j.HasDueDate ? $"{j.DueDate:F1}," + (j.Completed ? $"{j.Tardiness:F1}" : "") : ",")
                 );
             }
         }

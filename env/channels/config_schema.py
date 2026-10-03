@@ -41,7 +41,7 @@ TILING_KEYS = {"tiles", "machinesPerTile", "jobScope", "agvAssignment", "release
 
 MACHINE_TYPES = ("Mill", "Lathe", "Weld", "Inspect", "Assemble")
 LAYOUTS = tuple("ABCDEFGHIJKLMNO")
-_JOB_RULES = ("SPT", "LPT", "SRT", "LRT", "FIFO", "PTWINQ")
+_JOB_RULES = ("SPT", "LPT", "SRT", "LRT", "FIFO", "PTWINQ", "EDD", "MDD", "ATC")
 _MACHINE_RULES = ("SMPT", "SRWT", "MMUR", "ECT", "TECT")
 DISPATCHING_RULES = {f"{j}_{m}" for j in _JOB_RULES for m in _MACHINE_RULES} | {"Random"}
 
@@ -194,6 +194,11 @@ def _check_job(v: "_Checker", job: Any, j: int, counts: Dict[str, int]) -> None:
         v.fail(f"{where} must be an object")
         return
     v.number(job, "arrivalTime", minimum=0.0, where=f"{where}.")
+    due = job.get("dueDate")
+    if due is not None:
+        arrival = job.get("arrivalTime", 0.0)
+        if not _is_number(due) or not math.isfinite(due) or (_is_number(arrival) and due < arrival):
+            v.fail(f"{where}.dueDate must be a finite number >= arrivalTime (got {due!r})")
     ops = job.get("operations")
     if not isinstance(ops, list) or not ops:
         v.fail(f"{where}.operations must be a non-empty list")

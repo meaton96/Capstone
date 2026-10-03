@@ -359,3 +359,16 @@ class TestPlayerManifest:
         from player_manifest import check_player
         (tmp_path / "capstone.x86_64").write_bytes(b"old build")
         assert check_player(str(tmp_path / "capstone.x86_64"))["status"] == "no_manifest"
+
+
+def test_job_due_dates_are_validated():
+    """@brief "dueDate" is optional; when given it must be a finite number at or after the job's arrival."""
+    def job(**changes):
+        s = copy.deepcopy(SCENARIO)
+        s["jobs"][0].update(changes)
+        return s
+    validate_scenario(job(dueDate=500.0))
+    validate_scenario(job(dueDate=None))
+    validate_scenario(job(arrivalTime=10.0, dueDate=10.0))
+    for bad in (5.0, "soon", float("inf")):
+        assert any("dueDate" in e for e in errors_of(validate_scenario, job(arrivalTime=10.0, dueDate=bad)))
