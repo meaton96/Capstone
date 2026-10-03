@@ -1,0 +1,49 @@
+[UnityMemory] Configuration Parameters - Can be set up in boot.config
+    "memorysetup-allocator-temp-initial-block-size-main=262144"
+    "memorysetup-allocator-temp-initial-block-size-worker=262144"
+    "memorysetup-temp-allocator-size-background-worker=32768"
+    "memorysetup-temp-allocator-size-job-worker=262144"
+    "memorysetup-temp-allocator-size-preload-manager=262144"
+    "memorysetup-temp-allocator-size-nav-mesh-worker=65536"
+    "memorysetup-temp-allocator-size-audio-worker=65536"
+    "memorysetup-temp-allocator-size-cloud-worker=32768"
+    "memorysetup-bucket-allocator-granularity=16"
+    "memorysetup-bucket-allocator-bucket-count=8"
+    "memorysetup-bucket-allocator-block-size=4194304"
+    "memorysetup-bucket-allocator-block-count=1"
+    "memorysetup-main-allocator-block-size=16777216"
+    "memorysetup-thread-allocator-block-size=16777216"
+    "memorysetup-gfx-main-allocator-block-size=16777216"
+    "memorysetup-gfx-thread-allocator-block-size=16777216"
+    "memorysetup-cache-allocator-block-size=4194304"
+    "memorysetup-typetree-allocator-block-size=2097152"
+    "memorysetup-profiler-bucket-allocator-granularity=16"
+    "memorysetup-profiler-bucket-allocator-bucket-count=8"
+    "memorysetup-profiler-bucket-allocator-block-size=4194304"
+    "memorysetup-profiler-bucket-allocator-block-count=1"
+    "memorysetup-profiler-allocator-block-size=16777216"
+    "memorysetup-profiler-editor-allocator-block-size=1048576"
+    "memorysetup-temp-allocator-size-main=4194304"
+    "memorysetup-job-temp-allocator-block-size=2097152"
+    "memorysetup-job-temp-allocator-block-size-background=1048576"
+    "memorysetup-job-temp-allocator-reduction-small-platforms=262144"
+    "memorysetup-temp-allocator-size-gfx=262144"
+Evaluating 4 policies × 2 seeds = 8 episodes -> /home/ubuntupc/Documents/Github/Capstone/results/dev-due-reg/py_old
+Observation row caps: 15 machines, 256 jobs
+[   1/8] seed     0  SRT-TECT                     makespan  8958.7  total flow 193355.4  (  175s)
+[   2/8] seed     0  SPT-ECT                      makespan  8958.7  total flow 192057.8  (  262s)
+[   3/8] seed     0  FIFO-ECT                     makespan  8958.7  total flow 197435.1  (  358s)
+[   4/8] seed     0  PTWINQ-SRWT                  makespan  8958.7  total flow 185059.0  (  551s)
+[   5/8] seed     1  SRT-TECT                     makespan 12402.3  total flow 192375.0  (  828s)
+[   6/8] seed     1  SPT-ECT                      makespan 12402.3  total flow 184342.2  ( 1111s)
+[   7/8] seed     1  FIFO-ECT                     makespan 12402.3  total flow 205788.2  ( 1413s)
+[   8/8] seed     1  PTWINQ-SRWT                  makespan 12402.3  total flow 189932.7  ( 1749s)
+
+policy                            n     return    gap% jobs out total flow* deadlk timeout
+------------------------------------------------------------------------------------------
+SRT-TECT                          2    -147.28   +0.95    125.5    192865.2      0       0
+SPT-ECT                           2    -149.11   +1.88    122.5    188200.0      0       0
+PTWINQ-SRWT                       2    -153.02   +4.77    122.0    187495.9      0       0
+FIFO-ECT                          2    -160.68   +9.42    120.5    201611.6      0       0
+gap% = mean per-seed gap in return to the best PDR rule on that seed (> 0 worse); deadlocked / timed-out episodes are left out of it.
+* total flow of exited jobs only (censored, read it with jobs out); with --random-warmup both also count jobs that finished during the warm-up.

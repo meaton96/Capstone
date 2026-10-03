@@ -1,0 +1,460 @@
+code stamps: ['1d5d59fd5c2c'] at ['3d22f9c7']
+820 tasks
+
+== Calibration: twin vs Unity, time in system, current 12 pairs ==
+                              ref  seed  pairs  mean_|diff|_%  max_|diff|_%  rank_corr best_unity best_twin  oracle_gain_unity_%  oracle_gain_twin_%
+           rq2-switch-oracle (t0)     0      9           0.63          1.50       0.98   SRT-TECT  SRT-TECT                 0.14                0.79
+           rq2-switch-oracle (t0)     2      9           0.51          0.81       1.00    SPT-ECT   SPT-ECT                 0.00                0.13
+           rq2-switch-oracle (t0)     4      9           1.05          1.89       0.80    SRT-ECT  SRT-TECT                 0.04                0.00
+           rq2-switch-oracle (t0)    11      9           1.19          1.86       0.70   SRT-TECT  SRT-TECT                 0.16                0.00
+           rq2-switch-oracle (t0)    15      9           1.15          2.11       0.92   SRT-TECT  SRT-TECT                 0.02                0.03
+oracle-screen-qfifo mf-off (warm)     0     12           1.65          4.36       0.94 PTWINQ-ECT  SRT-TECT                 0.00                0.00 
+
+== Decision table (warm): oracle vs best-on-average pair, seed-bootstrap 90% intervals ==
+objective set   c  seeds best_pair   base  gain_abs  switch_med_%  total_mean_%   mean_CI90  total_med_% median_CI90  share>2%   share_CI90
+      tis P12 2.0     40  SRT-TECT 132.32      1.25          0.36          1.01  [0.7, 1.3]         0.51  [0.3, 0.7]      25.0 [15.0, 37.5]
+     tard P12 1.5     40  SRT-TECT  44.04      1.24          1.55          4.37  [3.1, 5.8]         2.06  [1.1, 4.1]      50.0 [37.5, 62.5]
+     tard P30 1.5     40   MDD-ECT  43.29      1.44          1.66          5.44  [4.0, 7.0]         3.92  [1.9, 5.6]      60.0 [47.5, 72.5]
+     tard H15 1.5     40   MDD-ECT  43.29      1.40          1.78          5.18  [3.8, 6.7]         3.58  [2.0, 5.4]      62.5 [50.0, 75.0]
+     tard H10 1.5     40   MDD-ECT  43.29      1.30          0.80          4.59  [3.2, 6.1]         2.94  [1.7, 4.3]      60.0 [47.5, 72.5]
+     tard P12 2.0     40  SRT-TECT  26.54      1.36          3.58         12.10 [8.4, 16.2]         5.18 [1.6, 13.5]      60.0 [47.5, 72.5]
+     tard P30 2.0     40  MDD-TECT  25.43      1.44          4.76         10.82 [7.8, 14.0]         6.66  [5.3, 8.2]      75.0 [62.5, 85.0]
+     tard H15 2.0     40  MDD-TECT  25.43      1.32          2.79          9.38 [6.8, 12.3]         6.47  [4.9, 7.6]      75.0 [62.5, 85.0]
+     tard H10 2.0     40  MDD-TECT  25.43      1.28          1.08          7.62 [5.3, 10.3]         5.25  [2.5, 6.3]      65.0 [52.5, 77.5] 
+
+== Headroom ==
+setting objective pairset   c  seeds  zero_seeds   best_pair  pct_tardy  static_%  switch_%  switch_med_%  total_%  total_med_%  total_min_%  total_max_%  seeds>2%  seeds>3%  gain_abs  spread_%  oracle_tis_vs_best_tis_%
+     t0      tard     P12 1.5     20           0    SRT-TECT      63.67      2.12      1.66          0.95     3.54         1.19         0.00        15.37         9         6      0.63    104.46                     -0.57
+     t0      tard     P12 2.0     19           1    SRT-TECT      34.66      8.13      8.35          8.52    13.62         9.67         0.00        48.86        15        15      0.93    151.61                      3.00
+     t0      tard     P12 3.0     16           4    SRT-TECT       8.38    962.17     19.15          7.02    39.12        33.49         0.00        99.33        14        13      0.60  13080.38                     10.87
+     t0      tard     P12 4.0      8          12     SRT-ECT       2.11     38.49     54.16         43.16    61.34        63.84         0.00       100.00         7         7      0.50   6363.28                     14.97
+     t0      tard     P12 6.0      2          18 PTWINQ-TECT       0.71      3.04    100.00        100.00   100.00       100.00       100.00       100.00         2         2      0.07   1466.95                     14.55
+     t0      tard     P30 1.5     20           0    SRT-TECT      63.67      5.65      2.14          1.13     6.85         3.66         0.00        24.74        12        11      1.18    111.57                     -0.93
+     t0      tard     P30 2.0     19           1    MDD-TECT      38.54     96.49      4.95          3.50    21.33        14.16         0.07        93.75        17        17      1.14    361.68                      2.99
+     t0      tard     P30 3.0     15           5    ATC-TECT       8.47   5042.60     22.73         16.07    54.87        58.94         5.41        99.86        15        15      0.64  17586.51                     12.26
+     t0      tard     P30 4.0      6          14    ATC-TECT       1.60    250.81     64.64         68.51    75.64        87.33        18.89       100.00         6         6      0.21   9703.53                     11.85
+     t0      tard     P30 6.0      1          19    ATC-TECT       0.18      0.00    100.00        100.00   100.00       100.00       100.00       100.00         1         1      0.04   1940.36                     -2.32
+     t0       tis     P12 2.0     20           0    SRT-TECT        NaN      0.41      0.27          0.14     0.68         0.33         0.00         3.69         2         1      0.67     17.58                       NaN
+   warm      tard     H10 1.5     40           0     MDD-ECT      75.16      2.96      2.04          0.80     4.59         2.94         0.00        22.51        24        19      1.30     23.40                     -1.49
+   warm      tard     H10 2.0     40           0    MDD-TECT      47.20      4.63      4.02          1.08     7.62         5.25         0.00        46.54        26        24      1.28     48.33                     -0.77
+   warm      tard     H15 1.5     40           0     MDD-ECT      75.16      2.96      2.64          1.78     5.18         3.58         0.06        22.51        25        21      1.40     46.36                     -1.52
+   warm      tard     H15 2.0     40           0    MDD-TECT      47.20      4.63      5.79          2.79     9.38         6.47         0.05        44.24        30        28      1.32     91.75                     -0.70
+   warm      tard     P12 1.5     40           0    SRT-TECT      73.76      2.04      2.61          1.55     4.37         2.06         0.00        22.77        20        16      1.24     62.67                     -0.86
+   warm      tard     P12 2.0     40           0    SRT-TECT      44.19      6.45      7.99          3.58    12.10         5.18         0.00        57.61        24        24      1.36    101.48                     -0.70
+   warm      tard     P12 3.0     39           1    SRT-TECT      15.81    399.67     19.83          2.22    26.18         8.64         0.00       100.00        27        23      0.95   5359.30                      0.83
+   warm      tard     P12 4.0     31           9     SRT-ECT       6.13     45.85     37.14         22.15    42.18        27.52         0.00       100.00        24        23      0.56    756.32                      6.43
+   warm      tard     P12 6.0     12          28     SRT-ECT       0.88     27.05     30.21          8.70    38.48        27.29         0.00       100.00         7         7      0.60    765.80                     26.02
+   warm      tard     P30 1.5     40           0     MDD-ECT      75.16      2.98      2.88          1.66     5.44         3.92         0.06        22.51        24        22      1.44     67.41                     -1.54
+   warm      tard     P30 2.0     40           0    MDD-TECT      47.20      5.12      7.10          4.76    10.82         6.66         0.05        52.61        30        30      1.44    128.23                     -0.66
+   warm      tard     P30 3.0     36           4    MDD-TECT      17.21    464.52     18.14          6.81    32.63        24.03         0.00       100.00        32        32      1.09   6984.85                      4.36
+   warm      tard     P30 4.0     25          15    ATC-TECT       6.01     97.37     24.78          5.64    40.66        27.87         0.00       100.00        21        20      0.52   3192.99                      9.47
+   warm      tard     P30 6.0      8          32    ATC-TECT       0.54     19.21     19.10          0.00    26.63         5.96         0.00       100.00         5         5      0.05   3862.04                      7.91
+   warm       tis     P12 2.0     40           0    SRT-TECT        NaN      0.41      0.61          0.36     1.01         0.51         0.00         4.41        10         4      1.25     17.83                       NaN 
+
+setting objective pairset   c                            job_rules               machine_rules
+     t0      tard     P12 1.5          SRT 68%, SPT 26%, PTWINQ 7%  ECT 52%, TECT 41%, SRWT 8%
+     t0      tard     P12 2.0          SRT 68%, SPT 23%, PTWINQ 9% ECT 54%, TECT 29%, SRWT 18%
+     t0      tard     P12 3.0 SRT 65%, SPT 25%, PTWINQ 9%, FIFO 1% ECT 59%, TECT 22%, SRWT 19%
+     t0      tard     P12 4.0 SRT 60%, SPT 31%, PTWINQ 6%, FIFO 2% ECT 69%, TECT 17%, SRWT 15%
+     t0      tard     P12 6.0          SPT 67%, PTWINQ 25%, SRT 8%  ECT 75%, TECT 17%, SRWT 8%
+     t0      tard     P30 1.5   SRT 33%, SPT 22%, MDD 16%, EDD 10%  ECT 53%, TECT 41%, SRWT 6%
+     t0      tard     P30 2.0 MDD 28%, SPT 16%, EDD 14%, SLACK 13% ECT 53%, TECT 35%, SRWT 12%
+     t0      tard     P30 3.0 SPT 27%, SLACK 21%, EDD 19%, ATC 17%  ECT 69%, TECT 22%, SRWT 9%
+     t0      tard     P30 4.0 SPT 33%, ATC 25%, SRT 17%, SLACK 11% ECT 44%, SRWT 31%, TECT 25%
+     t0      tard     P30 6.0             EDD 50%, SPT 33%, CR 17% ECT 67%, TECT 17%, SRWT 17%
+     t0       tis     P12 2.0 SRT 70%, SPT 21%, PTWINQ 7%, FIFO 2%  TECT 56%, ECT 37%, SRWT 8%
+   warm      tard     H10 1.5     SRT 57%, MDD 28%, ATC 8%, SPT 5%           ECT 61%, TECT 39%
+   warm      tard     H10 2.0    MDD 36%, SRT 33%, ATC 24%, SPT 4%           ECT 65%, TECT 35%
+   warm      tard     H15 1.5     SRT 56%, MDD 28%, ATC 8%, SPT 6% ECT 50%, TECT 38%, SRWT 12%
+   warm      tard     H15 2.0    MDD 35%, SRT 34%, ATC 25%, EDD 4% ECT 54%, TECT 31%, SRWT 15%
+   warm      tard     P12 1.5          SRT 77%, SPT 15%, PTWINQ 9% ECT 60%, TECT 29%, SRWT 11%
+   warm      tard     P12 2.0 SRT 75%, SPT 21%, PTWINQ 4%, FIFO 0% ECT 49%, TECT 31%, SRWT 20%
+   warm      tard     P12 3.0 SRT 62%, SPT 25%, PTWINQ 9%, FIFO 3% ECT 60%, TECT 24%, SRWT 16%
+   warm      tard     P12 4.0 SRT 51%, SPT 39%, PTWINQ 8%, FIFO 2% ECT 66%, TECT 17%, SRWT 17%
+   warm      tard     P12 6.0          SPT 56%, SRT 42%, PTWINQ 3%  ECT 76%, SRWT 17%, TECT 7%
+   warm      tard     P30 1.5    SRT 48%, MDD 27%, SPT 11%, ATC 7% ECT 50%, TECT 38%, SRWT 12%
+   warm      tard     P30 2.0   MDD 28%, SRT 27%, ATC 17%, SPT 10% ECT 55%, TECT 30%, SRWT 15%
+   warm      tard     P30 3.0 SPT 23%, ATC 20%, MDD 15%, SLACK 14% ECT 59%, TECT 31%, SRWT 11%
+   warm      tard     P30 4.0   SPT 31%, ATC 23%, SRT 16%, EDD 13% ECT 63%, SRWT 26%, TECT 11%
+   warm      tard     P30 6.0     SPT 50%, EDD 27%, SRT 15%, CR 4%  ECT 83%, SRWT 15%, TECT 2%
+   warm       tis     P12 2.0 SRT 76%, SPT 15%, PTWINQ 8%, FIFO 1% ECT 53%, TECT 38%, SRWT 10% 
+
+== Fixed pairs on tardiness (warm): mean gap to per-seed best, top 10 per c ==
+-- c = 1.5
+       pair  tard_gap_%  wins  tard_mean  tis_gap_%
+   MDD-TECT        2.82     9      43.37       0.72
+    MDD-ECT        2.98    14      43.29       0.73
+   SRT-TECT        4.50     3      44.04       0.96
+    SRT-ECT        5.50     6      44.13       1.15
+   EDD-TECT       11.34     1      49.17       4.20
+    EDD-ECT       13.55     0      49.66       4.64
+    ATC-ECT       13.92     3      48.71       4.16
+   ATC-TECT       14.29     1      49.26       4.38
+PTWINQ-TECT       15.32     1      48.97       4.22
+    CR-TECT       15.34     1      49.20       4.65
+-- c = 2
+      pair  tard_gap_%  wins  tard_mean  tis_gap_%
+  MDD-TECT        5.12    12      25.43       1.15
+   MDD-ECT        9.48     5      25.76       1.48
+  EDD-TECT       13.19     1      28.79       3.39
+  ATC-TECT       13.25     4      28.01       3.25
+   ATC-ECT       13.83     5      27.83       3.15
+   EDD-ECT       17.30     2      28.93       3.64
+  SRT-TECT       18.97     1      26.54       0.71
+   SRT-ECT       20.89     4      26.60       0.91
+SLACK-TECT       24.80     3      31.94       5.99
+ SLACK-ECT       28.84     0      32.02       6.17
+-- c = 3
+      pair  tard_gap_%  wins  tard_mean  tis_gap_%
+   MOD-ECT      369.58     0      11.72       8.81
+  MDD-TECT      464.52     7       8.22       2.08
+  EDD-TECT      469.98     2       8.94       2.81
+   MDD-ECT      589.73     3       8.47       2.33
+   EDD-ECT      593.35     1       8.99       2.94
+   ATC-ECT      598.78     5       8.46       3.17
+PTWINQ-ECT      753.62     1      13.98       3.85
+  SRT-TECT      963.05     1      10.26       0.44
+   SRT-ECT      973.04     0      10.33       0.59
+  MDD-SRWT     1267.26     0       9.89       7.01
+-- c = 4
+      pair  tard_gap_%  wins  tard_mean  tis_gap_%
+  ATC-TECT       97.37     2       2.90       2.73
+SLACK-TECT      107.10     0       3.30       4.18
+  MDD-TECT      115.44     1       3.07       2.39
+  EDD-TECT      117.71     1       3.28       2.78
+ SLACK-ECT      127.22     2       3.36       4.49
+   ATC-ECT      139.87     4       2.96       3.04
+   MDD-ECT      141.43     1       3.12       2.76
+   EDD-ECT      144.06     3       3.35       3.11
+  ATC-SRWT      196.36     5       3.46       8.27
+SLACK-SRWT      286.80     0       4.26       9.35
+-- c = 6
+      pair  tard_gap_%  wins  tard_mean  tis_gap_%
+  ATC-TECT       19.21     1       0.50       4.32
+  MDD-TECT       29.20     0       0.52       4.29
+  EDD-TECT       29.20     0       0.52       4.29
+SLACK-TECT       42.40     0       0.53       5.71
+   MDD-ECT       82.83     0       0.55       4.98
+   EDD-ECT       82.83     1       0.55       4.98
+   ATC-ECT      154.14     2       0.56       4.54
+  EDD-SRWT      169.17     2       0.60       8.82
+  MDD-SRWT      169.17     0       0.60       8.82
+ SLACK-ECT      177.11     1       0.59       5.90
+
+== Fixed pairs on tardiness (t0): mean gap to per-seed best, top 10 per c ==
+-- c = 1.5
+       pair  tard_gap_%  wins  tard_mean  tis_gap_%
+   MDD-TECT        4.05     4      22.52       0.82
+   SRT-TECT        5.65     3      22.49       0.78
+    MDD-ECT        7.05     3      22.87       1.11
+   EDD-TECT        8.71     2      23.70       1.85
+    SRT-ECT        9.11     1      23.09       1.22
+    EDD-ECT       11.46     0      24.05       2.14
+    ATC-ECT       12.61     3      24.56       2.51
+   ATC-TECT       13.19     2      25.19       3.14
+    CR-TECT       16.91     0      25.02       3.33
+PTWINQ-TECT       18.34     0      25.96       3.66
+-- c = 2
+      pair  tard_gap_%  wins  tard_mean  tis_gap_%
+   MDD-ECT       28.61     2      10.66       1.28
+   ATC-ECT       28.75     1      11.85       2.79
+   EDD-ECT       32.23     0      11.17       1.83
+ SLACK-ECT       46.24     2      13.11       4.10
+   CR-TECT       52.25     1      12.76       4.73
+  MOD-TECT       56.66     1      14.57       6.21
+  ATC-TECT       61.73     2      11.77       2.95
+SLACK-TECT       68.85     2      12.67       3.86
+    CR-ECT       70.91     0      13.24       5.12
+   MOD-ECT       78.91     0      14.35       5.61
+-- c = 3
+      pair  tard_gap_%  wins  tard_mean  tis_gap_%
+  MDD-TECT     1154.79     1       1.45       1.89
+  EDD-TECT     1156.21     1       1.46       1.88
+   MOD-ECT     1231.06     0       3.73       8.43
+   ATC-ECT     1292.46     2       1.55       2.68
+   MDD-ECT     1497.94     1       1.64       2.35
+   EDD-ECT     1499.14     1       1.66       2.39
+  SRT-TECT     1519.68     0       2.20       0.64
+PTWINQ-ECT     1884.80     1       4.56       4.11
+   SRT-ECT     2096.28     0       2.57       1.32
+  MDD-SRWT     3192.09     0       3.27       9.12
+-- c = 4
+      pair  tard_gap_%  wins  tard_mean  tis_gap_%
+  ATC-TECT      250.81     2       0.33       2.30
+SLACK-TECT      297.42     0       0.33       2.75
+   SRT-ECT      305.50     0       0.85       1.62
+   MDD-ECT      507.89     0       0.55       3.11
+   EDD-ECT      507.89     0       0.55       3.11
+   ATC-ECT      590.87     1       0.69       3.22
+ SLACK-ECT      599.20     0       0.71       4.08
+  EDD-TECT      748.11     1       0.52       2.35
+  MDD-TECT      748.11     0       0.52       2.35
+   MOD-ECT     1068.70     0       1.07       8.59
+-- c = 6
+       pair  tard_gap_%  wins  tard_mean  tis_gap_%
+   MDD-TECT        0.00     0       0.04       0.02
+   ATC-TECT        0.00     1       0.04       0.10
+ SLACK-TECT        0.00     0       0.04       0.59
+   EDD-TECT        0.00     0       0.04       0.02
+   SPT-SRWT      116.71     0       0.09       8.84
+PTWINQ-SRWT      116.71     0       0.09       7.46
+PTWINQ-TECT      129.87     0       0.10       1.06
+   MOD-SRWT      172.68     0       0.12      10.06
+ PTWINQ-ECT      179.38     0       0.12       1.56
+    SRT-ECT      180.99     0       0.12       0.00
+
+== Oracle job-rule choice by segment load (warm, tard, P30, c = 1.5), share of slots ==
+job       ATC   CR  EDD   MDD  MOD  PTWINQ  SLACK   SPT   SRT
+load                                                         
+lull      9.0  0.0  4.0  17.0  0.0     7.0    0.0  33.0  30.0
+overload  8.0  1.0  3.0  36.0  0.0     5.0    1.0   1.0  47.0
+under 1   5.0  0.0  0.0  20.0  1.0     1.0    0.0  13.0  59.0 
+
+== Oracle job-rule choice by segment load (warm, tard, P30, c = 2), share of slots ==
+job        ATC   CR   EDD   MDD  MOD  PTWINQ  SLACK   SPT   SRT
+load                                                           
+lull      11.0  2.0  15.0  11.0  2.0     2.0    2.0  28.0  26.0
+overload  22.0  1.0   7.0  31.0  2.0     0.0    3.0   3.0  31.0
+under 1   12.0  1.0   5.0  34.0  5.0     0.0   12.0   8.0  22.0 
+
+== Oracle job-rule choice by segment load (warm, tard, P30, c = 3), share of slots ==
+job        ATC   CR   EDD   MDD  MOD  PTWINQ  SLACK   SPT   SRT
+load                                                           
+lull      13.0  0.0  13.0  11.0  7.0     0.0    4.0  43.0   9.0
+overload  23.0  1.0  14.0  16.0  1.0     1.0   17.0  17.0  11.0
+under 1   16.0  3.0  14.0  11.0  3.0     3.0   18.0  28.0   5.0 
+
+== Oracle job-rule choice by segment load (warm, tard, P30, c = 4), share of slots ==
+job        ATC   CR   EDD  FIFO  MDD  MOD  PTWINQ  SLACK   SPT   SRT
+load                                                                
+lull       7.0  2.0   7.0   0.0  0.0  0.0     0.0    4.0  57.0  24.0
+overload  22.0  2.0  14.0   1.0  3.0  1.0     1.0    6.0  29.0  21.0
+under 1    8.0  4.0  12.0   0.0  1.0  0.0     0.0    9.0  38.0  28.0 
+
+== Oracle job-rule choice by segment load (warm, tard, P30, c = 6), share of slots ==
+job       ATC   CR   EDD  SLACK   SPT   SRT
+load                                       
+lull      0.0  2.0   7.0    0.0  89.0   2.0
+overload  0.0  1.0  10.0    1.0  68.0  20.0
+under 1   1.0  0.0   4.0    0.0  88.0   7.0 
+
+== Per seed (warm, tard, P30, c = 1.5; best-on-average pair MDD-ECT) ==
+      best_pair_value  per_seed_best per_seed_best_pair   oracle  total_%                                                     schedule
+seed                                                                                                                                  
+0              32.673         30.856           SRT-TECT   30.825    5.657            SRT-TECT|SRT-ECT|SRT-ECT|SRT-ECT|SRT-ECT|SRT-SRWT
+1              23.156         23.156            MDD-ECT   22.207    4.098          MDD-ECT|SPT-TECT|SPT-TECT|SRT-TECT|SRT-TECT|SRT-ECT
+2              53.114         52.601            SRT-ECT   51.525    2.993             SRT-ECT|SRT-ECT|MDD-TECT|SRT-ECT|SRT-ECT|SRT-ECT
+3              75.816         75.816            MDD-ECT   75.249    0.749              MDD-ECT|MDD-ECT|MDD-ECT|MDD-ECT|SRT-ECT|SRT-ECT
+4               3.916          3.912           MDD-TECT    3.839    1.969        MDD-TECT|MDD-TECT|MDD-TECT|MDD-TECT|MDD-TECT|SRT-SRWT
+5              35.390         35.390            MDD-ECT   35.107    0.799             MDD-ECT|SRT-ECT|SRT-ECT|SRT-ECT|SRT-ECT|SRT-SRWT
+6               8.933          7.625            ATC-ECT    7.476   16.311         ATC-ECT|SPT-TECT|SPT-TECT|SPT-SRWT|SPT-SRWT|SPT-SRWT
+7             143.448        143.448            MDD-ECT  140.857    1.807           MDD-ECT|SRT-ECT|MDD-TECT|SRT-TECT|SRT-TECT|SRT-ECT
+8              59.067         56.441           SRT-TECT   55.885    5.388        SRT-TECT|SRT-TECT|SRT-TECT|MDD-ECT|SRT-ECT|PTWINQ-ECT
+9              14.059         13.925            ATC-ECT   12.500   11.089            ATC-ECT|ATC-ECT|ATC-ECT|ATC-ECT|MDD-SRWT|SRT-TECT
+10             37.167         33.011            ATC-ECT   32.502   12.552   ATC-ECT|ATC-ECT|PTWINQ-TECT|PTWINQ-ECT|PTWINQ-TECT|SRT-ECT
+11             69.185         66.945            SRT-ECT   66.945    3.238              SRT-ECT|SRT-ECT|SRT-ECT|SRT-ECT|SPT-ECT|SPT-ECT
+12            104.241        104.241            MDD-ECT  102.612    1.563            MDD-ECT|MDD-ECT|SRT-TECT|SRT-TECT|SRT-ECT|SRT-ECT
+13             77.539         75.663           MDD-TECT   73.254    5.526        MDD-TECT|MDD-TECT|SRT-TECT|SRT-TECT|SRT-TECT|MDD-SRWT
+14             26.534         26.534            MDD-ECT   26.510    0.093           SRT-ECT|ATC-TECT|SRT-TECT|SRT-TECT|SPT-ECT|SPT-ECT
+15             44.603         44.463           MDD-TECT   44.463    0.314        MDD-TECT|MDD-TECT|MDD-TECT|MDD-TECT|MDD-TECT|SPT-SRWT
+16             19.605         19.486            SRT-ECT   19.440    0.840           SRT-ECT|SRT-ECT|SRT-ECT|SRT-TECT|SRT-TECT|SRT-TECT
+17             75.561         75.531           MDD-TECT   75.517    0.059        MDD-TECT|SRT-TECT|SRT-TECT|SRT-TECT|SRT-TECT|SRT-SRWT
+18             81.722         81.722            MDD-ECT   81.540    0.222         MDD-ECT|SRT-TECT|SRT-TECT|SRT-TECT|MDD-TECT|SRT-TECT
+19             10.542         10.466           ATC-TECT    9.766    7.364      ATC-TECT|ATC-TECT|ATC-TECT|SRT-TECT|SRT-SRWT|PTWINQ-ECT
+20              8.554          8.554            MDD-ECT    7.916    7.458        MDD-ECT|MDD-ECT|SRT-SRWT|SRT-SRWT|SRT-SRWT|SLACK-SRWT
+21             40.402         40.402            MDD-ECT   38.817    3.923             MDD-ECT|MDD-ECT|SRT-TECT|SRT-ECT|SRT-ECT|SRT-ECT
+22             78.003         76.079            SRT-ECT   74.948    3.917             SRT-ECT|SRT-ECT|SRT-ECT|SRT-ECT|SRT-SRWT|SRT-ECT
+23             79.313         79.250           MDD-TECT   78.656    0.829            MDD-TECT|MDD-TECT|MDD-ECT|SRT-ECT|MDD-ECT|MDD-ECT
+24             45.956         45.956            MDD-ECT   45.745    0.461            MDD-ECT|MDD-ECT|MDD-ECT|MDD-ECT|MDD-SRWT|SPT-SRWT
+25             30.389         30.373           MDD-TECT   28.525    6.133           MDD-TECT|MDD-TECT|ATC-TECT|ATC-ECT|ATC-ECT|SPT-ECT
+26             39.373         39.257            SRT-ECT   38.570    2.041             SRT-ECT|SRT-TECT|SRT-ECT|SRT-ECT|SRT-ECT|SRT-ECT
+27             72.042         72.042            MDD-ECT   71.963    0.110            MDD-ECT|SRT-ECT|SRT-ECT|SRT-ECT|SRT-TECT|SRT-TECT
+28             23.401         21.793            CR-TECT   19.611   16.196           CR-TECT|PTWINQ-ECT|ATC-ECT|ATC-ECT|ATC-ECT|SPT-ECT
+29            110.897        110.897            MDD-ECT  109.876    0.921            MDD-ECT|MDD-ECT|MDD-ECT|SRT-ECT|MDD-SRWT|MDD-SRWT
+30             20.635         17.134            SPT-ECT   16.492   20.076              SPT-ECT|SPT-ECT|SRT-ECT|SRT-ECT|MDD-ECT|SRT-ECT
+31              7.752          6.421           EDD-TECT    6.007   22.514          EDD-TECT|EDD-TECT|EDD-TECT|EDD-ECT|EDD-TECT|SPT-ECT
+32             65.545         64.936        PTWINQ-TECT   64.435    1.694  PTWINQ-TECT|PTWINQ-TECT|SRT-TECT|SRT-TECT|SPT-TECT|SPT-TECT
+33              5.134          5.119            SRT-ECT    5.103    0.617           SRT-ECT|SRT-ECT|SRT-ECT|SRT-SRWT|SRT-SRWT|SRT-SRWT
+34             18.707         18.707            MDD-ECT   17.185    8.137          MDD-ECT|MDD-SRWT|MDD-SRWT|MDD-SRWT|MDD-TECT|SRT-ECT
+35             20.753         20.753            MDD-ECT   18.577   10.486        MDD-ECT|SRT-TECT|SRT-TECT|PTWINQ-ECT|SRT-ECT|SRT-SRWT
+36             20.146         20.117           MDD-TECT   19.342    3.991       MDD-TECT|PTWINQ-TECT|SPT-TECT|SPT-TECT|SPT-ECT|SPT-ECT
+37             11.725         11.724           MDD-TECT   10.989    6.281           MDD-TECT|MDD-TECT|SRT-ECT|SRT-ECT|SRT-ECT|SPT-SRWT
+38             15.967         15.269           MDD-TECT   14.631    8.367           MDD-TECT|MDD-TECT|MOD-ECT|MDD-TECT|MDD-ECT|SPT-ECT
+39             20.512         18.312           SRT-TECT   18.312   10.725        SRT-TECT|SRT-TECT|SRT-TECT|SRT-TECT|SRT-TECT|SRT-TECT 
+
+== Per seed (warm, tard, P30, c = 2; best-on-average pair MDD-TECT) ==
+      best_pair_value  per_seed_best per_seed_best_pair   oracle  total_%                                                 schedule
+seed                                                                                                                              
+0              18.708         17.712           SRT-TECT   17.426    6.853        SRT-TECT|SRT-ECT|SRT-ECT|MDD-ECT|MDD-SRWT|SRT-ECT
+1               6.780          6.631           ATC-TECT    5.895   13.054     ATC-TECT|ATC-TECT|SLACK-ECT|ATC-ECT|ATC-TECT|ATC-ECT
+2              29.861         26.361            ATC-ECT   25.788   13.639     ATC-ECT|ATC-ECT|ATC-ECT|ATC-SRWT|ATC-ECT|PTWINQ-SRWT
+3              45.074         45.074           MDD-TECT   45.051    0.051      MDD-TECT|MDD-TECT|MDD-TECT|MDD-TECT|MDD-ECT|MDD-ECT
+4               2.548          2.516            SRT-ECT    2.516    1.255          SRT-ECT|SRT-ECT|SRT-ECT|SRT-ECT|SRT-ECT|SRT-ECT
+5              18.158         16.380            MOD-ECT   14.183   21.890      MOD-ECT|MOD-ECT|MDD-TECT|SRT-TECT|SRT-TECT|SPT-SRWT
+6               2.234          2.234           MDD-TECT    2.232    0.070    MDD-TECT|SRT-TECT|SPT-TECT|SPT-SRWT|SPT-SRWT|SPT-SRWT
+7             123.031        122.822            MDD-ECT  122.822    0.170          MDD-ECT|MDD-ECT|MDD-ECT|MDD-ECT|MDD-ECT|MDD-ECT
+8              30.019         30.019           MDD-TECT   28.968    3.501     MDD-TECT|MDD-TECT|SRT-TECT|SRT-TECT|SRT-TECT|SRT-ECT
+9               3.516          2.633           ATC-TECT    2.342   33.405     ATC-TECT|ATC-TECT|ATC-TECT|ATC-TECT|EDD-TECT|SRT-ECT
+10             13.865         12.630         SLACK-TECT   11.763   15.158    SLACK-TECT|SLACK-TECT|MOD-ECT|MOD-ECT|ATC-ECT|SPT-ECT
+11             41.575         41.575           MDD-TECT   40.159    3.407        MDD-TECT|SRT-TECT|SRT-TECT|CR-ECT|SRT-ECT|SPT-ECT
+12             71.618         71.406            MDD-ECT   70.853    1.068          MDD-ECT|SRT-ECT|SRT-ECT|SRT-ECT|SRT-ECT|SPT-ECT
+13             48.200         48.200           MDD-TECT   47.490    1.471         MDD-TECT|MDD-ECT|MDD-ECT|MDD-ECT|SRT-ECT|SRT-ECT
+14             13.025         12.351            ATC-ECT   12.351    5.174          ATC-ECT|ATC-ECT|SRT-ECT|SRT-ECT|SPT-ECT|SPT-ECT
+15             20.227         20.227            MDD-ECT   20.119    0.532         MDD-ECT|MDD-ECT|MDD-ECT|MDD-ECT|SRT-SRWT|SPT-ECT
+16             16.672         16.651            MDD-ECT   15.898    4.643         MDD-ECT|EDD-SRWT|ATC-ECT|SRT-ECT|SRT-ECT|SPT-ECT
+17             43.637         43.637           MDD-TECT   43.083    1.271    MDD-TECT|MDD-TECT|MDD-TECT|ATC-TECT|SRT-TECT|SRT-TECT
+18             48.773         48.752            MDD-ECT   48.430    0.702          MDD-ECT|SRT-ECT|SRT-ECT|MDD-ECT|MDD-ECT|SRT-ECT
+19              5.133          3.583         SLACK-SRWT    3.127   39.090   SLACK-SRWT|SLACK-SRWT|MDD-TECT|MDD-ECT|EDD-ECT|SPT-ECT
+20              1.216          1.216            EDD-ECT    0.730   39.985       EDD-ECT|EDD-ECT|EDD-SRWT|EDD-SRWT|EDD-SRWT|CR-SRWT
+21             17.578         14.657         SLACK-TECT   12.736   27.547    SLACK-TECT|EDD-TECT|EDD-TECT|EDD-TECT|MDD-ECT|CR-SRWT
+22             47.121         45.845            SRT-ECT   43.551    7.576         SRT-ECT|SRT-ECT|MDD-ECT|SRT-ECT|MDD-ECT|ATC-SRWT
+23             52.103         50.215            SRT-ECT   48.006    7.863          SRT-ECT|MDD-ECT|SRT-ECT|SRT-ECT|MDD-ECT|SRT-ECT
+24             31.106         30.974           ATC-TECT   28.429    8.605     ATC-TECT|SRT-SRWT|MDD-ECT|SRT-SRWT|SRT-SRWT|EDD-SRWT
+25             16.030         16.030           MDD-TECT   14.810    7.612        MDD-TECT|ATC-ECT|ATC-ECT|SRT-SRWT|MDD-ECT|SRT-ECT
+26             15.992         15.992           MDD-TECT   15.087    5.656       MDD-TECT|MDD-TECT|SRT-TECT|SRT-ECT|MDD-ECT|MDD-ECT
+27             44.068         44.068           MDD-TECT   41.719    5.332     MDD-TECT|SRT-TECT|MOD-TECT|SRT-TECT|SRT-TECT|SRT-ECT
+28              7.005          6.671            ATC-ECT    5.940   15.208      ATC-ECT|ATC-TECT|ATC-TECT|ATC-ECT|SLACK-ECT|SPT-ECT
+29             75.022         70.336            SRT-ECT   70.165    6.474         SRT-ECT|SRT-ECT|SRT-ECT|SRT-ECT|MDD-SRWT|SRT-ECT
+30              3.579          2.886            SPT-ECT    1.696   52.614  SPT-ECT|SLACK-ECT|SLACK-ECT|SLACK-ECT|EDD-SRWT|SRT-TECT
+31              1.789          1.789           EDD-TECT    1.655    7.494    EDD-TECT|EDD-TECT|ATC-SRWT|ATC-SRWT|EDD-SRWT|SRT-SRWT
+32             55.270         53.179           ATC-TECT   51.694    6.470       ATC-TECT|MDD-ECT|SPT-TECT|MDD-SRWT|SPT-ECT|SPT-ECT
+33              2.026          2.014            EDD-ECT    1.629   19.623    EDD-ECT|EDD-ECT|SLACK-SRWT|ATC-TECT|SRT-SRWT|SRT-SRWT
+34              7.108          7.108           MDD-TECT    6.359   10.535     MDD-TECT|MDD-TECT|MDD-TECT|MDD-TECT|MDD-SRWT|MDD-ECT
+35              8.172          8.153         SLACK-TECT    7.311   10.545       SLACK-TECT|ATC-ECT|ATC-ECT|ATC-ECT|ATC-ECT|ATC-ECT
+36             12.906         12.349            ATC-ECT   12.223    5.291       ATC-ECT|MOD-TECT|SPT-TECT|SPT-TECT|SPT-ECT|SPT-ECT
+37              3.381          3.157            ATC-ECT    2.841   15.979     ATC-ECT|ATC-ECT|ATC-ECT|SLACK-ECT|SLACK-ECT|SPT-SRWT
+38              6.050          6.050           MDD-TECT    6.031    0.300    MDD-TECT|MDD-TECT|MDD-TECT|MDD-TECT|EDD-TECT|SRT-SRWT
+39              6.964          6.964           MDD-TECT    6.579    5.524         MDD-TECT|MDD-ECT|MDD-ECT|MDD-ECT|MDD-ECT|MOD-ECT 
+
+== Per seed (warm, tard, P30, c = 3; best-on-average pair MDD-TECT) ==
+      best_pair_value  per_seed_best per_seed_best_pair  oracle  total_%                                                      schedule
+seed                                                                                                                                  
+0               3.193          2.946         SLACK-TECT   2.933    8.145  SLACK-TECT|SLACK-TECT|SLACK-TECT|SLACK-TECT|EDD-SRWT|SPT-ECT
+1               0.840          0.663          SLACK-ECT   0.663   21.018     SLACK-ECT|SLACK-ECT|SLACK-ECT|SLACK-ECT|SLACK-ECT|SPT-ECT
+2               2.832          2.832           MDD-TECT   2.728    3.664          MDD-TECT|MDD-TECT|EDD-ECT|SLACK-ECT|SPT-SRWT|SPT-ECT
+3              10.790          8.285           ATC-TECT   7.953   26.292          ATC-TECT|ATC-TECT|ATC-TECT|ATC-TECT|MDD-TECT|SRT-ECT
+4               1.498          1.498            ATC-ECT   1.498    0.000               SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+5               3.831          2.952           MOD-TECT   1.840   51.956    MOD-TECT|PTWINQ-ECT|SLACK-ECT|SLACK-TECT|EDD-TECT|SRT-TECT
+6               0.131          0.001         PTWINQ-ECT   0.001   99.327            PTWINQ-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+7              72.770         72.770           MDD-TECT  72.770    0.000         MDD-TECT|MDD-TECT|MDD-TECT|MDD-TECT|MDD-TECT|MDD-TECT
+8               4.467          1.919            MDD-ECT   1.500   66.425              MDD-ECT|MDD-ECT|MDD-TECT|ATC-ECT|EDD-ECT|EDD-ECT
+9               0.133          0.000            ATC-ECT   0.000  100.000      SLACK-ECT|SLACK-ECT|SLACK-ECT|SLACK-ECT|EDD-SRWT|SPT-ECT
+10              1.720          0.870           ATC-TECT   0.667   61.206        ATC-TECT|ATC-TECT|ATC-TECT|ATC-SRWT|SLACK-SRWT|SPT-ECT
+11              9.366          7.850            ATC-ECT   7.697   17.820               ATC-ECT|ATC-ECT|MOD-ECT|MOD-ECT|EDD-ECT|SPT-ECT
+12             21.368         21.368           MDD-TECT  19.898    6.877      MDD-TECT|ATC-TECT|ATC-TECT|SRT-TECT|SRT-TECT|PTWINQ-SRWT
+13             11.300         11.300           MDD-TECT  11.274    0.229             MDD-TECT|MDD-ECT|MDD-ECT|MDD-ECT|MDD-ECT|EDD-SRWT
+14              3.843          3.843           MDD-TECT   3.840    0.062             MDD-TECT|EDD-TECT|SRT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+15              0.695          0.138          SLACK-ECT   0.000  100.000         SLACK-ECT|ATC-SRWT|SLACK-SRWT|EDD-ECT|SPT-ECT|SPT-ECT
+16              8.162          7.946           ATC-TECT   7.867    3.615          ATC-TECT|EDD-TECT|EDD-TECT|SPT-SRWT|SPT-SRWT|SPT-ECT
+17              5.625          4.428            CR-TECT   4.298   23.588        CR-TECT|CR-TECT|SLACK-ECT|SLACK-ECT|SLACK-ECT|SPT-SRWT
+18             14.365         14.365           MDD-TECT  11.428   20.444           MDD-TECT|ATC-ECT|ATC-ECT|MDD-TECT|MDD-TECT|ATC-TECT
+19              1.424          0.594           EDD-SRWT   0.270   81.020             EDD-SRWT|EDD-SRWT|SPT-ECT|EDD-ECT|SRT-ECT|SPT-ECT
+20              0.103          0.000            MOD-ECT   0.000  100.000        SLACK-ECT|SLACK-ECT|SRT-SRWT|SPT-SRWT|SPT-SRWT|SPT-ECT
+21              0.555          0.168           ATC-TECT   0.166   70.076         ATC-TECT|ATC-TECT|ATC-TECT|ATC-TECT|ATC-TECT|ATC-SRWT
+22             14.703         11.675           MOD-TECT  10.846   26.236          MOD-TECT|SLACK-ECT|MDD-ECT|MDD-ECT|MDD-SRWT|MDD-SRWT
+23             15.465         13.338            ATC-ECT  11.681   24.469             ATC-ECT|SLACK-ECT|ATC-ECT|SRT-ECT|SRT-ECT|EDD-ECT
+24             10.009         10.003            MDD-ECT   7.004   30.023       MDD-ECT|SLACK-TECT|ATC-TECT|SLACK-ECT|SLACK-ECT|SPT-ECT
+25              1.846          1.688            EDD-ECT   1.098   40.504              EDD-ECT|ATC-ECT|ATC-ECT|ATC-ECT|MDD-TECT|SPT-ECT
+26              2.021          1.947         SLACK-TECT   1.815   10.182            SLACK-TECT|ATC-ECT|EDD-ECT|EDD-ECT|EDD-ECT|SPT-ECT
+27              5.590          5.590           MDD-TECT   5.123    8.352          MDD-TECT|EDD-TECT|EDD-TECT|EDD-TECT|ATC-ECT|SRT-SRWT
+28              0.177          0.029             CR-ECT   0.000  100.000                CR-ECT|EDD-ECT|EDD-ECT|EDD-ECT|SRT-ECT|SPT-ECT
+29             21.111         20.778           ATC-SRWT  18.995   10.021             ATC-SRWT|ATC-ECT|ATC-ECT|ATC-ECT|MDD-ECT|MDD-SRWT
+30              0.233          0.000           MOD-TECT   0.000  100.000               SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+31              0.249          0.249           EDD-TECT   0.146   41.179           EDD-TECT|EDD-TECT|SRT-SRWT|SRT-TECT|SRT-ECT|SPT-ECT
+32             37.713         35.223            ATC-ECT  35.223    6.603               ATC-ECT|ATC-ECT|ATC-ECT|MOD-ECT|SPT-ECT|SPT-ECT
+33              0.577          0.577           EDD-TECT   0.433   24.998        EDD-TECT|EDD-TECT|ATC-SRWT|SLACK-TECT|SPT-TECT|SPT-ECT
+34              2.578          1.684           SRT-TECT   0.877   65.971         SRT-TECT|SRT-SRWT|SLACK-ECT|SRT-TECT|SRT-TECT|SRT-ECT
+35              1.106          0.449           ATC-SRWT   0.235   78.756              ATC-SRWT|ATC-ECT|ATC-ECT|ATC-ECT|SRT-ECT|SPT-ECT
+36              3.524          3.522            MDD-ECT   3.404    3.413               MDD-ECT|MOD-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+37              0.442          0.380            ATC-ECT   0.380   13.989               SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+38              0.002          0.000           ATC-TECT   0.000  100.000              ATC-TECT|EDD-ECT|EDD-ECT|EDD-ECT|SPT-ECT|SPT-ECT
+39              0.049          0.035          SLACK-ECT   0.035   28.297       SLACK-ECT|SLACK-ECT|SLACK-ECT|SLACK-ECT|SRT-ECT|SPT-ECT 
+
+== Per seed (warm, tard, P30, c = 4; best-on-average pair ATC-TECT) ==
+      best_pair_value  per_seed_best per_seed_best_pair  oracle  total_%                                                   schedule
+seed                                                                                                                               
+0               0.193          0.000            ATC-ECT   0.000  100.000            SRT-ECT|SRT-ECT|SRT-ECT|SRT-ECT|SRT-ECT|SPT-ECT
+1               0.248          0.027            EDD-ECT   0.027   89.149           EDD-ECT|SRT-ECT|SPT-TECT|SPT-ECT|SPT-ECT|SPT-ECT
+2               0.000          0.000            ATC-ECT   0.000      NaN           EDD-ECT|SRT-SRWT|SRT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+3               0.611          0.497          SLACK-ECT   0.020   96.797         SLACK-ECT|ATC-ECT|ATC-SRWT|ATC-SRWT|CR-ECT|SRT-ECT
+4               1.160          1.160            ATC-ECT   1.160    0.000            SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+5               0.672          0.111             CR-ECT   0.001   99.838             CR-ECT|CR-ECT|EDD-SRWT|EDD-ECT|EDD-ECT|SPT-ECT
+6               0.000          0.000            ATC-ECT   0.000      NaN            SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+7              23.986         23.985            ATC-ECT  20.801   13.278             ATC-ECT|MDD-ECT|ATC-ECT|ATC-ECT|ATC-ECT|CR-ECT
+8               0.000          0.000            ATC-ECT   0.000      NaN         SRT-TECT|SRT-TECT|SRT-ECT|SRT-ECT|SRT-ECT|SPT-SRWT
+9               0.000          0.000            ATC-ECT   0.000      NaN            SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+10              0.000          0.000           ATC-TECT   0.000      NaN   SLACK-SRWT|SLACK-SRWT|SLACK-TECT|EDD-ECT|EDD-ECT|SPT-ECT
+11              0.259          0.084          SLACK-ECT   0.000  100.000     SLACK-ECT|SLACK-ECT|SLACK-SRWT|EDD-ECT|SPT-ECT|SPT-ECT
+12              2.774          1.414           ATC-SRWT   1.335   51.892  ATC-SRWT|ATC-SRWT|SLACK-SRWT|ATC-SRWT|SRT-ECT|PTWINQ-SRWT
+13              0.071          0.051            ATC-ECT   0.051   27.540           ATC-ECT|ATC-ECT|ATC-ECT|ATC-ECT|EDD-SRWT|SPT-ECT
+14              1.609          1.346           EDD-TECT   1.346   16.337           EDD-TECT|EDD-ECT|SRT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+15              0.000          0.000            ATC-ECT   0.000      NaN           EDD-ECT|FIFO-ECT|SRT-ECT|SRT-ECT|SRT-ECT|SPT-ECT
+16              3.316          3.029            CR-TECT   3.029    8.669           CR-TECT|SRT-TECT|SRT-ECT|SRT-ECT|SRT-ECT|SPT-ECT
+17              0.213          0.213            ATC-ECT   0.213    0.000          ATC-ECT|SLACK-ECT|EDD-ECT|EDD-ECT|SRT-ECT|SPT-ECT
+18              1.777          1.320            MDD-ECT   1.199   32.529        MDD-ECT|MDD-ECT|MDD-ECT|SLACK-ECT|SLACK-ECT|EDD-ECT
+19              0.533          0.215           ATC-SRWT   0.135   74.659       ATC-SRWT|ATC-SRWT|SPT-TECT|SRT-SRWT|SRT-SRWT|SPT-ECT
+20              0.000          0.000            ATC-ECT   0.000      NaN           SRT-ECT|SPT-SRWT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+21              0.067          0.000           MOD-TECT   0.000  100.000           MOD-TECT|EDD-ECT|EDD-ECT|EDD-ECT|EDD-ECT|SRT-ECT
+22              3.540          3.540           ATC-TECT   3.119   11.899        ATC-TECT|ATC-SRWT|ATC-SRWT|ATC-SRWT|EDD-ECT|SPT-ECT
+23              4.807          4.533            EDD-ECT   4.368    9.130        EDD-ECT|ATC-SRWT|ATC-SRWT|ATC-SRWT|EDD-SRWT|SPT-ECT
+24              4.057          3.546           MDD-TECT   3.042   25.026     MDD-TECT|SLACK-SRWT|ATC-SRWT|ATC-SRWT|EDD-TECT|SPT-ECT
+25              0.000          0.000            ATC-ECT   0.000      NaN          SRT-SRWT|SRT-SRWT|SRT-ECT|SRT-ECT|SRT-ECT|SPT-ECT
+26              1.130          0.809           SRT-TECT   0.747   33.921         SRT-TECT|EDD-SRWT|EDD-SRWT|EDD-ECT|SRT-ECT|SPT-ECT
+27              0.000          0.000            ATC-ECT   0.000      NaN         SLACK-ECT|SRT-ECT|SPT-SRWT|SPT-ECT|SPT-ECT|SPT-ECT
+28              0.000          0.000            ATC-ECT   0.000      NaN        EDD-TECT|SRT-ECT|SPT-SRWT|SPT-SRWT|SPT-SRWT|SPT-ECT
+29              3.693          2.104           ATC-SRWT   2.092   43.339      ATC-SRWT|ATC-SRWT|ATC-TECT|ATC-TECT|SLACK-ECT|EDD-ECT
+30              0.000          0.000            ATC-ECT   0.000      NaN            SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+31              0.062          0.039           SRT-TECT   0.023   63.179       SRT-TECT|SRT-SRWT|SRT-SRWT|SRT-SRWT|SPT-SRWT|SPT-ECT
+32             16.209         16.209           ATC-TECT  15.870    2.088      ATC-TECT|ATC-TECT|SLACK-ECT|SLACK-ECT|SPT-ECT|SPT-ECT
+33              0.109          0.107            EDD-ECT   0.107    1.736          SRT-ECT|SRT-ECT|SRT-ECT|SRT-ECT|SPT-SRWT|SPT-SRWT
+34              0.769          0.437            SRT-ECT   0.096   87.569        SRT-ECT|ATC-SRWT|ATC-SRWT|EDD-TECT|SRT-TECT|SRT-ECT
+35              0.122          0.039            CR-SRWT   0.000  100.000            CR-SRWT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+36              0.665          0.665           ATC-SRWT   0.665    0.108           ATC-SRWT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+37              0.083          0.060           ATC-SRWT   0.060   27.868           SPT-SRWT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+38              0.000          0.000            ATC-ECT   0.000      NaN            SRT-ECT|SRT-ECT|SRT-ECT|SRT-ECT|SPT-ECT|SPT-ECT
+39              0.073          0.000            ATC-ECT   0.000  100.000            SRT-ECT|SRT-ECT|SRT-ECT|SRT-ECT|SRT-ECT|SPT-ECT 
+
+== Per seed (warm, tard, P30, c = 6; best-on-average pair ATC-TECT) ==
+      best_pair_value  per_seed_best per_seed_best_pair  oracle  total_%                                             schedule
+seed                                                                                                                         
+0               0.000          0.000            ATC-ECT   0.000      NaN      SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+1               0.000          0.000            ATC-ECT   0.000      NaN    SPT-TECT|SPT-TECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+2               0.000          0.000            ATC-ECT   0.000      NaN      SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+3               0.000          0.000            ATC-ECT   0.000      NaN  SRT-ECT|SPT-SRWT|SPT-SRWT|SPT-SRWT|SPT-SRWT|SPT-ECT
+4               0.000          0.000            ATC-ECT   0.000      NaN      SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+5               0.000          0.000            ATC-ECT   0.000      NaN  SPT-SRWT|SPT-SRWT|SPT-SRWT|SPT-SRWT|SPT-ECT|SPT-ECT
+6               0.000          0.000            ATC-ECT   0.000      NaN      SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+7               0.236          0.110           EDD-SRWT   0.057   75.917    EDD-SRWT|ATC-SRWT|EDD-ECT|EDD-ECT|SRT-ECT|SPT-ECT
+8               0.000          0.000            ATC-ECT   0.000      NaN      SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+9               0.000          0.000            ATC-ECT   0.000      NaN      SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+10              0.000          0.000           ATC-SRWT   0.000      NaN      SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+11              0.000          0.000            ATC-ECT   0.000      NaN     SRT-ECT|SPT-SRWT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+12              0.000          0.000            ATC-ECT   0.000      NaN      EDD-ECT|SRT-ECT|SRT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+13              0.000          0.000            ATC-ECT   0.000      NaN      SRT-ECT|SRT-ECT|SRT-ECT|SRT-ECT|SPT-ECT|SPT-ECT
+14              0.314          0.300            EDD-ECT   0.300    4.566      EDD-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+15              0.000          0.000            ATC-ECT   0.000      NaN      SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+16              0.000          0.000            ATC-ECT   0.000      NaN  SPT-SRWT|SPT-SRWT|SPT-SRWT|SPT-SRWT|SPT-ECT|SPT-ECT
+17              0.016          0.000            ATC-ECT   0.000  100.000      SRT-ECT|SRT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+18              0.000          0.000            ATC-ECT   0.000      NaN      EDD-ECT|SRT-ECT|SRT-ECT|SRT-ECT|SRT-ECT|SPT-ECT
+19              0.043          0.043           ATC-TECT   0.000  100.000     EDD-TECT|EDD-ECT|EDD-ECT|CR-SRWT|SPT-ECT|SPT-ECT
+20              0.000          0.000            ATC-ECT   0.000      NaN      SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+21              0.000          0.000            ATC-ECT   0.000      NaN     SPT-TECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+22              1.908          1.876           EDD-SRWT   1.876    1.687    EDD-SRWT|EDD-SRWT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+23              0.000          0.000            ATC-ECT   0.000      NaN      EDD-ECT|EDD-ECT|SRT-ECT|SRT-ECT|SPT-ECT|SPT-ECT
+24              0.131          0.105          SLACK-ECT   0.101   23.490  SLACK-ECT|EDD-SRWT|EDD-SRWT|SRT-ECT|SPT-ECT|SPT-ECT
+25              0.115          0.000             CR-ECT   0.000  100.000     SRT-ECT|SPT-TECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+26              0.050          0.050            ATC-ECT   0.050    0.000      SRT-ECT|SRT-ECT|SRT-ECT|SRT-ECT|SPT-ECT|SPT-ECT
+27              0.000          0.000            ATC-ECT   0.000      NaN      SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+28              0.000          0.000            ATC-ECT   0.000      NaN      SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+29              0.000          0.000            ATC-ECT   0.000      NaN      EDD-ECT|SRT-ECT|SRT-ECT|SRT-ECT|SPT-ECT|SPT-ECT
+30              0.000          0.000            ATC-ECT   0.000      NaN      SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+31              0.000          0.000            ATC-ECT   0.000      NaN      SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+32              0.943          0.874             CR-ECT   0.874    7.354       CR-ECT|EDD-ECT|SRT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+33              0.000          0.000            ATC-ECT   0.000      NaN      SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+34              0.000          0.000            ATC-ECT   0.000      NaN      SRT-ECT|SRT-ECT|SRT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+35              0.000          0.000            ATC-ECT   0.000      NaN      SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+36              0.345          0.345            ATC-ECT   0.345    0.000      EDD-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+37              0.000          0.000            ATC-ECT   0.000      NaN      SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+38              0.000          0.000            ATC-ECT   0.000      NaN     SPT-SRWT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT
+39              0.000          0.000            ATC-ECT   0.000      NaN     SPT-TECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT|SPT-ECT 
+

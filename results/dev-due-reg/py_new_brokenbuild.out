@@ -1,0 +1,42 @@
+[UnityMemory] Configuration Parameters - Can be set up in boot.config
+    "memorysetup-allocator-temp-initial-block-size-main=262144"
+    "memorysetup-allocator-temp-initial-block-size-worker=262144"
+    "memorysetup-temp-allocator-size-background-worker=32768"
+    "memorysetup-temp-allocator-size-job-worker=262144"
+    "memorysetup-temp-allocator-size-preload-manager=262144"
+    "memorysetup-temp-allocator-size-nav-mesh-worker=65536"
+    "memorysetup-temp-allocator-size-audio-worker=65536"
+    "memorysetup-temp-allocator-size-cloud-worker=32768"
+    "memorysetup-bucket-allocator-granularity=16"
+    "memorysetup-bucket-allocator-bucket-count=8"
+    "memorysetup-bucket-allocator-block-size=4194304"
+    "memorysetup-bucket-allocator-block-count=1"
+    "memorysetup-main-allocator-block-size=16777216"
+    "memorysetup-thread-allocator-block-size=16777216"
+    "memorysetup-gfx-main-allocator-block-size=16777216"
+    "memorysetup-gfx-thread-allocator-block-size=16777216"
+    "memorysetup-cache-allocator-block-size=4194304"
+    "memorysetup-typetree-allocator-block-size=2097152"
+    "memorysetup-profiler-bucket-allocator-granularity=16"
+    "memorysetup-profiler-bucket-allocator-bucket-count=8"
+    "memorysetup-profiler-bucket-allocator-block-size=4194304"
+    "memorysetup-profiler-bucket-allocator-block-count=1"
+    "memorysetup-profiler-allocator-block-size=16777216"
+    "memorysetup-profiler-editor-allocator-block-size=1048576"
+    "memorysetup-temp-allocator-size-main=4194304"
+    "memorysetup-job-temp-allocator-block-size=2097152"
+    "memorysetup-job-temp-allocator-block-size-background=1048576"
+    "memorysetup-job-temp-allocator-reduction-small-platforms=262144"
+    "memorysetup-temp-allocator-size-gfx=262144"
+Evaluating 4 policies × 2 seeds = 8 episodes -> /home/ubuntupc/Documents/Github/Capstone/results/dev-due-reg/py_new
+Observation row caps: 15 machines, 256 jobs
+Traceback (most recent call last):
+  File "/home/ubuntupc/Documents/Github/Capstone/env/evaluate.py", line 693, in <module>
+    main()
+  File "/home/ubuntupc/Documents/Github/Capstone/env/evaluate.py", line 651, in main
+    env = UnitySchedulingEnv(
+  File "/home/ubuntupc/Documents/Github/Capstone/env/env_wrappers/unity_env.py", line 188, in __init__
+    self._policy_index, self._metrics_index = self._find_observation_indices(self.spec, self.obs_caps)
+  File "/home/ubuntupc/Documents/Github/Capstone/env/env_wrappers/unity_env.py", line 231, in _find_observation_indices
+    assert shape == (expected,), (
+AssertionError: Unity VectorSensor size (44454,) does not match the 16902 floats expected for row caps 15 machines / 256 jobs. A player built before 2026-09-27 ignores -obsmaxmachines / -obsmaxjobs: rebuild it.

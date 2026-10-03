@@ -1,0 +1,7 @@
+ref,seed,pairs,mean_|diff|_%,max_|diff|_%,rank_corr,best_unity,best_twin,oracle_gain_unity_%,oracle_gain_twin_%
+rq2-switch-oracle (t0),0,9,0.627,1.502,0.983,SRT-TECT,SRT-TECT,0.145,0.795
+rq2-switch-oracle (t0),2,9,0.508,0.807,1.000,SPT-ECT,SPT-ECT,0.000,0.130
+rq2-switch-oracle (t0),4,9,1.052,1.892,0.800,SRT-ECT,SRT-TECT,0.039,0.000
+rq2-switch-oracle (t0),11,9,1.189,1.857,0.700,SRT-TECT,SRT-TECT,0.161,0.000
+rq2-switch-oracle (t0),15,9,1.149,2.108,0.917,SRT-TECT,SRT-TECT,0.021,0.026
+oracle-screen-qfifo mf-off (warm),0,12,1.649,4.356,0.937,PTWINQ-ECT,SRT-TECT,0.000,0.000

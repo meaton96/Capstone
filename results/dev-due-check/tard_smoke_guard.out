@@ -1,0 +1,49 @@
+[UnityMemory] Configuration Parameters - Can be set up in boot.config
+    "memorysetup-allocator-temp-initial-block-size-main=262144"
+    "memorysetup-allocator-temp-initial-block-size-worker=262144"
+    "memorysetup-temp-allocator-size-background-worker=32768"
+    "memorysetup-temp-allocator-size-job-worker=262144"
+    "memorysetup-temp-allocator-size-preload-manager=262144"
+    "memorysetup-temp-allocator-size-nav-mesh-worker=65536"
+    "memorysetup-temp-allocator-size-audio-worker=65536"
+    "memorysetup-temp-allocator-size-cloud-worker=32768"
+    "memorysetup-bucket-allocator-granularity=16"
+    "memorysetup-bucket-allocator-bucket-count=8"
+    "memorysetup-bucket-allocator-block-size=4194304"
+    "memorysetup-bucket-allocator-block-count=1"
+    "memorysetup-main-allocator-block-size=16777216"
+    "memorysetup-thread-allocator-block-size=16777216"
+    "memorysetup-gfx-main-allocator-block-size=16777216"
+    "memorysetup-gfx-thread-allocator-block-size=16777216"
+    "memorysetup-cache-allocator-block-size=4194304"
+    "memorysetup-typetree-allocator-block-size=2097152"
+    "memorysetup-profiler-bucket-allocator-granularity=16"
+    "memorysetup-profiler-bucket-allocator-bucket-count=8"
+    "memorysetup-profiler-bucket-allocator-block-size=4194304"
+    "memorysetup-profiler-bucket-allocator-block-count=1"
+    "memorysetup-profiler-allocator-block-size=16777216"
+    "memorysetup-profiler-editor-allocator-block-size=1048576"
+    "memorysetup-temp-allocator-size-main=4194304"
+    "memorysetup-job-temp-allocator-block-size=2097152"
+    "memorysetup-job-temp-allocator-block-size-background=1048576"
+    "memorysetup-job-temp-allocator-reduction-small-platforms=262144"
+    "memorysetup-temp-allocator-size-gfx=262144"
+Generator overrides: {'due_date_allowance': 2.0}
+Evaluating 4 policies × 2 seeds = 8 episodes -> /home/ubuntupc/Documents/Github/Capstone/results/dev-due-check/tard_smoke
+Observation row caps: 15 machines, 256 jobs
+Traceback (most recent call last):
+  File "/home/ubuntupc/Documents/Github/Capstone/env/evaluate.py", line 693, in <module>
+    main()
+  File "/home/ubuntupc/Documents/Github/Capstone/env/evaluate.py", line 673, in main
+    rows = run_evaluation(env, policies, schedule, log=lambda line: print(line, flush=True),
+  File "/home/ubuntupc/Documents/Github/Capstone/env/evaluate.py", line 276, in run_evaluation
+    obs, _, done, info = env.step(action)
+  File "/home/ubuntupc/Documents/Github/Capstone/env/env_wrappers/unity_env.py", line 341, in step
+    reward, terms = self._compute_reward(curr, float(steps.reward[0]), done)
+  File "/home/ubuntupc/Documents/Github/Capstone/env/env_wrappers/unity_env.py", line 390, in _compute_reward
+    return self.reward_fn(self._prev_metrics, curr, ctx)
+  File "/home/ubuntupc/Documents/Github/Capstone/env/rewards/base.py", line 49, in __call__
+    terms = {name: float(value) for name, value in self.compute(prev, curr, ctx).items()}
+  File "/home/ubuntupc/Documents/Github/Capstone/env/rewards/functions/tardiness.py", line 34, in compute
+    raise ValueError("the tardiness reward needs due dates, but no job in this episode has one (generate "
+ValueError: the tardiness reward needs due dates, but no job in this episode has one (generate with RandomizedParams.due_date_allowance > 0, or give the jobs a "dueDate")

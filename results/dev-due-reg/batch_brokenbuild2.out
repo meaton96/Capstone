@@ -1,0 +1,2 @@
+[Queue] exe /home/ubuntupc/Documents/Github/Capstone/linux_server_dev/capstone.x86_64 -> results /home/ubuntupc/Documents/Github/Capstone/linux_server_dev/Results
+[Queue] dev-due-reg: shard 0/1 = 12 of 12 cells, 0 already done, 12 to run, 12 workers
