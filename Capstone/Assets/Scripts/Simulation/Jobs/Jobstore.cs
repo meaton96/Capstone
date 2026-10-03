@@ -26,6 +26,52 @@ namespace Assets.Scripts.Simulation.Jobs
         public int JobCount => allJobs.Count;
         public readonly HashSet<int> DeferredJobIds = new HashSet<int>();
 
+        // ── Machine buffers (FJSSPConfig.InputBufferCapacity / OutputBufferCapacity; 0 = unbounded) ──
+        // Set by FactoryOrchestrator.StartEpisode from the episode's config.
+        public int InputBufferCapacity { get; private set; }
+        public int OutputBufferCapacity { get; private set; }
+        public bool BuffersBounded => InputBufferCapacity > 0 || OutputBufferCapacity > 0;
+
+        public void SetBufferCapacities(int input, int output)
+        {
+            InputBufferCapacity = System.Math.Max(0, input);
+            OutputBufferCapacity = System.Math.Max(0, output);
+        }
+
+        /// <summary>Jobs holding a slot in machine m's input buffer: queued there, or routed there and not yet
+        /// delivered (waiting for pickup or in transit). The job m is processing is not counted.</summary>
+        public int InputBufferCount(int machineId)
+        {
+            int n = 0;
+            foreach (var job in allJobs)
+            {
+                if (job.State == JobState.Queued && job.LocationMachineId == machineId) n++;
+                else if (job.TargetMachineId == machineId &&
+                         (job.State == JobState.WaitingForPickup || job.State == JobState.InTransit)) n++;
+            }
+            return n;
+        }
+
+        /// <summary>Finished jobs still at machine m waiting to be collected (to be routed, or routed and waiting
+        /// for their AGV). Includes a job held on the machine itself when the output buffer is full.</summary>
+        public int OutputBufferCount(int machineId)
+        {
+            int n = 0;
+            foreach (var job in allJobs)
+                if (job.LocationMachineId == machineId &&
+                    (job.State == JobState.NeedsRouting || job.State == JobState.WaitingForPickup)) n++;
+            return n;
+        }
+
+        /// <summary>True when machine m can take one more routed job (always true when unbounded).</summary>
+        public bool HasInputRoom(int machineId) =>
+            InputBufferCapacity <= 0 || InputBufferCount(machineId) < InputBufferCapacity;
+
+        /// <summary>Blocking after service: machine m holds a finished job it cannot release because its output
+        /// buffer is full, so it may not start another operation (always false when unbounded).</summary>
+        public bool IsOutputBlocked(int machineId) =>
+            OutputBufferCapacity > 0 && OutputBufferCount(machineId) > OutputBufferCapacity;
+
         public bool IsInitialized = false;
 
         /// <summary>

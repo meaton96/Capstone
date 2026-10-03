@@ -170,6 +170,8 @@ namespace Assets.Scripts.Simulation.Types
             public float machineFlexibilityProbability = 0f;
             public float secondaryTimeMultiplier = 1f;
             public float travelPrice = 0f;
+            public int inputBufferCapacity = 0;    // 0 = unbounded
+            public int outputBufferCapacity = 0;   // 0 = unbounded
             public float throughputTimingWindow = 0f;
             public string parkingMethod = "lane";
             public string ioDocks = "corner";
@@ -293,6 +295,8 @@ namespace Assets.Scripts.Simulation.Types
                 MachineFlexibilityProbability = raw.machineFlexibilityProbability,
                 SecondaryTimeMultiplier = raw.secondaryTimeMultiplier,
                 TravelPrice = raw.travelPrice,
+                InputBufferCapacity = raw.inputBufferCapacity,
+                OutputBufferCapacity = raw.outputBufferCapacity,
                 ThroughputTimingWindow = raw.throughputTimingWindow,
                 ProcTimeParams = procTimeParams,
                 parkingMethod = raw.parkingMethod,

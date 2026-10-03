@@ -251,6 +251,14 @@ namespace Assets.Scripts.Simulation
         /// <returns>The best alternate PhysicalMachine, or null if none is available.</returns>
         private PhysicalMachine FindBestAlternateMachine(JobData job, int excludeMachineId)
         {
+            if (_jobs.InputBufferCapacity > 0)
+                return FindBestAlternateMachine(job, excludeMachineId, requireRoom: true)
+                       ?? FindBestAlternateMachine(job, excludeMachineId, requireRoom: false);
+            return FindBestAlternateMachine(job, excludeMachineId, requireRoom: false);
+        }
+
+        private PhysicalMachine FindBestAlternateMachine(JobData job, int excludeMachineId, bool requireRoom)
+        {
             if (job.CurrentOpIndex < 0 || job.CurrentOpIndex >= job.EligibleMachinesPerOp.Length)
                 return null;
 
@@ -267,6 +275,9 @@ namespace Assets.Scripts.Simulation
                 PhysicalMachine candidate = _layout.GetMachine(candidateId);
                 if (candidate == null) continue;
                 if (candidate.HealthState != MachineHealthState.Operational) continue;
+                // Finite input buffers: prefer a machine with room; only if none has room is the job sent to a full
+                // one (one job over capacity) rather than aborting the transit, which would drop it in the aisle.
+                if (requireRoom && !_jobs.HasInputRoom(candidateId)) continue;
 
                 // GetMachineLoad sums processing times of queued + committed in-transit jobs —
                 // a better proxy than raw job count since operation durations vary

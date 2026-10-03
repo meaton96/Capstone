@@ -166,7 +166,18 @@ namespace Assets.Scripts.Simulation
                     bool anyAvailable = _layout.Machines
                         .Any(m => eligibleIds.Contains(m.MachineId) && m.IsAvailableForWork);
 
-                    if (!anyAvailable)
+                    // Finite input buffers: an up machine whose buffer is full is not a candidate. A job whose
+                    // up machines are all full waits in the routing pool (not deferred: deferral means "every
+                    // eligible machine is down"). Its pre-dispatched AGV, if any, is released rather than left
+                    // parked at the pickup dock holding a zone (ReleaseOrphanedPreDispatches frees it next tick).
+                    bool anyRoom = !anyAvailable || !_jobs.BuffersBounded || _layout.Machines
+                        .Any(m => eligibleIds.Contains(m.MachineId) && m.IsAvailableForWork && _jobs.HasInputRoom(m.MachineId));
+
+                    if (anyAvailable && !anyRoom)
+                    {
+                        if (job.PreDispatchedAgvId >= 0) job.PreDispatchedAgvId = -1;
+                    }
+                    else if (!anyAvailable)
                     {
                         // Log only on first deferral: this runs every decision poll, so a pinned phase waiting
                         // out a repair otherwise logs each job every tick (~1 MB / 10 s wall on compound + failures).
@@ -194,7 +205,8 @@ namespace Assets.Scripts.Simulation
 
             foreach (var machine in _layout.Machines)
             {
-                if (machine.IsIdle && machine.IsAvailableForWork && _jobs.HasDispatchableJob(machine.MachineId))
+                if (machine.IsIdle && machine.IsAvailableForWork && _jobs.HasDispatchableJob(machine.MachineId)
+                    && !_jobs.IsOutputBlocked(machine.MachineId))
                 {
                     return BuildDispatchDecision(machine.MachineId);
                 }
@@ -250,7 +262,7 @@ namespace Assets.Scripts.Simulation
                 job.EligibleMachinesPerOp[job.CurrentOpIndex].Keys);
 
             var candidates = _layout.Machines
-                .Where(m => eligibleIds.Contains(m.MachineId) && m.IsAvailableForWork)
+                .Where(m => eligibleIds.Contains(m.MachineId) && m.IsAvailableForWork && _jobs.HasInputRoom(m.MachineId))
                 .Select(m => m.MachineId)
                 .ToList();
 

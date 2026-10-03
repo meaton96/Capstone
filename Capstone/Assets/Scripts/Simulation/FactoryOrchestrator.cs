@@ -189,6 +189,10 @@ namespace Assets.Scripts.Simulation
         /// job to a machine in another tile than the one it was in, and the tile distance summed over those
         /// (results.csv / telemetry; 0 cross-tile moves on an untiled floor).</summary>
         private int _routedMoves, _crossTileMoves, _tilesCrossed;
+        // Finite machine buffers (FJSSPConfig.Input/OutputBufferCapacity), since takeover like _routedMoves:
+        // machine-seconds spent holding a finished job with a full output buffer, and job-seconds spent waiting to
+        // be routed because every up machine for the job's next operation had a full input buffer.
+        private double _outputBlockedMachineSeconds, _bufferWaitJobSeconds;
 
         /// <summary>
         /// Total number of dispatch decisions made in the current episode.
@@ -568,6 +572,10 @@ namespace Assets.Scripts.Simulation
                 config.SecondaryTimeMultiplier = ConfigOverrides.SecondaryTimeMultiplier.Value;
             if (config != null && ConfigOverrides.TravelPrice.HasValue)
                 config.TravelPrice = ConfigOverrides.TravelPrice.Value;
+            if (config != null && ConfigOverrides.InputBufferCapacity.HasValue)
+                config.InputBufferCapacity = ConfigOverrides.InputBufferCapacity.Value;
+            if (config != null && ConfigOverrides.OutputBufferCapacity.HasValue)
+                config.OutputBufferCapacity = ConfigOverrides.OutputBufferCapacity.Value;
             return config;
         }
 
@@ -791,6 +799,11 @@ namespace Assets.Scripts.Simulation
             _routeOnTransport = RoutingTriggerParser.Parse(currentConfig.routingTrigger) == RoutingTrigger.OnTransport;
             SimLogger.Low($"[Orchestrator] Routing trigger: {currentConfig.routingTrigger}");
 
+            Jobs.SetBufferCapacities(currentConfig.InputBufferCapacity, currentConfig.OutputBufferCapacity);
+            if (Jobs.BuffersBounded)
+                SimLogger.Low($"[Orchestrator] Machine buffers: input {currentConfig.InputBufferCapacity}, " +
+                              $"output {currentConfig.OutputBufferCapacity} (0 = unbounded)");
+
             _decisions = new DecisionCoordinator();
             _decisions.Initialize(
                 Jobs, layoutManager,
@@ -819,6 +832,7 @@ namespace Assets.Scripts.Simulation
             episodeActive = true;
             decisionCount = 0;
             _routedMoves = _crossTileMoves = _tilesCrossed = 0;
+            _outputBlockedMachineSeconds = _bufferWaitJobSeconds = 0.0;
             _decisionLog.Clear();
             IsWaitingForAction = false;
             _simTime = 0.0;
@@ -887,6 +901,34 @@ namespace Assets.Scripts.Simulation
         /// simulated events is a pure function of tick count — reproducible for a given
         /// seed regardless of real-world CPU scheduling/contention during the tick.
         /// </summary>
+        /// <summary>Accumulates the finite-buffer statistics for this tick (no-op when buffers are unbounded).</summary>
+        private void TickBufferStats()
+        {
+            if (!Jobs.BuffersBounded) return;
+            double dt = Time.fixedDeltaTime;
+            if (Jobs.OutputBufferCapacity > 0)
+                foreach (var m in layoutManager.Machines)
+                    if (Jobs.IsOutputBlocked(m.MachineId)) _outputBlockedMachineSeconds += dt;
+            if (Jobs.InputBufferCapacity > 0)
+                foreach (var job in Jobs.AllJobs)
+                    if (job.State == JobState.NeedsRouting && WaitsOnFullBuffers(job)) _bufferWaitJobSeconds += dt;
+        }
+
+        /// <summary>True if the job's current operation has an up machine but every up one has a full input buffer.</summary>
+        private bool WaitsOnFullBuffers(JobData job)
+        {
+            if (job.CurrentOpIndex < 0 || job.CurrentOpIndex >= job.EligibleMachinesPerOp.Length) return false;
+            bool anyUp = false;
+            foreach (int mid in job.EligibleMachinesPerOp[job.CurrentOpIndex].Keys)
+            {
+                var m = layoutManager.GetMachine(mid);
+                if (m == null || !m.IsAvailableForWork) continue;
+                anyUp = true;
+                if (Jobs.HasInputRoom(mid)) return false;
+            }
+            return anyUp;
+        }
+
         private void FixedUpdate()
         {
             if (!episodeActive) return;
@@ -957,6 +999,7 @@ namespace Assets.Scripts.Simulation
                 _warmupActive = false;
                 decisionCount = 0;
                 _routedMoves = _crossTileMoves = _tilesCrossed = 0;
+            _outputBlockedMachineSeconds = _bufferWaitJobSeconds = 0.0;
                 _decisionLog.Clear();
                 SimLogger.Low($"[Orchestrator] Warm-up complete at {SimTime:F0}s — RL agent now in " +
                               "control (decisionCount and decision log reset).");
@@ -985,6 +1028,7 @@ namespace Assets.Scripts.Simulation
             TickPoissonClock();
             TickScriptedArrivals();
             TickThroughputClock();
+            TickBufferStats();
             // Guard against ending the episode while arrivals are still pending: if the
             // currently-spawned job pool drains to zero before the next scheduled Poisson
             // arrival lands, AreAllExited() alone would end the episode early and silently
@@ -1527,7 +1571,11 @@ namespace Assets.Scripts.Simulation
                     tilesCrossed: _tilesCrossed,
                     agvIdleFraction: agvIdleFraction,
                     releaseCounts: releaseCounts,
-                    travelPrice: currentConfig.TravelPrice
+                    travelPrice: currentConfig.TravelPrice,
+                    inputBufferCapacity: currentConfig.InputBufferCapacity,
+                    outputBufferCapacity: currentConfig.OutputBufferCapacity,
+                    outputBlockedMachineSeconds: _outputBlockedMachineSeconds,
+                    bufferWaitJobSeconds: _bufferWaitJobSeconds
                 );
                 telemetry.Flush();
             }
@@ -1595,6 +1643,10 @@ namespace Assets.Scripts.Simulation
             record.CrossTileMoves = _crossTileMoves;
             record.TilesCrossed = _tilesCrossed;
             record.TravelPrice = currentConfig.TravelPrice;
+            record.InputBufferCapacity = currentConfig.InputBufferCapacity;
+            record.OutputBufferCapacity = currentConfig.OutputBufferCapacity;
+            record.OutputBlockedMachineSeconds = _outputBlockedMachineSeconds;
+            record.BufferWaitJobSeconds = _bufferWaitJobSeconds;
             record.MachineFlexibility = layoutManager.ActiveFlexibilityProbability;
             record.SecondaryTimeMultiplier = layoutManager.ActiveSecondaryTimeMultiplier;
             record.MeanCapabilitiesPerMachine = layoutManager.MeanCapabilitiesPerMachine;

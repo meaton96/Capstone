@@ -123,6 +123,21 @@ namespace Assets.Scripts.Simulation.Types
         ///          TECT decision of the episode, warm-up included; other machine rules ignore it.
         public float TravelPrice = 0f;
 
+        // ── Machine buffers ──
+
+        /// @brief Input buffer size per machine: the most jobs that can wait at a machine (queued there or already
+        ///        routed to it and on their way), not counting the one it is processing. 0 = unbounded (default).
+        /// @details A slot is claimed when a job is routed, so an AGV never arrives at a full buffer: a machine
+        ///          whose buffer is full is left out of the routing candidates, and a job with no machine that
+        ///          has room waits in the routing pool. See DecisionCoordinator.HasInputRoom.
+        public int InputBufferCapacity = 0;
+
+        /// @brief Output buffer size per machine: finished jobs waiting at a machine for pickup. 0 = unbounded.
+        /// @details Blocking after service: when the buffer is full the next finished job stays on the machine
+        ///          and the machine cannot start another operation until an AGV collects one.
+        ///          See DecisionCoordinator.IsOutputBlocked.
+        public int OutputBufferCapacity = 0;
+
         // ── Parking method ──
 
         /// @brief Parking layout: "lane" (default; reserved lane, one dedicated bay per AGV),
@@ -209,6 +224,8 @@ namespace Assets.Scripts.Simulation.Types
                 AGVHandshakeDuration = AGVHandshakeDuration,
                 dispatchingRule = dispatchingRule,
                 TravelPrice = TravelPrice,
+                InputBufferCapacity = InputBufferCapacity,
+                OutputBufferCapacity = OutputBufferCapacity,
                 ProcTimeParams = new Dictionary<MachineType, (float mu, float sigma)>(ProcTimeParams),
                 Stochastic = Stochastic,
                 MachineFlexibilityProbability = MachineFlexibilityProbability,

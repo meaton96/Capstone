@@ -257,7 +257,8 @@ namespace Assets.Scripts.Simulation.Logging
                     "config_hash,instance_hash," +
                     "agv_failures_enabled,agv_weibull_k,agv_weibull_lambda,agv_repair_log_mu,agv_repair_log_sigma," +
                     "agv_failures,agv_repair_time,agv_blocked_by_failure_time," +
-                    "travel_price,release_weights,release_counts,routed_moves,cross_tile_moves,tiles_crossed"
+                    "travel_price,release_weights,release_counts,routed_moves,cross_tile_moves,tiles_crossed," +
+                    "input_buffer_capacity,output_buffer_capacity,output_blocked_machine_seconds,buffer_wait_job_seconds"
                 );
 
             writer.WriteLine(
@@ -285,7 +286,8 @@ namespace Assets.Scripts.Simulation.Logging
                 $"{(hasAgvF ? 1 : 0)},{(hasAgvF ? r.Stochastic.AGVWeibullK : 0f):F2},{(hasAgvF ? r.Stochastic.AGVWeibullLambda : 0f):F1}," +
                 $"{(hasAgvF ? r.Stochastic.AGVRepairLogMu : 0f):F3},{(hasAgvF ? r.Stochastic.AGVRepairLogSigma : 0f):F3}," +
                 $"{r.AGVFailureCount},{r.AGVRepairTime:F1},{r.AGVBlockedByFailureTime:F1}," +
-                $"{r.TravelPrice:F3},{r.ReleaseWeights},{r.ReleaseCounts},{r.RoutedMoves},{r.CrossTileMoves},{r.TilesCrossed}"
+                $"{r.TravelPrice:F3},{r.ReleaseWeights},{r.ReleaseCounts},{r.RoutedMoves},{r.CrossTileMoves},{r.TilesCrossed}," +
+                $"{r.InputBufferCapacity},{r.OutputBufferCapacity},{r.OutputBlockedMachineSeconds:F1},{r.BufferWaitJobSeconds:F1}"
             );
 
             Debug.Log($"[Results] {r.InstanceName} {r.RuleName} seed={r.Seed} " +

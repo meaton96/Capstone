@@ -79,6 +79,8 @@ namespace Assets.Scripts.Simulation.Types
             Check(cfg.AGVHandshakeDuration == null || (Finite(cfg.AGVHandshakeDuration.Value) && cfg.AGVHandshakeDuration.Value >= 0f),
                   $"agvHandshakeDuration must be >= 0 (got {cfg.AGVHandshakeDuration})");
             Check(Finite(cfg.TravelPrice) && cfg.TravelPrice >= 0f, $"travelPrice must be >= 0 (got {cfg.TravelPrice})");
+            Check(cfg.InputBufferCapacity >= 0, $"inputBufferCapacity must be >= 0, 0 = unbounded (got {cfg.InputBufferCapacity})");
+            Check(cfg.OutputBufferCapacity >= 0, $"outputBufferCapacity must be >= 0, 0 = unbounded (got {cfg.OutputBufferCapacity})");
 
             foreach (var kvp in cfg.ProcTimeParams)
             {

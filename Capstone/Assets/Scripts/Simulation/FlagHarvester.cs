@@ -159,6 +159,10 @@ namespace Assets.Scripts.Simulation
                 // Skip pre-dispatch if the source machine is not operational
                 if (machine.HealthState != MachineHealthState.Operational) continue;
 
+                // Finite input buffers: no point sending an AGV for a job that has nowhere to go yet (DecisionCoordinator
+                // would release it again). It is routed normally once a downstream machine has room.
+                if (_jobs.BuffersBounded && !NextOpHasRoom(job)) continue;
+
                 if (yieldToWaitingJobs)
                 {
                     int tile = _layout.AgvsPooled ? 0 : _layout.TileOfMachine(machine.MachineId);
@@ -172,6 +176,19 @@ namespace Assets.Scripts.Simulation
                 agv.PreDispatch(jobId, machine.GetPickupPosition(), machine);
                 job.PreDispatchedAgvId = agv.AgvId;
             }
+        }
+
+        /// <summary>True if some up machine eligible for the job's NEXT operation has input-buffer room.</summary>
+        private bool NextOpHasRoom(JobData job)
+        {
+            int next = job.CurrentOpIndex + 1;
+            if (next >= job.EligibleMachinesPerOp.Length) return true;
+            foreach (int mid in job.EligibleMachinesPerOp[next].Keys)
+            {
+                PhysicalMachine m = _layout.GetMachine(mid);
+                if (m != null && m.IsAvailableForWork && _jobs.HasInputRoom(mid)) return true;
+            }
+            return false;
         }
 
         /// <summary>

@@ -200,6 +200,9 @@ namespace Assets.Scripts.Simulation
                     ConfigOverrides.TravelPrice = price;
                     SimLogger.Low($"[BatchRunner] Travel price override: {price}");
                 }
+                // Machine buffer sizes (FJSSPConfig.InputBufferCapacity / OutputBufferCapacity; 0 = unbounded).
+                ConfigOverrides.InputBufferCapacity = ParseBufferArg("-inbuf") ?? ConfigOverrides.InputBufferCapacity;
+                ConfigOverrides.OutputBufferCapacity = ParseBufferArg("-outbuf") ?? ConfigOverrides.OutputBufferCapacity;
                 // Linked tiles (TilingSpec.AgvsPooled / JobsOpen): "-jobscope open" alone implies "-agvassignment pooled".
                 string scopeStr = GetCLIArg("-jobscope");
                 if (!string.IsNullOrEmpty(scopeStr))
@@ -796,6 +799,17 @@ namespace Assets.Scripts.Simulation
             SimLogger.LogError("[BatchRunner] No batch config source available.");
             return Array.Empty<FJSSPConfig>();
         }
+        /// <summary>Parses -inbuf / -outbuf (an int >= 0, 0 = unbounded); null when the flag is absent.</summary>
+        private static int? ParseBufferArg(string flag)
+        {
+            string str = GetCLIArg(flag);
+            if (string.IsNullOrEmpty(str)) return null;
+            if (!int.TryParse(str, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out int n) || n < 0)
+                throw new ArgumentException($"Invalid {flag} '{str}': expected an integer >= 0 (0 = unbounded).");
+            SimLogger.Low($"[BatchRunner] {flag} override: {n}");
+            return n;
+        }
+
 
         private static DispatchingRule[] ParseRulesArg(string arg)
         {

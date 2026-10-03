@@ -97,6 +97,12 @@ namespace Assets.Scripts.Simulation.Types
         public int TilesCrossed;
         // TECT travel price λ (FJSSPConfig.TravelPrice); 0 = plain TECT. Part of scenario identity for TECT rules.
         public float TravelPrice;
+        // Finite machine buffers (FJSSPConfig.Input/OutputBufferCapacity, 0 = unbounded) and, since takeover,
+        // machine-seconds blocked by a full output buffer / job-seconds waiting on full input buffers.
+        public int InputBufferCapacity;
+        public int OutputBufferCapacity;
+        public double OutputBlockedMachineSeconds;
+        public double BufferWaitJobSeconds;
         // Machine flexibility (FJSSPConfig.MachineFlexibilityProbability / SecondaryTimeMultiplier) and the realised
         // mean number of operation types per machine (1 = fully typed; drawn per floor, so it varies around 1 + 4p).
         public float MachineFlexibility;
@@ -194,18 +200,26 @@ namespace Assets.Scripts.Simulation.Types
             : Mean(JobCompletionRecords, r => r.Completed, r => r.TimeWaitingPickup + r.TimeInTransit);
         public int JobsCensored => JobCompletionRecords.Count(r => !r.Completed);
 
-        // ── Penalized flow-time summary (computed over ALL jobs; censored jobs
-        // score FlowTime = Makespan, i.e. "never finished in the time given") ──
+        // ── Penalized flow-time summary (computed over ALL arrived jobs; a censored job is charged
+        // its time in system up to the end of the episode, Makespan - ArrivalTime) ──
+        // Until 2026-10-02 a censored job was charged the absolute end time (Makespan), which
+        // overcharged late arrivals and did not match the thesis definition; see
+        // docs/CSHARP_CODE_AUDIT_2026-10-02.md (G1). Averaged over arrived jobs this is the time
+        // integral of WIP divided by the job count, the quantity the flow-time reward accrues.
         // The completed-only metrics above go misleadingly LOW on runs where most
         // jobs are censored, since only the lucky fast-finishing survivors count
         // toward the mean. These give a true picture of scheduler performance
         // (or lack thereof) that's comparable across runs with different
         // completion rates.
         public double MeanFlowTimePenalized => JobCompletionRecords.Count == 0 ? 0
-            : JobCompletionRecords.Average(r => r.Completed ? r.FlowTime : (float)Makespan);
+            : JobCompletionRecords.Average(r => (double)CensoredFlow(r));
         public double P95FlowTimePenalized => Percentile(JobCompletionRecords, 0.95, penalized: true);
         public double MaxFlowTimePenalized => JobCompletionRecords.Count == 0 ? 0
-            : JobCompletionRecords.Max(r => r.Completed ? r.FlowTime : (float)Makespan);
+            : JobCompletionRecords.Max(r => (double)CensoredFlow(r));
+
+        /// <summary>Flow time of a finished job, or time in system up to the episode end for a censored one.</summary>
+        private float CensoredFlow(JobCompletionRecord r) =>
+            r.Completed ? r.FlowTime : System.Math.Max(0f, (float)Makespan - r.ArrivalTime);
 
         private static double Mean(List<JobCompletionRecord> records,
             System.Func<JobCompletionRecord, bool> filter, System.Func<JobCompletionRecord, double> select)
@@ -234,7 +248,7 @@ namespace Assets.Scripts.Simulation.Types
             foreach (var r in records)
             {
                 if (r.Completed) flowTimes.Add(r.FlowTime);
-                else if (penalized) flowTimes.Add(Makespan);
+                else if (penalized) flowTimes.Add(CensoredFlow(r));
             }
             if (flowTimes.Count == 0) return 0;
             flowTimes.Sort();

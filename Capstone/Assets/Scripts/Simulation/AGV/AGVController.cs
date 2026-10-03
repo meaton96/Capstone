@@ -140,7 +140,7 @@ namespace Assets.Scripts.Simulation.AGV
             Vector3 p = transform.position;
             _eventRecords.Add(new AGVEventRecord
             {
-                SimTime = FactoryOrchestrator.Instance != null ? FactoryOrchestrator.Instance.SimTime : Time.fixedTime,
+                SimTime = SimNow,
                 AgvId = AgvId,
                 Event = ev,
                 JobId = job,
@@ -194,7 +194,8 @@ namespace Assets.Scripts.Simulation.AGV
             _statTotalTrips = 0;
             _statTripAccumulator = 0.0;
             _statCurrentTripStart = 0.0;
-            _blockStartTime = -1f;
+            nextRetryTime = 0.0;
+            _blockStartTime = -1.0;
 
             _broken = false;
             _repairRemaining = 0f;
@@ -298,7 +299,12 @@ namespace Assets.Scripts.Simulation.AGV
 
         private bool waitingForZone;
         private int pendingZoneId = -1;
-        private float nextRetryTime;
+        private double nextRetryTime;
+
+        /// Episode clock for every AGV timer. Time.fixedTime is float32 and never reset, so after
+        /// 2^17 s of player life a 0.25 s retry interval rounds to a different tick (audit K1).
+        private static double SimNow =>
+            FactoryOrchestrator.Instance != null ? FactoryOrchestrator.Instance.SimTime : Time.fixedTimeAsDouble;
 
         private float pickupTimer;
         private float dropoffTimer;
@@ -329,13 +335,13 @@ namespace Assets.Scripts.Simulation.AGV
         private int _statStallRecoveryCount; // HandleZoneStall calls (suspected deadlock self-recoveries)
         private int _statTotalTrips;        // complete pickup→dropoff cycles
         private double _statTripAccumulator;   // sum of completed trip durations
-        private double _statCurrentTripStart;  // fixedTime when current trip began (set in DoPickup)
-        private float _blockStartTime = -1f;  // fixedTime when zone blocking began
+        private double _statCurrentTripStart;  // SimNow when current trip began (set in DoPickup)
+        private double _blockStartTime = -1.0;  // SimNow when zone blocking began
 
         // Breakdown state (see "Breakdowns" above).
         private bool _broken;
         private float _repairRemaining;            // sim-seconds of repair left while broken
-        private float _brokenSince;                // fixedTime the current breakdown began
+        private double _brokenSince;               // SimNow the current breakdown began
         private double _ttfRemaining = double.PositiveInfinity;  // operating seconds to the next failure
         private double _opAge;                     // operating seconds since the last repair (or episode start)
         private bool _firstLifeIsResidual;         // the current life was the equilibrium residual draw
@@ -451,7 +457,7 @@ namespace Assets.Scripts.Simulation.AGV
             targetMachine = null;
             atPickupDock = false;
             pickupZoneId = -1;
-            _blockStartTime = -1f;
+            _blockStartTime = -1.0;
 
             CancelCurrentRoute();
             State = AGVState.ReturningToParking;
@@ -511,7 +517,7 @@ namespace Assets.Scripts.Simulation.AGV
         public string DebugSummary()
         {
             string Z(int id) => id < 0 ? "-" : (trafficMgr?.GetZone(id)?.Name ?? id.ToString());
-            float blockedFor = _blockStartTime >= 0f ? Time.fixedTime - _blockStartTime : 0f;
+            double blockedFor = _blockStartTime >= 0f ? SimNow - _blockStartTime : 0f;
             return $"AGV{AgvId} state={State} job={CurrentJobId} preJob={PreDispatchedJobId} " +
                    $"cur={Z(currentZoneId)} prev={Z(previousZoneId)} " +
                    $"wantsZone={(waitingForZone ? Z(pendingZoneId) : "-")} blockedFor={blockedFor:F0}s " +
@@ -918,14 +924,14 @@ namespace Assets.Scripts.Simulation.AGV
 
             _broken = true;
             _repairRemaining = repair;
-            _brokenSince = Time.fixedTime;
+            _brokenSince = SimNow;
             _statFailureCount++;
 
             string zoneName = currentZoneId >= 0 ? (trafficMgr?.GetZone(currentZoneId)?.Name ?? currentZoneId.ToString()) : "-";
             _failureRecords.Add(new AGVFailureRecord
             {
                 AgvId = AgvId,
-                SimTime = FactoryOrchestrator.Instance != null ? FactoryOrchestrator.Instance.SimTime : Time.fixedTime,
+                SimTime = SimNow,
                 OperatingAge = _opAge,
                 ResidualLife = _firstLifeIsResidual,
                 RepairDuration = repair,
@@ -957,16 +963,16 @@ namespace Assets.Scripts.Simulation.AGV
             _firstLifeIsResidual = false;
 
             // Its own wait, if it broke while blocked, must not count toward HandleZoneStall.
-            if (waitingForZone) _stallExemptTime += Time.fixedTime - _brokenSince;
+            if (waitingForZone) _stallExemptTime += SimNow - _brokenSince;
 
-            SimLogger.Medium($"[AGV {AgvId}] Repaired after {Time.fixedTime - _brokenSince:F0}s (state={State}).");
+            SimLogger.Medium($"[AGV {AgvId}] Repaired after {SimNow - _brokenSince:F0}s (state={State}).");
 
             if (_replanOnRepair)
             {
                 _replanOnRepair = false;
                 _beginWaypointOnRepair = false;
                 CancelCurrentRoute();
-                _blockStartTime = -1f;
+                _blockStartTime = -1.0;
                 _stallExemptTime = 0.0;
                 _blockedByFailure = false;
                 BeginParkingRoute();   // State is already ReturningToParking
@@ -1033,7 +1039,7 @@ namespace Assets.Scripts.Simulation.AGV
             PickedUpFlag = true;
             TraceEvent("pickup", CurrentJobId, sourceMachine != null ? sourceMachine.MachineId : -1, targetMachine != null ? targetMachine.MachineId : -1);
             _statTotalTrips++;
-            _statCurrentTripStart = Time.fixedTime;     // ← NEW
+            _statCurrentTripStart = SimNow;     // ← NEW
 
             State = AGVState.MovingToDropoff;
             atPickupDock = false;
@@ -1069,7 +1075,7 @@ namespace Assets.Scripts.Simulation.AGV
             atDropoffDock = false;
             if (_statCurrentTripStart > 0)
             {
-                LastTripDuration = (float)(Time.fixedTime - _statCurrentTripStart);
+                LastTripDuration = (float)(SimNow - _statCurrentTripStart);
                 _statTripAccumulator += LastTripDuration;
                 _statCurrentTripStart = 0;
             }
@@ -1223,8 +1229,8 @@ namespace Assets.Scripts.Simulation.AGV
                 {
                     waitingForZone = true;
                     pendingZoneId = nextZoneId;
-                    nextRetryTime = Time.fixedTime + reservationRetryInterval;
-                    _blockStartTime = Time.fixedTime;
+                    nextRetryTime = SimNow + reservationRetryInterval;
+                    _blockStartTime = SimNow;
                     _stallExemptTime = 0.0;
                     _blockedByFailure = WaitChainReachesBrokenAGV();
                     return;
@@ -1249,15 +1255,15 @@ namespace Assets.Scripts.Simulation.AGV
         /// @brief Polls the @c TrafficZoneManager for a previously blocked zone reservation.
         private void TryResumeFromWait()
         {
-            if (Time.fixedTime < nextRetryTime) return;
+            if (SimNow < nextRetryTime) return;
 
             if (trafficMgr.TryReserve(pendingZoneId, AgvId))
             {
                 // Report block duration to zone manager for congestion logging  ← NEW
                 if (_blockStartTime >= 0f)
                 {
-                    trafficMgr.RecordBlockTime(pendingZoneId, Time.fixedTime - _blockStartTime);
-                    _blockStartTime = -1f;
+                    trafficMgr.RecordBlockTime(pendingZoneId, (float)(SimNow - _blockStartTime));
+                    _blockStartTime = -1.0;
                 }
 
                 TrafficZone zone = trafficMgr.GetZone(pendingZoneId);
@@ -1270,13 +1276,13 @@ namespace Assets.Scripts.Simulation.AGV
 
             else
             {
-                nextRetryTime = Time.fixedTime + reservationRetryInterval;
+                nextRetryTime = SimNow + reservationRetryInterval;
                 // Time spent queued behind a broken AGV is excluded: that wait ends when the repair does, so it
                 // is not the circular wait HandleZoneStall exists to break (and its retreat can snap an AGV to
                 // parking, which would be a teleport here).
                 _blockedByFailure = WaitChainReachesBrokenAGV();
                 if (_blockStartTime >= 0f &&
-                    Time.fixedTime - _blockStartTime - _stallExemptTime > zoneStallTimeoutSeconds)
+                    SimNow - _blockStartTime - _stallExemptTime > zoneStallTimeoutSeconds)
                     HandleZoneStall();
             }
         }
@@ -1300,7 +1306,7 @@ namespace Assets.Scripts.Simulation.AGV
             SimLogger.Error($"[AGV {AgvId}] Zone {pendingZoneId} reservation stalled past " +
                              $"{zoneStallTimeoutSeconds:F0}s (state={State}) — likely circular-wait " +
                              $"deadlock. Releasing job and retreating.");
-            _blockStartTime = -1f;
+            _blockStartTime = -1.0;
             _stallExemptTime = 0.0;
             _blockedByFailure = false;
             _statStallRecoveryCount++;

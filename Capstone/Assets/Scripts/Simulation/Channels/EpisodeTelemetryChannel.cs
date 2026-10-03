@@ -50,7 +50,7 @@ namespace Assets.Scripts.Simulation.Channels
                 machineId = machineId,
                 ttf = observedTtf,
                 repairDuration = repairDuration,
-                simTime = Time.time,
+                simTime = FactoryOrchestrator.Instance != null ? (float)FactoryOrchestrator.Instance.SimTime : 0f,
             });
         }
 
@@ -62,7 +62,7 @@ namespace Assets.Scripts.Simulation.Channels
                 type = "machine_repair_complete",
                 machineId = machineId,
                 repairDuration = actualRepairDuration,
-                simTime = Time.time,
+                simTime = FactoryOrchestrator.Instance != null ? (float)FactoryOrchestrator.Instance.SimTime : 0f,
             });
         }
 
@@ -76,7 +76,7 @@ namespace Assets.Scripts.Simulation.Channels
                 agvId = agvId,
                 ttf = observedTtf,
                 repairDuration = repairDuration,
-                simTime = Time.time,
+                simTime = FactoryOrchestrator.Instance != null ? (float)FactoryOrchestrator.Instance.SimTime : 0f,
             });
         }
 
@@ -88,7 +88,7 @@ namespace Assets.Scripts.Simulation.Channels
                 type = "job_arrival",
                 jobId = jobId,
                 interArrivalTime = interArrivalTime,
-                simTime = Time.time,
+                simTime = FactoryOrchestrator.Instance != null ? (float)FactoryOrchestrator.Instance.SimTime : 0f,
             });
         }
 
@@ -105,7 +105,9 @@ namespace Assets.Scripts.Simulation.Channels
                                         double agvBlockedByFailureTime = 0.0,
                                         int routedMoves = 0, int crossTileMoves = 0, int tilesCrossed = 0,
                                         double agvIdleFraction = 0.0, int[] releaseCounts = null,
-                                        float travelPrice = 0f)
+                                        float travelPrice = 0f,
+                                        int inputBufferCapacity = 0, int outputBufferCapacity = 0,
+                                        double outputBlockedMachineSeconds = 0.0, double bufferWaitJobSeconds = 0.0)
         {
             _result = new EpisodeResult
             {
@@ -129,6 +131,10 @@ namespace Assets.Scripts.Simulation.Channels
                 agvIdleFraction = agvIdleFraction,
                 releaseCounts = releaseCounts ?? new int[0],
                 travelPrice = travelPrice,
+                inputBufferCapacity = inputBufferCapacity,
+                outputBufferCapacity = outputBufferCapacity,
+                outputBlockedMachineSeconds = outputBlockedMachineSeconds,
+                bufferWaitJobSeconds = bufferWaitJobSeconds,
             };
         }
 
@@ -204,6 +210,12 @@ namespace Assets.Scripts.Simulation.Channels
             public double agvIdleFraction;
             public int[] releaseCounts;
             public float travelPrice;
+            /// <summary>Machine buffer sizes (0 = unbounded) and, since takeover, machine-seconds blocked by a full
+            /// output buffer and job-seconds waiting to be routed because every up machine's input buffer was full.</summary>
+            public int inputBufferCapacity;
+            public int outputBufferCapacity;
+            public double outputBlockedMachineSeconds;
+            public double bufferWaitJobSeconds;
         }
 
         [Serializable]

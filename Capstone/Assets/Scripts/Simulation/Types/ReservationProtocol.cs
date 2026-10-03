@@ -74,6 +74,9 @@ namespace Assets.Scripts.Simulation.Types
         public static float[] ReleaseWeights;
         /// <summary>TECT travel price λ (FJSSPConfig.TravelPrice, >= 0); overrides every config's travelPrice.</summary>
         public static float? TravelPrice;
+        /// <summary>FJSSPConfig.InputBufferCapacity / OutputBufferCapacity (>= 0, 0 = unbounded) for every config.</summary>
+        public static int? InputBufferCapacity;
+        public static int? OutputBufferCapacity;
         /// <summary>tiling.jobScope ("tile" | "open") for every config. Null = no override.</summary>
         public static string JobScope;
         /// <summary>tiling.agvAssignment ("tile" | "pooled") for every config. Null = no override.</summary>
