@@ -44,6 +44,13 @@ Weld machines, so 12 of 15 machines are background and a policy trained on them 
   the instance is unchanged. No random draws, so the jobs are identical at any c. c = 2 leaves about half the jobs
   late under SRT-ECT on the rnd_load family (rq2-twin-due); due-date rules (EDD, MDD, ATC) and the tardiness reward
   (env/config/rewards/tardiness.json) need them.
+- **Training mix (`due_date_allowance_range`, `load_mix`; 2026-10-03, user: train on a mix that varies c and load):**
+  per-episode draws, each from its own seed-derived stream. A non-empty `due_date_allowance_range` (lo, hi) draws c
+  uniformly per episode and overrides `due_date_allowance`; it changes only the due dates, so the jobs equal the
+  fixed-c instance of the same seed. `load_mix` is a list of load profiles, e.g. [{"name": "base"}, {"name":
+  "utilhi", "utilization": [1.0, 1.8], "lull_utilization": [0.4, 0.7], "weight": 1}]; one is drawn per episode
+  (by "weight", default 1) and its keys override the RandomizedParams fields of the same name. The draws are
+  recorded in `_meta` ("due_date_allowance", "load_profile").
 
 Every instance is a pure function of its seed. `_phases` lists the segments (for random warm-up cutoffs and
 analysis); `_meta` records the per-episode draws.
@@ -57,6 +64,7 @@ python env/scenarios/randomized.py --write 0-8 --out linux_server/BatchConfigs/S
 @endcode
 """
 
+import dataclasses
 import json
 import math
 import random
@@ -124,6 +132,8 @@ class RandomizedParams:
     release_weights: Tuple[float, ...] = ()              # one per tile, for release_rule "weighted"
     travel_price: float = 0.0                            # TECT's λ; 0 = plain TECT, no key written
     due_date_allowance: float = 0.0                      # TWK allowance c: dueDate = arrival + c x work; 0 = none
+    due_date_allowance_range: Tuple[float, ...] = ()     # (lo, hi): c drawn per episode, overrides the above
+    load_mix: Tuple[Dict, ...] = ()                      # load profiles, one drawn per episode (see module doc)
 
     failure_probability: float = 2.0 / 3.0
     failures: Dict = field(default_factory=lambda: {
@@ -133,6 +143,32 @@ class RandomizedParams:
 
 
 DEFAULT_PARAMS = RandomizedParams()
+
+
+## @brief Load-profile keys a `load_mix` entry may set (besides "name" and "weight").
+LOAD_KEYS = ("utilization", "lull_utilization", "segment_weights", "op_mean_seconds")
+
+
+def _episode_params(seed: int, p: RandomizedParams) -> Tuple[RandomizedParams, Optional[str]]:
+    """@brief Resolve the training-mix draws (load profile, then c) for one seed; returns (params, profile name).
+    Each draw has its own stream, so the instance draws (rng = Random(seed)) are untouched and c alone never
+    changes the jobs."""
+    name = None
+    if p.load_mix:
+        mix = list(p.load_mix)
+        bad = sorted({k for prof in mix for k in prof} - set(LOAD_KEYS) - {"name", "weight"})
+        if bad:
+            raise ValueError(f"load_mix: unknown keys {bad}; allowed {LOAD_KEYS} plus name, weight")
+        prof = random.Random(seed ^ 0x10AD).choices(mix, [float(m.get("weight", 1.0)) for m in mix])[0]
+        name = prof.get("name", f"profile{mix.index(prof)}")
+        p = dataclasses.replace(p, load_mix=(), **{k: tuple(v) for k, v in prof.items() if k in LOAD_KEYS})
+    if p.due_date_allowance_range:
+        lo, hi = p.due_date_allowance_range
+        if not 0 < lo <= hi:
+            raise ValueError(f"due_date_allowance_range must be 0 < lo <= hi (got {p.due_date_allowance_range!r})")
+        c = round(random.Random(seed ^ 0xDA7E).uniform(lo, hi), 3)
+        p = dataclasses.replace(p, due_date_allowance=c, due_date_allowance_range=())
+    return p, name
 
 
 def _log_uniform(rng: random.Random, lo: float, hi: float) -> float:
@@ -197,7 +233,7 @@ def randomized_scenario(seed: int, params: RandomizedParams = DEFAULT_PARAMS) ->
     @param seed    Instance seed; the same seed always returns an identical scenario.
     @param params  Generator knobs (RandomizedParams).
     """
-    p = params
+    p, load_profile = _episode_params(seed, params)
     if not p.due_date_allowance >= 0:
         raise ValueError(f"due_date_allowance must be >= 0 (got {p.due_date_allowance!r})")
     tiling = _tiling_block(p)
@@ -299,6 +335,8 @@ def randomized_scenario(seed: int, params: RandomizedParams = DEFAULT_PARAMS) ->
             "op_mean_seconds": round(op_mean, 2),
             "machine_speed": {t_: [round(x, 3) for x in v] for t_, v in speed.items()},
             "failures_on": failures_on,
+            "due_date_allowance": p.due_date_allowance,
+            "load_profile": load_profile,
             "params": json.loads(json.dumps(asdict(p))),   # JSON-native (tuples -> lists)
         },
     }

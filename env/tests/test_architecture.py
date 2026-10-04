@@ -671,9 +671,9 @@ class TestSliceObs:
 
     def test_total_obs_size_matches_csharp(self):
         """@brief Mirrors ObservationBuilder.TotalObservationSize at the default caps (64*64*3 + 105*16 + 1792*17 + 16 + 6)."""
-        assert TOTAL_OBS_SIZE == 44_454
+        assert TOTAL_OBS_SIZE == 51_624
         assert SLICE_FLAGS_END == TOTAL_OBS_SIZE
-        assert (MAX_MACHINES, MACHINE_FEATURES, MAX_JOBS, JOB_FEATURES) == (105, 16, 1792, 17)
+        assert (MAX_MACHINES, MACHINE_FEATURES, MAX_JOBS, JOB_FEATURES) == (105, 16, 1792, 21)
 
 
 class TestPerLaunchRowCaps:
@@ -690,7 +690,7 @@ class TestPerLaunchRowCaps:
     def test_total_size_at_default_caps(self):
         from config import obs_total_size
         assert obs_total_size(MAX_MACHINES, MAX_JOBS) == TOTAL_OBS_SIZE
-        assert obs_total_size(15, 256) == 16_902
+        assert obs_total_size(15, 256) == 17_928
 
     def test_row_caps_for_scenarios(self):
         """@brief Caps fit the largest floor; overrides replace one half; no scenarios -> defaults."""

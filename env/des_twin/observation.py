@@ -1,4 +1,4 @@
-"""Observation schema v2 and action masks from the twin's state (port of ObservationBuilder.cs and
+"""Observation schema v3 and action masks from the twin's state (port of ObservationBuilder.cs and
 DispatchingEngine.HeadsThatMatter), so a policy can be trained on the twin and run on the Unity player.
 
 Built at a decision, between the twin's yield and the agent's answer (engine.Twin.agent_decisions): the state then is
@@ -28,8 +28,8 @@ from .engine import EXITED, IN_TRANSIT, NEEDS_ROUTING, PROCESSING, QUEUED, WAITI
 GRID = 64
 CHANNELS = 3
 MACHINE_FEATURES = 16
-JOB_FEATURES = 17
-GLOBAL_SCALARS = 16
+JOB_FEATURES = 21
+GLOBAL_SCALARS = 18
 EVENT_FLAGS = 6
 JOB_HEAD = len(JOB_HEAD_RULES)          # sizes of the two action branches (env/config.py)
 MACHINE_HEAD = len(MACHINE_HEAD_RULES)
@@ -48,6 +48,12 @@ def squash(x, scale):
     """ObservationBuilder.Squash: x / (x + scale) in double, cast to float."""
     x = float(x)
     return f32(0.0) if x <= 0.0 else f32(x / (x + scale))
+
+
+def signed_squash(x, scale):
+    """ObservationBuilder.SignedSquash: x / (|x| + scale), sign kept."""
+    x = float(x)
+    return f32(-squash(-x, scale)) if x < 0.0 else squash(x, scale)
 
 
 def clamp01(x):
@@ -212,6 +218,12 @@ class ObservationBuilder:
             r[15] = 1.0 if j.id in cands else 0.0
             if disp >= 0 and j.state == QUEUED and j.location == disp:
                 r[16] = squash(j.proc(disp), TIME_SCALE)
+            if j.due is not None:   # C#: float DueDate - double SimTime - float remaining work, in double
+                to_due = float(f32(j.due)) - now
+                r[17] = 1.0
+                r[18] = signed_squash(to_due - float(twin.remaining_work(j.id)), AGE_SCALE)
+                r[19] = 1.0 if to_due < 0.0 else 0.0
+                r[20] = signed_squash(to_due, AGE_SCALE)
         return t
 
     def _scalars(self, twin, dec, live, agvs, loads):
@@ -241,6 +253,13 @@ class ObservationBuilder:
             s[11] = f32(active - self.max_jobs) / f32(active)
         options = len(dec.machines) if dec.kind == "routing" else len(dec.queue)
         s[15] = squash(options, COUNT_SCALE)
+        due = [j for j in live if j.due is not None]
+        if due:
+            now = twin.now
+            late = sum(float(f32(j.due)) - now < 0.0 for j in due)
+            behind = sum(float(f32(j.due)) - now - float(twin.remaining_work(j.id)) < 0.0 for j in due)
+            s[16] = f32(late) / f32(len(due))
+            s[17] = f32(behind) / f32(len(due))
         return s
 
     def _flags(self, twin, dec, agvs, queued):

@@ -196,17 +196,6 @@ def build_policies(pdr_spec: str, checkpoints, device: str, deterministic: bool)
     return policies
 
 
-## @brief Simulated seconds one player may run before its float32 Time.fixedTime (exact to 2^17 = 131,072 s)
-##        perturbs AGV timers (same value as switch_oracle.PLAYER_SIM_BUDGET_S).
-PLAYER_SIM_BUDGET_S = 120_000.0
-## @brief Upper bound on the unseeded default-config episode a fresh player plays first.
-STARTUP_EPISODE_S = 700.0
-
-
-def planned_player_seconds(scenarios: list, episodes_per_scenario: int, window_seconds: float) -> float:
-    """@brief Simulated time one player covers: its startup episode plus, per episode, warm-up + window."""
-    per = [float((sc.get("stochastic") or {}).get("warmupSeconds") or 0.0) + window_seconds for sc in scenarios]
-    return STARTUP_EPISODE_S + episodes_per_scenario * sum(per)
 
 
 def run_evaluation(env, policies: list, schedule: list, log=print, decision_writer=None,
@@ -530,8 +519,6 @@ def main(argv=None):
     parser.add_argument("--reward-spec", type=str, default=str(REPO_ROOT / "env" / "config" / "rewards" / "flow_time.json"),
                         help="Reward spec whose episode return is the score (default flow_time: time in system of "
                              "every job); 'none' passes Unity's reward through (always 0) and ranks nothing")
-    parser.add_argument("--allow-clock-drift", action="store_true",
-                        help="Run even when one player would simulate past PLAYER_SIM_BUDGET_S (float32 clock)")
     parser.add_argument("--device", type=str, default="cpu")
     parser.add_argument("--out", type=str,
                         default=str(REPO_ROOT / "results" / f"eval-{datetime.now():%Y%m%d-%H%M%S}"))
@@ -638,15 +625,6 @@ def main(argv=None):
         planned = []
     obs_caps = row_caps_for(planned, args.obs_max_machines, args.obs_max_jobs)
     print(f"Observation row caps: {obs_caps[0]} machines, {obs_caps[1]} jobs")
-    if scenario_generator is not None and args.episode_duration_seconds > 0:
-        sim_s = planned_player_seconds(planned, len(policies), args.episode_duration_seconds)
-        if sim_s > PLAYER_SIM_BUDGET_S:
-            message = (f"this run simulates about {sim_s:,.0f} s in one player, past the {PLAYER_SIM_BUDGET_S:,.0f} s "
-                       "budget: Unity's float32 clock perturbs AGV timers past 2^17 s (C# audit K1/H1). Split the "
-                       "seeds over several calls")
-            if not args.allow_clock_drift:
-                parser.error(message + ", or pass --allow-clock-drift.")
-            print(f"[WARNING] {message}.")
 
     env = UnitySchedulingEnv(
         file_name=args.unity_path,

@@ -130,11 +130,18 @@ class ActorHead(nn.Module):
 
 
 class CriticHead(nn.Module):
-    """@brief Critic network: estimates the state value V(s).
+    """@brief Critic network: estimates the state value V(s), with PopArt value normalization.
 
     @details
-    Architecture mirrors ActorHead but outputs a single scalar per
-    batch element.
+    Architecture mirrors ActorHead but outputs a single scalar per batch element. The last layer predicts the
+    value normalized by running return statistics (mean @c ret_mean, std @c ret_std); forward() returns it in
+    reward units, so rollouts, GAE and bootstraps see real values. update_stats() moves the statistics toward a
+    rollout's returns and rescales the last layer so the unnormalized outputs do not change ("preserving outputs
+    precisely", PopArt: van Hasselt et al. 2016). The value loss divides by ret_std**2 (value_loss_scale), which is
+    regression on normalized targets. Added 2026-10-03: the tardiness training mix has episodes whose returns
+    differ several-fold in scale, and the critic shares the trunk with the actor, so raw-scale value gradients
+    swamped the policy's (audit section 9). With update_stats never called (ret_mean 0, ret_std 1) the head is the
+    plain critic it was before.
     """
 
     def __init__(self, input_dim: int = 256, hidden_dim: int = 256):
@@ -145,21 +152,58 @@ class CriticHead(nn.Module):
         """
         super().__init__()
 
-        ## @brief Single-hidden-layer MLP producing a scalar value estimate.
+        ## @brief Single-hidden-layer MLP producing a scalar (normalized) value estimate.
         self.net = nn.Sequential(
             nn.Linear(input_dim, hidden_dim),
             nn.LayerNorm(hidden_dim),
             nn.SiLU(inplace=True),
             nn.Linear(hidden_dim, 1),
         )
+        ## @brief Running return statistics (float64; saved in checkpoints). ret_updates counts update_stats calls,
+        ##        for the bias correction of the moving averages.
+        self.register_buffer("ret_mean", torch.zeros((), dtype=torch.float64))
+        self.register_buffer("ret_sq", torch.ones((), dtype=torch.float64))
+        self.register_buffer("ret_updates", torch.zeros((), dtype=torch.float64))
+
+    @property
+    def ret_std(self) -> torch.Tensor:
+        """@brief Return std from the second moment (floored, so a constant return cannot divide by zero)."""
+        return (self.ret_sq - self.ret_mean ** 2).clamp_min(1e-8).sqrt().clamp_min(1e-4)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """@brief Compute the state-value estimate.
+        """@brief Compute the state-value estimate in reward units.
 
         @param x  Fused feature vector of shape (B, @p input_dim).
         @return Value estimate of shape (B, 1).
         """
-        return self.net(x)
+        return self.net(x) * self.ret_std.to(x.dtype) + self.ret_mean.to(x.dtype)
+
+    def value_loss_scale(self) -> float:
+        """@brief 1 / ret_std**2: multiplies the MSE of unnormalized values so it equals the normalized one."""
+        return float(1.0 / self.ret_std ** 2)
+
+    @torch.no_grad()
+    def update_stats(self, returns, beta: float) -> None:
+        """@brief Move the return statistics toward @p returns (exponential average with rate @p beta, bias-corrected
+        as in Adam, so the first call takes the rollout's own mean and second moment) and rescale the last layer so
+        forward() gives the same outputs as before.
+
+        @param returns  The rollout's GAE returns (any shape; numpy or tensor).
+        @param beta     Rate per call, in (0, 1].
+        """
+        r = torch.as_tensor(returns, dtype=torch.float64).flatten()
+        old_mean, old_std = self.ret_mean.clone(), self.ret_std.clone()
+        n = self.ret_updates + 1
+        # Bias-corrected EMA: keep the uncorrected averages implicitly by blending toward the batch with weight
+        # beta / (1 - (1 - beta)^n), which is 1 on the first call.
+        w = beta / (1.0 - (1.0 - beta) ** n)
+        self.ret_mean.mul_(1 - w).add_(w * r.mean())
+        self.ret_sq.mul_(1 - w).add_(w * (r ** 2).mean())
+        self.ret_updates.copy_(n)
+        new_mean, new_std = self.ret_mean, self.ret_std
+        last = self.net[-1]
+        last.weight.mul_((old_std / new_std).to(last.weight.dtype))
+        last.bias.copy_(((old_std * last.bias.double() + old_mean - new_mean) / new_std).to(last.bias.dtype))
 
 
 class ActorCritic(nn.Module):

@@ -578,6 +578,14 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
                 last_values = last_values.cpu().numpy()
 
             buffer.compute_gae(last_values)
+            critic = net.actor_critic.critic
+            # Explained variance of the rollout's value predictions (before this update): 1 = the critic predicts
+            # the GAE returns, <= 0 = no better than their mean.
+            ret_var = float(np.var(buffer.returns))
+            explained_var = 1.0 - float(np.var(buffer.returns - buffer.values)) / ret_var if ret_var > 0 else float("nan")
+            if ppo_cfg.value_norm_beta > 0:
+                critic.update_stats(buffer.returns, ppo_cfg.value_norm_beta)
+            v_scale = critic.value_loss_scale()
 
             # ---- PPO update ----
             net.train()
@@ -605,7 +613,8 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
                     )
                     pg_loss = -torch.min(surr1, surr2).mean()
 
-                    v_loss = nn.functional.mse_loss(new_values, batch["returns"])
+                    # v_scale = 1 / return std**2: the MSE of normalized values (PopArt); 1 without normalization.
+                    v_loss = v_scale * nn.functional.mse_loss(new_values, batch["returns"])
                     ent_loss = -entropy.mean()
 
                     loss = (
@@ -642,6 +651,9 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
             writer.add_scalar("losses/entropy", total_entropy / n_batches, global_step)
             writer.add_scalar("charts/entropy_coef", ent_coef, global_step)
             writer.add_scalar("charts/step_reward_mean", avg_reward, global_step)
+            writer.add_scalar("charts/explained_variance", explained_var, global_step)
+            writer.add_scalar("charts/return_mean", float(critic.ret_mean), global_step)
+            writer.add_scalar("charts/return_std", float(critic.ret_std), global_step)
             writer.add_scalar("charts/sps", sps, global_step)
             writer.add_scalar("charts/episodes", episodes_done, global_step)
             # Share of this rollout's decisions each head could change (Unity leaves more than action 0 enabled).
@@ -668,6 +680,7 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
                     f"Ret {avg_return:+.3f} | "
                     f"PG {total_pg_loss/n_batches:.4f} | "
                     f"VL {total_v_loss/n_batches:.4f} | "
+                    f"EV {explained_var:+.2f} | "
                     f"Ent {total_entropy/n_batches:.3f} | "
                     f"T {update_time:.2f}s"
                 )
@@ -819,6 +832,8 @@ if __name__ == "__main__":
     parser.add_argument("--discount-horizon-s", type=float, default=PPOConfig.discount_horizon_s,
                         help="Discount over simulated time: gamma_s = 1 - 1/H per second (SMDP). "
                              "0 = per-decision gamma 0.99, as in every run before 2026-10-01")
+    parser.add_argument("--value-norm-beta", type=float, default=PPOConfig.value_norm_beta,
+                        help="PopArt value normalization rate per rollout (0 = off: raw-scale critic, as before 2026-10-03)")
     parser.add_argument("--ent-coef-final", type=float, default=None,
                         help="If set, decay the entropy coefficient linearly to this value over --total-timesteps")
     parser.add_argument("--torch-threads", type=int, default=0,
@@ -849,6 +864,7 @@ if __name__ == "__main__":
         entropy_coef=args.ent_coef,
         entropy_coef_final=args.ent_coef_final,
         discount_horizon_s=args.discount_horizon_s if args.discount_horizon_s > 0 else None,
+        value_norm_beta=args.value_norm_beta,
     )
     if args.torch_threads > 0:
         torch.set_num_threads(args.torch_threads)

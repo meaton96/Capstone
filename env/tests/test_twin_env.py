@@ -317,7 +317,7 @@ def test_env_episode_reward_is_total_flow_time(floor_path):
     total, steps = 0.0, 0
     while True:
         last = obs
-        obs, r, done, info = env.step((0, 0))   # SPT, ECT
+        obs, r, done, info = env.step((0, 0))   # SRT, ECT
         total += r
         steps += 1
         if done:
@@ -328,7 +328,7 @@ def test_env_episode_reward_is_total_flow_time(floor_path):
     assert total == pytest.approx(-ep["total_flow_time"] / 1000.0, rel=1e-4)
     # terminal_obs is the ended episode's last decision, not a zero pad (the player's own terminal obs).
     assert info["terminal_obs"] is last and info["terminal_obs"]["job_table"].any()
-    ref = run_twin(env.floor, resolve_jobs(scenario, env.floor), TwinConfig("SPT_ECT"))
+    ref = run_twin(env.floor, resolve_jobs(scenario, env.floor), TwinConfig("SRT_ECT"))
     assert ep["mean_flow_time"] == pytest.approx(ref.summary()["mean_flow_time"], rel=1e-5)
     assert obs["action_mask"].shape == (ACTION_MASK_LEN,)      # already the next episode's first decision
 
@@ -367,7 +367,7 @@ def test_vectorized_env_with_the_randomized_generator(floor_path):
     vec = VectorizedTwinEnv(2, floor_path, transport="kinematic", reward_spec=os.path.join(REWARDS, "flow_time.json"),
                             train_seed=0, scenario_generator=gen, obs_caps=(15, 256))
     obs, _ = vec.reset()
-    assert obs["job_table"].shape == (2, 256, 17)
+    assert obs["job_table"].shape == (2, 256, 21)
     finished = []
     for _ in range(20000):
         actions = np.stack([np.random.randint(len(JOB_HEAD_RULES), size=2),

@@ -110,7 +110,7 @@ def test_parse_seeds():
 def test_resolve_pdr_names():
     assert resolve_pdr_names("all") == list(PDR_ACTIONS)
     assert resolve_pdr_names("none") == []
-    assert resolve_pdr_names("spt_ect, FIFO-SRWT") == ["SPT-ECT", "FIFO-SRWT"]
+    assert resolve_pdr_names("spt_ect, ATC-SRWT") == ["SPT-ECT", "ATC-SRWT"]
     with pytest.raises(ValueError):
         resolve_pdr_names("NOT-A-RULE")
     with pytest.raises(ValueError):
@@ -224,8 +224,8 @@ def test_decision_row_includes_checkpoint_probabilities():
     row = decision_row(ProbabilisticPolicy(), seed=1, seed_index=0, step=4, metrics=metrics, action=(0, 1))
 
     assert row["chosen_prob"] == pytest.approx(0.7 * 0.25)
-    assert row["p_job_SRT"] == 0.3 and row["p_machine_TECT"] == 0.25
-    assert row["wip"] == 3 and row["rule"] == "SPT-TECT"
+    assert row["p_job_SPT"] == 0.3 and row["p_machine_TECT"] == 0.25
+    assert row["wip"] == 3 and row["rule"] == "SRT-TECT"
     assert row["job_head_used"] == 1 and row["machine_head_used"] == 1
     job_entropy = -(0.7 * np.log(0.7) + 0.3 * np.log(0.3))
     machine_entropy = -(0.5 * np.log(0.5) + 2 * 0.25 * np.log(0.25))
@@ -295,12 +295,3 @@ def test_run_evaluation_queues_scenario_paths_with_a_scenario_dir(tmp_path):
     assert max(len(json.dumps(items)) for items, _ in env.queued_scenarios) < 4096
     assert sorted(p.name for p in (tmp_path / "scenarios").iterdir()) == ["s3.json", "s4.json"]
     assert json.loads((tmp_path / "scenarios" / "s4.json").read_text()) == big(4)
-
-
-def test_planned_player_seconds_counts_warmups():
-    from evaluate import PLAYER_SIM_BUDGET_S, planned_player_seconds
-    plain = [{"jobs": []}] * 20
-    assert planned_player_seconds(plain, 1, 5400.0) == pytest.approx(700 + 20 * 5400)
-    assert planned_player_seconds(plain, 1, 5400.0) <= PLAYER_SIM_BUDGET_S   # 20 seeds, one policy: fine
-    warm = [{"stochastic": {"warmupSeconds": 4000.0}}] * 20
-    assert planned_player_seconds(warm, 1, 5400.0) > PLAYER_SIM_BUDGET_S

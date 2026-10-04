@@ -65,10 +65,11 @@ namespace Assets.Scripts.Simulation
 
         /// <summary>
         /// RL action branch 0 (job head): the job half the agent picks. Order is the Python contract
-        /// (env/config.py JOB_HEAD_RULES); append only.
+        /// (env/config.py JOB_HEAD_RULES, action schema v4). v4 (2026-10-03) is the H15 head of the tardiness
+        /// objective (rq2-twin-due, rq2-oracle-due): PTWINQ and FIFO left it (never a best pair or an oracle pick).
         /// </summary>
         private static readonly JobRule[] JobHead =
-            { JobRule.SPT, JobRule.SRT, JobRule.PTWINQ, JobRule.FIFO, JobRule.EDD, JobRule.MDD, JobRule.ATC };
+            { JobRule.SRT, JobRule.SPT, JobRule.MDD, JobRule.EDD, JobRule.ATC };
 
         /// <summary>
         /// RL action branch 1 (machine head): the machine half the agent picks. Order is the Python contract

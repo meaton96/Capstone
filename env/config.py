@@ -3,22 +3,24 @@
 @brief Configuration for DRL Job-Shop Scheduling Architecture.
 
 @details
-Observation schema v2 (2026-09-24). All dimensions are synced to the C# ObservationBuilder constants:
+Observation schema v3 (2026-10-03; v2 2026-09-24). All dimensions are synced to the C# ObservationBuilder constants:
   SpatialGridSize = 64,  SpatialChannels = 3
   MaxMachines = 105,  MachineFeatures = 16    (machine table, one row per machine, zero-padded)
-  MaxJobs     = 1792, JobFeatures     = 17    (job table over ACTIVE jobs, decision-relevant first)
-  GlobalScalarLength = 16
+  MaxJobs     = 1792, JobFeatures     = 21    (job table over ACTIVE jobs, decision-relevant first)
+  GlobalScalarLength = 18
   EventFlagLength    = 6
 
 Row caps are chosen per player launch (2026-09-27, see obs_row_caps / env_wrappers/unity_env.py): machine rows =
 the largest floor the run will see, job rows = JOB_ROWS_PER_15_MACHINES per 15 machines. A 15-machine run is
-12,310 + 15*16 + 256*17 = 16,902 floats; the defaults below (7 tiles, 105 machines / 1,792 jobs) give 44,454.
+12,312 + 15*16 + 256*21 = 17,928 floats; the defaults below (7 tiles, 105 machines / 1,792 jobs) give 51,624.
 Row-cap history: MaxJobs 64 -> 256 on 2026-09-25; defaults 105 / 1792 and per-launch caps on 2026-09-27. The
 caps never affect checkpoints (no weight depends on the row count).
 
 v1 (13,328 floats) had an 8-machine x first-20-jobs scheduling matrix and an 8x8 distance matrix: on the
 15-machine floor it dropped machines 8-14 and went blank once the first 20 jobs had exited. v1 checkpoints
-do not load into v2 networks.
+do not load into v2 networks. v3 adds due dates for the tardiness objective: job columns 17-20 (has due date,
+slack = due - now - remaining work, late, due - now; signed squashes) and global scalars 16-17 (share of due-dated
+active jobs late / with negative slack). v2 checkpoints do not load into v3 networks.
 """
 
 from dataclasses import dataclass, field
@@ -31,7 +33,7 @@ from typing import List, Optional, Tuple
 
 ## @brief Version of the observation's column meanings; bump together with ObservationBuilder.cs whenever a
 ##        feature is added, removed or redefined.
-OBS_SCHEMA_VERSION = 2
+OBS_SCHEMA_VERSION = 3
 
 GRID_SIZE        = 64
 GRID_CHANNELS    = 3
@@ -43,8 +45,8 @@ MAX_JOBS         = 1792
 ## @brief Job rows per 15 machines when caps are chosen per launch (randomized-family WIP peaked at 165 on
 ##        15 machines; the 7-tile compound pilot at 476 = 68 per tile).
 JOB_ROWS_PER_15_MACHINES = 256
-JOB_FEATURES     = 17
-GLOBAL_SCALARS   = 16
+JOB_FEATURES     = 21
+GLOBAL_SCALARS   = 18
 EVENT_FLAGS      = 6
 
 ## @brief Column meanings (see ObservationBuilder.BuildMachineTable / BuildJobTable). Column 0 of both
@@ -88,11 +90,12 @@ OBS_LAYOUT = {
 ##        of composite rules (SPT-SMPT ... FIFO-SRWT); v2 (2026-09-26) is two branches, job head x machine
 ##        head, chosen from the gen_rules0926 sweep (docs/features/DECISION_POINTS.md section 7). v3 (2026-10-03)
 ##        appends the due-date job rules EDD, MDD, ATC (rq2-twin-due; they need jobs with due dates, else they
-##        rank every job as due at +infinity and keep the first candidate).
-ACTION_SCHEMA_VERSION = 3
+##        rank every job as due at +infinity and keep the first candidate). v4 (2026-10-03) is the H15 head of the
+##        tardiness objective (rq2-twin-due, rq2-oracle-due): PTWINQ and FIFO dropped, SRT first.
+ACTION_SCHEMA_VERSION = 4
 
 ## @brief Branch 0: which job (dispatch: from the machine's queue; routing: from the pool).
-JOB_HEAD_RULES = ["SPT", "SRT", "PTWINQ", "FIFO", "EDD", "MDD", "ATC"]
+JOB_HEAD_RULES = ["SRT", "SPT", "MDD", "EDD", "ATC"]
 ## @brief Branch 1: which machine a routed job goes to.
 MACHINE_HEAD_RULES = ["ECT", "TECT", "SRWT"]
 ACTION_BRANCHES = (len(JOB_HEAD_RULES), len(MACHINE_HEAD_RULES))
@@ -229,6 +232,10 @@ class PPOConfig:
     ##        total_timesteps (by absolute global step, so a resumed run continues the schedule).
     entropy_coef_final: Optional[float] = None
     value_coef: float = 0.5
+    ## @brief PopArt value normalization (models.actor_critic.CriticHead, 2026-10-03): the critic regresses returns
+    ##        normalized by running statistics, updated once per rollout with this rate (bias-corrected EMA;
+    ##        0 = off, the raw-scale critic of every run before 2026-10-03). 0.05 averages over about 20 rollouts.
+    value_norm_beta: float = 0.05
     max_grad_norm: float = 0.5
     num_epochs: int = 4
     batch_size: int = 64

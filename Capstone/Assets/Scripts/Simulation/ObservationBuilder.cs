@@ -35,7 +35,8 @@ namespace Assets.Scripts.Simulation
         public const int MachineFeatures = 16;
         public static int MachineTableLength => MaxMachines * MachineFeatures;
 
-        public const int JobFeatures = 17;
+        // v3 (2026-10-03): job features 17-20 and global scalars 16-17 carry due dates (tardiness objective).
+        public const int JobFeatures = 21;
         public static int JobTableLength => MaxJobs * JobFeatures;
 
         static ObservationBuilder()
@@ -60,7 +61,7 @@ namespace Assets.Scripts.Simulation
 
         private static bool _warnedMachineTruncation;
 
-        public const int GlobalScalarLength = 16;
+        public const int GlobalScalarLength = 18;
         public const int EventFlagLength = 6;
 
         public static int TotalObservationSize =>
@@ -234,6 +235,10 @@ namespace Assets.Scripts.Simulation
             return (float)(x / (x + scale));
         }
 
+        /** @brief Squash keeping the sign: x / (|x| + scale) in (-1, 1), for quantities that go negative (slack). */
+        private static float SignedSquash(double x, float scale) =>
+            x < 0.0 ? -Squash(-x, scale) : Squash(x, scale);
+
         /**
          * @brief One-hot index of a job state among the five pre-exit states, or -1 for Exited.
          */
@@ -355,6 +360,10 @@ namespace Assets.Scripts.Simulation
          *   [14] routing focus job (DecisionRequest.JobId; see BuildMachineTable on agent mode)
          *   [15] decision candidate (routing: routable job; dispatch: queued at the dispatching machine)
          *   [16] dispatch only: processing time on the dispatching machine, squashed (TimeScale)
+         *   [17] has a due date (17-20 are 0 without one)
+         *   [18] slack: due date - now - remaining work (MDD / ATC's quantity), signed squash (AgeScale)
+         *   [19] late: now past the due date
+         *   [20] time to due date: due date - now, signed squash (AgeScale)
          */
         private float[] BuildJobTable(DecisionRequest req)
         {
@@ -432,6 +441,15 @@ namespace Assets.Scripts.Simulation
                 table[b + 15] = candidateIds.Contains(job.JobId) ? 1f : 0f;
                 if (dispatchMachine >= 0 && job.State == JobState.Queued && job.LocationMachineId == dispatchMachine)
                     table[b + 16] = Squash(job.GetProcessingTime(dispatchMachine), TimeScale);
+
+                if (job.HasDueDate)
+                {
+                    double toDue = job.DueDate - now;
+                    table[b + 17] = 1f;
+                    table[b + 18] = SignedSquash(toDue - DispatchingEngine.GetRemainingWork(job.JobId, store), AgeScale);
+                    table[b + 19] = toDue < 0.0 ? 1f : 0f;
+                    table[b + 20] = SignedSquash(toDue, AgeScale);
+                }
             }
             return table;
         }
@@ -453,6 +471,8 @@ namespace Assets.Scripts.Simulation
          *   [13] AGVs per machine (clamped to 1)
          *   [14] deferred jobs, squashed (CountScale)
          *   [15] options in the current decision (routing: candidate machines; dispatch: queued jobs), squashed (CountScale)
+         *   [16] fraction of active jobs with a due date that are already late
+         *   [17] fraction of active jobs with a due date whose slack is negative (late unless rushed)
          */
         private float[] BuildGlobalScalars(DecisionRequest req)
         {
@@ -463,13 +483,18 @@ namespace Assets.Scripts.Simulation
             JobStore store = orch.Jobs;
 
             int[] byState = new int[5];
-            int active = 0;
+            int active = 0, withDue = 0, late = 0, behind = 0;
             foreach (JobData job in store.AllJobs)
             {
                 int slot = StateSlot(job.State);
                 if (slot < 0) continue;
                 byState[slot]++;
                 active++;
+                if (!job.HasDueDate) continue;
+                withDue++;
+                double toDue = job.DueDate - orch.SimTime;
+                if (toDue < 0.0) late++;
+                if (toDue - DispatchingEngine.GetRemainingWork(job.JobId, store) < 0.0) behind++;
             }
 
             s[0] = Squash(orch.SimTime, HorizonScale);
@@ -510,6 +535,11 @@ namespace Assets.Scripts.Simulation
                 : req.Type == DecisionType.Routing ? (req.CandidateMachineIds?.Length ?? 0)
                 : (req.QueuedJobIds?.Length ?? 0);
             s[15] = Squash(options, CountScale);
+            if (withDue > 0)
+            {
+                s[16] = (float)late / withDue;
+                s[17] = (float)behind / withDue;
+            }
             return s;
         }
 

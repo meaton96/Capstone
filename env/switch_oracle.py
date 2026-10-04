@@ -13,11 +13,9 @@ instance (a lower bound on what per-decision switching could do), not an upper-b
 earlier segment oracle.
 
 Scoring is the reward's own quantity: the episode return of --reward-spec (flow_time: -(time in system
-of every job, finished or not) / 1000). Each stage's candidates run in as few fresh players as keep every
-player's simulated time (its unseeded startup episode + each candidate's warm-up + window) under
-PLAYER_SIM_BUDGET_S, below Unity's float32 clock limit of 131,072 s (AGVController timers; see
-docs/experiments/rq4-agvfail_findings_1001.md section 3), so replayed prefixes are reproduced exactly. Without
-warm-up that is one player for 12 x 5,400 s; a random warm-up of up to 8,600 s per episode needs two or three.
+of every job, finished or not) / 1000). Each stage's candidates run back to back in one fresh player; the AGV
+timers use the per-episode double SimTime, so replayed prefixes are reproduced exactly however long the player
+runs (checked past 2^17 s on 10-03: results/dev-clock-check).
 
 Outputs in --out: stages.csv (every candidate run) and result.json (the chosen schedule and the gains).
 
@@ -42,18 +40,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from config import pdr_action
 from env_wrappers.unity_env import UnitySchedulingEnv
-from evaluate import PLAYER_SIM_BUDGET_S, STARTUP_EPISODE_S, resolve_pdr_names, run_evaluation
+from evaluate import resolve_pdr_names, run_evaluation
 
-
-
-def player_chunks(n_candidates: int, episode_sim_seconds: float, budget: float = PLAYER_SIM_BUDGET_S) -> list:
-    """@brief Split candidates 0..n-1 into consecutive runs, one per fresh player, each player staying within
-    @p budget simulated seconds (startup episode + episode_sim_seconds per candidate)."""
-    per_player = int((budget - STARTUP_EPISODE_S) // episode_sim_seconds)
-    if per_player < 1:
-        raise ValueError(f"one episode ({episode_sim_seconds:.0f} s simulated) exceeds the per-player budget "
-                         f"of {budget:.0f} s")
-    return [list(range(i, min(i + per_player, n_candidates))) for i in range(0, n_candidates, per_player)]
 
 
 class ScheduledPolicy:
@@ -81,31 +69,26 @@ class ScheduledPolicy:
 
 
 def run_stage(args, scenario_generator, reward_fn, obs_caps, prefix, pairs, stage, out):
-    """@brief One episode per candidate tail pair, over as many fresh players as the sim-time budget needs;
-    returns the episode rows in candidate order."""
-    scenario = scenario_generator(args.seed)
-    warmup = float((scenario.get("stochastic") or {}).get("warmupSeconds") or 0.0)
-    chunks = player_chunks(len(pairs), warmup + args.episode_duration_seconds)
-    rows = []
-    for part, chunk in enumerate(chunks):
-        tag = f"stage{stage}" if len(chunks) == 1 else f"stage{stage}_{part}"
-        env = UnitySchedulingEnv(
-            file_name=args.unity_path,
-            obs_caps=obs_caps,
-            reward_fn=reward_fn,
-            time_scale=args.time_scale,
-            worker_id=args.base_worker_id,
-            no_graphics=True,
-            decision_drain=True,
-            log_file=out / f"Player_{tag}.log",
-        )
-        try:
-            policies = [ScheduledPolicy(env, prefix, pairs[i], args.segment_seconds) for i in chunk]
-            schedule = [(p, args.seed) for p in range(len(policies))]
-            rows += run_evaluation(env, policies, schedule, log=lambda line: print(f"[{tag}] {line}", flush=True),
-                                   scenario_generator=scenario_generator, scenario_dir=out / "scenarios")
-        finally:
-            env.close()
+    """@brief One episode per candidate tail pair, all in one fresh player; returns the episode rows in candidate
+    order."""
+    tag = f"stage{stage}"
+    env = UnitySchedulingEnv(
+        file_name=args.unity_path,
+        obs_caps=obs_caps,
+        reward_fn=reward_fn,
+        time_scale=args.time_scale,
+        worker_id=args.base_worker_id,
+        no_graphics=True,
+        decision_drain=True,
+        log_file=out / f"Player_{tag}.log",
+    )
+    try:
+        policies = [ScheduledPolicy(env, prefix, pair, args.segment_seconds) for pair in pairs]
+        schedule = [(p, args.seed) for p in range(len(policies))]
+        rows = run_evaluation(env, policies, schedule, log=lambda line: print(f"[{tag}] {line}", flush=True),
+                              scenario_generator=scenario_generator, scenario_dir=out / "scenarios")
+    finally:
+        env.close()
     for row in rows:
         row["stage"] = stage
         row["tail"] = row["policy"].split("|")[-1]
