@@ -1,0 +1,28 @@
+20 seeds, 420 episodes, deadlocks 0, timeouts 0
+
+== Fixed pairs (tardiness and time in system: 1000 job-s over the window; gaps to the per-seed best) ==
+             tardiness  gap_%  gap_median_%  wins  time_in_system  tis_gap_%  pct_late
+MDD-TECT         54.71   2.73          0.20   8.0          167.03       1.29     57.52
+MDD-ECT          55.11   5.39          3.30   3.0          167.25       1.48     57.90
+SRT-TECT         55.69   5.58          1.90   2.0          166.59       0.92     54.90
+SRT-ECT          55.68   6.75          3.25   3.0          166.59       0.92     55.41
+EDD-TECT         62.75  13.06         12.44   0.0          175.06       4.79     58.39
+EDD-ECT          62.78  14.02         15.32   0.0          175.18       4.82     59.69
+ATC-ECT          62.16  15.40         11.52   4.0          175.17       5.23     59.61
+ATC-TECT         61.86  16.18         13.12   0.0          174.95       5.22     59.21
+MDD-SRWT         60.19  18.53         14.24   0.0          173.60       5.42     60.92
+PTWINQ-ECT       62.94  19.70         17.57   0.0          174.91       5.28     56.09
+SRT-SRWT         60.09  20.32         15.45   0.0          172.44       4.79     57.15
+PTWINQ-TECT      63.95  23.04         18.05   0.0          175.90       5.96     57.08
+SPT-ECT          65.58  23.19         18.72   0.0          177.72       6.50     58.13
+SPT-TECT         65.77  25.61         20.71   0.0          177.82       6.68     57.61
+ATC-SRWT         66.32  28.12         26.47   0.0          180.60       8.85     63.67
+EDD-SRWT         67.17  28.60         24.18   0.0          180.71       8.64     60.94
+SPT-SRWT         69.53  35.21         29.65   0.0          182.94      10.05     60.74
+PTWINQ-SRWT      68.66  35.40         32.95   0.0          181.80       9.67     60.42
+FIFO-TECT        82.37  55.13         55.00   0.0          196.03      16.16     62.33
+FIFO-ECT         81.92  55.28         53.30   0.0          195.40      15.77     61.81
+FIFO-SRWT        88.23  72.52         69.68   0.0          202.66      20.34     64.83
+
+best on average: MDD-TECT; seeds without tardiness under some pair: 0
+check vs rq2-oracle-due stage 1: 300 pairs compared, max |return difference| 2.84e-14

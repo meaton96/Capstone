@@ -1,37 +1,222 @@
 [10-03 14:17] starting 44 tasks, 20 workers
-[10-03 14:17] FAIL results/rq2-oracle-due/s11 (see results/rq2-oracle-due/s11/oracle.log)
-[10-03 14:17] FAIL results/rq2-oracle-due/s15 (see results/rq2-oracle-due/s15/oracle.log)
-[10-03 14:17] FAIL results/rq2-oracle-due-utilhi/s0 (see results/rq2-oracle-due-utilhi/s0/oracle.log)
-[10-03 14:17] FAIL results/rq2-oracle-due/s9 (see results/rq2-oracle-due/s9/oracle.log)
-[10-03 14:17] FAIL results/rq2-oracle-due/s10 (see results/rq2-oracle-due/s10/oracle.log)
-[10-03 14:17] FAIL results/rq2-oracle-due-agv4/s1 (see results/rq2-oracle-due-agv4/s1/oracle.log)
-[10-03 14:17] FAIL results/rq2-oracle-due/s19 (see results/rq2-oracle-due/s19/oracle.log)
-[10-03 14:17] FAIL results/rq2-oracle-due/s8 (see results/rq2-oracle-due/s8/oracle.log)
-[10-03 14:17] FAIL results/rq2-oracle-due-agv4/s0 (see results/rq2-oracle-due-agv4/s0/oracle.log)
-[10-03 14:17] FAIL results/rq2-oracle-due/s16 (see results/rq2-oracle-due/s16/oracle.log)
-[10-03 14:17] FAIL results/rq2-oracle-due/s14 (see results/rq2-oracle-due/s14/oracle.log)
-[10-03 14:17] FAIL results/rq2-oracle-due/s18 (see results/rq2-oracle-due/s18/oracle.log)
-[10-03 14:17] FAIL results/rq2-oracle-due/s13 (see results/rq2-oracle-due/s13/oracle.log)
-[10-03 14:17] FAIL results/rq2-oracle-due-l1500/s2 (see results/rq2-oracle-due-l1500/s2/oracle.log)
-[10-03 14:17] FAIL results/rq2-oracle-due-agv4/s2 (see results/rq2-oracle-due-agv4/s2/oracle.log)
-[10-03 14:17] FAIL results/rq2-oracle-due/s12 (see results/rq2-oracle-due/s12/oracle.log)
-[10-03 14:17] FAIL results/rq2-oracle-due-utilhi/s1 (see results/rq2-oracle-due-utilhi/s1/oracle.log)
-[10-03 14:17] FAIL results/rq2-oracle-due-l1500/s1 (see results/rq2-oracle-due-l1500/s1/oracle.log)
-[10-03 14:17] FAIL results/rq2-oracle-due/s17 (see results/rq2-oracle-due/s17/oracle.log)
-[10-03 14:17] FAIL results/rq2-oracle-due-l1500/s0 (see results/rq2-oracle-due-l1500/s0/oracle.log)
-[10-03 14:17] FAIL results/base-due-c2/s4 (see results/base-due-c2/s4/eval.log)
-[10-03 14:17] FAIL results/base-due-c2/s2 (see results/base-due-c2/s2/eval.log)
-[10-03 14:17] FAIL results/base-due-c2/s3 (see results/base-due-c2/s3/eval.log)
-[10-03 14:17] FAIL results/base-due-c2/s1 (see results/base-due-c2/s1/eval.log)
-[10-03 14:17] FAIL results/base-due-c2/s7 (see results/base-due-c2/s7/eval.log)
-[10-03 14:17] FAIL results/base-due-c2/s5 (see results/base-due-c2/s5/eval.log)
-[10-03 14:17] FAIL results/base-due-c2/s12 (see results/base-due-c2/s12/eval.log)
-[10-03 14:17] FAIL results/base-due-c2/s0 (see results/base-due-c2/s0/eval.log)
-[10-03 14:17] FAIL results/base-due-c2/s15 (see results/base-due-c2/s15/eval.log)
-[10-03 14:17] FAIL results/base-due-c2/s10 (see results/base-due-c2/s10/eval.log)
-[10-03 14:17] FAIL results/base-due-c2/s14 (see results/base-due-c2/s14/eval.log)
-[10-03 14:17] FAIL results/base-due-c2/s13 (see results/base-due-c2/s13/eval.log)
-[10-03 14:17] FAIL results/base-due-c2/s11 (see results/base-due-c2/s11/eval.log)
-[10-03 14:17] FAIL results/base-due-c2/s16 (see results/base-due-c2/s16/eval.log)
-[10-03 14:17] FAIL results/base-due-c2/s18 (see results/base-due-c2/s18/eval.log)
-[10-03 14:17] FAIL results/base-due-c2/s17 (see results/base-due-c2/s17/eval.log)
+[10-03 17:08] ok   results/rq2-oracle-due-utilhi/s1 seed 1: best fixed SRT-TECT -0.820, oracle -0.820 (time in system +0.00%), schedule ['SRT-TECT', 'SRT-TECT', 'SRT-TECT',
+[10-03 17:08] FAIL results/rq2-oracle-due-utilhi/s2 (see results/rq2-oracle-due-utilhi/s2/oracle.log)
+[10-03 17:08] FAIL results/rq2-oracle-due-agv4/s3 (see results/rq2-oracle-due-agv4/s3/oracle.log)
+[10-03 17:08] FAIL results/rq2-oracle-due-l1500/s3 (see results/rq2-oracle-due-l1500/s3/oracle.log)
+[10-03 17:08] FAIL results/rq2-oracle-due-utilhi/s3 (see results/rq2-oracle-due-utilhi/s3/oracle.log)
+[10-03 17:08] FAIL results/base-due-c2/s0 (see results/base-due-c2/s0/eval.log)
+[10-03 17:08] FAIL results/base-due-c2/s1 (see results/base-due-c2/s1/eval.log)
+[10-03 17:08] FAIL results/base-due-c2/s2 (see results/base-due-c2/s2/eval.log)
+[10-03 17:08] FAIL results/base-due-c2/s3 (see results/base-due-c2/s3/eval.log)
+[10-03 17:08] FAIL results/base-due-c2/s4 (see results/base-due-c2/s4/eval.log)
+[10-03 17:08] FAIL results/base-due-c2/s5 (see results/base-due-c2/s5/eval.log)
+[10-03 17:08] skip results/base-due-c2/s6
+[10-03 17:08] FAIL results/base-due-c2/s7 (see results/base-due-c2/s7/eval.log)
+[10-03 17:08] skip results/base-due-c2/s8
+[10-03 17:08] skip results/base-due-c2/s9
+[10-03 17:08] FAIL results/base-due-c2/s10 (see results/base-due-c2/s10/eval.log)
+[10-03 17:08] FAIL results/base-due-c2/s11 (see results/base-due-c2/s11/eval.log)
+[10-03 17:08] FAIL results/base-due-c2/s12 (see results/base-due-c2/s12/eval.log)
+[10-03 17:08] FAIL results/base-due-c2/s13 (see results/base-due-c2/s13/eval.log)
+[10-03 17:08] FAIL results/base-due-c2/s14 (see results/base-due-c2/s14/eval.log)
+[10-03 17:09] FAIL results/base-due-c2/s15 (see results/base-due-c2/s15/eval.log)
+[10-03 17:09] FAIL results/base-due-c2/s16 (see results/base-due-c2/s16/eval.log)
+[10-03 17:09] FAIL results/base-due-c2/s17 (see results/base-due-c2/s17/eval.log)
+[10-03 17:09] FAIL results/base-due-c2/s18 (see results/base-due-c2/s18/eval.log)
+[10-03 17:09] skip results/base-due-c2/s19
+[10-03 17:12] ok   results/rq2-oracle-due/s19 seed 19: best fixed MDD-TECT -11.594, oracle -11.127 (time in system -4.03%), schedule ['MDD-TECT', 'MDD-ECT', 'MDD-ECT'
+[10-03 17:21] ok   results/rq2-oracle-due/s9 seed 9: best fixed MDD-TECT -18.454, oracle -18.400 (time in system -0.29%), schedule ['MDD-TECT', 'MDD-TECT', 'MDD-TECT
+[10-03 17:47] ok   results/rq2-oracle-due/s8 seed 8: best fixed MDD-TECT -38.563, oracle -35.649 (time in system -7.56%), schedule ['MDD-TECT', 'SRT-ECT', 'MDD-TECT'
+[10-03 18:55] ok   results/rq2-oracle-due/s18 seed 18: best fixed MDD-ECT -79.534, oracle -77.823 (time in system -2.15%), schedule ['MDD-ECT', 'MDD-SRWT', 'MDD-SRWT'
+[10-03 19:07] ok   results/rq2-oracle-due-agv4/s0 seed 0: best fixed ATC-TECT -16.870, oracle -16.652 (time in system -1.29%), schedule ['ATC-TECT', 'ATC-TECT', 'SRT-ECT'
+[10-03 19:12] ok   results/rq2-oracle-due/s11 seed 11: best fixed MDD-TECT -41.358, oracle -40.405 (time in system -2.31%), schedule ['MDD-TECT', 'MDD-TECT', 'SPT-TEC
+[10-03 19:13] ok   results/rq2-oracle-due/s14 seed 14: best fixed SRT-ECT -34.612, oracle -34.114 (time in system -1.44%), schedule ['SRT-ECT', 'ATC-TECT', 'ATC-TECT'
+[10-03 19:19] ok   results/rq2-oracle-due-l1500/s0 seed 0: best fixed ATC-ECT -17.470, oracle -17.244 (time in system -1.29%), schedule ['ATC-ECT', 'ATC-ECT', 'ATC-ECT', '
+[10-03 19:22] ok   results/rq2-oracle-due/s10 seed 10: best fixed ATC-ECT -44.842, oracle -39.154 (time in system -12.69%), sched[10-03 19:33] ok   results/rq2-oracle-due-agv4/s3 seed 3: best fixed SRT-TECT -86.812, oracle -85.337 (time in system -1.70%), schedule ['SRT-TECT', 'MDD-ECT', 'MDD-ECT',
+[10-03 19:45] ok   results/rq2-oracle-due-l1500/s3 seed 3: best fixed MDD-TECT -94.436, oracle -94.429 (time in system -0.01%), schedule ['MDD-TECT', 'MDD-TECT', 'MDD-TECT
+[10-03 19:46] ok   results/rq2-oracle-due-utilhi/s3 seed 3: best fixed MDD-TECT -87.469, oracle -87.469 (time in system +0.00%), schedule ['MDD-TECT', 'MDD-TECT', 'MDD-TECT
+[10-03 19:46] all done
+== results/rq2-oracle-due
+rq2-oracle-due: 18 seeds finished
+== Per seed (tardiness, 1000 job-s; best-on-average pair MDD-TECT) ==
+      best_pair_value  per_seed_best per_se[10-03 20:08] ok   results/rq2-oracle-due-agv4/s2 seed 2: best fixed ATC-ECT -27.425, oracle -24.752 (time in system -9.75%), schedule ['ATC-ECT', 'ATC-ECT', 'SRT-ECT', '
+[10-03 20:14] ok   results/rq2-oracle-due-agv4/s1 seed 1: best fixed ATC-TECT -45.566, oracle -42.925 (time in system -5.80%), schedule ['ATC-TECT', 'SRT-TECT', 'SRT-ECT'
+[10-03 20:16] ok   results/rq2-oracle-due/s12 seed 12: best fixed MDD-ECT -148.816, oracle -146.633 (time in system -1.47%), schedule ['MDD-ECT', 'MDD-SRWT', 'MDD-SRW
+[10-03 20:17] ok   results/rq2-oracle-due-l1500/s2 seed 2: best fixed SRT-ECT -29.521, oracle -29.430 (time in system -0.31%), schedule ['SRT-ECT', 'SRT-ECT', 'SRT-ECT', '
+[10-03 20:22] ok   results/rq2-oracle-due-l1500/s1 seed 1: best fixed MDD-ECT -58.864, oracle -57.216 (time in system -2.80%), schedule ['MDD-ECT', 'MDD-TECT', 'MDD-TECT',
+[10-03 20:39] ok   results/rq2-oracle-due/s13 seed 13: best fixed MDD-TECT -88.402, oracle -88.380 (time in system -0.02%), schedule ['MDD-TECT', 'MDD-TECT', 'MDD-TEC
+[10-03 20:39] all done
+== results/rq2-oracle-due
+rq2-oracle-due: 20 seeds finished
+== Per seed (tardiness, 1000 job-s; best-on-average pair MDD-TECT) ==
+      best_pair_value  per_seed_best per_seed_best_pair   oracle  total_%  switch_%  vs_SRT-TECT_%                                               schedule
+seed                                                                                                                                                     
+0              18.813         17.025            ATC-ECT   15.018   20.174    11.792         26.623       ATC-ECT|ATC-ECT|ATC-ECT|MDD-ECT|SRT-ECT|SRT-SRWT
+1              47.953         45.622            SRT-ECT   45.104    5.940     1.134          1.519        SRT-ECT|SRT-ECT|MDD-ECT|MDD-ECT|MDD-ECT|SRT-ECT
+10             49.313         44.842            ATC-ECT   39.154   20.601    12.685         21.933       ATC-ECT|MDD-ECT|MDD-ECT|MDD-ECT|MDD-ECT|ATC-SRWT
+11             41.358         41.358           MDD-TECT   40.405    2.306     2.306          3.902   MDD-TECT|MDD-TECT|SPT-TECT|SPT-TECT|SRT-TECT|SRT-ECT
+12            148.816        148.816            MDD-ECT  146.633    1.466     1.466          2.230     MDD-ECT|MDD-SRWT|MDD-SRWT|MDD-ECT|MDD-ECT|SRT-SRWT
+13             88.402         88.402           MDD-TECT   88.380    0.024     0.024          1.402    MDD-TECT|MDD-TECT|MDD-TECT|MDD-TECT|SRT-ECT|EDD-ECT
+14             38.092         34.612            SRT-ECT   34.114   10.443     1.438          6.484     SRT-ECT|ATC-TECT|ATC-TECT|ATC-TECT|SRT-ECT|SRT-ECT
+15             21.655         21.642            MDD-ECT   20.533    5.180     5.122          6.271     MDD-ECT|SRT-ECT|SRT-ECT|MDD-SRWT|MDD-SRWT|SRT-SRWT
+16             44.015         39.839            ATC-ECT   38.209   13.190     4.090         14.036       ATC-ECT|EDD-ECT|ATC-ECT|ATC-ECT|ATC-ECT|MDD-SRWT
+17             99.705         97.740           SRT-TECT   97.140    2.573     0.614          0.614   SRT-TECT|MDD-TECT|MDD-TECT|MDD-TECT|MDD-TECT|SRT-ECT
+18             80.063         79.534            MDD-ECT   77.823    2.798     2.151          9.532      MDD-ECT|MDD-SRWT|MDD-SRWT|SRT-ECT|SRT-ECT|SRT-ECT
+19             11.594         11.594           MDD-TECT   11.127    4.028     4.028          4.532       MDD-TECT|MDD-ECT|MDD-ECT|ATC-ECT|SRT-ECT|SRT-ECT
+2              29.505         28.343            ATC-ECT   26.761    9.299     5.581         11.561       ATC-ECT|MDD-ECT|MDD-ECT|MDD-ECT|EDD-ECT|EDD-SRWT
+3              87.495         87.495           MDD-TECT   87.263    0.264     0.264          6.307      MDD-TECT|MDD-ECT|MDD-ECT|MDD-ECT|MDD-SRWT|SRT-ECT
+4               2.595          2.586           SRT-TECT    2.558    1.433     1.090          1.090  SRT-TECT|SRT-TECT|SRT-TECT|SRT-TECT|SRT-TECT|MDD-SRWT
+5              27.580         27.580           MDD-TECT   26.396    4.295     4.295         23.602    MDD-TECT|MDD-TECT|MDD-TECT|MDD-ECT|SRT-SRWT|SRT-ECT
+6               4.803          4.803           MDD-TECT    4.730    1.515     1.515          1.573    MDD-TECT|ATC-TECT|ATC-ECT|ATC-ECT|SPT-SRWT|SRT-SRWT
+7             195.334        192.901           SRT-TECT  190.312    2.571     1.342          1.342     SRT-TECT|SRT-TECT|MDD-ECT|MDD-ECT|SRT-ECT|SRT-SRWT
+8              38.563         38.563           MDD-TECT   35.649    7.555     7.555          9.497   MDD-TECT|SRT-ECT|MDD-TECT|MDD-TECT|SRT-TECT|SRT-TECT
+9              18.454         18.454           MDD-TECT   18.400    0.288     0.288          7.434     MDD-TECT|MDD-TECT|MDD-TECT|MDD-ECT|MDD-ECT|ATC-ECT 
+
+total_% vs MDD-TECT: mean 5.80, median 3.41, seeds > 2%: 14/20 (70%)
+switch_% vs per-seed best: mean 3.44, median 1.83
+oracle vs SRT-TECT: mean 8.07, median 6.29
+
+== Fixed pairs: mean gap to the per-seed best (%), wins ==
+          gap_%  wins
+MDD-TECT   2.73   8.0
+MDD-ECT    5.39   3.0
+SRT-TECT   5.58   3.0
+SRT-ECT    6.75   2.0
+EDD-TECT  13.06   0.0
+EDD-ECT   14.02   0.0
+ATC-ECT   15.40   4.0
+ATC-TECT  16.18   0.0
+MDD-SRWT  18.53   0.0
+== results/rq2-oracle-due-agv4
+rq2-oracle-due-agv4: 4 seeds finished
+== Per seed (tardiness, 1000 job-s; best-on-average pair MDD-ECT) ==
+      best_pair_value  per_seed_best per_seed_best_pair  oracle  total_%  switch_%  vs_SRT-TECT_%                                              schedule
+seed                                                                                                                                                   
+0              16.894         16.870           ATC-TECT  16.652    1.436     1.293          9.852    ATC-TECT|ATC-TECT|SRT-ECT|SRT-ECT|SRT-ECT|SRT-SRWT
+1              46.525         45.566           ATC-TECT  42.925    7.736     5.796          8.890  ATC-TECT|SRT-TECT|SRT-ECT|MDD-TECT|MDD-TECT|EDD-SRWT
+2              30.019         27.425            ATC-ECT  24.752   17.545     9.747         17.923      ATC-ECT|ATC-ECT|SRT-ECT|MDD-ECT|SRT-SRWT|SRT-ECT
+3              86.882         86.812           SRT-TECT  85.337    1.778     1.699          1.699     SRT-TECT|MDD-ECT|MDD-ECT|MDD-ECT|MDD-ECT|MDD-SRWT 
+
+total_% vs MDD-ECT: mean 7.12, median 4.76, seeds > 2%: 2/4 (50%)
+switch_% vs per-seed best: mean 4.63, median 3.75
+oracle vs SRT-TECT: mean 9.59, median 9.37
+
+== Fixed pairs: mean gap to the per-seed best (%), wins ==
+          gap_%  wins
+MDD-ECT    2.95   0.0
+ATC-TECT   3.09   2.0
+MDD-TECT   3.49   0.0
+SRT-ECT    5.23   0.0
+SRT-TECT   5.71   1.0
+ATC-ECT    6.68   1.0
+SRT-SRWT  12.32   0.0
+EDD-TECT  14.62   0.0
+EDD-ECT   14.89   0.0
+SPT-TECT  16.04   0.0
+MDD-SRWT  16.32   0.0
+SPT-ECT   16.46   0.0
+ATC-SRWT  30.93   0.0
+EDD-SRWT  31.55   0.0
+SPT-SRWT  45.61   0.0 
+
+oracle job rules: SRT 42%, MDD 33%, ATC 21%, EDD 4%
+
+oracle schedule's time in system vs the seed's best fixed pair on time in system: -0.46% (mean)
+== results/rq2-oracle-due-l1500
+rq2-oracle-due-l1500: 4 seeds finished
+== Per seed (tardiness, 1000 job-s; best-on-average pair SRT-ECT) ==
+      best_pair_value  per_seed_best per_seed_best_pair  oracle  total_%  switch_%  vs_SRT-TECT_%                                              schedule
+seed                                                                                                                                                   
+0              20.118         17.470            ATC-ECT  17.244   14.285     1.290         16.269      ATC-ECT|ATC-ECT|ATC-ECT|ATC-ECT|ATC-ECT|EDD-SRWT
+1              58.988         58.864            MDD-ECT  57.216    3.004     2.800          5.489  MDD-ECT|MDD-TECT|MDD-TECT|MDD-TECT|MDD-TECT|MDD-TECT
+2              29.521         29.521            SRT-ECT  29.430    0.308     0.308          0.308     SRT-ECT|SRT-ECT|SRT-ECT|SRT-ECT|SRT-SRWT|MDD-SRWT
+3              95.277         94.436           MDD-TECT  94.429    0.890     0.008          1.653    MDD-TECT|MDD-TECT|MDD-TECT|MDD-ECT|MDD-ECT|MDD-ECT 
+
+total_% vs SRT-ECT: mean 4.62, median 1.95, seeds > 2%: 2/4 (50%)
+switch_% vs per-seed best: mean 1.10, median 0.80
+oracle vs SRT-TECT: mean 5.93, median 3.57
+
+== Fixed pairs: mean gap to the per-seed best (%), wins ==
+          gap_%  wins
+SRT-ECT    4.07   1.0
+SRT-TECT   5.60   0.0
+ATC-ECT    5.91   1.0
+MDD-ECT    7.61   1.0
+MDD-TECT   8.25   1.0
+ATC-TECT  10.73   0.0
+MDD-SRWT  16.25   0.0
+EDD-ECT   17.80   0.0
+EDD-TECT  18.18   0.0
+SPT-ECT   18.22   0.0
+SRT-SRWT  18.39   0.0
+SPT-TECT  26.35   0.0
+ATC-SRWT  29.56   0.0
+EDD-SRWT  31.59   0.0
+SPT-SRWT  40.04   0.0 
+
+oracle job rules: MDD 54%, ATC 21%, SRT 21%, EDD 4%
+
+oracle schedule's time in system vs the seed's best fixed pair on time in system: +0.07% (mean)
+== results/rq2-oracle-due-utilhi
+rq2-oracle-due-utilhi: 4 seeds finished
+== Per seed (tardiness, 1000 job-s; best-on-average pair MDD-TECT) ==
+      best_pair_value  per_seed_best per_seed_best_pair  oracle  total_%  switch_%  vs_SRT-TECT_%                                               schedule
+seed                                                                                                                                                    
+0             103.262        102.002            SRT-ECT  98.156    4.945     3.771          3.771     SRT-ECT|MDD-SRWT|SRT-ECT|SRT-ECT|ATC-SRWT|SRT-SRWT
+1               0.820          0.820           SRT-TECT   0.820    0.000     0.000          0.000   SRT-TECT|SRT-TECT|SRT-TECT|SRT-TECT|SRT-TECT|SRT-ECT
+2               3.335          2.472            MDD-ECT   2.472   25.884     0.000         25.579        MDD-ECT|MDD-ECT|MDD-ECT|MDD-ECT|MDD-ECT|MDD-ECT
+3              87.469         87.469           MDD-TECT  87.469    0.000     0.000          6.099  MDD-TECT|MDD-TECT|MDD-TECT|MDD-TECT|MDD-TECT|MDD-TECT 
+
+total_% vs MDD-TECT: mean 7.71, median 2.47, seeds > 2%: 2/4 (50%)
+switch_% vs per-seed best: mean 0.94, median 0.00
+oracle vs SRT-TECT: mean 8.86, median 4.94
+
+== Fixed pairs: mean gap to the per-seed best (%), wins ==
+           gap_%  wins
+MDD-TECT    9.04   1.0
+SRT-TECT   10.22   1.0
+EDD-TECT   15.49   0.0
+ATC-TECT   19.16   0.0
+SPT-ECT    46.76   0.0
+ATC-ECT    47.83   0.0
+SRT-ECT    49.39   1.0
+SPT-TECT   58.07   0.0
+MDD-ECT    63.74   1.0
+MDD-SRWT   79.09   0.0
+EDD-ECT    81.11   0.0
+SPT-SRWT   88.71   0.0
+SRT-SRWT   92.46   0.0
+EDD-SRWT  103.15   0.0
+ATC-SRWT  110.44   0.0 
+
+oracle job rules: MDD 54%, SRT 42%, ATC 4%
+
+oracle schedule's time in system vs the seed's best fixed pair on time in system: +0.25% (mean)
+4 seeds, 84 episodes, deadlocks 0, timeouts 0
+
+== Fixed pairs (tardiness and time in system: 1000 job-s over the window; gaps to the per-seed best) ==
+             tardiness  gap_%  gap_median_%  wins  time_in_system  tis_gap_%  pct_late
+MDD-TECT         18.35   0.00          0.00   4.0          124.83       0.57     48.24
+SRT-TECT         18.93   2.61          1.34   0.0          124.40       0.33     47.12
+EDD-TECT         20.70  12.40         11.35   0.0          127.29       2.35     48.19
+MDD-ECT          20.28  13.51         10.74   0.0          126.79       2.17     50.42
+SRT-ECT          20.54  13.60          9.88   0.0          126.13       1.61     46.66
+EDD-ECT          21.43  19.29         17.49   0.0          128.14       3.11     52.03
+ATC-ECT          23.70  21.91         22.08   0.0          131.04       4.42     50.06
+ATC-TECT         23.69  27.95         29.37   0.0          130.95       5.26     48.09
+PTWINQ-ECT       25.14  32.38         30.22   0.0          131.54       5.05     44.64
+MDD-SRWT         23.52  32.95         27.49   0.0          131.65       6.08     59.09
+SPT-ECT          26.57  33.77         29.38   0.0          133.21       6.01     49.18
+PTWINQ-TECT      24.47  36.23         35.84   0.0          130.66       5.37     47.95
+SPT-TECT         25.86  40.13         44.77   0.0          131.89       5.81     46.31
+EDD-SRWT         25.47  42.30         43.11   0.0          133.47       7.35     56.38
+SRT-SRWT         25.29  46.13         45.64   0.0          132.75       7.05     53.50
+ATC-SRWT         27.87  46.81         49.64   0.0          137.28       9.81     58.69
+SPT-SRWT         29.48  56.77         66.63   0.0          138.33      10.62     57.33
+PTWINQ-SRWT      28.39  63.17         51.20   0.0          137.03      10.62     57.72
+FIFO-TECT        33.51  73.95         76.77   0.0          141.28      12.16     52.20
+FIFO-ECT         34.01  83.84         79.47   0.0          141.58      12.63     51.62
+FIFO-SRWT        37.78  96.91        103.86   0.0          146.39      15.89     59.06
+
+best on average: MDD-TECT; seeds without tardiness under some pair: 0
+check vs rq2-oracle-due stage 1: 60 pairs compared, max |return difference| 7.11e-15
