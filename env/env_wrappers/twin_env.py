@@ -288,7 +288,8 @@ class VectorizedTwinEnv:
     def __init__(self, num_envs: int, floor: Union[str, Path], transport: str = "kinematic", reward_spec=None,
                  train_seed: Optional[int] = None, scenario_generator: Optional[Callable[[int], dict]] = None,
                  scenario: Optional[dict] = None, obs_caps: Optional[Tuple[int, int]] = None,
-                 instant_fleet: Optional[int] = None, seed_stream: int = 0, env_indices: Optional[list] = None):
+                 instant_fleet: Optional[int] = None, seed_stream: int = 0, env_indices: Optional[list] = None,
+                 slot_seconds: float = 0.0, gamma_per_second: Optional[float] = None):
         """@param env_indices  Build only these env indices (SubprocTwinEnv's workers); None = 0 .. num_envs - 1.
         An env's id and instance-seed stream depend only on its index, so a split gives the same episodes."""
         if scenario_generator is not None and train_seed is None:
@@ -302,6 +303,9 @@ class VectorizedTwinEnv:
             seed_rng=None if train_seed is None else instance_seed_rng(train_seed, i, seed_stream),
             scenario_generator=scenario_generator, scenario=scenario, obs_caps=obs_caps,
             instant_fleet=instant_fleet) for i in (range(num_envs) if env_indices is None else env_indices)]
+        if slot_seconds > 0:      # slot actions (env_wrappers.slot_env, 2026-10-05)
+            from env_wrappers.slot_env import SlotActionEnv
+            self.envs = [SlotActionEnv(e, slot_seconds, gamma_per_second) for e in self.envs]
         self.num_envs = len(self.envs)
         self.global_step = 0
 

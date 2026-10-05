@@ -465,3 +465,38 @@ def test_queued_twin_env_plays_the_queue_in_order(floor_path):
 
     rows = run_evaluation(env, [Fixed()], [(0, 5), (0, 6)], log=lambda *a: None, scenario_generator=gen)
     assert [(r["seed"], r["seed_index"]) for r in rows] == [(5, 0), (6, 1)]
+
+
+def test_slot_actions_hold_the_pair_and_report_the_slot(floor_path):
+    """@brief SlotActionEnv (2026-10-05): a held fixed pair equals the per-decision fixed run, slots follow a fixed grid
+    from the window start (about window / slot_seconds agent steps), the mask is all ones, and the slot reward is the discounted sum of decision rewards."""
+    from env_wrappers.slot_env import SlotActionEnv
+    from env_wrappers.twin_env import TwinSchedulingEnv
+    from rewards import load_reward
+    from scenarios.randomized import RandomizedParams, randomized_generator
+    gen = randomized_generator(3600.0, random_warmup=True, params=RandomizedParams(agv_count=3, failure_probability=0.0,
+                                                                                  due_date_allowance=2.0))
+    sc = gen(4)
+
+    def run(slot):
+        env = TwinSchedulingEnv(floor_path, reward_fn=load_reward(os.path.join(REWARDS, "tardiness.json")).build(),
+                                obs_caps=(15, 256), queued=True)
+        env.queue_seeds([4])
+        env.queue_scenarios([sc])
+        e = SlotActionEnv(env, slot, gamma_per_second=1.0) if slot else env
+        obs, steps, total, dts = e.reset(), 0, 0.0, []
+        while True:
+            obs, r, done, info = e.step((1, 1))
+            steps += 1
+            total += r
+            dts.append(info["dt"])
+            if slot:
+                assert obs["action_mask"].all()
+            if done:
+                return info["episode"], steps, total, dts
+
+    plain, n_plain, r_plain, _ = run(0)
+    slotted, n_slot, r_slot, dts = run(600.0)
+    assert slotted["window_tardiness"] == plain["window_tardiness"]
+    assert r_slot == pytest.approx(r_plain, rel=1e-6)          # gamma 1: the slot reward is the plain sum
+    assert n_slot < n_plain and 5 <= n_slot <= 7               # a fixed 600 s grid over the 3,600 s window

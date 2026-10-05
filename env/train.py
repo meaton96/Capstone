@@ -112,6 +112,8 @@ def build_env(args, ppo_cfg, run_dir: Path, reward, scenario_generator=None, see
             obs_caps=obs_caps,
             instant_fleet=args.twin_instant_fleet,
             seed_stream=seed_stream,
+            slot_seconds=getattr(args, "slot_seconds", 0.0),
+            gamma_per_second=getattr(ppo_cfg, "gamma_per_second", None),
         )
         if getattr(args, "twin_workers", 0) > 1:
             from env_wrappers.twin_env import SubprocTwinEnv
@@ -121,6 +123,9 @@ def build_env(args, ppo_cfg, run_dir: Path, reward, scenario_generator=None, see
             vec_env = VectorizedTwinEnv(num_envs=ppo_cfg.num_envs, **twin_kwargs)
         shutil.copy2(args.twin, run_dir / "des_floor.json")
     elif args.unity:
+        if getattr(args, "slot_seconds", 0.0) > 0:
+            raise ValueError("--slot-seconds is implemented for --twin only so far (VectorizedUnityEnv wraps per env "
+                             "the same way; add it before training on Unity)")
         from env_wrappers.unity_env import TRAIN_SEED_LOW, VectorizedUnityEnv
         from scenarios import row_caps_for
         # Row caps fit the floors this run will see, so a small floor isn't padded to the largest one.
@@ -809,6 +814,9 @@ if __name__ == "__main__":
                         help="Train on the event-based twin (env/des_twin) instead of Unity: the floor exported by a "
                              "player with -destrace (built after 2026-10-01) for the layout and fleet size trained "
                              "on. Needs --scenario or --scenario-generator; failures and flexibility are refused")
+    parser.add_argument("--slot-seconds", type=float, default=0.0,
+                        help="Slot actions: hold each chosen rule pair for this many simulated seconds (all decisions "
+                             "in the slot), as the switching oracle does; 0 = choose at every decision (2026-10-05)")
     parser.add_argument("--twin-workers", type=int, default=0,
                         help="With --twin: step the envs in this many worker processes (0/1 = in this process)")
     parser.add_argument("--twin-transport", type=str, default="kinematic",

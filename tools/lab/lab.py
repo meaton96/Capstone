@@ -28,6 +28,7 @@ from the server), so other web pages in the browser cannot drive it.
 @code{.sh}
 python3 tools/lab/lab.py serve                       # service + web page (keep it running: nohup / systemd --user)
 python3 tools/lab/lab.py status                      # table of everything
+python3 tools/lab/lab.py show NAME                   # one experiment: record, progress, events, log tail
 python3 tools/lab/lab.py add NAME --status future --waits-on X,Y --note "..."
 python3 tools/lab/lab.py add NAME --status queued --launch "bash results/NAME/run.sh" --done-glob 'results/NAME/s*/result.json' --done-count 20 --workers 20
 python3 tools/lab/lab.py set NAME --check-at 2026-10-05T03:00 --eta 2026-10-05T05:00
@@ -586,6 +587,26 @@ def cmd_action(args):
     print(f"{args.action}: {args.name}")
 
 
+def cmd_show(args):
+    """Everything about one experiment: record, progress, recent events (with analysis output) and the log tail."""
+    con = connect()
+    e = get(con, args.name)
+    for k in ("name", "status", "purpose", "location", "workers", "launch_cmd", "proc_pattern", "pid", "done_glob",
+              "done_count", "slurm_jobs", "pull_cmd", "analysis_cmd", "results_path", "waits_on", "waits_note",
+              "eta", "check_at", "started_at", "finished_at", "writeup", "log_path", "notes"):
+        if e.get(k) not in ("", None):
+            print(f"{k:13s} {e[k]}")
+    n = done_count(e)
+    if n is not None:
+        print(f"{'progress':13s} {n}/{e['done_count']}")
+    print("-- events")
+    for r in con.execute("SELECT * FROM events WHERE experiment = ? ORDER BY id DESC LIMIT ?", (args.name, args.events)):
+        print_event(r)
+    if e["log_path"] and Path(e["log_path"]).exists():
+        print(f"-- log tail ({e['log_path']})")
+        print("\n".join(Path(e["log_path"]).read_text(errors="replace").splitlines()[-args.tail:]))
+
+
 def print_event(r):
     print(f"[{r['ts']}] {r['kind']}: {r['message']}")
     if r["detail"]:
@@ -643,6 +664,11 @@ def main(argv=None):
         p = sub.add_parser(act)
         p.add_argument("name")
         p.set_defaults(fn=cmd_action, action=act)
+    p = sub.add_parser("show")
+    p.add_argument("name")
+    p.add_argument("--events", type=int, default=5)
+    p.add_argument("--tail", type=int, default=15)
+    p.set_defaults(fn=cmd_show)
     p = sub.add_parser("inbox")
     p.add_argument("--keep", action="store_true", help="do not mark read")
     p.set_defaults(fn=cmd_inbox)

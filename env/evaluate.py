@@ -452,6 +452,8 @@ def main(argv=None):
                         help="evaluate on the event-based twin instead of a player (2026-10-05); the floor export must "
                              "carry the observation frame and match the scenarios' layout and fleet")
     parser.add_argument("--twin-transport", default="kinematic", choices=("instant", "geometric", "kinematic"))
+    parser.add_argument("--slot-seconds", type=float, default=0.0,
+                        help="evaluate checkpoints trained with slot actions: hold each action for this many sim-seconds")
     # No effect since 2026-10-02, when the launch-time check against BUILD_MANIFEST.json was removed
     # (see env/player_manifest.py); still accepted so older commands run.
     parser.add_argument("--allow-unverified-player", action="store_true", help=argparse.SUPPRESS)
@@ -650,6 +652,10 @@ def main(argv=None):
         log_file=out / "Player.log",
         extra_args=["-decisionlogdir", str(out.resolve())] if args.unity_decision_log else None,
     )
+    if args.slot_seconds > 0:
+        # Hold each policy's action for a slot (env_wrappers.slot_env); a fixed pair is unchanged by it.
+        from env_wrappers.slot_env import SlotActionEnv
+        env = SlotActionEnv(env, args.slot_seconds)
     if args.scenario:
         env.load_scenario(args.scenario)
 
