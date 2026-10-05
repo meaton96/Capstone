@@ -1,0 +1,14 @@
+{
+ "run_id": "train-due-twin_s0",
+ "label": "train-due-twin_s0 (local on ubuntu)",
+ "update": 1464,
+ "num_updates": 1464,
+ "global_step": 2998272,
+ "total_timesteps": 3000000,
+ "sps": 316.01,
+ "eta_hours": 0.0,
+ "episodes": 1852,
+ "recent_return": -235.956,
+ "recent_mean_flow": 2087.6,
+ "updated_at": "2026-10-05T16:50:58"
+}

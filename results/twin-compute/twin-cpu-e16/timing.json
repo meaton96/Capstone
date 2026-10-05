@@ -1,0 +1,22 @@
+{
+ "startup_s": 2.2293825149536133,
+ "env_s": 16.27532410621643,
+ "infer_s": 46.26348090171814,
+ "update_s": 74.36539149284363,
+ "steps": 20480,
+ "updates": 10,
+ "total_s": 141.8740372657776,
+ "loop_s": 136.9041965007782,
+ "sps_loop": 149.59366128622352,
+ "backend": "twin",
+ "num_envs": 16,
+ "twin_workers": 16,
+ "device": "cpu",
+ "torch_threads": 16,
+ "cpus": 36,
+ "gpu": null,
+ "rollout_length": 128,
+ "batch_size": 64,
+ "num_epochs": 4,
+ "host": "spr-a-02.rc.rit.edu"
+}

@@ -1,2 +1,11 @@
 [10-04 19:47] starting
 [10-04 22:10] ok   results/rq2-oracle-due-long/short-u/s2 seed 2: best fixed ATC-ECT -1.326, oracle -0.621 (time in system -53.19%), schedule ['ATC-ECT', 'ATC-ECT', 'ATC-TECT', '
+[10-05 00:23] ok   results/rq2-oracle-due-long/short-u/s0 seed 0: best fixed ATC-TECT -16.851, oracle -16.490 (time in system -2.15%), schedule ['ATC-TECT', 'EDD-TECT', 'EDD-TECT
+[10-05 00:58] ok   results/rq2-oracle-due-long/short-u/s3 seed 3: best fixed MDD-ECT -57.323, oracle -57.270 (time in system -0.09%), schedule ['MDD-ECT', 'MDD-TECT', 'MDD-TECT',
+[10-05 02:48] ok   results/rq2-oracle-due-long/short-u/s1 seed 1: best fixed MDD-ECT -38.836, oracle -38.123 (time in system -1.84%), schedule ['MDD-ECT', 'MDD-ECT', 'SRT-ECT', '
+[10-05 03:24] ok   results/rq2-oracle-due-long/short-u/s6 seed 6: best fixed MDD-ECT -2.394, oracle -1.520 (time in system -36.53%), schedule ['MDD-ECT', 'ATC-TECT', 'ATC-ECT', '
+[10-05 03:51] ok   results/rq2-oracle-due-long/short-u/s5 seed 5: best fixed MDD-TECT -1.243, oracle -1.118 (time in system -10.02%), schedule ['MDD-TECT', 'SRT-TECT', 'SRT-TECT'
+[10-05 04:14] ok   results/rq2-oracle-due-long/short-u/s4 seed 4: best fixed SPT-TECT -1.417, oracle -1.263 (time in system -10.84%), schedule ['SPT-TECT', 'SPT-TECT', 'SPT-TECT'
+[10-05 10:06] ok   results/rq2-oracle-due-long/short-u/s7 seed 7: best fixed SRT-TECT -99.838, oracle -98.582 (time in system -1.26%), schedule ['SRT-TECT', 'SRT-ECT', 'SRT-ECT',
+[10-05 15:26] ok   results/rq2-oracle-due-long/long-u/s2 seed 2: best fixed ATC-TECT -52.496, oracle -47.571 (time in system -9.38%), schedule ['ATC-TECT', 'ATC-ECT', 'ATC-ECT',
+[10-05 16:59] ok   results/rq2-oracle-due-long/long-u/s6 seed 6: best fixed ATC-TECT -126.776, oracle -102.376 (time in system -19.25%), schedule ['ATC-TECT', 'SPT-ECT', 'ATC-SR

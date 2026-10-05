@@ -1,0 +1,38 @@
+[bench] twin-gpu-e16 on skl-a-37.rc.rit.edu: twin, 16 envs, device cuda, 24 CPUs, 20480 steps
+NVIDIA A100-PCIE-40GB
+============================================================
+DRL Scheduling Network — PPO Training
+============================================================
+
+Reward: tardiness (rewards/functions/tardiness.py:TardinessReward)
+
+Parameter counts:
+  encoder_factory_cnn               168,352
+  encoder_machine_set                38,400
+  encoder_job_set                    38,720
+  encoder_global_mlp                  3,488
+  encoder_event_embed                   848
+  fusion_head                       420,096
+  actor                              68,360
+  critic                             66,561
+  total                             804,825
+
+Scenario generator: randomized (episode_duration_seconds=5400.0) (random_warmup, rule=default) (params {"failure_probability": 0.0, "due_date_allowance_range": [1.75, 2.5], "load_mix": [{"name": "base"}, {"name": "utilhi", "utilization": [1.0, 1.8], "lull_utilization": [0.4, 0.7]}]})
+Observation row caps: 15 machines, 256 jobs
+Twin envs: 16 over 16 worker processes
+Discount: gamma_s = 0.999667 per simulated second (horizon 3,000 s)
+
+Backend: twin (kinematic, /home/me3870/capstone/results/twin-compute/des_floor7.json)
+Run directory: /home/me3870/capstone/results/twin-compute/twin-gpu-e16
+Training for 20,480 timesteps
+  10 updates × 128 steps × 16 envs
+  Device: cuda
+
+Update    1/10 | Step    2,048 | SPS    290 | Ep     1 | EpRet +0.000 | Makespan  12451 | R_avg -0.0811 | Ret -1.300 | PG 0.0093 | VL 0.2837 | EV -0.01 | Ent 0.915 | T 7.05s
+Update    5/10 | Step   10,240 | SPS    357 | Ep    17 | EpRet -53.387 | Makespan   9579 | R_avg -0.0711 | Ret -4.741 | PG -0.0038 | VL 0.0312 | EV +0.94 | Ent 0.919 | T 5.04s
+Update   10/10 | Step   20,480 | SPS    361 | Ep    38 | EpRet -40.069 | Makespan   8758 | R_avg -0.1074 | Ret -13.272 | PG -0.0053 | VL 0.0170 | EV +0.98 | Ent 0.803 | T 4.77s
+Timing: env 24s, inference 10s, update 20s, startup 10s; 380.4 steps/s in the loop
+
+Checkpoint saved to /home/me3870/capstone/results/twin-compute/twin-gpu-e16/checkpoint.pt
+Total training time: 57.1s
+Average SPS: 359

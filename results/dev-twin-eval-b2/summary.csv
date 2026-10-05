@@ -1,0 +1,3 @@
+policy,kind,episodes,return_mean,jobs_exited_mean,makespan_mean,makespan_std,total_flow_censored_mean,mean_flow_time_censored_mean,deadlocks,timeouts,return_gap_pct,makespan_gap_pct,flow_censored_gap_pct
+MDD-TECT,pdr,2,-77.220642578125,287.5,23379.3505859375,1779.3388671875,501705.640625,1692.8736250388683,0,0,0.9733999737930139,0.0,2.648668597754918
+SRT-ECT,pdr,2,-78.69221679687502,285.5,23379.3505859375,1779.3388671875,492338.125,1667.114799423759,0,0,6.2593575483783965,0.0,0.0

@@ -94,3 +94,13 @@ def test_web_writes_need_the_token(con, monkeypatch):
         assert [x["name"] for x in state["experiments"]] == ["dev-i"]
     finally:
         srv.shutdown()
+
+
+def test_zero_slot_experiment_starts_when_slots_are_full(con, monkeypatch):
+    monkeypatch.setitem(lab.CONFIG, "max_local_workers", 1)
+    lab.add_experiment(con, "dev-j", "queued", launch_cmd="sleep 5", workers=1)
+    lab.add_experiment(con, "dev-k", "queued", launch_cmd="sleep 5", workers=0)
+    lab.Service().tick(con)
+    assert lab.get(con, "dev-j")["status"] == "running" and lab.get(con, "dev-k")["status"] == "running"
+    lab.cancel(con, "dev-j")
+    lab.cancel(con, "dev-k")

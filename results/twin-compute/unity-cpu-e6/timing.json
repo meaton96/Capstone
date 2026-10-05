@@ -1,0 +1,22 @@
+{
+ "startup_s": 125.14943408966064,
+ "env_s": 974.0264735221863,
+ "infer_s": 26.88593816757202,
+ "update_s": 120.72506260871887,
+ "steps": 7680,
+ "updates": 10,
+ "total_s": 1251.0078997612,
+ "loop_s": 1121.6374742984772,
+ "sps_loop": 6.847132140269671,
+ "backend": "unity",
+ "num_envs": 6,
+ "twin_workers": 0,
+ "device": "cpu",
+ "torch_threads": 4,
+ "cpus": 18,
+ "gpu": null,
+ "rollout_length": 128,
+ "batch_size": 64,
+ "num_epochs": 4,
+ "host": "skl-a-51.rc.rit.edu"
+}

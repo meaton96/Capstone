@@ -1,0 +1,162 @@
+{
+  "seed": 2,
+  "regime": {
+    "generator": "randomized",
+    "params": "{\"due_date_allowance_range\": [1.75, 2.5], \"utilization\": [0.6, 1.2], \"horizon_seconds\": 30600}",
+    "random_warmup": true,
+    "agvs": null,
+    "layout": null,
+    "agv_failures": null,
+    "input_buffer": null,
+    "output_buffer": null
+  },
+  "segment_seconds": 1800.0,
+  "episode_duration_seconds": 21600.0,
+  "schedule": [
+    "ATC-TECT",
+    "ATC-ECT",
+    "ATC-ECT",
+    "MDD-ECT",
+    "MDD-ECT",
+    "MDD-ECT",
+    "MDD-ECT",
+    "MDD-TECT",
+    "MDD-TECT",
+    "SRT-TECT",
+    "SRT-TECT",
+    "SRT-ECT"
+  ],
+  "stages": [
+    {
+      "stage": 1,
+      "chosen": "ATC-TECT",
+      "return": -52.49586718750001,
+      "total_flow_time": 309330.40625,
+      "mean_flow_time": 1874.729734848485,
+      "jobs_exited": 165.0,
+      "deadlock": false
+    },
+    {
+      "stage": 2,
+      "chosen": "ATC-ECT",
+      "return": -51.354320312500036,
+      "total_flow_time": 295558.1875,
+      "mean_flow_time": 1824.4332561728395,
+      "jobs_exited": 162.0,
+      "deadlock": false
+    },
+    {
+      "stage": 3,
+      "chosen": "ATC-ECT",
+      "return": -51.354320312500036,
+      "total_flow_time": 295558.1875,
+      "mean_flow_time": 1824.4332561728395,
+      "jobs_exited": 162.0,
+      "deadlock": false
+    },
+    {
+      "stage": 4,
+      "chosen": "MDD-ECT",
+      "return": -49.24497656249997,
+      "total_flow_time": 287717.875,
+      "mean_flow_time": 1776.0362654320988,
+      "jobs_exited": 162.0,
+      "deadlock": false
+    },
+    {
+      "stage": 5,
+      "chosen": "MDD-ECT",
+      "return": -49.24497656249997,
+      "total_flow_time": 287717.875,
+      "mean_flow_time": 1776.0362654320988,
+      "jobs_exited": 162.0,
+      "deadlock": false
+    },
+    {
+      "stage": 6,
+      "chosen": "MDD-ECT",
+      "return": -49.24497656249997,
+      "total_flow_time": 287717.875,
+      "mean_flow_time": 1776.0362654320988,
+      "jobs_exited": 162.0,
+      "deadlock": false
+    },
+    {
+      "stage": 7,
+      "chosen": "MDD-ECT",
+      "return": -49.24497656249997,
+      "total_flow_time": 287717.875,
+      "mean_flow_time": 1776.0362654320988,
+      "jobs_exited": 162.0,
+      "deadlock": false
+    },
+    {
+      "stage": 8,
+      "chosen": "MDD-TECT",
+      "return": -49.202894531249996,
+      "total_flow_time": 299163.9375,
+      "mean_flow_time": 1835.3615797546013,
+      "jobs_exited": 163.0,
+      "deadlock": false
+    },
+    {
+      "stage": 9,
+      "chosen": "MDD-TECT",
+      "return": -49.202894531249996,
+      "total_flow_time": 299163.9375,
+      "mean_flow_time": 1835.3615797546013,
+      "jobs_exited": 163.0,
+      "deadlock": false
+    },
+    {
+      "stage": 10,
+      "chosen": "SRT-TECT",
+      "return": -47.572503906250006,
+      "total_flow_time": 296600.34375,
+      "mean_flow_time": 1808.5386814024391,
+      "jobs_exited": 164.0,
+      "deadlock": false
+    },
+    {
+      "stage": 11,
+      "chosen": "SRT-TECT",
+      "return": -47.572503906250006,
+      "total_flow_time": 296600.34375,
+      "mean_flow_time": 1808.5386814024391,
+      "jobs_exited": 164.0,
+      "deadlock": false
+    },
+    {
+      "stage": 12,
+      "chosen": "SRT-ECT",
+      "return": -47.57144531250001,
+      "total_flow_time": 296600.3125,
+      "mean_flow_time": 1808.5384908536585,
+      "jobs_exited": 164.0,
+      "deadlock": false
+    }
+  ],
+  "best_fixed_pair": "ATC-TECT",
+  "best_fixed_return": -52.49586718750001,
+  "oracle_return": -47.57144531250001,
+  "tis_change_vs_best_fixed_pct": -9.380589632725556,
+  "fixed_returns": {
+    "SRT-ECT": -58.78859765625001,
+    "SRT-TECT": -59.42593359374999,
+    "SRT-SRWT": -72.80309374999997,
+    "SPT-ECT": -60.17799999999995,
+    "SPT-TECT": -61.801660156249945,
+    "SPT-SRWT": -71.71214843750002,
+    "MDD-ECT": -56.49880859375,
+    "MDD-TECT": -52.748421874999984,
+    "MDD-SRWT": -67.42535937499996,
+    "EDD-ECT": -64.71792968749999,
+    "EDD-TECT": -60.214652343750025,
+    "EDD-SRWT": -77.61596875000004,
+    "ATC-ECT": -59.27389453125,
+    "ATC-TECT": -52.49586718750001,
+    "ATC-SRWT": -77.9274375
+  },
+  "fixed_deadlocks": [],
+  "oracle_deadlock": false
+}

@@ -55,7 +55,7 @@ class TwinSchedulingEnv:
                  scenario_generator: Optional[Callable[[int], dict]] = None,
                  scenario: Optional[dict] = None,
                  obs_caps: Optional[Tuple[int, int]] = None,
-                 instant_fleet: Optional[int] = None):
+                 instant_fleet: Optional[int] = None, queued: bool = False):
         """
         @param floor        des_floor.json path (or a loaded Floor) for the layout and fleet size trained on.
         @param transport    "instant" (DES-0), "geometric" (DES-1g) or "kinematic" (DES-1k).
@@ -63,10 +63,18 @@ class TwinSchedulingEnv:
                             scenario_generator(seed). Without a generator, `scenario` is replayed every episode.
         @param obs_caps     (machine rows, job rows); None uses MAX_MACHINES / MAX_JOBS.
         @param instant_fleet  AGVs reported (parked, idle) in DES-0 observations; None: the floor's fleet.
+        @param queued       Evaluation mode (evaluate.py --twin, 2026-10-05): episodes come from queue_seeds /
+                            queue_scenarios in order, as the player's seed and scenario queues, and the queue position
+                            is the episode's seed index. Past the end of the queue the last scenario is replayed
+                            with seed index -1 (discarded by evaluate.run_evaluation, as Unity's unseeded episode).
         """
-        if scenario_generator is not None and seed_rng is None:
+        self.queued = queued
+        self._queue_seeds, self._queue_scenarios, self._queue_pos = [], [], 0
+        if queued:
+            seed_rng, scenario_generator = None, None
+        elif scenario_generator is not None and seed_rng is None:
             raise ValueError("scenario_generator needs seed_rng, to draw the seed each variant is built from")
-        if scenario_generator is None and scenario is None:
+        if scenario_generator is None and scenario is None and not queued:
             raise ValueError("the twin needs a scenario or a scenario_generator (it has no default floor job set)")
         self.floor = floor if isinstance(floor, Floor) else Floor.load(floor)
         self.transport = transport
@@ -121,7 +129,42 @@ class TwinSchedulingEnv:
             if scenario.get(key) is not None and data.get(field) and scenario[key] != data[field]:
                 raise ValueError(f"scenario {key} {scenario[key]!r} but the floor export used {data[field]!r}")
 
+    def queue_seeds(self, seeds, clear: bool = False):
+        """@brief Seeds of the next episodes, in order (UnitySchedulingEnv.queue_seeds); queued mode only."""
+        if clear:
+            self._queue_seeds, self._queue_scenarios, self._queue_pos = [], [], 0
+        self._queue_seeds += [int(s) for s in seeds]
+
+    def queue_scenarios(self, items, clear: bool = False):
+        """@brief Scenario dicts or JSON paths for the queued seeds, in the same order."""
+        if clear:
+            self._queue_scenarios = []
+        self._queue_scenarios += list(items)
+
+    def _next_queued(self):
+        if self._queue_pos < len(self._queue_seeds) and self._queue_pos < len(self._queue_scenarios):
+            item = self._queue_scenarios[self._queue_pos]
+            self._seed, self._seed_index = self._queue_seeds[self._queue_pos], self._queue_pos
+            self._queue_pos += 1
+            if isinstance(item, (str, Path)):
+                import json
+                item = json.loads(Path(item).read_text())
+            self.scenario = item
+        else:
+            self._seed_index = -1
+        if self.scenario is None:
+            raise RuntimeError("queued twin env: nothing queued yet (call queue_seeds / queue_scenarios first)")
+        return self.scenario
+
     def _new_twin(self):
+        if self.queued:
+            scenario = self._next_queued()
+            self._check_scenario(scenario)
+            warmup, cap, rule = episode_settings(scenario)
+            cfg = TwinConfig(rule=rule, transport=self.transport, routing_trigger=scenario.get("routingTrigger"),
+                             max_sim_seconds=MAX_EPISODE_SIM_SECONDS, warmup_seconds=warmup,
+                             episode_duration_seconds=cap, agv_schedule=agv_schedule(scenario))
+            return Twin(self.floor, resolve_jobs(scenario, self.floor), cfg)
         if self.seed_rng is not None:
             self._seed = int(self.seed_rng.integers(TRAIN_SEED_LOW, MAX_SEED))
             self._seed_index += 1
@@ -159,7 +202,7 @@ class TwinSchedulingEnv:
         values = self._twin.metrics()
         values["decision_count"] = self._twin.decisions
         values["episode_seed"] = self._seed
-        values["episode_seed_index"] = self._seed_index if self.seed_rng is not None else -1
+        values["episode_seed_index"] = self._seed_index if (self.seed_rng is not None or self.queued) else -1
         return MetricsSnapshot.from_dict(values)
 
     def _obs(self) -> Dict[str, np.ndarray]:

@@ -447,7 +447,11 @@ def write_csv(path: Path, rows: list):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Evaluate policies on reproducible instances")
-    parser.add_argument("--unity-path", type=str, required=True)
+    parser.add_argument("--unity-path", type=str, default=None, help="player (required unless --twin)")
+    parser.add_argument("--twin", type=str, default=None, metavar="DES_FLOOR_JSON",
+                        help="evaluate on the event-based twin instead of a player (2026-10-05); the floor export must "
+                             "carry the observation frame and match the scenarios' layout and fleet")
+    parser.add_argument("--twin-transport", default="kinematic", choices=("instant", "geometric", "kinematic"))
     # No effect since 2026-10-02, when the launch-time check against BUILD_MANIFEST.json was removed
     # (see env/player_manifest.py); still accepted so older commands run.
     parser.add_argument("--allow-unverified-player", action="store_true", help=argparse.SUPPRESS)
@@ -531,6 +535,8 @@ def main(argv=None):
     parser.add_argument("--obs-max-jobs", type=int, default=0,
                         help="Observation job rows (0 = 256 per 15 machines of the largest floor)")
     args = parser.parse_args(argv)
+    if not args.unity_path and not args.twin:
+        parser.error("pass --unity-path (a player) or --twin (a des_floor.json)")
 
     if args.scenario and args.scenario_generator:
         parser.error("--scenario and --scenario-generator are mutually exclusive")
@@ -626,7 +632,14 @@ def main(argv=None):
     obs_caps = row_caps_for(planned, args.obs_max_machines, args.obs_max_jobs)
     print(f"Observation row caps: {obs_caps[0]} machines, {obs_caps[1]} jobs")
 
-    env = UnitySchedulingEnv(
+    if args.twin:
+        # Event-based twin (2026-10-05): same queue interface, episodes simulated in this process.
+        from env_wrappers.twin_env import TwinSchedulingEnv
+        env = TwinSchedulingEnv(args.twin, transport=args.twin_transport, reward_fn=reward_fn, obs_caps=obs_caps,
+                                queued=True)
+    else:
+        env = None
+    env = env or UnitySchedulingEnv(
         file_name=args.unity_path,
         obs_caps=obs_caps,
         reward_fn=reward_fn,

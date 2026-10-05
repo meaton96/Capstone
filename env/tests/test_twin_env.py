@@ -445,3 +445,23 @@ def test_subproc_twin_env_matches_in_process(floor_path):
     finally:
         a.close()
         b.close()
+
+
+def test_queued_twin_env_plays_the_queue_in_order(floor_path):
+    """@brief evaluate.py --twin (2026-10-05): queued mode plays queue_seeds / queue_scenarios in order, the queue
+    position is the seed index, and past the end it reports index -1."""
+    from env_wrappers.twin_env import TwinSchedulingEnv
+    from evaluate import run_evaluation
+    from scenarios.randomized import RandomizedParams, randomized_generator
+    gen = randomized_generator(600.0, random_warmup=True, params=RandomizedParams(agv_count=3, failure_probability=0.0,
+                                                                                 due_date_allowance=2.0))
+    env = TwinSchedulingEnv(floor_path, reward_fn=None, obs_caps=(15, 256), queued=True)
+
+    class Fixed:
+        kind, name = "pdr", "SRT-ECT"
+
+        def __call__(self, obs):
+            return (0, 0)
+
+    rows = run_evaluation(env, [Fixed()], [(0, 5), (0, 6)], log=lambda *a: None, scenario_generator=gen)
+    assert [(r["seed"], r["seed_index"]) for r in rows] == [(5, 0), (6, 1)]

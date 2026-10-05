@@ -175,6 +175,11 @@ def notify(text):
         return False
 
 
+def slots(exp):
+    """Local worker slots an experiment takes (0 is allowed, e.g. a GPU job; missing = 1)."""
+    return 1 if exp.get("workers") is None else int(exp["workers"])
+
+
 def done_count(exp):
     if not exp["done_glob"]:
         return None
@@ -242,11 +247,14 @@ def start(con, name):
     with open(log, "a") as fh:
         fh.write(f"\n[{iso(now())}] lab start: {exp['launch_cmd']}\n")
         fh.flush()
+        log_start = log.stat().st_size
         if exp["location"] == "cluster":
             r = subprocess.run(exp["launch_cmd"], shell=True, cwd=cwd, stdout=fh, stderr=subprocess.STDOUT, text=True,
                                timeout=600)
             fh.flush()
-            jobs = re.findall(r"Submitted batch job (\d+)", log.read_text())
+            with open(log) as rd:          # only this launch's output, not earlier submissions in the same log
+                rd.seek(log_start)
+                jobs = re.findall(r"Submitted batch job (\d+)", rd.read())
             if r.returncode != 0 or not jobs:
                 update(con, name, status="failed", finished_at=iso(now()), log_path=str(log))
                 event(con, name, "failed", f"{name}: cluster launch failed (exit {r.returncode}, no job ids); see {log}")
@@ -351,17 +359,17 @@ class Service:
                 event(con, exp["name"], "promoted", f"{exp['name']} queued: {', '.join(deps)} done")
                 notify(f":arrow_forward: **lab** {exp['name']} is ready (waited on {', '.join(deps)})")
         # start queued experiments while slots are free
-        running_workers = sum(e["workers"] or 0 for e in all_experiments(con)
+        running_workers = sum(slots(e) for e in all_experiments(con)
                               if e["status"] == "running" and e["location"] == "local")
         for exp in all_experiments(con):
             if exp["status"] != "queued" or not exp["auto_start"] or not exp["launch_cmd"]:
                 continue
-            if exp["location"] == "local" and running_workers + (exp["workers"] or 1) > CONFIG["max_local_workers"]:
+            if exp["location"] == "local" and running_workers + slots(exp) > CONFIG["max_local_workers"]:
                 continue
             try:
                 start(con, exp["name"])
                 if exp["location"] == "local":
-                    running_workers += exp["workers"] or 1
+                    running_workers += slots(exp)
                 notify(f":rocket: **lab** started {exp['name']}")
             except Exception as e:   # noqa: BLE001
                 event(con, exp["name"], "failed", f"{exp['name']}: start failed: {e}")

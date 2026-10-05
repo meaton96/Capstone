@@ -1,0 +1,22 @@
+{
+ "startup_s": 9.992294549942017,
+ "env_s": 23.627021551132202,
+ "infer_s": 9.762735366821289,
+ "update_s": 20.442491054534912,
+ "steps": 20480,
+ "updates": 10,
+ "total_s": 67.09564518928528,
+ "loop_s": 53.8322479724884,
+ "sps_loop": 380.4411067965533,
+ "backend": "twin",
+ "num_envs": 16,
+ "twin_workers": 16,
+ "device": "cuda",
+ "torch_threads": 4,
+ "cpus": 24,
+ "gpu": "NVIDIA A100-PCIE-40GB",
+ "rollout_length": 128,
+ "batch_size": 64,
+ "num_epochs": 4,
+ "host": "skl-a-37.rc.rit.edu"
+}
