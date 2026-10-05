@@ -1,0 +1,14 @@
+{
+ "run_id": "run",
+ "label": "run (local on ubuntu)",
+ "update": 2,
+ "num_updates": 2,
+ "global_step": 6144,
+ "total_timesteps": 6144,
+ "sps": 37.12,
+ "eta_hours": 0.0,
+ "episodes": 1,
+ "recent_return": -0.013,
+ "recent_mean_flow": 1103.5,
+ "updated_at": "2026-10-03T23:59:42"
+}

@@ -1,0 +1,102 @@
+{
+  "seed": 39,
+  "regime": {
+    "generator": "randomized",
+    "params": "{\"due_date_allowance_range\": [1.75, 2.5], \"load_mix\": [{\"name\": \"base\"}, {\"name\": \"utilhi\", \"utilization\": [1.0, 1.8], \"lull_utilization\": [0.4, 0.7]}]}",
+    "random_warmup": true,
+    "agvs": null,
+    "layout": null,
+    "agv_failures": null,
+    "input_buffer": null,
+    "output_buffer": null
+  },
+  "segment_seconds": 900.0,
+  "episode_duration_seconds": 5400.0,
+  "schedule": [
+    "MDD-ECT",
+    "MDD-ECT",
+    "MDD-TECT",
+    "MDD-TECT",
+    "MDD-TECT",
+    "SRT-ECT"
+  ],
+  "stages": [
+    {
+      "stage": 1,
+      "chosen": "MDD-ECT",
+      "return": -2.909756835937501,
+      "total_flow_time": 66935.9453125,
+      "mean_flow_time": 1062.475322420635,
+      "jobs_exited": 63.0,
+      "deadlock": false
+    },
+    {
+      "stage": 2,
+      "chosen": "MDD-ECT",
+      "return": -2.909756835937501,
+      "total_flow_time": 66935.9453125,
+      "mean_flow_time": 1062.475322420635,
+      "jobs_exited": 63.0,
+      "deadlock": false
+    },
+    {
+      "stage": 3,
+      "chosen": "MDD-TECT",
+      "return": -2.906796875000001,
+      "total_flow_time": 66859.8984375,
+      "mean_flow_time": 1061.2682291666667,
+      "jobs_exited": 63.0,
+      "deadlock": false
+    },
+    {
+      "stage": 4,
+      "chosen": "MDD-TECT",
+      "return": -2.906796875000001,
+      "total_flow_time": 66859.8984375,
+      "mean_flow_time": 1061.2682291666667,
+      "jobs_exited": 63.0,
+      "deadlock": false
+    },
+    {
+      "stage": 5,
+      "chosen": "MDD-TECT",
+      "return": -2.906796875000001,
+      "total_flow_time": 66859.8984375,
+      "mean_flow_time": 1061.2682291666667,
+      "jobs_exited": 63.0,
+      "deadlock": false
+    },
+    {
+      "stage": 6,
+      "chosen": "SRT-ECT",
+      "return": -2.87595703125,
+      "total_flow_time": 68662.640625,
+      "mean_flow_time": 1072.853759765625,
+      "jobs_exited": 64.0,
+      "deadlock": false
+    }
+  ],
+  "best_fixed_pair": "MDD-ECT",
+  "best_fixed_return": -2.909756835937501,
+  "oracle_return": -2.87595703125,
+  "tis_change_vs_best_fixed_pct": -1.1616023809979503,
+  "fixed_returns": {
+    "SRT-ECT": -3.912864990234373,
+    "SRT-TECT": -4.598160644531251,
+    "SRT-SRWT": -5.542882324218748,
+    "SPT-ECT": -7.920822753906249,
+    "SPT-TECT": -6.880899414062498,
+    "SPT-SRWT": -7.89058740234375,
+    "MDD-ECT": -2.909756835937501,
+    "MDD-TECT": -3.6768869628906256,
+    "MDD-SRWT": -4.3715810546875,
+    "EDD-ECT": -2.937536376953125,
+    "EDD-TECT": -3.8232131347656244,
+    "EDD-SRWT": -5.849317382812501,
+    "ATC-ECT": -4.551459960937499,
+    "ATC-TECT": -3.5655590820312493,
+    "ATC-SRWT": -6.281641113281251
+  },
+  "fixed_deadlocks": [],
+  "oracle_deadlock": false
+}

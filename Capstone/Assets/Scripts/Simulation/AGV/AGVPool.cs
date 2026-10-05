@@ -24,6 +24,27 @@ namespace Assets.Scripts.Simulation.AGV
         private List<AGVController> fleet = new List<AGVController>();
 
         public IReadOnlyList<AGVController> AllAGVs => fleet;
+
+        // Fleet schedule of the current config (FJSSPConfig.AgvScheduleStarts / Counts); null = whole fleet.
+        private float[] _scheduleStarts;
+        private int[] _scheduleCounts;
+
+        /// <summary>AGVs on duty now under the fleet schedule (the first n of the fleet); the whole fleet without one.</summary>
+        public int OnDutyCount
+        {
+            get
+            {
+                int n = fleet.Count;
+                if (_scheduleStarts == null || FactoryOrchestrator.Instance == null) return n;
+                double now = FactoryOrchestrator.Instance.SimTime;
+                for (int i = 0; i < _scheduleStarts.Length && _scheduleStarts[i] <= now; i++) n = _scheduleCounts[i];
+                return Mathf.Min(n, fleet.Count);
+            }
+        }
+
+        /// <summary>True when the fleet schedule has this AGV off duty: it takes no new task (finishes its current one
+        ///          and returns to its bay), like the twin's TwinConfig.agv_schedule.</summary>
+        public bool IsOffDuty(AGVController agv) => _scheduleStarts != null && fleet.IndexOf(agv) >= OnDutyCount;
         [SerializeField] private float parkingSlotSpacing = 2f;
         private void Awake()
         {
@@ -40,6 +61,8 @@ namespace Assets.Scripts.Simulation.AGV
         public void InitializeFleet(FJSSPConfig config)
         {
             int fleetSize = config.AGVCount;
+            _scheduleStarts = config.AgvScheduleStarts;
+            _scheduleCounts = config.AgvScheduleCounts;
             // Deactivate before Destroy (which only lands at the end of the frame) so old units
             // can't tick or touch the rebuilt traffic graph when respawned mid-FixedUpdate.
             foreach (var agv in fleet)

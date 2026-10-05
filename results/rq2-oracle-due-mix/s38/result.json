@@ -1,0 +1,102 @@
+{
+  "seed": 38,
+  "regime": {
+    "generator": "randomized",
+    "params": "{\"due_date_allowance_range\": [1.75, 2.5], \"load_mix\": [{\"name\": \"base\"}, {\"name\": \"utilhi\", \"utilization\": [1.0, 1.8], \"lull_utilization\": [0.4, 0.7]}]}",
+    "random_warmup": true,
+    "agvs": null,
+    "layout": null,
+    "agv_failures": null,
+    "input_buffer": null,
+    "output_buffer": null
+  },
+  "segment_seconds": 900.0,
+  "episode_duration_seconds": 5400.0,
+  "schedule": [
+    "MDD-SRWT",
+    "MDD-SRWT",
+    "MDD-SRWT",
+    "MDD-SRWT",
+    "MDD-SRWT",
+    "SRT-SRWT"
+  ],
+  "stages": [
+    {
+      "stage": 1,
+      "chosen": "MDD-SRWT",
+      "return": -21.15101953125,
+      "total_flow_time": 175752.640625,
+      "mean_flow_time": 1974.7487710674156,
+      "jobs_exited": 89.0,
+      "deadlock": false
+    },
+    {
+      "stage": 2,
+      "chosen": "MDD-SRWT",
+      "return": -21.15101953125,
+      "total_flow_time": 175752.640625,
+      "mean_flow_time": 1974.7487710674156,
+      "jobs_exited": 89.0,
+      "deadlock": false
+    },
+    {
+      "stage": 3,
+      "chosen": "MDD-SRWT",
+      "return": -21.15101953125,
+      "total_flow_time": 175752.640625,
+      "mean_flow_time": 1974.7487710674156,
+      "jobs_exited": 89.0,
+      "deadlock": false
+    },
+    {
+      "stage": 4,
+      "chosen": "MDD-SRWT",
+      "return": -21.15101953125,
+      "total_flow_time": 175752.640625,
+      "mean_flow_time": 1974.7487710674156,
+      "jobs_exited": 89.0,
+      "deadlock": false
+    },
+    {
+      "stage": 5,
+      "chosen": "MDD-SRWT",
+      "return": -21.15101953125,
+      "total_flow_time": 175752.640625,
+      "mean_flow_time": 1974.7487710674156,
+      "jobs_exited": 89.0,
+      "deadlock": false
+    },
+    {
+      "stage": 6,
+      "chosen": "SRT-SRWT",
+      "return": -21.15101953125,
+      "total_flow_time": 175752.640625,
+      "mean_flow_time": 1974.7487710674156,
+      "jobs_exited": 89.0,
+      "deadlock": false
+    }
+  ],
+  "best_fixed_pair": "MDD-SRWT",
+  "best_fixed_return": -21.15101953125,
+  "oracle_return": -21.15101953125,
+  "tis_change_vs_best_fixed_pct": 0.0,
+  "fixed_returns": {
+    "SRT-ECT": -22.100699218750005,
+    "SRT-TECT": -23.632207031250005,
+    "SRT-SRWT": -24.637761718749996,
+    "SPT-ECT": -23.245359374999996,
+    "SPT-TECT": -23.072042968749994,
+    "SPT-SRWT": -24.669191406250008,
+    "MDD-ECT": -22.03134375,
+    "MDD-TECT": -22.44472265625,
+    "MDD-SRWT": -21.15101953125,
+    "EDD-ECT": -23.217363281249995,
+    "EDD-TECT": -23.343824218749997,
+    "EDD-SRWT": -23.105027343750013,
+    "ATC-ECT": -21.586574218750005,
+    "ATC-TECT": -21.66741406249999,
+    "ATC-SRWT": -22.61174609375
+  },
+  "fixed_deadlocks": [],
+  "oracle_deadlock": false
+}

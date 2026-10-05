@@ -1,0 +1,49 @@
+rq2-oracle-due-mix: 19 seeds finished
+== Per seed (tardiness, 1000 job-s; best-on-average pair MDD-ECT) ==
+      best_pair_value  per_seed_best per_seed_best_pair   oracle  total_%  switch_%  vs_SRT-TECT_%                                               schedule
+seed                                                                                                                                                     
+20              0.229          0.100           SRT-SRWT   -0.000  100.000   100.000        100.000      SRT-SRWT|SPT-ECT|SRT-TECT|SRT-ECT|SRT-ECT|SRT-ECT
+21            123.304        118.592           SRT-SRWT  111.906    9.244     5.638          9.891   SRT-SRWT|MDD-TECT|SRT-TECT|SRT-TECT|MDD-TECT|SRT-ECT
+22             48.356         45.713            SRT-ECT   41.254   14.688     9.755          9.762      SRT-ECT|ATC-TECT|MDD-ECT|SRT-ECT|MDD-ECT|ATC-SRWT
+23            254.044        252.545           MDD-SRWT  249.704    1.709     1.125          3.014   MDD-SRWT|SRT-SRWT|SRT-SRWT|MDD-ECT|MDD-SRWT|MDD-SRWT
+24             47.722         41.503            SPT-ECT   36.484   23.549    12.094         22.891    SPT-ECT|MDD-TECT|EDD-TECT|MDD-SRWT|EDD-SRWT|SRT-ECT
+25             24.648         24.648            MDD-ECT   23.899    3.039     3.039          4.625    MDD-ECT|MDD-ECT|MDD-TECT|SRT-TECT|MDD-TECT|ATC-SRWT
+26             21.810         20.736           SRT-TECT   17.687   18.905    14.704         14.704     SRT-TECT|SRT-ECT|MDD-SRWT|MDD-ECT|MDD-ECT|SRT-SRWT
+27             21.427         19.206           ATC-TECT   18.902   11.785     1.585         16.097  ATC-TECT|ATC-TECT|ATC-TECT|MDD-TECT|MDD-TECT|ATC-TECT
+28             31.872         30.344           ATC-TECT   28.524   10.504     5.999          9.748    ATC-TECT|SRT-ECT|MDD-TECT|MDD-TECT|SRT-TECT|SPT-ECT
+29             82.308         82.308            MDD-ECT   80.706    1.947     1.947          4.203        MDD-ECT|MDD-ECT|MDD-ECT|SRT-ECT|SRT-ECT|SRT-ECT
+30             12.743         11.614           EDD-TECT   11.051   13.277     4.849         20.388     EDD-TECT|EDD-ECT|EDD-ECT|EDD-ECT|MDD-SRWT|MDD-SRWT
+31              5.632          3.609           ATC-TECT    3.532   37.289     2.149         27.635     ATC-TECT|ATC-TECT|ATC-TECT|ATC-ECT|ATC-ECT|SRT-ECT
+33            265.513        262.085           MDD-SRWT  260.367    1.938     0.656          2.203   MDD-SRWT|MDD-SRWT|MDD-ECT|SRT-SRWT|SRT-SRWT|SRT-SRWT
+34              9.052          9.052            MDD-ECT    7.269   19.701    19.701         27.066    MDD-ECT|SRT-TECT|SRT-TECT|SRT-TECT|SRT-TECT|MDD-ECT
+35              8.981          8.981            MDD-ECT    8.545    4.862     4.862         25.266        MDD-ECT|MDD-ECT|MDD-ECT|EDD-ECT|SRT-ECT|SRT-ECT
+36             46.656         39.814           ATC-SRWT   39.153   16.082     1.661         16.545     ATC-SRWT|ATC-ECT|ATC-SRWT|ATC-SRWT|ATC-ECT|SRT-ECT
+37              3.197          3.197            MDD-ECT    3.187    0.325     0.325         19.372       MDD-ECT|MDD-ECT|MDD-ECT|MDD-ECT|ATC-ECT|SPT-SRWT
+38             22.031         21.151           MDD-SRWT   21.151    3.996     0.000         10.499  MDD-SRWT|MDD-SRWT|MDD-SRWT|MDD-SRWT|MDD-SRWT|SRT-SRWT
+39              2.910          2.910            MDD-ECT    2.876    1.162     1.162         37.454     MDD-ECT|MDD-ECT|MDD-TECT|MDD-TECT|MDD-TECT|SRT-ECT 
+
+total_% vs MDD-ECT: mean 15.47, median 10.50, seeds > 2%: 14/19 (74%)
+switch_% vs per-seed best: mean 10.07, median 3.04
+oracle vs SRT-TECT: mean 20.07, median 16.10
+
+== Fixed pairs: mean gap to the per-seed best (%), wins ==
+          gap_%  wins
+MDD-ECT   13.85   6.0
+MDD-TECT  17.99   0.0
+SRT-ECT   19.79   1.0
+ATC-TECT  20.57   3.0
+EDD-ECT   20.89   0.0
+SRT-TECT  22.83   1.0
+EDD-TECT  24.17   1.0
+ATC-ECT   24.66   0.0
+MDD-SRWT  27.39   3.0
+SRT-SRWT  32.16   2.0
+ATC-SRWT  35.89   1.0
+EDD-SRWT  37.37   0.0
+SPT-TECT  45.40   0.0
+SPT-ECT   46.76   1.0
+SPT-SRWT  55.57   0.0 
+
+oracle job rules: MDD 42%, SRT 32%, ATC 17%, EDD 6%, SPT 4%
+
+oracle schedule's time in system vs the seed's best fixed pair on time in system: -0.02% (mean)

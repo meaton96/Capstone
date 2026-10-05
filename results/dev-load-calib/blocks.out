@@ -1,0 +1,8 @@
+B0 normal only             MDD_TECT     9.5   13.9   16.2   17.9   15.8   11.9   h6/h3 0.73
+B0 normal only             SRT_TECT    10.8   15.1   18.0   19.7   17.1   13.0   h6/h3 0.72
+B1 normal2:surge1          MDD_TECT    14.6   23.4   31.7   36.8   33.7   39.2   h6/h3 1.24
+B1 normal2:surge1          SRT_TECT    15.2   25.1   33.5   39.1   36.3   44.0   h6/h3 1.31
+B2 normal2:surge1:short1   MDD_TECT    12.7   22.3   28.0   30.0   31.4   31.0   h6/h3 1.11
+B2 normal2:surge1:short1   SRT_TECT    14.1   24.1   31.3   32.2   33.0   31.8   h6/h3 1.01
+B3 normal3:short1          MDD_TECT    12.7   21.8   24.3   23.6   23.0   20.1   h6/h3 0.83
+B3 normal3:short1          SRT_TECT    14.2   23.3   26.3   25.7   25.4   22.0   h6/h3 0.84

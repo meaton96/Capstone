@@ -1,0 +1,61 @@
+rq2-twin-fleet: 200 tasks B0: 40 seeds, B2: 40 seeds, B3: 40 seeds, long-cal: 40 seeds, single-cal: 40 seeds
+setting                          B0        B2        B3  long-cal single-cal
+seeds                            40        40        40        40         40
+best_avg_pair              ATC-TECT  MDD-TECT  MDD-TECT  ATC-TECT    MDD-ECT
+switch_med_%                   8.53      7.94       7.9      8.17       2.38
+switch_mean_%                 10.36      8.33      9.45      8.63       6.51
+switch_gt2_%                   90.0      90.0      90.0      82.5       47.5
+total_med_%                   12.95     13.32     14.99     10.94      10.86
+total_mean_%                  14.42     15.54     16.96     12.99       23.0
+saved_per_h_js              1266.54   1713.12   1594.49    989.68     285.72
+best_tard_per_h             14640.1  27342.58  20665.63  13619.85    8831.34
+blocksel_med_%                 6.36      5.02      5.45       NaN        NaN
+oracle_vs_blocksel_med_%       3.56       1.9      3.56       NaN        NaN
+distinct_block_best_pairs      3.25      3.45       3.4       NaN        NaN
+
+Oracle job-rule shares by slot regime (and how often the chosen pair changes):
+  B0         agvs 7: job                  ATC 50%, MDD 29%, SRT 13%, EDD 6%, SPT 2%  (n=960)
+  B0         agvs 7: machine              TECT 54%, ECT 45%, SRWT 1%  (n=960)
+  B0         c2.0-2.25                    ATC 61%, MDD 27%, SRT 8%, EDD 2%, SPT 1%  (n=273)
+  B0         c<2.0                        ATC 46%, MDD 30%, SRT 16%, EDD 7%, SPT 1%  (n=325)
+  B0         c>=2.25                      ATC 44%, MDD 30%, SRT 14%, EDD 9%, SPT 2%  (n=362)
+  B0         changes at block boundary    kept 74%, changed 26%  (n=141)
+  B0         changes within block         kept 72%, changed 28%  (n=779)
+  B0         normal                       ATC 50%, MDD 29%, SRT 13%, EDD 6%, SPT 2%  (n=960)
+  B2         agvs 2: job                  MDD 47%, ATC 18%, SRT 16%, EDD 13%, SPT 5%  (n=238)
+  B2         agvs 2: machine              TECT 57%, ECT 42%, SRWT 1%  (n=238)
+  B2         agvs 7: job                  MDD 43%, ATC 31%, SRT 20%, EDD 5%, SPT 1%  (n=722)
+  B2         agvs 7: machine              TECT 50%, ECT 47%, SRWT 3%  (n=722)
+  B2         c2.0-2.25                    MDD 49%, ATC 31%, SRT 12%, EDD 7%, SPT 0%  (n=277)
+  B2         c<2.0                        MDD 43%, SRT 23%, ATC 21%, EDD 8%, SPT 5%  (n=324)
+  B2         c>=2.25                      MDD 42%, ATC 31%, SRT 21%, EDD 5%  (n=359)
+  B2         changes at block boundary    kept 76%, changed 24%  (n=143)
+  B2         changes within block         kept 74%, changed 26%  (n=777)
+  B2         normal                       MDD 42%, ATC 31%, SRT 20%, EDD 6%, SPT 1%  (n=507)
+  B2         short                        MDD 47%, ATC 18%, SRT 16%, EDD 13%, SPT 5%  (n=238)
+  B2         surge                        MDD 48%, ATC 31%, SRT 20%, EDD 1%, SPT 0%  (n=215)
+  B3         agvs 2: job                  MDD 45%, ATC 24%, SRT 14%, EDD 13%, SPT 3%  (n=242)
+  B3         agvs 2: machine              TECT 67%, ECT 32%, SRWT 2%  (n=242)
+  B3         agvs 7: job                  ATC 38%, MDD 35%, SRT 17%, EDD 8%, SPT 2%  (n=718)
+  B3         agvs 7: machine              TECT 54%, ECT 43%, SRWT 3%  (n=718)
+  B3         c2.0-2.25                    ATC 42%, MDD 34%, SRT 12%, EDD 11%, SPT 1%  (n=273)
+  B3         c<2.0                        MDD 42%, ATC 28%, SRT 21%, SPT 5%, EDD 4%  (n=325)
+  B3         c>=2.25                      MDD 38%, ATC 35%, SRT 15%, EDD 12%, SPT 1%  (n=362)
+  B3         changes at block boundary    kept 72%, changed 28%  (n=141)
+  B3         changes within block         kept 70%, changed 30%  (n=779)
+  B3         normal                       ATC 38%, MDD 35%, SRT 17%, EDD 8%, SPT 2%  (n=718)
+  B3         short                        MDD 45%, ATC 24%, SRT 14%, EDD 13%, SPT 3%  (n=242)
+  long-cal   agvs 7: job                  ATC 48%, MDD 29%, SRT 18%, EDD 3%, SPT 2%  (n=960)
+  long-cal   agvs 7: machine              TECT 51%, ECT 45%, SRWT 4%  (n=960)
+  long-cal   c2.0-2.25                    ATC 59%, MDD 23%, SRT 12%, EDD 4%, SPT 2%  (n=264)
+  long-cal   c<2.0                        MDD 38%, ATC 36%, SRT 23%, SPT 2%, EDD 1%  (n=408)
+  long-cal   c>=2.25                      ATC 53%, MDD 24%, SRT 15%, EDD 5%, SPT 3%  (n=288)
+  long-cal   changes within block         kept 73%, changed 27%  (n=920)
+  long-cal   normal                       ATC 48%, MDD 29%, SRT 18%, EDD 3%, SPT 2%  (n=960)
+  single-cal agvs 7: job                  SRT 35%, ATC 33%, MDD 23%, SPT 5%, EDD 4%  (n=240)
+  single-cal agvs 7: machine              ECT 63%, TECT 26%, SRWT 10%  (n=240)
+  single-cal c2.0-2.25                    SRT 39%, ATC 32%, MDD 26%, SPT 3%  (n=66)
+  single-cal c<2.0                        SRT 34%, ATC 28%, MDD 19%, SPT 11%, EDD 8%  (n=102)
+  single-cal c>=2.25                      ATC 40%, SRT 31%, MDD 26%, EDD 3%  (n=72)
+  single-cal changes within block         kept 57%, changed 43%  (n=200)
+  single-cal normal                       SRT 35%, ATC 33%, MDD 23%, SPT 5%, EDD 4%  (n=240)

@@ -468,7 +468,7 @@ namespace Assets.Scripts.Simulation
          *   [10] mean committed work per machine, squashed (TimeScale)
          *   [11] fraction of active jobs that did not fit in the job table
          *   [12] machine count / MachineCountScale (clamped to 1)
-         *   [13] AGVs per machine (clamped to 1)
+         *   [13] AGVs on duty per machine (clamped to 1; the fleet schedule's active count, else the whole fleet)
          *   [14] deferred jobs, squashed (CountScale)
          *   [15] options in the current decision (routing: candidate machines; dispatch: queued jobs), squashed (CountScale)
          *   [16] fraction of active jobs with a due date that are already late
@@ -526,7 +526,7 @@ namespace Assets.Scripts.Simulation
                     if (!agv.IsIdle) activeAgvs++;
                 s[9] = (float)activeAgvs / AGVPool.Instance.AllAGVs.Count;
                 if (machineCount > 0)
-                    s[13] = Mathf.Clamp01((float)AGVPool.Instance.AllAGVs.Count / machineCount);
+                    s[13] = Mathf.Clamp01((float)AGVPool.Instance.OnDutyCount / machineCount);
             }
 
             if (active > MaxJobs) s[11] = (float)(active - MaxJobs) / active;

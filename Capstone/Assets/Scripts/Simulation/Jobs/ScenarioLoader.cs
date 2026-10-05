@@ -152,7 +152,7 @@ namespace Assets.Scripts.Simulation.Jobs
             "name", "seed", "agvCount", "agvMoveSpeed", "agvHandshakeDuration", "dispatchingRule",
             "jobs", "machineTypeLayout", "parkingMethod", "ioDocks", "reservationProtocol", "routingTrigger", "stochastic", "layout", "tiling",
             "machineFlexibilityProbability", "secondaryTimeMultiplier", "travelPrice",
-            "inputBufferCapacity", "outputBufferCapacity"
+            "inputBufferCapacity", "outputBufferCapacity", "agvSchedule"
         };
 
         private static FJSSPConfig BuildConfig(string json, string fileName,
@@ -227,7 +227,7 @@ namespace Assets.Scripts.Simulation.Jobs
                 }
             }
 
-            return new FJSSPConfig
+            var config = new FJSSPConfig
             {
                 Name = (string)root["name"] ?? $"scenario_{fileName}",
                 Seed = seed,
@@ -257,6 +257,34 @@ namespace Assets.Scripts.Simulation.Jobs
                 Stochastic = ReadStochastic(root, strict),
                 dispatchingRule = ReadDispatchingRule(root, strict),
             };
+            ReadAgvSchedule(root, config, fileName, strict);
+            return config;
+        }
+
+        /// <summary>
+        /// "agvSchedule": [{"start": t, "agvCount": n}, ...] (2026-10-04, regime blocks with fleet changes): starts
+        /// ascending and >= 0, each n in 1..agvCount. Absent = whole fleet throughout.
+        /// </summary>
+        private static void ReadAgvSchedule(JObject root, FJSSPConfig config, string fileName, bool strict)
+        {
+            if (!(root["agvSchedule"] is JArray sched) || sched.Count == 0) return;
+            var starts = new float[sched.Count];
+            var counts = new int[sched.Count];
+            for (int i = 0; i < sched.Count; i++)
+            {
+                float start = sched[i]["start"]?.Value<float>() ?? -1f;
+                int n = sched[i]["agvCount"]?.Value<int>() ?? 0;
+                if (start < 0f || (i > 0 && start < starts[i - 1]) || n < 1 || n > config.AGVCount)
+                {
+                    ReportError(strict, $"[ScenarioLoader] '{fileName}': agvSchedule[{i}] (start {start}, agvCount {n}) " +
+                                        $"needs ascending starts >= 0 and 1 <= agvCount <= {config.AGVCount}; schedule ignored.");
+                    return;
+                }
+                starts[i] = start;
+                counts[i] = n;
+            }
+            config.AgvScheduleStarts = starts;
+            config.AgvScheduleCounts = counts;
         }
 
         /// <summary>

@@ -1,0 +1,14 @@
+{
+ "run_id": "gpu",
+ "label": "gpu (local on ubuntu)",
+ "update": 2,
+ "num_updates": 2,
+ "global_step": 2048,
+ "total_timesteps": 2048,
+ "sps": 44.19,
+ "eta_hours": 0.0,
+ "episodes": 1,
+ "recent_return": -31.489,
+ "recent_mean_flow": 2789.2,
+ "updated_at": "2026-10-04T16:41:34"
+}

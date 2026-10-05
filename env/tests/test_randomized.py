@@ -26,3 +26,29 @@ def test_load_mix_picks_a_profile_and_base_equals_defaults():
     assert randomized_scenario(hi, mix)["_meta"]["params"]["utilization"] == [1.0, 1.8]
     with pytest.raises(ValueError):
         randomized_scenario(0, dataclasses.replace(DEFAULT_PARAMS, load_mix=({"name": "x", "agv_count": 4},)))
+
+
+def test_regime_blocks_redraw_per_block_and_respect_boundaries():
+    import dataclasses
+    from scenarios.randomized import DEFAULT_PARAMS, randomized_scenario
+    mix = ({"name": "base"}, {"name": "utilhi", "utilization": [1.0, 1.8], "lull_utilization": [0.4, 0.7]})
+    p = dataclasses.replace(DEFAULT_PARAMS, regime_block_seconds=5400.0, horizon_seconds=30600.0,
+                            due_date_allowance_range=(1.75, 2.5), load_mix=mix)
+    sc = randomized_scenario(7, p)
+    blocks = sc["_meta"]["blocks"]
+    assert len(blocks) == 6 and len({b["due_date_allowance"] for b in blocks}) == 6
+    assert all(int(ph["start"] // 5400) == int((ph["end"] - 1e-6) // 5400) for ph in sc["_phases"])
+    for j in sc["jobs"]:
+        b = blocks[int(j["arrivalTime"] // 5400)]
+        work = sum(min(op["duration"]) for op in j["operations"])
+        assert abs(j["dueDate"] - (j["arrivalTime"] + b["due_date_allowance"] * work)) < 0.02
+    longer = randomized_scenario(7, dataclasses.replace(p, horizon_seconds=40000.0))
+    assert longer["_meta"]["blocks"][:6] == blocks                 # adding blocks keeps the earlier ones
+
+
+def test_regime_blocks_off_leaves_the_instance_unchanged():
+    import dataclasses
+    from scenarios.randomized import DEFAULT_PARAMS, randomized_scenario
+    p = dataclasses.replace(DEFAULT_PARAMS, due_date_allowance=2.0)
+    sc = randomized_scenario(4, p)
+    assert "blocks" not in sc["_meta"] and all("block" not in ph for ph in sc["_phases"])

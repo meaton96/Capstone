@@ -106,8 +106,10 @@ namespace Assets.Scripts.Simulation.AGV
         ///          ReturningToParking (redirectable), and not broken.</summary>
         public bool IsAvailableForDispatch =>
             !IsOutOfService && (State == AGVState.Idle || State == AGVState.ReturningToParking);
-        /// <summary>True while broken down or serving a stall-snap travel penalty: not dispatchable.</summary>
-        public bool IsOutOfService => _broken || _snapPenaltyRemaining > 0.0;
+        /// <summary>True while broken down, serving a stall-snap travel penalty, or off duty under the fleet schedule
+        ///          (AGVPool.IsOffDuty, 2026-10-04): not dispatchable.</summary>
+        public bool IsOutOfService => _broken || _snapPenaltyRemaining > 0.0
+                                      || (AGVPool.Instance != null && AGVPool.Instance.IsOffDuty(this));
         /// <summary>True while blocked on a zone whose chain of holders ends at a broken AGV.</summary>
         public bool IsBlockedByFailure => waitingForZone && _blockedByFailure;
         /// <summary>One row per breakdown this episode (agv_failures.csv).</summary>

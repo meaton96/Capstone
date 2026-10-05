@@ -417,3 +417,31 @@ def test_env_accepts_scenario_keys_that_match_the_export(floor_path):
             "routingTrigger": "onTransport", "reservationProtocol": "releasePrevious"}
     env = TwinSchedulingEnv(floor_path, scenario=dict(_scenario(), agvCount=3, **same), obs_caps=(15, 64))
     env.reset()
+
+
+def test_subproc_twin_env_matches_in_process(floor_path):
+    """@brief SubprocTwinEnv (2026-10-04) gives the same observations, rewards and episode ends as VectorizedTwinEnv."""
+    from env_wrappers.twin_env import SubprocTwinEnv, VectorizedTwinEnv
+    from scenarios.randomized import RandomizedParams, randomized_generator
+    gen = randomized_generator(600.0, random_warmup=True, params=RandomizedParams(agv_count=3, failure_probability=0.0,
+                                                                                 due_date_allowance=2.0))
+    kw = dict(transport="kinematic", reward_spec=os.path.join(REWARDS, "tardiness.json"), train_seed=1,
+              scenario_generator=gen, obs_caps=(15, 256))
+    a = VectorizedTwinEnv(3, floor_path, **kw)
+    b = SubprocTwinEnv(3, 2, floor=floor_path, **kw)
+    try:
+        oa, _ = a.reset()
+        ob, _ = b.reset()
+        assert all(np.array_equal(oa[k], ob[k]) for k in oa)
+        rng = np.random.default_rng(0)
+        ends = 0
+        for _ in range(400):
+            act = [(int(rng.integers(len(JOB_HEAD_RULES))), int(rng.integers(len(MACHINE_HEAD_RULES)))) for _ in range(3)]
+            ra, rb = a.step(act), b.step(act)
+            assert all(np.array_equal(ra[0][k], rb[0][k]) for k in ra[0])
+            assert np.array_equal(ra[1], rb[1]) and np.array_equal(ra[2], rb[2]) and np.array_equal(ra[3], rb[3])
+            ends += int(ra[2].sum())
+        assert ends >= 1
+    finally:
+        a.close()
+        b.close()

@@ -102,4 +102,5 @@ __pycache__/
 linux_server2/
 # Development build (LinuxServerBuild.BuildDev), kept apart from the baseline and any running player
 linux_server_dev/
-CLAUDE.md
+linux_server_v4/
+CLAUDE.mdtools/lab/state/

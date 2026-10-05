@@ -1,0 +1,2 @@
+global_step,env,seed,seed_index,return,length,makespan,mean_flow_time,total_flow_time,jobs_exited,deadlock,timed_out,truncated,config_hash,instance_hash,tick_error
+1312,3,8458037,0,-31.488605468749995,164,14007.9345703125,2789.196726190476,292865.65625,105.0,False,False,True,,,False

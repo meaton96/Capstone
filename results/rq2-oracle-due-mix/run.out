@@ -1,0 +1,28 @@
+[10-04 12:39] starting
+[10-04 13:09] FAIL results/rq2-oracle-due-mix/s32 (see results/rq2-oracle-due-mix/s32/oracle.log)
+[10-04 15:38] ok   results/rq2-oracle-due-mix/s20 seed 20: best fixed SRT-SRWT -0.100, oracle 0.000 (time in system -100.00%), schedule ['SRT-SRWT', 'SPT-ECT', 'SRT-TECT'
+[10-04 16:14] ok   results/rq2-oracle-due-mix/s31 seed 31: best fixed ATC-TECT -3.609, oracle -3.532 (time in system -2.15%), schedule ['ATC-TECT', 'ATC-TECT', 'ATC-TECT'
+[10-04 16:24] ok   results/rq2-oracle-due-mix/s35 seed 35: best fixed MDD-ECT -8.981, oracle -8.545 (time in system -4.86%), schedule ['MDD-ECT', 'MDD-ECT', 'MDD-ECT', 'E
+[10-04 16:29] ok   results/rq2-oracle-due-mix/s39 seed 39: best fixed MDD-ECT -2.910, oracle -2.876 (time in system -1.16%), schedule ['MDD-ECT', 'MDD-ECT', 'MDD-TECT', '
+[10-04 16:50] ok   results/rq2-oracle-due-mix/s28 seed 28: best fixed ATC-TECT -30.344, oracle -28.524 (time in system -6.00%), schedule ['ATC-TECT', 'SRT-ECT', 'MDD-TECT
+[10-04 17:38] ok   results/rq2-oracle-due-mix/s34 seed 34: best fixed MDD-ECT -9.052, oracle -7.269 (time in system -19.70%), schedule ['MDD-ECT', 'SRT-TECT', 'SRT-TECT',
+[10-04 18:24] ok   results/rq2-oracle-due-mix/s30 seed 30: best fixed EDD-TECT -11.614, oracle -11.051 (time in system -4.85%), schedule ['EDD-TECT', 'EDD-ECT', 'EDD-ECT'
+[10-04 18:38] ok   results/rq2-oracle-due-mix/s24 seed 24: best fixed SPT-ECT -41.503, oracle -36.484 (time in system -12.09%), schedule ['SPT-ECT', 'MDD-TECT', 'EDD-TECT
+[10-04 18:43] ok   results/rq2-oracle-due-mix/s37 seed 37: best fixed MDD-ECT -3.197, oracle -3.187 (time in system -0.33%), schedule ['MDD-ECT', 'MDD-ECT', 'MDD-ECT', 'M
+[10-04 18:46] ok   results/rq2-oracle-due-mix/s25 seed 25: best fixed MDD-ECT -24.648, oracle -23.899 (time in system -3.04%), schedule ['MDD-ECT', 'MDD-ECT', 'MDD-TECT',
+[10-04 18:46] ok   results/rq2-oracle-due-mix/s26 seed 26: best fixed SRT-TECT -20.736, oracle -17.687 (time in system -14.70%), schedule ['SRT-TECT', 'SRT-ECT', 'MDD-SRW
+[10-04 19:01] ok   results/rq2-oracle-due-mix/s36 seed 36: best fixed ATC-SRWT -39.814, oracle -39.153 (time in system -1.66%), schedule ['ATC-SRWT', 'ATC-ECT', 'ATC-SRWT
+[10-04 19:04] ok   results/rq2-oracle-due-mix/s21 seed 21: best fixed SRT-SRWT -118.592, oracle -111.906 (time in system -5.64%), schedule ['SRT-SRWT', 'MDD-TECT', 'SRT-T
+[10-04 19:06] ok   results/rq2-oracle-due-mix/s27 seed 27: best fixed ATC-TECT -19.206, oracle -18.902 (time in system -1.58%), schedule ['ATC-TECT', 'ATC-TECT', 'ATC-TEC
+[10-04 19:22] ok   results/rq2-oracle-due-mix/s22 seed 22: best fixed SRT-ECT -45.713, oracle -41.254 (time in system -9.76%), schedule ['SRT-ECT', 'ATC-TECT', 'MDD-ECT',
+[10-04 19:23] ok   results/rq2-oracle-due-mix/s38 seed 38: best fixed MDD-SRWT -21.151, oracle -21.151 (time in system +0.00%), schedule ['MDD-SRWT', 'MDD-SRWT', 'MDD-SRW
+[10-04 19:43] ok   results/rq2-oracle-due-mix/s33 seed 33: best fixed MDD-SRWT -262.085, oracle -260.367 (time in system -0.66%), schedule ['MDD-SRWT', 'MDD-SRWT', 'MDD-E
+[10-04 19:45] ok   results/rq2-oracle-due-mix/s29 seed 29: best fixed MDD-ECT -82.308, oracle -80.706 (time in system -1.95%), schedule ['MDD-ECT', 'MDD-ECT', 'MDD-ECT', 
+[10-04 19:47] ok   results/rq2-oracle-due-mix/s23 seed 23: best fixed MDD-SRWT -252.545, oracle -249.704 (time in system -1.12%), schedule ['MDD-SRWT', 'SRT-SRWT', 'SRT-S
+[10-04 19:47] all done
+rq2-oracle-due-mix: 19 seeds finished
+      best_pair_value  per_seed_best per_seed_best_pair   oracle  total_%  switch_%  vs_SRT-TECT_%                                               schedule
+total_% vs MDD-ECT: mean 15.47, median 10.50, seeds > 2%: 14/19 (74%)
+switch_% vs per-seed best: mean 10.07, median 3.04
+oracle vs SRT-TECT: mean 20.07, median 16.10
+oracle job rules: MDD 42%, SRT 32%, ATC 17%, EDD 6%, SPT 4%

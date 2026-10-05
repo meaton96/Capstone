@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Capstone Lab</title>
+<style>
+:root { --bg:#f6f7f9; --card:#fff; --ink:#1d2330; --muted:#667085; --line:#e3e6eb; --accent:#2f6fde;
+        --run:#1a7f4e; --queue:#2f6fde; --future:#8a6d1d; --fail:#c0392b; --done:#667085; }
+@media (prefers-color-scheme: dark) { :root { --bg:#14171c; --card:#1c2027; --ink:#e7e9ee; --muted:#9aa3b2;
+        --line:#2c323c; --accent:#6ea0ff; --run:#4cc38a; --queue:#6ea0ff; --future:#d6b25e; --fail:#ff7a6b; --done:#9aa3b2; } }
+* { box-sizing:border-box; }
+body { margin:0; font:14px/1.45 system-ui, -apple-system, Segoe UI, sans-serif; background:var(--bg); color:var(--ink); }
+header { display:flex; align-items:baseline; gap:16px; flex-wrap:wrap; padding:14px 20px; border-bottom:1px solid var(--line); background:var(--card); position:sticky; top:0; z-index:2; }
+h1 { font-size:18px; margin:0; }
+#clock { font-variant-numeric:tabular-nums; font-size:20px; font-weight:600; }
+.muted { color:var(--muted); }
+main { padding:16px 20px 60px; max-width:1300px; margin:0 auto; display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:18px; }
+@media (max-width:900px) { main { grid-template-columns:1fr; } }
+section { background:var(--card); border:1px solid var(--line); border-radius:10px; margin-bottom:16px; overflow:hidden; }
+section h2 { font-size:14px; margin:0; padding:10px 14px; border-bottom:1px solid var(--line); display:flex; gap:8px; align-items:center; }
+.dot { width:9px; height:9px; border-radius:50%; display:inline-block; }
+.exp { padding:10px 14px; border-bottom:1px solid var(--line); }
+.exp:last-child { border-bottom:0; }
+.row { display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:baseline; }
+.name { font-weight:600; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; }
+.meta { color:var(--muted); font-size:12.5px; }
+.bar { height:6px; background:var(--line); border-radius:3px; margin-top:6px; overflow:hidden; }
+.bar > i { display:block; height:100%; background:var(--run); }
+button { font:inherit; font-size:12.5px; padding:3px 9px; border-radius:6px; border:1px solid var(--line); background:transparent; color:var(--ink); cursor:pointer; }
+button:hover { border-color:var(--accent); }
+button.danger:hover { border-color:var(--fail); color:var(--fail); }
+.btns { display:flex; gap:6px; flex-wrap:wrap; }
+details { font-size:12.5px; margin-top:4px; }
+code { font-size:12px; word-break:break-all; }
+form { padding:12px 14px; display:grid; gap:8px; }
+label { font-size:12.5px; color:var(--muted); display:grid; gap:3px; }
+input, select, textarea { font:inherit; font-size:13px; padding:5px 7px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--ink); width:100%; }
+textarea { min-height:52px; }
+.events { max-height:520px; overflow:auto; }
+.ev { padding:7px 14px; border-bottom:1px solid var(--line); font-size:12.5px; }
+.ev.unread { border-left:3px solid var(--accent); }
+.empty { padding:10px 14px; color:var(--muted); font-size:13px; }
+#err { color:var(--fail); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Capstone Lab</h1>
+  <span id="clock">--:--:--</span>
+  <span class="muted" id="date"></span>
+  <span class="muted" id="slots"></span>
+  <span id="err"></span>
+</header>
+<main>
+  <div id="lists"></div>
+  <aside>
+    <section>
+      <h2>Add experiment</h2>
+      <form id="add">
+        <label>Name (purpose-what[-variant])<input name="name" required placeholder="rq2-oracle-due-long"></label>
+        <label>Status<select name="status"><option>future</option><option>queued</option></select></label>
+        <label>Where<select name="location"><option>local</option><option>cluster</option></select></label>
+        <label>Launch command (from repo root)<input name="launch_cmd" placeholder="bash results/NAME/run.sh"></label>
+        <label>Waits on (experiment names, comma)<input name="waits_on"></label>
+        <label>Waits on (free text; blocks auto-queue until cleared)<input name="waits_note"></label>
+        <label>Done when this glob has N files<input name="done_glob" placeholder="results/NAME/s*/result.json"></label>
+        <label>N<input name="done_count" type="number" min="0"></label>
+        <label>Worker slots (local)<input name="workers" type="number" min="0" value="1"></label>
+        <label>Analysis command (runs on finish)<input name="analysis_cmd"></label>
+        <label>Pull command (cluster, runs when jobs end)<input name="pull_cmd"></label>
+        <label>ETA<input name="eta" type="datetime-local"></label>
+        <label>Notes<textarea name="notes"></textarea></label>
+        <button type="submit">Add</button>
+      </form>
+    </section>
+    <section>
+      <h2>Events <button id="markread" style="margin-left:auto">mark read</button></h2>
+      <div class="events" id="events"></div>
+    </section>
+  </aside>
+</main>
+<script>
+const TOKEN = "__LAB_TOKEN__";
+const ORDER = [["running","Running","--run"],["queued","Queued","--queue"],["future","Future (waiting)","--future"],
+               ["failed","Failed","--fail"],["done","Done","--done"],["cancelled","Cancelled","--done"]];
+let state = null, offset = 0;
+
+async function post(path, body) {
+  const r = await fetch(path, {method:"POST", headers:{"Content-Type":"application/json","X-Lab-Token":TOKEN}, body:JSON.stringify(body)});
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) { document.getElementById("err").textContent = j.error || r.statusText; throw new Error(j.error); }
+  document.getElementById("err").textContent = "";
+  load();
+}
+function esc(s) { return String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function since(t) {
+  if (!t) return "";
+  const s = Math.max(0, (Date.now() + offset - new Date(t)) / 1000);
+  const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60);
+  return h ? `${h}h ${m}m` : `${m}m`;
+}
+function until(t) {
+  if (!t) return "";
+  const s = (new Date(t) - Date.now() - offset) / 1000;
+  if (s < 0) return "overdue";
+  const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60);
+  return h ? `in ${h}h ${m}m` : `in ${m}m`;
+}
+function card(e) {
+  const prog = e.progress != null && e.done_count ? `${e.progress}/${e.done_count}` : "";
+  const pct = e.progress != null && e.done_count ? Math.min(100, 100 * e.progress / e.done_count) : 0;
+  const btn = (a, label, cls="") => `<button class="${cls}" data-a="${a}" data-n="${esc(e.name)}">${label}</button>`;
+  let btns = "";
+  if (e.status === "running") btns = btn("cancel", "cancel", "danger");
+  else if (e.status === "queued") btns = btn("start", "start now") + btn("future", "hold") + btn("cancel", "cancel", "danger");
+  else if (e.status === "future") btns = btn("queued", "queue") + btn("cancel", "cancel", "danger");
+  else btns = btn("queued", "requeue");
+  const bits = [];
+  bits.push(e.location + (e.slurm_jobs ? ` · jobs ${esc(e.slurm_jobs)}` : "") + (e.location === "local" && e.workers ? ` · ${e.workers} slots` : ""));
+  if (e.status === "running" && e.started_at) bits.push(`running ${since(e.started_at)}`);
+  if (e.eta) bits.push(`ETA ${esc(e.eta.replace("T", " "))} (${until(e.eta)})`);
+  if (e.check_at) bits.push(`check ${esc(e.check_at.replace("T", " "))}`);
+  if (e.finished_at) bits.push(`finished ${esc(e.finished_at.replace("T", " "))}`);
+  if (e.waits_on || e.waits_note) bits.push(`waits on: ${esc([e.waits_on, e.waits_note].filter(Boolean).join("; "))}`);
+  return `<div class="exp">
+    <div class="row"><span class="name">${esc(e.name)}</span><span class="btns">${btns}</span></div>
+    <div class="meta">${bits.join(" · ")}${prog ? " · " + prog : ""}</div>
+    ${prog ? `<div class="bar"><i style="width:${pct}%"></i></div>` : ""}
+    ${e.notes ? `<div class="meta" style="margin-top:4px">${esc(e.notes)}</div>` : ""}
+    <details><summary class="meta">commands</summary>
+      ${e.launch_cmd ? `<div>launch: <code>${esc(e.launch_cmd)}</code></div>` : ""}
+      ${e.analysis_cmd ? `<div>analysis: <code>${esc(e.analysis_cmd)}</code></div>` : ""}
+      ${e.pull_cmd ? `<div>pull: <code>${esc(e.pull_cmd)}</code></div>` : ""}
+      ${e.done_glob ? `<div>done: <code>${esc(e.done_glob)}</code> × ${e.done_count}</div>` : ""}
+      ${e.log_path ? `<div>log: <code>${esc(e.log_path)}</code></div>` : ""}
+    </details></div>`;
+}
+function render() {
+  const ex = state.experiments;
+  document.getElementById("slots").textContent = `local slots ${state.workers_used}/${state.workers_max}`;
+  document.getElementById("lists").innerHTML = ORDER.map(([st, title, col]) => {
+    const rows = ex.filter(e => e.status === st);
+    if (!rows.length && (st === "failed" || st === "cancelled")) return "";
+    const shown = st === "done" ? rows.slice(-15).reverse() : rows;
+    return `<section><h2><span class="dot" style="background:var(${col})"></span>${title} <span class="muted">${rows.length}</span></h2>
+      ${shown.length ? shown.map(card).join("") : `<div class="empty">none</div>`}</section>`;
+  }).join("");
+  document.getElementById("events").innerHTML = state.events.map(v =>
+    `<div class="ev ${v.read ? "" : "unread"}"><span class="muted">${esc(v.ts.replace("T", " "))}</span> <b>${esc(v.kind)}</b> ${esc(v.message)}
+     ${v.detail ? `<details><summary class="meta">output</summary><pre style="white-space:pre-wrap;font-size:11.5px">${esc(v.detail)}</pre></details>` : ""}</div>`).join("")
+    || `<div class="empty">no events</div>`;
+}
+async function load() {
+  try {
+    const r = await fetch("/api/state", {cache:"no-store"});
+    state = await r.json();
+    offset = new Date(state.now) - Date.now();
+    render();
+  } catch (e) { document.getElementById("err").textContent = "service not reachable"; }
+}
+function tick() {
+  const d = new Date(Date.now() + offset);
+  document.getElementById("clock").textContent = d.toLocaleTimeString([], {hour12:false});
+  document.getElementById("date").textContent = d.toLocaleDateString([], {weekday:"short", month:"short", day:"numeric"});
+}
+document.addEventListener("click", ev => {
+  const b = ev.target.closest("button[data-a]");
+  if (!b) return;
+  const a = b.dataset.a, n = b.dataset.n;
+  if (a === "cancel" && !confirm(`Cancel ${n}? Running processes or Slurm jobs are stopped.`)) return;
+  if (a === "start" && !confirm(`Start ${n} now?`)) return;
+  post("/api/action", {name:n, action:a});
+});
+document.getElementById("markread").onclick = () => post("/api/action", {name:"", action:"read"});
+document.getElementById("add").onsubmit = ev => {
+  ev.preventDefault();
+  const body = Object.fromEntries(new FormData(ev.target).entries());
+  for (const k of ["done_count", "workers"]) body[k] = body[k] === "" ? undefined : Number(body[k]);
+  if (body.eta) body.eta = body.eta.length === 16 ? body.eta + ":00" : body.eta;
+  post("/api/add", body).then(() => ev.target.reset());
+};
+setInterval(tick, 1000); tick();
+setInterval(load, 10000); load();
+</script>
+</body>
+</html>

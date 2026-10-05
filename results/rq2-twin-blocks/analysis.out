@@ -1,0 +1,41 @@
+rq2-twin-blocks: 160 tasks blocks: 40 seeds, single: 40 seeds, blocks-base: 40 seeds, long: 40 seeds
+setting                      blocks blocks-base      long    single
+seeds                            40          40        40        40
+best_avg_pair              MDD-TECT    MDD-TECT  MDD-TECT  MDD-TECT
+switch_med_%                   5.76        8.39      4.87      1.43
+switch_mean_%                  7.18        8.34      7.63      7.25
+switch_gt2_%                   90.0        87.5      87.5      42.5
+total_med_%                    9.34        15.2     12.59       5.1
+total_mean_%                  11.77       14.92     14.06      11.7
+saved_per_h_js              2850.75     2129.51    2080.1    414.02
+best_tard_per_h            50466.58    29008.88   46370.6  23322.63
+blocksel_med_%                 2.72        5.38       NaN       NaN
+oracle_vs_blocksel_med_%       2.98        2.02       NaN       NaN
+distinct_block_best_pairs      3.25         3.5       NaN       NaN
+
+Oracle job-rule shares by slot regime (and how often the chosen pair changes):
+  blocks base                         MDD 48%, SRT 27%, ATC 22%, SPT 2%, EDD 1%  (n=505)
+  blocks c2.0-2.25                    MDD 52%, ATC 25%, SRT 22%, EDD 1%, SPT 0%  (n=267)
+  blocks c<2.0                        MDD 45%, SRT 31%, ATC 19%, SPT 3%, EDD 2%  (n=330)
+  blocks c>=2.25                      MDD 52%, SRT 25%, ATC 21%, EDD 1%, SPT 1%  (n=363)
+  blocks changes at block boundary    kept 73%, changed 27%  (n=145)
+  blocks changes within block         kept 71%, changed 29%  (n=775)
+  blocks utilhi                       MDD 52%, SRT 25%, ATC 21%, EDD 1%, SPT 0%  (n=455)
+  blocks-base base                         MDD 40%, ATC 34%, SRT 23%, SPT 2%, EDD 1%  (n=960)
+  blocks-base c2.0-2.25                    MDD 39%, ATC 37%, SRT 22%, SPT 1%, EDD 0%  (n=278)
+  blocks-base c<2.0                        MDD 37%, ATC 33%, SRT 24%, SPT 6%  (n=324)
+  blocks-base c>=2.25                      MDD 42%, ATC 33%, SRT 22%, EDD 2%, SPT 1%  (n=358)
+  blocks-base changes at block boundary    kept 73%, changed 27%  (n=142)
+  blocks-base changes within block         kept 72%, changed 28%  (n=778)
+  long   base                         MDD 41%, ATC 33%, SRT 21%, SPT 4%, EDD 2%  (n=624)
+  long   c2.0-2.25                    MDD 49%, SRT 26%, ATC 23%, SPT 2%, EDD 0%  (n=264)
+  long   c<2.0                        MDD 45%, SRT 32%, ATC 17%, SPT 4%, EDD 1%  (n=408)
+  long   c>=2.25                      ATC 49%, MDD 36%, SRT 13%, EDD 1%, SPT 1%  (n=288)
+  long   changes within block         kept 74%, changed 26%  (n=920)
+  long   utilhi                       MDD 48%, SRT 32%, ATC 20%, SPT 0%  (n=336)
+  single base                         MDD 39%, SRT 34%, ATC 18%, SPT 7%, EDD 2%  (n=156)
+  single c2.0-2.25                    MDD 56%, SRT 38%, SPT 5%, ATC 2%  (n=66)
+  single c<2.0                        SRT 42%, MDD 38%, SPT 8%, ATC 8%, EDD 4%  (n=102)
+  single c>=2.25                      MDD 39%, ATC 33%, SRT 24%, EDD 3%, SPT 1%  (n=72)
+  single changes within block         kept 50%, changed 50%  (n=200)
+  single utilhi                       MDD 51%, SRT 38%, ATC 6%, EDD 4%, SPT 1%  (n=84)

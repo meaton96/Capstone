@@ -66,6 +66,12 @@ namespace Assets.Scripts.Simulation.Types
         /// @brief Number of AGVs in the fleet for material transport.
         public int AGVCount;
 
+        /// @brief Fleet schedule (2026-10-04, scenario "agvSchedule"): from sim time AgvScheduleStarts[i] only the first
+        ///        AgvScheduleCounts[i] AGVs take new tasks (AGVPool.IsOffDuty); an AGV going off duty finishes its task
+        ///        and returns to its bay. Null = the whole fleet throughout (left out of the config hash then).
+        [FingerprintOmitIfNull] public float[] AgvScheduleStarts;
+        [FingerprintOmitIfNull] public int[] AgvScheduleCounts;
+
         /// @brief AGV travel speed (units/sim-second), overriding the AGV prefab's own
         ///        serialized default (3.5) when set. Null = use the prefab's value.
         /// @details Lets a config raise/lower physical transit time relative to job processing
@@ -220,6 +226,8 @@ namespace Assets.Scripts.Simulation.Types
                 MinOpsPerJob = MinOpsPerJob,
                 MaxOpsPerJob = MaxOpsPerJob,
                 AGVCount = AGVCount,
+                AgvScheduleStarts = (float[])AgvScheduleStarts?.Clone(),
+                AgvScheduleCounts = (int[])AgvScheduleCounts?.Clone(),
                 AGVMoveSpeed = AGVMoveSpeed,
                 AGVHandshakeDuration = AGVHandshakeDuration,
                 dispatchingRule = dispatchingRule,
