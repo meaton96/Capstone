@@ -40,15 +40,14 @@ from config import JOB_HEAD_RULES, MACHINE_HEAD_RULES, PPOConfig  # noqa: E402
 from models.network import SchedulingNetwork  # noqa: E402
 
 STREAMS = ("factory_grid", "machine_table", "job_table", "global_scalars", "event_flags", "action_mask")
-TEST = list(range(40))
 
 
-def load(seeds):
+def load(seeds, data_dir):
     obs = {k: [] for k in STREAMS}
     tails, seed_of, slot_of = [], [], []
     pairs = None
     for s in seeds:
-        d = np.load(HERE / "data" / f"s{s}.npz")
+        d = np.load(Path(data_dir) / f"s{s}.npz")
         pairs = list(d["pairs"])
         for k in STREAMS:
             obs[k].append(d[k].astype(np.float32))
@@ -161,16 +160,23 @@ def main():
     ap.add_argument("--epochs", type=int, default=300)
     ap.add_argument("--patience", type=int, default=20)
     ap.add_argument("--device", default="cuda")
+    ap.add_argument("--data-dir", default=str(HERE / "data"),
+                    help="npz folder (rq2-oracle-steady/data for the steady-state setting, added 10-07)")
+    ap.add_argument("--test-seeds", default="0-39")
+    ap.add_argument("--out-dir", default=str(HERE), help="where bc_scores / bc_full checkpoints go")
     ap.add_argument("--tag", default="", help="suffix for the outputs (bc_scores<tag>.csv, bc_full_s<k><tag>.pt), "
                     "e.g. a capacity check with --patience 1000 (added 10-07)")
     a = ap.parse_args()
     lo, hi = (int(x) for x in a.train_seeds.split("-"))
-    train_seeds = [s for s in range(lo, hi + 1) if (HERE / "data" / f"s{s}.npz").exists()]
-    obs, tails, seed_of, slot_of, pairs = load(train_seeds)
-    tobs, ttails, tseed, tslot, _ = load(TEST)
+    train_seeds = [s for s in range(lo, hi + 1) if (Path(a.data_dir) / f"s{s}.npz").exists()]
+    tlo, thi = (int(x) for x in a.test_seeds.split("-"))
+    test = list(range(tlo, thi + 1))
+    out_dir = Path(a.out_dir)
+    obs, tails, seed_of, slot_of, pairs = load(train_seeds, a.data_dir)
+    tobs, ttails, tseed, tslot, _ = load(test, a.data_dir)
     qj, qm, _ = soft_targets(tails, pairs, a.tau)
     _, _, tregret = soft_targets(ttails, pairs, a.tau)
-    print(f"train {len(train_seeds)} seeds / {len(tails)} slots, test {len(TEST)} seeds / {len(ttails)} slots; "
+    print(f"train {len(train_seeds)} seeds / {len(tails)} slots, test {len(test)} seeds / {len(ttails)} slots; "
           f"tau {a.tau}% regret; mean regret of the slot's 2nd-best pair (test) "
           f"{np.sort(tregret, 1)[:, 1].mean():.2f}%")
     rows = []
@@ -193,16 +199,16 @@ def main():
             if kind == "full":
                 import train as T
                 from rewards import load_reward
-                ck = HERE / f"bc_full_s{k}{a.tag}.pt"
+                ck = out_dir / f"bc_full_s{k}{a.tag}.pt"
                 T.save_checkpoint(ck, model, torch.optim.Adam(model.parameters()), 0, PPOConfig(),
                                   load_reward(str(REPO / "env/config/rewards/tardiness.json")).name, (15, 256))
     import pandas as pd
     pd.set_option("display.width", 200)
     df = pd.DataFrame(rows)
-    print("\n== test seeds 0-39, per slot (deterministic argmax pair); mean over BC seeds")
+    print(f"\n== test seeds {a.test_seeds}, per slot (deterministic argmax pair); mean over BC seeds")
     print(df.groupby("model")[["epochs", "train_pair_match_%", "pair_match_%", "job_rule_match_%", "mean_regret_%",
                                "mddtect_regret_%", "share_mddtect_%"]].mean().round(2).to_string())
-    df.to_csv(HERE / f"bc_scores{a.tag}.csv", index=False)
+    df.to_csv(out_dir / f"bc_scores{a.tag}.csv", index=False)
 
 
 if __name__ == "__main__":
