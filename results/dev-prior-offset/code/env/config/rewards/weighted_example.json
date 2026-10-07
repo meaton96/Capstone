@@ -1,0 +1,13 @@
+{
+  "name": "weighted_example",
+  "description": "JSON-only reward: flow time, plus an AGV congestion penalty phased in over the first 200k steps, plus a deadlock penalty.",
+  "entry": "rewards/functions/weighted.py:WeightedReward",
+  "params": {
+    "terms": {
+      "flow_time": {"metric": "time_in_system_sum", "mode": "delta", "weight": -0.001},
+      "congestion": {"metric": "agv_time_waiting_route_sum", "mode": "delta",
+                     "weight": {"start": 0.0, "end": -0.001, "steps": 200000}},
+      "deadlock": {"metric": "deadlock", "mode": "terminal", "weight": -10.0}
+    }
+  }
+}

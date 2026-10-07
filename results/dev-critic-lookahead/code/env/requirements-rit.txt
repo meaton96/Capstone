@@ -1,0 +1,15 @@
+# Minimal training environment for RIT Research Computing (CPU only, Python 3.10.x exactly: mlagents-envs 1.1.0).
+# torch comes from the PyTorch CPU index (pinned in env/lock_requirements.sh);
+# the full requirements.txt also carries the mlagents trainer and CUDA wheels, which training does not use.
+# This file is the input only: setup installs the hash-locked requirements-rit.lock generated from it by
+# env/lock_requirements.sh. Rerun that script after changing a pin here.
+numpy==1.23.5
+mlagents-envs==1.1.0
+grpcio==1.48.2
+protobuf==3.20.3
+tensorboard==2.20.0
+Gymnasium==0.26.3
+pytest==9.0.3
+# Security floors for transitive dependencies (pip-audit, 2026-09-30): tensorboard pulls these in.
+pillow>=12.3.0
+werkzeug>=3.1.6

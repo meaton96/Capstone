@@ -1,0 +1,35 @@
+============================================================
+DRL Scheduling Network — PPO Training
+============================================================
+
+Reward: tardiness (rewards/functions/tardiness.py:TardinessReward)
+
+Scenario generator: randomized (episode_duration_seconds=21600.0) (random_warmup, rule=default) (params {"failure_probability": 0.0, "due_date_allowance_range": [1.75, 2.5], "regime_block_seconds": 5400, "horizon_seconds": 30600, "load_mix": [{"name": "normal", "utilization": [0.6, 1.2], "weight": 2}, {"name": "surge", "utilization": [1.0, 1.6]}, {"name": "short", "utilization": [0.6, 1.2], "agv_count": 2}]})
+Observation row caps: 15 machines, 256 jobs
+Twin envs: 16 over 2 worker processes
+
+Parameter counts:
+  encoder_factory_cnn               168,352
+  encoder_machine_set                38,400
+  encoder_job_set                    38,720
+  encoder_global_mlp                  3,488
+  encoder_event_embed                   848
+  fusion_head                       420,096
+  actor                              68,360
+  critic                             66,561
+  total                             804,825
+
+Action prior MDD-TECT (p = 0.8 per head), policy started at the prior (fixed logit offset log p0); KL coef 0.05
+Discount: gamma_s = 0.999907 per simulated second (horizon 10,800 s)
+
+Backend: twin (kinematic, results/dev-popart-smoke/floor7/des_floor.json)
+Run directory: results/dev-prior-offset_s0
+Training for 100,000 timesteps
+  195 updates × 32 steps × 16 envs
+  Device: cuda
+
+Update    1/195 | Step      512 | SPS     10 | Ep    16 | EpRet -193.015 | Makespan  25851 | R_avg -6.8271 | Ret -41.173 | PG 0.0138 | VL 1.1879 | EV +0.00 | Ent 1.513 | KLp 0.039 | T 53.28s
+Update    5/195 | Step    2,560 | SPS      9 | Ep    96 | EpRet -173.378 | Makespan  25924 | R_avg -7.6232 | Ret -89.871 | PG -0.0133 | VL 0.4935 | EV +0.64 | Ent 1.339 | KLp 0.059 | T 58.04s
+Update   10/195 | Step    5,120 | SPS      9 | Ep   208 | EpRet -141.185 | Makespan  24907 | R_avg -5.9578 | Ret -102.346 | PG -0.0137 | VL 0.4125 | EV +0.67 | Ent 1.626 | KLp 0.056 | T 61.76s
+Update   15/195 | Step    7,680 | SPS      9 | Ep   320 | EpRet -214.550 | Makespan  26009 | R_avg -8.4417 | Ret -120.241 | PG -0.0047 | VL 0.2681 | EV +0.77 | Ent 1.385 | KLp 0.077 | T 59.11s
+Update   20/195 | Step   10,240 | SPS      9 | Ep   416 | EpRet -153.995 | Makespan  24372 | R_avg -5.7797 | Ret -92.995 | PG -0.0011 | VL 0.2081 | EV +0.72 | Ent 1.317 | KLp 0.049 | T 60.29s

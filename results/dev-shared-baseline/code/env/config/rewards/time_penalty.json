@@ -1,0 +1,8 @@
+{
+  "name": "time_penalty",
+  "description": "Penalize sim time elapsed after each decision; episode sum is -makespan / time_scale.",
+  "entry": "rewards/functions/time_penalty.py:TimePenaltyReward",
+  "params": {
+    "time_scale": 100.0
+  }
+}

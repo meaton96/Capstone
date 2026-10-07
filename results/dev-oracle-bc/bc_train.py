@@ -42,9 +42,11 @@ from models.network import SchedulingNetwork  # noqa: E402
 STREAMS = ("factory_grid", "machine_table", "job_table", "global_scalars", "event_flags", "action_mask")
 
 
-def load(seeds, data_dir):
+def load(seeds, data_dir, with_futures=False):
+    """Obs, realized tails (slots, pairs), seed and slot of each row, pair names; with_futures also returns the
+    redrawn-future tails (slots, futures, pairs) of ../dev-oracle-bc-ev/collect_ev.py data as a 6th element."""
     obs = {k: [] for k in STREAMS}
-    tails, seed_of, slot_of = [], [], []
+    tails, fut, seed_of, slot_of = [], [], [], []
     pairs = None
     for s in seeds:
         d = np.load(Path(data_dir) / f"s{s}.npz")
@@ -52,10 +54,43 @@ def load(seeds, data_dir):
         for k in STREAMS:
             obs[k].append(d[k].astype(np.float32))
         tails.append(d["tails"])
+        if with_futures:
+            if "tails_fut" not in d:
+                raise ValueError(f"s{s}.npz has no redrawn-future tails (collect with ../dev-oracle-bc-ev/collect_ev.py)")
+            fut.append(d["tails_fut"])
         seed_of += [s] * len(d["tails"])
         slot_of += list(range(len(d["tails"])))
-    return ({k: np.concatenate(v) for k, v in obs.items()}, np.concatenate(tails), np.array(seed_of),
-            np.array(slot_of), pairs)
+    out = ({k: np.concatenate(v) for k, v in obs.items()}, np.concatenate(tails), np.array(seed_of),
+           np.array(slot_of), pairs)
+    return out + (np.concatenate(fut),) if with_futures else out
+
+
+def label_tails(tails, fut, pairs, mode, default="MDD-TECT", z=1.0):
+    """Tails the soft targets are built from (2026-10-07, handoff fix 7).
+
+    - "oracle": the realized future's hold-to-end tails (one future: its argmax is about a coin flip in sign against
+      the expected best, docs/experiments/review_1007/CREDIT_ASSIGNMENT_TRACE_1007.md);
+    - "ev": the mean over the realized and the redrawn futures (an expected-value oracle);
+    - "ev-safe": ev, but a pair other than @p default counts only by the lower confidence bound of its gain over the
+      default, mean - z * standard error over the futures (paired), so the label switches away from the default only
+      when the predicted gain beats its uncertainty (after Wei et al. 2026, arXiv:2605.23957).
+    """
+    if mode == "oracle":
+        return tails
+    allf = np.concatenate([tails[:, None, :], fut], axis=1)          # (slots, 1 + futures, pairs)
+    ev = allf.mean(1)
+    if mode == "ev":
+        return ev
+    if mode != "ev-safe":
+        raise ValueError(f"unknown label mode {mode!r}")
+    d = pairs.index(default)
+    gain = allf[:, :, d:d + 1] - allf                                # > 0: the pair beats the default on that future
+    se = gain.std(1, ddof=1) / np.sqrt(allf.shape[1])
+    lcb = gain.mean(1) - z * se
+    lcb[:, d] = 0.0
+    out = ev[:, d:d + 1] - lcb
+    out[:, np.arange(len(pairs)) != d] += 1e-9      # exact ties (pairs that play identically) go to the default
+    return out
 
 
 def head_index(pairs):
@@ -164,6 +199,12 @@ def main():
                     help="npz folder (rq2-oracle-steady/data for the steady-state setting, added 10-07)")
     ap.add_argument("--test-seeds", default="0-39")
     ap.add_argument("--out-dir", default=str(HERE), help="where bc_scores / bc_full checkpoints go")
+    ap.add_argument("--labels", choices=("oracle", "ev", "ev-safe"), default="oracle",
+                    help="label tails: the realized future (oracle), the mean over redrawn futures (ev), or ev with "
+                         "switches away from --default-pair only past z standard errors (ev-safe); ev* need "
+                         "../dev-oracle-bc-ev data (added 10-07)")
+    ap.add_argument("--safe-z", type=float, default=1.0, help="ev-safe: standard errors a switch must clear")
+    ap.add_argument("--default-pair", default="MDD-TECT", help="ev-safe: the pair kept unless a switch clears z SE")
     ap.add_argument("--tag", default="", help="suffix for the outputs (bc_scores<tag>.csv, bc_full_s<k><tag>.pt), "
                     "e.g. a capacity check with --patience 1000 (added 10-07)")
     a = ap.parse_args()
@@ -172,9 +213,15 @@ def main():
     tlo, thi = (int(x) for x in a.test_seeds.split("-"))
     test = list(range(tlo, thi + 1))
     out_dir = Path(a.out_dir)
-    obs, tails, seed_of, slot_of, pairs = load(train_seeds, a.data_dir)
+    loaded = load(train_seeds, a.data_dir, with_futures=a.labels != "oracle")
+    obs, tails, seed_of, slot_of, pairs = loaded[:5]
     tobs, ttails, tseed, tslot, _ = load(test, a.data_dir)
-    qj, qm, _ = soft_targets(tails, pairs, a.tau)
+    ltails = label_tails(tails, loaded[5] if a.labels != "oracle" else None, pairs, a.labels, a.default_pair, a.safe_z)
+    if a.labels != "oracle":
+        agree = float((ltails.argmin(1) == tails.argmin(1)).mean())
+        print(f"labels {a.labels}: the label's best pair is the realized future's best on {100 * agree:.1f}% of slots; "
+              f"default {a.default_pair} best on {100 * float((ltails.argmin(1) == pairs.index(a.default_pair)).mean()):.1f}%")
+    qj, qm, _ = soft_targets(ltails, pairs, a.tau)
     _, _, tregret = soft_targets(ttails, pairs, a.tau)
     print(f"train {len(train_seeds)} seeds / {len(tails)} slots, test {len(test)} seeds / {len(ttails)} slots; "
           f"tau {a.tau}% regret; mean regret of the slot's 2nd-best pair (test) "

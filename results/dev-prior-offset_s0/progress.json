@@ -1,0 +1,14 @@
+{
+ "run_id": "dev-prior-offset_s0",
+ "label": "dev-prior-offset_s0 (local on ubuntu)",
+ "update": 23,
+ "num_updates": 195,
+ "global_step": 11776,
+ "total_timesteps": 100000,
+ "sps": 8.52,
+ "eta_hours": 2.88,
+ "episodes": 480,
+ "recent_return": -140.758,
+ "recent_mean_flow": 1841.1,
+ "updated_at": "2026-10-07T12:20:56"
+}
