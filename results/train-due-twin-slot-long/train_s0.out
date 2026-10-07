@@ -1,0 +1,155 @@
+============================================================
+DRL Scheduling Network — PPO Training
+============================================================
+
+Reward: tardiness (rewards/functions/tardiness.py:TardinessReward)
+/home/ubuntupc/Documents/Github/Capstone/.venv/lib/python3.10/site-packages/torch/_utils.py:831: UserWarning: TypedStorage is deprecated. It will be removed in the future and UntypedStorage will be the only storage class. This should only matter to you if you are using storages directly.  To access UntypedStorage directly, use tensor.untyped_storage() instead of tensor.storage()
+  return self.fget.__get__(instance, owner)()
+
+Parameter counts:
+  encoder_factory_cnn               168,352
+  encoder_machine_set                38,400
+  encoder_job_set                    38,720
+  encoder_global_mlp                  3,488
+  encoder_event_embed                   848
+  fusion_head                       420,096
+  actor                              68,360
+  critic                             66,561
+  total                             804,825
+
+Resumed from results/train-due-twin-slot_s0/checkpoint.pt at step 99,840 (checkpoint reward: tardiness)
+
+Scenario generator: randomized (episode_duration_seconds=21600.0) (random_warmup, rule=default) (params {"failure_probability": 0.0, "due_date_allowance_range": [1.75, 2.5], "regime_block_seconds": 5400, "horizon_seconds": 30600, "load_mix": [{"name": "normal", "utilization": [0.6, 1.2], "weight": 2}, {"name": "surge", "utilization": [1.0, 1.6]}, {"name": "short", "utilization": [0.6, 1.2], "agv_count": 2}]})
+Observation row caps: 15 machines, 256 jobs
+Twin envs: 16 over 5 worker processes
+Discount: gamma_s = 0.999907 per simulated second (horizon 10,800 s)
+
+Backend: twin (kinematic, results/dev-popart-smoke/floor7/des_floor.json)
+Run directory: results/train-due-twin-slot-long_s0
+Resuming at step 99,840 — 300,160 more of 400,000 target timesteps
+  586 updates × 32 steps × 16 envs
+  Device: cuda
+
+Update    1/586 | Step  100,352 | SPS     15 | Ep    16 | EpRet -186.017 | Makespan  26517 | R_avg -7.0230 | Ret -109.177 | PG -0.0157 | VL 0.2206 | EV +0.71 | Ent 1.412 | T 33.56s
+Update    5/586 | Step  102,400 | SPS     15 | Ep    96 | EpRet -202.346 | Makespan  24950 | R_avg -6.9180 | Ret -107.702 | PG -0.0218 | VL 0.1970 | EV +0.83 | Ent 1.427 | T 35.40s
+Update   10/586 | Step  104,960 | SPS     15 | Ep   208 | EpRet -93.891 | Makespan  25357 | R_avg -4.0037 | Ret -75.230 | PG -0.0123 | VL 0.0942 | EV +0.47 | Ent 1.461 | T 27.60s
+Update   15/586 | Step  107,520 | SPS     15 | Ep   320 | EpRet -207.298 | Makespan  25580 | R_avg -8.2367 | Ret -125.699 | PG -0.0154 | VL 0.2480 | EV +0.73 | Ent 1.480 | T 34.99s
+Update   20/586 | Step  110,080 | SPS     15 | Ep   416 | EpRet -246.421 | Makespan  25759 | R_avg -10.2127 | Ret -153.480 | PG -0.0166 | VL 0.3911 | EV +0.74 | Ent 1.518 | T 34.02s
+Update   25/586 | Step  112,640 | SPS     15 | Ep   528 | EpRet -196.169 | Makespan  26726 | R_avg -7.3212 | Ret -115.719 | PG -0.0122 | VL 0.2061 | EV +0.78 | Ent 1.596 | T 32.71s
+Update   30/586 | Step  115,200 | SPS     15 | Ep   640 | EpRet -249.139 | Makespan  24643 | R_avg -9.8476 | Ret -143.855 | PG -0.0137 | VL 0.2687 | EV +0.72 | Ent 1.415 | T 34.69s
+Update   35/586 | Step  117,760 | SPS     15 | Ep   736 | EpRet -152.320 | Makespan  25128 | R_avg -7.6727 | Ret -128.973 | PG -0.0064 | VL 0.3342 | EV +0.73 | Ent 1.472 | T 32.34s
+Update   40/586 | Step  120,320 | SPS     15 | Ep   848 | EpRet -220.773 | Makespan  25922 | R_avg -9.4240 | Ret -141.430 | PG -0.0071 | VL 0.3299 | EV +0.72 | Ent 1.418 | T 32.45s
+Update   45/586 | Step  122,880 | SPS     15 | Ep   960 | EpRet -177.115 | Makespan  26421 | R_avg -8.2457 | Ret -114.299 | PG -0.0039 | VL 0.1407 | EV +0.74 | Ent 1.422 | T 39.88s
+Update   50/586 | Step  125,440 | SPS     15 | Ep  1056 | EpRet -158.969 | Makespan  25370 | R_avg -6.8600 | Ret -114.273 | PG -0.0181 | VL 0.2032 | EV +0.79 | Ent 1.368 | T 31.62s
+Update   55/586 | Step  128,000 | SPS     15 | Ep  1168 | EpRet -142.064 | Makespan  26218 | R_avg -6.0229 | Ret -118.148 | PG -0.0108 | VL 0.2636 | EV +0.76 | Ent 1.342 | T 31.63s
+Update   60/586 | Step  130,560 | SPS     15 | Ep  1280 | EpRet -200.385 | Makespan  25420 | R_avg -7.7617 | Ret -132.779 | PG -0.0155 | VL 0.2173 | EV +0.80 | Ent 1.390 | T 33.85s
+Update   65/586 | Step  133,120 | SPS     15 | Ep  1376 | EpRet -122.538 | Makespan  23718 | R_avg -6.3293 | Ret -109.617 | PG -0.0136 | VL 0.2219 | EV +0.71 | Ent 1.222 | T 31.65s
+Update   70/586 | Step  135,680 | SPS     15 | Ep  1488 | EpRet -181.016 | Makespan  24735 | R_avg -7.3923 | Ret -128.665 | PG -0.0034 | VL 0.2867 | EV +0.71 | Ent 1.260 | T 35.22s
+Update   75/586 | Step  138,240 | SPS     15 | Ep  1600 | EpRet -191.295 | Makespan  24820 | R_avg -7.1494 | Ret -128.117 | PG -0.0050 | VL 0.2728 | EV +0.74 | Ent 1.288 | T 32.70s
+Update   80/586 | Step  140,800 | SPS     15 | Ep  1696 | EpRet -192.717 | Makespan  26656 | R_avg -7.7642 | Ret -144.289 | PG -0.0010 | VL 0.3254 | EV +0.56 | Ent 1.338 | T 34.19s
+Update   85/586 | Step  143,360 | SPS     15 | Ep  1808 | EpRet -219.873 | Makespan  25388 | R_avg -8.6475 | Ret -130.723 | PG -0.0124 | VL 0.2191 | EV +0.81 | Ent 1.473 | T 35.04s
+Update   90/586 | Step  145,920 | SPS     15 | Ep  1920 | EpRet -171.807 | Makespan  25623 | R_avg -9.0620 | Ret -158.912 | PG -0.0118 | VL 0.3332 | EV +0.71 | Ent 1.566 | T 35.43s
+Update   95/586 | Step  148,480 | SPS     15 | Ep  2016 | EpRet -199.286 | Makespan  25730 | R_avg -9.3444 | Ret -153.344 | PG -0.0079 | VL 0.3036 | EV +0.73 | Ent 1.568 | T 35.48s
+Update  100/586 | Step  151,040 | SPS     15 | Ep  2128 | EpRet -176.999 | Makespan  26148 | R_avg -7.1106 | Ret -114.066 | PG -0.0125 | VL 0.1897 | EV +0.76 | Ent 1.796 | T 30.72s
+Update  105/586 | Step  153,600 | SPS     15 | Ep  2240 | EpRet -220.009 | Makespan  26483 | R_avg -8.8602 | Ret -140.201 | PG -0.0122 | VL 0.2126 | EV +0.71 | Ent 1.583 | T 35.62s
+Update  110/586 | Step  156,160 | SPS     15 | Ep  2336 | EpRet -205.729 | Makespan  26252 | R_avg -7.5020 | Ret -126.350 | PG -0.0134 | VL 0.2047 | EV +0.71 | Ent 1.624 | T 35.25s
+Update  115/586 | Step  158,720 | SPS     15 | Ep  2448 | EpRet -296.219 | Makespan  25915 | R_avg -10.6149 | Ret -157.204 | PG -0.0040 | VL 0.3353 | EV +0.77 | Ent 1.746 | T 36.46s
+Update  120/586 | Step  161,280 | SPS     15 | Ep  2560 | EpRet -235.036 | Makespan  25647 | R_avg -10.1140 | Ret -140.176 | PG -0.0035 | VL 0.2496 | EV +0.68 | Ent 1.533 | T 36.02s
+Update  125/586 | Step  163,840 | SPS     15 | Ep  2656 | EpRet -216.982 | Makespan  25848 | R_avg -7.9654 | Ret -128.200 | PG -0.0075 | VL 0.1877 | EV +0.64 | Ent 1.555 | T 32.07s
+Update  130/586 | Step  166,400 | SPS     15 | Ep  2768 | EpRet -166.921 | Makespan  26021 | R_avg -5.1280 | Ret -104.430 | PG -0.0155 | VL 0.1433 | EV +0.77 | Ent 1.658 | T 27.91s
+Update  135/586 | Step  168,960 | SPS     15 | Ep  2880 | EpRet -225.214 | Makespan  25174 | R_avg -9.7884 | Ret -138.899 | PG -0.0098 | VL 0.2113 | EV +0.74 | Ent 1.634 | T 37.38s
+Update  140/586 | Step  171,520 | SPS     15 | Ep  2976 | EpRet -154.597 | Makespan  25630 | R_avg -7.3203 | Ret -114.326 | PG -0.0084 | VL 0.1823 | EV +0.56 | Ent 1.804 | T 36.43s
+Update  145/586 | Step  174,080 | SPS     15 | Ep  3088 | EpRet -211.895 | Makespan  25156 | R_avg -7.7427 | Ret -133.871 | PG -0.0070 | VL 0.2968 | EV +0.64 | Ent 1.777 | T 31.03s
+Update  150/586 | Step  176,640 | SPS     15 | Ep  3200 | EpRet -182.515 | Makespan  25858 | R_avg -8.7285 | Ret -134.464 | PG -0.0035 | VL 0.2425 | EV +0.80 | Ent 1.811 | T 33.75s
+Update  155/586 | Step  179,200 | SPS     15 | Ep  3296 | EpRet -179.584 | Makespan  25977 | R_avg -7.3599 | Ret -129.779 | PG -0.0174 | VL 0.1950 | EV +0.73 | Ent 1.760 | T 33.26s
+Update  160/586 | Step  181,760 | SPS     15 | Ep  3408 | EpRet -152.509 | Makespan  24915 | R_avg -5.9390 | Ret -101.023 | PG -0.0121 | VL 0.1346 | EV +0.57 | Ent 1.809 | T 30.94s
+Update  165/586 | Step  184,320 | SPS     15 | Ep  3520 | EpRet -175.065 | Makespan  24976 | R_avg -7.5026 | Ret -113.593 | PG -0.0011 | VL 0.1626 | EV +0.72 | Ent 1.826 | T 34.16s
+Update  170/586 | Step  186,880 | SPS     15 | Ep  3616 | EpRet -156.727 | Makespan  25557 | R_avg -6.6392 | Ret -104.325 | PG -0.0145 | VL 0.2285 | EV +0.68 | Ent 1.864 | T 32.73s
+Update  175/586 | Step  189,440 | SPS     15 | Ep  3728 | EpRet -201.245 | Makespan  25841 | R_avg -7.5217 | Ret -114.859 | PG -0.0113 | VL 0.2223 | EV +0.70 | Ent 1.785 | T 32.68s
+Update  180/586 | Step  192,000 | SPS     15 | Ep  3840 | EpRet -204.514 | Makespan  25264 | R_avg -7.3151 | Ret -112.773 | PG 0.0008 | VL 0.2931 | EV +0.61 | Ent 1.833 | T 32.78s
+Update  185/586 | Step  194,560 | SPS     15 | Ep  3936 | EpRet -180.480 | Makespan  24665 | R_avg -6.9701 | Ret -105.941 | PG -0.0040 | VL 0.1886 | EV +0.71 | Ent 1.831 | T 33.50s
+Update  190/586 | Step  197,120 | SPS     15 | Ep  4048 | EpRet -169.721 | Makespan  25365 | R_avg -6.6949 | Ret -120.929 | PG -0.0104 | VL 0.3238 | EV +0.56 | Ent 1.841 | T 32.89s
+Update  195/586 | Step  199,680 | SPS     15 | Ep  4160 | EpRet -174.514 | Makespan  25910 | R_avg -7.4120 | Ret -125.383 | PG -0.0184 | VL 0.3222 | EV +0.77 | Ent 1.807 | T 33.66s
+Update  200/586 | Step  202,240 | SPS     15 | Ep  4256 | EpRet -172.958 | Makespan  25678 | R_avg -7.0498 | Ret -113.628 | PG -0.0124 | VL 0.2631 | EV +0.60 | Ent 1.768 | T 32.84s
+Update  205/586 | Step  204,800 | SPS     15 | Ep  4368 | EpRet -156.554 | Makespan  25342 | R_avg -5.9296 | Ret -108.315 | PG -0.0108 | VL 0.2778 | EV +0.74 | Ent 1.810 | T 30.16s
+Update  210/586 | Step  207,360 | SPS     15 | Ep  4480 | EpRet -273.290 | Makespan  25383 | R_avg -11.2568 | Ret -183.647 | PG -0.0020 | VL 0.3615 | EV +0.79 | Ent 1.693 | T 37.38s
+Update  215/586 | Step  209,920 | SPS     15 | Ep  4576 | EpRet -199.978 | Makespan  26045 | R_avg -8.6319 | Ret -136.941 | PG -0.0066 | VL 0.2204 | EV +0.75 | Ent 1.827 | T 33.98s
+Update  220/586 | Step  212,480 | SPS     15 | Ep  4688 | EpRet -223.508 | Makespan  25415 | R_avg -8.1672 | Ret -131.618 | PG -0.0103 | VL 0.2301 | EV +0.77 | Ent 1.888 | T 33.64s
+Update  225/586 | Step  215,040 | SPS     15 | Ep  4800 | EpRet -108.849 | Makespan  25929 | R_avg -6.6678 | Ret -111.040 | PG -0.0182 | VL 0.1679 | EV +0.82 | Ent 1.852 | T 34.14s
+Update  230/586 | Step  217,600 | SPS     15 | Ep  4896 | EpRet -230.420 | Makespan  26397 | R_avg -8.4228 | Ret -152.944 | PG -0.0102 | VL 0.3238 | EV +0.75 | Ent 1.817 | T 34.22s
+Update  235/586 | Step  220,160 | SPS     15 | Ep  5008 | EpRet -191.069 | Makespan  27014 | R_avg -6.4575 | Ret -109.845 | PG -0.0113 | VL 0.1798 | EV +0.77 | Ent 1.910 | T 28.63s
+Update  240/586 | Step  222,720 | SPS     15 | Ep  5120 | EpRet -199.813 | Makespan  24561 | R_avg -8.5193 | Ret -136.633 | PG -0.0124 | VL 0.2505 | EV +0.74 | Ent 1.931 | T 36.14s
+Update  245/586 | Step  225,280 | SPS     15 | Ep  5216 | EpRet -177.230 | Makespan  25173 | R_avg -8.9463 | Ret -146.939 | PG -0.0034 | VL 0.2644 | EV +0.78 | Ent 1.753 | T 36.15s
+Update  250/586 | Step  227,840 | SPS     15 | Ep  5328 | EpRet -148.069 | Makespan  25092 | R_avg -5.7223 | Ret -119.957 | PG -0.0161 | VL 0.1695 | EV +0.62 | Ent 1.602 | T 33.72s
+Update  255/586 | Step  230,400 | SPS     15 | Ep  5440 | EpRet -214.931 | Makespan  26774 | R_avg -8.7503 | Ret -129.062 | PG -0.0070 | VL 0.1729 | EV +0.68 | Ent 1.789 | T 38.64s
+Update  260/586 | Step  232,960 | SPS     15 | Ep  5536 | EpRet -176.468 | Makespan  26208 | R_avg -8.6206 | Ret -125.410 | PG -0.0078 | VL 0.1962 | EV +0.82 | Ent 1.867 | T 32.06s
+Update  265/586 | Step  235,520 | SPS     15 | Ep  5648 | EpRet -184.348 | Makespan  24508 | R_avg -7.1293 | Ret -122.778 | PG -0.0142 | VL 0.2242 | EV +0.77 | Ent 1.851 | T 35.93s
+Update  270/586 | Step  238,080 | SPS     15 | Ep  5760 | EpRet -184.877 | Makespan  26016 | R_avg -9.2633 | Ret -157.694 | PG -0.0199 | VL 0.3037 | EV +0.84 | Ent 1.790 | T 34.90s
+Update  275/586 | Step  240,640 | SPS     15 | Ep  5856 | EpRet -244.575 | Makespan  24821 | R_avg -8.8672 | Ret -143.363 | PG -0.0139 | VL 0.2202 | EV +0.74 | Ent 1.773 | T 35.29s
+Update  280/586 | Step  243,200 | SPS     15 | Ep  5968 | EpRet -210.055 | Makespan  26015 | R_avg -8.1330 | Ret -127.974 | PG -0.0061 | VL 0.1945 | EV +0.77 | Ent 1.745 | T 32.33s
+Update  285/586 | Step  245,760 | SPS     15 | Ep  6080 | EpRet -163.188 | Makespan  24809 | R_avg -6.4219 | Ret -101.798 | PG -0.0146 | VL 0.1847 | EV +0.71 | Ent 1.714 | T 33.55s
+Update  290/586 | Step  248,320 | SPS     15 | Ep  6176 | EpRet -210.927 | Makespan  25945 | R_avg -9.5977 | Ret -149.747 | PG -0.0083 | VL 0.2205 | EV +0.73 | Ent 1.546 | T 34.53s
+Update  295/586 | Step  250,880 | SPS     15 | Ep  6288 | EpRet -133.104 | Makespan  25131 | R_avg -4.8765 | Ret -108.314 | PG -0.0049 | VL 0.2118 | EV +0.72 | Ent 1.621 | T 31.95s
+Update  300/586 | Step  253,440 | SPS     15 | Ep  6400 | EpRet -155.414 | Makespan  25589 | R_avg -6.3840 | Ret -95.777 | PG -0.0040 | VL 0.1369 | EV +0.67 | Ent 1.647 | T 35.10s
+Update  305/586 | Step  256,000 | SPS     15 | Ep  6496 | EpRet -172.705 | Makespan  25089 | R_avg -6.8986 | Ret -107.318 | PG -0.0069 | VL 0.2282 | EV +0.67 | Ent 1.566 | T 31.20s
+Update  310/586 | Step  258,560 | SPS     15 | Ep  6608 | EpRet -233.176 | Makespan  25732 | R_avg -7.7954 | Ret -145.312 | PG -0.0092 | VL 0.2573 | EV +0.76 | Ent 1.653 | T 31.82s
+Update  315/586 | Step  261,120 | SPS     15 | Ep  6720 | EpRet -163.889 | Makespan  25857 | R_avg -6.6645 | Ret -109.085 | PG -0.0070 | VL 0.1915 | EV +0.76 | Ent 1.685 | T 35.23s
+Update  320/586 | Step  263,680 | SPS     15 | Ep  6816 | EpRet -192.625 | Makespan  25428 | R_avg -6.7176 | Ret -124.442 | PG 0.0014 | VL 0.2227 | EV +0.78 | Ent 1.571 | T 31.40s
+Update  325/586 | Step  266,240 | SPS     15 | Ep  6928 | EpRet -134.110 | Makespan  24241 | R_avg -5.4747 | Ret -105.535 | PG -0.0109 | VL 0.1644 | EV +0.75 | Ent 1.696 | T 29.60s
+Update  330/586 | Step  268,800 | SPS     15 | Ep  7040 | EpRet -202.526 | Makespan  25076 | R_avg -8.6771 | Ret -139.204 | PG -0.0123 | VL 0.2127 | EV +0.77 | Ent 1.748 | T 37.24s
+Update  335/586 | Step  271,360 | SPS     15 | Ep  7136 | EpRet -186.836 | Makespan  25754 | R_avg -5.3347 | Ret -95.979 | PG -0.0093 | VL 0.1904 | EV +0.69 | Ent 1.620 | T 31.98s
+Update  340/586 | Step  273,920 | SPS     15 | Ep  7248 | EpRet -157.213 | Makespan  24963 | R_avg -6.4334 | Ret -112.154 | PG -0.0112 | VL 0.1832 | EV +0.66 | Ent 1.737 | T 33.88s
+Update  345/586 | Step  276,480 | SPS     15 | Ep  7360 | EpRet -153.357 | Makespan  25493 | R_avg -6.7255 | Ret -105.916 | PG -0.0112 | VL 0.1752 | EV +0.68 | Ent 1.833 | T 34.85s
+Update  350/586 | Step  279,040 | SPS     15 | Ep  7456 | EpRet -174.663 | Makespan  26492 | R_avg -7.3040 | Ret -111.452 | PG -0.0162 | VL 0.1836 | EV +0.80 | Ent 1.784 | T 33.47s
+Update  355/586 | Step  281,600 | SPS     15 | Ep  7568 | EpRet -166.500 | Makespan  24402 | R_avg -6.6677 | Ret -120.287 | PG -0.0105 | VL 0.3194 | EV +0.72 | Ent 1.862 | T 31.53s
+Update  360/586 | Step  284,160 | SPS     15 | Ep  7680 | EpRet -160.692 | Makespan  25278 | R_avg -7.1904 | Ret -112.445 | PG -0.0051 | VL 0.1994 | EV +0.70 | Ent 1.966 | T 35.41s
+Update  365/586 | Step  286,720 | SPS     15 | Ep  7776 | EpRet -192.055 | Makespan  26008 | R_avg -8.1008 | Ret -126.959 | PG -0.0013 | VL 0.2536 | EV +0.62 | Ent 1.927 | T 33.67s
+Update  370/586 | Step  289,280 | SPS     15 | Ep  7888 | EpRet -171.436 | Makespan  26059 | R_avg -6.4525 | Ret -107.142 | PG -0.0040 | VL 0.2474 | EV +0.63 | Ent 1.840 | T 31.70s
+Update  375/586 | Step  291,840 | SPS     15 | Ep  8000 | EpRet -145.209 | Makespan  25516 | R_avg -6.3990 | Ret -113.328 | PG -0.0092 | VL 0.2044 | EV +0.75 | Ent 1.812 | T 34.02s
+Update  380/586 | Step  294,400 | SPS     15 | Ep  8096 | EpRet -168.904 | Makespan  24946 | R_avg -7.9104 | Ret -114.786 | PG -0.0056 | VL 0.2437 | EV +0.72 | Ent 1.674 | T 30.83s
+Update  385/586 | Step  296,960 | SPS     15 | Ep  8208 | EpRet -243.959 | Makespan  25443 | R_avg -7.3232 | Ret -124.070 | PG -0.0060 | VL 0.2384 | EV +0.74 | Ent 1.632 | T 32.71s
+Update  390/586 | Step  299,520 | SPS     15 | Ep  8320 | EpRet -219.732 | Makespan  26399 | R_avg -8.8365 | Ret -136.093 | PG -0.0144 | VL 0.2345 | EV +0.78 | Ent 1.535 | T 38.22s
+Update  395/586 | Step  302,080 | SPS     15 | Ep  8416 | EpRet -152.467 | Makespan  25786 | R_avg -7.3135 | Ret -112.444 | PG -0.0085 | VL 0.2194 | EV +0.80 | Ent 1.499 | T 33.26s
+Update  400/586 | Step  304,640 | SPS     15 | Ep  8528 | EpRet -173.237 | Makespan  25568 | R_avg -6.6457 | Ret -118.129 | PG -0.0113 | VL 0.2270 | EV +0.73 | Ent 1.354 | T 30.97s
+Update  405/586 | Step  307,200 | SPS     15 | Ep  8640 | EpRet -189.037 | Makespan  25437 | R_avg -7.9602 | Ret -116.938 | PG -0.0090 | VL 0.2398 | EV +0.74 | Ent 1.477 | T 38.38s
+Update  410/586 | Step  309,760 | SPS     15 | Ep  8736 | EpRet -186.694 | Makespan  26223 | R_avg -7.2043 | Ret -104.207 | PG -0.0100 | VL 0.1713 | EV +0.69 | Ent 1.595 | T 33.63s
+Update  415/586 | Step  312,320 | SPS     15 | Ep  8848 | EpRet -189.984 | Makespan  25585 | R_avg -6.9047 | Ret -120.017 | PG -0.0081 | VL 0.2623 | EV +0.71 | Ent 1.667 | T 34.33s
+Update  420/586 | Step  314,880 | SPS     15 | Ep  8960 | EpRet -201.169 | Makespan  26287 | R_avg -7.7762 | Ret -136.035 | PG -0.0094 | VL 0.3790 | EV +0.80 | Ent 1.597 | T 35.44s
+Update  425/586 | Step  317,440 | SPS     15 | Ep  9056 | EpRet -231.907 | Makespan  26027 | R_avg -8.4099 | Ret -132.950 | PG -0.0023 | VL 0.2353 | EV +0.78 | Ent 1.451 | T 33.10s
+Update  430/586 | Step  320,000 | SPS     15 | Ep  9168 | EpRet -203.940 | Makespan  24801 | R_avg -7.5644 | Ret -132.317 | PG -0.0065 | VL 0.3204 | EV +0.71 | Ent 1.611 | T 34.05s
+Update  435/586 | Step  322,560 | SPS     15 | Ep  9280 | EpRet -190.550 | Makespan  24578 | R_avg -7.9335 | Ret -155.897 | PG -0.0043 | VL 0.3656 | EV +0.77 | Ent 1.553 | T 36.69s
+Update  440/586 | Step  325,120 | SPS     15 | Ep  9376 | EpRet -191.761 | Makespan  26282 | R_avg -8.9658 | Ret -155.959 | PG -0.0091 | VL 0.2702 | EV +0.75 | Ent 1.480 | T 36.86s
+Update  445/586 | Step  327,680 | SPS     15 | Ep  9488 | EpRet -227.329 | Makespan  24877 | R_avg -8.2965 | Ret -131.540 | PG -0.0105 | VL 0.2147 | EV +0.78 | Ent 1.577 | T 31.80s
+Update  450/586 | Step  330,240 | SPS     15 | Ep  9600 | EpRet -181.578 | Makespan  25230 | R_avg -8.5993 | Ret -133.181 | PG -0.0036 | VL 0.2218 | EV +0.78 | Ent 1.537 | T 33.92s
+Update  455/586 | Step  332,800 | SPS     15 | Ep  9696 | EpRet -137.643 | Makespan  25733 | R_avg -5.3614 | Ret -92.411 | PG -0.0074 | VL 0.1876 | EV +0.71 | Ent 1.784 | T 31.01s
+Update  460/586 | Step  335,360 | SPS     15 | Ep  9808 | EpRet -186.644 | Makespan  25835 | R_avg -7.6186 | Ret -133.161 | PG -0.0055 | VL 0.2630 | EV +0.61 | Ent 1.744 | T 36.08s
+Update  465/586 | Step  337,920 | SPS     15 | Ep  9920 | EpRet -192.603 | Makespan  25130 | R_avg -7.1434 | Ret -121.338 | PG -0.0154 | VL 0.2762 | EV +0.78 | Ent 1.787 | T 31.93s
+Update  470/586 | Step  340,480 | SPS     15 | Ep 10016 | EpRet -241.217 | Makespan  24557 | R_avg -7.5722 | Ret -121.009 | PG -0.0050 | VL 0.2338 | EV +0.79 | Ent 1.842 | T 33.64s
+Update  475/586 | Step  343,040 | SPS     15 | Ep 10128 | EpRet -142.303 | Makespan  25359 | R_avg -5.4252 | Ret -97.626 | PG -0.0139 | VL 0.1466 | EV +0.70 | Ent 1.815 | T 29.47s
+Update  480/586 | Step  345,600 | SPS     15 | Ep 10240 | EpRet -134.675 | Makespan  24794 | R_avg -5.9318 | Ret -107.189 | PG -0.0030 | VL 0.1133 | EV +0.76 | Ent 1.601 | T 32.79s
+Update  485/586 | Step  348,160 | SPS     15 | Ep 10336 | EpRet -191.449 | Makespan  25013 | R_avg -7.2326 | Ret -110.630 | PG -0.0122 | VL 0.1840 | EV +0.84 | Ent 1.677 | T 29.53s
+Update  490/586 | Step  350,720 | SPS     15 | Ep 10448 | EpRet -142.800 | Makespan  25356 | R_avg -5.8557 | Ret -108.785 | PG -0.0055 | VL 0.2607 | EV +0.74 | Ent 1.587 | T 30.79s
+Update  495/586 | Step  353,280 | SPS     15 | Ep 10560 | EpRet -189.689 | Makespan  25528 | R_avg -8.0727 | Ret -134.841 | PG -0.0057 | VL 0.1942 | EV +0.86 | Ent 1.553 | T 34.95s
+Update  500/586 | Step  355,840 | SPS     15 | Ep 10656 | EpRet -153.357 | Makespan  25756 | R_avg -6.4525 | Ret -105.499 | PG -0.0114 | VL 0.2057 | EV +0.75 | Ent 1.747 | T 30.68s
+Update  505/586 | Step  358,400 | SPS     15 | Ep 10768 | EpRet -132.580 | Makespan  25384 | R_avg -4.6082 | Ret -80.633 | PG -0.0061 | VL 0.1159 | EV +0.64 | Ent 1.674 | T 27.71s
+Update  510/586 | Step  360,960 | SPS     15 | Ep 10880 | EpRet -190.177 | Makespan  24712 | R_avg -7.9660 | Ret -117.651 | PG -0.0067 | VL 0.2215 | EV +0.85 | Ent 1.663 | T 36.24s
+Update  515/586 | Step  363,520 | SPS     15 | Ep 10976 | EpRet -259.498 | Makespan  25804 | R_avg -8.1391 | Ret -126.716 | PG -0.0063 | VL 0.1523 | EV +0.85 | Ent 1.608 | T 34.38s
+Update  520/586 | Step  366,080 | SPS     15 | Ep 11088 | EpRet -202.723 | Makespan  25718 | R_avg -8.0960 | Ret -140.841 | PG -0.0046 | VL 0.2842 | EV +0.71 | Ent 1.551 | T 32.91s
+Update  525/586 | Step  368,640 | SPS     15 | Ep 11200 | EpRet -143.997 | Makespan  26308 | R_avg -6.7520 | Ret -115.435 | PG -0.0117 | VL 0.1269 | EV +0.82 | Ent 1.658 | T 34.88s
+Update  530/586 | Step  371,200 | SPS     15 | Ep 11296 | EpRet -158.700 | Makespan  24654 | R_avg -6.6473 | Ret -107.515 | PG -0.0101 | VL 0.2121 | EV +0.71 | Ent 1.526 | T 32.06s
+Update  535/586 | Step  373,760 | SPS     15 | Ep 11408 | EpRet -160.952 | Makespan  25284 | R_avg -6.2664 | Ret -104.053 | PG -0.0083 | VL 0.1567 | EV +0.65 | Ent 1.609 | T 31.44s
+Update  540/586 | Step  376,320 | SPS     15 | Ep 11520 | EpRet -249.396 | Makespan  25823 | R_avg -9.4054 | Ret -130.593 | PG -0.0051 | VL 0.2767 | EV +0.70 | Ent 1.450 | T 34.38s
+Update  545/586 | Step  378,880 | SPS     15 | Ep 11616 | EpRet -133.465 | Makespan  25461 | R_avg -6.3163 | Ret -99.632 | PG -0.0163 | VL 0.1761 | EV +0.66 | Ent 1.870 | T 31.96s
+Update  550/586 | Step  381,440 | SPS     15 | Ep 11728 | EpRet -163.458 | Makespan  25138 | R_avg -6.5418 | Ret -115.523 | PG -0.0080 | VL 0.3221 | EV +0.69 | Ent 1.904 | T 28.30s
+Update  555/586 | Step  384,000 | SPS     15 | Ep 11840 | EpRet -230.037 | Makespan  25777 | R_avg -8.9901 | Ret -141.137 | PG -0.0073 | VL 0.4215 | EV +0.73 | Ent 1.786 | T 36.36s
+Update  560/586 | Step  386,560 | SPS     15 | Ep 11936 | EpRet -180.572 | Makespan  25225 | R_avg -5.4979 | Ret -96.713 | PG -0.0124 | VL 0.2130 | EV +0.74 | Ent 2.115 | T 29.39s
+Update  565/586 | Step  389,120 | SPS     15 | Ep 12048 | EpRet -200.209 | Makespan  25674 | R_avg -7.4706 | Ret -115.949 | PG -0.0054 | VL 0.1828 | EV +0.77 | Ent 1.921 | T 32.56s
+Update  570/586 | Step  391,680 | SPS     15 | Ep 12160 | EpRet -255.604 | Makespan  24825 | R_avg -10.9273 | Ret -153.586 | PG -0.0045 | VL 0.2932 | EV +0.68 | Ent 1.572 | T 38.78s
+Update  575/586 | Step  394,240 | SPS     15 | Ep 12256 | EpRet -167.145 | Makespan  25785 | R_avg -8.5514 | Ret -138.614 | PG -0.0088 | VL 0.3920 | EV +0.70 | Ent 1.694 | T 32.14s
+Update  580/586 | Step  396,800 | SPS     15 | Ep 12368 | EpRet -222.548 | Makespan  25121 | R_avg -6.8554 | Ret -120.175 | PG -0.0077 | VL 0.2341 | EV +0.74 | Ent 1.610 | T 33.05s
+Update  585/586 | Step  399,360 | SPS     15 | Ep 12480 | EpRet -249.839 | Makespan  27099 | R_avg -10.3268 | Ret -141.975 | PG -0.0077 | VL 0.2233 | EV +0.81 | Ent 1.332 | T 34.34s
+Timing: env 19209s, inference 152s, update 258s, startup 4s; 15.3 steps/s in the loop
+
+Checkpoint saved to results/train-due-twin-slot-long_s0/checkpoint.pt
+Total training time: 19639.5s
+Average SPS: 15

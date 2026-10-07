@@ -129,7 +129,7 @@ class SchedulingNetwork(nn.Module):
         fused = self.fusion(encoded)
         return self.actor_critic.act(fused, obs.get("action_mask"), deterministic=deterministic)
 
-    def evaluate(self, obs: dict, actions: torch.Tensor):
+    def evaluate(self, obs: dict, actions: torch.Tensor, prior_logp: torch.Tensor = None):
         """@brief Re-evaluate stored actions for the PPO loss computation.
 
         @param obs      Observation dict corresponding to the stored
@@ -144,7 +144,7 @@ class SchedulingNetwork(nn.Module):
         """
         encoded = self.encoder(obs)
         fused = self.fusion(encoded)
-        return self.actor_critic.evaluate(fused, actions, obs.get("action_mask"))
+        return self.actor_critic.evaluate(fused, actions, obs.get("action_mask"), prior_logp)
 
     def distributions(self, obs: dict):
         """@brief The (masked) Categorical of each action branch, for inspection and decision logging."""

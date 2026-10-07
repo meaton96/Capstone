@@ -1,0 +1,92 @@
+40 seeds, 960 slots; oracle replay max |diff| 0.00e+00
+obs columns used: s0 (time), s1 (wip), s2 (share needs routing), s3 (share waiting pickup), s4 (share in transit), s5 (share queued), s6 (share processing), s7 (machines busy), s9 (AGVs busy), s10 (mean machine load), s13 (AGVs on duty / machine), s15 (options), s16 (share late), s17 (share behind), f0 (flag 0), f1 (flag 1), f2 (flag 2), f3 (flag 3)
+
+== how much of the congestion features obs v3 already carries: best |Spearman| with any obs column
+  c_wait_n                     best f2 (flag) 0.60
+  c_wait_per_agv               best s13 (AGVs on duty / machine) 0.72
+  c_wait_mean                  best f2 (flag) 0.59
+  c_wait_max                   best f2 (flag) 0.59
+  c_wait_sum_per_agv           best f2 (flag) 0.60
+  c_transit_n                  best s4 (share in transit) 0.93
+  c_agv_on_duty                best s13 (AGVs on duty / machine) 1.00
+  c_agv_busy_share             best f2 (flag) 0.75
+  c_agv_idle_share_last        best s5 (share queued) 0.67
+  c_queued_per_machine         best s5 (share queued) 0.96
+  c_queued_work_per_machine    best s10 (mean machine load) 0.97
+  c_wip                        best s1 (wip) 1.00
+
+== univariate Spearman with d (ATC-TECT tail minus MDD-TECT tail), pooled slots
+  c_wait_n                     ATC-TECT +0.22   ATC-ECT +0.20
+  c_wait_per_agv               ATC-TECT +0.21   ATC-ECT +0.21
+  c_wait_mean                  ATC-TECT +0.16   ATC-ECT +0.14
+  c_wait_max                   ATC-TECT +0.16   ATC-ECT +0.15
+  c_wait_sum_per_agv           ATC-TECT +0.16   ATC-ECT +0.15
+  c_transit_n                  ATC-TECT +0.03   ATC-ECT +0.01
+  c_agv_on_duty                ATC-TECT -0.17   ATC-ECT -0.22
+  c_agv_busy_share             ATC-TECT +0.16   ATC-ECT +0.17
+  c_agv_idle_share_last        ATC-TECT -0.03   ATC-ECT +0.03
+  c_queued_per_machine         ATC-TECT +0.08   ATC-ECT +0.04
+  c_queued_work_per_machine    ATC-TECT +0.05   ATC-ECT +0.02
+  c_wip                        ATC-TECT +0.23   ATC-ECT +0.18
+  s1                           ATC-TECT +0.23   ATC-ECT +0.18
+  s6                           ATC-TECT -0.17   ATC-ECT -0.15
+  s13                          ATC-TECT -0.17   ATC-ECT -0.22
+  f2                           ATC-TECT -0.20   ATC-ECT -0.21
+
+== all slots: target d_ATC-TECT (960 slots, 40 seeds; ATC better in 32%; median d +3.1%)
+  AUC                logistic  obs 0.667  cong 0.663  both 0.670   both - obs +0.003 (range over 10 partitions -0.006 .. +0.013)
+  AUC                boosting  obs 0.683  cong 0.658  both 0.680   both - obs -0.003 (range over 10 partitions -0.026 .. +0.008)
+  Spearman(pred, d)  ridge     obs 0.138  cong 0.154  both 0.134   both - obs -0.004 (range over 10 partitions -0.017 .. +0.012)
+  Spearman(pred, d)  boosting  obs 0.185  cong 0.179  both 0.189   both - obs +0.004 (range over 10 partitions -0.027 .. +0.025)
+
+== all slots: target d_ATC-ECT (960 slots, 40 seeds; ATC better in 31%; median d +3.6%)
+  AUC                logistic  obs 0.635  cong 0.654  both 0.640   both - obs +0.005 (range over 10 partitions -0.005 .. +0.017)
+  AUC                boosting  obs 0.662  cong 0.660  both 0.651   both - obs -0.011 (range over 10 partitions -0.027 .. +0.001)
+  Spearman(pred, d)  ridge     obs 0.097  cong 0.119  both 0.102   both - obs +0.006 (range over 10 partitions -0.007 .. +0.022)
+  Spearman(pred, d)  boosting  obs 0.163  cong 0.145  both 0.160   both - obs -0.003 (range over 10 partitions -0.026 .. +0.033)
+
+== first 4 h (slots 0-15; later tails are short): target d_ATC-TECT (640 slots, 40 seeds; ATC better in 36%; median d +5.5%)
+  AUC                logistic  obs 0.561  cong 0.566  both 0.566   both - obs +0.005 (range over 10 partitions -0.003 .. +0.020)
+  AUC                boosting  obs 0.584  cong 0.567  both 0.579   both - obs -0.004 (range over 10 partitions -0.020 .. +0.010)
+  Spearman(pred, d)  ridge     obs 0.081  cong 0.045  both 0.111   both - obs +0.029 (range over 10 partitions +0.006 .. +0.046)
+  Spearman(pred, d)  boosting  obs 0.098  cong 0.095  both 0.101   both - obs +0.004 (range over 10 partitions -0.034 .. +0.034)
+
+(dev1: 755 of 960 slots where the swap changes tardiness)
+  c_wait_n                     Spearman with dev1 +0.17
+  c_wait_per_agv               Spearman with dev1 +0.16
+  c_wait_mean                  Spearman with dev1 +0.13
+  c_wait_max                   Spearman with dev1 +0.13
+  c_wait_sum_per_agv           Spearman with dev1 +0.13
+  c_transit_n                  Spearman with dev1 -0.04
+  c_agv_on_duty                Spearman with dev1 -0.13
+  c_agv_busy_share             Spearman with dev1 +0.07
+  c_agv_idle_share_last        Spearman with dev1 +0.07
+  c_queued_per_machine         Spearman with dev1 +0.01
+  c_queued_work_per_machine    Spearman with dev1 -0.01
+  c_wip                        Spearman with dev1 +0.16
+
+== local swap of 1 slot(s) in the oracle schedule: target dev1 (755 slots, 40 seeds; ATC better in 37%; median d +1.0%)
+  AUC                logistic  obs 0.659  cong 0.657  both 0.661   both - obs +0.002 (range over 10 partitions -0.009 .. +0.014)
+  AUC                boosting  obs 0.651  cong 0.660  both 0.648   both - obs -0.003 (range over 10 partitions -0.026 .. +0.007)
+  Spearman(pred, d)  ridge     obs 0.123  cong 0.115  both 0.123   both - obs -0.000 (range over 10 partitions -0.017 .. +0.028)
+  Spearman(pred, d)  boosting  obs 0.137  cong 0.138  both 0.121   both - obs -0.016 (range over 10 partitions -0.034 .. +0.013)
+
+(dev4: 895 of 960 slots where the swap changes tardiness)
+  c_wait_n                     Spearman with dev4 +0.22
+  c_wait_per_agv               Spearman with dev4 +0.22
+  c_wait_mean                  Spearman with dev4 +0.17
+  c_wait_max                   Spearman with dev4 +0.17
+  c_wait_sum_per_agv           Spearman with dev4 +0.18
+  c_transit_n                  Spearman with dev4 -0.00
+  c_agv_on_duty                Spearman with dev4 -0.25
+  c_agv_busy_share             Spearman with dev4 +0.21
+  c_agv_idle_share_last        Spearman with dev4 +0.07
+  c_queued_per_machine         Spearman with dev4 +0.07
+  c_queued_work_per_machine    Spearman with dev4 +0.05
+  c_wip                        Spearman with dev4 +0.25
+
+== local swap of 4 slot(s) in the oracle schedule: target dev4 (895 slots, 40 seeds; ATC better in 38%; median d +1.7%)
+  AUC                logistic  obs 0.689  cong 0.694  both 0.693   both - obs +0.003 (range over 10 partitions -0.002 .. +0.012)
+  AUC                boosting  obs 0.696  cong 0.685  both 0.695   both - obs -0.002 (range over 10 partitions -0.010 .. +0.008)
+  Spearman(pred, d)  ridge     obs 0.260  cong 0.270  both 0.254   both - obs -0.006 (range over 10 partitions -0.014 .. +0.009)
+  Spearman(pred, d)  boosting  obs 0.252  cong 0.258  both 0.255   both - obs +0.003 (range over 10 partitions -0.020 .. +0.025)

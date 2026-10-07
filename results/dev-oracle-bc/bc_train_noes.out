@@ -1,0 +1,13 @@
+train 160 seeds / 3840 slots, test 40 seeds / 960 slots; tau 1.0% regret; mean regret of the slot's 2nd-best pair (test) 3.00%
+{"model": "full", "bc_seed": 0, "epochs": 200, "val_loss": 2.158609390258789, "train_pair_match_%": 78.40073529411765, "pair_match_%": 21.5625, "job_rule_match_%": 45.625, "mean_regret_%": 7.630107031596136, "mddtect_regret_%": 6.636078635788734, "share_mddtect_%": 33.33333333333333, "minutes": 1.2919560352961221}
+{"model": "scalars", "bc_seed": 0, "epochs": 200, "val_loss": 2.1913602352142334, "train_pair_match_%": 46.66053921568628, "pair_match_%": 21.979166666666668, "job_rule_match_%": 42.5, "mean_regret_%": 8.081197777743869, "mddtect_regret_%": 6.636078635788734, "share_mddtect_%": 35.104166666666664, "minutes": 0.3073585589726766}
+{"model": "full", "bc_seed": 1, "epochs": 200, "val_loss": 2.134824275970459, "train_pair_match_%": 77.91053921568627, "pair_match_%": 18.333333333333332, "job_rule_match_%": 43.645833333333336, "mean_regret_%": 7.694016254198281, "mddtect_regret_%": 6.636078635788734, "share_mddtect_%": 26.25, "minutes": 1.3115839640299478}
+{"model": "scalars", "bc_seed": 1, "epochs": 200, "val_loss": 2.154420852661133, "train_pair_match_%": 45.557598039215684, "pair_match_%": 21.25, "job_rule_match_%": 42.604166666666664, "mean_regret_%": 8.38399697978953, "mddtect_regret_%": 6.636078635788734, "share_mddtect_%": 39.375, "minutes": 0.31466199159622193}
+{"model": "full", "bc_seed": 2, "epochs": 200, "val_loss": 2.065436840057373, "train_pair_match_%": 78.61519607843137, "pair_match_%": 21.666666666666668, "job_rule_match_%": 46.35416666666667, "mean_regret_%": 7.257785279161254, "mddtect_regret_%": 6.636078635788734, "share_mddtect_%": 28.645833333333332, "minutes": 1.2957941571871439}
+{"model": "scalars", "bc_seed": 2, "epochs": 200, "val_loss": 2.1092562675476074, "train_pair_match_%": 48.314950980392155, "pair_match_%": 20.0, "job_rule_match_%": 40.416666666666664, "mean_regret_%": 8.672740556504829, "mddtect_regret_%": 6.636078635788734, "share_mddtect_%": 26.979166666666664, "minutes": 0.31202148596445717}
+
+== test seeds 0-39, per slot (deterministic argmax pair); mean over BC seeds
+         epochs  train_pair_match_%  pair_match_%  job_rule_match_%  mean_regret_%  mddtect_regret_%  share_mddtect_%
+model                                                                                                                
+full      200.0               78.31         20.52             45.21           7.53              6.64            29.41
+scalars   200.0               46.84         21.08             41.84           8.38              6.64            33.82

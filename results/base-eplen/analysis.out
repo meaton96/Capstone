@@ -1,0 +1,39 @@
+stability B0 w24h b1.5h: MDD-TECT tardiness per 6 h chunk (mean over seeds) 99 111 125 112  (rising = backlog grows: not stationary over this window)
+stability B0 w96h b1.5h: MDD-TECT tardiness per 6 h chunk (mean over seeds) 97 111 125 113 115 104 113 130 147 112 134 143 137 174 147 129  (rising = backlog grows: not stationary over this window)
+stability B0 w200h b1.5h: MDD-TECT tardiness per 6 h chunk (mean over seeds) 97 125 114 113 147 133 137 147 124 104 125 120 107 126 94 112 139  (rising = backlog grows: not stationary over this window)
+stability B2 w24h b1.5h: MDD-TECT tardiness per 6 h chunk (mean over seeds) 172 282 343 395  (rising = backlog grows: not stationary over this window)
+stability B2 w24h b6.0h: MDD-TECT tardiness per 6 h chunk (mean over seeds) 194 357 382 494  (rising = backlog grows: not stationary over this window)
+stability B2 w96h b1.5h: MDD-TECT tardiness per 6 h chunk (mean over seeds) 173 283 341 395 349 334 327 386 370 421 474 512 434 348 427 386  (rising = backlog grows: not stationary over this window)
+stability B2 w96h b6.0h: MDD-TECT tardiness per 6 h chunk (mean over seeds) 183 348 392 503 598 555 606 512 546 564 523 538 549 595 502 382  (rising = backlog grows: not stationary over this window)
+stability B2 w200h b1.5h: MDD-TECT tardiness per 6 h chunk (mean over seeds) 174 342 350 327 370 473 435 426 401 340 350 328 350 412 422 323 430  (rising = backlog grows: not stationary over this window)
+stability B2 w200h b6.0h: MDD-TECT tardiness per 6 h chunk (mean over seeds) 190 390 598 606 543 510 542 502 370 565 398 568 539 608 544 534 547  (rising = backlog grows: not stationary over this window)
+consistency (6 h / 1.5 h vs rq2-twin-fleet B2): 40 seeds, max |diff| 0.00e+00
+
+== whole episodes: does the per-instance best pair wash out with length?
+mix  window_h  block_h  seeds  timed_out  jobs_exited  mddtect_tard_per_job best_on_avg  own_best_is_avg_best_%  hindsight_gain_mean_%  hindsight_gain_median_%  rank_rho_mean  distinct_own_best
+ B0       6.0      1.5     40          0      261.675               349.766    ATC-TECT                    40.0                  4.473                    2.582          0.825                  6
+ B0      24.0      1.5     40          0     1045.275               416.025    ATC-TECT                    52.5                  2.056                    0.000          0.906                  5
+ B0      96.0      1.5     40          0     4199.050               482.868     ATC-ECT                    55.0                  1.496                    0.000          0.976                  2
+ B0     200.0      1.5     40          0     8736.125               469.993    ATC-TECT                    52.5                  0.885                    0.000          0.987                  2
+ B2       6.0      1.5     40          0      270.800               603.983    MDD-TECT                    20.0                  7.871                    4.842          0.805                  8
+ B2       6.0      6.0     40          0      265.200               663.415    MDD-TECT                    27.5                  9.694                    5.860          0.773                  6
+ B2      24.0      1.5     40          0     1128.925              1039.061    MDD-TECT                    27.5                  5.412                    2.828          0.851                  9
+ B2      24.0      6.0     40          0     1110.175              1235.159    MDD-TECT                    27.5                  6.602                    2.476          0.823                  6
+ B2      96.0      1.5     40          0     4540.650              1303.199    ATC-TECT                    52.5                  1.528                    0.000          0.919                  6
+ B2      96.0      6.0     40          0     4486.275              1739.833    MDD-TECT                    37.5                  3.943                    1.393          0.877                  7
+ B2     200.0      1.5     40          0     9419.250              1326.422    ATC-TECT                    75.0                  0.628                    0.000          0.940                  4
+ B2     200.0      6.0     40          0     9318.625              1806.552    MDD-TECT                    45.0                  2.586                    0.210          0.891                  6
+
+== 6 h chunks inside the long episodes (warm floor): per-chunk preference
+mix  window_h  block_h  chunks  chunk_best_is_episode_best_% chunk_best_on_avg  chunk_own_best_is_avg_best_%  chunk_hindsight_gain_mean_%  chunk_hindsight_gain_median_%  chunk_rank_rho_mean  chunk_distinct_own_best
+ B0      24.0      1.5     160                        43.125          ATC-TECT                        36.250                        6.243                          3.586                0.826                       10
+ B0      96.0      1.5     640                        35.000           ATC-ECT                        32.812                        7.251                          4.912                0.840                       10
+ B0     200.0      1.5    1320                        35.379          ATC-TECT                        32.348                        6.917                          4.162                0.842                       10
+ B2      24.0      1.5     160                        39.375          MDD-TECT                        18.125                       11.093                          7.536                0.775                        9
+ B2      24.0      6.0     160                        39.375          MDD-TECT                        18.750                       13.714                          8.498                0.721                       10
+ B2      96.0      1.5     640                        28.594          ATC-TECT                        24.375                        8.154                          6.029                0.782                       10
+ B2      96.0      6.0     640                        26.875          MDD-TECT                        17.656                       18.053                         12.030                0.705                       10
+ B2     200.0      1.5    1320                        26.515          ATC-TECT                        25.303                        8.235                          6.212                0.791                       10
+ B2     200.0      6.0    1320                        22.576          MDD-TECT                        16.439                       18.778                         12.761                0.708                       10
+
+(hindsight gain = picking each instance's own best fixed pair after the fact vs the best-on-average pair; rank rho = agreement of an instance's pair ranking with the average ranking)

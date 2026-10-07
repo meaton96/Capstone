@@ -53,8 +53,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from config import (
     EncoderConfig, FusionConfig, ActorCriticConfig, PPOConfig, OBS_SHAPES, OBS_LAYOUT,
-    ACTION_BRANCHES, ACTION_LAYOUT, obs_shapes as shapes_for_caps,
+    ACTION_BRANCHES, ACTION_LAYOUT, JOB_HEAD_RULES, MACHINE_HEAD_RULES, obs_shapes as shapes_for_caps,
 )
+from models.actor_critic import prior_log_probs
 from models.network import SchedulingNetwork, encoder_config_for
 from notify import Watchdog, notify, run_label
 from rollout_buffer import RolloutBuffer
@@ -254,6 +255,14 @@ def entropy_coef_at(ppo_cfg: PPOConfig, global_step: int) -> float:
     return ppo_cfg.entropy_coef + frac * (ppo_cfg.entropy_coef_final - ppo_cfg.entropy_coef)
 
 
+def prior_kl_coef_at(ppo_cfg: PPOConfig, global_step: int) -> float:
+    """@brief KL-to-prior coefficient at global_step: constant, or linear decay to prior_kl_coef_final."""
+    if ppo_cfg.prior_kl_coef_final is None:
+        return ppo_cfg.prior_kl_coef
+    frac = min(max(global_step / max(ppo_cfg.total_timesteps, 1), 0.0), 1.0)
+    return ppo_cfg.prior_kl_coef + frac * (ppo_cfg.prior_kl_coef_final - ppo_cfg.prior_kl_coef)
+
+
 def check_obs_schema(ckpt: dict, path) -> None:
     """@brief Refuse a checkpoint whose observation layout this network cannot read, with a clear message.
 
@@ -405,6 +414,17 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
     print("\nParameter counts:")
     for name, count in param_summary.items():
         print(f"  {name:30s} {count:>10,}")
+
+    # Action prior (action-prior branch, 2026-10-06): a fresh network starts at p0; the KL term is in the update.
+    prior_logp = None
+    if ppo_cfg.prior_pair:
+        prior_logp = prior_log_probs(ppo_cfg.prior_pair, ppo_cfg.prior_prob,
+                                     (JOB_HEAD_RULES, MACHINE_HEAD_RULES)).to(device)
+        if not args.resume_from:
+            net.actor_critic.actor.init_prior(prior_logp)
+        print(f"\nAction prior {ppo_cfg.prior_pair} (p = {ppo_cfg.prior_prob} per head)"
+              f"{'' if args.resume_from else ', policy initialized at the prior'}; KL coef {ppo_cfg.prior_kl_coef}"
+              f"{'' if ppo_cfg.prior_kl_coef_final is None else f' -> {ppo_cfg.prior_kl_coef_final}'}")
 
     optimizer = torch.optim.Adam(net.parameters(), lr=ppo_cfg.lr, eps=1e-5)
 
@@ -618,14 +638,16 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
             total_pg_loss = 0.0
             total_v_loss = 0.0
             total_entropy = 0.0
+            total_prior_kl = 0.0
             n_batches = 0
 
             ent_coef = entropy_coef_at(ppo_cfg, global_step)
+            kl_coef = prior_kl_coef_at(ppo_cfg, global_step)
             for epoch in range(ppo_cfg.num_epochs):
                 for batch in buffer.get_batches(ppo_cfg.batch_size):
-                    new_log_probs, new_values, entropy = net.evaluate(
-                        batch["obs"], batch["actions"]
-                    )
+                    out = net.evaluate(batch["obs"], batch["actions"], prior_logp)
+                    new_log_probs, new_values, entropy = out[:3]
+                    prior_kl = out[3] if prior_logp is not None else None
 
                     ratio = torch.exp(new_log_probs - batch["old_log_probs"])
                     surr1 = ratio * batch["advantages"]
@@ -648,6 +670,10 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
                         + ppo_cfg.value_coef * v_loss
                         + ent_coef * ent_loss
                     )
+                    if prior_kl is not None:
+                        if kl_coef > 0:
+                            loss = loss + kl_coef * prior_kl.mean()
+                        total_prior_kl += prior_kl.mean().item()
 
                     optimizer.zero_grad()
                     loss.backward()
@@ -684,6 +710,9 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
             writer.add_scalar("losses/value", total_v_loss / n_batches, global_step)
             writer.add_scalar("losses/entropy", total_entropy / n_batches, global_step)
             writer.add_scalar("charts/entropy_coef", ent_coef, global_step)
+            if prior_logp is not None:
+                writer.add_scalar("losses/prior_kl", total_prior_kl / n_batches, global_step)
+                writer.add_scalar("charts/prior_kl_coef", kl_coef, global_step)
             writer.add_scalar("charts/step_reward_mean", avg_reward, global_step)
             writer.add_scalar("charts/explained_variance", explained_var, global_step)
             writer.add_scalar("charts/return_mean", float(critic.ret_mean), global_step)
@@ -716,6 +745,7 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
                     f"VL {total_v_loss/n_batches:.4f} | "
                     f"EV {explained_var:+.2f} | "
                     f"Ent {total_entropy/n_batches:.3f} | "
+                    + (f"KLp {total_prior_kl/n_batches:.3f} | " if prior_logp is not None else "") +
                     f"T {update_time:.2f}s"
                 )
 
@@ -887,6 +917,14 @@ if __name__ == "__main__":
                              "0 = per-decision gamma 0.99, as in every run before 2026-10-01")
     parser.add_argument("--value-norm-beta", type=float, default=PPOConfig.value_norm_beta,
                         help="PopArt value normalization rate per rollout (0 = off: raw-scale critic, as before 2026-10-03)")
+    parser.add_argument("--prior-pair", type=str, default=None, metavar="JOB-MACHINE",
+                        help="Action prior (e.g. MDD-TECT): a fresh network starts at it; see --prior-kl-coef")
+    parser.add_argument("--prior-prob", type=float, default=PPOConfig.prior_prob,
+                        help="Probability each head of the prior puts on the pair's rule")
+    parser.add_argument("--prior-kl-coef", type=float, default=0.0,
+                        help="Weight of KL(pi || prior) in the loss (0 = prior only as the starting policy)")
+    parser.add_argument("--prior-kl-coef-final", type=float, default=None,
+                        help="If set, decay the KL-to-prior coefficient linearly to this value over --total-timesteps")
     parser.add_argument("--ent-coef-final", type=float, default=None,
                         help="If set, decay the entropy coefficient linearly to this value over --total-timesteps")
     parser.add_argument("--torch-threads", type=int, default=0,
@@ -918,6 +956,10 @@ if __name__ == "__main__":
         entropy_coef_final=args.ent_coef_final,
         discount_horizon_s=args.discount_horizon_s if args.discount_horizon_s > 0 else None,
         value_norm_beta=args.value_norm_beta,
+        prior_pair=args.prior_pair,
+        prior_prob=args.prior_prob,
+        prior_kl_coef=args.prior_kl_coef,
+        prior_kl_coef_final=args.prior_kl_coef_final,
     )
     if args.torch_threads > 0:
         torch.set_num_threads(args.torch_threads)

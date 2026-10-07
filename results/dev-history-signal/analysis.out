@@ -1,0 +1,51 @@
+40 seeds, 880 slots (slots 2-23); now 18 columns, history 72, prev pair 8
+
+== strongest history columns (|Spearman| with dev4, partial: after the current-state model)
+  s1_l1        +0.26
+  s6_l1        -0.23
+  s1_l2        +0.23
+  f2_l1        -0.21
+  s13_l1       -0.21
+  s6_d4        -0.19
+  f2_l2        -0.18
+  s2_d4        +0.17
+
+######## +history (printed as 'cong' = extra alone, 'both' = now + extra)
+
+== +history, target dev1: target dev1 (706 slots, 40 seeds; ATC better in 36%; median d +1.0%)
+  AUC                logistic  obs 0.674  cong 0.633  both 0.631   both - obs -0.043 (range over 10 partitions -0.074 .. -0.031)
+  AUC                boosting  obs 0.668  cong 0.646  both 0.648   both - obs -0.020 (range over 10 partitions -0.039 .. +0.007)
+  Spearman(pred, d)  ridge     obs 0.142  cong 0.100  both 0.097   both - obs -0.046 (range over 10 partitions -0.125 .. +0.030)
+  Spearman(pred, d)  boosting  obs 0.167  cong 0.141  both 0.154   both - obs -0.012 (range over 10 partitions -0.046 .. +0.030)
+
+== +history, target dev4: target dev4 (820 slots, 40 seeds; ATC better in 36%; median d +1.7%)
+  AUC                logistic  obs 0.705  cong 0.677  both 0.676   both - obs -0.030 (range over 10 partitions -0.045 .. -0.023)
+  AUC                boosting  obs 0.712  cong 0.698  both 0.695   both - obs -0.017 (range over 10 partitions -0.027 .. -0.001)
+  Spearman(pred, d)  ridge     obs 0.269  cong 0.224  both 0.222   both - obs -0.047 (range over 10 partitions -0.071 .. -0.008)
+  Spearman(pred, d)  boosting  obs 0.277  cong 0.226  both 0.241   both - obs -0.036 (range over 10 partitions -0.073 .. +0.000)
+
+== +history, target d_ATC-TECT: target d_ATC-TECT (880 slots, 40 seeds; ATC better in 32%; median d +3.0%)
+  AUC                logistic  obs 0.697  cong 0.662  both 0.664   both - obs -0.034 (range over 10 partitions -0.060 .. -0.018)
+  AUC                boosting  obs 0.704  cong 0.668  both 0.685   both - obs -0.019 (range over 10 partitions -0.039 .. +0.000)
+  Spearman(pred, d)  ridge     obs 0.164  cong 0.174  both 0.173   both - obs +0.009 (range over 10 partitions -0.042 .. +0.057)
+  Spearman(pred, d)  boosting  obs 0.223  cong 0.167  both 0.182   both - obs -0.041 (range over 10 partitions -0.073 .. -0.010)
+
+######## +prev pair (printed as 'cong' = extra alone, 'both' = now + extra)
+
+== +prev pair, target dev1: target dev1 (706 slots, 40 seeds; ATC better in 36%; median d +1.0%)
+  AUC                logistic  obs 0.674  cong 0.800  both 0.819   both - obs +0.145 (range over 10 partitions +0.134 .. +0.153)
+  AUC                boosting  obs 0.668  cong 0.810  both 0.812   both - obs +0.144 (range over 10 partitions +0.127 .. +0.160)
+  Spearman(pred, d)  ridge     obs 0.142  cong 0.463  both 0.480   both - obs +0.338 (range over 10 partitions +0.304 .. +0.383)
+  Spearman(pred, d)  boosting  obs 0.167  cong 0.520  both 0.499   both - obs +0.333 (range over 10 partitions +0.290 .. +0.370)
+
+== +prev pair, target dev4: target dev4 (820 slots, 40 seeds; ATC better in 36%; median d +1.7%)
+  AUC                logistic  obs 0.705  cong 0.803  both 0.838   both - obs +0.133 (range over 10 partitions +0.119 .. +0.155)
+  AUC                boosting  obs 0.712  cong 0.805  both 0.832   both - obs +0.120 (range over 10 partitions +0.094 .. +0.141)
+  Spearman(pred, d)  ridge     obs 0.269  cong 0.476  both 0.548   both - obs +0.279 (range over 10 partitions +0.229 .. +0.359)
+  Spearman(pred, d)  boosting  obs 0.277  cong 0.521  both 0.560   both - obs +0.282 (range over 10 partitions +0.237 .. +0.337)
+
+== +prev pair, target d_ATC-TECT: target d_ATC-TECT (880 slots, 40 seeds; ATC better in 32%; median d +3.0%)
+  AUC                logistic  obs 0.697  cong 0.860  both 0.903   both - obs +0.205 (range over 10 partitions +0.191 .. +0.235)
+  AUC                boosting  obs 0.704  cong 0.877  both 0.907   both - obs +0.203 (range over 10 partitions +0.190 .. +0.217)
+  Spearman(pred, d)  ridge     obs 0.164  cong 0.582  both 0.624   both - obs +0.460 (range over 10 partitions +0.388 .. +0.579)
+  Spearman(pred, d)  boosting  obs 0.223  cong 0.611  both 0.727   both - obs +0.504 (range over 10 partitions +0.446 .. +0.592)

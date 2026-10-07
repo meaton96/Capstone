@@ -1,0 +1,14 @@
+{
+ "run_id": "train-due-twin-slot-prior-kl_s2",
+ "label": "train-due-twin-slot-prior-kl_s2 (local on ubuntu)",
+ "update": 195,
+ "num_updates": 195,
+ "global_step": 99840,
+ "total_timesteps": 100000,
+ "sps": 15.11,
+ "eta_hours": 0.0,
+ "episodes": 4160,
+ "recent_return": -143.134,
+ "recent_mean_flow": 1916.8,
+ "updated_at": "2026-10-06T21:06:13"
+}

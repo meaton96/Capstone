@@ -1,0 +1,119 @@
+label: mean gap of checkpoints (0, 3) to MDD-TECT (window tardiness, %); > 0 = policy worse
+seeds 0-39: 15/40 lost; label vs s0-s3 mean Spearman 0.94
+seeds 1000-1199: 86/200 lost; mean gap -2.24%, median -0.87%; MDD-TECT vs ATC-ECT median +6.20%
+
+== scenario features, seeds 0-39 (Spearman with the gap; bad = top quartile, good = bottom quartile; q_bh = Benjamini-Hochberg over all scenario features)
+                           rho      p  bad_med  good_med  all_med   mw_p   q_bh
+feature                                                                        
+transport_load_max_slot  0.316  0.047    3.434     2.204    3.190  0.059  0.722
+transport_backlog_max    0.298  0.062  216.281   122.109  196.484  0.089  0.722
+transport_backlog_mean   0.293  0.066   43.801    15.900   44.488  0.089  0.722
+transport_load           0.290  0.069    1.082     0.703    0.986  0.045  0.722
+c_job_p10               -0.272  0.090    1.833     1.971    1.858  0.017  0.722
+short_last3              0.256  0.111    0.000     0.000    0.000  0.123  0.722
+c_min                   -0.256  0.111    1.833     1.914    1.858  0.021  0.722
+normal_last3            -0.251  0.118    0.377     0.750    0.578  0.047  0.722
+jobs                     0.233  0.148  313.500   275.500  290.500  0.089  0.722
+util_nominal_max        -0.228  0.157    1.176     1.443    1.374  0.450  0.722
+short_mid3               0.217  0.179    0.120     0.000    0.066  0.362  0.722
+short_share              0.216  0.180    0.250     0.083    0.250  0.077  0.722
+op_mean_block           -0.211  0.191  323.288   342.260  337.229  0.241  0.722
+surge_mid3              -0.204  0.207    0.000     0.500    0.093  0.372  0.723
+regime_changes           0.198  0.221    2.500     2.000    2.000  0.344  0.723
+transport_capped         0.188  0.246    0.179     0.018    0.089  0.116  0.754
+type_imbalance           0.179  0.269    1.119     1.108    1.122  0.623  0.774
+backlog_start_h          0.163  0.314    0.062     0.007    0.047  0.358  0.810
+type_load_max            0.163  0.314    0.995     0.921    0.972  0.345  0.810
+backlog_end_h            0.157  0.334    0.395     0.074    0.204  0.520  0.818
+
+== same features on the replication set (200 seeds)
+                        rho_0_39  p_0_39  q_bh_0_39  rho_ext  p_ext  q_bh_ext  bad_med  good_med  replicates
+feature                                                                                                     
+normal_first3              0.032   0.844      0.926   -0.210  0.003     0.130    0.466     0.733       False
+backlog_mean_h             0.129   0.429      0.832    0.190  0.007     0.130    0.240     0.169       False
+surge_first3               0.091   0.574      0.832    0.173  0.014     0.130    0.056     0.000       False
+util_nominal              -0.075   0.647      0.852    0.169  0.017     0.130    0.902     0.863       False
+util_real_first3          -0.108   0.508      0.832    0.161  0.023     0.130    0.888     0.826       False
+util_real                  0.087   0.592      0.832    0.160  0.023     0.130    0.885     0.837       False
+type_load_max              0.163   0.314      0.810    0.159  0.025     0.130    0.992     0.963       False
+transport_backlog_max      0.298   0.062      0.722    0.158  0.025     0.130  185.000   146.531       False
+seg_lull                   0.144   0.375      0.832   -0.157  0.027     0.130    0.102     0.155       False
+type_backlog_max_h         0.114   0.486      0.832    0.155  0.028     0.130    1.132     1.022       False
+transport_backlog_mean     0.293   0.066      0.722    0.151  0.033     0.130   34.551    24.396       False
+c_mean                    -0.124   0.444      0.832    0.148  0.037     0.130    2.119     2.105       False
+normal_share              -0.082   0.615      0.838   -0.145  0.040     0.130    0.500     0.500       False
+transport_load             0.290   0.069      0.722    0.145  0.040     0.130    0.951     0.872       False
+c_min                     -0.256   0.111      0.722    0.145  0.041     0.130    1.904     1.856       False
+normal_mid3                0.027   0.869      0.926   -0.144  0.042     0.130    0.500     0.500       False
+jobs                       0.233   0.148      0.722    0.140  0.048     0.138  281.000   273.000       False
+c_job_p10                 -0.272   0.090      0.722    0.134  0.059     0.161    1.905     1.867       False
+c_job_mean                -0.136   0.401      0.832    0.132  0.062     0.161    2.107     2.092       False
+backlog_max_h              0.100   0.540      0.832    0.116  0.100     0.235    0.711     0.641       False
+seg_skewed                -0.015   0.928      0.967    0.116  0.101     0.235    0.238     0.221       False
+seg_burst                 -0.104   0.525      0.832    0.103  0.145     0.324    0.098     0.075       False
+short_mid3                 0.217   0.179      0.722    0.101  0.155     0.331    0.000     0.000       False
+transport_capped           0.188   0.246      0.754    0.099  0.164     0.334    0.091     0.060       False
+short_share                0.216   0.180      0.722    0.085  0.231     0.453    0.250     0.250       False
+
+== outcome-side (fixed pairs / oracle) and policy-choice features, seeds 0-39 (not generator knobs)
+                       rho      p  bad_med  good_med  all_med   mw_p   q_bh
+feature                                                                    
+mddtect_vs_own_best -0.626  0.000    0.468    13.410    5.089  0.001  0.000
+atc_vs_mddtect       0.577  0.000   18.250   -10.032    6.537  0.002  0.000
+oracle_gain         -0.444  0.004   10.357    20.064   13.322  0.009  0.014
+mddect_vs_mddtect    0.414  0.008    4.389    -0.314    1.747  0.021  0.020
+pol_mddtect_share    0.342  0.031    0.146     0.031    0.146  0.046  0.062
+pol_atc_share       -0.325  0.041    0.510     0.708    0.583  0.028  0.068
+pol_tect_share      -0.229  0.155    1.000     1.000    1.000  0.124  0.219
+mddtect              0.219  0.175  120.971    76.254  137.507  0.212  0.219
+fixed_spread        -0.133  0.412    0.196     0.237    0.186  0.427  0.458
+pol_switches         0.044  0.789    5.250     5.750    4.750  0.621  0.789
+
+best fixed pair per instance, bad vs good quartile (seeds 0-39):
+          bad  good
+own_best           
+ATC-ECT     0     1
+ATC-TECT    0     8
+MDD-ECT     2     1
+MDD-TECT    4     0
+SPT-TECT    1     0
+SRT-ECT     3     0
+
+== outcome / policy features on the replication set
+                     rho      p  bad_med  good_med  all_med   mw_p   q_bh
+feature                                                                  
+atc_vs_mddtect     0.608  0.000   14.845    -9.477    6.196  0.000  0.000
+pol_atc_share     -0.288  0.000    0.479     0.667    0.521  0.001  0.000
+pol_mddtect_share  0.283  0.000    0.208     0.062    0.208  0.001  0.000
+pol_tect_share    -0.177  0.012    1.000     1.000    1.000  0.012  0.018
+mddtect            0.159  0.025  133.975   101.767  159.084  0.120  0.030
+pol_switches      -0.005  0.944    5.000     4.750    5.000  0.964  0.944
+
+== can the scenario predict ATC-ECT vs MDD-TECT? (replication set, top Spearman)
+                           rho    p  bad_med  good_med  all_med   mw_p   q_bh
+feature                                                                      
+transport_backlog_max    0.408  0.0  266.133   139.930  183.914  0.000  0.000
+transport_backlog_mean   0.384  0.0   81.980    21.184   35.719  0.000  0.000
+transport_load           0.383  0.0    1.193     0.814    0.936  0.000  0.000
+normal_mid3             -0.351  0.0    0.222     0.500    0.500  0.000  0.000
+normal_share            -0.333  0.0    0.282     0.500    0.500  0.000  0.000
+backlog_mean_h           0.286  0.0    0.270     0.167    0.245  0.000  0.000
+backlog_max_h            0.279  0.0    0.802     0.614    0.772  0.001  0.000
+short_share              0.275  0.0    0.250     0.250    0.250  0.000  0.001
+transport_load_max_slot  0.270  0.0    3.769     2.763    3.224  0.000  0.001
+type_backlog_max_h       0.263  0.0    1.327     0.993    1.204  0.000  0.001
+
+== prediction: bad (gap > 0) from scenario features only
+  logreg_L2  cv_auc_discovery 0.40  transfer_auc 0.53  cv_auc_replication 0.54
+  forest     cv_auc_discovery 0.35  transfer_auc 0.56  cv_auc_replication 0.56
+  forest importance (both sets):
+transport_backlog_max     0.045
+transport_backlog_mean    0.038
+jobs                      0.029
+c_mean                    0.029
+util_nominal              0.028
+transport_load            0.027
+ops_per_job               0.026
+seg_skewed                0.026
+util_nominal_max          0.026
+c_job_mean                0.026

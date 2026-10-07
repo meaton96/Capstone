@@ -1,0 +1,75 @@
+============================================================
+DRL Scheduling Network — PPO Training
+============================================================
+
+Reward: tardiness (rewards/functions/tardiness.py:TardinessReward)
+
+Parameter counts:
+  encoder_factory_cnn               168,352
+  encoder_machine_set                38,400
+  encoder_job_set                    38,720
+  encoder_global_mlp                  3,488
+  encoder_event_embed                   848
+  fusion_head                       420,096
+  actor                              68,360
+  critic                             66,561
+  total                             804,825
+
+Action prior MDD-TECT (p = 0.8 per head), policy initialized at the prior; KL coef 0.05 -> 0.0
+
+Scenario generator: randomized (episode_duration_seconds=21600.0) (random_warmup, rule=default) (params {"failure_probability": 0.0, "due_date_allowance_range": [1.75, 2.5], "regime_block_seconds": 5400, "horizon_seconds": 30600, "load_mix": [{"name": "normal", "utilization": [0.6, 1.2], "weight": 2}, {"name": "surge", "utilization": [1.0, 1.6]}, {"name": "short", "utilization": [0.6, 1.2], "agv_count": 2}]})
+Observation row caps: 15 machines, 256 jobs
+Twin envs: 16 over 5 worker processes
+Discount: gamma_s = 0.999907 per simulated second (horizon 10,800 s)
+
+Backend: twin (kinematic, results/dev-popart-smoke/floor7/des_floor.json)
+Run directory: results/train-due-twin-slot-prior-kldecay_s3
+Training for 100,000 timesteps
+  195 updates × 32 steps × 16 envs
+  Device: cuda
+
+Update    1/195 | Step      512 | SPS     14 | Ep    16 | EpRet -234.426 | Makespan  25269 | R_avg -7.5508 | Ret -47.647 | PG -0.0041 | VL 1.2486 | EV +0.00 | Ent 1.420 | KLp 0.003 | T 37.63s
+Update    5/195 | Step    2,560 | SPS     15 | Ep    96 | EpRet -201.489 | Makespan  25671 | R_avg -9.6081 | Ret -107.526 | PG -0.0028 | VL 0.5753 | EV +0.63 | Ent 1.519 | KLp 0.029 | T 34.36s
+Update   10/195 | Step    5,120 | SPS     16 | Ep   208 | EpRet -191.069 | Makespan  25195 | R_avg -6.4428 | Ret -100.204 | PG -0.0073 | VL 0.2505 | EV +0.58 | Ent 1.596 | KLp 0.059 | T 30.55s
+Update   15/195 | Step    7,680 | SPS     15 | Ep   320 | EpRet -173.843 | Makespan  26641 | R_avg -6.9416 | Ret -118.066 | PG -0.0083 | VL 0.2593 | EV +0.70 | Ent 1.394 | KLp 0.042 | T 35.83s
+Update   20/195 | Step   10,240 | SPS     16 | Ep   416 | EpRet -172.702 | Makespan  25635 | R_avg -7.7739 | Ret -121.006 | PG -0.0060 | VL 0.2149 | EV +0.71 | Ent 1.507 | KLp 0.090 | T 33.88s
+Update   25/195 | Step   12,800 | SPS     15 | Ep   528 | EpRet -249.612 | Makespan  26362 | R_avg -9.3933 | Ret -141.169 | PG -0.0038 | VL 0.3417 | EV +0.68 | Ent 1.510 | KLp 0.060 | T 35.03s
+Update   30/195 | Step   15,360 | SPS     15 | Ep   640 | EpRet -220.711 | Makespan  25969 | R_avg -10.1090 | Ret -136.293 | PG -0.0038 | VL 0.3242 | EV +0.81 | Ent 1.303 | KLp 0.058 | T 36.83s
+Update   35/195 | Step   17,920 | SPS     15 | Ep   736 | EpRet -182.570 | Makespan  25788 | R_avg -6.0875 | Ret -109.941 | PG -0.0035 | VL 0.2206 | EV +0.75 | Ent 1.362 | KLp 0.046 | T 30.07s
+Update   40/195 | Step   20,480 | SPS     16 | Ep   848 | EpRet -187.015 | Makespan  26314 | R_avg -7.0405 | Ret -110.593 | PG -0.0082 | VL 0.1508 | EV +0.75 | Ent 1.395 | KLp 0.065 | T 30.60s
+Update   45/195 | Step   23,040 | SPS     15 | Ep   960 | EpRet -180.146 | Makespan  26611 | R_avg -9.1910 | Ret -134.240 | PG -0.0044 | VL 0.2758 | EV +0.76 | Ent 1.479 | KLp 0.120 | T 37.95s
+Update   50/195 | Step   25,600 | SPS     15 | Ep  1056 | EpRet -170.905 | Makespan  25689 | R_avg -6.9259 | Ret -110.848 | PG -0.0041 | VL 0.2133 | EV +0.66 | Ent 1.466 | KLp 0.071 | T 32.55s
+Update   55/195 | Step   28,160 | SPS     15 | Ep  1168 | EpRet -220.206 | Makespan  25266 | R_avg -7.9783 | Ret -137.783 | PG -0.0064 | VL 0.3439 | EV +0.65 | Ent 1.431 | KLp 0.030 | T 31.87s
+Update   60/195 | Step   30,720 | SPS     15 | Ep  1280 | EpRet -240.805 | Makespan  25199 | R_avg -10.4354 | Ret -173.587 | PG -0.0046 | VL 0.4152 | EV +0.70 | Ent 1.348 | KLp 0.103 | T 34.98s
+Update   65/195 | Step   33,280 | SPS     15 | Ep  1376 | EpRet -237.193 | Makespan  25691 | R_avg -9.9664 | Ret -153.359 | PG -0.0133 | VL 0.2035 | EV +0.79 | Ent 1.402 | KLp 0.246 | T 33.08s
+Update   70/195 | Step   35,840 | SPS     15 | Ep  1488 | EpRet -234.984 | Makespan  25627 | R_avg -7.6496 | Ret -123.482 | PG -0.0085 | VL 0.2433 | EV +0.69 | Ent 1.506 | KLp 0.127 | T 31.59s
+Update   75/195 | Step   38,400 | SPS     15 | Ep  1600 | EpRet -228.031 | Makespan  26188 | R_avg -10.0505 | Ret -145.650 | PG -0.0036 | VL 0.2503 | EV +0.80 | Ent 1.688 | KLp 0.194 | T 35.19s
+Update   80/195 | Step   40,960 | SPS     15 | Ep  1696 | EpRet -249.765 | Makespan  25843 | R_avg -8.2928 | Ret -132.442 | PG 0.0036 | VL 0.3926 | EV +0.74 | Ent 1.497 | KLp 0.176 | T 33.13s
+Update   85/195 | Step   43,520 | SPS     15 | Ep  1808 | EpRet -170.054 | Makespan  25966 | R_avg -7.0106 | Ret -130.887 | PG -0.0130 | VL 0.3108 | EV +0.77 | Ent 1.541 | KLp 0.174 | T 33.21s
+Update   90/195 | Step   46,080 | SPS     15 | Ep  1920 | EpRet -204.294 | Makespan  27070 | R_avg -7.3751 | Ret -119.747 | PG -0.0110 | VL 0.1928 | EV +0.69 | Ent 1.651 | KLp 0.155 | T 32.56s
+Update   95/195 | Step   48,640 | SPS     15 | Ep  2016 | EpRet -193.920 | Makespan  26327 | R_avg -9.0586 | Ret -129.890 | PG -0.0124 | VL 0.2215 | EV +0.76 | Ent 1.292 | KLp 0.074 | T 32.70s
+Update  100/195 | Step   51,200 | SPS     15 | Ep  2128 | EpRet -195.987 | Makespan  25660 | R_avg -7.8162 | Ret -126.168 | PG -0.0036 | VL 0.2458 | EV +0.78 | Ent 1.333 | KLp 0.072 | T 31.65s
+Update  105/195 | Step   53,760 | SPS     15 | Ep  2240 | EpRet -170.278 | Makespan  24804 | R_avg -7.3775 | Ret -127.970 | PG -0.0054 | VL 0.1302 | EV +0.77 | Ent 1.427 | KLp 0.061 | T 35.94s
+Update  110/195 | Step   56,320 | SPS     15 | Ep  2336 | EpRet -201.075 | Makespan  25844 | R_avg -7.8544 | Ret -118.836 | PG -0.0110 | VL 0.1929 | EV +0.73 | Ent 1.605 | KLp 0.054 | T 34.57s
+Update  115/195 | Step   58,880 | SPS     15 | Ep  2448 | EpRet -165.670 | Makespan  24932 | R_avg -7.1040 | Ret -111.090 | PG -0.0092 | VL 0.1764 | EV +0.77 | Ent 1.423 | KLp 0.053 | T 31.19s
+Update  120/195 | Step   61,440 | SPS     15 | Ep  2560 | EpRet -232.304 | Makespan  26330 | R_avg -10.2554 | Ret -163.121 | PG -0.0036 | VL 0.2819 | EV +0.75 | Ent 1.325 | KLp 0.107 | T 36.99s
+Update  125/195 | Step   64,000 | SPS     15 | Ep  2656 | EpRet -119.625 | Makespan  25187 | R_avg -5.7377 | Ret -100.892 | PG -0.0063 | VL 0.2584 | EV +0.66 | Ent 1.253 | KLp 0.114 | T 28.88s
+Update  130/195 | Step   66,560 | SPS     15 | Ep  2768 | EpRet -142.656 | Makespan  25982 | R_avg -5.8049 | Ret -101.275 | PG -0.0034 | VL 0.2740 | EV +0.64 | Ent 1.228 | KLp 0.078 | T 31.76s
+Update  135/195 | Step   69,120 | SPS     15 | Ep  2880 | EpRet -157.331 | Makespan  25864 | R_avg -6.9262 | Ret -104.428 | PG -0.0071 | VL 0.1087 | EV +0.75 | Ent 1.157 | KLp 0.058 | T 30.69s
+Update  140/195 | Step   71,680 | SPS     15 | Ep  2976 | EpRet -163.687 | Makespan  25566 | R_avg -7.5321 | Ret -126.018 | PG -0.0044 | VL 0.2486 | EV +0.75 | Ent 1.025 | KLp 0.080 | T 30.05s
+Update  145/195 | Step   74,240 | SPS     15 | Ep  3088 | EpRet -213.855 | Makespan  26080 | R_avg -7.9072 | Ret -145.248 | PG -0.0038 | VL 0.2132 | EV +0.76 | Ent 1.067 | KLp 0.071 | T 31.28s
+Update  150/195 | Step   76,800 | SPS     15 | Ep  3200 | EpRet -222.157 | Makespan  26291 | R_avg -8.7762 | Ret -142.343 | PG -0.0020 | VL 0.1985 | EV +0.71 | Ent 0.785 | KLp 0.117 | T 33.97s
+Update  155/195 | Step   79,360 | SPS     15 | Ep  3296 | EpRet -123.208 | Makespan  25528 | R_avg -6.3137 | Ret -115.819 | PG -0.0086 | VL 0.1661 | EV +0.72 | Ent 1.303 | KLp 0.128 | T 31.21s
+Update  160/195 | Step   81,920 | SPS     15 | Ep  3408 | EpRet -194.362 | Makespan  25666 | R_avg -7.4803 | Ret -137.993 | PG -0.0035 | VL 0.3175 | EV +0.77 | Ent 1.204 | KLp 0.091 | T 33.49s
+Update  165/195 | Step   84,480 | SPS     15 | Ep  3520 | EpRet -193.700 | Makespan  24993 | R_avg -7.9432 | Ret -120.818 | PG -0.0033 | VL 0.2119 | EV +0.83 | Ent 1.142 | KLp 0.116 | T 33.02s
+Update  170/195 | Step   87,040 | SPS     15 | Ep  3616 | EpRet -199.538 | Makespan  24870 | R_avg -9.6542 | Ret -142.624 | PG -0.0026 | VL 0.2928 | EV +0.81 | Ent 0.888 | KLp 0.128 | T 33.41s
+Update  175/195 | Step   89,600 | SPS     15 | Ep  3728 | EpRet -197.814 | Makespan  26236 | R_avg -6.3034 | Ret -114.014 | PG -0.0018 | VL 0.2313 | EV +0.68 | Ent 1.037 | KLp 0.092 | T 31.52s
+Update  180/195 | Step   92,160 | SPS     15 | Ep  3840 | EpRet -217.645 | Makespan  25340 | R_avg -8.8983 | Ret -126.048 | PG -0.0083 | VL 0.1646 | EV +0.74 | Ent 0.913 | KLp 0.137 | T 33.63s
+Update  185/195 | Step   94,720 | SPS     15 | Ep  3936 | EpRet -190.502 | Makespan  24944 | R_avg -6.7318 | Ret -102.007 | PG -0.0036 | VL 0.1186 | EV +0.87 | Ent 0.803 | KLp 0.147 | T 28.89s
+Update  190/195 | Step   97,280 | SPS     15 | Ep  4048 | EpRet -203.136 | Makespan  25821 | R_avg -7.4950 | Ret -135.792 | PG -0.0021 | VL 0.4111 | EV +0.68 | Ent 0.711 | KLp 0.172 | T 33.22s
+Update  195/195 | Step   99,840 | SPS     15 | Ep  4160 | EpRet -273.157 | Makespan  25955 | R_avg -9.8213 | Ret -141.668 | PG -0.0023 | VL 0.2573 | EV +0.78 | Ent 0.666 | KLp 0.189 | T 20.66s
+Timing: env 6306s, inference 49s, update 82s, startup 4s; 15.5 steps/s in the loop
+
+Checkpoint saved to results/train-due-twin-slot-prior-kldecay_s3/checkpoint.pt
+Total training time: 6444.2s
+Average SPS: 15

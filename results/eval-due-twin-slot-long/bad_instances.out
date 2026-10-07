@@ -1,0 +1,49 @@
+== worst 8 seeds (mean gap to MDD-TECT over seeds (0, 1, 2, 3, 4))
+      gap_s0_%  gap_s1_%  gap_s2_%  gap_s3_%  gap_s4_%  gap_mean_%  mddtect  mddtect_vs_own_best_%  own_best  oracle_gain_%  surge_share  short_share  mean_c  mean_op  warmup_h  jobs
+seed                                                                                                                                                                                  
+26        5.32     11.50      6.49     -4.24     34.81       10.77   154.70                   0.00  MDD-TECT           3.52         0.00         0.53    2.35   313.32      1.32   283
+37       10.66      8.96     22.73      8.83     -0.82       10.07    88.43                   0.00  MDD-TECT           1.27         0.09         0.25    2.21   301.49      0.98   291
+36        2.13     14.49      9.28      2.38     10.40        7.74   146.56                   0.00  MDD-TECT           0.86         0.00         0.25    2.05   330.80      1.50   339
+20        5.99     -2.22      8.07      7.97     16.93        7.35   122.83                   0.96   MDD-ECT          15.12         0.75         0.25    2.07   315.52      0.00   326
+12        2.18      6.86     -1.11     17.18      9.70        6.96   241.28                   6.69   SRT-ECT          14.48         0.25         0.00    2.05   292.98      1.50   301
+34       11.47    -15.08      8.84      7.13     20.10        6.49    48.28                   0.00  MDD-TECT          15.20         0.00         0.25    2.10   364.28      0.37   224
+33       -2.13     12.13      7.02     10.70      0.58        5.66   105.84                   3.80  SPT-TECT          18.91         0.50         0.25    2.24   315.78      1.40   329
+7        -2.87      6.33      9.44      8.43      5.49        5.37   478.88                   1.31   SRT-ECT           3.15         0.13         0.37    2.09   308.95      2.26   334
+
+== group means: worst 8 vs the other 32
+                       worst8    rest
+gap_s0_%                 4.09   -4.51
+gap_s1_%                 5.37   -1.84
+gap_s2_%                 8.85   -3.50
+gap_s3_%                 7.30   -6.85
+gap_s4_%                12.15    1.55
+gap_mean_%               7.55   -3.03
+mddtect                173.35  172.15
+mddtect_vs_own_best_%    1.60   12.51
+oracle_gain_%            9.06   17.16
+surge_share              0.21    0.23
+short_share              0.27    0.24
+mean_c                   2.15    2.14
+mean_op                317.89  339.87
+warmup_h                 1.17    1.09
+jobs                   303.38  282.38
+
+== Spearman correlation with the mean policy gap (40 seeds)
+mddtect                  0.20
+mddtect_vs_own_best_%   -0.58
+oracle_gain_%           -0.46
+surge_share             -0.23
+short_share              0.19
+mean_c                  -0.13
+mean_op                 -0.24
+warmup_h                 0.05
+jobs                     0.26
+
+== per seed: instances lost to MDD-TECT, and Spearman of its gap with the mean gap of the other seeds
+gap_s0_%   lost 15/40  rho vs others 0.59
+gap_s1_%   lost 16/40  rho vs others 0.50
+gap_s2_%   lost 18/40  rho vs others 0.50
+gap_s3_%   lost 16/40  rho vs others 0.52
+gap_s4_%   lost 22/40  rho vs others 0.14
+
+== vs the 100k checkpoints (s1/s2 mean, eval-due-twin-slot): worst-8 overlap 7/8 [7, 20, 26, 33, 34, 36, 37]; Spearman of the mean gaps over 40 seeds 0.67

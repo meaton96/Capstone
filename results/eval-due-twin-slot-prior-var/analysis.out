@@ -1,0 +1,70 @@
+40 seeds; consistency vs B2 fixed: max |diff| 1.45e-05
+MDD-TECT mean tardiness 172.39; oracle 153.78 (-10.8%)
+
+                                             arm  mean_gap_%  median_gap_%  lost  tied  worst_%  bad_q_mean_gap_%  rest_mean_gap_%  wilcoxon_p  oracle_closed_med
+policy                                                                                                                                                           
+train-due-twin-slot-prior-kl01_s0        KL 0.01       0.000         0.000     0    40    0.000             0.000            0.000       0.501             -0.000
+train-due-twin-slot-prior-kl01_s1        KL 0.01      -0.770        -0.000     2    30    2.683            -0.054           -0.333       0.211              0.000
+train-due-twin-slot-prior-kl01_s2        KL 0.01       0.000         0.000     0    40    0.000             0.000            0.000       0.501             -0.000
+train-due-twin-slot-prior-kl01_s3        KL 0.01      -0.206         0.000     7    26    5.952             0.084           -0.130       0.765             -0.000
+train-due-twin-slot-prior-kl01_s4        KL 0.01       0.000         0.000     0    40    0.000             0.000            0.000       0.501             -0.000
+train-due-twin-slot-prior-kl_s0          KL 0.05       0.000         0.000     0    40    0.000             0.000            0.000       0.501             -0.000
+train-due-twin-slot-prior-kl_s1          KL 0.05       0.000         0.000     0    40    0.000             0.000            0.000       0.501             -0.000
+train-due-twin-slot-prior-kl_s2          KL 0.05       0.000         0.000     0    40    0.000             0.000            0.000       0.501             -0.000
+train-due-twin-slot-prior-kl_s3          KL 0.05       0.067         0.000     2    38    0.727             0.073            0.005       0.271             -0.000
+train-due-twin-slot-prior-kl_s4          KL 0.05       0.000         0.000     0    40    0.000             0.000            0.000       0.501             -0.000
+train-due-twin-slot-prior-kldecay_s0  KL 0.05->0       0.000         0.000     0    40    0.000             0.000            0.000       0.501             -0.000
+train-due-twin-slot-prior-kldecay_s1  KL 0.05->0       0.200         0.000     7    28    2.924             0.316            0.017       0.307             -0.000
+train-due-twin-slot-prior-kldecay_s2  KL 0.05->0      -0.034         0.000     7    28    2.934             0.338           -0.038       0.340             -0.000
+train-due-twin-slot-prior-kldecay_s3  KL 0.05->0       0.000         0.000     0    40    0.000             0.000            0.000       0.501             -0.000
+train-due-twin-slot-prior-kldecay_s4  KL 0.05->0      -0.398         0.000     1    34    3.180            -0.049           -0.394       0.666             -0.000
+train-due-twin-slot_s0                  baseline       3.005         0.904    23     0   25.835             9.800            1.393       0.023             -0.071
+train-due-twin-slot_s1                  baseline      -0.417        -3.041    13     0   29.547             7.185           -7.088       0.216              0.162
+train-due-twin-slot_s2                  baseline       0.267        -1.752    13     2   19.779             6.344           -4.859       0.428              0.147
+train-due-twin-slot_s3                  baseline       0.810        -0.601    19     0   20.642             3.356           -3.557       0.900              0.039
+train-due-twin-slot_s4                  baseline       6.212         5.286    29     0   31.549            10.840            4.082       0.000             -0.340
+train-due-twin-slot-prior-kl_s0_init   init only       0.000         0.000     0    40    0.000             0.000            0.000       0.501             -0.000
+
+(gaps: % of MDD-TECT tardiness, < 0 = better, |gap| <= 0.001% counted as a tie (float noise ~1e-5); bad_q = the 10 instances the 400k policies lost most on)
+
+== arms (one value per training seed)
+  baseline  n=5  mean gap +1.98% (seeds -0.42 .. +6.21)  median gap +0.16%  lost 19.4/40  worst +25.5%  bad-quartile gap +7.51%  rest -2.01%
+  KL 0.05   n=5  mean gap +0.01% (seeds +0.00 .. +0.07)  median gap +0.00%  lost 0.4/40  worst +0.1%  bad-quartile gap +0.01%  rest +0.00%
+  KL 0.01   n=5  mean gap -0.20% (seeds -0.77 .. +0.00)  median gap +0.00%  lost 1.8/40  worst +1.7%  bad-quartile gap +0.01%  rest -0.09%
+  KL 0.05->0 n=5  mean gap -0.05% (seeds -0.40 .. +0.20)  median gap +0.00%  lost 3.0/40  worst +1.8%  bad-quartile gap +0.12%  rest -0.08%
+  Mann-Whitney KL 0.05 vs baseline: mean_gap_% p = 0.131, lost p = 0.009, worst_% p = 0.010, bad_q_mean_gap_% p = 0.010
+  Mann-Whitney KL 0.01 vs baseline: mean_gap_% p = 0.091, lost p = 0.011, worst_% p = 0.011, bad_q_mean_gap_% p = 0.011
+  Mann-Whitney KL 0.05->0 vs baseline: mean_gap_% p = 0.142, lost p = 0.011, worst_% p = 0.012, bad_q_mean_gap_% p = 0.012
+
+== mean head probabilities (p0: 0.8 MDD, 0.8 TECT)
+                                                      p_job_SRT  p_job_SPT  p_job_MDD  p_job_EDD  p_job_ATC  p_machine_ECT  p_machine_TECT  p_machine_SRWT
+policy                                                                                                                                                    
+ckpt:train-due-twin-slot-prior-kl01_s0/checkpoint         0.046      0.014      0.793      0.030      0.116          0.174           0.799           0.027
+ckpt:train-due-twin-slot-prior-kl01_s1/checkpoint         0.104      0.025      0.768      0.052      0.051          0.128           0.859           0.012
+ckpt:train-due-twin-slot-prior-kl01_s2/checkpoint         0.101      0.042      0.791      0.020      0.045          0.090           0.898           0.011
+ckpt:train-due-twin-slot-prior-kl01_s3/checkpoint         0.103      0.063      0.781      0.023      0.030          0.103           0.865           0.032
+ckpt:train-due-twin-slot-prior-kl01_s4/checkpoint         0.031      0.034      0.804      0.099      0.032          0.182           0.788           0.031
+ckpt:train-due-twin-slot-prior-kldecay_s0/checkpoint      0.038      0.005      0.805      0.006      0.146          0.240           0.739           0.021
+ckpt:train-due-twin-slot-prior-kldecay_s1/checkpoint      0.016      0.024      0.847      0.077      0.036          0.178           0.806           0.016
+ckpt:train-due-twin-slot-prior-kldecay_s2/checkpoint      0.164      0.076      0.719      0.021      0.020          0.112           0.877           0.010
+ckpt:train-due-twin-slot-prior-kldecay_s3/checkpoint      0.006      0.032      0.943      0.004      0.015          0.086           0.896           0.018
+ckpt:train-due-twin-slot-prior-kldecay_s4/checkpoint      0.027      0.023      0.693      0.227      0.030          0.195           0.766           0.039
+
+== slot choices (share of slots, seeds 0-39)
+policy                                                rule    
+ckpt:train-due-twin-slot-prior-kl01_s0/checkpoint     MDD-TECT    1.000
+ckpt:train-due-twin-slot-prior-kl01_s1/checkpoint     MDD-TECT    0.921
+                                                      MDD-ECT     0.042
+                                                      SRT-ECT     0.038
+ckpt:train-due-twin-slot-prior-kl01_s2/checkpoint     MDD-TECT    1.000
+ckpt:train-due-twin-slot-prior-kl01_s3/checkpoint     MDD-TECT    0.882
+                                                      SRT-TECT    0.118
+ckpt:train-due-twin-slot-prior-kl01_s4/checkpoint     MDD-TECT    1.000
+ckpt:train-due-twin-slot-prior-kldecay_s0/checkpoint  MDD-TECT    1.000
+ckpt:train-due-twin-slot-prior-kldecay_s1/checkpoint  MDD-TECT    0.877
+                                                      MDD-ECT     0.123
+ckpt:train-due-twin-slot-prior-kldecay_s2/checkpoint  MDD-TECT    0.930
+                                                      SRT-TECT    0.070
+ckpt:train-due-twin-slot-prior-kldecay_s3/checkpoint  MDD-TECT    1.000
+ckpt:train-due-twin-slot-prior-kldecay_s4/checkpoint  MDD-TECT    0.805
+                                                      EDD-TECT    0.195

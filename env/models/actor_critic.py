@@ -38,6 +38,44 @@ def branch_distributions(logits: torch.Tensor, branches: Sequence[int],
             for part, mask in zip(parts, masks)]
 
 
+def prior_log_probs(pair: str, prob: float, heads: Sequence[Sequence[str]]) -> torch.Tensor:
+    """@brief Log-probabilities of the action prior p0, branches concatenated (action-prior branch, 2026-10-06).
+
+    @param pair   Default pair "JOB-MACHINE", one rule per head (e.g. "MDD-TECT").
+    @param prob   Probability each head puts on the pair's rule; the rest is spread evenly over the head's others.
+    @param heads  Rule names of each head (config.JOB_HEAD_RULES, config.MACHINE_HEAD_RULES).
+    """
+    rules = pair.split("-")
+    if len(rules) != len(heads):
+        raise ValueError(f"prior pair {pair!r} needs one rule per head ({len(heads)})")
+    if not 0.0 < prob < 1.0:
+        raise ValueError(f"prior_prob must be in (0, 1), got {prob}")
+    out = []
+    for rule, names in zip(rules, heads):
+        if rule not in names:
+            raise ValueError(f"prior rule {rule!r} is not in head {list(names)}")
+        p = torch.full((len(names),), (1.0 - prob) / (len(names) - 1))
+        p[list(names).index(rule)] = prob
+        out.append(p.log())
+    return torch.cat(out)
+
+
+def kl_to_prior(dists: List[Categorical], prior_logp: torch.Tensor, branches: Sequence[int],
+                action_mask: Optional[torch.Tensor] = None) -> torch.Tensor:
+    """@brief KL(pi || p0) summed over the branches, (B,). Under a mask p0 is renormalized over the enabled actions,
+    so a head masked down to one action contributes 0 (as it does to log-prob and entropy)."""
+    parts = torch.split(prior_logp.to(dists[0].logits.device), list(branches))
+    masks = torch.split(action_mask > 0.5, list(branches), dim=-1) if action_mask is not None else [None] * len(parts)
+    kl = 0.0
+    for d, lp, m in zip(dists, parts, masks):
+        lp = lp.expand_as(d.logits)
+        if m is not None:
+            lp = lp.masked_fill(~m, -1e9)
+        lp = F.log_softmax(lp, dim=-1)
+        kl = kl + (d.probs * (d.logits - lp)).sum(-1)
+    return kl
+
+
 class FusionHead(nn.Module):
     """@brief Fusion MLP: projects concatenated encoder features to a
     shared representation.
@@ -127,6 +165,14 @@ class ActorHead(nn.Module):
         @param action_mask  (B, sum(branches)), 1 = enabled; None enables every action.
         """
         return branch_distributions(self.forward(x), self.branches, action_mask)
+
+    @torch.no_grad()
+    def init_prior(self, prior_logp: torch.Tensor, weight_scale: float = 0.01) -> None:
+        """@brief Start the policy at the prior: output-layer weights scaled by @p weight_scale and its bias set to
+        log p0, so the logits are about log p0 for any input (action-prior branch, 2026-10-06)."""
+        last = self.net[-1]
+        last.weight.mul_(weight_scale)
+        last.bias.copy_(prior_logp.to(last.bias.device))
 
 
 class CriticHead(nn.Module):
@@ -264,7 +310,7 @@ class ActorCritic(nn.Module):
         return action, log_prob, value
 
     def evaluate(self, features: torch.Tensor, actions: torch.Tensor,
-                 action_mask: Optional[torch.Tensor] = None):
+                 action_mask: Optional[torch.Tensor] = None, prior_logp: Optional[torch.Tensor] = None):
         """@brief Evaluate previously taken actions for the PPO update step.
 
         @param features     Fused representation of shape (B, 256).
@@ -276,10 +322,13 @@ class ActorCritic(nn.Module):
                 - @c values    (B,) — state-value estimates (squeezed).
                 - @c entropy   (B,) — summed branch entropy for the entropy bonus
                   (0 for a masked head).
+                - @c prior_kl  (B,) — KL(pi || p0), only when @p prior_logp is given (a 4th element).
         """
         dists = self.actor.get_distributions(features, action_mask)
         value = self.critic(features).squeeze(-1)
 
         log_probs = sum(d.log_prob(actions[:, i]) for i, d in enumerate(dists))
         entropy = sum(d.entropy() for d in dists)
+        if prior_logp is not None:
+            return log_probs, value, entropy, kl_to_prior(dists, prior_logp, self.actor.branches, action_mask)
         return log_probs, value, entropy

@@ -236,6 +236,15 @@ class PPOConfig:
     ##        normalized by running statistics, updated once per rollout with this rate (bias-corrected EMA;
     ##        0 = off, the raw-scale critic of every run before 2026-10-03). 0.05 averages over about 20 rollouts.
     value_norm_beta: float = 0.05
+    ## @brief Action prior (2026-10-06, action-prior branch): a default rule pair "JOB-MACHINE" (e.g. "MDD-TECT").
+    ##        A fresh network starts at the prior p0 (each head puts prior_prob on the pair's rule, the rest spread
+    ##        evenly), and with prior_kl_coef > 0 the loss adds prior_kl_coef * KL(pi || p0), so leaving the default
+    ##        has to pay for itself in advantage. None = no prior (every run before).
+    prior_pair: Optional[str] = None
+    prior_prob: float = 0.8
+    prior_kl_coef: float = 0.0
+    ## @brief If set, the KL coefficient decays linearly to this value over total_timesteps (like entropy).
+    prior_kl_coef_final: Optional[float] = None
     max_grad_norm: float = 0.5
     num_epochs: int = 4
     batch_size: int = 64
