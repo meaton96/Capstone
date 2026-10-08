@@ -40,6 +40,38 @@ hindsight, the rq2-twin-fleet oracle). Analysis: `results/scripts/dev_b2_slot_an
 
 **Question:** with gradient reaching the trunk, does the argmax leave MDD-TECT on the instances where ATC-ECT wins?
 
-## Result
+## Result (`analysis.out`, 10-07 16:02; 4 h, 2 seeds in parallel)
 
-(pending: `analysis.out`)
+**The offset init does not change the outcome: both policies still play MDD-TECT in 100% of held-out slots.**
+
+| | offset (this run) s0 / s1 | scale x0.01 (train-due-twin-slot-prior-kl) s0 / s1 |
+|---|---|---|
+| held-out B2 0-39 vs MDD-TECT | 0.000% / 0.000% (identical on all 40) | 0.000% / 0.000% |
+| slots not MDD-TECT | 0 / 0 of 960 | 0 / 0 |
+| p(MDD) over slots: mean (min) | 0.835 (0.798) / 0.843 (0.783) | 0.821 (0.695) / 0.866 (0.775) |
+| max p(ATC) | 0.099 / 0.072 | 0.131 / 0.074 |
+| Spearman(p(ATC), ATC-ECT's gap to MDD-TECT) | -0.31 / -0.36 | -0.27 / -0.32 |
+| actor output weight norm | 1.41 / 1.42 | 0.55 / 0.71 |
+| critic explained variance (last quarter) | 0.75 / 0.74 | 0.75 / 0.74 |
+| training return by fifth | within 1-2 of the reference in every fifth | |
+
+The three-reference table (same for both checkpoints, since they are MDD-TECT):
+- vs the best fixed pair (MDD-TECT): 0.0%;
+- vs each instance's hindsight best pair: +5.1%;
+- vs the oracle: +12.1%, with 0% of the oracle's gain captured.
+
+The oracle check passed: the 600 fixed-pair episodes match rq2-twin-fleet's within 8e-8. The discounted return
+(10,800 s) is -60.25 for MDD-TECT, against -62.7 for SRT-ECT and -69.4 for ATC-ECT, the same order as the window score.
+
+## Reading
+
+- The gradient is restored: the output layer grows to a default-sized norm (1.4 vs 0.55-0.7). The direction of the
+  learned preference is the same as before, and slightly stronger (Spearman -0.31 / -0.36 vs -0.27 / -0.32).
+- But the policy stays at p0 or above on MDD. The audit's M1 was a real mechanical defect, but **not** what held the
+  argmax at the prior. With KL 0.05 and the per-slot signal-to-noise of 0.03-0.05, the learned shift in p(ATC) never
+  gets near 0.5.
+- What remains to try is the noise side of the handoff: dev-paired-advantage, dev-shared-baseline, dev-slot-horizon,
+  dev-critic-lookahead and dev-big-batch, all of which use this offset init so they compare against this run.
+
+(Analysis note: the "logit offset+bias" line in `analysis.out` prints the offset plus the zeroed bias for offset runs,
+so it is log p0 by construction; the weight norm and the probabilities are the informative lines.)

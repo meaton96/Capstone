@@ -35,7 +35,7 @@ for name, rows in cells.items():
           f"{np.mean([x['deviations'] for x in r]):8.1f} {np.mean([x['outside_rule_set'] for x in r]):13.1f} "
           f"{np.mean([x['capped'] for x in r]):7.1f}")
 print("\n== paired: direct - rule (percentage points of base, same seeds)")
-for mode in ("hindsight", "expected8"):
+for mode in ("hindsight", "expected8", "expected32"):
     a, b = cells.get(f"direct-{mode}"), cells.get(f"rule-{mode}")
     if not a or not b:
         continue

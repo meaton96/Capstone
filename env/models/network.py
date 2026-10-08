@@ -22,10 +22,14 @@ from config import EncoderConfig, FusionConfig, ActorCriticConfig
 
 def ac_config_for(state_dict: dict) -> ActorCriticConfig:
     """@brief ActorCriticConfig matching a saved model: the critic's first layer is wider than the fused features when
-    it was trained with critic-only look-ahead inputs (2026-10-07)."""
+    it was trained with critic-only look-ahead inputs (2026-10-07); the actor's too when the policy reads them
+    (policy_extra_dim, rq3-lookahead)."""
+    fused = FusionConfig().output_dim
+    a = state_dict.get("actor_critic.actor.net.0.weight")
+    policy_extra = max(int(a.shape[1]) - fused, 0) if a is not None else 0
     w = state_dict.get("actor_critic.critic.net.0.weight")
-    extra = int(w.shape[1]) - FusionConfig().output_dim if w is not None else 0
-    return ActorCriticConfig(critic_extra_dim=max(extra, 0))
+    extra = int(w.shape[1]) - fused - policy_extra if w is not None else 0
+    return ActorCriticConfig(critic_extra_dim=max(extra, 0), policy_extra_dim=policy_extra)
 
 
 def encoder_config_for(state_dict: dict) -> EncoderConfig:
@@ -92,7 +96,7 @@ class SchedulingNetwork(nn.Module):
 
         ## @brief Shared actor-critic heads consuming the 256-D fused features.
         self.actor_critic = ActorCritic(
-            input_dim=fusion_cfg.output_dim,
+            input_dim=fusion_cfg.output_dim + ac_cfg.policy_extra_dim,
             hidden_dim=ac_cfg.hidden_dim,
             branches=ac_cfg.action_branches,
             critic_extra_dim=ac_cfg.critic_extra_dim,
@@ -112,6 +116,17 @@ class SchedulingNetwork(nn.Module):
                 m.eval()
         return self
 
+    def _features(self, obs: dict) -> torch.Tensor:
+        """@brief Fused features, with the look-ahead features appended when the policy reads them (policy_extra_dim)."""
+        fused = self.fusion(self.encoder(obs))
+        if self.ac_cfg.policy_extra_dim:
+            extra = obs.get("critic_lookahead")
+            if extra is None:
+                raise ValueError("this policy reads look-ahead features (obs 'critic_lookahead'), but the observation "
+                                 "has none: train / evaluate with --policy-lookahead on the twin")
+            fused = torch.cat([fused, extra.to(fused.dtype)], dim=-1)
+        return fused
+
     def forward(self, obs: dict):
         """@brief Full forward pass through encoder, fusion, and actor-critic.
 
@@ -121,8 +136,7 @@ class SchedulingNetwork(nn.Module):
                 - @c action_logits (B, sum(branches)) — raw branch logits, concatenated.
                 - @c value         (B, 1) — state-value estimate.
         """
-        encoded = self.encoder(obs)       # (B, 560)
-        fused = self.fusion(encoded)      # (B, 256)
+        fused = self._features(obs)       # (B, 256 [+ policy look-ahead])
         return self.actor_critic(fused, obs.get("critic_lookahead"))
 
     def act(self, obs: dict, deterministic: bool = False):
@@ -136,8 +150,7 @@ class SchedulingNetwork(nn.Module):
                 - @c log_prob (B,) — log-probability of the selected action.
                 - @c value    (B,) — state-value estimate.
         """
-        encoded = self.encoder(obs)
-        fused = self.fusion(encoded)
+        fused = self._features(obs)
         return self.actor_critic.act(fused, obs.get("action_mask"), deterministic=deterministic,
                                      critic_extra=obs.get("critic_lookahead"))
 
@@ -154,14 +167,13 @@ class SchedulingNetwork(nn.Module):
                 - @c entropy   (B,) — distribution entropy for the
                   entropy bonus.
         """
-        encoded = self.encoder(obs)
-        fused = self.fusion(encoded)
+        fused = self._features(obs)
         return self.actor_critic.evaluate(fused, actions, obs.get("action_mask"), prior_logp,
                                           critic_extra=obs.get("critic_lookahead"))
 
     def distributions(self, obs: dict):
         """@brief The (masked) Categorical of each action branch, for inspection and decision logging."""
-        fused = self.fusion(self.encoder(obs))
+        fused = self._features(obs)
         return self.actor_critic.actor.get_distributions(fused, obs.get("action_mask"))
 
     def get_param_summary(self) -> dict:

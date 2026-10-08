@@ -80,7 +80,8 @@ class Episode:
             rule=self.warm_rule, transport="kinematic", warmup_seconds=self.warmup,
             episode_duration_seconds=self.cfg["window"], max_sim_seconds=self.warmup + self.cfg["window"] + 200000.0,
             agv_schedule=self.sched))
-        slot, n = self.cfg["slot"], n_slots(self.setting)
+        slot = self.cfg["slot"]
+        n = int(round(self.cfg["window"] / slot))           # = n_slots(setting) unless cfg["slot"] is overridden
         gen = tw.agent_decisions()
         t0, played, current = None, [], None
         try:

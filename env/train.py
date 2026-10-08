@@ -108,7 +108,7 @@ def build_env(args, ppo_cfg, run_dir: Path, reward, scenario_generator=None, see
             raise ValueError("--twin needs --scenario or --scenario-generator (the twin has no default job set)")
         obs_caps = row_caps_for(planned, args.obs_max_machines, args.obs_max_jobs)
         obs_shapes = shapes_for_caps(*obs_caps)
-        if getattr(args, "critic_lookahead", False):
+        if lookahead_obs(args):
             from des_twin.lookahead import LOOKAHEAD_DIM
             obs_shapes["critic_lookahead"] = (LOOKAHEAD_DIM,)
         print(f"Observation row caps: {obs_caps[0]} machines, {obs_caps[1]} jobs")
@@ -130,7 +130,7 @@ def build_env(args, ppo_cfg, run_dir: Path, reward, scenario_generator=None, see
             gamma_per_second=getattr(ppo_cfg, "gamma_per_second", None),
             instance_group=getattr(ppo_cfg, "shared_baseline_group", 1),
             paired=paired_settings(ppo_cfg),
-            critic_lookahead=getattr(args, "critic_lookahead", False),
+            critic_lookahead=lookahead_obs(args),
         )
         if getattr(args, "twin_workers", 0) > 1:
             from env_wrappers.twin_env import SubprocTwinEnv
@@ -140,8 +140,9 @@ def build_env(args, ppo_cfg, run_dir: Path, reward, scenario_generator=None, see
             vec_env = VectorizedTwinEnv(num_envs=ppo_cfg.num_envs, **twin_kwargs)
         shutil.copy2(args.twin, run_dir / "des_floor.json")
     elif args.unity:
-        if getattr(args, "critic_lookahead", False):
-            raise ValueError("--critic-lookahead is twin only (the player does not export future arrivals)")
+        if lookahead_obs(args):
+            raise ValueError("--critic-lookahead / --policy-lookahead are twin only (the player does not export future "
+                             "arrivals)")
         if getattr(args, "slot_seconds", 0.0) > 0:
             raise ValueError("--slot-seconds is implemented for --twin only so far (VectorizedUnityEnv wraps per env "
                              "the same way; add it before training on Unity)")
@@ -327,9 +328,14 @@ def check_action_layout(ckpt: dict, path) -> None:
 
 ## @brief CLI settings that decide what a checkpoint's policy was trained on, saved with it (audit m2, 2026-10-07):
 ##        evaluate.py takes slot_seconds from here and warns when its own flags differ from the rest.
-RUN_SETTING_KEYS = ("slot_seconds", "critic_lookahead", "twin", "twin_transport", "scenario", "scenario_generator", "params",
+RUN_SETTING_KEYS = ("slot_seconds", "critic_lookahead", "policy_lookahead", "twin", "twin_transport", "scenario", "scenario_generator", "params",
                     "episode_duration_seconds", "random_warmup", "warmup_dispatching_rule", "agv_move_speed",
                     "agv_handshake_duration", "machine_flexibility", "secondary_time_multiplier", "reward_spec")
+
+
+def lookahead_obs(args) -> bool:
+    """@brief Whether the twin adds the look-ahead features (obs "critic_lookahead"): for a look-ahead critic or policy."""
+    return bool(getattr(args, "critic_lookahead", False) or getattr(args, "policy_lookahead", False))
 
 
 def run_settings(args) -> dict:
@@ -503,10 +509,17 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
               "minibatch statistics.")
     from des_twin.lookahead import LOOKAHEAD_DIM
     ac_cfg = ac_config_for(ckpt["model_state_dict"]) if ckpt else \
-        ActorCriticConfig(critic_extra_dim=LOOKAHEAD_DIM if getattr(args, "critic_lookahead", False) else 0)
+        ActorCriticConfig(critic_extra_dim=LOOKAHEAD_DIM if getattr(args, "critic_lookahead", False) else 0,
+                          policy_extra_dim=LOOKAHEAD_DIM if getattr(args, "policy_lookahead", False) else 0)
+    if bool(ac_cfg.policy_extra_dim) != bool(getattr(args, "policy_lookahead", False)):
+        raise ValueError(f"the checkpoint's policy {'reads' if ac_cfg.policy_extra_dim else 'does not read'} look-ahead "
+                         f"features; {'pass' if ac_cfg.policy_extra_dim else 'drop'} --policy-lookahead to match it")
     if bool(ac_cfg.critic_extra_dim) != bool(getattr(args, "critic_lookahead", False)):
         raise ValueError(f"the checkpoint's critic {'reads' if ac_cfg.critic_extra_dim else 'does not read'} look-ahead "
                          f"features; pass --critic-lookahead {'' if ac_cfg.critic_extra_dim else 'only '}to match it")
+    if ac_cfg.policy_extra_dim:
+        print(f"\nPolicy look-ahead: {ac_cfg.policy_extra_dim} features (des_twin/lookahead.py) appended to the fused "
+              "features; actor and critic both read them")
     if ac_cfg.critic_extra_dim:
         print(f"\nCritic-only look-ahead: {ac_cfg.critic_extra_dim} features (des_twin/lookahead.py); the actor never sees them")
     net = SchedulingNetwork(
@@ -1070,6 +1083,9 @@ if __name__ == "__main__":
     parser.add_argument("--critic-lookahead", action="store_true",
                         help="Twin: give the critic (never the policy) the next 30/60/120 min of known arrivals, load, "
                              "due-date slack and AGV fleet (des_twin/lookahead.py; asymmetric actor-critic)")
+    parser.add_argument("--policy-lookahead", action="store_true",
+                        help="Twin: give the policy (and critic) the same look-ahead features as --critic-lookahead, "
+                             "appended to the fused features (rq3-lookahead, real schedule; excludes --critic-lookahead)")
     parser.add_argument("--paired-advantage", action="store_true",
                         help="Same-future paired advantage per slot (--twin --slot-seconds): G(chosen, then default) - "
                              "G(default) on redrawn futures replaces the GAE advantage (env_wrappers/paired_slot_env.py)")
@@ -1099,6 +1115,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.twin and args.unity:
         parser.error("--twin and --unity are mutually exclusive")
+    if args.policy_lookahead and args.critic_lookahead:
+        parser.error("--policy-lookahead already gives the critic the look-ahead features; drop --critic-lookahead")
 
     cfg = PPOConfig(
         total_timesteps=args.total_timesteps,

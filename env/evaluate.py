@@ -849,8 +849,10 @@ def main(argv=None):
     if args.twin:
         # Event-based twin (2026-10-05): same queue interface, episodes simulated in this process.
         from env_wrappers.twin_env import TwinSchedulingEnv
+        # Look-ahead features (des_twin.lookahead) only when a checkpoint's policy reads them (rq3-lookahead).
+        lookahead = any(p.kind == "checkpoint" and p.net.ac_cfg.policy_extra_dim for p in policies)
         env = TwinSchedulingEnv(args.twin, transport=args.twin_transport, reward_fn=reward_fn, obs_caps=obs_caps,
-                                queued=True)
+                                queued=True, critic_lookahead=lookahead)
     else:
         env = None
     env = env or UnitySchedulingEnv(

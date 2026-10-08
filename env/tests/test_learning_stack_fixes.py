@@ -367,3 +367,32 @@ def test_critic_lookahead_reaches_the_critic_only(tmp_path):
         net.act(make_dummy_obs(2))
     assert ac_config_for(net.state_dict()).critic_extra_dim == LOOKAHEAD_DIM
     assert ac_config_for(SchedulingNetwork().state_dict()).critic_extra_dim == 0
+
+
+# ── Policy look-ahead (rq3-lookahead, 10-07) ───────────────────────────────────────────────────────────
+
+def test_policy_lookahead_reaches_actor_and_critic():
+    from des_twin.lookahead import LOOKAHEAD_DIM
+    from config import ActorCriticConfig
+    from models.network import ac_config_for
+    torch.manual_seed(0)
+    net = SchedulingNetwork(ac_cfg=ActorCriticConfig(policy_extra_dim=LOOKAHEAD_DIM))
+    batch = make_dummy_obs(4)
+    batch["critic_lookahead"] = torch.rand(4, LOOKAHEAD_DIM)
+    batch2 = dict(batch, critic_lookahead=torch.rand(4, LOOKAHEAD_DIM))
+    _, _, v1 = net.act(batch, deterministic=True)
+    _, _, v2 = net.act(batch2, deterministic=True)
+    assert not torch.allclose(v1, v2)                                  # the critic reads it
+    d1 = [d.probs for d in net.distributions(batch)]
+    d2 = [d.probs for d in net.distributions(batch2)]
+    assert not all(torch.allclose(a, b) for a, b in zip(d1, d2))        # and so does the actor
+    actions, logp, _ = net.act(batch)
+    logp2, _, _ = net.evaluate(batch, actions)
+    assert torch.allclose(logp, logp2, atol=1e-6)                       # rollout and update agree
+    with pytest.raises(ValueError):
+        net.act(make_dummy_obs(2))
+    cfg = ac_config_for(net.state_dict())
+    assert cfg.policy_extra_dim == LOOKAHEAD_DIM and cfg.critic_extra_dim == 0
+    critic_only = SchedulingNetwork(ac_cfg=ActorCriticConfig(critic_extra_dim=LOOKAHEAD_DIM))
+    cfg = ac_config_for(critic_only.state_dict())
+    assert cfg.policy_extra_dim == 0 and cfg.critic_extra_dim == LOOKAHEAD_DIM

@@ -26,6 +26,12 @@ dev-prior-offset with `--critic-lookahead`, seeds 0-1, 100k steps.
 **Question:** does the critic's explained variance rise (dev-prior-offset is the reference), and does the policy then
 learn faster?
 
-## Result
-
-(pending: `analysis.out`)
+## Result (10-08 08:57, cluster CPU; `analysis.out`)
+- **Held-out B2 seeds 0-39:** both seeds play MDD-TECT in 100% of slots (= MDD-TECT, 0.000%).
+- **The look-ahead critic works:** explained variance 0.90 (s0 0.904, s1 0.902), against 0.75 for the plain critic.
+  That is the largest critic improvement of the dev runs (5,400 s horizon 0.84-0.85; shared baseline 0.63-0.66).
+  Known future arrivals explain much of the return variance that the current state cannot.
+- **The policy does not move:** mean p(ATC) 0.03-0.04, Spearman with ATC-ECT's gap −0.22 / −0.36.
+- **Reading:** a better baseline does not create a per-slot signal that the action can exploit. It confirms the credit
+  trace: arrival noise dominates the return. Removing it leaves MDD-TECT best from the current state (compare
+  dev-paired-advantage).

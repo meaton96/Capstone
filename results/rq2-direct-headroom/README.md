@@ -1,6 +1,7 @@
 # rq2-direct-headroom: does a direct job×machine action space have more headroom than rule pairs?
 
-Status: running (lab, local, 16 workers, started 2026-10-07). Results are filled in when it finishes.
+Status: done 2026-10-07 22:32 (local, 160/160). 32-future recheck (rq2-direct-headroom-f32, cluster): 70/80 on
+10-08 03:38; the 10 direct seeds that hit the 12 h limit were resubmitted with 24 h.
 
 ## Why
 The fallback plan, if the PDR agent cannot be made to work, is a GNN that chooses job and machine directly (L2D,
@@ -54,5 +55,35 @@ non-rule choice has to exist. Background: `docs/experiments/review_1007/FINDINGS
   - A one-step rollout over a 30-min stretch is a lower bound on what a full policy could do.
   - The 60-option cap binds at high WIP (the `capped` column).
 
-## Results
-(pending)
+## Results (B2 seeds 0-39; `analysis.out`)
+| cell | gain over MDD-TECT, pooled | mean per seed ± 95% | decisions rolled | deviations from base | outside the rule set |
+|---|---|---|---|---|---|
+| rule, hindsight | +10.6% | +11.1 ± 2.0 | 128 | 4.0 | 0 |
+| direct, hindsight | +13.1% | +13.6 ± 2.4 | 128 | 6.5 | 5.2 |
+| rule, expected8 | 0.0% | −0.5 ± 3.0 | 127 | 15.6 | 0 |
+| direct, expected8 | −1.8% | −2.3 ± 2.9 | 123 | 35.3 | 28.8 |
+
+Paired direct − rule: **+2.5 ± 1.1 points in hindsight**; **−1.8 ± 2.6 points with 8 redrawn futures**.
+
+## Reading
+- **With the realized future**, 30 minutes of one-step choices alone nearly reach the full-window switching oracle
+  (−10.8%). Direct job×machine choice adds 2.5 points over rule outcomes, mostly by leaving the rule set (5 of 6.5
+  deviations are choices no H15 pair makes).
+- **Knowing only the present** (scored over redrawn futures), neither action space gains anything. The direct
+  rollout deviates far more often (35 vs 16 times) and ends slightly worse. With 8 futures it chases noise in a larger
+  option set.
+- **For the GNN question:** on B2, a bigger action space buys nothing a non-clairvoyant controller can use, at least
+  greedily. A trained GNN could still find multi-step strategies a one-step rollout cannot, so this is evidence, not
+  proof. The 32-future recheck tests whether the rollout's estimate is the limit.
+
+## 32-future recheck (rq2-direct-headroom-f32; 70/80 tasks, 10-08)
+| cell | pooled gain over MDD-TECT | mean per seed ± 95% | seeds |
+|---|---|---|---|
+| rule, expected32 | +1.1% | +1.2 ± 2.1 | 40 |
+| direct, expected32 | −2.3% | −2.0 ± 3.2 | 30 (10 timed out, resubmitted) |
+
+Paired direct − rule: −3.0 ± 3.2 points (30 seeds).
+
+- A less noisy estimate gives the rule rollout a small gain (+1.1%).
+- The direct rollout is still worse: more options, judged on a noisy estimate, cost more than the extra freedom buys.
+- The conclusion stands: no extra usable headroom for a direct action space on B2, at least greedily.

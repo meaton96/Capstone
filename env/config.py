@@ -214,6 +214,10 @@ class ActorCriticConfig:
     ## @brief Extra critic-only inputs (obs key "critic_lookahead", des_twin.lookahead, 2026-10-07): the critic reads
     ##        [fused features, these]; the actor never does. 0 = the plain critic.
     critic_extra_dim: int = 0
+    ## @brief Look-ahead inputs for the policy (and critic) (2026-10-07, rq3-lookahead): the same features (obs key
+    ##        "critic_lookahead") appended to the fused features before the actor-critic heads, so the actor sees the
+    ##        known future arrivals too. 0 = the policy sees the current state only. Excludes critic_extra_dim.
+    policy_extra_dim: int = 0
 
 
 @dataclass

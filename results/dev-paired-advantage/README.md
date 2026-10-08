@@ -38,6 +38,20 @@ dev-prior-offset config plus `--paired-advantage --paired-futures 2 --paired-tai
 (not 100k, for cost), 6 twin workers per seed, seeds 0-1. Compare with dev-prior-offset at matched steps, and on the
 held-out table.
 
-## Result
-
-(pending: `analysis.out`)
+## Result (10-08 05:39, cluster CPU, 30k steps per seed; `analysis.out`)
+- **Held-out B2 seeds 0-39:** both seeds play MDD-TECT in 100% of slots (= MDD-TECT, 0.000%).
+- **The paired advantage did its job on variance:** 3.45 / 2.79 at the first update against about 2,400-2,600 for the
+  GAE advantage. Late in training it is 0.02-0.07.
+- **It also drove the policy *toward* MDD-TECT, not away from it:**
+  - entropy 1.2 → 0.32;
+  - mean p(ATC) down to 0.002-0.015;
+  - the prior KL rose to 0.31, because the policy became more certain of MDD-TECT than the p = 0.8 prior itself.
+  - Only 6% of late slots have a nonzero paired advantage (34-37% at the start).
+- **Reading:** this is the cleanest learning signal any run has had.
+  - It is unbiased and paired on redrawn futures, so the arrival noise is gone.
+  - Under it, leaving MDD-TECT has negative or zero expected value from the current state, so PPO correctly converges
+    to MDD-TECT.
+  - That agrees with rq2-direct-headroom's current-state rollouts (8 futures 0.0%, 32 futures +1.1%) and with the
+    oracle decomposition. On B2, rule switching from the current state has about no per-slot headroom over MDD-TECT
+    that 2 redrawn futures can detect.
+  - The learning stack is not what holds the policy at MDD-TECT; the problem is.

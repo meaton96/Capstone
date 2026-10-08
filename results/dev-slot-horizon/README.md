@@ -21,6 +21,12 @@
 dev-prior-offset with `--discount-horizon-s 5400` (seeds 0-1, 100k steps, offset prior, KL 0.05). Compare with
 dev-prior-offset (10,800 s), which differs only in the horizon.
 
-## Result
-
-(pending: `analysis.out`)
+## Result (10-08 04:57, cluster CPU; `analysis.out`)
+- **Held-out B2 seeds 0-39:**
+  - s0 plays MDD-TECT in 100% of slots (= MDD-TECT, 0.000%).
+  - s1 plays it in 96.7% (MDD-SRWT 2.7%) and is +0.4% (4 wins, 5 losses).
+- **The critic improved:** explained variance is 0.84-0.85 at the 5,400 s horizon, against 0.75 at 10,800 s. That is
+  the expected variance cut of the shorter horizon.
+- **The policy didn't leave the prior:** mean p(ATC) 0.02-0.04, Spearman with ATC-ECT's gap −0.31 / −0.33.
+- **Reading:** the shorter horizon makes the value estimate better but does not overcome the MDD-TECT prior's KL pull.
+  Same outcome as dev-prior-offset and dev-big-batch.
