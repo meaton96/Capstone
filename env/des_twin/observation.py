@@ -128,7 +128,7 @@ class ObservationBuilder:
 
     def build(self, twin, decision):
         """Observation dict (env_wrappers.unity_env.slice_obs keys plus "action_mask") at this decision."""
-        live = [j for j in twin.order if j.state != EXITED]
+        live = list(twin._live())        # live jobs in arrival order (the engine's index)
         agvs = self.agv_view(twin)
         agv_ids = [a.id for a in twin.agvs] if not twin.instant else list(range(len(agvs)))
         agv_xz = {i: xz for i, (_, xz) in zip(agv_ids, agvs)}

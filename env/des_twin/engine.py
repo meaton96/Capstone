@@ -17,9 +17,18 @@ With a fixed rule (run / run_twin) every decision is drained with it, as "-basel
 Machines and AGVs act after the orchestrator in a tick, so work started at tick k runs from tick k and a flag
 raised at tick m is harvested at m + 1. Machine failures, AGV failures and multi-tile floors are not modelled:
 compare only against Unity runs without them.
+
+Indexes (2026-10-09, dev-twin-speed): the engine used to find live jobs, routable jobs, machine queues and machine loads
+by scanning every job that ever arrived (`self.order`), several times per tick; at 100 machines that was ~90% of the
+run time. It now keeps the live jobs (`_live_d`), the jobs per state and per machine queue / load target as indexes
+ordered by arrival position (`Job.seq` = index in `self.order`), so every scan visits the same jobs in the same order
+as before and the results are bit-identical (float32 sums included). `_to` is the only place a job's state changes and
+every location / target change happens before the `_to` that follows it, so `_to` keeps the indexes current. metrics()
+caches its left fold over the leading exited jobs (they never change). Exactness check: results/dev-twin-speed.
 """
 import heapq
 import math
+from bisect import bisect_left, insort
 from dataclasses import dataclass
 
 import numpy as np
@@ -68,9 +77,33 @@ class Decision:
         return pool, pool or len(self.machines) > 1
 
 
+class _OrdIdx:
+    """Jobs kept in arrival order (Job.seq): iterating it visits them as a scan of Twin.order would."""
+    __slots__ = ("keys", "items")
+
+    def __init__(self):
+        self.keys, self.items = [], {}
+
+    def add(self, job):
+        insort(self.keys, job.seq)
+        self.items[job.seq] = job
+
+    def remove(self, job):
+        del self.keys[bisect_left(self.keys, job.seq)]
+        del self.items[job.seq]
+
+    def jobs(self):
+        items = self.items
+        return [items[k] for k in self.keys]
+
+    def __len__(self):
+        return len(self.keys)
+
+
 class Job:
     __slots__ = ("id", "arrival", "ops", "types", "cur_op", "completed_ops", "state", "since", "t_state",
-                 "location", "target", "assigned_agv", "pre_agv", "exit_time", "op_rows", "due", "op_due")
+                 "location", "target", "assigned_agv", "pre_agv", "exit_time", "op_rows", "due", "op_due",
+                 "seq", "ix_load", "ix_queue")
 
     def __init__(self, jid, arrival, ops, types, due=None, op_due=None):
         self.id, self.arrival, self.ops, self.types = jid, arrival, ops, types
@@ -81,6 +114,9 @@ class Job:
         self.location = self.target = self.assigned_agv = self.pre_agv = -1
         self.exit_time = None
         self.op_rows = []
+        self.seq = -1              # index in Twin.order once arrived
+        self.ix_load = -1          # machine whose load index holds the job (-1: none)
+        self.ix_queue = -1         # machine whose queue index holds the job (-1: none)
 
     @property
     def total_ops(self):
@@ -141,9 +177,18 @@ class Twin:
         if n_agv > len(floor.agvs):
             raise ValueError(f"agv_count {n_agv} exceeds the {len(floor.agvs)} bays exported in des_floor.json")
         self.agvs = [] if self.instant else [AgvRT(a) for a in floor.agvs[:n_agv]]
+        self._agv_pos = {id(a): i for i, a in enumerate(self.agvs)}   # self.agvs.index(a)
         self.incoming_zone = floor.incoming_zone()
 
         self.jobs, self.order, self.pending = {}, [], []
+        self._live_d = {}                                  # live (arrived, not exited) jobs by seq, in arrival order
+        self._by_state = [_OrdIdx() for _ in range(6)]     # live jobs per state (EXITED unused)
+        self._queued_at = {m.id: _OrdIdx() for m in self.machines}   # QUEUED jobs by location
+        self._load_at = {m.id: _OrdIdx() for m in self.machines}     # jobs counted in machine_load(mid)
+        self._mpos = {m.id: i for i, m in enumerate(self.machines)}
+        self._dispatchable = set()                         # positions of idle machines with a non-empty queue
+        self._prearrive = {}                               # trace entry "arrive_prepickup" -> its indexes
+        self._mprefix = None                               # metrics(): fold over the leading exited jobs
         for jd in jobs_data["jobs"]:
             ops = [{int(m): f32(d) for m, d in op["eligible"]} for op in jd["ops"]]
             due, op_due = jd.get("due"), jd.get("op_due")
@@ -161,7 +206,7 @@ class Twin:
             if job.arrival > 0.0:
                 self.pending.append(job)
             else:
-                self.order.append(job)
+                self._arrive(job)
         self.pending.sort(key=lambda j: (j.arrival, j.id))
         self.pending_i = 0
 
@@ -174,6 +219,7 @@ class Twin:
         self.truncated = False
         self.makespan = None
         self.agent = False
+        self.forced = None             # (job, machine) for the next decision only; see force()
         # FixedUpdate ends the episode at the first tick with SimTime > warm-up end + cap, before harvesting
         self.cap_tick = None
         if cfg.episode_duration_seconds > 0:
@@ -204,6 +250,12 @@ class Twin:
         the twin's state is the one the decision is made in (for the observation). Ends with the episode."""
         self.agent = True
         return self._events()
+
+    def force(self, job=None, machine=None):
+        """Agent mode, while paused at a decision: the next decision takes this job (and, for a routing, this
+        machine) instead of the rule halves' pick; None leaves that half to the rule. Used for rollouts
+        (des_twin.branch); equivalent to rq2-direct-headroom's FORCE wrapper on rank_jobs / select_machine."""
+        self.forced = (job, machine)
 
     @property
     def in_warmup(self):
@@ -258,22 +310,62 @@ class Twin:
         while self.pending_i < len(self.pending) and self.pending[self.pending_i].arrival <= self.now + 1e-9:
             job = self.pending[self.pending_i]
             self.pending_i += 1
-            self.order.append(job)
+            self._arrive(job)
             added = True
         if added:
             self._wake(k + 1)
-        return self.pending_i >= len(self.pending) and all(j.state == EXITED for j in self.order)
+        return self.pending_i >= len(self.pending) and not self._live_d
 
     # ── Job bookkeeping ─────────────────────────────────────────────────────────────────────────
+
+    def _arrive(self, job):
+        job.seq = len(self.order)
+        self.order.append(job)
+        self._live_d[job.seq] = job
+        self._by_state[job.state].add(job)
+        self._index_load(job)
 
     def _to(self, job, state):
         dt = self.now - job.since
         if dt > 0:
             job.t_state[job.state] += dt
+        old = job.state
         job.state, job.since = state, self.now
+        # indexes (callers set location / target before the _to that follows)
+        self._by_state[old].remove(job)
+        if job.ix_queue >= 0:
+            q = self._queued_at[job.ix_queue]
+            q.remove(job)
+            if not q.items:
+                self._dispatchable.discard(self._mpos[job.ix_queue])
+            job.ix_queue = -1
+        if state == EXITED:
+            del self._live_d[job.seq]
+        else:
+            self._by_state[state].add(job)
+        if state == QUEUED:
+            job.ix_queue = job.location
+            self._queued_at[job.location].add(job)
+            if self.mach[job.location].idle:
+                self._dispatchable.add(self._mpos[job.location])
+        self._index_load(job)
+
+    def _index_load(self, job):
+        if job.state == QUEUED:
+            mid = job.location
+        elif job.state in (WAITING_PICKUP, IN_TRANSIT) and job.target >= 0:
+            mid = job.target
+        else:
+            mid = -1
+        if mid != job.ix_load:
+            if job.ix_load >= 0:
+                self._load_at[job.ix_load].remove(job)
+            if mid >= 0:
+                self._load_at[mid].add(job)
+            job.ix_load = mid
 
     def _live(self):
-        return (j for j in self.order if j.state != EXITED)
+        return iter(self._live_d.values())
 
     def remaining_work(self, jid):
         job = self.jobs[jid]
@@ -290,23 +382,19 @@ class Twin:
 
     def machine_load(self, mid):
         load = self.remaining_proc(self.mach[mid])
-        for j in self._live():
-            if (j.state == QUEUED and j.location == mid) or \
-                    (j.target == mid and j.state in (WAITING_PICKUP, IN_TRANSIT)):
-                load = f32(load + j.proc(mid))
+        # QUEUED at mid, or WAITING_PICKUP / IN_TRANSIT to mid, in arrival order (float32 sum order)
+        for j in self._load_at[mid].jobs():
+            load = f32(load + j.proc(mid))
         return load
 
     def all_machine_loads(self):
         loads = {m.id: self.remaining_proc(m) for m in self.machines}
-        for j in self._live():
-            if j.state == QUEUED:
-                mid = j.location
-            elif j.state in (WAITING_PICKUP, IN_TRANSIT):
-                mid = j.target
-            else:
-                continue
-            if mid >= 0:
-                loads[mid] = f32(loads.get(mid, f32(0)) + j.proc(mid))
+        for mid, idx in self._load_at.items():   # per machine in arrival order, as the scan added them
+            if idx.keys:
+                load = loads[mid]
+                for j in idx.jobs():
+                    load = f32(load + j.proc(mid))
+                loads[mid] = load
         return loads
 
     def work_in_next_queue(self, jid, loads):
@@ -335,6 +423,7 @@ class Twin:
         m.almost_tick = self.k + max(1, f32_countdown(dur, self.dt, until=self.lead)[0])
         for belt in m.belts:
             belt[1].discard(job.id)
+        self._dispatchable.discard(self._mpos[m.id])
         self._wake(m.finish_tick)
         self._wake(m.almost_tick)
 
@@ -342,6 +431,8 @@ class Twin:
         job = self.jobs[m.job]
         m.busy += self.now - m.proc_start
         m.proc_start, m.idle, m.job, m.finish_tick = None, True, -1, None
+        if self._queued_at[m.id].keys:
+            self._dispatchable.add(self._mpos[m.id])
         job.op_rows[-1]["end"] = self.now
         job.completed_ops += 1
         job.cur_op += 1
@@ -397,7 +488,7 @@ class Twin:
             if t > self.now:
                 break
             n = k
-        return self.agvs.index(a) < n
+        return self._agv_pos[id(a)] < n
 
     def _available(self, a):
         return self._status(a) in ("idle", "returning") and self._on_duty(a)
@@ -465,7 +556,10 @@ class Twin:
         self._trace(done, a, "pickup", job.id)
 
     def _trace(self, tick, a, ev, jid):
-        self.trace.append((round(tick * self.dt, 2), a.id, ev, jid))
+        row = (round(tick * self.dt, 2), a.id, ev, jid)
+        if ev == "arrive_prepickup":
+            self._prearrive.setdefault(row, []).append(len(self.trace))
+        self.trace.append(row)
 
     def _predispatch(self, a, job, m):
         zid, dock = self._pickup_dock(m)
@@ -485,8 +579,9 @@ class Twin:
         else:                            # still on the way: the normal arrival
             done, yaw = handshake_done(self.kin, a.leg.end_yaw, goal, a.pre_arrive, True)
             pre = (round(a.pre_arrive * self.dt, 2), a.id, "arrive_prepickup", job.id)
-            if pre in self.trace:         # it now arrives as MovingToPickup, as Unity logs it
-                self.trace[self.trace.index(pre)] = pre[:2] + ("arrive_pickup", job.id)
+            at = self._prearrive.get(pre)
+            if at:                        # it now arrives as MovingToPickup, as Unity logs it (first match)
+                self.trace[at.pop(0)] = pre[:2] + ("arrive_pickup", job.id)
         a.state, a.target, a.drop_pos, a.yaw = "to_pickup", target.id if target else -1, drop_pos, yaw
         a.milestone = (done + 1, "pickup")
         self._wake(done + 1)
@@ -553,13 +648,13 @@ class Twin:
     def _assign_agvs(self):
         if self.instant:
             return
-        for job in [j for j in self._live() if j.state == WAITING_PICKUP and j.assigned_agv == -1 and j.pre_agv < 0]:
+        for job in [j for j in self._by_state[WAITING_PICKUP].jobs() if j.assigned_agv == -1 and j.pre_agv < 0]:
             if not self._try_assign(job):
                 break
 
     def _any_waiting_for_transport(self):
-        return any(j.state == NEEDS_ROUTING or
-                   (j.state == WAITING_PICKUP and j.assigned_agv == -1 and j.pre_agv < 0) for j in self._live())
+        return len(self._by_state[NEEDS_ROUTING]) > 0 or \
+            any(j.assigned_agv == -1 and j.pre_agv < 0 for j in self._by_state[WAITING_PICKUP].items.values())
 
     def _almost_done(self, m, waiting):
         if m.job < 0 or self.instant:
@@ -578,17 +673,16 @@ class Twin:
     # ── Decisions ───────────────────────────────────────────────────────────────────────────────
 
     def _next_decision(self):
-        ready = [j for j in self._live() if j.state == NEEDS_ROUTING]
+        ready = self._by_state[NEEDS_ROUTING].jobs()
         if ready:
             open_ = not self.on_transport or any(self._available(a) for a in self.agvs)
             routable = [j for j in ready if open_ or j.pre_agv >= 0]
             if routable:
                 yield from self._route(routable)
                 return True
-        for m in self.machines:
-            if m.idle and any(j.state == QUEUED and j.location == m.id for j in self._live()):
-                yield from self._dispatch_decision(m)
-                return True
+        if self._dispatchable:            # the first machine in floor order that is idle with a queue
+            yield from self._dispatch_decision(self.machines[min(self._dispatchable)])
+            return True
         return False
 
     def _rule_for(self, make_decision):
@@ -610,7 +704,13 @@ class Twin:
         job_rule, machine_rule = yield from self._rule_for(lambda: Decision(
             "routing", job=ids[0], job_candidates=tuple(ids), selected_by_rule=len(ids) == 1,
             machines=tuple(self.candidate_machines(routable[0]))))
-        jid = rank_jobs(job_rule, ids, self, lambda i: self.jobs[i].min_proc())
+        forced, self.forced = self.forced, None
+        if forced is not None and forced[0] is not None:
+            if forced[0] not in ids:
+                raise ValueError(f"forced job {forced[0]} is not routable now ({ids})")
+            jid = forced[0]
+        else:
+            jid = rank_jobs(job_rule, ids, self, lambda i: self.jobs[i].min_proc())
         job = self.jobs[jid]
         cands = self.candidate_machines(job)
         times = [job.proc(mid) for mid in cands]
@@ -621,7 +721,12 @@ class Twin:
         else:
             speed = self.floor.agv["speed"]
             travel = [f32(self.floor.estimate_path_length(job.location, mid) / speed) for mid in cands]
-        mid = select_machine(machine_rule, cands, times, loads, utils, travel)
+        if forced is not None and forced[1] is not None:
+            if forced[1] not in cands:
+                raise ValueError(f"forced machine {forced[1]} is not eligible for job {jid} ({cands})")
+            mid = forced[1]
+        else:
+            mid = select_machine(machine_rule, cands, times, loads, utils, travel)
         self.decision_rows.append((self.now, "routing", job.id, mid, len(cands), len(ids)))
         job.op_rows.append({"job": job.id, "op": job.cur_op, "machine": mid, "routed": self.now,
                             "from": job.location, "queued": None, "start": None, "end": None})
@@ -643,9 +748,15 @@ class Twin:
 
     def _dispatch_decision(self, m):
         self.decisions += 1
-        queue = [j.id for j in self._live() if j.state == QUEUED and j.location == m.id]
+        queue = [j.id for j in self._queued_at[m.id].jobs()]
         job_rule, _ = yield from self._rule_for(lambda: Decision("dispatch", machine=m.id, queue=tuple(queue)))
-        jid = rank_jobs(job_rule, queue, self, lambda i: self.jobs[i].proc(m.id))
+        forced, self.forced = self.forced, None
+        if forced is not None and forced[0] is not None:
+            if forced[0] not in queue:
+                raise ValueError(f"forced job {forced[0]} is not queued at machine {m.id} ({queue})")
+            jid = forced[0]
+        else:
+            jid = rank_jobs(job_rule, queue, self, lambda i: self.jobs[i].proc(m.id))
         job = self.jobs[jid]
         self.decision_rows.append((self.now, "dispatch", m.id, jid, len(queue), 0))
         job.op_rows[-1]["start"] = self.now
@@ -695,13 +806,37 @@ class Twin:
         AGV travel time is the non-idle time (handshakes included) and there are no route waits or zone blocks:
         the twin has no reservations."""
         jobs = self.order                 # AllJobs: arrived jobs only
+        # The sums are a left fold over self.order. Its leading run of exited jobs never changes, so the fold up to
+        # the first live job is cached (_mprefix) and only the rest is re-summed: the same additions in the same
+        # order, so the same bits.
+        pre = self._mprefix
+        if pre is None:
+            pre = self._mprefix = [0, 0, 0.0, 0.0, 0, 0, 0, [0.0] * 6, 0, 0.0, 0.0]
+        p, with_due, tard, tard_exited, late_exited, ops_total, ops_done, t_state, exited, flow, tis = pre
+        t_state = list(t_state)
+        while p < len(jobs) and jobs[p].state == EXITED:
+            j = jobs[p]
+            if j.due is not None:
+                with_due += 1
+                late = j.exit_time - j.due
+                if late > 0:
+                    tard += late
+                    tard_exited += late
+                    late_exited += 1
+            ops_total += j.total_ops
+            ops_done += j.completed_ops
+            for s in range(5):
+                t_state[s] += j.t_state[s]
+            exited += 1
+            f = j.exit_time - j.arrival
+            flow += f
+            tis += f
+            p += 1
+        self._mprefix = [p, with_due, tard, tard_exited, late_exited, ops_total, ops_done, list(t_state), exited,
+                         flow, tis]
         n_state = [0] * 6
-        t_state = [0.0] * 6
-        flow = tis = 0.0
-        exited = ops_total = ops_done = 0
-        tard = tard_exited = 0.0
-        late_open = late_exited = with_due = 0
-        for j in jobs:
+        late_open = 0
+        for j in jobs[p:]:
             if j.due is not None:
                 with_due += 1
                 if j.state == EXITED:
