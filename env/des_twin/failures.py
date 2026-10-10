@@ -249,28 +249,53 @@ class WeibullModel:
     @param renewal   "good_as_new" (Unity: age 0 after a repair) or "minimal" (as-bad-as-old: the operating age keeps
                      growing, so the hazard rises over the episode when k > 1 - a degradation model)
     @param pm_interval  with renewal="minimal": a preventive-maintenance renewal (age back to 0, no downtime) every
-                     this many operating seconds; None = never"""
+                     this many operating seconds; None = never
+    @param static_info  what the "static" information level (the datasheet) knows: "machine" = each machine's own
+                     long-run parameters; "pooled" = only the floor-wide pooled values (mean failure rate, mean
+                     repair), the same for every machine - for a plant whose unreliable machines are not known in
+                     advance (condition b', the set redrawn per episode). current_rel (oracle) is per machine either
+                     way."""
 
-    def __init__(self, params, initial="unity", renewal="good_as_new", pm_interval=None, unreliable=()):
+    def __init__(self, params, initial="unity", renewal="good_as_new", pm_interval=None, unreliable=(),
+                 static_info="machine"):
         if initial not in ("unity", "equilibrium", "fresh"):
             raise ValueError(initial)
         if renewal not in ("good_as_new", "minimal"):
             raise ValueError(renewal)
+        if static_info not in ("machine", "pooled"):
+            raise ValueError(static_info)
         self.params, self.initial, self.renewal, self.pm_interval = params, initial, renewal, pm_interval
         self.unreliable = frozenset(unreliable)
+        self.static_info = static_info
+        self._pooled = None
 
     def rel(self, mid):
         return self.params if isinstance(self.params, Rel) else self.params[mid]
 
-    # information for reliability-aware rules
-    def static_rel(self, mid):
-        """Long-run (k, lam, mtbf, mttr) the plant's datasheet would give."""
+    def _machine_rel(self, mid):
         r = self.rel(mid)
         return r.k, r.lam, r.mtbf, r.mttr
 
+    def pooled_rel(self):
+        """Floor-wide (k, lam, mtbf, mttr): the mean failure rate (MTBF = 1 / mean of 1 / MTBF_i, the floor's
+        failures per up-second) and the mean repair; k of the first machine (the models use one shape)."""
+        if self._pooled is None:
+            rels = [self.params] if isinstance(self.params, Rel) else [self.params[m] for m in sorted(self.params)]
+            k = rels[0].k
+            m = len(rels) / sum(1.0 / r.mtbf for r in rels)
+            self._pooled = (k, m / math.gamma(1.0 + 1.0 / k), m, sum(r.mttr for r in rels) / len(rels))
+        return self._pooled
+
+    # information for reliability-aware rules
+    def static_rel(self, mid):
+        """Long-run (k, lam, mtbf, mttr) the plant's datasheet would give (per machine, or pooled: static_info)."""
+        if self.static_info == "pooled":
+            return self.pooled_rel()
+        return self._machine_rel(mid)
+
     def current_rel(self, mid, t, trace=None):
-        """True current (k, lam, mtbf, mttr): the same as static for a stationary model."""
-        return self.static_rel(mid)
+        """True current (k, lam, mtbf, mttr): each machine's own long-run parameters for a stationary model."""
+        return self._machine_rel(mid)
 
     def _age_after(self, age, ttf_ticks, dt):
         if self.renewal == "good_as_new":
@@ -511,14 +536,15 @@ def pick_subset(machine_types, fraction, seed):
 
 
 def hetero(machine_types, ratio=4.0, fraction=0.4, availability_target=0.90, k=1.5, mu=6.3, sigma=0.5,
-           subset_seed=0, initial="equilibrium"):
+           subset_seed=0, initial="equilibrium", static_info="machine"):
     """Stationary heterogeneous reliability: `fraction` of each type fails `ratio` times as often, with the floor-mean
     availability held at `availability_target`. subset_seed fixed = the same machines in every episode; pass the
-    episode seed to redraw the set per episode. The unreliable ids are on model.unreliable."""
+    episode seed to redraw the set per episode. The unreliable ids are on model.unreliable. static_info: see
+    WeibullModel ("pooled" for a redrawn set the datasheet cannot know)."""
     lam_r, lam_u = hetero_lams_for_availability(availability_target, ratio, fraction, k, mu, sigma)
     bad = set(pick_subset(machine_types, fraction, subset_seed))
     params = {mid: Rel(k, lam_u if mid in bad else lam_r, mu, sigma) for mid in machine_types}
-    return WeibullModel(params, initial=initial, unreliable=bad)
+    return WeibullModel(params, initial=initial, unreliable=bad, static_info=static_info)
 
 
 def regime(ratio=8.0, bad_fraction=0.25, mean_bad=5400.0, availability_target=0.90, k=1.5, mu=6.3, sigma=0.5,
@@ -560,7 +586,9 @@ class OnlineReliability:
         if model is not None and ids:
             stats = [model.static_rel(mid) for mid in ids]
             self.k_shape = stats[0][0]
-            self.mtbf0 = sum(s[2] for s in stats) / len(stats)
+            # floor MTBF = 1 / mean failure rate (the pooled rate per up-second; the arithmetic mean of the MTBFs
+            # overstated it by ~35% on the hetero conditions before 2026-10-10)
+            self.mtbf0 = len(stats) / sum(1.0 / s[2] for s in stats)
             self.mttr0 = sum(s[3] for s in stats) / len(stats)
         else:
             self.mtbf0, self.mttr0 = math.inf, 0.0
@@ -624,6 +652,7 @@ def scaled(model, s):
     """A copy of a WeibullModel / RegimeModel with every Weibull lambda multiplied by s (lives s times longer)."""
     import copy
     m = copy.copy(model)
+    m._pooled = None
     if isinstance(model, RegimeModel):
         m.lam = (model.lam[0] * s, model.lam[1] * s)
     elif isinstance(model.params, Rel):

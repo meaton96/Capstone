@@ -85,6 +85,10 @@ class TwinConfig:
     reliability: str = "static"
     reliability_kappa: float = 1.0
     reroute_cost: float = 90.0
+    # R-online estimator (failures.OnlineReliability, reliability="online" only): forgetting half-life (seconds) and
+    # prior strength (pseudo-failures at the pooled floor rate).
+    reliability_half_life: float = 7200.0
+    reliability_prior: float = 2.0
 
 
 @dataclass
@@ -876,7 +880,8 @@ class Twin:
                                        "aborts", "held_to_down", "redirect_no_route", "predispatch_cleared",
                                        "orphans_released", "delivered_to_down", "target_down_rerouted")}
         self.deferred_seconds = 0.0
-        self.reliability_info = OnlineReliability(self) if self.cfg.reliability == "online" else None
+        self.reliability_info = (OnlineReliability(self, self.cfg.reliability_half_life, self.cfg.reliability_prior)
+                                 if self.cfg.reliability == "online" else None)
         for m in self.machines:
             mt = tr.machines.get(m.id)
             m.events = mt.events if mt is not None else []

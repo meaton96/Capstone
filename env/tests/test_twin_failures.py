@@ -546,6 +546,53 @@ def test_online_estimate_separates_unreliable_machines():
     assert bad < good
 
 
+def test_online_estimator_parameters_and_pooled_prior():
+    """TwinConfig.reliability_half_life / reliability_prior reach OnlineReliability (dev-hetero-tune, 10-10); the
+    prior MTBF is the pooled floor MTBF (1 / mean rate), and a strong prior with a long memory pulls every machine
+    towards it (the per-machine spread shrinks as the prior grows)."""
+    floor = _floor()
+    types = {m.id: m.type for m in floor.machines}
+    model = F.hetero(types, ratio=6.0, fraction=0.4, availability_target=0.85, subset_seed=0)
+    trace = _trace(model, floor, 5)
+    pooled = len(types) / sum(1.0 / model.rel(m).mtbf for m in types)
+    spread = {}
+    for a0 in (0.5, 50.0):
+        tw = _run("SRT_RECT", trace, floor=floor, reliability="online", reliability_half_life=3600.0,
+                  reliability_prior=a0)
+        est = tw.reliability_info
+        assert est.h == 3600.0 and est.a0 == a0
+        assert est.mtbf0 == pytest.approx(pooled)
+        vals = [est.estimate(m)[2] for m in tw.machines]
+        spread[a0] = np.std(np.log(vals))
+    assert spread[50.0] < spread[0.5]
+
+
+def test_pooled_static_information():
+    """static_info="pooled" (condition b', unreliable set redrawn per episode): the static level gets the floor's pooled
+    values for every machine, the oracle level each machine's own; "machine" (default) gives both per machine."""
+    floor = _floor()
+    types = {m.id: m.type for m in floor.machines}
+    per = F.hetero(types, ratio=4.0, fraction=0.4, availability_target=0.85, subset_seed=3)
+    pool = F.hetero(types, ratio=4.0, fraction=0.4, availability_target=0.85, subset_seed=3, static_info="pooled")
+    rate = np.mean([1.0 / per.rel(m).mtbf for m in types])
+    for m in types:
+        assert per.static_rel(m) == per.current_rel(m, 0.0) == pool.current_rel(m, 0.0)
+        k, lam, mtbf_, mttr_ = pool.static_rel(m)
+        assert mtbf_ == pytest.approx(1.0 / rate) and lam == pytest.approx(mtbf_ / math.gamma(1 + 1 / k))
+        assert mttr_ == pytest.approx(per.rel(m).mttr)
+    assert F.scaled(pool, 2.0).static_rel(0)[2] == pytest.approx(2.0 * pool.static_rel(0)[2], rel=1e-9)
+    with pytest.raises(ValueError):
+        F.WeibullModel(F.Rel(), static_info="bogus")
+    # the engine: pooled static information makes every candidate look the same (RECT -> ECT with a uniform q / A)
+    trace = _trace(pool, floor, 4)
+    tw = _run("SRT_RECT", trace, floor=floor, reliability="static")
+    terms = tw.reliability_terms([m.id for m in tw.machines])["terms"]
+    assert len({t[:5] for t in terms}) == 1
+    tw = _run("SRT_RECT", trace, floor=floor, reliability="oracle")
+    terms = tw.reliability_terms([m.id for m in tw.machines])["terms"]
+    assert len({t[1] for t in terms}) == 2
+
+
 # ── Scenario plumbing ────────────────────────────────────────────────────────────────────────────
 
 def test_scenario_failures_opt_in_and_trace():
