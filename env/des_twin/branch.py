@@ -12,7 +12,10 @@ still at the same decision and can apply the chosen option and go on.
 
 Determinism: the twin has no random numbers or clock reads (engine, motion, rules, floor), and a child starts from
 the parent's exact memory, so a child's result equals a replay from t = 0 with the same choices
-(results/dev-twin-speed/check_branch.py verifies this with ==). A caller whose policy or scorer draws random numbers
+(results/dev-twin-speed/check_branch.py verifies this with ==). Machine failures (TwinConfig.failures, 2026-10-09) are
+an exogenous trace drawn before the episode, so every option sees the same failures (common random numbers); for a
+rollout over a redrawn failure future, call tw.replace_failures(trace.redraw_after(tw.k, seed)) inside the child
+(env/tests/test_twin_failures.py). A caller whose policy or scorer draws random numbers
 gets the parent's RNG state in every child: seed per option inside the callback if that matters.
 
 Linux / POSIX only (os.fork). Fork the twin process before starting threads where possible: a child of a

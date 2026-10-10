@@ -18,11 +18,23 @@ JOB_RULES = ("SPT", "LPT", "SRT", "LRT", "FIFO", "PTWINQ") + ("EDD", "SLACK", "C
 DUE_DATE_RULES = ("EDD", "SLACK", "CR", "MDD", "MOD", "ATC")
 ATC_K = 2.0    # ATC look-ahead parameter k (Vepsalainen & Morton 1987 report k of about 1.5-3 working well)
 MACHINE_RULES = ("SMPT", "SRWT", "MMUR", "ECT", "TECT")
+# Reliability-aware machine halves (2026-10-09, plan §3; twin only, not in the RL action heads or DispatchingEngine.cs).
+# p = processing time on the candidate, q = its load (machine_load), tr = TECT's travel estimate, A = availability,
+# MTBF / age / Weibull (k, lam) at the twin's information level (TwinConfig.reliability: static / online / oracle),
+# kappa = TwinConfig.reliability_kappa, R = TwinConfig.reroute_cost:
+#   RECT    q / A + p + kappa P (p / 2 + R),  P = 1 - exp(-p / MTBF): the chance the operation is interrupted (a
+#           restart loses about p / 2 and the job is re-routed); q / A: the queue drains at the long-run availability
+#   RTECT   max(tr, q / A) + p + kappa P (p / 2 + R)
+#   RECTA   RECT with P the Weibull conditional failure probability over the job's exposure window given the age a:
+#           1 - exp(-((a + q + p) / lam)^k + ((a + q) / lam)^k)
+#   RTECTA  RTECT with RECTA's P
+#   HAECT   hard-avoid control: ECT over the candidates with A >= the floor median (all candidates if none qualify)
+RELIABILITY_RULES = ("RECT", "RTECT", "RECTA", "RTECTA", "HAECT")
 
 
 def parse_rule(name):
     parts = name.upper().split("_")
-    if len(parts) != 2 or parts[0] not in JOB_RULES or parts[1] not in MACHINE_RULES:
+    if len(parts) != 2 or parts[0] not in JOB_RULES or parts[1] not in MACHINE_RULES + RELIABILITY_RULES:
         raise ValueError(f"unsupported rule {name!r} (expected JOB_MACHINE, e.g. SPT_ECT; Random is not modelled)")
     return parts[0], parts[1]
 
@@ -118,11 +130,46 @@ def _rank_due(job_rule, ids, sim, proc_time):
     raise ValueError(job_rule)
 
 
-def select_machine(machine_rule, cands, job_times, loads, utils, travel):
-    """DispatchingEngine.SelectMachine over parallel candidate lists (float32)."""
+def _interrupt_prob(rule, p, q, term):
+    a, mtbf, _, k, lam, age = term
+    if not math.isfinite(mtbf):
+        return 0.0
+    if rule in ("RECTA", "RTECTA"):
+        age = age or 0.0
+        return 1.0 - math.exp(-(((age + q + p) / lam) ** k - ((age + q) / lam) ** k))
+    return 1.0 - math.exp(-p / mtbf)
+
+
+def reliability_scores(machine_rule, job_times, loads, travel, rel):
+    """Scores (lower first) of a reliability-aware machine rule; rel = Twin.reliability_terms(cands)."""
+    kappa, reroute = rel["kappa"], rel["reroute"]
+    out = []
+    for p, q, tr, term in zip(job_times, loads, travel, rel["terms"]):
+        p, q, tr = float(p), float(q), float(tr)
+        a = max(term[0], 1e-6)
+        if machine_rule == "HAECT":
+            out.append(f32(q + p) if term[0] >= rel["median_A"] else math.inf)
+            continue
+        wait = q / a
+        if machine_rule in ("RTECT", "RTECTA"):
+            wait = max(tr, wait)
+        risk = _interrupt_prob(machine_rule, p, q, term) * (p / 2.0 + reroute)
+        out.append(f32(wait + p + kappa * risk))
+    if machine_rule == "HAECT" and all(math.isinf(s) for s in out):
+        out = [f32(float(q) + float(p)) for p, q in zip(job_times, loads)]
+    return out
+
+
+def select_machine(machine_rule, cands, job_times, loads, utils, travel, rel=None):
+    """DispatchingEngine.SelectMachine over parallel candidate lists (float32). The reliability-aware halves
+    (RELIABILITY_RULES, twin only) also need rel = Twin.reliability_terms(cands)."""
     if len(cands) == 1:
         return cands[0]
-    if machine_rule == "SMPT":
+    if machine_rule in RELIABILITY_RULES:
+        if rel is None:
+            raise ValueError(f"machine rule {machine_rule} needs reliability terms (rel=Twin.reliability_terms)")
+        score = reliability_scores(machine_rule, job_times, loads, travel, rel)
+    elif machine_rule == "SMPT":
         score = job_times
     elif machine_rule == "SRWT":
         score = loads

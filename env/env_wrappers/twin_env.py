@@ -16,8 +16,10 @@ from reward-metrics snapshots (env/rewards), the episode summary in info["episod
 and info["terminal_obs"], the observation of the ended episode's last decision (the Unity wrapper keeps the same
 one, since the player's own terminal observation is padded with zeros).
 
-Not modelled by the twin, and refused per scenario: machine and AGV failures, Poisson arrivals, machine
-flexibility, tiled floors (des_twin.scenario / des_twin.floor raise).
+Not modelled by the twin, and refused per scenario: AGV failures, Poisson arrivals, machine flexibility, tiled
+floors (des_twin.scenario / des_twin.floor raise). Machine failures are refused too unless machine_failures=True
+(2026-10-09): each episode then gets the twin's own failure trace from the scenario's "stochastic" block
+(des_twin.scenario.failure_trace, seeded by the scenario seed) - the same model as the player, not the same draws.
 """
 from pathlib import Path
 from typing import Callable, Dict, Optional, Tuple, Union
@@ -28,7 +30,7 @@ from config import ACTION_BRANCHES, JOB_HEAD_RULES, MACHINE_HEAD_RULES, MAX_JOBS
 from des_twin import Floor
 from des_twin.engine import Twin, TwinConfig
 from des_twin.observation import ObservationBuilder
-from des_twin.scenario import agv_schedule, episode_settings, resolve_jobs
+from des_twin.scenario import agv_schedule, episode_settings, failure_trace, resolve_jobs
 from rewards import (LoadedReward, MetricsSnapshot, RewardContext, RewardFunction, elapsed_sim_time, load_reward,
                      window_outcomes)
 
@@ -55,7 +57,8 @@ class TwinSchedulingEnv:
                  scenario_generator: Optional[Callable[[int], dict]] = None,
                  scenario: Optional[dict] = None,
                  obs_caps: Optional[Tuple[int, int]] = None,
-                 instant_fleet: Optional[int] = None, queued: bool = False, critic_lookahead: bool = False):
+                 instant_fleet: Optional[int] = None, queued: bool = False, critic_lookahead: bool = False,
+                 machine_failures: bool = False):
         """
         @param floor        des_floor.json path (or a loaded Floor) for the layout and fleet size trained on.
         @param transport    "instant" (DES-0), "geometric" (DES-1g) or "kinematic" (DES-1k).
@@ -69,6 +72,8 @@ class TwinSchedulingEnv:
                             with seed index -1 (discarded by evaluate.run_evaluation, as Unity's unseeded episode).
         """
         self.queued = queued
+        ## @brief Model the scenario's machine failures (des_twin.failures) instead of refusing them.
+        self.machine_failures = bool(machine_failures)
         ## @brief Add obs["critic_lookahead"] (des_twin.lookahead: known future arrivals, for the critic only).
         self.critic_lookahead = critic_lookahead
         self._queue_seeds, self._queue_scenarios, self._queue_pos = [], [], 0
@@ -162,21 +167,20 @@ class TwinSchedulingEnv:
         if self.queued:
             scenario = self._next_queued()
             self._check_scenario(scenario)
-            warmup, cap, rule = episode_settings(scenario)
-            cfg = TwinConfig(rule=rule, transport=self.transport, routing_trigger=scenario.get("routingTrigger"),
-                             max_sim_seconds=MAX_EPISODE_SIM_SECONDS, warmup_seconds=warmup,
-                             episode_duration_seconds=cap, agv_schedule=agv_schedule(scenario))
-            return Twin(self.floor, resolve_jobs(scenario, self.floor), cfg)
+            return Twin(self.floor, resolve_jobs(scenario, self.floor), self._config(scenario))
         if self.seed_rng is not None:
             self._seed = int(self.seed_rng.integers(TRAIN_SEED_LOW, MAX_SEED))
             self._seed_index += 1
         scenario = self.scenario_generator(self._seed) if self.scenario_generator is not None else self.scenario
         self._check_scenario(scenario)
-        warmup, cap, rule = episode_settings(scenario)
-        cfg = TwinConfig(rule=rule, transport=self.transport, routing_trigger=scenario.get("routingTrigger"),
-                         max_sim_seconds=MAX_EPISODE_SIM_SECONDS, warmup_seconds=warmup,
-                         episode_duration_seconds=cap, agv_schedule=agv_schedule(scenario))
-        return Twin(self.floor, resolve_jobs(scenario, self.floor), cfg)
+        return Twin(self.floor, resolve_jobs(scenario, self.floor), self._config(scenario))
+
+    def _config(self, scenario: dict) -> TwinConfig:
+        warmup, cap, rule = episode_settings(scenario, machine_failures=self.machine_failures)
+        failures = failure_trace(scenario, self.floor) if self.machine_failures else None
+        return TwinConfig(rule=rule, transport=self.transport, routing_trigger=scenario.get("routingTrigger"),
+                          max_sim_seconds=MAX_EPISODE_SIM_SECONDS, warmup_seconds=warmup,
+                          episode_duration_seconds=cap, agv_schedule=agv_schedule(scenario), failures=failures)
 
     def _start_episode(self) -> Dict[str, np.ndarray]:
         """Starts episodes until one reaches a decision (one that ends inside its warm-up gives the agent nothing
@@ -296,7 +300,8 @@ class VectorizedTwinEnv:
                  scenario: Optional[dict] = None, obs_caps: Optional[Tuple[int, int]] = None,
                  instant_fleet: Optional[int] = None, seed_stream: int = 0, env_indices: Optional[list] = None,
                  slot_seconds: float = 0.0, gamma_per_second: Optional[float] = None, instance_group: int = 1,
-                 paired: Optional[dict] = None, critic_lookahead: bool = False):
+                 paired: Optional[dict] = None, critic_lookahead: bool = False,
+                 machine_failures: bool = False):
         """@param env_indices  Build only these env indices (SubprocTwinEnv's workers); None = 0 .. num_envs - 1.
         An env's id and instance-seed stream depend only on its index, so a split gives the same episodes.
         @param instance_group  Envs i with the same i // instance_group draw the same instance seeds (the shared-
@@ -315,7 +320,7 @@ class VectorizedTwinEnv:
             shared, transport=transport, reward_fn=loaded.build() if loaded is not None else None, env_id=i,
             seed_rng=None if train_seed is None else instance_seed_rng(train_seed, i // instance_group, seed_stream),
             scenario_generator=scenario_generator, scenario=scenario, obs_caps=obs_caps,
-            instant_fleet=instant_fleet, critic_lookahead=critic_lookahead)
+            instant_fleet=instant_fleet, critic_lookahead=critic_lookahead, machine_failures=machine_failures)
             for i in (range(num_envs) if env_indices is None else env_indices)]
         if paired is not None:
             if slot_seconds <= 0:
