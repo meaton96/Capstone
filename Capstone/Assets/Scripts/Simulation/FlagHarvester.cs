@@ -237,6 +237,8 @@ namespace Assets.Scripts.Simulation
                             job.LocationMachineId = machineId;
 
                             PhysicalMachine targetMachine = _layout.GetMachine(machineId);
+                            // AGVController.DoDropoff has already placed the job; PlaceOnIncoming is idempotent
+                            // (since 2026-10-10), so this only places it if the AGV's placement found no visual.
                             targetMachine.PlaceOnIncoming(jobId, job.Visual);
                             RefreshMachineLabels(machineId);
 

@@ -428,6 +428,15 @@ namespace Assets.Scripts.Simulation.Machines
         /// @details Prefers @ref incomingConveyor, falls back to @ref secondaryIncomingConveyor.
         /// The job visual is flagged as being on a conveyor.
         ///
+        /// Idempotent: a job already on either incoming belt is not placed again. A delivery reaches this twice,
+        /// from @c AGVController.DoDropoff and again from @c FlagHarvester.HarvestAGVFlags. Before 2026-10-10 the
+        /// second call checked only the belt @c PickIncomingBelt chose, so when the first placement had filled the
+        /// primary belt of a two-belt machine (layout A interior machines) the copy went onto the secondary belt and
+        /// was never removed (@c StartJob removes one entry): the belt stayed fuller than it was and sent later
+        /// deliveries to the other dock. One-belt machines (layout D) are unaffected: there the second call was
+        /// already a no-op, counted as @c DropoffRedundant, and still is. @c DropoffDoublePlaced is now always 0
+        /// (column kept for the CSV format).
+        ///
         /// @param jobId The ID of the job to place.
         /// @param visual The visual component to enqueue.
         public void PlaceOnIncoming(int jobId, JobVisual visual)
@@ -437,12 +446,8 @@ namespace Assets.Scripts.Simulation.Machines
             {
                 bool alreadyOnBelt = (incomingConveyor != null && incomingConveyor.Contains(jobId))
                                   || (secondaryIncomingConveyor != null && secondaryIncomingConveyor.Contains(jobId));
-                bool placed = belt.TryEnqueue(jobId, visual);
-                if (alreadyOnBelt)
-                {
-                    if (placed) handoffs.DropoffDoublePlaced++;
-                    else handoffs.DropoffRedundant++;
-                }
+                bool placed = !alreadyOnBelt && belt.TryEnqueue(jobId, visual);
+                if (alreadyOnBelt) handoffs.DropoffRedundant++;
                 else if (!placed) handoffs.DropoffBeltFull++;
                 else if (belt == secondaryIncomingConveyor) handoffs.DropoffBeltSecondary++;
                 else handoffs.DropoffBeltPrimary++;
