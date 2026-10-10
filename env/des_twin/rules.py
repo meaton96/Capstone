@@ -30,11 +30,27 @@ MACHINE_RULES = ("SMPT", "SRWT", "MMUR", "ECT", "TECT")
 #   RTECTA  RTECT with RECTA's P
 #   HAECT   hard-avoid control: ECT over the candidates with A >= the floor median (all candidates if none qualify)
 RELIABILITY_RULES = ("RECT", "RTECT", "RECTA", "RTECTA", "HAECT")
+# Processing-time-weighted machine halves (2026-10-10, dev-pect-rule; twin only, not in the RL action heads or
+# DispatchingEngine.cs). dev-b2-pect-check / dev-hetero-tune found that RECT / RTECT with no reliability information
+# and no failures beat ECT / TECT by 15-25%: their risk term is a convex penalty on the candidate's processing time p.
+# These are that weighting as a rule of its own, with the shape g chosen by TwinConfig.ptime_shape:
+#   PECT    q / A + p + alpha g(p)
+#   PTECT   max(tr, q / A) + p + alpha g(p)
+# q, p, tr as ECT / TECT; alpha = TwinConfig.ptime_alpha; A = TwinConfig.ptime_avail (default 1: the plain queue; the
+# reliability rules' blind form uses the floor availability, so a value < 1 reproduces them exactly). Shapes, over the
+# routed job's eligible candidates (p_min the fastest, p_mean their mean):
+#   lin     g = p                                   (score = wait + (1 + alpha) p; p - p_min ranks identically)
+#   quad    g = p^2 / p_mean                        (scale-free: alpha is dimensionless)
+#   ratio   g = p (p / p_min - 1)                   (scale-free, zero on the fastest candidate)
+#   exp     g = (1 - exp(-p / tau)) (p / 2 + R)     (the reliability rules' risk term at a common MTBF tau and
+#                                                    re-route cost R: TwinConfig.ptime_tau / ptime_reroute, seconds)
+PTIME_RULES = ("PECT", "PTECT")
+PTIME_SHAPES = ("lin", "quad", "ratio", "exp")
 
 
 def parse_rule(name):
     parts = name.upper().split("_")
-    if len(parts) != 2 or parts[0] not in JOB_RULES or parts[1] not in MACHINE_RULES + RELIABILITY_RULES:
+    if len(parts) != 2 or parts[0] not in JOB_RULES or parts[1] not in MACHINE_RULES + RELIABILITY_RULES + PTIME_RULES:
         raise ValueError(f"unsupported rule {name!r} (expected JOB_MACHINE, e.g. SPT_ECT; Random is not modelled)")
     return parts[0], parts[1]
 
@@ -160,12 +176,45 @@ def reliability_scores(machine_rule, job_times, loads, travel, rel):
     return out
 
 
-def select_machine(machine_rule, cands, job_times, loads, utils, travel, rel=None):
+def ptime_scores(machine_rule, job_times, loads, travel, pt):
+    """Scores (lower first) of a processing-time-weighted machine rule (PTIME_RULES); pt = Twin.ptime_params():
+    {"alpha", "shape", "tau", "reroute", "avail"}. Float64 arithmetic, float32 score, as the reliability rules."""
+    alpha, shape, avail = pt["alpha"], pt["shape"], pt["avail"]
+    if shape not in PTIME_SHAPES:
+        raise ValueError(f"processing-time shape must be one of {PTIME_SHAPES}, not {shape!r}")
+    ps = [float(p) for p in job_times]
+    p_min = max(min(ps), 1e-6)
+    p_mean = max(sum(ps) / len(ps), 1e-6)
+    tau, reroute = pt["tau"], pt["reroute"]
+    out = []
+    for p, q, tr in zip(ps, loads, travel):
+        q, tr = float(q), float(tr)
+        wait = q / avail
+        if machine_rule == "PTECT":
+            wait = max(tr, wait)
+        if shape == "lin":
+            g = p
+        elif shape == "quad":
+            g = p * p / p_mean
+        elif shape == "ratio":
+            g = p * (p / p_min - 1.0)
+        else:
+            g = (1.0 - math.exp(-p / tau)) * (p / 2.0 + reroute)
+        out.append(f32(wait + p + alpha * g))
+    return out
+
+
+def select_machine(machine_rule, cands, job_times, loads, utils, travel, rel=None, pt=None):
     """DispatchingEngine.SelectMachine over parallel candidate lists (float32). The reliability-aware halves
-    (RELIABILITY_RULES, twin only) also need rel = Twin.reliability_terms(cands)."""
+    (RELIABILITY_RULES, twin only) also need rel = Twin.reliability_terms(cands); the processing-time-weighted
+    halves (PTIME_RULES, twin only) pt = Twin.ptime_params()."""
     if len(cands) == 1:
         return cands[0]
-    if machine_rule in RELIABILITY_RULES:
+    if machine_rule in PTIME_RULES:
+        if pt is None:
+            raise ValueError(f"machine rule {machine_rule} needs its parameters (pt=Twin.ptime_params())")
+        score = ptime_scores(machine_rule, job_times, loads, travel, pt)
+    elif machine_rule in RELIABILITY_RULES:
         if rel is None:
             raise ValueError(f"machine rule {machine_rule} needs reliability terms (rel=Twin.reliability_terms)")
         score = reliability_scores(machine_rule, job_times, loads, travel, rel)

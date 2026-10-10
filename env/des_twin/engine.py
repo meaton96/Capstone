@@ -53,7 +53,7 @@ import numpy as np
 from .failures import OnlineReliability, harvest_tick, remaining_countdown
 from .floor import Floor
 from .motion import Kinematics, dock_yaw_after, f32_countdown, handshake_done, heading, plan_leg
-from .rules import RELIABILITY_RULES, f32, parse_rule, rank_jobs, select_machine
+from .rules import PTIME_RULES, RELIABILITY_RULES, f32, parse_rule, rank_jobs, select_machine
 
 NEEDS_ROUTING, WAITING_PICKUP, IN_TRANSIT, QUEUED, PROCESSING, EXITED = range(6)
 TRANSPORTS = ("instant", "geometric", "kinematic")
@@ -94,6 +94,14 @@ class TwinConfig:
     # (the original rules); 0 = blind (every candidate gets the floor values, so kappa / R only weight the processing-
     # time exposure). Decouples the exposure weight (kappa, R) from discrimination. HAECT ignores it.
     reliability_mix: float = 1.0
+    # Processing-time-weighted machine rules (PECT, PTECT; twin only, dev-pect-rule 10-10, rules.PTIME_RULES): weight
+    # alpha of the penalty g(p), its shape (lin / quad / ratio / exp), the exp shape's time scale tau and re-route cost
+    # R (seconds), and the availability A that divides the queue (1 = the plain queue).
+    ptime_alpha: float = 1.0
+    ptime_shape: str = "lin"
+    ptime_tau: float = 5544.0
+    ptime_reroute: float = 0.0
+    ptime_avail: float = 1.0
 
 
 @dataclass
@@ -831,6 +839,8 @@ class Twin:
         elif machine_rule in RELIABILITY_RULES:
             mid = select_machine(machine_rule, cands, times, loads, utils, travel,
                                  rel=self.reliability_terms(cands))
+        elif machine_rule in PTIME_RULES:
+            mid = select_machine(machine_rule, cands, times, loads, utils, travel, pt=self.ptime_params())
         else:
             mid = select_machine(machine_rule, cands, times, loads, utils, travel)
         self.decision_rows.append((self.now, "routing", job.id, mid, len(cands), len(ids)))
@@ -1183,6 +1193,12 @@ class Twin:
         if info == "online":
             return self.reliability_info.estimate(m) + (self.machine_age(m),)
         raise ValueError(f"reliability information must be static / online / oracle, not {info!r}")
+
+    def ptime_params(self):
+        """Parameters of the processing-time-weighted machine rules (rules.select_machine's pt=)."""
+        c = self.cfg
+        return {"alpha": c.ptime_alpha, "shape": c.ptime_shape, "tau": c.ptime_tau, "reroute": c.ptime_reroute,
+                "avail": c.ptime_avail}
 
     def reliability_terms(self, cands):
         """Inputs of the reliability-aware machine rules (rules.select_machine's rel=): per candidate (A, mtbf, mttr,
