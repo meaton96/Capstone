@@ -593,6 +593,32 @@ def test_pooled_static_information():
     assert len({t[1] for t in terms}) == 2
 
 
+def test_reliability_mix_shrinks_to_the_floor():
+    """TwinConfig.reliability_mix: 1 keeps each machine's values (default, same decisions as before), 0 gives every
+    candidate the floor-mean rate and repair (= pooled static information), in between interpolates the rate."""
+    floor = _floor()
+    types = {m.id: m.type for m in floor.machines}
+    per = F.hetero(types, ratio=4.0, fraction=0.4, availability_target=0.85, subset_seed=3)
+    trace = _trace(per, floor, 4)
+    ids = [m.id for m in floor.machines]
+    base = _run("SRT_RECT", trace, floor=floor, reliability_kappa=4.0)
+    assert _run("SRT_RECT", trace, floor=floor, reliability_kappa=4.0, reliability_mix=1.0).decision_rows == \
+        base.decision_rows
+    t1 = base.reliability_terms(ids)["terms"]
+    base.cfg.reliability_mix = 0.0
+    t0 = base.reliability_terms(ids)["terms"]
+    k, lam, mtbf_, mttr_ = per.pooled_rel()
+    for t in t0:
+        assert t[1] == pytest.approx(mtbf_) and t[2] == pytest.approx(mttr_) and t[4] == pytest.approx(lam)
+    base.cfg.reliability_mix = 0.5
+    th = base.reliability_terms(ids)["terms"]
+    for a, b, h in zip(t1, t0, th):
+        assert 1.0 / h[1] == pytest.approx(0.5 / a[1] + 0.5 / b[1])
+    # the blind rule still runs and differs from the informed one
+    blind = _run("SRT_RECT", trace, floor=floor, reliability_kappa=4.0, reliability_mix=0.0)
+    assert blind.summary()["jobs_completed"] > 0
+
+
 # ── Scenario plumbing ────────────────────────────────────────────────────────────────────────────
 
 def test_scenario_failures_opt_in_and_trace():

@@ -89,6 +89,11 @@ class TwinConfig:
     # prior strength (pseudo-failures at the pooled floor rate).
     reliability_half_life: float = 7200.0
     reliability_prior: float = 2.0
+    # Machine discrimination of the reliability rules (dev-hetero-tune, 10-10): each candidate's failure rate and repair
+    # time become omega x its own + (1 - omega) x the floor mean at the information level. 1 = the per-machine values
+    # (the original rules); 0 = blind (every candidate gets the floor values, so kappa / R only weight the processing-
+    # time exposure). Decouples the exposure weight (kappa, R) from discrimination. HAECT ignores it.
+    reliability_mix: float = 1.0
 
 
 @dataclass
@@ -1184,15 +1189,29 @@ class Twin:
         k, lam, age) at the information level cfg.reliability, the floor's median availability, kappa and the
         re-route cost. Without failures every machine is perfectly reliable, so the rules reduce to ECT / TECT."""
         info = self.cfg.reliability
+        omega = self.cfg.reliability_mix
         terms = []
         for mid in cands:
             k, lam, mtbf_, mttr_, age = self._rel_info(mid, info)
             a = mtbf_ / (mtbf_ + mttr_) if math.isfinite(mtbf_) else 1.0
             terms.append((a, mtbf_, mttr_, k, lam, age))
-        avail = []
+        avail, rates, mttrs = [], [], []
         for m in self.machines:
             _, _, mtbf_, mttr_, _ = self._rel_info(m.id, info)
             avail.append(mtbf_ / (mtbf_ + mttr_) if math.isfinite(mtbf_) else 1.0)
+            rates.append(1.0 / mtbf_)
+            mttrs.append(mttr_)
+        if omega != 1.0 and self.fail is not None and self.fail.model is not None:
+            # shrink each candidate's failure rate and repair time towards the floor mean at this information level
+            r_floor, m_floor = sum(rates) / len(rates), sum(mttrs) / len(mttrs)
+            mixed = []
+            for a, mtbf_, mttr_, k, lam, age in terms:
+                rate = omega / mtbf_ + (1.0 - omega) * r_floor
+                mt = omega * mttr_ + (1.0 - omega) * m_floor
+                mb = 1.0 / rate if rate > 0 else math.inf
+                mixed.append((mb / (mb + mt) if math.isfinite(mb) else 1.0, mb, mt, k,
+                              mb / math.gamma(1.0 + 1.0 / k) if math.isfinite(mb) else math.inf, age))
+            terms = mixed
         avail.sort()
         n = len(avail)
         median = avail[n // 2] if n % 2 else 0.5 * (avail[n // 2 - 1] + avail[n // 2])
