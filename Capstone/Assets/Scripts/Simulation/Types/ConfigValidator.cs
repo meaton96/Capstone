@@ -129,6 +129,37 @@ namespace Assets.Scripts.Simulation.Types
                 Check(!float.IsNaN(s.BurstSizeMean) && s.BurstSizeMean >= 1f, $"burstSizeMean must be >= 1 (got {s.BurstSizeMean})");
             Check(NonNegative(s.EpisodeDurationSeconds), $"episodeDurationSeconds must be >= 0 (got {s.EpisodeDurationSeconds})");
             Check(NonNegative(s.WarmupSeconds), $"warmupSeconds must be >= 0 (got {s.WarmupSeconds})");
+            ValidateFailureSchedule(s, errors);
+        }
+
+        /// <summary>
+        /// "stochastic.failureSchedule": needs machineFailuresEnabled; initial countdown and TTFs finite and > 0, repairs
+        /// finite and >= 0, len(ttfs) in {len(repairs), len(repairs) + 1}. That every floor machine has an entry is
+        /// checked where the layout is known (FactoryOrchestrator.StartEpisode).
+        /// </summary>
+        public static void ValidateFailureSchedule(StochasticConfig s, List<string> errors)
+        {
+            FailureSchedule fs = s?.MachineFailureSchedule;
+            if (fs == null) return;
+            void Check(bool ok, string message) { if (!ok) errors.Add("stochastic.failureSchedule." + message); }
+            bool Finite(float v) => !float.IsNaN(v) && !float.IsInfinity(v);
+            Check(s.MachineFailuresEnabled, "requires machineFailuresEnabled");
+            Check(Finite(fs.Dt) && fs.Dt > 0f, $"dt must be > 0 (got {fs.Dt})");
+            foreach (var kv in fs.Machines)
+            {
+                MachineSchedule m = kv.Value;
+                string at = $"machines.{kv.Key}.";
+                if (m == null) { Check(false, at + " is null"); continue; }
+                Check(Finite(m.InitialCountdown) && m.InitialCountdown > 0f,
+                      $"{at}initialCountdown must be > 0 (got {m.InitialCountdown})");
+                foreach (float r in m.Repairs)
+                    if (!(Finite(r) && r >= 0f)) { Check(false, $"{at}repairs must be >= 0 (got {r})"); break; }
+                foreach (float t in m.Ttfs)
+                    if (!(Finite(t) && t > 0f)) { Check(false, $"{at}ttfs must be > 0 (got {t})"); break; }
+                int n = m.Repairs.Length;
+                Check(m.Ttfs.Length == n || m.Ttfs.Length == n + 1,
+                      $"{at}len(ttfs) must be len(repairs) or len(repairs) + 1 (got {m.Ttfs.Length} and {n})");
+            }
         }
 
         private static void TryCheck(Action check, List<string> errors)

@@ -547,6 +547,32 @@ namespace Assets.Scripts.Simulation
 #endif
         }
 
+        /// <summary>
+        /// A scenario "failureSchedule" (2026-10-09) must pass ConfigValidator's value checks and name every machine on
+        /// the floor. A Python-sent scenario that fails is rejected (the player stops); a batch scenario logs the
+        /// problems, and a machine missing from the schedule never fails. Returns false only on a rejection.
+        /// </summary>
+        private bool CheckFailureSchedule()
+        {
+            FailureSchedule sched = StochasticEventManager.Instance?.MachineSchedule;
+            if (sched == null) return true;
+            var errors = new List<string>();
+            ConfigValidator.ValidateFailureSchedule(currentConfig.Stochastic, errors);
+            var missing = layoutManager.Machines.Where(m => !sched.Machines.ContainsKey(m.MachineId))
+                                                .Select(m => m.MachineId).ToList();
+            if (missing.Count > 0)
+                errors.Add($"stochastic.failureSchedule has no entry for machine(s) {string.Join(", ", missing)}");
+            if (errors.Count == 0) return true;
+            string reason = string.Join("; ", errors);
+            if (_scenarioFromPython)
+            {
+                RejectPythonConfig($"scenario '{currentConfig.Name}': {reason}");
+                return false;
+            }
+            SimLogger.Error($"[Orchestrator] {reason} (machines without an entry never fail)");
+            return true;
+        }
+
         /// <summary>Hashes the applied config and the initial job set of the episode that is starting.</summary>
         private void UpdateFingerprints(FJSSPJobDefinition[] jobDefs)
         {
@@ -779,6 +805,7 @@ namespace Assets.Scripts.Simulation
             {
                 StochasticEventManager.Instance?.Initialize(
                     currentConfig, _episodeSeed >= 0 ? _episodeSeed : currentConfig.Seed);
+                if (!CheckFailureSchedule()) return;
                 foreach (var machine in layoutManager.Machines)
                     machine.InitializeStochastic();
                 // After Initialize, so each AGV's breakdown stream derives from this episode's seed.
@@ -1020,7 +1047,7 @@ namespace Assets.Scripts.Simulation
                 return;
             }
 
-            _failures.SetSimTime(SimTime);
+            _failures.SetSimTime(SimTime, _episodeTicks);
             _flags.SetSimTime(SimTime);
 
             _failures.HarvestFailureFlags();
@@ -1736,6 +1763,8 @@ namespace Assets.Scripts.Simulation
             // Time order across the fleet (stable, so one AGV's same-tick milestones keep their order).
             if (record.AGVEventRecords.Count > 0)
                 record.AGVEventRecords = record.AGVEventRecords.OrderBy(e => e.SimTime).ToList();
+            if (_failures != null)
+                record.MachineFailureEventRecords.AddRange(_failures.EventRecords);   // harvest order ("-destrace")
             record.AGVFailureCount = agvFailures;
             record.AGVRepairTime = agvRepairTime;
             record.AGVBlockedByFailureTime = agvBlockedByFailure;

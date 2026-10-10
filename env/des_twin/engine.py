@@ -27,6 +27,14 @@ machines are all down is deferred, TryAssignAgv sends a job whose target went do
 a machine that is down is re-routed (audit B3). With failures None every one of these paths is skipped and the engine
 is bit-identical to 84e221c3 (results/dev-twin-failures/check_exact.py).
 
+Quirk fixes (2026-10-09, dev-csharp-failures, mirrored in the C# of the v5 player): a job re-routed off a failed machine
+without being started (failure step 2, B3) frees its incoming-belt slot, and a transit with no operational alternate is
+delivered to the down machine and re-routed there by B3 instead of being aborted with a stale location.
+TwinConfig.legacy_failure_quirks restores the old handling (player flag -legacyfailurequirks). A task cancelled or
+redirected mid-handshake re-plans from the heading the AGV has turned to by then (motion.dock_yaw_after). Unity runs on
+an injected failureSchedule (FailureTrace.from_schedule) match the twin event for event at 1 AGV
+(results/dev-csharp-failures); failures-off behaviour is still bit-identical (check_exact.py there, vs 3ac76c2b).
+
 Indexes (2026-10-09, dev-twin-speed): the engine used to find live jobs, routable jobs, machine queues and machine loads
 by scanning every job that ever arrived (`self.order`), several times per tick; at 100 machines that was ~90% of the
 run time. It now keeps the live jobs (`_live_d`), the jobs per state and per machine queue / load target as indexes
@@ -44,7 +52,7 @@ import numpy as np
 
 from .failures import OnlineReliability, harvest_tick, remaining_countdown
 from .floor import Floor
-from .motion import Kinematics, f32_countdown, handshake_done, heading, plan_leg
+from .motion import Kinematics, dock_yaw_after, f32_countdown, handshake_done, heading, plan_leg
 from .rules import RELIABILITY_RULES, f32, parse_rule, rank_jobs, select_machine
 
 NEEDS_ROUTING, WAITING_PICKUP, IN_TRANSIT, QUEUED, PROCESSING, EXITED = range(6)
@@ -66,6 +74,11 @@ class TwinConfig:
     agv_schedule: tuple = ()
     # Machine failures (2026-10-09): a des_twin.failures.FailureTrace (exogenous, calendar-time events), None = off.
     failures: object = None
+    # Unity's failure handling before 2026-10-09 ("-legacyfailurequirks"): a job re-routed off a failed machine keeps its
+    # incoming-belt slot, and a transit with no operational alternate is aborted (job collected later from the machine
+    # it came from). False (default) = the fixed handling of the v5 player: the slot is freed and such a transit is
+    # delivered to the down machine and re-routed there (results/dev-csharp-failures).
+    legacy_failure_quirks: bool = False
     # Reliability-aware machine rules (RECT, RTECT, RECTA, RTECTA, HAECT; twin only): the information they get -
     # "static" (long-run per-machine parameters), "online" (estimated from the failures observed so far) or "oracle"
     # (the true current hazard: hidden regime and age) - the risk-term weight and the re-route cost (seconds).
@@ -166,7 +179,7 @@ class MachineRT:
 class AgvRT:
     __slots__ = ("id", "park_pos", "park_zone", "state", "pos", "yaw", "zone", "leg", "job", "source", "target",
                  "drop_pos", "dock", "milestone", "pre_arrive", "pre_yaw", "path", "idle_since", "idle_time",
-                 "trips")
+                 "trips", "hs")
 
     def __init__(self, a):
         self.id = a["id"]
@@ -178,6 +191,9 @@ class AgvRT:
         self.drop_pos = self.dock = self.milestone = None
         self.pre_arrive, self.pre_yaw = None, 0.0
         self.path, self.idle_since, self.idle_time, self.trips = 0.0, 0.0, 0.0, 0
+        # the current dock handshake (yaw in, goal, first tick, align first), kept with failures only: the heading
+        # of an AGV whose task is cancelled or redirected mid-handshake (Twin._leg_pose)
+        self.hs = None
 
 
 class Twin:
@@ -494,6 +510,12 @@ class Twin:
                 return pos
         return m.info.in_belts[0][0]
 
+    @staticmethod
+    def _release_slot(m, jid):
+        """PhysicalMachine.ReleaseIncomingSlot: a job re-routed off the machine without being started frees its slot."""
+        for belt in m.belts:
+            belt[1].discard(jid)
+
     def _place_on_belt(self, m, jid):
         for cap, jobs in m.belts:
             if len(jobs) < cap:
@@ -580,6 +602,8 @@ class Twin:
         zid, dock = self._pickup_dock(src)
         leg = self._drive(a, zid, dock.approach, "dock")
         done, yaw = handshake_done(self.kin, leg.end_yaw, heading(*dock.facing), leg.arrive_tick, True)
+        if self.fail is not None:
+            a.hs = (leg.end_yaw, heading(*dock.facing), leg.arrive_tick, True)
         a.state, a.leg, a.dock = "to_pickup", leg, dock
         a.job, a.source, a.target, a.drop_pos = job.id, src.id if src else -1, target.id if target else -1, drop_pos
         a.pos, a.yaw, a.zone = leg.end_pos, yaw, leg.end_zone
@@ -615,8 +639,12 @@ class Twin:
         goal = heading(*a.dock.facing)
         if a.pre_arrive <= self.k - 1:   # already waiting at the dock: re-armed handshake from this tick
             done, yaw = handshake_done(self.kin, a.pre_yaw, goal, self.k, False)
+            if self.fail is not None:
+                a.hs = (a.pre_yaw, goal, self.k, False)
         else:                            # still on the way: the normal arrival
             done, yaw = handshake_done(self.kin, a.leg.end_yaw, goal, a.pre_arrive, True)
+            if self.fail is not None:
+                a.hs = (a.leg.end_yaw, goal, a.pre_arrive, True)
             pre = (round(a.pre_arrive * self.dt, 2), a.id, "arrive_prepickup", job.id)
             at = self._prearrive.get(pre)
             if at:                        # it now arrives as MovingToPickup, as Unity logs it (first match)
@@ -644,6 +672,8 @@ class Twin:
             leg = plan_leg(self.kin, self.floor, self.k, a.pos, a.yaw, a.zone, route, dock.approach, "dock")
             a.path += leg.path_length
             done, yaw = handshake_done(self.kin, leg.end_yaw, heading(*dock.facing), leg.arrive_tick, True)
+            if self.fail is not None:
+                a.hs = (leg.end_yaw, heading(*dock.facing), leg.arrive_tick, True)
             a.state, a.leg, a.dock = "to_dropoff", leg, dock
             a.pos, a.yaw, a.zone = leg.end_pos, yaw, leg.end_zone
             a.milestone = (done + 1, "dropoff")
@@ -662,6 +692,8 @@ class Twin:
             if m.down:                    # delivered to a machine that is down (audit B3): re-routed
                 self._to(job, NEEDS_ROUTING)
                 self.fstats["delivered_to_down"] += 1
+                if not self.cfg.legacy_failure_quirks:     # not started here: its belt slot is freed
+                    self._release_slot(m, job.id)
         else:
             self._exit(job)
         job.assigned_agv = -1
@@ -838,9 +870,11 @@ class Twin:
         self._orphans = False              # a pre-dispatch claim was cleared: ReleaseOrphanedPreDispatches runs
         self._agv_tr = {}
         self.fail_log = []                 # (time, machine, event, job / -1, repair duration)
+        # Unity's machine_failures.csv rows (FailureCoordinator, "-destrace"), same columns
+        self.fail_rows = []
         self.fstats = {k: 0 for k in ("jobs_interrupted", "queued_rerouted", "pickups_cancelled", "redirects",
-                                       "aborts", "redirect_no_route", "predispatch_cleared", "orphans_released",
-                                       "delivered_to_down", "target_down_rerouted")}
+                                       "aborts", "held_to_down", "redirect_no_route", "predispatch_cleared",
+                                       "orphans_released", "delivered_to_down", "target_down_rerouted")}
         self.deferred_seconds = 0.0
         self.reliability_info = OnlineReliability(self) if self.cfg.reliability == "online" else None
         for m in self.machines:
@@ -880,6 +914,7 @@ class Twin:
             elif m.repair_tick == k:
                 self._repair_done(m)
                 self._retry_deferred()
+                self.fail_rows[-1]["deferred_jobs"] = len(self.deferred)
 
     def downtime_so_far(self, m):
         """EpisodeTracker.DowntimeSoFar: closed repair intervals plus the open one."""
@@ -910,6 +945,7 @@ class Twin:
         m.repair_tick = harvest_tick(k, rep, self.dt)
         self._wake(m.repair_tick)
         self.fail_log.append((self.now, m.id, "fail", m.job, rep))
+        row = self._fail_row(m, "fail", m.job, rep)
         if self.reliability_info is not None:
             self.reliability_info.on_fail(m)
         # 0. the interrupted operation's elapsed time is not busy time (G10)
@@ -927,10 +963,15 @@ class Twin:
         m.idle, m.job, m.proc_start, m.dur = True, -1, None, f32(0)
         m.finish_tick = m.almost_tick = None          # no stale finish / almost-done fires (TickProcessing stopped)
         self._dispatchable.discard(self._mpos[m.id])
-        # 2. jobs queued at the machine are re-routed (Unity leaves them on its incoming belt: kept here too)
+        # 2. jobs queued at the machine are re-routed and free their incoming-belt slots (PhysicalMachine.
+        # ReleaseIncomingSlot; with legacy_failure_quirks they keep them, as Unity did before 2026-10-09)
+        legacy = self.cfg.legacy_failure_quirks
         for job in self._queued_at[m.id].jobs():
             self._to(job, NEEDS_ROUTING)
+            if not legacy:
+                self._release_slot(m, job.id)
             self.fstats["queued_rerouted"] += 1
+            row["queued_rerouted"] += 1
         # 3. pickups bound for the machine: the AGV turns back, the job is re-routed. An AGV whose handshake ended
         # last tick is already MovingToDropoff in Unity (its PickedUpFlag is harvested after this step): skipped.
         for a in self.agvs:
@@ -943,9 +984,12 @@ class Twin:
             job.target, job.assigned_agv = -1, -1
             self._to(job, NEEDS_ROUTING)
             self.fstats["pickups_cancelled"] += 1
+            row["pickups_cancelled"] += 1
         # 4. deliveries in transit to the machine: redirected to the least-loaded operational eligible machine
-        # (a fixed heuristic, not the policy), or aborted when there is none. An AGV that unloaded last tick is
-        # already returning in Unity: skipped (its delivery is re-routed by B3 in the AGV harvest).
+        # (a fixed heuristic, not the policy). With no alternate the delivery carries on to the down machine, where
+        # the B3 path re-routes the job on arrival (legacy_failure_quirks: aborted, the AGV goes home and the job
+        # keeps its previous location). An AGV that unloaded last tick is already returning in Unity: skipped (its
+        # delivery is re-routed by B3 in the AGV harvest).
         for a in self.agvs:
             if a.state != "to_dropoff" or (a.milestone is not None and a.milestone[0] == k):
                 continue
@@ -953,16 +997,22 @@ class Twin:
             if job.state != IN_TRANSIT or job.target != m.id:
                 continue
             alt = self._best_alternate(job, m.id)
+            if alt is None and not legacy:
+                self.fstats["held_to_down"] += 1
+                row["held"] += 1
+                continue
             if alt is not None:
                 job.target = alt
                 self._index_load(job)
                 job.op_rows[-1]["machine"] = alt   # the operation now goes to the alternate
                 if self._redirect(a, job, self.mach[alt]):
                     self.fstats["redirects"] += 1
+                    row["redirected"] += 1
                     continue
                 self.fstats["redirect_no_route"] += 1
             job.target, job.assigned_agv = -1, -1
             self._to(job, NEEDS_ROUTING)          # location unchanged (Unity drops the job where the AGV is)
+            row["aborted"] += 1
             if alt is None:
                 self._abandon(a, "abort")
                 self.fstats["aborts"] += 1
@@ -972,6 +1022,15 @@ class Twin:
                 job.pre_agv = -1
                 self._orphans = True
                 self.fstats["predispatch_cleared"] += 1
+                row["predispatch_cleared"] += 1
+
+    def _fail_row(self, m, event, job, rep):
+        """A machine_failures.csv row (FailureCoordinator.EventRecords), appended to fail_rows."""
+        row = {"sim_time": round(self.now, 2), "tick": self.k, "machine_id": m.id, "event": event, "active_job": job,
+               "repair_duration": float(np.float32(rep)), "queued_rerouted": 0, "pickups_cancelled": 0,
+               "redirected": 0, "held": 0, "aborted": 0, "predispatch_cleared": 0, "deferred_jobs": 0}
+        self.fail_rows.append(row)
+        return row
 
     def _best_alternate(self, job, failed):
         """FailureCoordinator.FindBestAlternateMachine: the operational eligible machine (eligible-list order) with
@@ -993,6 +1052,7 @@ class Twin:
         m.down_since = None
         m.life_start = k
         self.fail_log.append((self.now, m.id, "repair_done", -1, m.repair_dur))
+        self._fail_row(m, "repair_done", -1, m.repair_dur)
         if self.reliability_info is not None:
             self.reliability_info.on_repair(m)
         if m.fptr < len(m.events):
@@ -1016,8 +1076,13 @@ class Twin:
         already inside, and the leg's undriven length (path_length was added in full when the leg was planned)."""
         leg = a.leg
         x, z, yaw, zone, ri = leg.state_after(self.k - 1, self.kin)
-        if self.k - 1 >= leg.arrive_tick:      # at the dock (handshake): the aligned yaw
-            yaw = a.pre_yaw if a.state == "to_prepickup" else a.yaw
+        if self.k - 1 >= leg.arrive_tick:      # at the dock (handshake): turned toward the dock as far as by now
+            if a.state == "to_prepickup":
+                yaw = a.pre_yaw
+            elif a.hs is not None:
+                yaw = dock_yaw_after(self.kin, a.hs[0], a.hs[1], a.hs[2], self.k - 1, a.hs[3])
+            else:
+                yaw = a.yaw
         if ri < len(leg.route):
             ahead = leg.route[ri]
             if ahead != zone and self.floor.zone_by_id[ahead].contains(x, z):
@@ -1077,6 +1142,7 @@ class Twin:
         leg = plan_leg(self.kin, self.floor, self.k, pos, yaw, zone, route, dock.approach, "dock")
         a.path += leg.path_length
         done, yaw2 = handshake_done(self.kin, leg.end_yaw, heading(*dock.facing), leg.arrive_tick, True)
+        a.hs = (leg.end_yaw, heading(*dock.facing), leg.arrive_tick, True)
         a.leg, a.dock, a.target, a.drop_pos = leg, dock, target.id, drop_pos
         a.pos, a.yaw, a.zone = leg.end_pos, yaw2, leg.end_zone
         a.milestone = (done + 1, "dropoff")

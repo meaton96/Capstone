@@ -596,7 +596,9 @@ namespace Assets.Scripts.Simulation.AGV
         /// TargetMachineId and no owning AGV forever.
         public bool RedirectDropoff(Vector3 newDropoffPos, PhysicalMachine newTarget, JobVisual visual)
         {
-            TraceEvent("redirect", CurrentJobId);
+            // The new target in target_machine (2026-10-09; it used to be -1).
+            TraceEvent("redirect", CurrentJobId, sourceMachine != null ? sourceMachine.MachineId : -1,
+                       newTarget != null ? newTarget.MachineId : -1);
             if (State != AGVState.MovingToDropoff)
             {
                 SimLogger.Error($"[AGV {AgvId}] RedirectDropoff called in wrong state ({State}).");

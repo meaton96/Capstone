@@ -151,6 +151,8 @@ namespace Assets.Scripts.Simulation.Types
         public List<AGVFailureRecord> AGVFailureRecords = new List<AGVFailureRecord>();
         /// <summary>Transport milestones of every AGV (agv_events.csv); only collected under "-destrace".</summary>
         public List<AGVEventRecord> AGVEventRecords = new List<AGVEventRecord>();
+        /// <summary>Machine failure / repair events (machine_failures.csv); only collected under "-destrace".</summary>
+        public List<MachineFailureEventRecord> MachineFailureEventRecords = new List<MachineFailureEventRecord>();
 
         // Phase 4: dynamic arrival totals
         public int DynamicArrivals;           // total jobs injected by the Poisson clock this episode
@@ -607,6 +609,26 @@ namespace Assets.Scripts.Simulation.Types
         public float X, Z, Yaw;         // floor position and heading (degrees) at the event
         public double CumPathLength;
         public double CumWaitRoute;
+    }
+
+    /// <summary>One machine failure or repair completion (machine_failures.csv, "-destrace", 2026-10-09), written
+    /// by FailureCoordinator at harvest time. The event-based twin's Twin.fail_rows has the same rows.</summary>
+    [System.Serializable]
+    public class MachineFailureEventRecord
+    {
+        public double SimTime;
+        public int Tick;                // FactoryOrchestrator._episodeTicks at the harvest
+        public int MachineId;
+        public string Event;            // "fail" or "repair_done"
+        public int ActiveJob;           // fail: job interrupted in process, -1 if none
+        public float RepairDuration;    // sampled (or scheduled) repair seconds of this failure
+        public int QueuedRerouted;      // HandleMachineFailure step 2
+        public int PickupsCancelled;    // step 3
+        public int Redirected;          // step 4, redirected to an alternate machine
+        public int Held;                // step 4, no alternate: kept on its way to the down machine (default)
+        public int Aborted;             // step 4, aborted transits ("-legacyfailurequirks") or failed redirects
+        public int PredispatchCleared;  // step 5
+        public int DeferredJobs;        // repair_done: DeferredJobIds.Count after RetryDeferredJobs
     }
 
     /// <summary>AGV motion parameters, exported for the event-based twin (des_floor.json).</summary>

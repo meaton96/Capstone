@@ -39,6 +39,7 @@ namespace Assets.Scripts.Simulation.Logging
         private static string _collisionsFilename = "agv_collisions.csv";
         private static string _agvFailuresFilename = "agv_failures.csv";
         private static string _agvEventsFilename = "agv_events.csv";
+        private static string _machineFailuresFilename = "machine_failures.csv";
         private static string _appliedConfigsFilename = "applied_configs.jsonl";
 
         public static void SetFilenameSuffix(string suffix)
@@ -56,6 +57,7 @@ namespace Assets.Scripts.Simulation.Logging
             _collisionsFilename = StripExt(_collisionsFilename, ext) + suffix + ext;
             _agvFailuresFilename = StripExt(_agvFailuresFilename, ext) + suffix + ext;
             _agvEventsFilename = StripExt(_agvEventsFilename, ext) + suffix + ext;
+            _machineFailuresFilename = StripExt(_machineFailuresFilename, ext) + suffix + ext;
             _appliedConfigsFilename = StripExt(_appliedConfigsFilename, ".jsonl") + suffix + ".jsonl";
         }
 
@@ -78,6 +80,7 @@ namespace Assets.Scripts.Simulation.Logging
         private static string CollisionsFilePath => BuildPath(_collisionsFilename);
         private static string AGVFailuresFilePath => BuildPath(_agvFailuresFilename);
         private static string AGVEventsFilePath => BuildPath(_agvEventsFilename);
+        private static string MachineFailuresFilePath => BuildPath(_machineFailuresFilename);
         private static string AppliedConfigsFilePath => BuildPath(_appliedConfigsFilename);
 
         // ── Convenience: write all logs in one call ───────────────────────────
@@ -98,6 +101,7 @@ namespace Assets.Scripts.Simulation.Logging
             if (r.CollisionRecords.Count > 0) LogCollisions(r);
             if (r.AGVFailureRecords.Count > 0) LogAGVFailures(r);
             if (r.AGVEventRecords.Count > 0) LogAGVEvents(r);
+            if (r.MachineFailureEventRecords.Count > 0) LogMachineFailureEvents(r);
             if (r.ConfigCanonical != null) LogAppliedConfig(r.ConfigHash, r.ConfigCanonical);
             // results.csv last: run_experiment_queue.py treats its existence as "cell done", so it must
             // not appear before the other files are written (audit G6).
@@ -157,6 +161,27 @@ namespace Assets.Scripts.Simulation.Logging
                     "{0},{1},{2},{3},{4:F2},{5},{6},{7},{8},{9},{10},{11:F3},{12:F3},{13:F2},{14:F3},{15:F2}",
                     r.InstanceName, r.RuleName, r.Seed, r.AGVCount, e.SimTime, e.AgvId, e.Event, e.JobId,
                     e.SourceMachineId, e.TargetMachineId, e.ZoneId, e.X, e.Z, e.Yaw, e.CumPathLength, e.CumWaitRoute));
+        }
+
+        /// <summary>
+        /// machine_failures.csv - one row per machine failure / repair completion ("-destrace", FailureCoordinator), in
+        /// harvest order. Compared failure by failure with the event-based twin's Twin.fail_rows (des_twin.failparity).
+        /// </summary>
+        public static void LogMachineFailureEvents(EpisodeRecord r)
+        {
+            bool fileExists = File.Exists(MachineFailuresFilePath);
+            using var writer = new StreamWriter(MachineFailuresFilePath, append: true);
+            if (!fileExists)
+                writer.WriteLine(
+                    "instance,rule,seed,sim_time,tick,machine_id,event,active_job,repair_duration,queued_rerouted," +
+                    "pickups_cancelled,redirected,held,aborted,predispatch_cleared,deferred_jobs");
+            var ic = System.Globalization.CultureInfo.InvariantCulture;
+            foreach (var e in r.MachineFailureEventRecords)
+                writer.WriteLine(string.Format(ic,
+                    "{0},{1},{2},{3:F2},{4},{5},{6},{7},{8:R},{9},{10},{11},{12},{13},{14},{15}",
+                    r.InstanceName, r.RuleName, r.Seed, e.SimTime, e.Tick, e.MachineId, e.Event, e.ActiveJob,
+                    e.RepairDuration, e.QueuedRerouted, e.PickupsCancelled, e.Redirected, e.Held, e.Aborted,
+                    e.PredispatchCleared, e.DeferredJobs));
         }
 
         /// <summary>Full path of a file in the run's output directory (used by DesTwinExport).</summary>

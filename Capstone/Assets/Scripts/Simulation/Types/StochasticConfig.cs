@@ -63,6 +63,17 @@ namespace Assets.Scripts.Simulation.Types
         /// @details Higher σ produces heavier right tail (occasional very long repairs).
         public float RepairLogSigma = 0.5f;
 
+        /// @brief Optional per-machine failure schedule (scenario JSON "failureSchedule", 2026-10-09).
+        ///
+        /// @details When set (and MachineFailuresEnabled), each machine takes its initial countdown, its repair
+        ///          durations and its post-repair times to failure from its own queue instead of drawing them
+        ///          (StochasticEventManager.SampleMachineTTF(int) / SampleMachineRepair(int)). Null = the native
+        ///          Weibull / lognormal samplers, unchanged. Written by env/des_twin/failures.py
+        ///          FailureTrace.to_schedule(), so Unity and the event-based twin run on the same failures.
+        ///          Left out of the config hash while null, so unscheduled configs keep their hash.
+        [FingerprintOmitIfNull]
+        public FailureSchedule MachineFailureSchedule = null;
+
         // ── AGV failures ──
 
         /// @brief Enable Weibull-distributed AGV breakdowns (see AGVController, "Breakdowns").
@@ -197,5 +208,30 @@ namespace Assets.Scripts.Simulation.Types
                 return string.Join("+", parts);
             }
         }
+    }
+
+    /// @brief Per-machine failure schedule: an exogenous trace injected in place of the native samplers.
+    public class FailureSchedule
+    {
+        /// @brief Fixed time step the schedule was generated for (informational; checked against
+        ///        Time.fixedDeltaTime with a warning).
+        public float Dt = 0.02f;
+
+        /// @brief Schedule per machine id. Every machine on the floor must have an entry.
+        public System.Collections.Generic.Dictionary<int, MachineSchedule> Machines =
+            new System.Collections.Generic.Dictionary<int, MachineSchedule>();
+    }
+
+    /// @brief One machine's queue of failure-process values, in draw order (seconds).
+    public class MachineSchedule
+    {
+        /// @brief Countdown to the first failure at episode start (replaces Random.Range(0, fullTtf)).
+        public float InitialCountdown;
+
+        /// @brief Repair duration of the i-th failure.
+        public float[] Repairs = new float[0];
+
+        /// @brief Time to failure drawn at the i-th repair completion.
+        public float[] Ttfs = new float[0];
     }
 }

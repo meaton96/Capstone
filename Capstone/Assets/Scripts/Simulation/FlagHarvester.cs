@@ -247,6 +247,9 @@ namespace Assets.Scripts.Simulation
                             if (targetMachine.HealthState != MachineHealthState.Operational)
                             {
                                 job.TransitionTo(JobState.NeedsRouting, _simTimeRef);
+                                // Not started here: free the incoming-belt slot (FailureCoordinator step 2 does the
+                                // same; FailureCoordinator.LegacyQuirks keeps the old leak).
+                                if (!FailureCoordinator.LegacyQuirks) targetMachine.ReleaseIncomingSlot(jobId);
                                 SimLogger.Medium($"[Failure] Job {jobId} delivered to machine {machineId} " +
                                                  $"as it failed — re-routed.");
                             }

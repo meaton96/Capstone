@@ -1,6 +1,7 @@
 """Machine failures in the event-based twin (2026-10-09, dev-twin-failures): des_twin.failures (models, traces,
 conditional redraw), the engine's FailureCoordinator port, the observation's failure columns, the reliability-aware
-rules and the scenario plumbing. Exactness with failures off against 84e221c3 is results/dev-twin-failures/
+rules and the scenario plumbing; the 2026-10-09 quirk fixes (belt slot, no-alternate hold, legacy mode) and the
+mid-handshake heading (dev-csharp-failures). Exactness with failures off against 84e221c3 is results/dev-twin-failures/
 check_exact.py; here only the cheap version (an empty trace changes nothing)."""
 import json
 import math
@@ -264,19 +265,98 @@ def test_engine_invariants_with_failures(rule):
     assert all(not m.down or m.idle for m in tw.machines)
 
 
-def test_handlers_cancel_redirect_abort_and_deferral_all_occur():
+@pytest.mark.parametrize("legacy", [False, True])
+def test_handlers_cancel_redirect_hold_and_deferral_all_occur(legacy):
+    """Every handler fires across seeds. A transit with no operational alternate is held (delivered to the down
+    machine and re-routed there, 2026-10-09) by default, aborted with legacy_failure_quirks."""
     floor = _floor()
     tot = {}
     for seed in range(4):
         for rule in ("SPT_ECT", "MDD_TECT", "SRT_SRWT"):
-            tw = _run(rule, _heavy_trace(floor, seed), seed=seed, floor=floor)
+            tw = _run(rule, _heavy_trace(floor, seed), seed=seed, floor=floor, legacy_failure_quirks=legacy)
             for k, v in tw.summary().items():
                 if isinstance(v, (int, float)) and not isinstance(v, bool):
                     tot[k] = tot.get(k, 0) + v
+            # machine_failures.csv rows agree with the counters
+            fails = [r for r in tw.fail_rows if r["event"] == "fail"]
+            assert len(fails) == tw.summary()["episode_failures"]
+            assert sum(r["queued_rerouted"] for r in fails) == tw.fstats["queued_rerouted"]
+            assert sum(r["pickups_cancelled"] for r in fails) == tw.fstats["pickups_cancelled"]
+            assert sum(r["redirected"] for r in fails) == tw.fstats["redirects"]
+            assert sum(r["held"] for r in fails) == tw.fstats["held_to_down"]
+            assert sum(r["aborted"] for r in fails) == tw.fstats["aborts"] + tw.fstats["redirect_no_route"]
+            assert sum(r["predispatch_cleared"] for r in fails) == tw.fstats["predispatch_cleared"]
+            assert [(r["sim_time"], r["machine_id"], r["event"]) for r in tw.fail_rows] == \
+                [(round(t, 2), m, ev) for t, m, ev, _, _ in tw.fail_log]
     for key in ("pickups_cancelled", "redirects", "predispatch_cleared", "orphans_released", "jobs_interrupted",
-                "queued_rerouted", "aborts", "deferred_job_seconds"):
+                "queued_rerouted", "aborts" if legacy else "held_to_down", "deferred_job_seconds"):
         assert tot[key] > 0, key
+    assert tot["aborts" if not legacy else "held_to_down"] == 0
+    if not legacy:
+        assert tot["delivered_to_down"] >= tot["held_to_down"] > 0
     assert tot["orphans_released"] <= tot["predispatch_cleared"]
+
+
+def _first_hold(floor, legacy):
+    """A heavy-trace run (seeds 0-3, SPT_ECT) with at least one transit that had no operational alternate."""
+    for seed in range(4):
+        tw = _run("SPT_ECT", _heavy_trace(floor, seed), seed=seed, floor=floor, legacy_failure_quirks=legacy)
+        if tw.fstats["held_to_down" if not legacy else "aborts"]:
+            return seed, tw
+    raise AssertionError("no transit without an alternate in seeds 0-3")
+
+
+def test_no_alternate_transit_is_delivered_to_the_down_machine():
+    """Fixed handling: the AGV keeps going to the failed machine, the job is queued there and re-routed at once (B3),
+    and its next pickup is from that machine (its true location), not from the machine it came from. Legacy: the
+    transit is aborted and the job is later collected from where it came from."""
+    floor = _floor()
+    seed, tw = _first_hold(floor, legacy=False)
+    held = [r for r in tw.fail_rows if r["held"]]
+    t_fail, mid = held[0]["sim_time"], held[0]["machine_id"]
+    # the op row of the held job: routed to mid before the failure, "queued" (delivered) at mid after it, never
+    # started there, and the next attempt at the same operation is collected from mid
+    rows = [o for j in tw.jobs.values() for o in j.op_rows
+            if o["machine"] == mid and o["routed"] < t_fail and o["queued"] is not None and o["queued"] >= t_fail
+            and o["start"] is None]
+    assert rows, "the held delivery must land on the failed machine"
+    o = rows[0]
+    job = tw.jobs[o["job"]]
+    later = [r for r in job.op_rows if r["op"] == o["op"] and r["routed"] >= o["queued"]]
+    assert later and later[0]["from"] == mid
+    assert all(ev != "abort" for _, _, ev, _ in tw.trace)
+    # legacy: aborted, and the job's next attempt is collected from its previous location
+    _, old = _first_hold(floor, legacy=True)
+    assert old.fstats["held_to_down"] == 0 and any(ev == "abort" for _, _, ev, _ in old.trace)
+
+
+@pytest.mark.parametrize("legacy", [False, True])
+def test_rerouted_queued_jobs_free_their_belt_slot(legacy):
+    """Step 2 / B3: a job re-routed off a failed machine without being started leaves its incoming belt (the C#
+    PhysicalMachine.ReleaseIncomingSlot); with legacy_failure_quirks it keeps the slot (the old leak)."""
+    floor = _floor()
+    tw = Twin(floor, resolve_jobs(_scenario(0), floor),
+              TwinConfig(rule="SPT_ECT", agv_count=3, failures=_heavy_trace(floor, 0), legacy_failure_quirks=legacy))
+    leaked = []
+    orig = tw._fail
+
+    def spy(m):
+        before = {jid for _, jobs in m.belts for jid in jobs}
+        queued = [j.id for j in tw._queued_at[m.id].jobs()]
+        orig(m)
+        after = {jid for _, jobs in m.belts for jid in jobs}
+        leaked.extend(j for j in queued if j in before and j in after)
+        assert legacy or not (after & set(queued))
+
+    tw._fail = spy
+    tw.run()
+    assert tw.fstats["queued_rerouted"] > 0
+    assert bool(leaked) == legacy
+    # whatever the mode, a belt only ever holds jobs that are queued at that machine (or, legacy, leaked ones)
+    if not legacy:
+        for m in tw.machines:
+            for _, jobs in m.belts:
+                assert all(tw.jobs[j].state == 3 and tw.jobs[j].location == m.id for j in jobs)
 
 
 def _one_failure(floor, mid, tick, repair):
@@ -499,3 +579,17 @@ def test_twin_env_runs_with_machine_failures():
             break
     with pytest.raises(NotImplementedError):
         TwinSchedulingEnv(Floor(data), scenario=_scenario(1), obs_caps=(15, 256)).reset()
+
+
+def test_dock_yaw_mid_handshake():
+    """motion.dock_yaw_after (the heading of an AGV redirected or cancelled mid-handshake) turns as handshake_done
+    does: unchanged before the first tick, the aligned heading from the completion tick on, monotone in between."""
+    from des_twin.motion import Kinematics, angdiff, dock_yaw_after, handshake_done
+    floor = _floor()
+    kin = Kinematics(floor.agv, floor.dt, "kinematic")
+    for yaw0, goal in ((0.0, 170.0), (350.0, 90.0), (90.0, 92.0)):
+        done, yaw_done = handshake_done(kin, yaw0, goal, 100, True)
+        assert dock_yaw_after(kin, yaw0, goal, 100, 99, True) == yaw0
+        assert dock_yaw_after(kin, yaw0, goal, 100, done, True) == yaw_done
+        gaps = [abs(angdiff(dock_yaw_after(kin, yaw0, goal, 100, t, True), goal)) for t in range(100, done + 1)]
+        assert all(b <= a for a, b in zip(gaps, gaps[1:]))

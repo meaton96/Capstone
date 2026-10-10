@@ -5,6 +5,7 @@ using Assets.Scripts.Simulation.AGV;
 using Assets.Scripts.Simulation.FactoryLayout;
 using Assets.Scripts.Simulation.Stochastic;
 using Assets.Scripts.Simulation.Logging;
+using Assets.Scripts.Simulation.Types;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -32,6 +33,25 @@ namespace Assets.Scripts.Simulation
         private Action<int> _refreshLabels;
         /// <summary>Current simulation time reference used for event tracking.</summary>
         private double _simTimeRef;
+        /// <summary>Episode tick (FactoryOrchestrator._episodeTicks) of the current harvest, for machine_failures.csv.</summary>
+        private int _tickRef;
+
+        /// <summary>
+        /// "-legacyfailurequirks": the failure handling of every build before 2026-10-09, kept for regression checks
+        /// against older players (results/dev-csharp-failures):
+        ///   - a queued job re-routed off a failed machine (step 2), or a delivery landing on a machine as it failed
+        ///     (audit B3, FlagHarvester), keeps its incoming-belt slot for the rest of the episode;
+        ///   - a transit to the failed machine with no operational alternate is aborted: the AGV drops the job where it
+        ///     is and returns to parking, while the job's LocationMachineId stays at the machine it was collected from,
+        ///     so it is later collected from that machine's dock (a teleport).
+        /// The default since 2026-10-09 frees the slot, and keeps such a transit on its way to the failed machine: the
+        /// job is delivered there, re-routed by the B3 path, and collected from where it really is.
+        /// </summary>
+        public static bool LegacyQuirks =
+            System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "-legacyfailurequirks") >= 0;
+
+        /// <summary>Failure / repair events of this episode (machine_failures.csv); collected under "-destrace".</summary>
+        public readonly List<MachineFailureEventRecord> EventRecords = new List<MachineFailureEventRecord>();
 
         /// <summary>
         /// Initializes the FailureCoordinator with required dependencies and callbacks.
@@ -65,9 +85,10 @@ namespace Assets.Scripts.Simulation
         /// Sets the current simulation time reference used for event tracking.
         /// </summary>
         /// <param name="simTime">The current simulation time.</param>
-        public void SetSimTime(double simTime)
+        public void SetSimTime(double simTime, int tick = -1)
         {
             _simTimeRef = simTime;
+            _tickRef = tick;
         }
 
         /// <summary>
@@ -86,8 +107,9 @@ namespace Assets.Scripts.Simulation
                     HandleMachineFailure(machine);
                 else if (machine.RepairCompleteFlag)
                 {
-                    HandleMachineRepairComplete(machine);
+                    MachineFailureEventRecord rec = HandleMachineRepairComplete(machine);
                     RetryDeferredJobs();
+                    if (rec != null) rec.DeferredJobs = _jobs.DeferredJobIds.Count;
                 }
 
             }
@@ -131,6 +153,12 @@ namespace Assets.Scripts.Simulation
             // (user decision 10-03, audit G10).
             _machineProcessingStartTime.Remove(machineId);
             _tracker.RecordMachineFailure(machineId, machine.SampledRepairDuration, _simTimeRef);
+            var rec = new MachineFailureEventRecord
+            {
+                SimTime = _simTimeRef, Tick = _tickRef, MachineId = machineId, Event = "fail",
+                ActiveJob = machine.ActiveJobId, RepairDuration = machine.SampledRepairDuration,
+            };
+            if (DesTwinExport.Enabled) EventRecords.Add(rec);
 
             // Step 1: Handle job actively being processed on this machine
             if (machine.ActiveJobId >= 0)
@@ -152,6 +180,10 @@ namespace Assets.Scripts.Simulation
                 if (job.LocationMachineId != machineId) continue;
 
                 job.TransitionTo(JobState.NeedsRouting, _simTimeRef);
+                // The job leaves the queue without being started: free its incoming-belt slot (only StartJob did,
+                // so the slot leaked for the rest of the episode before 2026-10-09).
+                if (!LegacyQuirks) machine.ReleaseIncomingSlot(job.JobId);
+                rec.QueuedRerouted++;
                 SimLogger.Medium($"[Failure] Queued job {job.JobId} re-routed from failed machine {machineId}.");
             }
 
@@ -172,6 +204,7 @@ namespace Assets.Scripts.Simulation
                 waitingJob.TransitionTo(JobState.NeedsRouting, _simTimeRef);
                 waitingJob.TargetMachineId = -1;
                 waitingJob.AssignedAgvId = -1;
+                rec.PickupsCancelled++;
                 SimLogger.Medium($"[Failure] WaitingForPickup job {waitingJob.JobId}: " +
                               $"AGV {agv.AgvId} pickup cancelled, job re-routed.");
             }
@@ -205,6 +238,7 @@ namespace Assets.Scripts.Simulation
                     bool redirected = agv.RedirectDropoff(alternate.GetDropoffPosition(), alternate, transitJob.Visual);
                     if (redirected)
                     {
+                        rec.Redirected++;
                         SimLogger.Medium($"[Failure] AGV {agv.AgvId} carrying job {agvJobId} " +
                                       $"redirected: machine {machineId} failed → machine {alternate.MachineId}.");
                     }
@@ -213,12 +247,27 @@ namespace Assets.Scripts.Simulation
                         transitJob.TransitionTo(JobState.NeedsRouting, _simTimeRef);
                         transitJob.TargetMachineId = -1;
                         transitJob.AssignedAgvId = -1;
+                        rec.Aborted++;
                         SimLogger.Medium($"[Failure] AGV {agv.AgvId} carrying job {agvJobId}: " +
                                       $"redirect to machine {alternate.MachineId} failed (no route), job re-routed.");
                     }
                 }
+                else if (!LegacyQuirks)
+                {
+                    // No operational alternate: keep the delivery going to the failed machine (2026-10-09). The job
+                    // is placed on its input belt and, the machine being down, re-routed at once by the delivery
+                    // harvest (audit B3), so it is collected later from the machine it is really at. Aborting
+                    // instead dropped the job in the aisle (the comment on FindBestAlternateMachine) while its
+                    // LocationMachineId still named the machine it was collected from, which a later AGV then
+                    // collected it from: a teleport. Every eligible machine is down here, so the job could not be
+                    // routed before a repair either way.
+                    rec.Held++;
+                    SimLogger.Medium($"[Failure] AGV {agv.AgvId} carrying job {agvJobId}: no operational " +
+                                     $"alternate, delivering to failed machine {machineId} (re-routed on arrival).");
+                }
                 else
                 {
+                    rec.Aborted++;
                     // No operational alternate available — abort transit and re-enter job pool
                     transitJob.TransitionTo(JobState.NeedsRouting, _simTimeRef);
                     transitJob.TargetMachineId = -1;
@@ -238,6 +287,7 @@ namespace Assets.Scripts.Simulation
 
                 SimLogger.Medium($"[Failure] Pre-dispatch for job {job.JobId} to machine {machineId} cancelled.");
                 job.PreDispatchedAgvId = -1;
+                rec.PredispatchCleared++;
             }
 
             machine.AcknowledgeFailure();
@@ -294,14 +344,25 @@ namespace Assets.Scripts.Simulation
 
             return best;
         }
-        private void HandleMachineRepairComplete(PhysicalMachine machine)
+        private MachineFailureEventRecord HandleMachineRepairComplete(PhysicalMachine machine)
         {
             SimLogger.Medium($"[Orchestrator] Machine {machine.MachineId} repair complete — " +
                           $"returning to OPERATIONAL.");
 
+            MachineFailureEventRecord rec = null;
+            if (DesTwinExport.Enabled)
+            {
+                rec = new MachineFailureEventRecord
+                {
+                    SimTime = _simTimeRef, Tick = _tickRef, MachineId = machine.MachineId, Event = "repair_done",
+                    ActiveJob = -1, RepairDuration = machine.SampledRepairDuration,
+                };
+                EventRecords.Add(rec);
+            }
             machine.AcknowledgeRepairComplete();
             _tracker.RecordRepairComplete(machine.MachineId, _simTimeRef);
             _refreshLabels?.Invoke(machine.MachineId);
+            return rec;
         }
     }
 }
