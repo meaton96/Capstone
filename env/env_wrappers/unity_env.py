@@ -49,7 +49,7 @@ from config import (
     GRID_SIZE, GRID_CHANNELS, MAX_JOBS, JOB_FEATURES, MAX_MACHINES, MACHINE_FEATURES,
     SPATIAL_LEN, GLOBAL_SCALARS, EVENT_FLAGS, ACTION_BRANCHES, ACTION_MASK_LEN, obs_total_size, normalize_rule,
 )
-from channels.channels import EpisodeConfigChannel, EpisodeSeedChannel, EpisodeTelemetryChannel
+from channels.channels import DecisionViewChannel, EpisodeConfigChannel, EpisodeSeedChannel, EpisodeTelemetryChannel
 from env_wrappers.loopback import LoopbackUnityEnvironment
 from rewards import (
     SENSOR_NAME, LoadedReward, MetricsSnapshot, RewardContext, RewardFunction, elapsed_sim_time, load_reward,
@@ -118,8 +118,12 @@ class UnitySchedulingEnv:
                  target_frame_rate: Optional[int] = -1,
                  extra_args: Optional[list] = None,
                  scenario_generator: Optional[Callable[[int], dict]] = None,
-                 obs_caps: Optional[Tuple[int, int]] = None):
+                 obs_caps: Optional[Tuple[int, int]] = None, py_rules: bool = False):
         """
+        @param py_rules        Python rule mode (2026-10-11, env/rules_api): launch the player with -pyrules, so it
+                               sends each decision's candidate view (DecisionViewChannel) and step() accepts a
+                               rules_api.RulePair as the action (the pair picks in Python; the pick is sent back).
+                               Needs a player built with PyRules (dev-pyrules); False launches exactly as before.
         @param obs_caps        Observation row caps (machine rows, job rows), passed to the player as
                                -obsmaxmachines / -obsmaxjobs. Pick them with config.obs_row_caps for the
                                largest floor the run will see; None uses the defaults (MAX_MACHINES,
@@ -148,11 +152,19 @@ class UnitySchedulingEnv:
         self.config_channel = EpisodeConfigChannel()
         self.seed_channel = EpisodeSeedChannel()
         self.telemetry = EpisodeTelemetryChannel()
+        self.py_rules = bool(py_rules)
+        self.view_channel = DecisionViewChannel() if self.py_rules else None
+        ## @brief Python-rule mode timing: decisions picked in Python and the seconds spent parsing + picking.
+        self.py_rule_decisions, self.py_rule_seconds = 0, 0.0
 
         self.obs_caps = (MAX_MACHINES, MAX_JOBS) if obs_caps is None else (int(obs_caps[0]), int(obs_caps[1]))
         additional_args = ["-obsmaxmachines", str(self.obs_caps[0]), "-obsmaxjobs", str(self.obs_caps[1])]
         if decision_drain:
             additional_args += ["-rldecisiondrain", "true"]
+        if self.py_rules:
+            if not decision_drain:
+                raise ValueError("Python rule mode needs decision drain (one Python step per decision)")
+            additional_args += ["-pyrules"]
         if log_file is not None:
             # Must be absolute: the player does not resolve relative paths against Python's
             # working directory, and exits at startup ("Unable to open log file") if it can't open it.
@@ -167,7 +179,7 @@ class UnitySchedulingEnv:
                 self.config_channel,
                 self.seed_channel,
                 self.telemetry,
-            ],
+            ] + ([self.view_channel] if self.view_channel is not None else []),
             worker_id=worker_id,
             timeout_wait=timeout_wait,
             no_graphics=no_graphics,
@@ -330,7 +342,15 @@ class UnitySchedulingEnv:
                 that ended episode's own last observation, and @c obs is already the first
                 observation of the next episode.
         """
-        if isinstance(action, str):
+        if getattr(action, "is_py_rule", False):
+            # Python rule mode: the pair picks from this decision's view; Unity applies the pick (StepPick) in place
+            # of the placeholder action's rule.
+            if self._rule_override is not None:
+                self.config_channel.set_rule_override(None)
+                self._rule_override = None
+            self._send_py_pick(action)
+            action = (0,) * len(ACTION_BRANCHES)
+        elif isinstance(action, str):
             rule = normalize_rule(action)
             if rule != self._rule_override:
                 self.config_channel.set_rule_override(rule)
@@ -339,6 +359,9 @@ class UnitySchedulingEnv:
         elif self._rule_override is not None:
             self.config_channel.set_rule_override(None)
             self._rule_override = None
+        if self.view_channel is not None and not getattr(self, "_py_picked", False):
+            self.view_channel.take()       # a decision answered without a Python pick: drop its view
+        self._py_picked = False
         self.env.set_actions(
             self.behavior_name,
             ActionTuple(discrete=np.asarray(action, dtype=np.int32).reshape(1, len(ACTION_BRANCHES))),
@@ -384,6 +407,26 @@ class UnitySchedulingEnv:
             self._refill_seeds_and_scenarios(1, clear=False)
         next_obs = self._begin_episode(self._wait_for_decision(decision))
         return next_obs, reward, True, info
+
+    def _send_py_pick(self, pair):
+        """Parse the pending decision's view (sent by the player with this decision), let the pair pick, and queue the
+        pick to go out with this step. A decision without a fresh view is an error (player not launched with -pyrules,
+        or an older player)."""
+        import time
+        from rules_api.unity_adapter import parse_view
+        if self.view_channel is None:
+            raise RuntimeError("a Python rule needs UnitySchedulingEnv(py_rules=True) (player flag -pyrules)")
+        raw = self.view_channel.take()
+        if raw is None:
+            raise RuntimeError("no decision view arrived with this decision: is the player built with Python rule "
+                               "mode (dev-pyrules) and launched with -pyrules?")
+        t = time.perf_counter()
+        view = parse_view(raw)
+        job, machine = pair.pick(view)
+        self.py_rule_seconds += time.perf_counter() - t
+        self.py_rule_decisions += 1
+        self.config_channel.send_pick(job, machine, view.decision, pair.job.name, pair.machine.name)
+        self._py_picked = True
 
     def _draw_training_seeds(self, count: int) -> list:
         return self.seed_rng.integers(TRAIN_SEED_LOW, EpisodeSeedChannel.MAX_SEED, size=count).tolist()

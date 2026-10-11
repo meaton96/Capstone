@@ -129,7 +129,7 @@ def decision_row(policy, seed: int, seed_index: int, step: int, metrics, action,
     """@brief One decisions.csv row: the (job head, machine head) chosen at a decision, which heads could
     change it, and, for checkpoints, the policy's per-head distributions (summed entropy, probability of
     the chosen action over the heads used, p_job_<rule> / p_machine_<rule>)."""
-    fixed = isinstance(action, str)
+    fixed = isinstance(action, str) or getattr(action, "is_py_rule", False)
     job, machine = (-1, -1) if fixed else (int(action[0]), int(action[1]))
     used = heads_used(action_mask)
     row = {
@@ -162,7 +162,7 @@ class ConstantPolicy:
     last_probs = None
 
     def __init__(self, action, name: str):
-        self.action = action if isinstance(action, str) else tuple(action)
+        self.action = action if isinstance(action, str) or getattr(action, "is_py_rule", False) else tuple(action)
         self.name = name
 
     def __call__(self, obs):
@@ -208,8 +208,42 @@ class CheckpointPolicy:
         return action
 
 
-def build_policies(pdr_spec: str, checkpoints, device: str, deterministic: bool) -> list:
-    policies = [ConstantPolicy(fixed_action(name), name) for name in resolve_pdr_names(pdr_spec)]
+def resolve_py_pdr_names(spec: str, all_python: bool) -> list:
+    """@brief (name, is_python) per --pdr item. "py:JOB-MACHINE" is always a Python rule (rules_api registry: the built-in
+    ports plus --py-rules modules); with all_python (--py-rules given) every name, sets expanded, is one too. Otherwise
+    names resolve as resolve_pdr_names (catalog rules)."""
+    out = []
+    for part in [p.strip() for p in spec.split(",") if p.strip()]:
+        if part.lower().startswith("py:"):
+            out.append((part[3:].strip().upper().replace("_", "-"), True))
+        elif all_python:
+            names = PDR_SETS.get(part.lower(), [part]) if part.lower() not in ("none", "") else []
+            out += [(n.strip().upper().replace("_", "-"), True) for n in names]
+        else:
+            out += [(n, False) for n in resolve_pdr_names(part)]
+    seen, unique = set(), []
+    for item in out:
+        if item not in seen:
+            seen.add(item)
+            unique.append(item)
+    return unique
+
+
+def build_policies(pdr_spec: str, checkpoints, device: str, deterministic: bool, py_rules: str = None) -> list:
+    """@brief ConstantPolicy per --pdr rule (a Python rule's action is its rules_api.RulePair, named "py:JOB-MACHINE"),
+    then the checkpoints."""
+    if py_rules is not None or "py:" in pdr_spec.lower():
+        import rules_api
+        rules_api.load_rules(py_rules or "builtin")
+        policies = []
+        for name, is_py in resolve_py_pdr_names(pdr_spec, py_rules is not None):
+            if is_py:
+                pair = rules_api.resolve(name)
+                policies.append(ConstantPolicy(pair, f"py:{pair.name}"))
+            else:
+                policies.append(ConstantPolicy(fixed_action(name), name))
+    else:
+        policies = [ConstantPolicy(fixed_action(name), name) for name in resolve_pdr_names(pdr_spec)]
     policies += [CheckpointPolicy(path, device, deterministic) for path in checkpoints or []]
 
     seen = {}
@@ -690,6 +724,12 @@ def main(argv=None):
                         help="PDR baselines: 'all' (the 6 RL-head pairs {SRT,MDD,ATC} x {PECT,PTECT}), 'h15' (the "
                              "old 15 pairs {SRT,SPT,MDD,EDD,ATC} x {ECT,TECT,SRWT}), 'none', or a comma list of "
                              "JOB-MACHINE catalog rules and set names (e.g. all,MDD-TECT)")
+    parser.add_argument("--py-rules", type=str, default=None, metavar="MODULES",
+                        help="Python rule mode (env/rules_api, 2026-10-11): load these rule modules (.py paths or module "
+                             "names, comma-separated; 'builtin' = only the reference ports of the built-in rules) and "
+                             "run every --pdr name as a Python rule pair from the registry (e.g. --pdr OPSLACK-PECT); "
+                             "policies are named py:JOB-MACHINE. Without it, a --pdr item 'py:JOB-MACHINE' is still a "
+                             "Python rule. Unity: the player is launched with -pyrules (a dev-pyrules build)")
     parser.add_argument("--checkpoint", action="append", default=[],
                         help="train.py checkpoint to evaluate (repeatable)")
     parser.add_argument("--scenario", type=str, default=None,
@@ -850,7 +890,13 @@ def main(argv=None):
 
     if args.stochastic_policy:
         torch.manual_seed(args.policy_seed)
-    policies = build_policies(args.pdr, args.checkpoint, args.device, not args.stochastic_policy)
+    try:
+        policies = build_policies(args.pdr, args.checkpoint, args.device, not args.stochastic_policy, args.py_rules)
+    except (KeyError, ValueError, FileNotFoundError, ImportError) as exc:
+        parser.error(f"--pdr / --py-rules: {exc}")
+    py_mode = any(getattr(p, "action", None) is not None and getattr(p.action, "is_py_rule", False) for p in policies)
+    if py_mode:
+        print("Python rules: " + ", ".join(p.name for p in policies if getattr(p.action, "is_py_rule", False)))
     if not policies:
         parser.error("Nothing to evaluate: pass --checkpoint and/or --pdr")
 
@@ -899,6 +945,7 @@ def main(argv=None):
         decision_drain=not args.no_decision_drain,
         log_file=out / "Player.log",
         extra_args=["-decisionlogdir", str(out.resolve())] if args.unity_decision_log else None,
+        py_rules=py_mode,
     )
     if slot_seconds > 0:
         # Hold each policy's action for a slot (env_wrappers.slot_env); a fixed pair is unchanged by it. Its reward
@@ -920,6 +967,10 @@ def main(argv=None):
                               decision_writer=decision_writer, scenario_generator=scenario_generator,
                               scenario_dir=out / "scenarios", gamma_per_second=gamma_per_second)
     finally:
+        n_py = getattr(env, "py_rule_decisions", 0)
+        if n_py:
+            print(f"Python rules: {n_py} picks, {1e3 * env.py_rule_seconds / n_py:.3f} ms per pick in Python "
+                  "(view parse + rule)", flush=True)
         env.close()
         # Record each episode's floor so per-condition runs (--agvs / --layout / --params) stay self-describing.
         if scenario_generator is not None:
