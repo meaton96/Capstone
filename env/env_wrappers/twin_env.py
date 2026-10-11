@@ -16,6 +16,10 @@ from reward-metrics snapshots (env/rewards), the episode summary in info["episod
 and info["terminal_obs"], the observation of the ended episode's last decision (the Unity wrapper keeps the same
 one, since the player's own terminal observation is padded with zeros).
 
+Uncertainty layer (2026-10-11, dev-twin-uncertainty): a scenario with an "uncertainty" block
+(scenarios.uncertainty.with_uncertainty; train.py / evaluate.py --uncertainty) runs the world derived from its plan
+(des_twin.uncertainty) and the observation is built from the controllers' degraded view (Twin.observed).
+
 Not modelled by the twin, and refused per scenario: AGV failures, Poisson arrivals, machine flexibility, tiled
 floors (des_twin.scenario / des_twin.floor raise). Machine failures are refused too unless machine_failures=True
 (2026-10-09): each episode then gets the twin's own failure trace from the scenario's "stochastic" block
@@ -31,6 +35,7 @@ from des_twin import Floor
 from des_twin.engine import Twin, TwinConfig
 from des_twin.observation import ObservationBuilder
 from des_twin.scenario import agv_schedule, episode_settings, failure_trace, ptime_settings, resolve_jobs
+from scenarios.uncertainty import trace_for
 from rewards import (LoadedReward, MetricsSnapshot, RewardContext, RewardFunction, elapsed_sim_time, load_reward,
                      window_outcomes)
 
@@ -166,22 +171,25 @@ class TwinSchedulingEnv:
     def _new_twin(self):
         if self.queued:
             scenario = self._next_queued()
-            self._check_scenario(scenario)
-            return Twin(self.floor, resolve_jobs(scenario, self.floor), self._config(scenario))
-        if self.seed_rng is not None:
-            self._seed = int(self.seed_rng.integers(TRAIN_SEED_LOW, MAX_SEED))
-            self._seed_index += 1
-        scenario = self.scenario_generator(self._seed) if self.scenario_generator is not None else self.scenario
+        else:
+            if self.seed_rng is not None:
+                self._seed = int(self.seed_rng.integers(TRAIN_SEED_LOW, MAX_SEED))
+                self._seed_index += 1
+            scenario = self.scenario_generator(self._seed) if self.scenario_generator is not None else self.scenario
         self._check_scenario(scenario)
-        return Twin(self.floor, resolve_jobs(scenario, self.floor), self._config(scenario))
+        plan = resolve_jobs(scenario, self.floor)
+        # Uncertainty layer (2026-10-11): the resolved jobs are the plan; the twin runs the world derived from it
+        # (the scenario's "uncertainty" block, written by scenarios.uncertainty.with_uncertainty).
+        trace = trace_for(scenario, self.floor, plan) if scenario.get("uncertainty") else None
+        return Twin(self.floor, plan if trace is None else trace.world_jobs, self._config(scenario, trace))
 
-    def _config(self, scenario: dict) -> TwinConfig:
+    def _config(self, scenario: dict, trace=None) -> TwinConfig:
         warmup, cap, rule = episode_settings(scenario, machine_failures=self.machine_failures)
         failures = failure_trace(scenario, self.floor) if self.machine_failures else None
         return TwinConfig(rule=rule, transport=self.transport, routing_trigger=scenario.get("routingTrigger"),
                           max_sim_seconds=MAX_EPISODE_SIM_SECONDS, warmup_seconds=warmup,
                           episode_duration_seconds=cap, agv_schedule=agv_schedule(scenario), failures=failures,
-                          **ptime_settings(scenario))
+                          uncertainty=trace, **ptime_settings(scenario))
 
     def _start_episode(self) -> Dict[str, np.ndarray]:
         """Starts episodes until one reaches a decision (one that ends inside its warm-up gives the agent nothing
@@ -213,7 +221,8 @@ class TwinSchedulingEnv:
         return MetricsSnapshot.from_dict(values)
 
     def _obs(self) -> Dict[str, np.ndarray]:
-        obs = self.obs_builder.build(self._twin, self._decision)
+        tw = self._twin
+        obs = self.obs_builder.build(tw if tw.observed is None else tw.observed, self._decision)
         if self.critic_lookahead:
             from des_twin.lookahead import lookahead_features
             obs["critic_lookahead"] = lookahead_features(self._twin)

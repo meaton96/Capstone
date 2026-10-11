@@ -49,6 +49,7 @@ import torch
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from scenarios.uncertainty import UNCERTAINTY_HELP
 from config import (ActorCriticConfig, FusionConfig, PDR_ACTIONS, H15_PAIRS, fixed_action, normalize_rule, action_rule,
                     ACTION_BRANCHES, JOB_HEAD_RULES, MACHINE_HEAD_RULES)
 from env_wrappers.unity_env import SEED_BUFFER, TRAIN_SEED_LOW, UnitySchedulingEnv
@@ -716,6 +717,8 @@ def main(argv=None):
     parser.add_argument("--random-warmup", action="store_true",
                         help="With --scenario-generator: start each episode mid-stream after a heuristic warm-up "
                              "(the training distribution; the warm-up cutoff is drawn from the seed)")
+    parser.add_argument("--uncertainty", type=str, default=None,
+                        help="With --twin and --scenario-generator: " + UNCERTAINTY_HELP)
     parser.add_argument("--agv-failures", nargs="?", const="{}", default=None, metavar="JSON",
                         help="With --scenario-generator: add AGV breakdowns to every instance (same instance "
                              "otherwise). Bare flag = scenarios.AGV_FAILURE_DEFAULTS; a JSON object overrides "
@@ -775,6 +778,8 @@ def main(argv=None):
         parser.error("--agvs / --layout need --scenario-generator")
     if (args.input_buffer is not None or args.output_buffer is not None) and not args.scenario_generator:
         parser.error("--input-buffer / --output-buffer need --scenario-generator")
+    if args.uncertainty and not args.scenario_generator:
+        parser.error("--uncertainty needs --scenario-generator")
     if (args.params is not None or args.random_warmup) and not args.scenario_generator:
         parser.error("--params / --random-warmup need --scenario-generator")
     if args.params is not None and args.scenario_generator != "randomized":
@@ -820,6 +825,16 @@ def main(argv=None):
                 parser.error(f"--agvs / --layout: {exc}")
             print(f"Floor override: {fields}")
             scenario_generator = with_floor(scenario_generator, args.agvs, args.layout)
+        if args.uncertainty:
+            if not args.twin:
+                parser.error("--uncertainty needs --twin (the uncertainty layer is twin-only)")
+            from scenarios.uncertainty import spec_from_arg, with_uncertainty
+            try:
+                spec = spec_from_arg(args.uncertainty)
+            except ValueError as exc:
+                parser.error(f"--uncertainty: {exc}")
+            print(f"Uncertainty layer: {args.uncertainty}")
+            scenario_generator = with_uncertainty(scenario_generator, spec)
         if args.input_buffer is not None or args.output_buffer is not None:
             from scenarios import buffer_override_fields, with_buffers
             try:

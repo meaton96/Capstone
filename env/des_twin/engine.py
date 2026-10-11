@@ -42,6 +42,15 @@ ordered by arrival position (`Job.seq` = index in `self.order`), so every scan v
 as before and the results are bit-identical (float32 sums included). `_to` is the only place a job's state changes and
 every location / target change happens before the `_to` that follows it, so `_to` keeps the indexes current. metrics()
 caches its left fold over the leading exited jobs (they never change). Exactness check: results/dev-twin-speed.
+
+Uncertainty layer (2026-10-11, dev-twin-uncertainty; des_twin.uncertainty, des_twin.observed): with
+TwinConfig.uncertainty (an UncertaintyTrace; the job list passed in is then its world_jobs) Job.ops keeps the PLANNED
+durations, `_start` draws the actual one f32(p_plan x b_m(now) x f_jom) from the trace, the almost-done pre-dispatch
+fires on the controllers' estimate (predispatch_on "planned"), `_to` / `_arrive` hand every transition to the view, and
+routing / dispatch / FindBestAlternateMachine read the degraded view (Twin.view; the observation reads Twin.observed)
+instead of the twin. Decisions are still triggered on the true state. pause_at / replace_pending serve the fork-based
+planner (des_twin.planner). With uncertainty None every new path is skipped; with an all-zero configuration the engine
+is still bit-identical to 95af8606 (results/dev-twin-uncertainty/check_exact.py).
 """
 import heapq
 import math
@@ -107,6 +116,11 @@ class TwinConfig:
     ptime_tau: float = PTIME_RULE_PARAMS["tau"]
     ptime_reroute: float = PTIME_RULE_PARAMS["reroute"]
     ptime_avail: float = PTIME_RULE_PARAMS["avail"]
+    # Uncertainty layer (2026-10-11, dev-twin-uncertainty): a des_twin.uncertainty.UncertaintyTrace built from the plan
+    # (the jobs passed to Twin are then the trace's world_jobs), None = off. Actual durations are drawn at the start
+    # of each operation, and rules / routing / dispatch read the degraded view des_twin.observed.ObservedState
+    # (Twin.view; the observation reads Twin.observed). With None every new path is skipped.
+    uncertainty: object = None
 
 
 @dataclass
@@ -128,6 +142,9 @@ class Decision:
             return len(self.queue) > 1, False
         pool = not self.selected_by_rule and len(self.job_candidates) > 1
         return pool, pool or len(self.machines) > 1
+
+
+PAUSE = Decision("pause")     # yielded by agent_decisions() at a pause_at() time; the value sent back is ignored
 
 
 class _OrdIdx:
@@ -186,7 +203,8 @@ class Job:
 class MachineRT:
     __slots__ = ("id", "idle", "job", "start_tick", "dur", "proc_start", "busy", "belts", "finish_tick",
                  "almost_tick", "info", "down", "fail_tick", "repair_tick", "repair_dur", "repair_start", "fptr",
-                 "events", "n_fail", "repair_sum", "downtime", "down_since", "lost_work", "life_start", "age0")
+                 "events", "n_fail", "repair_sum", "downtime", "down_since", "lost_work", "life_start", "age0",
+                 "est_dur")
 
     def __init__(self, info):
         self.info, self.id = info, info.id
@@ -196,6 +214,7 @@ class MachineRT:
         self.finish_tick = self.almost_tick = None
         self.down = False                       # Failed or Repairing (failures only)
         self.fail_tick = self.repair_tick = None
+        self.est_dur = None                     # uncertainty: the controller's estimate of the running op's duration
 
 
 class AgvRT:
@@ -248,19 +267,15 @@ class Twin:
         self._dispatchable = set()                         # positions of idle machines with a non-empty queue
         self._prearrive = {}                               # trace entry "arrive_prepickup" -> its indexes
         self._mprefix = None                               # metrics(): fold over the leading exited jobs
+        self._pause_t = None                               # pause_at(): agent mode yields a "pause" before this time
+        self.unc = cfg.uncertainty
+        self.view = self.observed = None
+        if self.unc is not None:
+            from .observed import make_views
+            self._vcore, self.view, self.observed = make_views(self, self.unc)
+            self.dur_rows = []             # (job, op, machine, start time, planned, actual, estimated duration)
         for jd in jobs_data["jobs"]:
-            ops = [{int(m): f32(d) for m, d in op["eligible"]} for op in jd["ops"]]
-            due, op_due = jd.get("due"), jd.get("op_due")
-            if due is not None and op_due is None:
-                # Operation due dates for MOD: the allowance split by work, as scenario.assign_due_dates does
-                # (d_io = r + (d - r) x work of ops 0..o / total work).
-                work = [float(min(op.values())) for op in ops]
-                total, cum, op_due = sum(work), 0.0, []
-                for w in work:
-                    cum += w
-                    op_due.append(float(jd["arrival"]) + (float(due) - float(jd["arrival"])) * (cum / total if total > 0 else 1.0))
-            job = Job(int(jd["id"]), float(jd["arrival"]), ops, [op["type"] for op in jd["ops"]],
-                      None if due is None else float(due), op_due)
+            job = self._make_job(jd)
             self.jobs[job.id] = job
             if job.arrival > 0.0:
                 self.pending.append(job)
@@ -293,6 +308,22 @@ class Twin:
         if self.fail is not None:
             self._init_failures()
 
+    @staticmethod
+    def _make_job(jd):
+        """A Job from a des_jobs/1 entry."""
+        ops = [{int(m): f32(d) for m, d in op["eligible"]} for op in jd["ops"]]
+        due, op_due = jd.get("due"), jd.get("op_due")
+        if due is not None and op_due is None:
+            # Operation due dates for MOD: the allowance split by work, as scenario.assign_due_dates does
+            # (d_io = r + (d - r) x work of ops 0..o / total work).
+            work = [float(min(op.values())) for op in ops]
+            total, cum, op_due = sum(work), 0.0, []
+            for w in work:
+                cum += w
+                op_due.append(float(jd["arrival"]) + (float(due) - float(jd["arrival"])) * (cum / total if total > 0 else 1.0))
+        return Job(int(jd["id"]), float(jd["arrival"]), ops, [op["type"] for op in jd["ops"]],
+                   None if due is None else float(due), op_due)
+
     # ── Clock ───────────────────────────────────────────────────────────────────────────────────
 
     def _wake(self, tick):
@@ -319,6 +350,49 @@ class Twin:
         (des_twin.branch); equivalent to rq2-direct-headroom's FORCE wrapper on rank_jobs / select_machine."""
         self.forced = (job, machine)
 
+    def pause_at(self, t):
+        """Agent mode: the generator yields PAUSE (Decision kind "pause") once, before the first tick at or after sim
+        time t, i.e. in the state after every tick before t, and goes on when sent anything. Used by the planner
+        (des_twin.planner) to re-plan at fixed times without adding a tick."""
+        self._pause_t = float(t)
+
+    def replace_pending(self, jobs):
+        """Replaces the jobs that have not arrived yet by `jobs` (des_jobs/1 entries, arrival after the last processed
+        tick), e.g. a forked planner child's belief of the future (the published schedule) or a redrawn world. The
+        arrival wakes of dropped jobs are removed unless another event needs that tick, so the child processes the
+        ticks a twin built on the new job list would; the job dict is re-ordered as resolve_jobs orders it."""
+        old = self.pending[self.pending_i:]
+        dt = self.dt
+
+        def tick(j):
+            return max(1, math.ceil(j.arrival / dt - 1e-9))
+        new = [self._make_job(jd) for jd in jobs]
+        for j in new:
+            if tick(j) <= self.k:
+                raise ValueError(f"job {j.id}: arrival {j.arrival} is not after the current tick {self.k}")
+        for j in old:
+            self.jobs.pop(j.id, None)
+        for j in new:
+            if j.id in self.jobs:
+                raise ValueError(f"job {j.id} has already arrived")
+            self.jobs[j.id] = j
+        new.sort(key=lambda j: (j.arrival, j.id))
+        self.pending = self.pending[:self.pending_i] + new
+        need = {m.finish_tick for m in self.machines} | {m.almost_tick for m in self.machines}
+        need |= {a.milestone[0] for a in self.agvs if a.milestone is not None}
+        need |= {self.cap_tick, self.k + 1}
+        if self.fail is not None:
+            need |= {m.fail_tick for m in self.machines} | {m.repair_tick for m in self.machines}
+        new_ticks = {tick(j) for j in new}
+        drop = {tick(j) for j in old} - new_ticks - need
+        if drop:
+            self._heap = [t for t in self._heap if t not in drop]
+            heapq.heapify(self._heap)
+            self._queued -= drop
+        for t in sorted(new_ticks):
+            self._wake(t)
+        self.jobs = dict(sorted(self.jobs.items(), key=lambda kv: (np.float32(kv[1].arrival), kv[0])))
+
     @property
     def in_warmup(self):
         return self.now < self.cfg.warmup_seconds
@@ -335,6 +409,10 @@ class Twin:
             self._wake(self.cap_tick)
         max_tick = int(self.cfg.max_sim_seconds / self.dt)
         while self._heap:
+            if self._pause_t is not None and self._heap[0] * self.dt >= self._pause_t - 1e-9:
+                self._pause_t = None
+                yield PAUSE                    # pause_at(): the state after every tick before the pause time
+                continue
             k = heapq.heappop(self._heap)
             self._queued.discard(k)
             if k > max_tick:
@@ -390,6 +468,8 @@ class Twin:
         self._live_d[job.seq] = job
         self._by_state[job.state].add(job)
         self._index_load(job)
+        if self.unc is not None:
+            self._vcore.on_arrive(job)
 
     def _to(self, job, state):
         dt = self.now - job.since
@@ -416,6 +496,8 @@ class Twin:
             if m.idle and not m.down:
                 self._dispatchable.add(self._mpos[job.location])
         self._index_load(job)
+        if self.unc is not None:
+            self._vcore.on_event(job, old, state)
 
     def _index_load(self, job):
         if job.state == QUEUED:
@@ -487,12 +569,20 @@ class Twin:
     # ── Machines ────────────────────────────────────────────────────────────────────────────────
 
     def _start(self, m, job):
-        dur = job.proc(m.id)
+        dur = est = job.proc(m.id)
+        if self.unc is not None:
+            # planned duration in Job.ops; the actual one f32(p_plan x b_m(now) x f_jom) drawn now. Pre-dispatch
+            # fires on the controller's estimate (predispatch_on "planned") or on the true countdown ("actual").
+            plan = dur
+            dur = self.unc.actual_duration(plan, job.id, job.cur_op, m.id, self.now)
+            est = dur if self.unc.cfg.predispatch_on == "actual" else self._vcore.estimate(job.id, job.cur_op, m.id, plan)
+            m.est_dur = est
+            self.dur_rows.append((job.id, job.cur_op, m.id, self.now, float(plan), float(dur), float(est)))
         m.idle, m.job, m.start_tick, m.dur, m.proc_start = False, job.id, self.k, dur, self.now
         # PhysicalMachine.TickProcessing: float32 remainingTime -= dt each tick from this one; the almost-done flag at
         # remainingTime <= PreDispatchLeadTime, the finished flag at <= 0, each harvested the next tick
         m.finish_tick = self.k + max(1, f32_countdown(dur, self.dt, until=0.0)[0])
-        m.almost_tick = self.k + max(1, f32_countdown(dur, self.dt, until=self.lead)[0])
+        m.almost_tick = self.k + max(1, f32_countdown(est, self.dt, until=self.lead)[0])
         for belt in m.belts:
             belt[1].discard(job.id)
         self._dispatchable.discard(self._mpos[m.id])
@@ -503,6 +593,8 @@ class Twin:
         job = self.jobs[m.job]
         m.busy += self.now - m.proc_start
         m.proc_start, m.idle, m.job, m.finish_tick = None, True, -1, None
+        if self.unc is not None and m.almost_tick is not None and m.almost_tick > self.k:
+            m.almost_tick = None           # finished before its (planned) almost-done: no pre-dispatch
         if self._queued_at[m.id].keys:
             self._dispatchable.add(self._mpos[m.id])
         job.op_rows[-1]["end"] = self.now
@@ -817,6 +909,10 @@ class Twin:
     def _route(self, routable):
         self.decisions += 1
         ids = [j.id for j in routable]
+        S = self                          # what the rule halves read: the twin, or its degraded view
+        if self.unc is not None:
+            S = self.view
+            S.set_local(ids)
         job_rule, machine_rule = yield from self._rule_for(lambda: Decision(
             "routing", job=ids[0], job_candidates=tuple(ids), selected_by_rule=len(ids) == 1,
             machines=tuple(self.candidate_machines(routable[0]))))
@@ -826,12 +922,13 @@ class Twin:
                 raise ValueError(f"forced job {forced[0]} is not routable now ({ids})")
             jid = forced[0]
         else:
-            jid = rank_jobs(job_rule, ids, self, lambda i: self.jobs[i].min_proc())
+            jid = rank_jobs(job_rule, ids, S, lambda i: S.jobs[i].min_proc())
         job = self.jobs[jid]
         cands = self.candidate_machines(job)
-        times = [job.proc(mid) for mid in cands]
-        loads = [self.machine_load(mid) for mid in cands]
-        utils = [self.utilization(self.mach[mid]) for mid in cands]
+        sjob = S.jobs[jid]
+        times = [sjob.proc(mid) for mid in cands]
+        loads = [S.machine_load(mid) for mid in cands]
+        utils = [S.utilization(S.mach[mid]) for mid in cands]
         if self.instant:
             travel = [f32(0)] * len(cands)
         else:
@@ -848,6 +945,8 @@ class Twin:
             mid = select_machine(machine_rule, cands, times, loads, utils, travel, pt=self.ptime_params())
         else:
             mid = select_machine(machine_rule, cands, times, loads, utils, travel)
+        if S is not self:
+            S.clear_local()
         self.decision_rows.append((self.now, "routing", job.id, mid, len(cands), len(ids)))
         job.op_rows.append({"job": job.id, "op": job.cur_op, "machine": mid, "routed": self.now,
                             "from": job.location, "queued": None, "start": None, "end": None})
@@ -872,6 +971,10 @@ class Twin:
     def _dispatch_decision(self, m):
         self.decisions += 1
         queue = [j.id for j in self._queued_at[m.id].jobs()]
+        S = self
+        if self.unc is not None:
+            S = self.view
+            S.set_local(queue, m.id)
         job_rule, _ = yield from self._rule_for(lambda: Decision("dispatch", machine=m.id, queue=tuple(queue)))
         forced, self.forced = self.forced, None
         if forced is not None and forced[0] is not None:
@@ -879,7 +982,9 @@ class Twin:
                 raise ValueError(f"forced job {forced[0]} is not queued at machine {m.id} ({queue})")
             jid = forced[0]
         else:
-            jid = rank_jobs(job_rule, queue, self, lambda i: self.jobs[i].proc(m.id))
+            jid = rank_jobs(job_rule, queue, S, lambda i: S.jobs[i].proc(m.id))
+        if S is not self:
+            S.clear_local()
         job = self.jobs[jid]
         self.decision_rows.append((self.now, "dispatch", m.id, jid, len(queue), 0))
         job.op_rows[-1]["start"] = self.now
@@ -1061,10 +1166,11 @@ class Twin:
         """FailureCoordinator.FindBestAlternateMachine: the operational eligible machine (eligible-list order) with
         the lowest GetMachineLoad, first minimum."""
         best, best_load = None, f32(np.finfo(np.float32).max)
+        S = self.view if self.unc is not None and self.unc.cfg.alternate_on == "view" else self
         for mid in job.ops[job.cur_op]:
             if mid == failed or mid not in self.mach or self.mach[mid].down:
                 continue
-            load = self.machine_load(mid)
+            load = S.machine_load(mid)
             if load < best_load:
                 best, best_load = mid, load
         return best

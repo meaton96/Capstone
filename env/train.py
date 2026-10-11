@@ -59,6 +59,7 @@ from models.actor_critic import prior_log_probs
 from models.network import SchedulingNetwork, ac_config_for, encoder_config_for
 from notify import Watchdog, notify, run_label
 from rollout_buffer import RolloutBuffer
+from scenarios.uncertainty import UNCERTAINTY_HELP
 
 ENV_ROOT = Path(__file__).resolve().parent
 REPO_ROOT = ENV_ROOT.parent
@@ -338,7 +339,8 @@ def check_action_layout(ckpt: dict, path) -> None:
 ##        evaluate.py takes slot_seconds from here and warns when its own flags differ from the rest.
 RUN_SETTING_KEYS = ("slot_seconds", "critic_lookahead", "policy_lookahead", "twin", "twin_transport", "scenario", "scenario_generator", "params",
                     "episode_duration_seconds", "random_warmup", "warmup_dispatching_rule", "agv_move_speed",
-                    "agv_handshake_duration", "machine_flexibility", "secondary_time_multiplier", "reward_spec")
+                    "agv_handshake_duration", "machine_flexibility", "secondary_time_multiplier", "reward_spec",
+                    "uncertainty")
 
 
 def lookahead_obs(args) -> bool:
@@ -472,6 +474,12 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
             agv_move_speed=args.agv_move_speed, agv_handshake_duration=args.agv_handshake_duration,
             machine_flexibility=args.machine_flexibility, secondary_time_multiplier=args.secondary_time_multiplier,
             **extra)
+        if getattr(args, "uncertainty", None):
+            if not args.twin:
+                raise ValueError("--uncertainty needs --twin (the uncertainty layer is twin-only)")
+            from scenarios.uncertainty import spec_from_arg, with_uncertainty
+            scenario_generator = with_uncertainty(scenario_generator, spec_from_arg(args.uncertainty))
+            print(f"Uncertainty layer: {args.uncertainty}")
         print(f"\nScenario generator: {args.scenario_generator}"
               + (f" (episode_duration_seconds={args.episode_duration_seconds})"
                  if args.episode_duration_seconds else "")
@@ -996,6 +1004,8 @@ if __name__ == "__main__":
     parser.add_argument("--slot-seconds", type=float, default=0.0,
                         help="Slot actions: hold each chosen rule pair for this many simulated seconds (all decisions "
                              "in the slot), as the switching oracle does; 0 = choose at every decision (2026-10-05)")
+    parser.add_argument("--uncertainty", type=str, default=None,
+                        help="With --twin and --scenario-generator: " + UNCERTAINTY_HELP)
     parser.add_argument("--twin-workers", type=int, default=0,
                         help="With --twin: step the envs in this many worker processes (0/1 = in this process)")
     parser.add_argument("--twin-transport", type=str, default="kinematic",
