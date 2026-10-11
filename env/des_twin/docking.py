@@ -29,6 +29,7 @@ from .engine import TwinConfig, run_twin
 from .floor import Floor
 from .legs import compare_legs
 from .run import unity_row
+from .scenario import ptime_settings
 
 
 def _first_diff(a, b, same):
@@ -74,8 +75,9 @@ def dock(run_dir, transport="kinematic", failures=None, legacy_failure_quirks=Fa
     floor = Floor.load(os.path.join(run_dir, "des_floor.json"))
     with open(os.path.join(run_dir, "des_jobs.json")) as f:
         jobs = json.load(f)
+    # PECT / PTECT parameters: the export's "ptime_rule" (written only when not the defaults), else the defaults
     tw = run_twin(floor, jobs, TwinConfig(u["rule"], transport, agv_count=int(u["agvCount"]), failures=failures,
-                                          legacy_failure_quirks=legacy_failure_quirks))
+                                          legacy_failure_quirks=legacy_failure_quirks, **ptime_settings(floor.data)))
     s = tw.summary()
 
     with open(os.path.join(run_dir, "agv_events.csv")) as f:

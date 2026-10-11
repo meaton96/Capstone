@@ -56,6 +56,7 @@ namespace Assets.Scripts.Simulation.Channels
             "machineFlexibilityProbability", "secondaryTimeMultiplier", "parkingMethod", "ioDocks",
             "reservationProtocol", "routingTrigger", "tiling", "preDispatchingMethod", "stochastic", "procTimeParams",
             "travelPrice", "inputBufferCapacity", "outputBufferCapacity",
+            "ptimeAlpha", "ptimeShape", "ptimeTau", "ptimeReroute", "ptimeAvail",
         };
 
         private FJSSPConfig _pendingConfig = null;
@@ -85,6 +86,11 @@ namespace Assets.Scripts.Simulation.Channels
                     ReadScenarioQueue(scenarios, root["clear"]?.Value<bool>() ?? false);
                     return;
                 }
+                if (root.Count == 1 && root.ContainsKey("ruleOverride"))
+                {
+                    SetRuleOverride(root["ruleOverride"]);
+                    return;
+                }
 
                 FJSSPConfig cfg = DeserialiseConfig(json);
                 lock (_lock) { _pendingConfig = cfg; }
@@ -97,6 +103,42 @@ namespace Assets.Scripts.Simulation.Channels
             {
                 Reject($"config message rejected: {ex.Message}");
             }
+        }
+
+        /// <summary>
+        /// Catalog index (DispatchingEngine.RuleForIndex) that SchedulingAgent steps instead of the policy's (job head,
+        /// machine head) while set, -1 = none (2026-10-10, results/dev-pect-unity). Python sets it with
+        /// {"ruleOverride": "MDD_TECT"} and clears it with {"ruleOverride": null} (UnitySchedulingEnv.step with a rule
+        /// name, so evaluate.py can run fixed rules that are not in the RL heads through the same decision path).
+        /// Side-channel data of a step is processed before that step's actions (RpcCommunicator), so a message sent
+        /// with a step applies to that step's decision.
+        /// </summary>
+        public static int RuleOverrideIndex { get; private set; } = -1;
+
+        /// <summary>Name of the rule override, or null.</summary>
+        public static string RuleOverrideName { get; private set; }
+
+        private void SetRuleOverride(JToken value)
+        {
+            if (value == null || value.Type == JTokenType.Null)
+            {
+                RuleOverrideIndex = -1;
+                RuleOverrideName = null;
+                SimLogger.Low("[ConfigChannel] Rule override cleared.");
+                return;
+            }
+            string name = value.Value<string>();
+            if (!DispatchingEngine.TryIndexForName(name, out int index) || DispatchingEngine.RuleForIndex(index) == DispatchingRule.Random)
+            {
+                // Refuse loudly: stepping the policy's action instead would silently run another rule.
+                Reject($"ruleOverride: unknown rule '{name}'");
+                SimLogger.Error($"[ConfigChannel] ruleOverride '{name}' is not a JOB_MACHINE rule; quitting.");
+                UnityEngine.Application.Quit(2);
+                return;
+            }
+            RuleOverrideIndex = index;
+            RuleOverrideName = DispatchingEngine.RuleForIndex(index).ToString();
+            SimLogger.Low($"[ConfigChannel] Rule override -> {RuleOverrideName} (catalog index {index}).");
         }
 
         /// <summary>
@@ -222,6 +264,7 @@ namespace Assets.Scripts.Simulation.Channels
                 routingTrigger = RoutingTriggerParser.Validated(root["routingTrigger"]?.Value<string>()),
                 Tiling = TilingSpec.FromJson(root["tiling"]),
                 preDispatchingMethod = root["preDispatchingMethod"]?.Value<string>() ?? "fixed",
+                PtimeRule = PtimeRuleParams.FromJson(root),
             };
 
             // MachineTypeLayout from machineTypes string array

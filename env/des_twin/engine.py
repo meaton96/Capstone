@@ -53,6 +53,8 @@ import numpy as np
 from .failures import OnlineReliability, harvest_tick, remaining_countdown
 from .floor import Floor
 from .motion import Kinematics, dock_yaw_after, f32_countdown, handshake_done, heading, plan_leg
+from config import PTIME_RULE_PARAMS
+
 from .rules import PTIME_RULES, RELIABILITY_RULES, f32, parse_rule, rank_jobs, select_machine
 
 NEEDS_ROUTING, WAITING_PICKUP, IN_TRANSIT, QUEUED, PROCESSING, EXITED = range(6)
@@ -94,14 +96,17 @@ class TwinConfig:
     # (the original rules); 0 = blind (every candidate gets the floor values, so kappa / R only weight the processing-
     # time exposure). Decouples the exposure weight (kappa, R) from discrimination. HAECT ignores it.
     reliability_mix: float = 1.0
-    # Processing-time-weighted machine rules (PECT, PTECT; twin only, dev-pect-rule 10-10, rules.PTIME_RULES): weight
-    # alpha of the penalty g(p), its shape (lin / quad / ratio / exp), the exp shape's time scale tau and re-route cost
-    # R (seconds), and the availability A that divides the queue (1 = the plain queue).
-    ptime_alpha: float = 1.0
-    ptime_shape: str = "lin"
-    ptime_tau: float = 5544.0
-    ptime_reroute: float = 0.0
-    ptime_avail: float = 1.0
+    # Processing-time-weighted machine rules (PECT, PTECT; dev-pect-rule 10-10, rules.PTIME_RULES; in Unity and the RL
+    # heads since dev-pect-unity 10-10): weight alpha of the penalty g(p), its shape (lin / quad / ratio / exp), the exp
+    # shape's time scale tau and re-route cost R (seconds), and the availability A that divides the queue (1 = the
+    # plain queue). Defaults = config.PTIME_RULE_PARAMS (quad, alpha 3), as Unity's PtimeRuleParams.Default; until
+    # dd0b3092 the defaults were lin, alpha 1 (dev-pect-rule set every value explicitly). A scenario's ptime* keys
+    # override them (des_twin.scenario.ptime_settings).
+    ptime_alpha: float = PTIME_RULE_PARAMS["alpha"]
+    ptime_shape: str = PTIME_RULE_PARAMS["shape"]
+    ptime_tau: float = PTIME_RULE_PARAMS["tau"]
+    ptime_reroute: float = PTIME_RULE_PARAMS["reroute"]
+    ptime_avail: float = PTIME_RULE_PARAMS["avail"]
 
 
 @dataclass

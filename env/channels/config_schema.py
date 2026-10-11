@@ -18,6 +18,7 @@ SCENARIO_KEYS = {
     "jobs", "machineTypeLayout", "parkingMethod", "ioDocks", "reservationProtocol", "routingTrigger",
     "stochastic", "layout", "tiling", "machineFlexibilityProbability", "secondaryTimeMultiplier", "travelPrice",
     "inputBufferCapacity", "outputBufferCapacity", "agvSchedule",
+    "ptimeAlpha", "ptimeShape", "ptimeTau", "ptimeReroute", "ptimeAvail",
 }
 
 ## @brief EpisodeConfigChannel.ConfigKeys (top level of a generated-config message).
@@ -27,6 +28,7 @@ CONFIG_KEYS = {
     "machineFlexibilityProbability", "secondaryTimeMultiplier", "parkingMethod", "ioDocks",
     "reservationProtocol", "routingTrigger", "tiling", "preDispatchingMethod", "stochastic", "procTimeParams",
     "travelPrice", "inputBufferCapacity", "outputBufferCapacity",
+    "ptimeAlpha", "ptimeShape", "ptimeTau", "ptimeReroute", "ptimeAvail",
 }
 
 ## @brief ScenarioLoader.StochasticKeys.
@@ -46,7 +48,7 @@ TILING_KEYS = {"tiles", "machinesPerTile", "jobScope", "agvAssignment", "release
 MACHINE_TYPES = ("Mill", "Lathe", "Weld", "Inspect", "Assemble")
 LAYOUTS = tuple("ABCDEFGHIJKLMNO")
 _JOB_RULES = ("SPT", "LPT", "SRT", "LRT", "FIFO", "PTWINQ", "EDD", "MDD", "ATC")
-_MACHINE_RULES = ("SMPT", "SRWT", "MMUR", "ECT", "TECT")
+_MACHINE_RULES = ("SMPT", "SRWT", "MMUR", "ECT", "TECT", "PECT", "PTECT")
 DISPATCHING_RULES = {f"{j}_{m}" for j in _JOB_RULES for m in _MACHINE_RULES} | {"Random"}
 
 ## @brief Gridlock-safe fleet per 15-machine reference floor (ConfigValidator.cs, where the sources are cited):
@@ -184,6 +186,13 @@ def _check_common(v: "_Checker", cfg: Dict[str, Any], machine_count: int) -> Non
     v.number(cfg, "travelPrice", minimum=0.0)
     v.integer(cfg, "inputBufferCapacity", minimum=0)
     v.integer(cfg, "outputBufferCapacity", minimum=0)
+    # PECT / PTECT parameters (2026-10-10; PtimeRuleParams.Problems in FJSSPConfig.cs)
+    v.number(cfg, "ptimeAlpha", minimum=0.0)
+    v.number(cfg, "ptimeTau", exclusive_min=0.0)
+    v.number(cfg, "ptimeReroute", minimum=0.0)
+    v.number(cfg, "ptimeAvail", exclusive_min=0.0)
+    if "ptimeShape" in cfg and cfg["ptimeShape"] not in ("lin", "quad", "ratio", "exp"):
+        v.fail(f"ptimeShape must be one of lin, quad, ratio, exp (got {cfg['ptimeShape']!r})")
     v.choice(cfg, "reservationProtocol", {"holdprevious", "releaseprevious"})
     v.choice(cfg, "routingTrigger", {"ontransport", "onready"})
     v.choice(cfg, "parkingMethod", {"single", "multiple", "lane"})

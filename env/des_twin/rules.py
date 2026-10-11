@@ -30,8 +30,9 @@ MACHINE_RULES = ("SMPT", "SRWT", "MMUR", "ECT", "TECT")
 #   RTECTA  RTECT with RECTA's P
 #   HAECT   hard-avoid control: ECT over the candidates with A >= the floor median (all candidates if none qualify)
 RELIABILITY_RULES = ("RECT", "RTECT", "RECTA", "RTECTA", "HAECT")
-# Processing-time-weighted machine halves (2026-10-10, dev-pect-rule; twin only, not in the RL action heads or
-# DispatchingEngine.cs). dev-b2-pect-check / dev-hetero-tune found that RECT / RTECT with no reliability information
+# Processing-time-weighted machine halves (2026-10-10, dev-pect-rule; ported to DispatchingEngine.cs PtimeScores and
+# made the RL machine head, action schema v5, in dev-pect-unity the same day: keep the two in step; defaults quad,
+# alpha 3 = TwinConfig = Unity PtimeRuleParams = config.PTIME_RULE_PARAMS). dev-b2-pect-check / dev-hetero-tune found that RECT / RTECT with no reliability information
 # and no failures beat ECT / TECT by 15-25%: their risk term is a convex penalty on the candidate's processing time p.
 # These are that weighting as a rule of its own, with the shape g chosen by TwinConfig.ptime_shape:
 #   PECT    q / A + p + alpha g(p)
@@ -207,7 +208,7 @@ def ptime_scores(machine_rule, job_times, loads, travel, pt):
 def select_machine(machine_rule, cands, job_times, loads, utils, travel, rel=None, pt=None):
     """DispatchingEngine.SelectMachine over parallel candidate lists (float32). The reliability-aware halves
     (RELIABILITY_RULES, twin only) also need rel = Twin.reliability_terms(cands); the processing-time-weighted
-    halves (PTIME_RULES, twin only) pt = Twin.ptime_params()."""
+    halves (PTIME_RULES; also in Unity) pt = Twin.ptime_params()."""
     if len(cands) == 1:
         return cands[0]
     if machine_rule in PTIME_RULES:

@@ -1,7 +1,7 @@
 """Observation parity: the twin's observation and action masks against the Unity player's, decision by decision.
 
 Launches the player in RL mode (as training does) with "-destrace", replays one scripted scenario under a fixed
-rule given as the two action heads, and drives the twin (agent mode, DES-1k) with the same answers from the
+rule (an RL-head pair as the two action heads, any other catalog rule through the player's rule override), and drives the twin (agent mode, DES-1k) with the same answers from the
 floor and jobs the player exported. With one AGV the twin reproduces the player's decisions exactly (twin-dock),
 so every decision's observation must match; with more AGVs they agree until the first AGV conflict, after which
 the decision times drift apart (reported, and the comparison stops there).
@@ -32,11 +32,11 @@ ENV_ROOT = Path(__file__).resolve().parents[1]
 if str(ENV_ROOT) not in sys.path:
     sys.path.insert(0, str(ENV_ROOT))
 
-from config import JOB_HEAD_RULES, MACHINE_HEAD_RULES  # noqa: E402
+from config import fixed_action, normalize_rule  # noqa: E402
 from des_twin.engine import Twin, TwinConfig  # noqa: E402
 from des_twin.floor import Floor  # noqa: E402
 from des_twin.observation import ObservationBuilder  # noqa: E402
-from des_twin.scenario import agv_schedule, episode_settings, resolve_jobs  # noqa: E402
+from des_twin.scenario import agv_schedule, episode_settings, ptime_settings, resolve_jobs  # noqa: E402
 
 STREAMS = ("factory_grid", "machine_table", "job_table", "global_scalars", "event_flags")
 # (stream, column) pairs Unity computes from job visuals; for the grid the "column" is the channel
@@ -53,10 +53,12 @@ def _columns(stream, arr):
 
 
 def _heads(rule):
-    job, machine = rule.upper().split("_")
-    if job not in JOB_HEAD_RULES or machine not in MACHINE_HEAD_RULES:
-        raise SystemExit(f"{rule}: both halves must be RL heads (job {JOB_HEAD_RULES}, machine {MACHINE_HEAD_RULES})")
-    return JOB_HEAD_RULES.index(job), MACHINE_HEAD_RULES.index(machine)
+    """The env action for @p rule: (job head, machine head) for an RL-head pair, else the rule name (fixed-rule action;
+    the player steps it through its rule override, 2026-10-10)."""
+    try:
+        return fixed_action(rule)
+    except ValueError as exc:
+        raise SystemExit(str(exc))
 
 
 def _wait_for(path, timeout=60.0):
@@ -77,7 +79,7 @@ def main(argv=None):
                     help='fleet schedule, e.g. [{"start": 0, "agvCount": 1}] (scenario "agvSchedule"; 2026-10-04). With '
                          "--agvs 2 and one AGV on duty throughout, decisions must match exactly as at --agvs 1")
     ap.add_argument("--layout", default=None, help="layout override (default: the scenario's)")
-    ap.add_argument("--rule", default="SPT_ECT", help="fixed rule, both halves RL heads (e.g. SRT_TECT)")
+    ap.add_argument("--rule", default="SPT_ECT", help="fixed rule (any catalog rule, e.g. SRT_PECT or SPT_ECT)")
     ap.add_argument("--keep-stochastic", action="store_true",
                     help="keep the scenario's warm-up / cap (failures are refused either way)")
     ap.add_argument("--max-decisions", type=int, default=0, help="stop after this many decisions (0: the episode)")
@@ -142,11 +144,11 @@ def main(argv=None):
                                              agv_schedule=agv_schedule(scenario),
                                              routing_trigger=scenario.get("routingTrigger"),
                                              warmup_seconds=warmup, episode_duration_seconds=cap,
-                                             max_sim_seconds=100_000.0))
+                                             max_sim_seconds=100_000.0, **ptime_settings(scenario)))
         builder = ObservationBuilder(floor, *args.obs_caps, instant_fleet=args.agvs)
         gen = twin.agent_decisions()
         dec = next(gen)
-        halves = (JOB_HEAD_RULES[heads[0]], MACHINE_HEAD_RULES[heads[1]])
+        halves = tuple(normalize_rule(args.rule).split("-"))
 
         col_stats = {}
         rows = []

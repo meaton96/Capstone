@@ -47,7 +47,7 @@ from mlagents_envs.side_channel.engine_configuration_channel import (
 
 from config import (
     GRID_SIZE, GRID_CHANNELS, MAX_JOBS, JOB_FEATURES, MAX_MACHINES, MACHINE_FEATURES,
-    SPATIAL_LEN, GLOBAL_SCALARS, EVENT_FLAGS, ACTION_BRANCHES, ACTION_MASK_LEN, obs_total_size,
+    SPATIAL_LEN, GLOBAL_SCALARS, EVENT_FLAGS, ACTION_BRANCHES, ACTION_MASK_LEN, obs_total_size, normalize_rule,
 )
 from channels.channels import EpisodeConfigChannel, EpisodeSeedChannel, EpisodeTelemetryChannel
 from env_wrappers.loopback import LoopbackUnityEnvironment
@@ -209,6 +209,8 @@ class UnitySchedulingEnv:
         self.episodes_completed = 0
 
         self._pending_config = None
+        ## @brief Fixed rule the player currently steps instead of the heads ("JOB-MACHINE"), or None.
+        self._rule_override: Optional[str] = None
         self._prev_metrics: Optional[MetricsSnapshot] = None
         self._first_metrics: Optional[MetricsSnapshot] = None   # the agent window's first snapshot
         self._last_obs: Optional[Dict[str, np.ndarray]] = None   # last decision of the running episode
@@ -317,6 +319,10 @@ class UnitySchedulingEnv:
     def step(self, action) -> Tuple[Dict[str, np.ndarray], float, bool, dict]:
         """@brief Apply one scheduling action (job head, machine head) and advance to the next decision.
 
+        @details A rule name "JOB-MACHINE" instead of the head pair plays that fixed rule (any catalog rule, e.g. an old
+        H15 pair; config.fixed_action): the player is told to step that rule (EpisodeConfigChannel ruleOverride, sent
+        with this step, sticky until a head-pair action clears it) and action (0, 0) is sent as a placeholder.
+
         @return (obs, reward, done, info). @c info["reward_terms"] holds this step's named
                 reward terms. When @c done is True the episode just ended: @c reward is its
                 final reward, @c info["episode"] summarizes it (including "truncated" — a
@@ -324,6 +330,15 @@ class UnitySchedulingEnv:
                 that ended episode's own last observation, and @c obs is already the first
                 observation of the next episode.
         """
+        if isinstance(action, str):
+            rule = normalize_rule(action)
+            if rule != self._rule_override:
+                self.config_channel.set_rule_override(rule)
+                self._rule_override = rule
+            action = (0,) * len(ACTION_BRANCHES)
+        elif self._rule_override is not None:
+            self.config_channel.set_rule_override(None)
+            self._rule_override = None
         self.env.set_actions(
             self.behavior_name,
             ActionTuple(discrete=np.asarray(action, dtype=np.int32).reshape(1, len(ACTION_BRANCHES))),

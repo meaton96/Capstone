@@ -11,10 +11,17 @@ attributed to exactly one policy even though episodes roll over inside Unity.
 The episode already running when evaluation starts (index -1) is discarded.
 
 PDR baselines run as constant-action policies through the same wrapper and decision path
-as the learned policy, so the comparison differs only in the actions chosen. Only the
-(job head, machine head) pairs are reachable this way (config.PDR_ACTIONS); other catalog
-rules run through the batch runner (linux_server/run_experiment_queue.py). Evaluation
-seeds should stay below unity_env.TRAIN_SEED_LOW so they never coincide with training
+as the learned policy, so the comparison differs only in the actions chosen. A pair of the
+RL heads (config.PDR_ACTIONS) is played as its (job head, machine head); any other catalog
+rule (e.g. the old H15 pairs MDD-TECT, SPT-ECT) is played as a fixed-rule action
+(config.fixed_action: the twin runs the rule directly, a v5 player steps it through its rule
+override). --pdr names (2026-10-10, action schema v5):
+  all      the 6 pairs of the RL heads, {SRT, MDD, ATC} x {PECT, PTECT} (config.PDR_ACTIONS)
+  h15      the 15 pairs of the v4 heads, {SRT, SPT, MDD, EDD, ATC} x {ECT, TECT, SRWT} (config.H15_PAIRS)
+  none     no baselines
+  a comma list of JOB-MACHINE names from the catalog (config.CATALOG_JOB_RULES x CATALOG_MACHINE_RULES), and the
+  set names above, mixed, e.g. "all,MDD-TECT".
+Evaluation seeds should stay below unity_env.TRAIN_SEED_LOW so they never coincide with training
 instances.
 
 Outputs in --out: episodes.csv (one row per episode), summary.csv, and the Unity log.
@@ -42,7 +49,7 @@ import torch
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from config import (ActorCriticConfig, FusionConfig, PDR_ACTIONS, pdr_action,
+from config import (ActorCriticConfig, FusionConfig, PDR_ACTIONS, H15_PAIRS, fixed_action, normalize_rule, action_rule,
                     ACTION_BRANCHES, JOB_HEAD_RULES, MACHINE_HEAD_RULES)
 from env_wrappers.unity_env import SEED_BUFFER, TRAIN_SEED_LOW, UnitySchedulingEnv
 
@@ -70,20 +77,29 @@ def parse_seeds(spec: str) -> list:
     return seeds
 
 
+## @brief Named rule sets of --pdr (see the module docstring).
+PDR_SETS = {"all": PDR_ACTIONS, "heads": PDR_ACTIONS, "h15": H15_PAIRS}
+
+
 def resolve_pdr_names(spec: str) -> list:
-    """@brief "all", "none", or a comma list of rule names (case and -/_ insensitive)."""
+    """@brief "all" (the RL heads' 6 pairs), "h15" (the old 15), "none", or a comma list of catalog rule names
+    and set names (case and -/_ insensitive); duplicates are dropped, first occurrence kept."""
     spec = spec.strip()
-    if spec.lower() == "all":
-        return list(PDR_ACTIONS)
     if spec.lower() in ("", "none"):
         return []
     names = []
     for part in spec.split(","):
-        name = part.strip().upper().replace("_", "-")
-        if name not in PDR_ACTIONS:
-            raise ValueError(f"Unknown PDR rule {part.strip()!r}; choose from {', '.join(PDR_ACTIONS)}")
-        names.append(name)
-    return names
+        part = part.strip()
+        if not part:
+            continue
+        if part.lower() in PDR_SETS:
+            names += PDR_SETS[part.lower()]
+            continue
+        try:
+            names.append(normalize_rule(part))
+        except ValueError as exc:
+            raise ValueError(f"Unknown PDR rule {part!r}: {exc}; or a set: {', '.join(PDR_SETS)}") from None
+    return list(dict.fromkeys(names))
 
 
 ## @brief Per-head probability columns of decisions.csv.
@@ -112,7 +128,8 @@ def decision_row(policy, seed: int, seed_index: int, step: int, metrics, action,
     """@brief One decisions.csv row: the (job head, machine head) chosen at a decision, which heads could
     change it, and, for checkpoints, the policy's per-head distributions (summed entropy, probability of
     the chosen action over the heads used, p_job_<rule> / p_machine_<rule>)."""
-    job, machine = int(action[0]), int(action[1])
+    fixed = isinstance(action, str)
+    job, machine = (-1, -1) if fixed else (int(action[0]), int(action[1]))
     used = heads_used(action_mask)
     row = {
         "policy": policy.name, "kind": policy.kind, "seed": seed, "seed_index": seed_index,
@@ -120,7 +137,7 @@ def decision_row(policy, seed: int, seed_index: int, step: int, metrics, action,
         "decision_count": int(metrics.decision_count), "wip": int(metrics.wip),
         "jobs_exited": int(metrics.jobs_exited), "job_head": job, "machine_head": machine,
         "job_head_used": int(used[0]), "machine_head_used": int(used[1]),
-        "rule": f"{JOB_HEAD_RULES[job]}-{MACHINE_HEAD_RULES[machine]}",
+        "rule": action_rule(action),
     }
     probs = getattr(policy, "last_probs", None)
     if probs is not None:
@@ -137,13 +154,14 @@ def decision_row(policy, seed: int, seed_index: int, step: int, metrics, action,
 
 
 class ConstantPolicy:
-    """@brief A fixed dispatching rule: always the same (job head, machine head)."""
+    """@brief A fixed dispatching rule: always the same action, a (job head, machine head) pair or a fixed-rule name
+    (config.fixed_action)."""
 
     kind = "pdr"
     last_probs = None
 
     def __init__(self, action, name: str):
-        self.action = tuple(action)
+        self.action = action if isinstance(action, str) else tuple(action)
         self.name = name
 
     def __call__(self, obs):
@@ -190,7 +208,7 @@ class CheckpointPolicy:
 
 
 def build_policies(pdr_spec: str, checkpoints, device: str, deterministic: bool) -> list:
-    policies = [ConstantPolicy(pdr_action(name), name) for name in resolve_pdr_names(pdr_spec)]
+    policies = [ConstantPolicy(fixed_action(name), name) for name in resolve_pdr_names(pdr_spec)]
     policies += [CheckpointPolicy(path, device, deterministic) for path in checkpoints or []]
 
     seen = {}
@@ -668,8 +686,9 @@ def main(argv=None):
     parser.add_argument("--seeds", type=str, default="0-19",
                         help="Evaluation seeds, e.g. '0-19' or '1,5,9' (keep below %d)" % TRAIN_SEED_LOW)
     parser.add_argument("--pdr", type=str, default="all",
-                        help="PDR baselines: 'all', 'none', or a comma list of JOB-MACHINE names from the "
-                             "RL heads (e.g. SPT-ECT)")
+                        help="PDR baselines: 'all' (the 6 RL-head pairs {SRT,MDD,ATC} x {PECT,PTECT}), 'h15' (the "
+                             "old 15 pairs {SRT,SPT,MDD,EDD,ATC} x {ECT,TECT,SRWT}), 'none', or a comma list of "
+                             "JOB-MACHINE catalog rules and set names (e.g. all,MDD-TECT)")
     parser.add_argument("--checkpoint", action="append", default=[],
                         help="train.py checkpoint to evaluate (repeatable)")
     parser.add_argument("--scenario", type=str, default=None,

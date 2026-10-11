@@ -91,14 +91,26 @@ OBS_LAYOUT = {
 ##        head, chosen from the gen_rules0926 sweep (docs/features/DECISION_POINTS.md section 7). v3 (2026-10-03)
 ##        appends the due-date job rules EDD, MDD, ATC (rq2-twin-due; they need jobs with due dates, else they
 ##        rank every job as due at +infinity and keep the first candidate). v4 (2026-10-03) is the H15 head of the
-##        tardiness objective (rq2-twin-due, rq2-oracle-due): PTWINQ and FIFO dropped, SRT first.
-ACTION_SCHEMA_VERSION = 4
+##        tardiness objective (rq2-twin-due, rq2-oracle-due): PTWINQ and FIFO dropped, SRT first. v5 (2026-10-10,
+##        results/dev-pect-rule, results/dev-pect-unity) is the pruned 3 x 2 set: job head SRT, MDD, ATC; machine head
+##        the processing-time-weighted PECT, PTECT (quad, alpha 3: PTIME_RULE_PARAMS). v4 checkpoints are refused.
+ACTION_SCHEMA_VERSION = 5
 
 ## @brief Branch 0: which job (dispatch: from the machine's queue; routing: from the pool).
-JOB_HEAD_RULES = ["SRT", "SPT", "MDD", "EDD", "ATC"]
+JOB_HEAD_RULES = ["SRT", "MDD", "ATC"]
 ## @brief Branch 1: which machine a routed job goes to.
-MACHINE_HEAD_RULES = ["ECT", "TECT", "SRWT"]
+MACHINE_HEAD_RULES = ["PECT", "PTECT"]
 ACTION_BRANCHES = (len(JOB_HEAD_RULES), len(MACHINE_HEAD_RULES))
+
+## @brief Parameters of the PECT / PTECT machine rules (des_twin TwinConfig.ptime_*, Unity FJSSPConfig.PtimeRule):
+##        PECT = q / A + p + alpha g(p), PTECT = max(travel, q / A) + p + alpha g(p), g by shape (quad: p^2 / p_mean
+##        over the candidates). Both simulators default to these; a scenario overrides them with the keys in
+##        PTIME_SCENARIO_KEYS (twin: des_twin.scenario.ptime_settings; Unity: ScenarioLoader / EpisodeConfigChannel).
+##        Part of ACTION_LAYOUT, so a checkpoint records the machine-head rules it was trained with.
+PTIME_RULE_PARAMS = {"shape": "quad", "alpha": 3.0, "tau": 5544.0, "reroute": 0.0, "avail": 1.0}
+## @brief Scenario / config JSON key of each PTIME_RULE_PARAMS entry.
+PTIME_SCENARIO_KEYS = {"shape": "ptimeShape", "alpha": "ptimeAlpha", "tau": "ptimeTau", "reroute": "ptimeReroute",
+                       "avail": "ptimeAvail"}
 
 ## @brief Unity masks a head that cannot change a decision down to its action 0 (DispatchingEngine.HeadsThatMatter).
 ##        The wrapper passes the masks as obs["action_mask"]: 1 = enabled, branches concatenated.
@@ -109,8 +121,19 @@ ACTION_LAYOUT = {
     "schema_version": ACTION_SCHEMA_VERSION,
     "job_head": list(JOB_HEAD_RULES),
     "machine_head": list(MACHINE_HEAD_RULES),
+    "machine_head_params": dict(PTIME_RULE_PARAMS),
 }
 
+## @brief The v4 (H15) heads, 2026-10-03 to 2026-10-10: kept as a named baseline set (evaluate.py --pdr h15), so old
+##        baseline tables can be regenerated. These pairs run as fixed rules now, not through the RL heads.
+H15_JOB_RULES = ["SRT", "SPT", "MDD", "EDD", "ATC"]
+H15_MACHINE_RULES = ["ECT", "TECT", "SRWT"]
+
+## @brief Every rule half both simulators run as a fixed rule (Unity's DispatchingRule catalog JOB_MACHINE, the twin's
+##        des_twin.rules JOB_RULES x MACHINE_RULES + PTIME_RULES). The twin also has rules Unity lacks (SLACK, CR, MOD,
+##        the reliability halves); those are not reachable through the RL wrappers.
+CATALOG_JOB_RULES = ["SPT", "LPT", "SRT", "LRT", "FIFO", "PTWINQ", "EDD", "MDD", "ATC"]
+CATALOG_MACHINE_RULES = ["SMPT", "SRWT", "MMUR", "ECT", "TECT", "PECT", "PTECT"]
 
 ## @brief Per-key observation shapes (no batch dim) — the single source for train.py, the
 ##        placeholder env and tests.
@@ -294,12 +317,45 @@ class PPOConfig:
         return 1.0 - 1.0 / self.discount_horizon_s
 
 
-## @brief Fixed-rule baselines reachable through the RL action space: every (job head, machine head) pair,
-##        named JOB-MACHINE, job-major. Rules outside the heads (e.g. SPT-SMPT) run through the batch runner.
+## @brief The RL heads' fixed-rule baselines: every (job head, machine head) pair, named JOB-MACHINE, job-major
+##        (evaluate.py --pdr all).
 PDR_ACTIONS = [f"{job}-{machine}" for job in JOB_HEAD_RULES for machine in MACHINE_HEAD_RULES]
+## @brief The 15 pairs of the v4 heads (evaluate.py --pdr h15), job-major as they were.
+H15_PAIRS = [f"{job}-{machine}" for job in H15_JOB_RULES for machine in H15_MACHINE_RULES]
+
+
+def normalize_rule(name: str) -> str:
+    """@brief "mdd_tect" / "MDD-TECT" -> "MDD-TECT"; ValueError unless both halves are catalog rules."""
+    parts = str(name).strip().upper().replace("_", "-").split("-")
+    if len(parts) != 2 or parts[0] not in CATALOG_JOB_RULES or parts[1] not in CATALOG_MACHINE_RULES:
+        raise ValueError(f"unknown rule {name!r}: expected JOB-MACHINE with job in {CATALOG_JOB_RULES} and machine in "
+                         f"{CATALOG_MACHINE_RULES}")
+    return f"{parts[0]}-{parts[1]}"
 
 
 def pdr_action(name: str) -> Tuple[int, int]:
-    """@brief (job head, machine head) of a PDR_ACTIONS name."""
-    job, machine = name.split("-")
+    """@brief (job head, machine head) of a rule pair whose halves are both RL heads (PDR_ACTIONS)."""
+    job, machine = normalize_rule(name).split("-")
+    if job not in JOB_HEAD_RULES or machine not in MACHINE_HEAD_RULES:
+        raise ValueError(f"{name}: not an RL head pair (job head {JOB_HEAD_RULES}, machine head {MACHINE_HEAD_RULES}); "
+                         "run it as a fixed rule (fixed_action)")
     return JOB_HEAD_RULES.index(job), MACHINE_HEAD_RULES.index(machine)
+
+
+def fixed_action(name: str):
+    """@brief The env action that plays rule @p name at every decision: (job head, machine head) when both halves are
+    RL heads, else the rule name "JOB-MACHINE" itself, which the wrappers accept as a fixed-rule action (the twin runs
+    the halves directly; Unity steps the rule's catalog index via the rule override, EpisodeConfigChannel ruleOverride)."""
+    rule = normalize_rule(name)
+    job, machine = rule.split("-")
+    if job in JOB_HEAD_RULES and machine in MACHINE_HEAD_RULES:
+        return JOB_HEAD_RULES.index(job), MACHINE_HEAD_RULES.index(machine)
+    return rule
+
+
+def action_rule(action) -> str:
+    """@brief "JOB-MACHINE" of an env action: a (job head, machine head) pair or a fixed-rule name."""
+    if isinstance(action, str):
+        return normalize_rule(action)
+    job, machine = (int(a) for a in action)
+    return f"{JOB_HEAD_RULES[job]}-{MACHINE_HEAD_RULES[machine]}"

@@ -115,6 +115,18 @@ class EpisodeConfigChannel(SideChannel):
         msg.write_string(json.dumps({"scenarios": encoded, "clear": bool(clear)}))
         super().queue_message_to_send(msg)
 
+    def set_rule_override(self, rule):
+        """
+        Make the player step this fixed rule ("MDD_TECT") at every decision instead of the policy's (job head,
+        machine head), until cleared with None (2026-10-10; Unity EpisodeConfigChannel.RuleOverrideIndex). Unity
+        processes a step's side-channel data before that step's actions, so the message applies from the decision the
+        accompanying step answers. A player whose RL heads are the v5 3 x 2 set knows the message (UnitySchedulingEnv
+        checks the branch sizes); an unknown rule stops the player.
+        """
+        msg = OutgoingMessage()
+        msg.write_string(json.dumps({"ruleOverride": None if rule is None else str(rule).upper().replace("-", "_")}))
+        super().queue_message_to_send(msg)
+
 
 class EpisodeTelemetryChannel(SideChannel):
     """

@@ -26,11 +26,11 @@ from typing import Callable, Dict, Optional, Tuple, Union
 
 import numpy as np
 
-from config import ACTION_BRANCHES, JOB_HEAD_RULES, MACHINE_HEAD_RULES, MAX_JOBS, MAX_MACHINES
+from config import ACTION_BRANCHES, JOB_HEAD_RULES, MACHINE_HEAD_RULES, MAX_JOBS, MAX_MACHINES, normalize_rule
 from des_twin import Floor
 from des_twin.engine import Twin, TwinConfig
 from des_twin.observation import ObservationBuilder
-from des_twin.scenario import agv_schedule, episode_settings, failure_trace, resolve_jobs
+from des_twin.scenario import agv_schedule, episode_settings, failure_trace, ptime_settings, resolve_jobs
 from rewards import (LoadedReward, MetricsSnapshot, RewardContext, RewardFunction, elapsed_sim_time, load_reward,
                      window_outcomes)
 
@@ -180,7 +180,8 @@ class TwinSchedulingEnv:
         failures = failure_trace(scenario, self.floor) if self.machine_failures else None
         return TwinConfig(rule=rule, transport=self.transport, routing_trigger=scenario.get("routingTrigger"),
                           max_sim_seconds=MAX_EPISODE_SIM_SECONDS, warmup_seconds=warmup,
-                          episode_duration_seconds=cap, agv_schedule=agv_schedule(scenario), failures=failures)
+                          episode_duration_seconds=cap, agv_schedule=agv_schedule(scenario), failures=failures,
+                          **ptime_settings(scenario))
 
     def _start_episode(self) -> Dict[str, np.ndarray]:
         """Starts episodes until one reaches a decision (one that ends inside its warm-up gives the agent nothing
@@ -222,9 +223,13 @@ class TwinSchedulingEnv:
 
     def step(self, action) -> Tuple[Dict[str, np.ndarray], float, bool, dict]:
         """@brief Apply (job head, machine head) and run to the next decision. Same return contract as
-        UnitySchedulingEnv.step: on done, obs is the next episode's first observation."""
-        job_head, machine_head = (int(a) for a in np.asarray(action).reshape(len(ACTION_BRANCHES)))
-        rule = (JOB_HEAD_RULES[job_head], MACHINE_HEAD_RULES[machine_head])
+        UnitySchedulingEnv.step: on done, obs is the next episode's first observation. A rule name "JOB-MACHINE" instead
+        of the head pair plays that fixed rule (any catalog rule, config.fixed_action; 2026-10-10)."""
+        if isinstance(action, str):
+            rule = tuple(normalize_rule(action).split("-"))
+        else:
+            job_head, machine_head = (int(a) for a in np.asarray(action).reshape(len(ACTION_BRANCHES)))
+            rule = (JOB_HEAD_RULES[job_head], MACHINE_HEAD_RULES[machine_head])
         try:
             self._decision = self._gen.send(rule)
             done = False

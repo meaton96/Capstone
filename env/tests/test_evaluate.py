@@ -14,7 +14,7 @@ import io
 import numpy as np
 import pytest
 
-from config import ACTION_BRANCHES, ACTION_MASK_LEN, PDR_ACTIONS
+from config import ACTION_BRANCHES, ACTION_MASK_LEN, H15_PAIRS, JOB_HEAD_RULES, MACHINE_HEAD_RULES, PDR_ACTIONS
 from env_wrappers.unity_env import SEED_BUFFER
 from evaluate import (
     DECISION_FIELDS, ConstantPolicy, decision_row, parse_seeds, resolve_pdr_names, run_evaluation, summarize,
@@ -29,7 +29,7 @@ class FakeEnv:
     consumes the next queued seed (and scenario, if any were queued). Like the real side
     channels, queue messages only reach "Unity" with the next reset() or step(). Episodes
     last @p length steps and report makespan = seed * 10 + the last action's flat index
-    (job * 3 + machine), so attribution is checkable. The episode index counts items
+    (job * machine-head size + machine; 100 for a fixed-rule name), so attribution is checkable. The episode index counts items
     consumed since the last clear.
     """
 
@@ -81,7 +81,8 @@ class FakeEnv:
         if self.t < self.length:
             return {}, 0.0, False, {}
         episode = {
-            "seed": self.seed, "seed_index": self.index, "makespan": self.seed * 10 + action[0] * ACTION_BRANCHES[1] + action[1],
+            "seed": self.seed, "seed_index": self.index,
+            "makespan": self.seed * 10 + (100 if isinstance(action, str) else action[0] * ACTION_BRANCHES[1] + action[1]),
             "mean_flow_time": 1.0, "total_flow_time": 2.0, "return": -1.0, "length": self.length,
             "jobs_exited": 15, "deadlock": False, "timed_out": False, "truncated": False,
             "scenario": self.scenario,
@@ -109,23 +110,50 @@ def test_parse_seeds():
 
 def test_resolve_pdr_names():
     assert resolve_pdr_names("all") == list(PDR_ACTIONS)
+    assert resolve_pdr_names("all") == ["SRT-PECT", "SRT-PTECT", "MDD-PECT", "MDD-PTECT", "ATC-PECT", "ATC-PTECT"]
+    assert resolve_pdr_names("h15") == list(H15_PAIRS) and len(H15_PAIRS) == 15
     assert resolve_pdr_names("none") == []
     assert resolve_pdr_names("spt_ect, ATC-SRWT") == ["SPT-ECT", "ATC-SRWT"]
+    # catalog rules outside the RL heads are accepted (fixed-rule actions); sets mix with names, duplicates dropped
+    assert resolve_pdr_names("SPT-SMPT") == ["SPT-SMPT"]
+    assert resolve_pdr_names("all,MDD-TECT,mdd_pect") == list(PDR_ACTIONS) + ["MDD-TECT"]
     with pytest.raises(ValueError):
         resolve_pdr_names("NOT-A-RULE")
     with pytest.raises(ValueError):
-        resolve_pdr_names("SPT-SMPT")   # a catalog rule outside the RL heads
+        resolve_pdr_names("SLACK-ECT")   # twin-only job rule: not in the Unity catalog
+
+
+def test_fixed_rule_policies_use_heads_or_rule_names():
+    """@brief Head pairs play as (job head, machine head), every other rule as its name (config.fixed_action)."""
+    from evaluate import build_policies
+    pols = {p.name: p for p in build_policies("all,h15", [], "cpu", True)}
+    assert len(pols) == 21
+    assert pols["MDD-PTECT"].action == (JOB_HEAD_RULES.index("MDD"), MACHINE_HEAD_RULES.index("PTECT"))
+    assert pols["MDD-TECT"].action == "MDD-TECT" and pols["SPT-SRWT"].action == "SPT-SRWT"
+
+
+def test_run_evaluation_with_a_fixed_rule_action():
+    """@brief A fixed-rule (name) action reaches the env unchanged and is logged by name."""
+    policies = [ConstantPolicy("MDD-TECT", "MDD-TECT"), ConstantPolicy((1, 0), "A")]
+    buffer = io.StringIO()
+    writer = csv.DictWriter(buffer, fieldnames=DECISION_FIELDS)
+    writer.writeheader()
+    rows = run_evaluation(FakeEnv(), policies, [(0, 7), (1, 7)], log=lambda *_: None, decision_writer=writer)
+    assert [(r["policy"], r["makespan"]) for r in rows] == [("MDD-TECT", 170), ("A", 72)]
+    logged = list(csv.DictReader(io.StringIO(buffer.getvalue())))
+    assert {(r["policy"], r["rule"], r["job_head"]) for r in logged} == {("MDD-TECT", "MDD-TECT", "-1"),
+                                                                        ("A", "MDD-PECT", "1")}
 
 
 def test_run_evaluation_attributes_episodes_to_policies():
     """@brief Each queued (policy, seed) runs under that policy; the unseeded startup episode is dropped."""
-    policies = [ConstantPolicy((1, 0), "A"), ConstantPolicy((1, 2), "B")]
+    policies = [ConstantPolicy((1, 0), "A"), ConstantPolicy((2, 1), "B")]
     schedule = [(p, seed) for seed in (7, 8) for p in range(2)]
 
     rows = run_evaluation(FakeEnv(), policies, schedule, log=lambda *_: None)
 
     assert [(r["policy"], r["seed"], r["makespan"]) for r in rows] == [
-        ("A", 7, 73), ("B", 7, 75), ("A", 8, 83), ("B", 8, 85),
+        ("A", 7, 72), ("B", 7, 75), ("A", 8, 82), ("B", 8, 85),
     ]
     assert [r["seed_index"] for r in rows] == [0, 1, 2, 3]
 
@@ -200,7 +228,7 @@ def test_run_evaluation_queues_no_scenarios_without_generator():
 def test_decision_log_records_every_decision_of_scheduled_episodes():
     """@brief Each scored decision gets one row (step numbering restarts per episode); the
     discarded startup episode is not logged."""
-    policies = [ConstantPolicy((1, 0), "A"), ConstantPolicy((1, 2), "B")]
+    policies = [ConstantPolicy((1, 0), "A"), ConstantPolicy((2, 1), "B")]
     buffer = io.StringIO()
     writer = csv.DictWriter(buffer, fieldnames=DECISION_FIELDS)
     writer.writeheader()
@@ -210,25 +238,25 @@ def test_decision_log_records_every_decision_of_scheduled_episodes():
 
     rows = list(csv.DictReader(io.StringIO(buffer.getvalue())))
     assert [(r["policy"], r["step"], r["job_head"], r["machine_head"], r["rule"]) for r in rows] == [
-        ("A", str(step), "1", "0", PDR_ACTIONS[3]) for step in range(3)
-    ] + [("B", str(step), "1", "2", PDR_ACTIONS[5]) for step in range(3)]
+        ("A", str(step), "1", "0", PDR_ACTIONS[2]) for step in range(3)
+    ] + [("B", str(step), "2", "1", PDR_ACTIONS[5]) for step in range(3)]
     assert all(r["entropy"] == "" for r in rows)   # constant rules have no action distribution
 
 
 def test_decision_row_includes_checkpoint_probabilities():
     class ProbabilisticPolicy:
         kind, name = "checkpoint", "P"
-        last_probs = [np.array([0.7, 0.3] + [0.0] * (ACTION_BRANCHES[0] - 2)), np.array([0.5, 0.25, 0.25])]
+        last_probs = [np.array([0.7, 0.3] + [0.0] * (ACTION_BRANCHES[0] - 2)), np.array([0.75, 0.25])]
 
     metrics = MetricsSnapshot.from_dict({"sim_time": 12.5, "wip": 3})
     row = decision_row(ProbabilisticPolicy(), seed=1, seed_index=0, step=4, metrics=metrics, action=(0, 1))
 
     assert row["chosen_prob"] == pytest.approx(0.7 * 0.25)
-    assert row["p_job_SPT"] == 0.3 and row["p_machine_TECT"] == 0.25
-    assert row["wip"] == 3 and row["rule"] == "SRT-TECT"
+    assert row["p_job_MDD"] == 0.3 and row["p_machine_PTECT"] == 0.25
+    assert row["wip"] == 3 and row["rule"] == "SRT-PTECT"
     assert row["job_head_used"] == 1 and row["machine_head_used"] == 1
     job_entropy = -(0.7 * np.log(0.7) + 0.3 * np.log(0.3))
-    machine_entropy = -(0.5 * np.log(0.5) + 2 * 0.25 * np.log(0.25))
+    machine_entropy = -(0.75 * np.log(0.75) + 0.25 * np.log(0.25))
     assert row["entropy"] == pytest.approx(job_entropy + machine_entropy, abs=1e-4)
 
 
@@ -236,7 +264,7 @@ def test_decision_row_skips_masked_head_in_chosen_prob():
     """@brief A head Unity masked (could not change the decision) does not scale the chosen action's probability."""
     class ProbabilisticPolicy:
         kind, name = "checkpoint", "P"
-        last_probs = [np.array([0.7, 0.3] + [0.0] * (ACTION_BRANCHES[0] - 2)), np.array([1.0, 0.0, 0.0])]
+        last_probs = [np.array([0.7, 0.3] + [0.0] * (ACTION_BRANCHES[0] - 2)), np.array([1.0, 0.0])]
 
     mask = np.ones(ACTION_MASK_LEN)
     mask[ACTION_BRANCHES[0] + 1:] = 0.0

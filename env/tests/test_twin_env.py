@@ -317,7 +317,7 @@ def test_env_episode_reward_is_total_flow_time(floor_path):
     total, steps = 0.0, 0
     while True:
         last = obs
-        obs, r, done, info = env.step((0, 0))   # SRT, ECT
+        obs, r, done, info = env.step((0, 0))   # SRT, PECT
         total += r
         steps += 1
         if done:
@@ -328,9 +328,53 @@ def test_env_episode_reward_is_total_flow_time(floor_path):
     assert total == pytest.approx(-ep["total_flow_time"] / 1000.0, rel=1e-4)
     # terminal_obs is the ended episode's last decision, not a zero pad (the player's own terminal obs).
     assert info["terminal_obs"] is last and info["terminal_obs"]["job_table"].any()
-    ref = run_twin(env.floor, resolve_jobs(scenario, env.floor), TwinConfig("SRT_ECT"))
+    ref = run_twin(env.floor, resolve_jobs(scenario, env.floor), TwinConfig("SRT_PECT"))
     assert ep["mean_flow_time"] == pytest.approx(ref.summary()["mean_flow_time"], rel=1e-5)
     assert obs["action_mask"].shape == (ACTION_MASK_LEN,)      # already the next episode's first decision
+
+
+def _play(env, action):
+    env.reset()
+    while True:
+        _, _, done, info = env.step(action)
+        if done:
+            return info
+
+
+@pytest.mark.parametrize("rule", ["MDD_TECT", "SPT-ECT", "ATC_PTECT"])
+def test_env_fixed_rule_name_action_equals_the_rule_run(floor_path, rule):
+    """A rule name as the action (config.fixed_action, 2026-10-10) plays that catalog rule, head pair or not."""
+    from env_wrappers.twin_env import TwinSchedulingEnv
+    scenario = dict(_scenario(), agvCount=3)
+    env = TwinSchedulingEnv(floor_path, scenario=scenario, obs_caps=(15, 64))
+    info = _play(env, rule)
+    ref = run_twin(env.floor, resolve_jobs(scenario, env.floor), TwinConfig(rule.replace("-", "_")))
+    drop = lambda s: {k: v for k, v in s.items() if k != "rule"}   # noqa: E731 (the config (warm-up) rule)
+    assert drop(info["twin_summary"]) == drop(ref.summary())
+
+
+def test_env_head_pair_and_its_name_are_the_same_run(floor_path):
+    from config import fixed_action
+    from env_wrappers.twin_env import TwinSchedulingEnv
+    scenario = dict(_scenario(), agvCount=3)
+    a = _play(TwinSchedulingEnv(floor_path, scenario=scenario, obs_caps=(15, 64)), fixed_action("MDD-PTECT"))
+    b = _play(TwinSchedulingEnv(floor_path, scenario=scenario, obs_caps=(15, 64)), "MDD-PTECT")
+    assert fixed_action("MDD-PTECT") == (JOB_HEAD_RULES.index("MDD"), MACHINE_HEAD_RULES.index("PTECT"))
+    assert a["twin_summary"] == b["twin_summary"]
+
+
+def test_scenario_ptime_keys_reach_the_twin(floor_path):
+    """A scenario's ptime* keys set TwinConfig.ptime_* (as Unity's FJSSPConfig.PtimeRule); absent keys keep the defaults."""
+    from des_twin.scenario import ptime_settings
+    from env_wrappers.twin_env import TwinSchedulingEnv
+    assert ptime_settings({}) == {} and ptime_settings({"name": "x"}) == {}
+    assert ptime_settings({"ptimeAlpha": 2, "ptimeShape": "lin"}) == {"ptime_alpha": 2.0, "ptime_shape": "lin"}
+    assert ptime_settings({"ptime_rule": {"alpha": 1.5, "shape": "ratio"}}) == {"ptime_alpha": 1.5,
+                                                                               "ptime_shape": "ratio"}
+    scenario = dict(_scenario(), agvCount=3, ptimeAlpha=0.5, ptimeShape="ratio")
+    env = TwinSchedulingEnv(floor_path, scenario=scenario, obs_caps=(15, 64))
+    cfg = env._config(scenario)
+    assert (cfg.ptime_alpha, cfg.ptime_shape, cfg.ptime_tau) == (0.5, "ratio", TwinConfig("SRT_PECT").ptime_tau)
 
 
 def test_env_reports_each_steps_simulated_duration(floor_path):

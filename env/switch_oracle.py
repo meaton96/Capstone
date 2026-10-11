@@ -38,7 +38,7 @@ from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from config import pdr_action
+from config import fixed_action
 from env_wrappers.unity_env import UnitySchedulingEnv
 from evaluate import resolve_pdr_names, run_evaluation
 
@@ -57,7 +57,7 @@ class ScheduledPolicy:
         self.tail = tail
         self.segment_seconds = segment_seconds
         self.name = "|".join(self.prefix + [tail])
-        self._actions = {name: tuple(pdr_action(name)) for name in set(self.prefix + [tail])}
+        self._actions = {name: fixed_action(name) for name in set(self.prefix + [tail])}
 
     def __call__(self, obs):
         sim_time = float(self.env.current_metrics.sim_time)

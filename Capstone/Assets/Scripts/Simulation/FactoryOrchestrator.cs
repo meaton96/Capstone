@@ -864,7 +864,8 @@ namespace Assets.Scripts.Simulation
                     : -1,
                 transportAvailable: _routeOnTransport ? tile => agvPool.AnyAvailableAGV(tile) : (Func<int, bool>)null,
                 estimateTravelSeconds: EstimateTravelSeconds,
-                travelPrice: () => currentConfig?.TravelPrice ?? 0f
+                travelPrice: () => currentConfig?.TravelPrice ?? 0f,
+                ptimeRule: () => currentConfig?.GetEffectivePtimeRule() ?? PtimeRuleParams.Default
             );
 
             // "-destrace": floor graph + resolved jobs for the event-based twin (env/des_twin).

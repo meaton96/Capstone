@@ -253,9 +253,13 @@ namespace Assets.Scripts.Simulation
         {
             if (!FactoryOrchestrator.Instance.IsWaitingForAction) return;
 
+            // A rule override from Python (Channels.EpisodeConfigChannel.RuleOverrideIndex, evaluate.py fixed rules outside
+            // the RL heads) replaces the policy's action; the decision path is otherwise the same.
             int index = _behavior != null && _behavior.IsInHeuristicMode()
                 ? HeuristicRuleIndex()
-                : DispatchingEngine.IndexForHeads(actions.DiscreteActions[0], actions.DiscreteActions[1]);
+                : Channels.EpisodeConfigChannel.RuleOverrideIndex >= 0
+                    ? Channels.EpisodeConfigChannel.RuleOverrideIndex
+                    : DispatchingEngine.IndexForHeads(actions.DiscreteActions[0], actions.DiscreteActions[1]);
             FactoryOrchestrator.Instance.Step(index);
         }
     }

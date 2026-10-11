@@ -52,6 +52,8 @@ namespace Assets.Scripts.Simulation
         private Func<JobData, int, float> _estimateTravelSeconds;
         /// <summary>The episode's TECT travel price λ (FJSSPConfig.TravelPrice). Null = 0.</summary>
         private Func<float> _travelPrice;
+        /// <summary>The episode's PECT / PTECT parameters (FJSSPConfig.GetEffectivePtimeRule). Null = the defaults.</summary>
+        private Func<PtimeRuleParams> _ptimeRule;
 
         /// <summary>
         /// Reference to the episode's live per-machine statistics (processing time, downtime),
@@ -92,10 +94,12 @@ namespace Assets.Scripts.Simulation
             Func<int> getBaselineActionIndex = null,
             Func<int, bool> transportAvailable = null,
             Func<JobData, int, float> estimateTravelSeconds = null,
-            Func<float> travelPrice = null)
+            Func<float> travelPrice = null,
+            Func<PtimeRuleParams> ptimeRule = null)
         {
             _estimateTravelSeconds = estimateTravelSeconds;
             _travelPrice = travelPrice;
+            _ptimeRule = ptimeRule;
             // Null = RoutingTrigger.OnReady (route as soon as a job is ready). Otherwise routing is gated on it:
             // see RoutingTrigger.OnTransport.
             _transportAvailable = transportAvailable;
@@ -288,6 +292,7 @@ namespace Assets.Scripts.Simulation
                 CandidateTravelTimes = _estimateTravelSeconds == null ? null
                     : candidates.Select(id => _estimateTravelSeconds(job, id)).ToArray(),
                 TravelPrice = _travelPrice?.Invoke() ?? 0f,
+                PtimeRule = _ptimeRule?.Invoke() ?? PtimeRuleParams.Default,
             };
         }
 

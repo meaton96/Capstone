@@ -127,6 +127,22 @@ def assign_due_dates(jobs_data, allowance):
     return out
 
 
+PTIME_KEYS = {"ptimeAlpha": "ptime_alpha", "ptimeShape": "ptime_shape", "ptimeTau": "ptime_tau",
+              "ptimeReroute": "ptime_reroute", "ptimeAvail": "ptime_avail"}
+
+
+def ptime_settings(source):
+    """TwinConfig keyword arguments for the PECT / PTECT parameters a scenario sets (its "ptime*" keys, as Unity's
+    FJSSPConfig.PtimeRule), or a des_floor.json export's "ptime_rule" block (written by the player only when the
+    parameters differ from the defaults); {} = the defaults (config.PTIME_RULE_PARAMS)."""
+    if not source:
+        return {}
+    if "ptime_rule" in source and isinstance(source["ptime_rule"], dict):
+        return {f"ptime_{k}": (str(v) if k == "shape" else float(v)) for k, v in source["ptime_rule"].items()}
+    return {field: (str(source[key]) if key == "ptimeShape" else float(source[key]))
+            for key, field in PTIME_KEYS.items() if source.get(key) is not None}
+
+
 def agv_schedule(scenario):
     """TwinConfig.agv_schedule from the scenario's "agvSchedule" ([{"start": t, "agvCount": n}, ...], written by the
     randomized generator's regime blocks with a fleet_mix); () when it has none."""

@@ -17,6 +17,7 @@ import time
 
 from .engine import TwinConfig, run_twin
 from .floor import Floor
+from .scenario import ptime_settings
 
 
 def _write(path, rows):
@@ -64,7 +65,8 @@ def run_dir(path, transports, rule=None, agvs=None, out="twin", machine_failures
     for tr in transports:
         t0 = time.time()
         twin = run_twin(floor, jobs, TwinConfig(rule=rule, transport=tr, agv_count=n_agv,
-                                                failures=None if tr == "instant" else failures))
+                                                failures=None if tr == "instant" else failures,
+                                                **ptime_settings(floor.data)))
         s = twin.summary()
         s.update({
             "instance": u["instance"], "seed": u["seed"], "layout": u.get("layout_id", ""),

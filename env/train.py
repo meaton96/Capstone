@@ -53,7 +53,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from config import (
     EncoderConfig, FusionConfig, ActorCriticConfig, PPOConfig, OBS_SHAPES, OBS_LAYOUT,
-    ACTION_BRANCHES, ACTION_LAYOUT, JOB_HEAD_RULES, MACHINE_HEAD_RULES, obs_shapes as shapes_for_caps,
+    ACTION_BRANCHES, ACTION_LAYOUT, JOB_HEAD_RULES, MACHINE_HEAD_RULES, PTIME_RULE_PARAMS, obs_shapes as shapes_for_caps,
 )
 from models.actor_critic import prior_log_probs
 from models.network import SchedulingNetwork, ac_config_for, encoder_config_for
@@ -322,6 +322,14 @@ def check_action_layout(ckpt: dict, path) -> None:
         raise ValueError(
             f"{path}: checkpoint uses action schema v1 (one 8-way composite-rule branch), this code is "
             f"v{ACTION_LAYOUT['schema_version']} (job head x machine head, see env/config.py); train a new run.")
+    if saved.get("schema_version") != ACTION_LAYOUT["schema_version"]:
+        raise ValueError(
+            f"{path}: checkpoint uses action schema v{saved.get('schema_version')} (job head {saved.get('job_head')} x "
+            f"machine head {saved.get('machine_head')}), this code is v{ACTION_LAYOUT['schema_version']} (job head "
+            f"{ACTION_LAYOUT['job_head']} x machine head {ACTION_LAYOUT['machine_head']}, since 2026-10-10, "
+            "results/dev-pect-unity); its action indices would select other rules. Evaluate it with code from before "
+            "the v5 heads (action-prior dd0b3092 or earlier) and a player with the matching heads (linux_server_v5/"
+            "archive_1010), or train a new run.")
     if saved != ACTION_LAYOUT:
         raise ValueError(f"{path}: action layout differs (checkpoint {saved} vs code {ACTION_LAYOUT}).")
 
@@ -344,6 +352,8 @@ def run_settings(args) -> dict:
     for key in RUN_SETTING_KEYS:
         value = getattr(args, key, None)
         out[key] = value if value is None or isinstance(value, (bool, int, float, str)) else str(value)
+    # The machine head's PECT / PTECT parameters (also in action_layout; JSON so weights_only loading accepts it).
+    out["machine_head_params"] = json.dumps(PTIME_RULE_PARAMS, sort_keys=True)
     return out
 
 
