@@ -329,7 +329,7 @@ def check_action_layout(ckpt: dict, path) -> None:
             f"machine head {saved.get('machine_head')}), this code is v{ACTION_LAYOUT['schema_version']} (job head "
             f"{ACTION_LAYOUT['job_head']} x machine head {ACTION_LAYOUT['machine_head']}, since 2026-10-10, "
             "results/dev-pect-unity); its action indices would select other rules. Evaluate it with code from before "
-            "the v5 heads (action-prior dd0b3092 or earlier) and a player with the matching heads (linux_server_v5/"
+            "the v5 heads (action-prior dd0b3092 or earlier) and a player with the matching heads (linux_server/"
             "archive_1010), or train a new run.")
     if saved != ACTION_LAYOUT:
         raise ValueError(f"{path}: action layout differs (checkpoint {saved} vs code {ACTION_LAYOUT}).")

@@ -1,7 +1,7 @@
 #!/bin/bash
 # PPO training on the event-based twin, one GPU or CPU only (DEVICE=cpu) (2026-10-05; twin-compute: ~380 steps/s at 16 envs on an A100, so
 # 3M steps in about 2 h). One array task per training seed. Submit with slurm/submit_train_twin.sh. Run from
-# ~/capstone/linux_server_v3 (for logs/); the twin needs no player, only the floor export.
+# ~/capstone/linux_server (for logs/); the twin needs no player, only the floor export.
 #   RUN_NAME  TOTAL_TIMESTEPS  PARAMS (generator JSON)  WINDOW (agent window, s)  FLOOR (des_floor.json)
 #   NUM_ENVS (16)  TWIN_WORKERS (16)  REWARD (tardiness)  TRAIN_SEED_BASE (0)
 #SBATCH --nodes=1
@@ -10,7 +10,7 @@
 #SBATCH --output=logs/%x_%A_%a.out
 #SBATCH --error=logs/%x_%A_%a.err
 set -euo pipefail
-cd "${SLURM_SUBMIT_DIR:-$HOME/capstone/linux_server_v3}"
+cd "${SLURM_SUBMIT_DIR:-$HOME/capstone/linux_server}"
 REPO="$(dirname "$PWD")"
 unset PYTHONPATH
 if [[ "${DEVICE:-cuda}" == cuda ]]; then source "$REPO/.venv-gpu/bin/activate"; else source "$REPO/.venv/bin/activate"; fi

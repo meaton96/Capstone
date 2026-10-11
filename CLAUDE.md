@@ -19,12 +19,22 @@ Name every new experiment, results folder and cluster run `<purpose>-<what>[-<va
   run, `-qfifo` reruns FIFO cells on a strict-FIFO build (FIFO by time in queue since 2026-10-02). Seeds go in the
   folder (`s<seed>`), not the experiment name.
 - **Never use a bare capital letter or letter+digit as a name** (G1, D4): layouts are A-O, so these read as layouts.
-- **Where data goes:** `evaluate.py` runs to `results/<name>/`; batch-runner sweeps to `<player dir>/Results/<name>/`.
+- **Where data goes:** `evaluate.py` runs to `results/<name>/`; batch-runner sweeps to `linux_server/Results/<name>/`.
+- **One player build (since 2026-10-11):** `linux_server/` is the current Unity player, locally and on the cluster
+  (`~/capstone/linux_server`, glibc-patched; also the Slurm working dir for logs). Rebuild into it, not into a new
+  `linux_server_*` folder; record the build in its `BUILD_NOTES.md`. `linux_server_archive/linux_server_v4` (H15 heads)
+  is kept only to rerun H15-era checkpoints; `linux_server_archive/notes/` holds the notes of deleted builds. Player
+  sweeps of the deleted builds were merged into `linux_server/Results/` (suffix `__des` / `__dev` on name clashes).
 - **Outdated results (moved 2026-10-03):** everything produced before the C# audit-fix build lives in
   `results/outdated/<name>/` and its findings docs in `docs/experiments/outdated/` (README in each says why). Do not
   compare new runs against them as baselines. `results/` keeps only `scripts/`, live/planned experiments and new runs.
-  Player sweeps likewise moved to `<player dir>/Results/outdated/<name>/` (`linux_server_des/Results/G1` is a
+  Player sweeps likewise moved to `linux_server/Results/outdated/<name>/` (`linux_server/Results/G1` is a
   symlink kept for the rq2-twin-due floor input).
+- **Index and archive (since 2026-10-11):** every results folder has a row in `results/INDEX.tsv` (rendered to
+  `results/INDEX.md` by `results/scripts/make_results_index.py`; add a row for each new experiment). Finished smoke
+  tests, checks and superseded runs move with `git mv` to `results/archive/<name>` (fix references in docs, READMEs,
+  memory and the lab db). Thesis-facing table of contents: `docs/experiments/THESIS_RESULTS_INDEX.md`; update it when a
+  result lands or is superseded.
 - **Old names are not renamed** (AGVR, G1, FLEX_p*, eval_pdr12_heads, ...): scripts, findings docs and memory point at
   those folders (under `results/outdated/` since 2026-10-03). Refer to them by the new name with the old one in parentheses, e.g. "twin-gap (G1)". The registry in
   `docs/WIP/EXPERIMENT_REGISTRY.md` maps old to new.

@@ -10,7 +10,7 @@
 #SBATCH --output=logs/%x_%j.out
 #SBATCH --error=logs/%x_%j.err
 set -euo pipefail
-cd "${SLURM_SUBMIT_DIR:-$HOME/capstone/linux_server_v3}"
+cd "${SLURM_SUBMIT_DIR:-$HOME/capstone/linux_server}"
 REPO="$(dirname "$PWD")"
 spack env activate default-ml-x86_64-25111401 2>/dev/null || true
 unset PYTHONPATH

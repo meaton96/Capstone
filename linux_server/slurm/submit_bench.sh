@@ -1,6 +1,6 @@
 #!/bin/bash
 # Submit the twin-compute benchmark matrix (one short job per config; see slurm/bench.sbatch). Run on the cluster from
-# ~/capstone/linux_server_v3. ACCOUNT (default drl-scheduling), PARTITION (sporc), TIME (01:30:00), ONLY=<config> to
+# ~/capstone/linux_server. ACCOUNT (default drl-scheduling), PARTITION (sporc), TIME (01:30:00), ONLY=<config> to
 # submit one config, DRY=1 to print the commands.
 #   config        backend envs device cpus threads twin_workers  (same network and PPO settings everywhere)
 set -euo pipefail

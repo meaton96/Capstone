@@ -7,7 +7,7 @@ from pathlib import Path
 import pandas as pd
 
 REPO = Path(__file__).resolve().parents[2]
-OLD, NEW = REPO / "linux_server/Results/dev-due-reg", REPO / "linux_server_dev/Results/dev-due-reg"
+OLD, NEW = REPO / "linux_server/Results/dev-due-reg", REPO / "linux_server/Results/dev-due-reg__dev"
 NEW_RESULTS = {"jobs_with_due_date", "mean_tardiness", "pct_tardy", "max_tardiness"}
 NEW_JOBS = {"due_date", "tardiness"}
 cells = sorted(p.parent.relative_to(NEW) for p in NEW.glob("*/*/*/results.csv"))

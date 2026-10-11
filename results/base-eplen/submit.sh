@@ -9,7 +9,7 @@ set -euo pipefail
 source "$(dirname "$0")/../../linux_server/slurm/rit_ssh.sh"
 "${SSH[@]}" "$REMOTE" MIXES="'${MIXES:-B2 B0}'" bash -s <<'REMOTE'
 set -euo pipefail
-cd ~/capstone/linux_server_v3
+cd ~/capstone/linux_server
 D=~/capstone/results/base-eplen
 mkdir -p logs $D
 for m in $MIXES; do
