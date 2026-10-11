@@ -354,7 +354,10 @@ def fixed_action(name: str):
 
 
 def action_rule(action) -> str:
-    """@brief "JOB-MACHINE" of an env action: a (job head, machine head) pair or a fixed-rule name."""
+    """@brief "JOB-MACHINE" of an env action: a (job head, machine head) pair or a fixed-rule name; "py:JOB-MACHINE" for
+    a Python rule (rules_api.RulePair)."""
+    if getattr(action, "is_py_rule", False):
+        return f"py:{action.name}"
     if isinstance(action, str):
         return normalize_rule(action)
     job, machine = (int(a) for a in action)

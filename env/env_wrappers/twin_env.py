@@ -233,8 +233,11 @@ class TwinSchedulingEnv:
     def step(self, action) -> Tuple[Dict[str, np.ndarray], float, bool, dict]:
         """@brief Apply (job head, machine head) and run to the next decision. Same return contract as
         UnitySchedulingEnv.step: on done, obs is the next episode's first observation. A rule name "JOB-MACHINE" instead
-        of the head pair plays that fixed rule (any catalog rule, config.fixed_action; 2026-10-10)."""
-        if isinstance(action, str):
+        of the head pair plays that fixed rule (any catalog rule, config.fixed_action; 2026-10-10). A rules_api.RulePair
+        (Python rule, 2026-10-11) picks from the decision view (rules_api.twin_adapter) instead."""
+        if getattr(action, "is_py_rule", False):
+            rule = action
+        elif isinstance(action, str):
             rule = tuple(normalize_rule(action).split("-"))
         else:
             job_head, machine_head = (int(a) for a in np.asarray(action).reshape(len(ACTION_BRANCHES)))

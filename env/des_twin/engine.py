@@ -121,6 +121,11 @@ class TwinConfig:
     # of each operation, and rules / routing / dispatch read the degraded view des_twin.observed.ObservedState
     # (Twin.view; the observation reads Twin.observed). With None every new path is skipped.
     uncertainty: object = None
+    # Python rule (2026-10-11, rules_api / dev-pyrules): a rules_api.RulePair that replaces `rule` as the fixed rule
+    # (agent mode: the warm-up rule); `rule` is then not used. None = the built-in `rule`. In agent mode a RulePair can
+    # also be sent per decision instead of (job_rule, machine_rule). The pair picks from the decision view
+    # (rules_api.twin_adapter); the built-in path is untouched without it.
+    py_rule: object = None
 
 
 @dataclass
@@ -243,7 +248,14 @@ class Twin:
             raise ValueError(f"transport must be one of {TRANSPORTS}")
         self.floor, self.cfg = floor, cfg
         self.dt = floor.dt
-        self.job_rule, self.machine_rule = parse_rule(cfg.rule)
+        if cfg.py_rule is None:
+            self.job_rule, self.machine_rule = parse_rule(cfg.rule)
+            self._fixed = (self.job_rule, self.machine_rule)
+        else:
+            if not getattr(cfg.py_rule, "is_py_rule", False):
+                raise ValueError(f"py_rule must be a rules_api.RulePair, not {cfg.py_rule!r}")
+            self.job_rule = self.machine_rule = None
+            self._fixed = cfg.py_rule
         self.instant = cfg.transport == "instant"
         self.kin = None if self.instant else Kinematics(floor.agv, self.dt, cfg.transport)
         trigger = cfg.routing_trigger or floor.routing_trigger
@@ -892,10 +904,13 @@ class Twin:
         return False
 
     def _rule_for(self, make_decision):
-        """The rule halves for this decision: the fixed rule, or (agent mode, after the warm-up) the agent's."""
+        """The rule halves for this decision: the fixed rule, or (agent mode, after the warm-up) the agent's. A Python
+        rule (rules_api.RulePair: cfg.py_rule, or sent by the agent) is returned as is."""
         if not self.agent or self.in_warmup:
-            return self.job_rule, self.machine_rule
+            return self._fixed
         rule = yield make_decision()
+        if getattr(rule, "is_py_rule", False):
+            return rule
         job_rule, machine_rule = (r.upper() for r in rule)
         parse_rule(f"{job_rule}_{machine_rule}")
         return job_rule, machine_rule
@@ -906,26 +921,11 @@ class Twin:
             return [m.id for m in self.machines if m.id in job.ops[job.cur_op]]
         return [m.id for m in self.machines if m.id in job.ops[job.cur_op] and not m.down]
 
-    def _route(self, routable):
-        self.decisions += 1
-        ids = [j.id for j in routable]
-        S = self                          # what the rule halves read: the twin, or its degraded view
-        if self.unc is not None:
-            S = self.view
-            S.set_local(ids)
-        job_rule, machine_rule = yield from self._rule_for(lambda: Decision(
-            "routing", job=ids[0], job_candidates=tuple(ids), selected_by_rule=len(ids) == 1,
-            machines=tuple(self.candidate_machines(routable[0]))))
-        forced, self.forced = self.forced, None
-        if forced is not None and forced[0] is not None:
-            if forced[0] not in ids:
-                raise ValueError(f"forced job {forced[0]} is not routable now ({ids})")
-            jid = forced[0]
-        else:
-            jid = rank_jobs(job_rule, ids, S, lambda i: S.jobs[i].min_proc())
-        job = self.jobs[jid]
+    def _machine_lists(self, job, S):
+        """The routed job's candidate machines and the machine halves' inputs, parallel lists (BuildRoutingDecision's
+        arrays): candidates, processing times, loads, utilizations, travel estimates."""
         cands = self.candidate_machines(job)
-        sjob = S.jobs[jid]
+        sjob = S.jobs[job.id]
         times = [sjob.proc(mid) for mid in cands]
         loads = [S.machine_load(mid) for mid in cands]
         utils = [S.utilization(S.mach[mid]) for mid in cands]
@@ -934,10 +934,51 @@ class Twin:
         else:
             speed = self.floor.agv["speed"]
             travel = [f32(self.floor.estimate_path_length(job.location, mid) / speed) for mid in cands]
+        return cands, times, loads, utils, travel
+
+    def _route(self, routable):
+        self.decisions += 1
+        ids = [j.id for j in routable]
+        S = self                          # what the rule halves read: the twin, or its degraded view
+        if self.unc is not None:
+            S = self.view
+            S.set_local(ids)
+        rule = yield from self._rule_for(lambda: Decision(
+            "routing", job=ids[0], job_candidates=tuple(ids), selected_by_rule=len(ids) == 1,
+            machines=tuple(self.candidate_machines(routable[0]))))
+        if type(rule) is tuple:
+            job_rule, machine_rule = rule
+            py = None
+        else:                             # a Python rule (rules_api): it picks from the decision view
+            from rules_api.twin_adapter import routing_view
+            job_rule = machine_rule = None
+            py, pyview = rule, routing_view(self, S, ids)
+        forced, self.forced = self.forced, None
+        if forced is not None and forced[0] is not None:
+            if forced[0] not in ids:
+                raise ValueError(f"forced job {forced[0]} is not routable now ({ids})")
+            jid = forced[0]
+        elif py is not None:
+            jid = py.pick_job(pyview)
+            if jid not in ids:
+                raise ValueError(f"python rule {py.name} picked job {jid}, not in the pool {ids}")
+        else:
+            jid = rank_jobs(job_rule, ids, S, lambda i: S.jobs[i].min_proc())
+        job = self.jobs[jid]
+        if py is not None:
+            pyjob = pyview.job(jid)
+            mviews = pyjob.machines       # computed by _machine_lists (lazily, unless the job rule read them)
+            cands = [m.id for m in mviews]
+        else:
+            cands, times, loads, utils, travel = self._machine_lists(job, S)
         if forced is not None and forced[1] is not None:
             if forced[1] not in cands:
                 raise ValueError(f"forced machine {forced[1]} is not eligible for job {jid} ({cands})")
             mid = forced[1]
+        elif py is not None:
+            mid = py.pick_machine(pyjob, pyview)
+            if mid not in cands:
+                raise ValueError(f"python rule {py.name} picked machine {mid}, not a candidate of job {jid} ({cands})")
         elif machine_rule in RELIABILITY_RULES:
             mid = select_machine(machine_rule, cands, times, loads, utils, travel,
                                  rel=self.reliability_terms(cands))
@@ -975,13 +1016,19 @@ class Twin:
         if self.unc is not None:
             S = self.view
             S.set_local(queue, m.id)
-        job_rule, _ = yield from self._rule_for(lambda: Decision("dispatch", machine=m.id, queue=tuple(queue)))
+        rule = yield from self._rule_for(lambda: Decision("dispatch", machine=m.id, queue=tuple(queue)))
         forced, self.forced = self.forced, None
         if forced is not None and forced[0] is not None:
             if forced[0] not in queue:
                 raise ValueError(f"forced job {forced[0]} is not queued at machine {m.id} ({queue})")
             jid = forced[0]
+        elif type(rule) is not tuple:     # a Python rule (rules_api): it picks from the decision view
+            from rules_api.twin_adapter import dispatch_view
+            jid = rule.pick_job(dispatch_view(self, S, m.id, queue))
+            if jid not in queue:
+                raise ValueError(f"python rule {rule.name} picked job {jid}, not queued at machine {m.id} ({queue})")
         else:
+            job_rule = rule[0]
             jid = rank_jobs(job_rule, queue, S, lambda i: S.jobs[i].proc(m.id))
         if S is not self:
             S.clear_local()
@@ -1387,7 +1434,7 @@ class Twin:
                 a.idle_time += self.makespan - a.idle_since
                 a.idle_since = self.makespan
         s = {
-            "rule": self.cfg.rule,
+            "rule": self.cfg.rule if self.cfg.py_rule is None else f"py:{self.cfg.py_rule.name}",
             "transport": self.cfg.transport,
             "agv_count": len(self.agvs),
             "makespan": self.makespan,
