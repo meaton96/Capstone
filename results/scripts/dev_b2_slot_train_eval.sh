@@ -1,20 +1,24 @@
 #!/bin/bash
 # Train + evaluate a twin slot-action PPO variant on the B2 regime (2026-10-07, learning-stack fixes from
-# docs/handoffs/HANDOFF_2026-10-07_learning_stack_fixes.md). Same setup as train-due-twin-slot-prior-kl (B2 regime,
-# 900 s slots, 100k agent steps, entropy 0.01 -> 0.001, MDD-TECT prior at p = 0.8, KL 0.05) unless the extra flags
-# override it; argparse keeps the last value, so extra flags win.
+# docs/handoffs/HANDOFF_2026-10-07_learning_stack_fixes.md). Defaults since 10-11 (RL heads v5 = {SRT, MDD, ATC} x
+# {PECT, PTECT}, results/dev-pect-unity): the dev-nokl-free stack (B2 regime, 900 s slots, 100k agent steps, entropy
+# 0.01 -> 0.001, NO action prior, NO KL, 5,400 s horizon, shared baseline groups of 4, rollout 128 / batch 256) unless
+# the extra flags override it; argparse keeps the last value, so extra flags win. Before 10-11 the defaults were the
+# H15 heads with an MDD-TECT prior at p = 0.8 and KL 0.05 (train-due-twin-slot-prior-kl): the dev-* runs of 10-07/08
+# used those; rerunning them needs their own code snapshot (results/<name>/code/env) and the old defaults.
 #
 # Usage: bash results/scripts/dev_b2_slot_train_eval.sh NAME "SEEDS" WORKERS_PER_SEED [extra train.py flags...]
-#   e.g. bash results/scripts/dev_b2_slot_train_eval.sh dev-prior-offset "0 1" 3 --prior-init offset
+#   e.g. bash results/scripts/dev_b2_slot_train_eval.sh dev-heads-v5 "0 1 2" 2 --total-timesteps 300000
 #
 # - Code: env/ is copied once to results/NAME/code/env and every train / evaluate call runs from that copy, so later
 #   edits in the checkout never reach a running or resumed experiment (memory: live-checkout runs pick up edits).
 #   The copy's git head and diff hash go to results/NAME/code/STAMP.
 # - Resumes: each seed resumes from its latest checkpoint; a finished seed (DONE_s<seed>) is skipped; evaluation is
 #   skipped once results/NAME/eval/DONE exists.
-# - Evaluation: twin, B2 seeds 0-39, deterministic, slot actions from the checkpoints, all 15 fixed pairs (the
-#   per-instance hindsight best), MDD-TECT named as the best fixed pair (the reference of every B2 write-up), and the
-#   switching oracle from rq2-twin-fleet (B2 tasks).
+# - Evaluation: twin, B2 seeds 0-39, deterministic, slot actions from the checkpoints, the 6 head pairs plus the old
+#   H15 pairs (--pdr all,h15: per-instance hindsight best over both), MDD-PECT named as the best fixed pair (the B2
+#   reference since 10-10, dev-pect-rule; MDD-TECT stays in the table), and the H15 switching oracle from
+#   rq2-twin-fleet (B2 tasks).
 set -uo pipefail
 cd "$(dirname "$0")/../.."
 NAME="$1"; SEEDS="$2"; WORKERS="$3"; shift 3
@@ -42,9 +46,9 @@ for SEED in $SEEDS; do
         nice -n 5 $PY "$CODE/train.py" --twin "$FLOOR" --twin-workers "$WORKERS" \
             --scenario-generator randomized --random-warmup --episode-duration-seconds 21600 --params "$PARAMS" \
             --reward-spec env/config/rewards/tardiness.json --train-seed "$SEED" \
-            --num-envs 16 --rollout-length 32 --batch-size 64 --total-timesteps 100000 --slot-seconds 900 \
-            --discount-horizon-s 10800 --ent-coef 0.01 --ent-coef-final 0.001 \
-            --prior-pair MDD-TECT --prior-prob 0.8 --prior-kl-coef 0.05 \
+            --num-envs 16 --total-timesteps 100000 --slot-seconds 900 \
+            --discount-horizon-s 5400 --ent-coef 0.01 --ent-coef-final 0.001 \
+            --prior-kl-coef 0 --shared-baseline-group 4 --rollout-length 128 --batch-size 256 \
             --device cuda --torch-threads 2 --save-every 25 --stall-minutes 30 --notify-every-hours 2 \
             --results-dir results --run-id "${NAME}_s$SEED" "${RESUME[@]}" "${EXTRA[@]}" \
             > "$OUT/train_s$SEED.out" 2>&1 \
@@ -61,7 +65,7 @@ if [ ! -f "$OUT/eval/DONE" ]; then
     for SEED in $SEEDS; do CK+=(--checkpoint "results/${NAME}_s$SEED/checkpoint.pt"); done
     $PY "$CODE/evaluate.py" --twin "$FLOOR" --reward-spec env/config/rewards/tardiness.json \
         --scenario-generator randomized --random-warmup --episode-duration-seconds 21600 --params "$PARAMS" \
-        --seeds 0-39 --pdr all --best-fixed MDD-TECT --oracle 'results/rq2-twin-fleet/tasks/B2_s*.json' \
+        --seeds 0-39 --pdr all,h15 --best-fixed MDD-PECT --oracle 'results/rq2-twin-fleet/tasks/B2_s*.json' \
         "${CK[@]}" --device cuda --decision-log --out "$OUT/eval" > "$OUT/eval.out" 2>&1 \
     && date -Is > "$OUT/eval/DONE"
 fi

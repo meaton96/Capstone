@@ -1,7 +1,8 @@
 # rq2-direct-headroom: does a direct job×machine action space have more headroom than rule pairs?
 
-Status: done 2026-10-07 22:32 (local, 160/160). 32-future recheck (rq2-direct-headroom-f32, cluster): 70/80 on
-10-08 03:38; the 10 direct seeds that hit the 12 h limit were resubmitted with 24 h.
+Status: done 2026-10-07 22:32 (local, 160/160). 32-future recheck (rq2-direct-headroom-f32, cluster): final at 70/80
+(10-08 03:38). The 10 direct seeds that hit the 12 h limit were resubmitted, then cancelled on 10-08 (user): the 30
+seeds settle the question.
 
 ## Why
 The fallback plan, if the PDR agent cannot be made to work, is a GNN that chooses job and machine directly (L2D,
@@ -80,7 +81,7 @@ Paired direct − rule: **+2.5 ± 1.1 points in hindsight**; **−1.8 ± 2.6 poi
 | cell | pooled gain over MDD-TECT | mean per seed ± 95% | seeds |
 |---|---|---|---|
 | rule, expected32 | +1.1% | +1.2 ± 2.1 | 40 |
-| direct, expected32 | −2.3% | −2.0 ± 3.2 | 30 (10 timed out, resubmitted) |
+| direct, expected32 | −2.3% | −2.0 ± 3.2 | 30 (10 timed out; not rerun) |
 
 Paired direct − rule: −3.0 ± 3.2 points (30 seeds).
 

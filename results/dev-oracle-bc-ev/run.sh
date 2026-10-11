@@ -18,7 +18,7 @@ for L in ev ev-safe; do
 done
 [ -f $D/rollout/DONE ] || { .venv/bin/python env/evaluate.py --twin results/dev-popart-smoke/floor7/des_floor.json \
     --reward-spec env/config/rewards/tardiness.json --scenario-generator randomized --random-warmup \
-    --episode-duration-seconds 21600 --params "$P" --seeds 0-39 --pdr all --best-fixed MDD-TECT \
+    --episode-duration-seconds 21600 --params "$P" --seeds 0-39 --pdr h15 --best-fixed MDD-TECT \
     --oracle 'results/rq2-twin-fleet/tasks/B2_s*.json' "${CK[@]}" --device cuda --slot-seconds 900 --decision-log \
     --out $D/rollout > $D/rollout.out 2>&1 && date -Is > $D/rollout/DONE; }
 [ -f $D/rollout/DONE ] || { echo "rollout failed (see $D/rollout.out)"; exit 1; }

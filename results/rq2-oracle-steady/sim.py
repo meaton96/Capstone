@@ -25,7 +25,10 @@ _spec = importlib.util.spec_from_file_location("sig", REPO / "results/dev-conges
 sig = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(sig)
 fleet = sig.fleet
-PAIRS = list(fleet.PAIRS)
+PAIRS = list(fleet.PAIRS)                       # the old H15 pairs (every result before 10-11)
+from config import JOB_HEAD_RULES as _J, MACHINE_HEAD_RULES as _M   # noqa: E402
+HEAD_PAIRS = [f"{j}-{m}" for j in _J for m in _M]  # RL heads v5 since 10-11: {SRT, MDD, ATC} x {PECT, PTECT}
+PAIR_SETS = {"h15": PAIRS, "heads": HEAD_PAIRS}
 
 SETTINGS = {
     "B2": {"window": 21600.0, "block": 5400.0, "min_warmup": 0.0, "slot": 900.0, "horizon": 30600.0},
