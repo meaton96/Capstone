@@ -91,6 +91,11 @@ namespace Assets.Scripts.Simulation.Channels
                     SetRuleOverride(root["ruleOverride"]);
                     return;
                 }
+                if (root.Count == 1 && root.ContainsKey("pick"))
+                {
+                    SetPick(root["pick"]);
+                    return;
+                }
 
                 FJSSPConfig cfg = DeserialiseConfig(json);
                 lock (_lock) { _pendingConfig = cfg; }
@@ -139,6 +144,55 @@ namespace Assets.Scripts.Simulation.Channels
             RuleOverrideIndex = index;
             RuleOverrideName = DispatchingEngine.RuleForIndex(index).ToString();
             SimLogger.Low($"[ConfigChannel] Rule override -> {RuleOverrideName} (catalog index {index}).");
+        }
+
+        /// <summary>
+        /// Python rule mode (PyRules, -pyrules): the choice Python made for the decision the accompanying step answers,
+        /// or null. Set by {"pick": {"job": id, "machine": id, "decision": n, "jobRule": name, "machineRule": name}};
+        /// SchedulingAgent.OnActionReceived takes it (TakePick) and applies it with FactoryOrchestrator.StepPick. Side-channel
+        /// data of a step is processed before that step's actions (RpcCommunicator), as for the rule override.
+        /// </summary>
+        private static PyRules.Pick _pendingPick;
+
+        /// <summary>Returns and clears the pending Python pick, or null.</summary>
+        public static PyRules.Pick TakePick()
+        {
+            PyRules.Pick p = _pendingPick;
+            _pendingPick = null;
+            return p;
+        }
+
+        private void SetPick(JToken value)
+        {
+            if (!PyRules.Enabled)
+            {
+                // Refuse loudly: without -pyrules the player would silently step the action's rule instead.
+                Reject("pick: the player was not launched with -pyrules");
+                SimLogger.Error("[ConfigChannel] pick received but the player was not launched with -pyrules; quitting.");
+                UnityEngine.Application.Quit(3);
+                return;
+            }
+            if (_pendingPick != null)
+                PyRules.Fail($"pick for decision {_pendingPick.Decision} was never applied before the next pick arrived");
+            PyRules.Pick pick;
+            try
+            {
+                var o = (JObject)value;
+                pick = new PyRules.Pick
+                {
+                    JobId = o["job"].Value<int>(),
+                    MachineId = o["machine"]?.Value<int>() ?? -1,
+                    Decision = o["decision"].Value<int>(),
+                    JobRule = o["jobRule"]?.Value<string>() ?? "",
+                    MachineRule = o["machineRule"]?.Value<string>() ?? "",
+                };
+            }
+            catch (Exception ex)
+            {
+                PyRules.Fail($"malformed pick {value}: {ex.Message}");
+                return;
+            }
+            _pendingPick = pick;
         }
 
         /// <summary>

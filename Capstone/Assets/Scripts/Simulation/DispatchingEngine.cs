@@ -312,6 +312,10 @@ namespace Assets.Scripts.Simulation
             return best;
         }
 
+        /// <summary>PTWINQ's WINQ for the Python rule view (FactoryOrchestrator.BuildPyRuleView): WorkInNextQueue over
+        /// GetAllMachineLoads, as RankJobs computes it.</summary>
+        public static float WorkInNextQueueForView(JobData job, Dictionary<int, float> loads) => WorkInNextQueue(job, loads);
+
         /// <summary>
         /// Minimum processing time for a job's current operation across its eligible machines —
         /// the best-case cost proxy used by SelectRoutingJob's SPT/LPT scoring, before a specific

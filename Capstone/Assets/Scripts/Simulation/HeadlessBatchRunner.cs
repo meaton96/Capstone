@@ -925,7 +925,7 @@ namespace Assets.Scripts.Simulation
             "-releaseweights", "-travelprice", "-jobscope", "-agvassignment", "-flex", "-flexmult", "-layout",
             "-inbuf", "-outbuf", "-repeats", "-disruption", "-loglevel", "-decisionlogdir", "-obsmaxjobs",
             "-obsmaxmachines", "-kenneyvisuals", "-primitivevisuals", "-allowunsafefleet", "-validatestochastic",
-            "-legacyfailurequirks",
+            "-legacyfailurequirks", "-pyrules",
         };
 
         /// Unity's own player flags that batch launches use (case-insensitive), plus prefixes of flag families.

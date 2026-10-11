@@ -1421,6 +1421,144 @@ namespace Assets.Scripts.Simulation
             return new StepResult { Done = false, CurrentMakespan = SimTime };
         }
 
+        // ── Python rule mode (-pyrules, PyRules; 2026-10-11) ───────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Applies a Python rule's choice to the pending decision instead of a catalog rule (PyRules). Validated against
+        /// exactly what the built-in path would choose among: the decision index, the routing pool (JobCandidateIds) or
+        /// the machine's dispatchable queue, and the picked job's candidate machines (BuildRoutingDecision for that job,
+        /// as ExecuteRoutingDecision's re-selection rebuilds it). Anything else stops the player (PyRules.Fail).
+        /// </summary>
+        public StepResult StepPick(PyRules.Pick pick)
+        {
+            DecisionRequest req = CurrentDecision;
+            if (req == null) PyRules.Fail("pick with no pending decision");
+            if (pick.Decision != req.DecisionIndex)
+                PyRules.Fail($"pick for decision {pick.Decision}, but decision {req.DecisionIndex} is pending");
+
+            if (req.Type == DecisionType.Routing)
+            {
+                int[] pool = req.JobCandidateIds != null && req.JobCandidateIds.Length > 0 ? req.JobCandidateIds : new[] { req.JobId };
+                if (Array.IndexOf(pool, pick.JobId) < 0)
+                    PyRules.Fail($"decision {req.DecisionIndex}: picked job {pick.JobId} is not in the routing pool [{string.Join(",", pool)}]");
+                if (pick.JobId != req.JobId)
+                {
+                    JobData picked = Jobs.Get(pick.JobId);
+                    DecisionRequest rebuilt = picked != null && picked.State == JobState.NeedsRouting
+                        ? _decisions.BuildRoutingDecision(picked, countsAsNewDecision: false)
+                        : null;
+                    if (rebuilt == null || rebuilt.CandidateMachineIds.Length == 0)
+                        PyRules.Fail($"decision {req.DecisionIndex}: picked job {pick.JobId} cannot be routed now");
+                    rebuilt.JobCandidateIds = req.JobCandidateIds;
+                    rebuilt.JobSelectedByRule = true;
+                    CurrentDecision = rebuilt;
+                }
+                if (Array.IndexOf(CurrentDecision.CandidateMachineIds, pick.MachineId) < 0)
+                    PyRules.Fail($"decision {req.DecisionIndex}: picked machine {pick.MachineId} is not a candidate of job " +
+                                 $"{pick.JobId} [{string.Join(",", CurrentDecision.CandidateMachineIds)}]");
+                IsWaitingForAction = false;
+                LogRoutingDecision(pick.MachineId, -1, pick);
+                ApplyRouting(pick.MachineId);
+            }
+            else
+            {
+                int machineId = req.MachineId;
+                if (pick.MachineId >= 0 && pick.MachineId != machineId)
+                    PyRules.Fail($"decision {req.DecisionIndex}: dispatch pick names machine {pick.MachineId}, the decision is machine {machineId}'s");
+                if (!Jobs.GetDispatchableJobs(machineId).Contains(pick.JobId))
+                    PyRules.Fail($"decision {req.DecisionIndex}: picked job {pick.JobId} is not dispatchable at machine {machineId}");
+                IsWaitingForAction = false;
+                LogDispatchDecision(pick.JobId, -1, pick);
+                ApplyDispatch(machineId, pick.JobId);
+            }
+            return new StepResult { Done = false, CurrentMakespan = SimTime };
+        }
+
+        /// <summary>
+        /// The raw candidate view of the pending decision for a Python rule (PyRules; env/rules_api/unity_adapter.py
+        /// parses it). Read-only: it computes exactly the inputs the built-in rules read at Step time, from the same
+        /// functions, with nothing changed in between (the decision waits for Python synchronously). Floats are
+        /// float32 values (G9), times doubles (G17), a job without a due date has "due": null.
+        ///   routing: jobs = JobCandidateIds (the pool, in order); per job p = GetMinEligibleProcTime, and "m" = its
+        ///            candidate machines [id, p, load, utilization, travel] (the focus job: the request's own arrays;
+        ///            the others: BuildRoutingDecision for that job, as Step-time re-selection rebuilds it)
+        ///   dispatch: jobs = the machine's dispatchable queue; per job p = its time on this machine
+        ///   per job also: op, ops (total), arrival, since (StateEntryTime), due, rw (GetRemainingWork), winq (PTWINQ)
+        /// </summary>
+        public string BuildPyRuleView()
+        {
+            DecisionRequest req = CurrentDecision;
+            var sb = new System.Text.StringBuilder(1024);
+            bool routing = req.Type == DecisionType.Routing;
+            sb.Append("{\"v\":").Append(PyRules.ViewVersion);
+            sb.Append(",\"kind\":\"").Append(routing ? "routing" : "dispatch").Append('"');
+            sb.Append(",\"decision\":").Append(req.DecisionIndex);
+            sb.Append(",\"t\":"); PyRules.Num(sb, SimTime);
+            sb.Append(",\"machine\":").Append(routing ? -1 : req.MachineId);
+            sb.Append(",\"wip\":").Append(WorkInProgress());
+            sb.Append(",\"fleet\":").Append(agvPool != null ? agvPool.OnDutyCount : 0);
+            sb.Append(",\"nAgvs\":").Append(agvPool != null ? agvPool.AllAGVs.Count : 0);
+            sb.Append(",\"travelPrice\":"); PyRules.Num(sb, routing ? req.TravelPrice : 0f);
+            PtimeRuleParams pt = routing ? (req.PtimeRule ?? PtimeRuleParams.Default) : null;
+            if (pt == null) sb.Append(",\"pt\":null");
+            else
+            {
+                sb.Append(",\"pt\":{\"alpha\":"); PyRules.Num(sb, pt.Alpha);
+                sb.Append(",\"shape\":"); PyRules.Str(sb, pt.Shape);
+                sb.Append(",\"tau\":"); PyRules.Num(sb, pt.Tau);
+                sb.Append(",\"reroute\":"); PyRules.Num(sb, pt.Reroute);
+                sb.Append(",\"avail\":"); PyRules.Num(sb, pt.Avail);
+                sb.Append('}');
+            }
+
+            List<int> ids;
+            if (routing)
+                ids = req.JobCandidateIds != null && req.JobCandidateIds.Length > 0
+                    ? new List<int>(req.JobCandidateIds) : new List<int> { req.JobId };
+            else
+                ids = Jobs.GetDispatchableJobs(req.MachineId);
+            Dictionary<int, float> loads = Jobs.GetAllMachineLoads();
+
+            sb.Append(",\"jobs\":[");
+            for (int k = 0; k < ids.Count; k++)
+            {
+                JobData j = Jobs.Get(ids[k]);
+                if (k > 0) sb.Append(',');
+                sb.Append("{\"id\":").Append(j.JobId);
+                sb.Append(",\"op\":").Append(j.CurrentOpIndex);
+                sb.Append(",\"ops\":").Append(j.TotalOperations);
+                sb.Append(",\"arrival\":"); PyRules.Num(sb, j.ArrivalTime);
+                sb.Append(",\"since\":"); PyRules.Num(sb, j.StateEntryTime);
+                sb.Append(",\"due\":");
+                if (j.HasDueDate) PyRules.Num(sb, j.DueDate); else sb.Append("null");
+                sb.Append(",\"p\":");
+                PyRules.Num(sb, routing ? DispatchingEngine.GetMinEligibleProcTime(j.JobId, Jobs) : j.GetProcessingTime(req.MachineId));
+                sb.Append(",\"rw\":"); PyRules.Num(sb, DispatchingEngine.GetRemainingWork(j.JobId, Jobs));
+                sb.Append(",\"winq\":"); PyRules.Num(sb, DispatchingEngine.WorkInNextQueueForView(j, loads));
+                if (routing)
+                {
+                    DecisionRequest r = j.JobId == req.JobId ? req
+                        : j.State == JobState.NeedsRouting ? _decisions.BuildRoutingDecision(j, countsAsNewDecision: false) : null;
+                    sb.Append(",\"m\":[");
+                    int n = r?.CandidateMachineIds?.Length ?? 0;
+                    for (int i = 0; i < n; i++)
+                    {
+                        if (i > 0) sb.Append(',');
+                        sb.Append('[').Append(r.CandidateMachineIds[i]).Append(',');
+                        PyRules.Num(sb, r.CandidateJobTimes[i]); sb.Append(',');
+                        PyRules.Num(sb, r.CandidateQueueLengths[i]); sb.Append(',');
+                        PyRules.Num(sb, r.CandidateUtilization[i]); sb.Append(',');
+                        PyRules.Num(sb, r.CandidateTravelTimes != null ? r.CandidateTravelTimes[i] : 0f);
+                        sb.Append(']');
+                    }
+                    sb.Append(']');
+                }
+                sb.Append('}');
+            }
+            sb.Append("]}");
+            return sb.ToString();
+        }
+
         /// <summary>
         /// Executes a routing decision by assigning the specified job to the selected machine
         /// and preparing AGV pickup if applicable.
@@ -1461,6 +1599,15 @@ namespace Assets.Scripts.Simulation
 
             int chosenMachineId = DispatchingEngine.SelectMachine(actionIndex, CurrentDecision);
             LogRoutingDecision(chosenMachineId, actionIndex);
+            ApplyRouting(chosenMachineId);
+        }
+
+        /// <summary>
+        /// Routes CurrentDecision's job to the chosen machine (the second half of ExecuteRoutingDecision, shared with a
+        /// Python rule's pick, StepPick).
+        /// </summary>
+        private void ApplyRouting(int chosenMachineId)
+        {
             JobData job = Jobs.Get(CurrentDecision.JobId);
             if (job == null) return;
 
@@ -1517,7 +1664,15 @@ namespace Assets.Scripts.Simulation
             int machineId = CurrentDecision.MachineId;
             int chosenJobId = DispatchingEngine.SelectJob(actionIndex, machineId, Jobs, SimTime);
             LogDispatchDecision(chosenJobId, actionIndex);
+            ApplyDispatch(machineId, chosenJobId);
+        }
 
+        /// <summary>
+        /// Starts the chosen queued job on the machine (the second half of ExecuteDispatchDecision, shared with a Python
+        /// rule's pick, StepPick).
+        /// </summary>
+        private void ApplyDispatch(int machineId, int chosenJobId)
+        {
             JobData job = Jobs.Get(chosenJobId);
             if (job == null || job.State != JobState.Queued || job.LocationMachineId != machineId) return;
 
@@ -1539,10 +1694,11 @@ namespace Assets.Scripts.Simulation
         /// decision including the candidates.Length &lt;= 1 degenerate case DispatchingEngine
         /// short-circuits on, so the log can directly show how often the rule never actually ran.
         /// </summary>
-        private void LogRoutingDecision(int chosenMachineId, int actionIndex)
+        private void LogRoutingDecision(int chosenMachineId, int actionIndex, PyRules.Pick pick = null)
         {
             var req = CurrentDecision;
-            var (jobRule, machineRule) = DispatchingEngine.DescribeAction(actionIndex);
+            var (jobRule, machineRule) = pick == null ? DispatchingEngine.DescribeAction(actionIndex)
+                : ("py:" + pick.JobRule, "py:" + pick.MachineRule);
             int count = req.CandidateMachineIds?.Length ?? 0;
             int jobCandidateCount = req.JobCandidateIds?.Length ?? 0;
             _decisionLog.Add(new DecisionRecord
@@ -1574,10 +1730,11 @@ namespace Assets.Scripts.Simulation
         /// Records a dispatch decision (machine picks a queued job) to _decisionLog. Fires for
         /// every dispatch decision including the queue.Count &lt;= 1 degenerate case.
         /// </summary>
-        private void LogDispatchDecision(int chosenJobId, int actionIndex)
+        private void LogDispatchDecision(int chosenJobId, int actionIndex, PyRules.Pick pick = null)
         {
             var req = CurrentDecision;
-            var (jobRule, machineRule) = DispatchingEngine.DescribeAction(actionIndex);
+            var (jobRule, machineRule) = pick == null ? DispatchingEngine.DescribeAction(actionIndex)
+                : ("py:" + pick.JobRule, "py:" + pick.MachineRule);
             int[] queuedIds = req.QueuedJobIds ?? Array.Empty<int>();
             int count = queuedIds.Length;
             var remainingWork = new float[count];
