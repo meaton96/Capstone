@@ -493,6 +493,94 @@ def test_redraw_keeps_the_past_and_redraws_the_future():
     assert done
 
 
+def test_next_tick_arrival_is_the_next_tick_in_float32():
+    """The clip-fix arrival (10-11, results/dev-uncert-clipfix): a des_jobs float32 value whose engine tick is exactly
+    k + 1 (where float32 resolves dt), and always after tick k."""
+    dt = _floor().dt
+    for k in [0, 1, 7, 49, 50, 12345, 90000, 179999, 360000, 2 ** 17 * 50 - 1, 5_000_000, 9_999_999]:
+        a = U.next_tick_arrival(k, dt)
+        assert a == float(str(np.float32(a)))                    # as des_jobs.json writes arrivals
+        assert U.arrival_tick(a, dt) == k + 1, (k, a)
+        assert a > k * dt
+    for k in (20_000_000, 50_000_000):                           # float32 spacing > dt: the earliest tick after k
+        assert U.arrival_tick(U.next_tick_arrival(k, dt), dt) > k
+
+
+def _pause_twin(seed, spec, t_pause):
+    tw = _twin(seed, spec, warmup=0.0, cap=0.0)
+    tw.pause_at(t_pause)
+    gen = tw.agent_decisions()
+    dec = gen.send(None)
+    while dec.kind != "pause":
+        dec = gen.send(("MDD", "PECT"))
+    return tw, gen
+
+
+@fork_only
+def test_redraw_moves_arrivals_in_the_past_to_the_next_tick():
+    """A redrawn E3 arrival at or before the current tick arrives at the next tick (before the fix: exactly t = now,
+    which Twin.replace_pending rejected); other redrawn arrivals are unchanged, the redraw stays deterministic (CRN),
+    and the forked child accepts the trace and plays to the end."""
+    tw, gen = _pause_twin(18, "E3=severe,E1=realistic", 4000.0)
+    t, k, dt = tw.now, tw.k, tw.dt
+    assert t == k * dt
+    arrived = {j.id for j in tw.order}
+    nxt = U.next_tick_arrival(k, dt)
+    found = None
+    for seed_k in range(50000, 50040):
+        new = tw.unc.redraw_after(tw, seed_k, mode="realizable", bias_est=lambda mid: (1.0, 0.0))
+        raw = {}
+        for jd in new.plan_jobs["jobs"]:
+            jid, a = int(jd["id"]), float(jd["arrival"])
+            if jid in arrived or jid in new.cancelled or a <= 0.0:
+                continue
+            r = max(0.0, a + new._lateness(jid))
+            raw[jid] = U._f32r(r) if r != a else a
+        past = [jid for jid, r in raw.items() if U.arrival_tick(r, dt) <= k]
+        if past:
+            found = (seed_k, new, raw, past)
+            break
+    assert found, "no redraw with an arrival in the past (pick another seed)"
+    seed_k, new, raw, past = found
+    fut = {int(jd["id"]): float(jd["arrival"]) for jd in new.world_jobs["jobs"] if int(jd["id"]) not in arrived}
+    assert all(U.arrival_tick(a, dt) > k for a in fut.values())          # what replace_pending requires
+    for jid, r in raw.items():
+        want = nxt if jid in past else r                                  # only the past ones move
+        assert fut[jid] == want and new.actual_arrival[jid] == want
+        assert new.world_by_id[jid]["arrival"] == want
+    assert all(U.arrival_tick(fut[jid], dt) == k + 1 for jid in past)
+    # deterministic, and a caller without the tick in keep (realizable.py's _build_world) gets the same world
+    again = tw.unc.redraw_after(tw, seed_k, mode="realizable", bias_est=lambda mid: (1.0, 0.0))
+    assert again.world_jobs == new.world_jobs and again.actual_arrival == new.actual_arrival
+    again._build_world(None, keep={"arrived": arrived, "t": t, "parent": tw.unc})
+    assert again.world_jobs == new.world_jobs and again.actual_arrival == new.actual_arrival
+
+    def child(_):
+        belief_transform(tw, None, keep_trace=new)                        # apply_trace -> replace_pending
+        assert tw.pending[tw.pending_i].arrival == nxt
+        d = gen.send(None)
+        try:
+            while True:
+                d = gen.send(("MDD", "PECT"))
+        except StopIteration:
+            pass
+        return all(j.state == EXITED for j in tw.jobs.values()), [tw.jobs[j].arrival for j in past]
+    done, arrivals = branch.fork_map(child, [0], max_parallel=1)[0]
+    assert done and arrivals == [nxt] * len(past)
+
+
+@fork_only
+def test_planner_ensemble_runs_under_arrival_noise():
+    """The noise-aware ensemble planner redraws E3 arrivals at every re-plan (it crashed under E3 / MIX before the
+    clip fix when a redrawn arrival fell before the re-plan's current tick)."""
+    pairs = ["MDD-PECT", "ATC-PTECT"]
+    slot, warmup, window = 900.0, 1800.0, 3 * 900.0
+    for seed, spec in ((22, "E3=severe"), (23, "mix:severe")):
+        res = plan_episode(_twin(seed, spec, warmup=warmup, cap=window), pairs, slot, warmup, window,
+                           max_parallel=2, ensemble=3, rush_pool=_pool(seed))
+        assert len(res["schedule"]) == 3 and res["real"] >= 0.0
+
+
 @fork_only
 def test_pause_and_belief_transform_are_identity_without_noise():
     """Noise off: a child that pauses, applies the belief transform with the true future and plays on equals the

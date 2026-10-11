@@ -35,7 +35,9 @@ to the plan, so f32(p x 1 x 1) == p and the engine reproduces the noise-free twi
 
 **Conditional redraw** (`redraw_after`, §1.5): keep what has happened by time t and redraw the rest with seed k, for
 rollouts scored over futures that use only current-state knowledge (mode "realizable": the bias continues from the
-online estimate) or the true current bias (mode "oracle").
+online estimate) or the true current bias (mode "oracle"). A job not yet arrived whose redrawn arrival would be in
+the past (at or before the current tick) arrives at the next tick (next_tick_arrival; fix of 10-11,
+results/dev-uncert-clipfix).
 """
 import copy
 import math
@@ -314,6 +316,34 @@ def _f32r(x):
     return float(str(np.float32(x)))
 
 
+def arrival_tick(arrival, dt):
+    """The engine tick at which a job with this arrival is admitted (Twin._events / Twin.replace_pending's formula:
+    max(1, ceil(arrival / dt - 1e-9))). A job can be swapped into a running twin at tick k only if this is > k."""
+    return max(1, math.ceil(arrival / dt - 1e-9))
+
+
+def next_tick_arrival(k, dt):
+    """@brief The arrival a redrawn job gets when its redrawn arrival is not after the current tick k: the time of the
+    next tick, (k + 1) x dt, as a des_jobs float32 value (_f32r) whose arrival_tick is the earliest tick > k.
+
+    float32 rounding can move (k + 1) x dt onto tick k (rounded down past the 1e-9 tolerance) or onto k + 2 (rounded
+    up); the value is stepped along the float32 grid until its tick is > k and, where float32 resolution allows, == k + 1
+    (beyond ~2^18 s, where the float32 spacing exceeds dt = 0.02 s, the earliest representable tick > k)."""
+    v = np.float32((k + 1) * dt)
+    a = _f32r(v)
+    up, down = np.float32(np.inf), np.float32(-np.inf)
+    while arrival_tick(a, dt) <= k:
+        v = np.nextafter(v, up)
+        a = _f32r(v)
+    while arrival_tick(a, dt) > k + 1:
+        w = np.nextafter(v, down)
+        b = _f32r(w)
+        if arrival_tick(b, dt) <= k:
+            break
+        v, a = w, b
+    return a
+
+
 def _op_due(arrival, due, jd):
     """Operation due dates from a job's PLANNED arrival (Twin.__init__'s formula, so an unmoved job is unchanged)."""
     work = [float(min(f32(d) for _, d in op["eligible"])) for op in jd["ops"]]
@@ -531,9 +561,21 @@ class UncertaintyTrace:
 
     def _build_world(self, rush_pool, keep=None):
         """world_jobs (des_jobs/1) from the plan. keep: redraw support (ids already arrived in the world at the
-        split time, the split time): those keep their parent values; the rest is redrawn."""
+        split time, the split time, optionally "k" = the twin's current tick): those keep their parent values; the
+        rest is redrawn.
+
+        Redrawn arrivals in the past (the 10-11 clip fix, results/dev-uncert-clipfix): a job not yet arrived whose
+        redrawn arrival (E3 earliness) is not after the current tick k (the tick at the split time t = twin.now) arrives
+        at the NEXT tick, (k + 1) x dt (next_tick_arrival), the earliest time a running twin can still admit it.
+        Before the fix it was clipped to exactly t, i.e. tick k, which Twin.replace_pending rejects. Without `keep`
+        (the world at episode start) nothing changes."""
         plan = self.plan_jobs["jobs"]
         self.actual_arrival, self.cancelled, self.rush = {}, {}, {}
+        if keep is not None:
+            k_now = keep.get("k")
+            if k_now is None:                                  # t = k x dt (twin.now) for a caller without the tick
+                k_now = math.floor(keep["t"] / self.dt + 1e-6)
+            a_next = next_tick_arrival(k_now, self.dt)
         moved = False
         out = []
         for jd in plan:
@@ -553,10 +595,10 @@ class UncertaintyTrace:
             act = a
             if self._on["E3"] and a > 0.0:
                 act = max(0.0, a + self._lateness(jid))
-                if keep is not None:
-                    act = max(act, keep["t"])
             if act != a:
                 act = _f32r(act)
+            if keep is not None and arrival_tick(act, self.dt) <= k_now:
+                act = a_next                                   # in the past: arrives at the next tick
             self.actual_arrival[jid] = act
             if act != a:
                 moved = True
@@ -637,9 +679,9 @@ class UncertaintyTrace:
 
         Kept: realized durations of started ops (they live in the engine), arrived jobs, known cancellations, bookings
         already emitted (they live in the view), the bias path up to now, the O3 factor of started ops, the outage in
-        progress. Redrawn: E1 factors of ops not started, future arrival lateness, future rush orders and
-        cancellations, future booking delays and dropouts, the bias path after now - continued from the true current
-        log bias (mode "oracle") or sampled around the online estimate (mode "realizable": bias_est(mid) -> (b_hat,
+        progress. Redrawn: E1 factors of ops not started, future arrival lateness (a redrawn arrival in the past moves
+        to the next tick), future rush orders and cancellations, future booking delays and dropouts, the bias path
+        after now - continued from the true current log bias (mode "oracle") or sampled around the online estimate (mode "realizable": bias_est(mid) -> (b_hat,
         n_eff), the posterior's mean and effective observation count). Apply it to a twin (normally a forked child)
         with apply_trace(twin, trace)."""
         t = twin.now
@@ -686,7 +728,7 @@ class UncertaintyTrace:
             tr._redraw_dropouts(keep, tr.prefix)
         # the job stream: arrived jobs and known cancellations stay
         arrived = {j.id for j in twin.order}
-        tr._build_world(rush_pool, keep={"arrived": arrived, "t": t, "parent": self})
+        tr._build_world(rush_pool, keep={"arrived": arrived, "t": t, "k": twin.k, "parent": self})
         return tr
 
     def _redraw_bias(self, i0, carry, seed_k):
