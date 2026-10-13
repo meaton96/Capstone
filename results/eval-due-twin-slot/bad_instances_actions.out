@@ -1,0 +1,43 @@
+Slot choices of train-due-twin-slot_s1 (deterministic) vs the oracle, per 900 s slot of the 6 h window
+job: R=SRT P=SPT M=MDD E=EDD A=ATC; machine: e=ECT t=TECT w=SRWT; block: n normal, S surge, F short fleet (2 AGVs)
+
+seed 37: policy  +29.5% vs MDD-TECT; oracle   -1.3%; best fixed MDD-TECT
+   block   S  S  n  n  n  n  n  n  n  n  n  n  n  n  F  F  F  F  F  F  n  n  n  n
+   policy Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Me Me Me Me Me Me
+   oracle Mt Mt Mt Mt Mt Mt Mt Mt Mt Mt Mt Mt Mt Mt Mt Mt Mt Mt Mt Me Me Me Rw Mw
+seed 34: policy  +13.4% vs MDD-TECT; oracle  -15.2%; best fixed MDD-TECT
+   block   n  n  n  n  n  F  F  F  F  F  F  n  n  n  n  n  n  n  n  n  n  n  n  n
+   policy Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae
+   oracle Mt Ae Mt Mt Mt Mt Mt Mt Mt Mt Mt Mt Ae Ee Me At At At At Ae Ae Me Rw Re
+seed 36: policy   +7.5% vs MDD-TECT; oracle   -0.9%; best fixed MDD-TECT
+   block   n  n  n  n  n  n  n  n  n  n  n  n  n  n  n  n  n  n  F  F  F  F  F  F
+   policy Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Me Ae Me Me Me Me Rt Re Re Re
+   oracle Mt Mt Mt Mt Mt Mt Mt Mt Mt Mt Mt Mt Rt Rt Rt Rt Rt Rt Rt Rt Rt Rt Me Re
+seed 20: policy   +4.9% vs MDD-TECT; oracle  -15.1%; best fixed MDD-ECT
+   block   S  S  S  S  S  S  S  S  S  S  S  S  F  F  F  F  F  F  S  S  S  S  S  S
+   policy Ae Ae Ae Ae Ae Ae Me Me Me Me Mt Ae Ae At Ae At Ae At Ae At Ae Ae Me Me
+   oracle Me Me Me Me At At At At At Ae Ae Ae At At Ae Ae Ae Ae Ae At Me Mw Rw Pw
+seed  1: policy  -27.4% vs MDD-TECT; oracle  -39.1%; best fixed ATC-ECT
+   block   S  S  S  S  S  S  S  S  S  S  S  S  n  n  n  n  n  n  n  n  n  n  n  n
+   policy Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae Ae At Ae Ae Ae Ae
+   oracle Ae Ae At At At At At At At At At At Ae Ae Ae Ae Ae Ae Ae Ae Ee Aw Me Re
+seed  9: policy   -7.1% vs MDD-TECT; oracle  -25.3%; best fixed ATC-TECT
+   block   F  F  F  F  F  F  F  F  F  F  F  F  n  n  n  n  n  n  S  S  S  S  S  S
+   policy Ae Ae Ae Ae At Ae Ae Ae Ae Ae Ae Ae Ae At At Ae Ae Ae Me Ae Me Ae At At
+   oracle At At At At At At At At At At At At At At At At At Ae Ae Me Me Me Me Re
+seed  7: policy  +19.6% vs MDD-TECT; oracle   -3.2%; best fixed SRT-ECT
+   block   F  F  F  n  n  n  n  n  n  F  F  F  F  F  F  n  n  n  n  n  n  S  S  S
+   policy Ae Ae Ae Me Me Me Me Me Me Me Re Re Re Re Re Re Re Re Re Re Re Re Re Re
+   oracle Re Re Re Re Re Re Rt Rt Rt Mt Mt Mt Mt Mt Mt Mt Rt Rt Rt Re Re Mw Me Me
+
+policy pair use over these seeds: {'Ae': 0.67, 'Me': 0.15, 'Re': 0.1, 'At': 0.06, 'Mt': 0.01, 'Rt': 0.01}
+policy switches per episode: 4.4 (of 23 possible)
+
+Fixed pairs on B2 seeds 0-39 (mean tardiness, median gap vs MDD-TECT, seeds better than MDD-TECT):
+  MDD-TECT  mean  172.4  median gap  +0.00%  better on 0/40
+  ATC-ECT   mean  195.6  median gap  +6.54%  better on 13/40
+  ATC-TECT  mean  191.2  median gap  +4.54%  better on 16/40
+  MDD-ECT   mean  177.1  median gap  +1.75%  better on 14/40
+  SRT-ECT   mean  179.5  median gap  +8.63%  better on 12/40
+policy s1 vs fixed ATC-ECT: mean 171.7 vs 195.6 (-12.25%), median gap -8.04%, better on 34/40, Wilcoxon p=0.000
+policy s2 vs fixed ATC-ECT: mean 172.9 vs 195.6 (-11.65%), median gap -6.39%, better on 30/40, Wilcoxon p=0.000

@@ -53,9 +53,10 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from config import (
     EncoderConfig, FusionConfig, ActorCriticConfig, PPOConfig, OBS_SHAPES, OBS_LAYOUT,
-    ACTION_BRANCHES, ACTION_LAYOUT, obs_shapes as shapes_for_caps,
+    ACTION_BRANCHES, ACTION_LAYOUT, JOB_HEAD_RULES, MACHINE_HEAD_RULES, obs_shapes as shapes_for_caps,
 )
-from models.network import SchedulingNetwork, encoder_config_for
+from models.actor_critic import prior_log_probs
+from models.network import SchedulingNetwork, ac_config_for, encoder_config_for
 from notify import Watchdog, notify, run_label
 from rollout_buffer import RolloutBuffer
 
@@ -69,6 +70,16 @@ def obs_to_torch(obs: dict, device: str) -> dict:
         k: torch.as_tensor(v, dtype=torch.float32).to(device)   # no extra host copy when v is already float32
         for k, v in obs.items()
     }
+
+
+def paired_settings(ppo_cfg):
+    """@brief PairedSlotEnv keyword arguments for the paired advantage, or None when it is off."""
+    if not getattr(ppo_cfg, "paired_advantage", False):
+        return None
+    from env_wrappers.paired_slot_env import default_action_for
+    pair = ppo_cfg.paired_default or ppo_cfg.prior_pair or "MDD-TECT"
+    return {"default_action": default_action_for(pair), "futures": ppo_cfg.paired_futures,
+            "tail_seconds": ppo_cfg.paired_tail_s}
 
 
 def build_env(args, ppo_cfg, run_dir: Path, reward, scenario_generator=None, seed_stream: int = 0):
@@ -97,6 +108,9 @@ def build_env(args, ppo_cfg, run_dir: Path, reward, scenario_generator=None, see
             raise ValueError("--twin needs --scenario or --scenario-generator (the twin has no default job set)")
         obs_caps = row_caps_for(planned, args.obs_max_machines, args.obs_max_jobs)
         obs_shapes = shapes_for_caps(*obs_caps)
+        if lookahead_obs(args):
+            from des_twin.lookahead import LOOKAHEAD_DIM
+            obs_shapes["critic_lookahead"] = (LOOKAHEAD_DIM,)
         print(f"Observation row caps: {obs_caps[0]} machines, {obs_caps[1]} jobs")
         scenario = None
         if args.scenario:
@@ -112,6 +126,11 @@ def build_env(args, ppo_cfg, run_dir: Path, reward, scenario_generator=None, see
             obs_caps=obs_caps,
             instant_fleet=args.twin_instant_fleet,
             seed_stream=seed_stream,
+            slot_seconds=getattr(args, "slot_seconds", 0.0),
+            gamma_per_second=getattr(ppo_cfg, "gamma_per_second", None),
+            instance_group=getattr(ppo_cfg, "shared_baseline_group", 1),
+            paired=paired_settings(ppo_cfg),
+            critic_lookahead=lookahead_obs(args),
         )
         if getattr(args, "twin_workers", 0) > 1:
             from env_wrappers.twin_env import SubprocTwinEnv
@@ -121,6 +140,12 @@ def build_env(args, ppo_cfg, run_dir: Path, reward, scenario_generator=None, see
             vec_env = VectorizedTwinEnv(num_envs=ppo_cfg.num_envs, **twin_kwargs)
         shutil.copy2(args.twin, run_dir / "des_floor.json")
     elif args.unity:
+        if lookahead_obs(args):
+            raise ValueError("--critic-lookahead / --policy-lookahead are twin only (the player does not export future "
+                             "arrivals)")
+        if getattr(args, "slot_seconds", 0.0) > 0:
+            raise ValueError("--slot-seconds is implemented for --twin only so far (VectorizedUnityEnv wraps per env "
+                             "the same way; add it before training on Unity)")
         from env_wrappers.unity_env import TRAIN_SEED_LOW, VectorizedUnityEnv
         from scenarios import row_caps_for
         # Row caps fit the floors this run will see, so a small floor isn't padded to the largest one.
@@ -249,6 +274,14 @@ def entropy_coef_at(ppo_cfg: PPOConfig, global_step: int) -> float:
     return ppo_cfg.entropy_coef + frac * (ppo_cfg.entropy_coef_final - ppo_cfg.entropy_coef)
 
 
+def prior_kl_coef_at(ppo_cfg: PPOConfig, global_step: int) -> float:
+    """@brief KL-to-prior coefficient at global_step: constant, or linear decay to prior_kl_coef_final."""
+    if ppo_cfg.prior_kl_coef_final is None:
+        return ppo_cfg.prior_kl_coef
+    frac = min(max(global_step / max(ppo_cfg.total_timesteps, 1), 0.0), 1.0)
+    return ppo_cfg.prior_kl_coef + frac * (ppo_cfg.prior_kl_coef_final - ppo_cfg.prior_kl_coef)
+
+
 def check_obs_schema(ckpt: dict, path) -> None:
     """@brief Refuse a checkpoint whose observation layout this network cannot read, with a clear message.
 
@@ -293,8 +326,29 @@ def check_action_layout(ckpt: dict, path) -> None:
         raise ValueError(f"{path}: action layout differs (checkpoint {saved} vs code {ACTION_LAYOUT}).")
 
 
+## @brief CLI settings that decide what a checkpoint's policy was trained on, saved with it (audit m2, 2026-10-07):
+##        evaluate.py takes slot_seconds from here and warns when its own flags differ from the rest.
+RUN_SETTING_KEYS = ("slot_seconds", "critic_lookahead", "policy_lookahead", "twin", "twin_transport", "scenario", "scenario_generator", "params",
+                    "episode_duration_seconds", "random_warmup", "warmup_dispatching_rule", "agv_move_speed",
+                    "agv_handshake_duration", "machine_flexibility", "secondary_time_multiplier", "reward_spec")
+
+
+def lookahead_obs(args) -> bool:
+    """@brief Whether the twin adds the look-ahead features (obs "critic_lookahead"): for a look-ahead critic or policy."""
+    return bool(getattr(args, "critic_lookahead", False) or getattr(args, "policy_lookahead", False))
+
+
+def run_settings(args) -> dict:
+    """@brief The RUN_SETTING_KEYS of @p args as plain values (checkpoints load with weights_only=True)."""
+    out = {}
+    for key in RUN_SETTING_KEYS:
+        value = getattr(args, key, None)
+        out[key] = value if value is None or isinstance(value, (bool, int, float, str)) else str(value)
+    return out
+
+
 def save_checkpoint(path: Path, net, optimizer, global_step: int, ppo_cfg: PPOConfig,
-                    reward_name, row_caps):
+                    reward_name, row_caps, settings: dict = None):
     """@brief Save network, optimizer, and config so a run can be resumed or evaluated.
 
     @details Keep every value a tensor, dict, list, tuple, str, number, bool or None: load_checkpoint uses
@@ -311,10 +365,11 @@ def save_checkpoint(path: Path, net, optimizer, global_step: int, ppo_cfg: PPOCo
         "obs_layout": dict(OBS_LAYOUT),
         "action_layout": dict(ACTION_LAYOUT),
         "obs_row_caps": {"max_machines": row_caps[0], "max_jobs": row_caps[1]},   # informational only
+        "run_settings": settings or {},
         "config": {
             "encoder": dict((getattr(net, "encoder_cfg", None) or EncoderConfig()).__dict__),
             "fusion": FusionConfig().__dict__,
-            "actor_critic": ActorCriticConfig().__dict__,
+            "actor_critic": dict((getattr(net, "ac_cfg", None) or ActorCriticConfig()).__dict__),
             "ppo": ppo_cfg.__dict__,
         },
     }, tmp)
@@ -370,8 +425,9 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
         reward.archive(run_dir)
         print(f"\nReward: {reward.name} ({reward.spec['entry']})")
 
-    # A resumed checkpoint decides the grid normalization (BatchNorm before 2026-10-01, GroupNorm after).
-    ckpt = load_checkpoint(args.resume_from, device) if args.resume_from else None
+    # A resumed checkpoint decides the grid normalization (BatchNorm before 2026-10-01, GroupNorm after). Loaded on the
+    # CPU: nothing touches CUDA until the env's worker processes are forked (audit m3).
+    ckpt = load_checkpoint(args.resume_from, "cpu") if args.resume_from else None
     # A resume keys its instance seeds, action sampling and minibatch order on its resumed step; with the
     # bare train seed every Slurm leg would replay the first leg's instances in order (audit P1.1).
     seed_stream = int(ckpt["global_step"]) if ckpt else 0
@@ -383,45 +439,6 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
             int(np.random.SeedSequence([args.train_seed, seed_stream]).generate_state(1)[0])
         torch.manual_seed(rng_seed)
         np.random.seed(rng_seed)
-
-    # ---- Initialize network ----
-    encoder_cfg = encoder_config_for(ckpt["model_state_dict"]) if ckpt else EncoderConfig()
-    if encoder_cfg.grid_norm == "batch":
-        print("\n[NOTE] the checkpoint's grid CNN uses BatchNorm (before 2026-10-01). It now stays on its running "
-              "statistics during updates too, so its statistics are frozen; the old runs normalized updates with "
-              "minibatch statistics.")
-    net = SchedulingNetwork(
-        encoder_cfg=encoder_cfg,
-        fusion_cfg=FusionConfig(),
-        ac_cfg=ActorCriticConfig(),
-    ).to(device)
-
-    param_summary = net.get_param_summary()
-    print("\nParameter counts:")
-    for name, count in param_summary.items():
-        print(f"  {name:30s} {count:>10,}")
-
-    optimizer = torch.optim.Adam(net.parameters(), lr=ppo_cfg.lr, eps=1e-5)
-
-    resumed_global_step = 0
-    if args.resume_from:
-        check_obs_schema(ckpt, args.resume_from)
-        check_action_layout(ckpt, args.resume_from)
-        net.load_state_dict(ckpt["model_state_dict"])
-        optimizer.load_state_dict(ckpt["optimizer_state_dict"])
-        resumed_global_step = ckpt["global_step"]
-        ckpt_reward = ckpt.get("reward")
-        print(f"\nResumed from {args.resume_from} at step {resumed_global_step:,} "
-              f"(checkpoint reward: {ckpt_reward})")
-        ckpt_horizon = ckpt.get("config", {}).get("ppo", {}).get("discount_horizon_s")   # absent = per-decision (before 10-01)
-        if ckpt_horizon != ppo_cfg.discount_horizon_s:
-            print(f"[WARNING] the checkpoint was trained with discount_horizon_s={ckpt_horizon} "
-                  f"(None = per-decision gamma) but this run uses {ppo_cfg.discount_horizon_s} -- "
-                  "continuing anyway, but this changes the objective mid-training.")
-        if (args.unity or args.twin) and ckpt_reward is not None and ckpt_reward != reward.name:
-            print(f"[WARNING] --reward-spec is '{reward.name}' but the checkpoint was trained "
-                  f"with '{ckpt_reward}' -- continuing anyway, but this changes the objective "
-                  "mid-training.")
 
     # ---- Scripted scenario: a fixed file, a generator of fresh seeded variants, or neither ----
     scenario_generator = None
@@ -458,6 +475,24 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
               + (f" (params {args.params})" if args.params else ""))
 
     # ---- Initialize environments ----
+    # Before the network: SubprocTwinEnv forks its workers here, and nothing has touched CUDA yet (audit m3; a CUDA
+    # context does not survive a fork, so a worker that ever used torch on the GPU would hang).
+    group = ppo_cfg.shared_baseline_group
+    if group > 1:
+        if not args.twin or args.slot_seconds <= 0:
+            raise ValueError("--shared-baseline-group needs --twin and --slot-seconds (it compares envs slot by slot on "
+                             "the same instance; per-decision steps do not line up across envs)")
+        if ppo_cfg.num_envs % group:
+            raise ValueError(f"--num-envs {ppo_cfg.num_envs} is not a multiple of --shared-baseline-group {group}")
+        if args.train_seed < 0 or args.scenario:
+            raise ValueError("--shared-baseline-group needs --scenario-generator and --train-seed >= 0")
+    if ppo_cfg.paired_advantage:
+        if not args.twin or args.slot_seconds <= 0 or ppo_cfg.gamma_per_second is None:
+            raise ValueError("--paired-advantage needs --twin, --slot-seconds and --discount-horizon-s > 0")
+        if group > 1:
+            raise ValueError("--paired-advantage and --shared-baseline-group are two different advantages; pick one")
+        print(f"Paired advantage: vs {ppo_cfg.paired_default or ppo_cfg.prior_pair or 'MDD-TECT'} on "
+              f"{ppo_cfg.paired_futures or 'the own'} future(s), slot + {ppo_cfg.paired_tail_s:,.0f} s tail")
     vec_env, obs_shapes = build_env(args, ppo_cfg, run_dir, reward, scenario_generator, seed_stream)
     row_caps = (obs_shapes["machine_table"][0], obs_shapes["job_table"][0])
     if (args.unity or args.twin) and args.scenario:
@@ -465,6 +500,90 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
             vec_env.load_scenario_all(args.scenario)
         shutil.copy2(args.scenario, run_dir / "scenario.json")
         print(f"Scenario: {args.scenario}")
+
+    # ---- Initialize network ----
+    encoder_cfg = encoder_config_for(ckpt["model_state_dict"]) if ckpt else EncoderConfig()
+    if encoder_cfg.grid_norm == "batch":
+        print("\n[NOTE] the checkpoint's grid CNN uses BatchNorm (before 2026-10-01). It now stays on its running "
+              "statistics during updates too, so its statistics are frozen; the old runs normalized updates with "
+              "minibatch statistics.")
+    from des_twin.lookahead import LOOKAHEAD_DIM
+    ac_cfg = ac_config_for(ckpt["model_state_dict"]) if ckpt else \
+        ActorCriticConfig(critic_extra_dim=LOOKAHEAD_DIM if getattr(args, "critic_lookahead", False) else 0,
+                          policy_extra_dim=LOOKAHEAD_DIM if getattr(args, "policy_lookahead", False) else 0)
+    if bool(ac_cfg.policy_extra_dim) != bool(getattr(args, "policy_lookahead", False)):
+        raise ValueError(f"the checkpoint's policy {'reads' if ac_cfg.policy_extra_dim else 'does not read'} look-ahead "
+                         f"features; {'pass' if ac_cfg.policy_extra_dim else 'drop'} --policy-lookahead to match it")
+    if bool(ac_cfg.critic_extra_dim) != bool(getattr(args, "critic_lookahead", False)):
+        raise ValueError(f"the checkpoint's critic {'reads' if ac_cfg.critic_extra_dim else 'does not read'} look-ahead "
+                         f"features; pass --critic-lookahead {'' if ac_cfg.critic_extra_dim else 'only '}to match it")
+    if ac_cfg.policy_extra_dim:
+        print(f"\nPolicy look-ahead: {ac_cfg.policy_extra_dim} features (des_twin/lookahead.py) appended to the fused "
+              "features; actor and critic both read them")
+    if ac_cfg.critic_extra_dim:
+        print(f"\nCritic-only look-ahead: {ac_cfg.critic_extra_dim} features (des_twin/lookahead.py); the actor never sees them")
+    net = SchedulingNetwork(
+        encoder_cfg=encoder_cfg,
+        fusion_cfg=FusionConfig(),
+        ac_cfg=ac_cfg,
+    ).to(device)
+
+    param_summary = net.get_param_summary()
+    print("\nParameter counts:")
+    for name, count in param_summary.items():
+        print(f"  {name:30s} {count:>10,}")
+
+    # Action prior (action-prior branch, 2026-10-06): a fresh network starts at p0; the KL term is in the update.
+    prior_logp = None
+    if ppo_cfg.prior_pair:
+        prior_logp = prior_log_probs(ppo_cfg.prior_pair, ppo_cfg.prior_prob,
+                                     (JOB_HEAD_RULES, MACHINE_HEAD_RULES)).to(device)
+        if args.resume_from:
+            # A resume keeps the checkpoint's own start (offset buffer or scaled layer). One trained without a prior
+            # never started at p0, so a KL toward it would pull a free policy to p0 mid-run (audit m5).
+            saved = ckpt.get("config", {}).get("ppo", {})
+            if not saved.get("prior_pair"):
+                raise ValueError(f"--prior-pair {ppo_cfg.prior_pair} with --resume-from a checkpoint trained without a "
+                                 "prior: the policy never started at p0. Drop --prior-pair, or start a fresh run.")
+            for key in ("prior_pair", "prior_prob"):
+                if saved.get(key) != getattr(ppo_cfg, key):
+                    print(f"[WARNING] the checkpoint was trained with {key}={saved.get(key)!r}, this run uses "
+                          f"{getattr(ppo_cfg, key)!r}; the KL now pulls toward a different p0 than the policy started at.")
+            ppo_cfg.prior_init = saved.get("prior_init", "scale")   # how it started (no prior_init before 10-07: scale)
+        elif ppo_cfg.prior_init == "offset":
+            net.actor_critic.actor.set_prior_offset(prior_logp)
+        elif ppo_cfg.prior_init == "scale":
+            net.actor_critic.actor.init_prior(prior_logp, ppo_cfg.prior_weight_scale)
+        else:
+            raise ValueError(f"prior_init must be 'offset' or 'scale', got {ppo_cfg.prior_init!r}")
+        how = ("fixed logit offset log p0" if ppo_cfg.prior_init == "offset"
+               else f"output weights x{ppo_cfg.prior_weight_scale}, bias log p0")
+        print(f"\nAction prior {ppo_cfg.prior_pair} (p = {ppo_cfg.prior_prob} per head)"
+              f"{'' if args.resume_from else f', policy started at the prior ({how})'}; KL coef {ppo_cfg.prior_kl_coef}"
+              f"{'' if ppo_cfg.prior_kl_coef_final is None else f' -> {ppo_cfg.prior_kl_coef_final}'}")
+
+    optimizer = torch.optim.Adam(net.parameters(), lr=ppo_cfg.lr, eps=1e-5)
+
+    resumed_global_step = 0
+    if args.resume_from:
+        check_obs_schema(ckpt, args.resume_from)
+        check_action_layout(ckpt, args.resume_from)
+        net.load_state_dict(ckpt["model_state_dict"])
+        optimizer.load_state_dict(ckpt["optimizer_state_dict"])
+        resumed_global_step = ckpt["global_step"]
+        ckpt_reward = ckpt.get("reward")
+        print(f"\nResumed from {args.resume_from} at step {resumed_global_step:,} "
+              f"(checkpoint reward: {ckpt_reward})")
+        ckpt_horizon = ckpt.get("config", {}).get("ppo", {}).get("discount_horizon_s")   # absent = per-decision (before 10-01)
+        if ckpt_horizon != ppo_cfg.discount_horizon_s:
+            print(f"[WARNING] the checkpoint was trained with discount_horizon_s={ckpt_horizon} "
+                  f"(None = per-decision gamma) but this run uses {ppo_cfg.discount_horizon_s} -- "
+                  "continuing anyway, but this changes the objective mid-training.")
+        if (args.unity or args.twin) and ckpt_reward is not None and ckpt_reward != reward.name:
+            print(f"[WARNING] --reward-spec is '{reward.name}' but the checkpoint was trained "
+                  f"with '{ckpt_reward}' -- continuing anyway, but this changes the objective "
+                  "mid-training.")
+
     obs, infos = vec_env.reset()
     watchdog.beat()
     RUN_STATUS["phase"] = "collecting the first rollout"
@@ -482,7 +601,10 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
         device=device,
         action_shape=(len(ACTION_BRANCHES),),
         gamma_per_second=ppo_cfg.gamma_per_second,
+        gae_lambda_time_s=ppo_cfg.gae_lambda_time_s,
     )
+    if ppo_cfg.gae_lambda_time_s is not None:
+        print(f"GAE lambda: {ppo_cfg.gae_lambda} per {ppo_cfg.gae_lambda_time_s:,.0f} simulated s")
     if ppo_cfg.gamma_per_second is None:
         print(f"Discount: gamma = {ppo_cfg.gamma} per decision")
     else:
@@ -506,10 +628,11 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
     start_time = time.time()
     reward_name = reward.name if reward is not None else None
     ckpt_path = run_dir / "checkpoint.pt"
+    settings = run_settings(args)
     if not args.resume_from:
         # Untrained starting policy, as a reference point for evaluation. Skipped when resuming
         # -- that file already exists from the original run and still means "untrained".
-        save_checkpoint(run_dir / "checkpoint_init.pt", net, optimizer, 0, ppo_cfg, reward_name, row_caps)
+        save_checkpoint(run_dir / "checkpoint_init.pt", net, optimizer, 0, ppo_cfg, reward_name, row_caps, settings)
 
     backend = (f"twin ({args.twin_transport}, {args.twin})" if args.twin
                else "Unity" if args.unity else "Placeholder")
@@ -545,6 +668,15 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
     # Canonical text of every config Unity applied, keyed by the config_hash column of episodes.csv (thesis 7.1).
     applied_configs_file = open(run_dir / "applied_configs.jsonl", "a" if args.resume_from else "w")
 
+    # Shared-instance baseline: per env, the episode ordinal and the slot index within it. Envs of a group draw the
+    # same instance seeds, so (ordinal, slot) names the same slot of the same instance across the group.
+    groups = np.arange(ppo_cfg.num_envs) // ppo_cfg.shared_baseline_group
+    episode_ordinal = np.zeros(ppo_cfg.num_envs, dtype=np.int64)
+    episode_slot = np.zeros(ppo_cfg.num_envs, dtype=np.int64)
+    step_keys = np.full((ppo_cfg.rollout_length, ppo_cfg.num_envs), -1, dtype=np.int64)
+    step_paired = np.full((ppo_cfg.rollout_length, ppo_cfg.num_envs), np.nan, dtype=np.float32)
+    ordinal_seed = {}   # (group, ordinal) -> instance seed, to check the group really shares its instances
+
     try:
         for update in range(1, num_updates + 1):
             update_start = time.time()
@@ -579,6 +711,21 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
 
                 buffer.add(obs, actions_np, log_probs_np, rewards, values_np, dones, bootstrap_values, dts)
                 obs = next_obs
+                if ppo_cfg.paired_advantage:
+                    step_paired[step] = [np.nan if i.get("paired_advantage") is None else i["paired_advantage"]
+                                         for i in infos]
+                if ppo_cfg.shared_baseline_group > 1:
+                    step_keys[step] = episode_ordinal * (1 << 20) + episode_slot
+                    episode_slot += 1
+                    for i in np.flatnonzero(dones):
+                        seed = (infos[i].get("episode") or {}).get("seed")
+                        known = ordinal_seed.setdefault((int(groups[i]), int(episode_ordinal[i])), seed)
+                        if known != seed:
+                            raise RuntimeError(f"shared baseline: env {i} played seed {seed} as episode "
+                                               f"{episode_ordinal[i]} of group {groups[i]}, another member played "
+                                               f"{known}; the group's instance streams have diverged")
+                        episode_ordinal[i] += 1
+                        episode_slot[i] = 0
                 watchdog.beat()
                 finished_now = log_episodes(writer, infos, global_step, recent_episodes, episode_csv,
                                             applied_configs_file)
@@ -597,6 +744,21 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
                 last_values = last_values.cpu().numpy()
 
             buffer.compute_gae(last_values)
+            baseline_stats = None
+            if ppo_cfg.shared_baseline_group > 1:
+                baseline_stats = buffer.apply_shared_baseline(step_keys, groups, ppo_cfg.shared_baseline_mode)
+                # Drop the seed checks of episodes every member has finished (keeps the dict small).
+                done_upto = {g: int(episode_ordinal[groups == g].min()) for g in np.unique(groups)}
+                ordinal_seed = {k: v for k, v in ordinal_seed.items() if k[1] >= done_upto[k[0]]}
+            if ppo_cfg.paired_advantage:
+                # The slot's paired same-future advantage replaces GAE's (a branch that could not reproduce the
+                # state keeps GAE's); the critic still regresses the GAE returns.
+                have = ~np.isnan(step_paired)
+                baseline_stats = {"paired_share": float(have.mean()),
+                                  "paired_nonzero_share": float((have & (step_paired != 0)).mean()),
+                                  "adv_var_gae": float(np.var(buffer.advantages))}
+                buffer.advantages = np.where(have, step_paired, buffer.advantages).astype(np.float32)
+                baseline_stats["adv_var_paired"] = float(np.var(buffer.advantages))
             timing["infer_s"] += time.time() - t_a
             t_update = time.time()
             critic = net.actor_critic.critic
@@ -613,14 +775,16 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
             total_pg_loss = 0.0
             total_v_loss = 0.0
             total_entropy = 0.0
+            total_prior_kl = 0.0
             n_batches = 0
 
             ent_coef = entropy_coef_at(ppo_cfg, global_step)
+            kl_coef = prior_kl_coef_at(ppo_cfg, global_step)
             for epoch in range(ppo_cfg.num_epochs):
                 for batch in buffer.get_batches(ppo_cfg.batch_size):
-                    new_log_probs, new_values, entropy = net.evaluate(
-                        batch["obs"], batch["actions"]
-                    )
+                    out = net.evaluate(batch["obs"], batch["actions"], prior_logp)
+                    new_log_probs, new_values, entropy = out[:3]
+                    prior_kl = out[3] if prior_logp is not None else None
 
                     ratio = torch.exp(new_log_probs - batch["old_log_probs"])
                     surr1 = ratio * batch["advantages"]
@@ -643,6 +807,10 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
                         + ppo_cfg.value_coef * v_loss
                         + ent_coef * ent_loss
                     )
+                    if prior_kl is not None:
+                        if kl_coef > 0:
+                            loss = loss + kl_coef * prior_kl.mean()
+                        total_prior_kl += prior_kl.mean().item()
 
                     optimizer.zero_grad()
                     loss.backward()
@@ -679,8 +847,13 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
             writer.add_scalar("losses/value", total_v_loss / n_batches, global_step)
             writer.add_scalar("losses/entropy", total_entropy / n_batches, global_step)
             writer.add_scalar("charts/entropy_coef", ent_coef, global_step)
+            if prior_logp is not None:
+                writer.add_scalar("losses/prior_kl", total_prior_kl / n_batches, global_step)
+                writer.add_scalar("charts/prior_kl_coef", kl_coef, global_step)
             writer.add_scalar("charts/step_reward_mean", avg_reward, global_step)
             writer.add_scalar("charts/explained_variance", explained_var, global_step)
+            for key, value in (baseline_stats or {}).items():
+                writer.add_scalar(f"charts/{key}", value, global_step)
             writer.add_scalar("charts/return_mean", float(critic.ret_mean), global_step)
             writer.add_scalar("charts/return_std", float(critic.ret_std), global_step)
             writer.add_scalar("charts/sps", sps, global_step)
@@ -711,12 +884,13 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
                     f"VL {total_v_loss/n_batches:.4f} | "
                     f"EV {explained_var:+.2f} | "
                     f"Ent {total_entropy/n_batches:.3f} | "
+                    + (f"KLp {total_prior_kl/n_batches:.3f} | " if prior_logp is not None else "") +
                     f"T {update_time:.2f}s"
                 )
 
             if args.save_every > 0 and update % args.save_every == 0:
                 save_checkpoint(run_dir / f"checkpoint_step{global_step}.pt", net, optimizer,
-                                global_step, ppo_cfg, reward_name, row_caps)
+                                global_step, ppo_cfg, reward_name, row_caps, settings)
 
             # ---- Progress file, heartbeat messages, watchdog ----
             watchdog.beat()
@@ -740,7 +914,7 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
                 last_heartbeat = time.time()
     finally:
         # Save and shut Unity down even on Ctrl-C, so long runs keep their progress.
-        save_checkpoint(ckpt_path, net, optimizer, global_step, ppo_cfg, reward_name, row_caps)
+        save_checkpoint(ckpt_path, net, optimizer, global_step, ppo_cfg, reward_name, row_caps, settings)
         writer.close()
         episode_file.close()
         applied_configs_file.close()
@@ -809,6 +983,9 @@ if __name__ == "__main__":
                         help="Train on the event-based twin (env/des_twin) instead of Unity: the floor exported by a "
                              "player with -destrace (built after 2026-10-01) for the layout and fleet size trained "
                              "on. Needs --scenario or --scenario-generator; failures and flexibility are refused")
+    parser.add_argument("--slot-seconds", type=float, default=0.0,
+                        help="Slot actions: hold each chosen rule pair for this many simulated seconds (all decisions "
+                             "in the slot), as the switching oracle does; 0 = choose at every decision (2026-10-05)")
     parser.add_argument("--twin-workers", type=int, default=0,
                         help="With --twin: step the envs in this many worker processes (0/1 = in this process)")
     parser.add_argument("--twin-transport", type=str, default="kinematic",
@@ -879,6 +1056,45 @@ if __name__ == "__main__":
                              "0 = per-decision gamma 0.99, as in every run before 2026-10-01")
     parser.add_argument("--value-norm-beta", type=float, default=PPOConfig.value_norm_beta,
                         help="PopArt value normalization rate per rollout (0 = off: raw-scale critic, as before 2026-10-03)")
+    parser.add_argument("--prior-pair", type=str, default=None, metavar="JOB-MACHINE",
+                        help="Action prior (e.g. MDD-TECT): a fresh network starts at it; see --prior-kl-coef")
+    parser.add_argument("--prior-prob", type=float, default=PPOConfig.prior_prob,
+                        help="Probability each head of the prior puts on the pair's rule")
+    parser.add_argument("--prior-kl-coef", type=float, default=0.0,
+                        help="Weight of KL(pi || prior) in the loss (0 = prior only as the starting policy)")
+    parser.add_argument("--prior-kl-coef-final", type=float, default=None,
+                        help="If set, decay the KL-to-prior coefficient linearly to this value over --total-timesteps")
+    parser.add_argument("--prior-init", choices=("offset", "scale"), default=PPOConfig.prior_init,
+                        help="How a fresh network starts at the prior: offset = fixed logit offset log p0 on a default "
+                             "output layer (since 2026-10-07); scale = output weights x --prior-weight-scale and bias "
+                             "log p0 (the 10-06 runs, 0.01), which also scales the policy gradient into the trunk")
+    parser.add_argument("--prior-weight-scale", type=float, default=PPOConfig.prior_weight_scale,
+                        help="With --prior-init scale: factor on the actor's output weights")
+    parser.add_argument("--gae-lambda-time-s", type=float, default=0.0,
+                        help="Decay GAE lambda over simulated time: lambda ** (dt / this) per step, e.g. 900 (needs "
+                             "--discount-horizon-s > 0); 0 = lambda per step (per decision, or per slot)")
+    parser.add_argument("--shared-baseline-group", type=int, default=1,
+                        help="Shared-instance baseline: run envs in groups of this size on the same instance seeds and "
+                             "compare each slot's advantage with the group's other envs at the same slot "
+                             "(--twin --slot-seconds only; --num-envs must be a multiple). 1 = off")
+    parser.add_argument("--shared-baseline-mode", choices=("residual", "return"), default=PPOConfig.shared_baseline_mode,
+                        help="residual: A - leave-one-out mean A of the group (next to V); return: G - leave-one-out "
+                             "mean G (instead of V)")
+    parser.add_argument("--critic-lookahead", action="store_true",
+                        help="Twin: give the critic (never the policy) the next 30/60/120 min of known arrivals, load, "
+                             "due-date slack and AGV fleet (des_twin/lookahead.py; asymmetric actor-critic)")
+    parser.add_argument("--policy-lookahead", action="store_true",
+                        help="Twin: give the policy (and critic) the same look-ahead features as --critic-lookahead, "
+                             "appended to the fused features (rq3-lookahead, real schedule; excludes --critic-lookahead)")
+    parser.add_argument("--paired-advantage", action="store_true",
+                        help="Same-future paired advantage per slot (--twin --slot-seconds): G(chosen, then default) - "
+                             "G(default) on redrawn futures replaces the GAE advantage (env_wrappers/paired_slot_env.py)")
+    parser.add_argument("--paired-futures", type=int, default=PPOConfig.paired_futures,
+                        help="Redrawn futures per slot for --paired-advantage (0 = the instance's own future only)")
+    parser.add_argument("--paired-tail-s", type=float, default=PPOConfig.paired_tail_s,
+                        help="Default-pair tail after the slot for --paired-advantage, simulated seconds")
+    parser.add_argument("--paired-default", type=str, default=None, metavar="JOB-MACHINE",
+                        help="Reference pair for --paired-advantage (default: --prior-pair, else MDD-TECT)")
     parser.add_argument("--ent-coef-final", type=float, default=None,
                         help="If set, decay the entropy coefficient linearly to this value over --total-timesteps")
     parser.add_argument("--torch-threads", type=int, default=0,
@@ -899,6 +1115,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.twin and args.unity:
         parser.error("--twin and --unity are mutually exclusive")
+    if args.policy_lookahead and args.critic_lookahead:
+        parser.error("--policy-lookahead already gives the critic the look-ahead features; drop --critic-lookahead")
 
     cfg = PPOConfig(
         total_timesteps=args.total_timesteps,
@@ -910,6 +1128,19 @@ if __name__ == "__main__":
         entropy_coef_final=args.ent_coef_final,
         discount_horizon_s=args.discount_horizon_s if args.discount_horizon_s > 0 else None,
         value_norm_beta=args.value_norm_beta,
+        prior_pair=args.prior_pair,
+        prior_prob=args.prior_prob,
+        prior_kl_coef=args.prior_kl_coef,
+        prior_kl_coef_final=args.prior_kl_coef_final,
+        prior_init=args.prior_init,
+        prior_weight_scale=args.prior_weight_scale,
+        gae_lambda_time_s=args.gae_lambda_time_s if args.gae_lambda_time_s > 0 else None,
+        shared_baseline_group=args.shared_baseline_group,
+        shared_baseline_mode=args.shared_baseline_mode,
+        paired_advantage=args.paired_advantage,
+        paired_futures=args.paired_futures,
+        paired_tail_s=args.paired_tail_s,
+        paired_default=args.paired_default,
     )
     if args.torch_threads > 0:
         torch.set_num_threads(args.torch_threads)

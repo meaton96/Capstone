@@ -1,0 +1,14 @@
+{
+ "run_id": "train-due-twin-slot-prior-kldecay_s1",
+ "label": "train-due-twin-slot-prior-kldecay_s1 (local on ubuntu)",
+ "update": 195,
+ "num_updates": 195,
+ "global_step": 99840,
+ "total_timesteps": 100000,
+ "sps": 15.42,
+ "eta_hours": 0.0,
+ "episodes": 4160,
+ "recent_return": -172.843,
+ "recent_mean_flow": 2009.6,
+ "updated_at": "2026-10-07T01:09:03"
+}

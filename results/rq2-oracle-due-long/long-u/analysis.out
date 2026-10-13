@@ -1,0 +1,38 @@
+long-u: 8 seeds finished
+== Per seed (tardiness, 1000 job-s; best-on-average pair ATC-ECT) ==
+      best_pair_value  per_seed_best per_seed_best_pair   oracle  total_%  switch_%  vs_SRT-TECT_%                                                                                                    schedule
+seed                                                                                                                                                                                                          
+0              65.114         63.215           ATC-TECT   57.324   11.964     9.318         18.630  ATC-TECT|ATC-TECT|ATC-TECT|ATC-TECT|ATC-TECT|ATC-TECT|ATC-ECT|MDD-TECT|EDD-TECT|SRT-SRWT|SRT-SRWT|SRT-TECT
+1              77.859         77.859            ATC-ECT   71.485    8.186     8.186         16.078          ATC-ECT|ATC-ECT|ATC-ECT|ATC-ECT|ATC-ECT|MDD-TECT|SRT-ECT|SRT-ECT|EDD-ECT|MDD-TECT|MDD-TECT|MDD-ECT
+2              59.274         52.496           ATC-TECT   47.571   19.743     9.381         19.948        ATC-TECT|ATC-ECT|ATC-ECT|MDD-ECT|MDD-ECT|MDD-ECT|MDD-ECT|MDD-TECT|MDD-TECT|SRT-TECT|SRT-TECT|SRT-ECT
+3             391.724        391.724            ATC-ECT  367.892    6.084     6.084         11.334    ATC-ECT|MDD-TECT|SRT-SRWT|MDD-TECT|MDD-TECT|MDD-TECT|MDD-TECT|MDD-TECT|MDD-TECT|MDD-TECT|MDD-ECT|MDD-ECT
+4              30.714         30.407            EDD-ECT   29.345    4.457     3.493         16.307       EDD-ECT|EDD-ECT|MDD-TECT|MDD-TECT|MDD-TECT|MDD-ECT|MDD-TECT|MDD-TECT|MDD-ECT|MDD-TECT|MDD-ECT|MDD-ECT
+5             144.856        144.856            ATC-ECT  128.517   11.279    11.279         13.567       ATC-ECT|ATC-ECT|EDD-TECT|EDD-TECT|ATC-TECT|ATC-TECT|ATC-TECT|ATC-ECT|ATC-ECT|MDD-ECT|MDD-ECT|SRT-SRWT
+6             129.779        126.776           ATC-TECT  102.376   21.116    19.247         21.629         ATC-TECT|SPT-ECT|ATC-SRWT|ATC-TECT|ATC-ECT|ATC-ECT|ATC-ECT|ATC-ECT|MDD-SRWT|MDD-ECT|MDD-ECT|SRT-ECT
+7             484.857        471.683            MDD-ECT  466.537    3.778     1.091          6.157       MDD-ECT|MDD-ECT|MDD-ECT|MDD-ECT|MDD-TECT|SRT-TECT|SRT-TECT|SRT-TECT|SRT-TECT|MDD-TECT|MDD-ECT|MDD-ECT 
+
+total_% vs ATC-ECT: mean 10.83, median 9.73, seeds > 2%: 8/8 (100%)
+switch_% vs per-seed best: mean 8.51, median 8.75
+oracle vs SRT-TECT: mean 15.46, median 16.19
+
+== Fixed pairs: mean gap to the per-seed best (%), wins ==
+          gap_%  wins
+ATC-ECT    2.76   3.0
+ATC-TECT   5.00   3.0
+SRT-TECT   8.30   0.0
+MDD-ECT    9.99   1.0
+MDD-TECT  11.28   0.0
+SRT-ECT   11.91   0.0
+SPT-ECT   16.20   0.0
+SPT-TECT  17.07   0.0
+EDD-TECT  21.84   0.0
+EDD-ECT   22.19   1.0
+ATC-SRWT  33.90   0.0
+MDD-SRWT  38.73   0.0
+SRT-SRWT  42.80   0.0
+SPT-SRWT  46.44   0.0
+EDD-SRWT  58.51   0.0 
+
+oracle job rules: MDD 46%, ATC 31%, SRT 16%, EDD 6%, SPT 1%
+
+oracle schedule's time in system vs the seed's best fixed pair on time in system: -1.10% (mean)

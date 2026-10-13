@@ -1,0 +1,36 @@
+== worst 8 seeds (mean of s1/s2 gap to MDD-TECT)
+      gap_s1_%  gap_s2_%  mddtect  mddtect_vs_own_best_%  own_best  oracle_gain_%  surge_share  short_share  mean_c  mean_op  warmup_h  jobs
+seed                                                                                                                                        
+37       29.55     14.05    88.43                   0.00  MDD-TECT           1.27         0.09         0.25    2.21   301.49      0.98   291
+7        19.62      9.64   478.88                   1.31   SRT-ECT           3.15         0.13         0.37    2.09   308.95      2.26   334
+34       13.41     14.40    48.28                   0.00  MDD-TECT          15.20         0.00         0.25    2.10   364.28      0.37   224
+20        4.87     19.78   122.83                   0.96   MDD-ECT          15.12         0.75         0.25    2.07   315.52      0.00   326
+36        7.48      9.45   146.56                   0.00  MDD-TECT           0.86         0.00         0.25    2.05   330.80      1.50   339
+5         5.26      8.61   308.58                   4.37   SRT-ECT           6.13         0.25         0.33    1.98   290.48      0.48   354
+33        5.23      4.88   105.84                   3.80  SPT-TECT          18.91         0.50         0.25    2.24   315.78      1.40   329
+26        3.21      2.09   154.70                   0.00  MDD-TECT           3.52         0.00         0.53    2.35   313.32      1.32   283
+
+== group means: worst 8 vs the other 32
+                       worst8    rest
+gap_s1_%                11.08   -7.17
+gap_s2_%                10.36   -5.16
+mddtect                181.76  170.05
+mddtect_vs_own_best_%    1.30   12.58
+oracle_gain_%            8.02   17.42
+surge_share              0.21    0.23
+short_share              0.31    0.23
+mean_c                   2.14    2.14
+mean_op                317.58  339.95
+warmup_h                 1.04    1.12
+jobs                   310.00  280.72
+
+== Spearman correlation with the mean policy gap (40 seeds)
+mddtect                  0.40
+mddtect_vs_own_best_%   -0.74
+oracle_gain_%           -0.63
+surge_share             -0.01
+short_share              0.38
+mean_c                  -0.13
+mean_op                 -0.28
+warmup_h                 0.14
+jobs                     0.43

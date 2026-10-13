@@ -1,0 +1,11 @@
+eval-due-twin: 40 seeds; consistency vs B2 fixed: max |diff| 1.45e-05
+best-on-average fixed pair: MDD-TECT (mean tardiness 172.39); oracle mean 153.78
+
+                                        seeds  mean_tard  gap_best_avg_%  gap_own_best_%  oracle_gap_closed_med  oracle_gap_closed_mean  beats_best_avg
+policy                                                                                                                                                 
+ckpt:train-due-twin_s0/checkpoint          40    190.775          17.184          20.856                 -1.292                  -2.535               1
+ckpt:train-due-twin_s0/checkpoint_init     40    247.837          44.513          55.483                 -3.225                  -7.568               0
+ckpt:train-due-twin_s1/checkpoint          40    193.301          11.354          19.413                 -0.764                  -2.972               6
+ckpt:train-due-twin_s2/checkpoint          40    200.713          13.911          22.195                 -0.905                  -3.344               7
+
+(gaps: median % of tardiness, < 0 = better than the pair; oracle gap closed: 1 = as good as the oracle)

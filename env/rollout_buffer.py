@@ -28,7 +28,8 @@ class RolloutBuffer:
     def __init__(self, rollout_length: int, num_envs: int,
                  obs_shapes: dict, gamma: float = 0.99,
                  gae_lambda: float = 0.95, device: str = "cpu",
-                 action_shape: tuple = (), gamma_per_second: Optional[float] = None):
+                 action_shape: tuple = (), gamma_per_second: Optional[float] = None,
+                 gae_lambda_time_s: Optional[float] = None):
         """@brief Construct the rollout buffer and pre-allocate storage.
 
         @param rollout_length  Number of environment steps per rollout.
@@ -44,7 +45,11 @@ class RolloutBuffer:
                                action, (n_branches,) for a branched action.
         @param gamma_per_second  If set, discount over simulated time instead (SMDP form): step t
                                is discounted by gamma_per_second ** dts[t]. See compute_gae.
+        @param gae_lambda_time_s  If set (needs @p gamma_per_second), λ decays over simulated time too: step t uses
+                               gae_lambda ** (dts[t] / gae_lambda_time_s) (audit M2, 2026-10-07). See compute_gae.
         """
+        if gae_lambda_time_s is not None and (gamma_per_second is None or gae_lambda_time_s <= 0):
+            raise ValueError("gae_lambda_time_s needs gamma_per_second (discounting over simulated time) and must be > 0")
         ## @brief Number of environment steps collected per rollout.
         self.rollout_length = rollout_length
         ## @brief Number of parallel environments.
@@ -55,6 +60,8 @@ class RolloutBuffer:
         self.gamma_per_second = gamma_per_second
         ## @brief GAE smoothing parameter λ.
         self.gae_lambda = gae_lambda
+        ## @brief Seconds per λ factor when λ decays over simulated time, or None for λ per step.
+        self.gae_lambda_time_s = gae_lambda_time_s
         ## @brief Torch device for mini-batch tensors.
         self.device = device
         ## @brief Write cursor into the time dimension (0-indexed).
@@ -154,7 +161,10 @@ class RolloutBuffer:
         Discounting. Decisions are not evenly spaced in simulated time, while the reward already
         integrates over the time between them, so this is a semi-MDP. With @ref gamma_per_second
         set, each step uses its own discount g_t = gamma_per_second ** dts[t] in the bootstrap term
-        and the GAE recursion (λ stays per decision); otherwise g_t = @ref gamma for every step.
+        and the GAE recursion; otherwise g_t = @ref gamma for every step. λ is per step unless
+        @ref gae_lambda_time_s is set, when step t uses λ_t = gae_lambda ** (dts[t] / gae_lambda_time_s). Per decision,
+        λ = 0.95 spans about 20 decisions (~240 s at ~12 s a decision) against a 3,000-10,800 s discount horizon, so
+        the advantage leans on the critic (audit M2); over time it spans the same seconds at any decision rate.
 
         @param last_values  Bootstrap values V(s_T) for the observation that
                             follows the final stored step, shape (num_envs,).
@@ -164,6 +174,10 @@ class RolloutBuffer:
             discounts = np.full_like(self.dts, self.gamma)
         else:
             discounts = np.power(self.gamma_per_second, self.dts, dtype=np.float64).astype(np.float32)
+        if self.gae_lambda_time_s is None:
+            lambdas = np.full_like(self.dts, self.gae_lambda)
+        else:
+            lambdas = np.power(self.gae_lambda, self.dts / self.gae_lambda_time_s, dtype=np.float64).astype(np.float32)
         for t in reversed(range(self.rollout_length)):
             next_values = last_values if t == self.rollout_length - 1 else self.values[t + 1]
             next_nonterminal = 1.0 - self.dones[t]
@@ -175,10 +189,59 @@ class RolloutBuffer:
                 + g * self.bootstrap_values[t]
                 - self.values[t]
             )
-            gae = delta + g * self.gae_lambda * next_nonterminal * gae
+            gae = delta + g * lambdas[t] * next_nonterminal * gae
             self.advantages[t] = gae
 
         self.returns = self.advantages + self.values
+
+    def apply_shared_baseline(self, keys: np.ndarray, groups: np.ndarray, mode: str = "residual") -> dict:
+        """@brief Shared-instance baseline (2026-10-07, credit trace item 3; Mao et al. ICLR 2019, Decima): replace each
+        step's advantage by a leave-one-out comparison with the other envs that played the same slot of the same
+        instance. Call after @ref compute_gae.
+
+        @details Envs of one group draw the same instance seeds (twin_env.VectorizedTwinEnv instance_group), and the twin
+        is deterministic given the instance and the actions, so the group's envs differ only in their sampled
+        actions. Returns spread about 68% of their mean across instances, and the critic cannot see the instance's
+        future arrivals; the other envs on the same instance can. Their returns do not depend on this env's action,
+        so subtracting them keeps the policy gradient unbiased.
+          - "residual" (baseline next to V): A_i = A_i - mean_{j != i} A_j, where A = λ-return - V is the GAE
+            advantage. V keeps what the state says; the group removes what the instance's future adds.
+          - "return": A_i = G_i - mean_{j != i} G_j with G the λ-return (the critic is not used for the advantage).
+        Steps whose (group, key) has no other member in this rollout keep their GAE advantage. @ref returns (the
+        critic's target) is unchanged.
+
+        @param keys    (rollout_length, num_envs) int64: the same value for the same slot of the same instance within
+                       a group (train.py: episode ordinal * 2**20 + slot index in the episode); -1 = no key.
+        @param groups  (num_envs,) group id of each env.
+        @param mode    "residual" or "return".
+        @return Stats for logging: share of steps that got a shared baseline, and the advantage variance before and
+                after (over those steps).
+        """
+        if mode not in ("residual", "return"):
+            raise ValueError(f"shared baseline mode must be 'residual' or 'return', got {mode!r}")
+        values = self.advantages if mode == "residual" else self.returns
+        buckets = {}
+        for t in range(self.rollout_length):
+            for e in range(self.num_envs):
+                if keys[t, e] >= 0:
+                    buckets.setdefault((int(groups[e]), int(keys[t, e])), []).append((t, e))
+        new = self.advantages.copy()
+        covered = []
+        for members in buckets.values():
+            if len(members) < 2:
+                continue
+            vals = np.array([values[t, e] for t, e in members], dtype=np.float64)
+            loo = (vals.sum() - vals) / (len(vals) - 1)
+            for (t, e), v, b in zip(members, vals, loo):
+                new[t, e] = v - b
+                covered.append((t, e))
+        stats = {"shared_baseline_share": len(covered) / max(self.rollout_length * self.num_envs, 1)}
+        if covered:
+            idx = tuple(np.array(covered).T)
+            stats["adv_var_before"] = float(np.var(self.advantages[idx]))
+            stats["adv_var_after"] = float(np.var(new[idx]))
+        self.advantages = new.astype(np.float32)
+        return stats
 
     def get_batches(self, batch_size: int) -> Generator:
         """@brief Yield randomised mini-batches as PyTorch tensors.

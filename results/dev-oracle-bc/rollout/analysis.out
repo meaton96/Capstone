@@ -1,0 +1,10 @@
+dev-oracle-bc rollout: 40 seeds; consistency vs B2 fixed: max |diff| 1.45e-05
+best-on-average fixed pair: MDD-TECT (mean tardiness 172.39); oracle mean 153.78
+
+                               seeds  mean_tard  gap_best_avg_%  gap_own_best_%  oracle_gap_closed_med  oracle_gap_closed_mean  beats_best_avg
+policy                                                                                                                                        
+ckpt:dev-oracle-bc/bc_full_s0     40    167.856          -3.627           2.970                  0.270                   0.125              26
+ckpt:dev-oracle-bc/bc_full_s1     40    168.650          -1.989           1.799                  0.141                  -0.286              28
+ckpt:dev-oracle-bc/bc_full_s2     40    170.573          -1.879           5.306                  0.105                  -0.133              24
+
+(gaps: median % of tardiness, < 0 = better than the pair; oracle gap closed: 1 = as good as the oracle)

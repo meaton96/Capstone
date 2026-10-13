@@ -156,20 +156,25 @@ class CheckpointPolicy:
     kind = "checkpoint"
 
     def __init__(self, path, device: str = "cpu", deterministic: bool = True):
-        from models.network import SchedulingNetwork, encoder_config_for
+        from models.network import SchedulingNetwork, ac_config_for, encoder_config_for
 
         path = Path(path)
         from train import check_action_layout, check_obs_schema, load_checkpoint
         checkpoint = load_checkpoint(path, device)
         check_obs_schema(checkpoint, path)
         check_action_layout(checkpoint, path)
+        # The policy uses the actor only; a look-ahead critic (ac_config_for) is loaded but never called here.
         self.net = SchedulingNetwork(encoder_config_for(checkpoint["model_state_dict"]), FusionConfig(),
-                                     ActorCriticConfig()).to(device)
+                                     ac_config_for(checkpoint["model_state_dict"])).to(device)
         self.net.load_state_dict(checkpoint["model_state_dict"])
         self.net.eval()
         self.device = device
         self.deterministic = deterministic
         self.name = f"ckpt:{path.parent.name}/{path.stem}" + ("" if deterministic else "~sampled")
+        ## @brief What the policy was trained on (train.run_settings; {} for checkpoints before 2026-10-07) and its
+        ##        PPO config, so main() can take slot_seconds and the discount from them and warn on mismatches.
+        self.settings = dict(checkpoint.get("run_settings") or {})
+        self.ppo = dict((checkpoint.get("config") or {}).get("ppo") or {})
         ## @brief Per-head action probabilities from the latest call (for decision logging).
         self.last_probs = None
 
@@ -199,7 +204,7 @@ def build_policies(pdr_spec: str, checkpoints, device: str, deterministic: bool)
 
 
 def run_evaluation(env, policies: list, schedule: list, log=print, decision_writer=None,
-                   scenario_generator=None, scenario_dir=None) -> list:
+                   scenario_generator=None, scenario_dir=None, gamma_per_second=None) -> list:
     """@brief Play one episode per (policy index, seed) in @p schedule, in order.
 
     @param env              A @ref UnitySchedulingEnv (or anything with queue_seeds /
@@ -215,6 +220,10 @@ def run_evaluation(env, policies: list, schedule: list, log=print, decision_writ
     @param scenario_dir     If set, each seed's scenario is written once to scenario_dir/s<seed>.json
                             and queued as that path, not inline: Unity's gRPC receive limit is
                             4 MiB per message, and a few linked-floor scenarios exceed it.
+    @param gamma_per_second  If set, each row also gets discounted_return: sum gamma_s^(tau - tau_0) r over the
+                            window, the quantity training maximizes (without its bootstrap past the window end), next
+                            to the undiscounted return that is scored (audit M3, 2026-10-07). A slot env must discount
+                            within its slots with the same gamma_s (SlotActionEnv gamma_per_second).
     @return One row dict per completed episode, in schedule order.
     """
     total = len(schedule)
@@ -251,6 +260,7 @@ def run_evaluation(env, policies: list, schedule: list, log=print, decision_writ
         raise RuntimeError("This Unity build has no reward-metrics sensor; rebuild the player.")
 
     rows, discarded, start, episode_step, consumed = [], 0, time.time(), 0, 0
+    disc_return, discount = 0.0, 1.0
     while len(rows) < total:
         metrics = env.current_metrics
         index = int(metrics.episode_seed_index)
@@ -262,10 +272,15 @@ def run_evaluation(env, policies: list, schedule: list, log=print, decision_writ
             decision_writer.writerow(decision_row(policy, schedule[index][1], index, episode_step, metrics,
                                                   action, obs.get("action_mask")))
         episode_step += 1
-        obs, _, done, info = env.step(action)
+        obs, reward, done, info = env.step(action)
+        if gamma_per_second is not None:
+            disc_return += discount * float(reward)
+            discount *= gamma_per_second ** float(info.get("dt") or 0.0)
         if not done:
             continue
         episode_step = 0
+        episode_disc_return = disc_return if gamma_per_second is not None else None
+        disc_return, discount = 0.0, 1.0
         # Unity has already started the next episode, consuming queue index started_index; refill
         # now so the following items arrive (with the next step) before this new episode ends.
         started_index = int(env.current_metrics.episode_seed_index)
@@ -293,6 +308,7 @@ def run_evaluation(env, policies: list, schedule: list, log=print, decision_writ
             "mean_flow_time": episode["mean_flow_time"],
             "total_flow_time": episode["total_flow_time"],
             "return": episode["return"],
+            "discounted_return": episode_disc_return,
             "decisions": episode["length"],
             "jobs_exited": episode["jobs_exited"],
             "deadlock": episode["deadlock"],
@@ -335,7 +351,13 @@ def _gap_pct(values, best):
     return float(100 * np.mean(gaps)) if gaps else None
 
 
-def summarize(rows: list, scored: bool = True) -> list:
+def _cost_change_pct(policy_costs, ref_costs):
+    """@brief 100 * (mean policy cost / mean reference cost - 1) over paired seeds: < 0 beats the reference."""
+    ref = float(np.mean(ref_costs))
+    return float(100 * (np.mean(policy_costs) / ref - 1)) if ref != 0 else None
+
+
+def summarize(rows: list, scored: bool = True, oracle: dict = None, best_fixed: str = None) -> list:
     """@brief Per-policy means, plus paired gaps against the best PDR rule on each seed.
 
     @details The gap for a policy is the mean over seeds of (policy − best PDR on that seed) /
@@ -347,10 +369,21 @@ def summarize(rows: list, scored: bool = True) -> list:
     so its gap is on -return: > 0 is worse. Total flow and makespan are censored by jobs still
     in the system (and, with random warm-up, count jobs that finished during the warm-up); their
     gaps are kept for reference only. Rows sort by the return gap when @p scored, else by name.
+
+    The three comparisons every policy result reports (user, 2026-10-07; as results/rq2-realizable/analyze.py), each
+    the change in mean cost (-return) over the seeds both have, < 0 better:
+      - vs_best_fixed_pct: the best fixed pair overall (@p best_fixed, e.g. chosen on training seeds; else the PDR
+        with the best mean return on these seeds, which favours the baseline);
+      - vs_hindsight_fixed_pct: each instance's own best fixed pair (the per-seed best PDR above);
+      - vs_oracle_pct: the switching oracle (@p oracle, seed -> oracle return), and oracle_gain_captured_pct, the
+        share of the oracle's gain over the best fixed pair the policy realizes.
     """
+    def clean(r):
+        return not (r["deadlock"] or r["timed_out"] or r.get("tick_error"))
+
     best = {}
     for row in rows:
-        if row["kind"] == "pdr" and not (row["deadlock"] or row["timed_out"] or row.get("tick_error")):
+        if row["kind"] == "pdr" and clean(row):
             ret, makespan, flow = best.get(row["seed"], (-math.inf, math.inf, math.inf))
             best[row["seed"]] = (max(ret, row["return"]), min(makespan, row["makespan"]),
                                  min(flow, row["total_flow_time"]))
@@ -358,6 +391,19 @@ def summarize(rows: list, scored: bool = True) -> list:
     by_policy = {}
     for row in rows:
         by_policy.setdefault(row["policy"], []).append(row)
+
+    # The best fixed pair overall: named, or the PDR with the best mean return on the seeds every PDR finished cleanly.
+    fixed_returns = None
+    if scored:
+        pdr = {name: {r["seed"]: r["return"] for r in rs if clean(r)}
+               for name, rs in by_policy.items() if rs[0]["kind"] == "pdr"}
+        if best_fixed is not None and best_fixed not in pdr:
+            raise ValueError(f"best fixed pair {best_fixed!r} was not evaluated (pass it in --pdr)")
+        if best_fixed is None and pdr:
+            common = set.intersection(*(set(v) for v in pdr.values()))
+            if common:
+                best_fixed = max(pdr, key=lambda n: np.mean([pdr[n][s] for s in common]))
+        fixed_returns = pdr.get(best_fixed)
 
     summary = []
     for name, policy_rows in by_policy.items():
@@ -375,18 +421,82 @@ def summarize(rows: list, scored: bool = True) -> list:
             "deadlocks": int(sum(bool(r["deadlock"]) for r in policy_rows)),
             "timeouts": int(sum(bool(r["timed_out"]) for r in policy_rows)),
         }
+        discounted = [r.get("discounted_return") for r in policy_rows]
+        if scored and discounted and all(d is not None for d in discounted):
+            entry["discounted_return_mean"] = float(np.mean(discounted))
         # Deadlocked / timed-out episodes stop the clock early, so they are counted above, not gapped.
-        paired = [r for r in policy_rows if r["seed"] in best and not (r["deadlock"] or r["timed_out"] or r.get("tick_error"))]
+        paired = [r for r in policy_rows if r["seed"] in best and clean(r)]
         if paired:
             ref = [best[r["seed"]] for r in paired]
             entry["return_gap_pct"] = _gap_pct([-r["return"] for r in paired], [-b[0] for b in ref]) \
                 if scored else None
             entry["makespan_gap_pct"] = _gap_pct([r["makespan"] for r in paired], [b[1] for b in ref])
             entry["flow_censored_gap_pct"] = _gap_pct([r["total_flow_time"] for r in paired], [b[2] for b in ref])
+        if scored:
+            mine = {r["seed"]: r["return"] for r in policy_rows if clean(r)}
+            if fixed_returns:
+                seeds = sorted(set(mine) & set(fixed_returns))
+                if seeds:
+                    entry["best_fixed"] = best_fixed
+                    entry["vs_best_fixed_pct"] = _cost_change_pct([-mine[s] for s in seeds],
+                                                                  [-fixed_returns[s] for s in seeds])
+                    entry["wins_vs_best_fixed"] = int(sum(mine[s] > fixed_returns[s] + 1e-9 for s in seeds))
+                    entry["losses_vs_best_fixed"] = int(sum(mine[s] < fixed_returns[s] - 1e-9 for s in seeds))
+            seeds = sorted(set(mine) & set(best))
+            if seeds:
+                entry["vs_hindsight_fixed_pct"] = _cost_change_pct([-mine[s] for s in seeds],
+                                                                   [-best[s][0] for s in seeds])
+            if oracle:
+                seeds = sorted(set(mine) & set(oracle))
+                if seeds:
+                    entry["oracle_seeds"] = len(seeds)
+                    entry["vs_oracle_pct"] = _cost_change_pct([-mine[s] for s in seeds], [-oracle[s] for s in seeds])
+                    if fixed_returns and set(seeds) <= set(fixed_returns):
+                        gain = np.mean([fixed_returns[s] - oracle[s] for s in seeds])   # <= 0 in return units
+                        mine_gain = np.mean([fixed_returns[s] - mine[s] for s in seeds])
+                        entry["oracle_gain_captured_pct"] = float(100 * mine_gain / gain) if gain != 0 else None
         summary.append(entry)
     if scored:
         return sorted(summary, key=lambda e: (e.get("return_gap_pct") is None, e.get("return_gap_pct") or 0.0))
     return sorted(summary, key=lambda e: e["policy"])
+
+
+def load_oracle(paths) -> tuple:
+    """@brief (seed -> switching-oracle return, seed -> {pair: fixed-pair return}) from result JSON files (globs
+    allowed): env/switch_oracle.py's result.json ("seed", "oracle_return", "fixed_returns") or the twin oracle tasks
+    ("seed", "oracle" and "fixed" {pair: {"tard"}}, costs = -return). The fixed-pair returns let main() check that the
+    oracle was run on the same instances and window as this evaluation."""
+    import glob
+    oracle, fixed = {}, {}
+    for pattern in paths:
+        files = sorted(glob.glob(pattern)) or [pattern]
+        for f in files:
+            data = json.loads(Path(f).read_text())
+            seed = int(data["seed"])
+            if "oracle_return" in data:
+                oracle[seed] = float(data["oracle_return"])
+                fixed[seed] = {k: float(v) for k, v in (data.get("fixed_returns") or {}).items()}
+            elif "oracle" in data:
+                oracle[seed] = -float(data["oracle"])
+                fixed[seed] = {k: -float(v["tard"]) for k, v in (data.get("fixed") or {}).items()}
+            else:
+                raise ValueError(f"{f}: no 'oracle_return' or 'oracle' field")
+    return oracle, fixed
+
+
+def check_oracle(rows: list, oracle_fixed: dict, tol: float = 1e-3) -> None:
+    """@brief Warn when this evaluation's fixed-pair returns differ from the oracle run's own fixed-pair returns on
+    the same seeds: then the oracle saw other instances, another window or another model, and vs_oracle is invalid."""
+    diffs = [abs(r["return"] - oracle_fixed[r["seed"]][r["policy"]]) / max(abs(r["return"]), 1e-9)
+             for r in rows if r["kind"] == "pdr" and r["policy"] in oracle_fixed.get(r["seed"], {})]
+    if not diffs:
+        print("[NOTE] the oracle results carry no fixed pairs that were evaluated here: vs_oracle is unchecked.")
+    elif max(diffs) > tol:
+        print(f"[WARNING] fixed-pair returns differ from the oracle run's own by up to {100 * max(diffs):.2f}% "
+              f"({sum(d > tol for d in diffs)}/{len(diffs)} episodes): the oracle is not on these instances or this "
+              "window, so vs_oracle is not comparable.")
+    else:
+        print(f"Oracle check: {len(diffs)} fixed-pair episodes match the oracle run's (max rel. diff {max(diffs):.1e}).")
 
 
 def print_summary(summary: list):
@@ -407,10 +517,40 @@ def print_summary(summary: list):
     if scored:
         print("gap% = mean per-seed gap in return to the best PDR rule on that seed (> 0 worse); "
               "deadlocked / timed-out episodes are left out of it.")
+        print_comparisons(summary)
     else:
         print("No --reward-spec: return is Unity's pass-through (0), so nothing is ranked.")
     print("* total flow of exited jobs only (censored, read it with jobs out); with --random-warmup both also "
           "count jobs that finished during the warm-up.")
+
+
+def print_comparisons(summary: list):
+    """@brief The three references per policy (summarize): change in mean cost, < 0 better."""
+    def pct(value):
+        return f"{value:+8.2f}" if value is not None else " " * 8
+
+    ref = next((e.get("best_fixed") for e in summary if e.get("best_fixed")), None)
+    has_oracle = any("vs_oracle_pct" in e for e in summary)
+    has_disc = any("discounted_return_mean" in e for e in summary)
+    header = (f"{'policy':30s} {'vs best':>8s} {'vs hind':>8s}" + (f" {'vs orcl':>8s} {'captured':>8s}" if has_oracle else "")
+              + f" {'W/L vs best':>11s}" + (f" {'disc ret':>10s}" if has_disc else ""))
+    print()
+    print(header)
+    print("-" * len(header))
+    for e in summary:
+        wl = (f"{e['wins_vs_best_fixed']}/{e['losses_vs_best_fixed']}" if "wins_vs_best_fixed" in e else "")
+        line = f"{e['policy']:30s} {pct(e.get('vs_best_fixed_pct'))} {pct(e.get('vs_hindsight_fixed_pct'))}"
+        if has_oracle:
+            line += f" {pct(e.get('vs_oracle_pct'))} {pct(e.get('oracle_gain_captured_pct'))}"
+        line += f" {wl:>11s}"
+        if has_disc:
+            d = e.get("discounted_return_mean")
+            line += f" {d:10.3f}" if d is not None else " " * 11
+        print(line)
+    print(f"Change in mean cost (-return) in %, < 0 better: vs the best fixed pair overall ({ref}), vs each instance's "
+          "own best fixed pair (hindsight)" + (", vs the switching oracle; captured = share of the oracle's gain over "
+                                              "the best fixed pair" if has_oracle else "")
+          + (". disc ret = discounted window return (training's gamma, no bootstrap)" if has_disc else "") + ".")
 
 
 def floor_fields(scenario: dict) -> dict:
@@ -445,6 +585,64 @@ def write_csv(path: Path, rows: list):
         writer.writerows(rows)
 
 
+## @brief run_settings keys evaluate.py compares with its own flags (train.RUN_SETTING_KEYS), with the flag's default.
+CHECKED_SETTINGS = {"twin_transport": "kinematic", "scenario_generator": None, "params": None,
+                    "episode_duration_seconds": 0.0, "random_warmup": False, "machine_flexibility": 0.0}
+
+
+def resolve_checkpoint_settings(args, policies) -> tuple:
+    """@brief (slot_seconds, gamma_per_second) for this evaluation, from the flags or the checkpoints (audit m2, M3).
+
+    @details A slot-trained checkpoint run per decision is out of distribution (per-decision masks, a different action
+    cadence) and nothing used to say so. Unset --slot-seconds / --discount-horizon-s take the checkpoints' own values
+    (they must agree, since one wrapper serves every policy); a flag that disagrees with a checkpoint is kept, with a
+    warning, as is any difference in the scenario settings. Checkpoints before 2026-10-07 record no run settings.
+    """
+    ckpts = [p for p in policies if p.kind == "checkpoint"]
+
+    def from_ckpts(get, what):
+        values = {p.name: get(p) for p in ckpts}
+        known = {v for v in values.values() if v is not None}
+        if len(known) > 1:
+            raise SystemExit(f"error: the checkpoints were trained with different {what} ({values}); pass it explicitly "
+                             "or evaluate them separately")
+        return known.pop() if known else None
+
+    slot = from_ckpts(lambda p: p.settings.get("slot_seconds"), "slot_seconds")
+    if args.slot_seconds is None:
+        if slot is None and any(not p.settings for p in ckpts):
+            print("[NOTE] checkpoint(s) from before 2026-10-07 record no slot setting: evaluating per decision. Pass "
+                  "--slot-seconds if they were trained with slot actions.")
+        slot_seconds = float(slot or 0.0)
+        if slot:
+            print(f"Slot actions: {slot_seconds:g} s, as the checkpoints were trained")
+    else:
+        slot_seconds = float(args.slot_seconds)
+        for p in ckpts:
+            trained = p.settings.get("slot_seconds")
+            if trained is not None and float(trained) != slot_seconds:
+                print(f"[WARNING] {p.name} was trained with slot_seconds={trained}, evaluating with {slot_seconds:g}: "
+                      "its actions are out of distribution")
+
+    horizon = args.discount_horizon_s
+    if horizon is None:
+        horizon = from_ckpts(lambda p: p.ppo.get("discount_horizon_s"), "discount_horizon_s")
+    gamma_per_second = 1.0 - 1.0 / horizon if horizon and horizon > 1.0 else None
+    if gamma_per_second is not None:
+        print(f"Discounted return: horizon {horizon:,.0f} s (gamma_s = {gamma_per_second:.6f})")
+
+    for p in ckpts:
+        for key, default in CHECKED_SETTINGS.items():
+            if key not in p.settings:
+                continue
+            trained, used = p.settings[key], getattr(args, key, default)
+            if key == "params":
+                trained, used = (json.loads(x) if x else None for x in (trained, used))
+            if (trained if trained is not None else default) != (used if used is not None else default):
+                print(f"[WARNING] {p.name} was trained with {key}={trained!r}, evaluating with {used!r}")
+    return slot_seconds, gamma_per_second
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Evaluate policies on reproducible instances")
     parser.add_argument("--unity-path", type=str, default=None, help="player (required unless --twin)")
@@ -452,6 +650,18 @@ def main(argv=None):
                         help="evaluate on the event-based twin instead of a player (2026-10-05); the floor export must "
                              "carry the observation frame and match the scenarios' layout and fleet")
     parser.add_argument("--twin-transport", default="kinematic", choices=("instant", "geometric", "kinematic"))
+    parser.add_argument("--slot-seconds", type=float, default=None,
+                        help="hold each action for this many sim-seconds (slot actions); default: the checkpoints' own "
+                             "training setting (recorded since 2026-10-07), else 0 = per decision")
+    parser.add_argument("--discount-horizon-s", type=float, default=None,
+                        help="also report each episode's discounted return with gamma_s = 1 - 1/H (training's "
+                             "objective); default: the checkpoints' own horizon; 0 = off")
+    parser.add_argument("--oracle", action="append", default=[], metavar="JSON_GLOB",
+                        help="switching-oracle results for the evaluated seeds (switch_oracle.py result.json or twin "
+                             "oracle task JSONs; repeatable, globs allowed): adds the vs-oracle comparison")
+    parser.add_argument("--best-fixed", type=str, default=None, metavar="JOB-MACHINE",
+                        help="the best fixed pair overall, chosen elsewhere (e.g. on training seeds); default: the PDR "
+                             "with the best mean return on the evaluated seeds")
     # No effect since 2026-10-02, when the launch-time check against BUILD_MANIFEST.json was removed
     # (see env/player_manifest.py); still accepted so older commands run.
     parser.add_argument("--allow-unverified-player", action="store_true", help=argparse.SUPPRESS)
@@ -610,6 +820,10 @@ def main(argv=None):
     if not policies:
         parser.error("Nothing to evaluate: pass --checkpoint and/or --pdr")
 
+    slot_seconds, gamma_per_second = resolve_checkpoint_settings(args, policies)
+    oracle, oracle_fixed = load_oracle(args.oracle) if args.oracle else (None, None)
+    best_fixed = args.best_fixed.strip().upper().replace("_", "-") if args.best_fixed else None
+
     # Seed-major order, so an interrupted run still has every policy on the seeds it finished.
     schedule = [(p, seed) for seed in seeds for p in range(len(policies))]
     out = Path(args.out)
@@ -635,8 +849,10 @@ def main(argv=None):
     if args.twin:
         # Event-based twin (2026-10-05): same queue interface, episodes simulated in this process.
         from env_wrappers.twin_env import TwinSchedulingEnv
+        # Look-ahead features (des_twin.lookahead) only when a checkpoint's policy reads them (rq3-lookahead).
+        lookahead = any(p.kind == "checkpoint" and p.net.ac_cfg.policy_extra_dim for p in policies)
         env = TwinSchedulingEnv(args.twin, transport=args.twin_transport, reward_fn=reward_fn, obs_caps=obs_caps,
-                                queued=True)
+                                queued=True, critic_lookahead=lookahead)
     else:
         env = None
     env = env or UnitySchedulingEnv(
@@ -650,6 +866,11 @@ def main(argv=None):
         log_file=out / "Player.log",
         extra_args=["-decisionlogdir", str(out.resolve())] if args.unity_decision_log else None,
     )
+    if slot_seconds > 0:
+        # Hold each policy's action for a slot (env_wrappers.slot_env); a fixed pair is unchanged by it. Its reward
+        # is discounted within the slot with training's gamma, for the discounted_return column.
+        from env_wrappers.slot_env import SlotActionEnv
+        env = SlotActionEnv(env, slot_seconds, gamma_per_second)
     if args.scenario:
         env.load_scenario(args.scenario)
 
@@ -663,7 +884,7 @@ def main(argv=None):
         # Flush each progress line so it still shows up when stdout is piped or redirected.
         rows = run_evaluation(env, policies, schedule, log=lambda line: print(line, flush=True),
                               decision_writer=decision_writer, scenario_generator=scenario_generator,
-                              scenario_dir=out / "scenarios")
+                              scenario_dir=out / "scenarios", gamma_per_second=gamma_per_second)
     finally:
         env.close()
         # Record each episode's floor so per-condition runs (--agvs / --layout / --params) stay self-describing.
@@ -675,7 +896,9 @@ def main(argv=None):
         if decision_file is not None:
             decision_file.close()
 
-    summary = summarize(rows, scored=reward_fn is not None)
+    if oracle_fixed is not None:
+        check_oracle(rows, oracle_fixed)
+    summary = summarize(rows, scored=reward_fn is not None, oracle=oracle, best_fixed=best_fixed)
     write_csv(out / "summary.csv", summary)
     print_summary(summary)
 

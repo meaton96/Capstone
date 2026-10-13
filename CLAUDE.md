@@ -31,7 +31,7 @@ Name every new experiment, results folder and cluster run `<purpose>-<what>[-<va
 
 ## Tracking experiments: the lab (`tools/lab/`, since 2026-10-04)
 
-Experiments are tracked and run by the lab service, not by hand-edited docs. `tools/lab/lab.py serve` (keep it
+Experiments are tracked and run by the lab service, not by hand-edited docs. Spec (data model, service loop, CLI, web API, new-session workflow): `tools/lab/README.md`. `tools/lab/lab.py serve` (keep it
 running; web page http://127.0.0.1:8765) holds every experiment in `tools/lab/state/lab.db` with a status
 (future -> queued -> running -> done / failed / cancelled), watches running ones (local process + done-glob, or Slurm
 job ids over the shared SSH connection), pulls and analyzes on finish, notifies Discord, starts the next queued

@@ -55,7 +55,7 @@ class TwinSchedulingEnv:
                  scenario_generator: Optional[Callable[[int], dict]] = None,
                  scenario: Optional[dict] = None,
                  obs_caps: Optional[Tuple[int, int]] = None,
-                 instant_fleet: Optional[int] = None, queued: bool = False):
+                 instant_fleet: Optional[int] = None, queued: bool = False, critic_lookahead: bool = False):
         """
         @param floor        des_floor.json path (or a loaded Floor) for the layout and fleet size trained on.
         @param transport    "instant" (DES-0), "geometric" (DES-1g) or "kinematic" (DES-1k).
@@ -69,6 +69,8 @@ class TwinSchedulingEnv:
                             with seed index -1 (discarded by evaluate.run_evaluation, as Unity's unseeded episode).
         """
         self.queued = queued
+        ## @brief Add obs["critic_lookahead"] (des_twin.lookahead: known future arrivals, for the critic only).
+        self.critic_lookahead = critic_lookahead
         self._queue_seeds, self._queue_scenarios, self._queue_pos = [], [], 0
         if queued:
             seed_rng, scenario_generator = None, None
@@ -206,7 +208,11 @@ class TwinSchedulingEnv:
         return MetricsSnapshot.from_dict(values)
 
     def _obs(self) -> Dict[str, np.ndarray]:
-        return self.obs_builder.build(self._twin, self._decision)
+        obs = self.obs_builder.build(self._twin, self._decision)
+        if self.critic_lookahead:
+            from des_twin.lookahead import lookahead_features
+            obs["critic_lookahead"] = lookahead_features(self._twin)
+        return obs
 
     # ── Stepping ────────────────────────────────────────────────────────────────────────────────────
 
@@ -288,9 +294,17 @@ class VectorizedTwinEnv:
     def __init__(self, num_envs: int, floor: Union[str, Path], transport: str = "kinematic", reward_spec=None,
                  train_seed: Optional[int] = None, scenario_generator: Optional[Callable[[int], dict]] = None,
                  scenario: Optional[dict] = None, obs_caps: Optional[Tuple[int, int]] = None,
-                 instant_fleet: Optional[int] = None, seed_stream: int = 0, env_indices: Optional[list] = None):
+                 instant_fleet: Optional[int] = None, seed_stream: int = 0, env_indices: Optional[list] = None,
+                 slot_seconds: float = 0.0, gamma_per_second: Optional[float] = None, instance_group: int = 1,
+                 paired: Optional[dict] = None, critic_lookahead: bool = False):
         """@param env_indices  Build only these env indices (SubprocTwinEnv's workers); None = 0 .. num_envs - 1.
-        An env's id and instance-seed stream depend only on its index, so a split gives the same episodes."""
+        An env's id and instance-seed stream depend only on its index, so a split gives the same episodes.
+        @param instance_group  Envs i with the same i // instance_group draw the same instance seeds (the shared-
+        instance baseline, train.py --shared-baseline-group, 2026-10-07); 1 = every env its own stream, as before.
+        @param paired  With slot_seconds: PairedSlotEnv keyword arguments (default_action, futures, tail_seconds), so
+        every slot step also reports the same-future paired advantage (env_wrappers.paired_slot_env, 2026-10-07)."""
+        if instance_group < 1:
+            raise ValueError("instance_group must be >= 1")
         if scenario_generator is not None and train_seed is None:
             raise ValueError("scenario_generator needs --train-seed, to draw the seed each variant is built from")
         loaded = None
@@ -299,9 +313,18 @@ class VectorizedTwinEnv:
         shared = Floor.load(floor)   # route / hop caches are pure functions of the floor: share them
         self.envs = [TwinSchedulingEnv(
             shared, transport=transport, reward_fn=loaded.build() if loaded is not None else None, env_id=i,
-            seed_rng=None if train_seed is None else instance_seed_rng(train_seed, i, seed_stream),
+            seed_rng=None if train_seed is None else instance_seed_rng(train_seed, i // instance_group, seed_stream),
             scenario_generator=scenario_generator, scenario=scenario, obs_caps=obs_caps,
-            instant_fleet=instant_fleet) for i in (range(num_envs) if env_indices is None else env_indices)]
+            instant_fleet=instant_fleet, critic_lookahead=critic_lookahead)
+            for i in (range(num_envs) if env_indices is None else env_indices)]
+        if paired is not None:
+            if slot_seconds <= 0:
+                raise ValueError("the paired advantage needs slot actions (slot_seconds > 0)")
+            from env_wrappers.paired_slot_env import PairedSlotEnv
+            self.envs = [PairedSlotEnv(e, slot_seconds, gamma_per_second, **paired) for e in self.envs]
+        elif slot_seconds > 0:      # slot actions (env_wrappers.slot_env, 2026-10-05)
+            from env_wrappers.slot_env import SlotActionEnv
+            self.envs = [SlotActionEnv(e, slot_seconds, gamma_per_second) for e in self.envs]
         self.num_envs = len(self.envs)
         self.global_step = 0
 

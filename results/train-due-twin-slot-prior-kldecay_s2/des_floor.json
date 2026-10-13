@@ -1,0 +1,2898 @@
+{
+  "schema": "des_floor/1",
+  "instance": "due2_s0",
+  "layout": "D",
+  "agv_count": 7,
+  "tile_count": 1,
+  "agvs_pooled": false,
+  "parking_method": "lane",
+  "routing_trigger": "onTransport",
+  "reservation_protocol": "releasePrevious",
+  "fixed_dt": 0.0199999921,
+  "pre_dispatch_lead": 15,
+  "obs": {
+    "grid_centre": [
+      -0.75,
+      0.75
+    ],
+    "grid_half": [
+      13.25,
+      23.5
+    ],
+    "floor_size": [
+      26.5,
+      47.0
+    ]
+  },
+  "parking_bayed": true,
+  "agv": {
+    "speed": 3.5,
+    "turn_speed": 120.0,
+    "path_turn_threshold": 5.0,
+    "alignment_threshold": 3.0,
+    "waypoint_arrival_dist": 0.4,
+    "dock_arrival_dist": 0.3,
+    "handshake": 1.5
+  },
+  "zones": [
+    {
+      "id": 0,
+      "name": "RowAisle0_Dock0",
+      "centre": [
+        -9.0,
+        7.5
+      ],
+      "size": [
+        3.0,
+        3.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        23
+      ],
+      "up": [
+        1
+      ],
+      "docks": [
+        {
+          "key": 0,
+          "approach": [
+            -9.0,
+            7.5
+          ],
+          "handshake": [
+            -9.0,
+            9.0
+          ],
+          "facing": [
+            0.0,
+            1.0
+          ],
+          "pickup": true
+        },
+        {
+          "key": 4,
+          "approach": [
+            -9.0,
+            7.5
+          ],
+          "handshake": [
+            -9.0,
+            6.0
+          ],
+          "facing": [
+            0.0,
+            -1.0
+          ],
+          "pickup": false
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "name": "RowAisle0_Transit0",
+      "centre": [
+        -6.0,
+        7.5
+      ],
+      "size": [
+        3.0,
+        3.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        0
+      ],
+      "up": [
+        2
+      ],
+      "docks": []
+    },
+    {
+      "id": 2,
+      "name": "RowAisle0_Dock1",
+      "centre": [
+        -3.0,
+        7.5
+      ],
+      "size": [
+        3.0,
+        3.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        1
+      ],
+      "up": [
+        3
+      ],
+      "docks": [
+        {
+          "key": 1,
+          "approach": [
+            -3.0,
+            7.5
+          ],
+          "handshake": [
+            -3.0,
+            9.0
+          ],
+          "facing": [
+            0.0,
+            1.0
+          ],
+          "pickup": true
+        },
+        {
+          "key": 5,
+          "approach": [
+            -3.0,
+            7.5
+          ],
+          "handshake": [
+            -3.0,
+            6.0
+          ],
+          "facing": [
+            0.0,
+            -1.0
+          ],
+          "pickup": false
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "RowAisle0_Transit1",
+      "centre": [
+        0.0,
+        7.5
+      ],
+      "size": [
+        3.0,
+        3.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        2
+      ],
+      "up": [
+        4
+      ],
+      "docks": []
+    },
+    {
+      "id": 4,
+      "name": "RowAisle0_Dock2",
+      "centre": [
+        3.0,
+        7.5
+      ],
+      "size": [
+        3.0,
+        3.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        3
+      ],
+      "up": [
+        5
+      ],
+      "docks": [
+        {
+          "key": 2,
+          "approach": [
+            3.0,
+            7.5
+          ],
+          "handshake": [
+            3.0,
+            9.0
+          ],
+          "facing": [
+            0.0,
+            1.0
+          ],
+          "pickup": true
+        },
+        {
+          "key": 6,
+          "approach": [
+            3.0,
+            7.5
+          ],
+          "handshake": [
+            3.0,
+            6.0
+          ],
+          "facing": [
+            0.0,
+            -1.0
+          ],
+          "pickup": false
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "RowAisle0_Transit2",
+      "centre": [
+        6.0,
+        7.5
+      ],
+      "size": [
+        3.0,
+        3.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        4
+      ],
+      "up": [
+        6
+      ],
+      "docks": []
+    },
+    {
+      "id": 6,
+      "name": "RowAisle0_Dock3",
+      "centre": [
+        9.0,
+        7.5
+      ],
+      "size": [
+        3.0,
+        3.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        5
+      ],
+      "up": [
+        34
+      ],
+      "docks": [
+        {
+          "key": 3,
+          "approach": [
+            9.0,
+            7.5
+          ],
+          "handshake": [
+            9.0,
+            9.0
+          ],
+          "facing": [
+            0.0,
+            1.0
+          ],
+          "pickup": true
+        },
+        {
+          "key": 7,
+          "approach": [
+            9.0,
+            7.5
+          ],
+          "handshake": [
+            9.0,
+            6.0
+          ],
+          "facing": [
+            0.0,
+            -1.0
+          ],
+          "pickup": false
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "RowAisle1_Dock0",
+      "centre": [
+        -9.0,
+        0.0
+      ],
+      "size": [
+        3.0,
+        3.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        8
+      ],
+      "up": [
+        26
+      ],
+      "docks": [
+        {
+          "key": 4,
+          "approach": [
+            -9.0,
+            0.0
+          ],
+          "handshake": [
+            -9.0,
+            1.5
+          ],
+          "facing": [
+            0.0,
+            1.0
+          ],
+          "pickup": true
+        },
+        {
+          "key": 8,
+          "approach": [
+            -9.0,
+            0.0
+          ],
+          "handshake": [
+            -9.0,
+            -1.5
+          ],
+          "facing": [
+            0.0,
+            -1.0
+          ],
+          "pickup": false
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "RowAisle1_Transit0",
+      "centre": [
+        -6.0,
+        0.0
+      ],
+      "size": [
+        3.0,
+        3.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        9
+      ],
+      "up": [
+        7
+      ],
+      "docks": []
+    },
+    {
+      "id": 9,
+      "name": "RowAisle1_Dock1",
+      "centre": [
+        -3.0,
+        0.0
+      ],
+      "size": [
+        3.0,
+        3.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        10
+      ],
+      "up": [
+        8
+      ],
+      "docks": [
+        {
+          "key": 5,
+          "approach": [
+            -3.0,
+            0.0
+          ],
+          "handshake": [
+            -3.0,
+            1.5
+          ],
+          "facing": [
+            0.0,
+            1.0
+          ],
+          "pickup": true
+        },
+        {
+          "key": 9,
+          "approach": [
+            -3.0,
+            0.0
+          ],
+          "handshake": [
+            -3.0,
+            -1.5
+          ],
+          "facing": [
+            0.0,
+            -1.0
+          ],
+          "pickup": false
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "RowAisle1_Transit1",
+      "centre": [
+        0.0,
+        0.0
+      ],
+      "size": [
+        3.0,
+        3.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        11
+      ],
+      "up": [
+        9
+      ],
+      "docks": []
+    },
+    {
+      "id": 11,
+      "name": "RowAisle1_Dock2",
+      "centre": [
+        3.0,
+        0.0
+      ],
+      "size": [
+        3.0,
+        3.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        12
+      ],
+      "up": [
+        10
+      ],
+      "docks": [
+        {
+          "key": 6,
+          "approach": [
+            3.0,
+            0.0
+          ],
+          "handshake": [
+            3.0,
+            1.5
+          ],
+          "facing": [
+            0.0,
+            1.0
+          ],
+          "pickup": true
+        },
+        {
+          "key": 10,
+          "approach": [
+            3.0,
+            0.0
+          ],
+          "handshake": [
+            3.0,
+            -1.5
+          ],
+          "facing": [
+            0.0,
+            -1.0
+          ],
+          "pickup": false
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "name": "RowAisle1_Transit2",
+      "centre": [
+        6.0,
+        0.0
+      ],
+      "size": [
+        3.0,
+        3.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        13
+      ],
+      "up": [
+        11
+      ],
+      "docks": []
+    },
+    {
+      "id": 13,
+      "name": "RowAisle1_Dock3",
+      "centre": [
+        9.0,
+        0.0
+      ],
+      "size": [
+        3.0,
+        3.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        37
+      ],
+      "up": [
+        12
+      ],
+      "docks": [
+        {
+          "key": 7,
+          "approach": [
+            9.0,
+            0.0
+          ],
+          "handshake": [
+            9.0,
+            1.5
+          ],
+          "facing": [
+            0.0,
+            1.0
+          ],
+          "pickup": true
+        },
+        {
+          "key": 11,
+          "approach": [
+            9.0,
+            0.0
+          ],
+          "handshake": [
+            9.0,
+            -1.5
+          ],
+          "facing": [
+            0.0,
+            -1.0
+          ],
+          "pickup": false
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "name": "RowAisle2_Dock0",
+      "centre": [
+        -9.0,
+        -7.5
+      ],
+      "size": [
+        3.0,
+        3.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        29
+      ],
+      "up": [
+        15
+      ],
+      "docks": [
+        {
+          "key": 8,
+          "approach": [
+            -9.0,
+            -7.5
+          ],
+          "handshake": [
+            -9.0,
+            -6.0
+          ],
+          "facing": [
+            0.0,
+            1.0
+          ],
+          "pickup": true
+        },
+        {
+          "key": 12,
+          "approach": [
+            -9.0,
+            -7.5
+          ],
+          "handshake": [
+            -9.0,
+            -9.0
+          ],
+          "facing": [
+            0.0,
+            -1.0
+          ],
+          "pickup": false
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "name": "RowAisle2_Transit0",
+      "centre": [
+        -6.0,
+        -7.5
+      ],
+      "size": [
+        3.0,
+        3.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        14
+      ],
+      "up": [
+        16
+      ],
+      "docks": []
+    },
+    {
+      "id": 16,
+      "name": "RowAisle2_Dock1",
+      "centre": [
+        -3.0,
+        -7.5
+      ],
+      "size": [
+        3.0,
+        3.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        15
+      ],
+      "up": [
+        17
+      ],
+      "docks": [
+        {
+          "key": 9,
+          "approach": [
+            -3.0,
+            -7.5
+          ],
+          "handshake": [
+            -3.0,
+            -6.0
+          ],
+          "facing": [
+            0.0,
+            1.0
+          ],
+          "pickup": true
+        },
+        {
+          "key": 13,
+          "approach": [
+            -3.0,
+            -7.5
+          ],
+          "handshake": [
+            -3.0,
+            -9.0
+          ],
+          "facing": [
+            0.0,
+            -1.0
+          ],
+          "pickup": false
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "name": "RowAisle2_Transit1",
+      "centre": [
+        0.0,
+        -7.5
+      ],
+      "size": [
+        3.0,
+        3.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        16
+      ],
+      "up": [
+        18
+      ],
+      "docks": []
+    },
+    {
+      "id": 18,
+      "name": "RowAisle2_Dock2",
+      "centre": [
+        3.0,
+        -7.5
+      ],
+      "size": [
+        3.0,
+        3.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        17
+      ],
+      "up": [
+        19
+      ],
+      "docks": [
+        {
+          "key": 10,
+          "approach": [
+            3.0,
+            -7.5
+          ],
+          "handshake": [
+            3.0,
+            -6.0
+          ],
+          "facing": [
+            0.0,
+            1.0
+          ],
+          "pickup": true
+        },
+        {
+          "key": 14,
+          "approach": [
+            3.0,
+            -7.5
+          ],
+          "handshake": [
+            3.0,
+            -9.0
+          ],
+          "facing": [
+            0.0,
+            -1.0
+          ],
+          "pickup": false
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "name": "RowAisle2_Transit2",
+      "centre": [
+        6.0,
+        -7.5
+      ],
+      "size": [
+        3.0,
+        3.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        18
+      ],
+      "up": [
+        20
+      ],
+      "docks": []
+    },
+    {
+      "id": 20,
+      "name": "RowAisle2_Dock3",
+      "centre": [
+        9.0,
+        -7.5
+      ],
+      "size": [
+        3.0,
+        3.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        19
+      ],
+      "up": [
+        40
+      ],
+      "docks": [
+        {
+          "key": 11,
+          "approach": [
+            9.0,
+            -7.5
+          ],
+          "handshake": [
+            9.0,
+            -6.0
+          ],
+          "facing": [
+            0.0,
+            1.0
+          ],
+          "pickup": true
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "name": "LeftVert_TopConn",
+      "centre": [
+        -11.5,
+        14.0
+      ],
+      "size": [
+        3.5,
+        4.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        43
+      ],
+      "up": [
+        22
+      ],
+      "docks": [
+        {
+          "key": -1,
+          "approach": [
+            -11.5,
+            14.0
+          ],
+          "handshake": [
+            -11.5,
+            15.5
+          ],
+          "facing": [
+            0.0,
+            1.0
+          ],
+          "pickup": true
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "name": "LeftVert_Gap0_1",
+      "centre": [
+        -11.5,
+        10.75
+      ],
+      "size": [
+        3.5,
+        3.25
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        21
+      ],
+      "up": [
+        23
+      ],
+      "docks": []
+    },
+    {
+      "id": 23,
+      "name": "LeftVert_Row0",
+      "centre": [
+        -11.5,
+        7.5
+      ],
+      "size": [
+        3.5,
+        3.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        22
+      ],
+      "up": [
+        24,
+        0
+      ],
+      "docks": []
+    },
+    {
+      "id": 24,
+      "name": "LeftVert_Gap1_1",
+      "centre": [
+        -11.5,
+        5.0
+      ],
+      "size": [
+        3.5,
+        2.5
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        23
+      ],
+      "up": [
+        25
+      ],
+      "docks": []
+    },
+    {
+      "id": 25,
+      "name": "LeftVert_Gap1_2",
+      "centre": [
+        -11.5,
+        2.5
+      ],
+      "size": [
+        3.5,
+        2.5
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        24
+      ],
+      "up": [
+        26
+      ],
+      "docks": []
+    },
+    {
+      "id": 26,
+      "name": "LeftVert_Row1",
+      "centre": [
+        -11.5,
+        0.0
+      ],
+      "size": [
+        3.5,
+        3.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        25,
+        7
+      ],
+      "up": [
+        27
+      ],
+      "docks": []
+    },
+    {
+      "id": 27,
+      "name": "LeftVert_Gap2_1",
+      "centre": [
+        -11.5,
+        -2.5
+      ],
+      "size": [
+        3.5,
+        2.5
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        26
+      ],
+      "up": [
+        28
+      ],
+      "docks": []
+    },
+    {
+      "id": 28,
+      "name": "LeftVert_Gap2_2",
+      "centre": [
+        -11.5,
+        -5.0
+      ],
+      "size": [
+        3.5,
+        2.5
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        27
+      ],
+      "up": [
+        29
+      ],
+      "docks": []
+    },
+    {
+      "id": 29,
+      "name": "LeftVert_Row2",
+      "centre": [
+        -11.5,
+        -7.5
+      ],
+      "size": [
+        3.5,
+        3.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        28
+      ],
+      "up": [
+        30,
+        14
+      ],
+      "docks": []
+    },
+    {
+      "id": 30,
+      "name": "LeftVert_Gap3_1",
+      "centre": [
+        -11.5,
+        -10.75
+      ],
+      "size": [
+        3.5,
+        3.25
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        29
+      ],
+      "up": [
+        31
+      ],
+      "docks": []
+    },
+    {
+      "id": 31,
+      "name": "LeftVert_BotConn",
+      "centre": [
+        -11.5,
+        -14.0
+      ],
+      "size": [
+        3.5,
+        4.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        30
+      ],
+      "up": [
+        50,
+        66
+      ],
+      "docks": []
+    },
+    {
+      "id": 32,
+      "name": "RightVert_TopConn",
+      "centre": [
+        11.5,
+        14.0
+      ],
+      "size": [
+        3.5,
+        4.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        33
+      ],
+      "up": [
+        49
+      ],
+      "docks": []
+    },
+    {
+      "id": 33,
+      "name": "RightVert_Gap0_1",
+      "centre": [
+        11.5,
+        10.75
+      ],
+      "size": [
+        3.5,
+        3.25
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        34
+      ],
+      "up": [
+        32
+      ],
+      "docks": []
+    },
+    {
+      "id": 34,
+      "name": "RightVert_Row0",
+      "centre": [
+        11.5,
+        7.5
+      ],
+      "size": [
+        3.5,
+        3.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        35,
+        6
+      ],
+      "up": [
+        33
+      ],
+      "docks": []
+    },
+    {
+      "id": 35,
+      "name": "RightVert_Gap1_1",
+      "centre": [
+        11.5,
+        5.0
+      ],
+      "size": [
+        3.5,
+        2.5
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        36
+      ],
+      "up": [
+        34
+      ],
+      "docks": []
+    },
+    {
+      "id": 36,
+      "name": "RightVert_Gap1_2",
+      "centre": [
+        11.5,
+        2.5
+      ],
+      "size": [
+        3.5,
+        2.5
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        37
+      ],
+      "up": [
+        35
+      ],
+      "docks": []
+    },
+    {
+      "id": 37,
+      "name": "RightVert_Row1",
+      "centre": [
+        11.5,
+        0.0
+      ],
+      "size": [
+        3.5,
+        3.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        38
+      ],
+      "up": [
+        36,
+        13
+      ],
+      "docks": []
+    },
+    {
+      "id": 38,
+      "name": "RightVert_Gap2_1",
+      "centre": [
+        11.5,
+        -2.5
+      ],
+      "size": [
+        3.5,
+        2.5
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        39
+      ],
+      "up": [
+        37
+      ],
+      "docks": []
+    },
+    {
+      "id": 39,
+      "name": "RightVert_Gap2_2",
+      "centre": [
+        11.5,
+        -5.0
+      ],
+      "size": [
+        3.5,
+        2.5
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        40
+      ],
+      "up": [
+        38
+      ],
+      "docks": []
+    },
+    {
+      "id": 40,
+      "name": "RightVert_Row2",
+      "centre": [
+        11.5,
+        -7.5
+      ],
+      "size": [
+        3.5,
+        3.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        41,
+        20
+      ],
+      "up": [
+        39
+      ],
+      "docks": []
+    },
+    {
+      "id": 41,
+      "name": "RightVert_Gap3_1",
+      "centre": [
+        11.5,
+        -10.75
+      ],
+      "size": [
+        3.5,
+        3.25
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        42
+      ],
+      "up": [
+        40
+      ],
+      "docks": []
+    },
+    {
+      "id": 42,
+      "name": "RightVert_BotConn",
+      "centre": [
+        11.5,
+        -14.0
+      ],
+      "size": [
+        3.5,
+        4.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        56,
+        57
+      ],
+      "up": [
+        41
+      ],
+      "docks": [
+        {
+          "key": -2,
+          "approach": [
+            11.5,
+            -15.5
+          ],
+          "handshake": [
+            11.5,
+            -17.0
+          ],
+          "facing": [
+            0.0,
+            -1.0
+          ],
+          "pickup": false
+        }
+      ]
+    },
+    {
+      "id": 43,
+      "name": "TopSpine_Dock0",
+      "centre": [
+        -9.0,
+        14.0
+      ],
+      "size": [
+        3.0,
+        4.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        44
+      ],
+      "up": [
+        21
+      ],
+      "docks": [
+        {
+          "key": 0,
+          "approach": [
+            -9.0,
+            15.0
+          ],
+          "handshake": [
+            -9.0,
+            13.5
+          ],
+          "facing": [
+            0.0,
+            -1.0
+          ],
+          "pickup": false
+        }
+      ]
+    },
+    {
+      "id": 44,
+      "name": "TopSpine_Transit0",
+      "centre": [
+        -6.0,
+        14.0
+      ],
+      "size": [
+        3.0,
+        4.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        45
+      ],
+      "up": [
+        43
+      ],
+      "docks": []
+    },
+    {
+      "id": 45,
+      "name": "TopSpine_Dock1",
+      "centre": [
+        -3.0,
+        14.0
+      ],
+      "size": [
+        3.0,
+        4.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        46
+      ],
+      "up": [
+        44
+      ],
+      "docks": [
+        {
+          "key": 1,
+          "approach": [
+            -3.0,
+            15.0
+          ],
+          "handshake": [
+            -3.0,
+            13.5
+          ],
+          "facing": [
+            0.0,
+            -1.0
+          ],
+          "pickup": false
+        }
+      ]
+    },
+    {
+      "id": 46,
+      "name": "TopSpine_Transit1",
+      "centre": [
+        0.0,
+        14.0
+      ],
+      "size": [
+        3.0,
+        4.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        47
+      ],
+      "up": [
+        45
+      ],
+      "docks": []
+    },
+    {
+      "id": 47,
+      "name": "TopSpine_Dock2",
+      "centre": [
+        3.0,
+        14.0
+      ],
+      "size": [
+        3.0,
+        4.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        48
+      ],
+      "up": [
+        46
+      ],
+      "docks": [
+        {
+          "key": 2,
+          "approach": [
+            3.0,
+            15.0
+          ],
+          "handshake": [
+            3.0,
+            13.5
+          ],
+          "facing": [
+            0.0,
+            -1.0
+          ],
+          "pickup": false
+        }
+      ]
+    },
+    {
+      "id": 48,
+      "name": "TopSpine_Transit2",
+      "centre": [
+        6.0,
+        14.0
+      ],
+      "size": [
+        3.0,
+        4.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        49
+      ],
+      "up": [
+        47
+      ],
+      "docks": []
+    },
+    {
+      "id": 49,
+      "name": "TopSpine_Dock3",
+      "centre": [
+        9.0,
+        14.0
+      ],
+      "size": [
+        3.0,
+        4.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        32
+      ],
+      "up": [
+        48
+      ],
+      "docks": [
+        {
+          "key": 3,
+          "approach": [
+            9.0,
+            15.0
+          ],
+          "handshake": [
+            9.0,
+            13.5
+          ],
+          "facing": [
+            0.0,
+            -1.0
+          ],
+          "pickup": false
+        }
+      ]
+    },
+    {
+      "id": 50,
+      "name": "BotSpine_Dock0",
+      "centre": [
+        -9.0,
+        -14.0
+      ],
+      "size": [
+        3.0,
+        4.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        31
+      ],
+      "up": [
+        51
+      ],
+      "docks": [
+        {
+          "key": 12,
+          "approach": [
+            -9.0,
+            -15.0
+          ],
+          "handshake": [
+            -9.0,
+            -13.5
+          ],
+          "facing": [
+            0.0,
+            1.0
+          ],
+          "pickup": true
+        }
+      ]
+    },
+    {
+      "id": 51,
+      "name": "BotSpine_Transit0",
+      "centre": [
+        -6.0,
+        -14.0
+      ],
+      "size": [
+        3.0,
+        4.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        50
+      ],
+      "up": [
+        52
+      ],
+      "docks": []
+    },
+    {
+      "id": 52,
+      "name": "BotSpine_Dock1",
+      "centre": [
+        -3.0,
+        -14.0
+      ],
+      "size": [
+        3.0,
+        4.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        51
+      ],
+      "up": [
+        53
+      ],
+      "docks": [
+        {
+          "key": 13,
+          "approach": [
+            -3.0,
+            -15.0
+          ],
+          "handshake": [
+            -3.0,
+            -13.5
+          ],
+          "facing": [
+            0.0,
+            1.0
+          ],
+          "pickup": true
+        }
+      ]
+    },
+    {
+      "id": 53,
+      "name": "BotSpine_Transit1",
+      "centre": [
+        0.0,
+        -14.0
+      ],
+      "size": [
+        3.0,
+        4.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        52
+      ],
+      "up": [
+        54
+      ],
+      "docks": []
+    },
+    {
+      "id": 54,
+      "name": "BotSpine_Dock2",
+      "centre": [
+        3.0,
+        -14.0
+      ],
+      "size": [
+        3.0,
+        4.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        53
+      ],
+      "up": [
+        55
+      ],
+      "docks": [
+        {
+          "key": 14,
+          "approach": [
+            3.0,
+            -15.0
+          ],
+          "handshake": [
+            3.0,
+            -13.5
+          ],
+          "facing": [
+            0.0,
+            1.0
+          ],
+          "pickup": true
+        }
+      ]
+    },
+    {
+      "id": 55,
+      "name": "BotSpine_Transit2",
+      "centre": [
+        6.0,
+        -14.0
+      ],
+      "size": [
+        3.0,
+        4.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        54
+      ],
+      "up": [
+        56
+      ],
+      "docks": []
+    },
+    {
+      "id": 56,
+      "name": "BotSpine_Dock3",
+      "centre": [
+        9.0,
+        -14.0
+      ],
+      "size": [
+        3.0,
+        4.0
+      ],
+      "capacity": 1,
+      "parking_lane": false,
+      "down": [
+        55
+      ],
+      "up": [
+        42
+      ],
+      "docks": []
+    },
+    {
+      "id": 57,
+      "name": "Lane_0",
+      "centre": [
+        11.5,
+        -19.75
+      ],
+      "size": [
+        2.5556,
+        2.5
+      ],
+      "capacity": 1,
+      "parking_lane": true,
+      "down": [
+        58
+      ],
+      "up": [
+        42
+      ],
+      "docks": []
+    },
+    {
+      "id": 58,
+      "name": "Lane_1",
+      "centre": [
+        8.9444,
+        -19.75
+      ],
+      "size": [
+        2.5556,
+        2.5
+      ],
+      "capacity": 1,
+      "parking_lane": true,
+      "down": [
+        59
+      ],
+      "up": [
+        57
+      ],
+      "docks": []
+    },
+    {
+      "id": 59,
+      "name": "Lane_2",
+      "centre": [
+        6.3889,
+        -19.75
+      ],
+      "size": [
+        2.5556,
+        2.5
+      ],
+      "capacity": 1,
+      "parking_lane": true,
+      "down": [
+        60
+      ],
+      "up": [
+        58
+      ],
+      "docks": []
+    },
+    {
+      "id": 60,
+      "name": "Lane_3",
+      "centre": [
+        3.8333,
+        -19.75
+      ],
+      "size": [
+        2.5556,
+        2.5
+      ],
+      "capacity": 1,
+      "parking_lane": true,
+      "down": [
+        61
+      ],
+      "up": [
+        59
+      ],
+      "docks": []
+    },
+    {
+      "id": 61,
+      "name": "Lane_4",
+      "centre": [
+        1.2778,
+        -19.75
+      ],
+      "size": [
+        2.5556,
+        2.5
+      ],
+      "capacity": 1,
+      "parking_lane": true,
+      "down": [
+        62
+      ],
+      "up": [
+        60
+      ],
+      "docks": []
+    },
+    {
+      "id": 62,
+      "name": "Lane_5",
+      "centre": [
+        -1.2778,
+        -19.75
+      ],
+      "size": [
+        2.5556,
+        2.5
+      ],
+      "capacity": 1,
+      "parking_lane": true,
+      "down": [
+        63,
+        73
+      ],
+      "up": [
+        61,
+        73
+      ],
+      "docks": []
+    },
+    {
+      "id": 63,
+      "name": "Lane_6",
+      "centre": [
+        -3.8333,
+        -19.75
+      ],
+      "size": [
+        2.5556,
+        2.5
+      ],
+      "capacity": 1,
+      "parking_lane": true,
+      "down": [
+        64,
+        71,
+        72
+      ],
+      "up": [
+        62,
+        71,
+        72
+      ],
+      "docks": []
+    },
+    {
+      "id": 64,
+      "name": "Lane_7",
+      "centre": [
+        -6.3889,
+        -19.75
+      ],
+      "size": [
+        2.5556,
+        2.5
+      ],
+      "capacity": 1,
+      "parking_lane": true,
+      "down": [
+        65,
+        69,
+        70
+      ],
+      "up": [
+        63,
+        69,
+        70
+      ],
+      "docks": []
+    },
+    {
+      "id": 65,
+      "name": "Lane_8",
+      "centre": [
+        -8.9444,
+        -19.75
+      ],
+      "size": [
+        2.5556,
+        2.5
+      ],
+      "capacity": 1,
+      "parking_lane": true,
+      "down": [
+        66,
+        67,
+        68
+      ],
+      "up": [
+        64,
+        67,
+        68
+      ],
+      "docks": []
+    },
+    {
+      "id": 66,
+      "name": "Lane_9",
+      "centre": [
+        -11.5,
+        -19.75
+      ],
+      "size": [
+        2.5556,
+        2.5
+      ],
+      "capacity": 1,
+      "parking_lane": true,
+      "down": [
+        31
+      ],
+      "up": [
+        65
+      ],
+      "docks": []
+    },
+    {
+      "id": 67,
+      "name": "Bay_0",
+      "centre": [
+        -8.9444,
+        -17.25
+      ],
+      "size": [
+        2.5556,
+        2.5
+      ],
+      "capacity": 1,
+      "parking_lane": true,
+      "down": [
+        65
+      ],
+      "up": [
+        65
+      ],
+      "docks": []
+    },
+    {
+      "id": 68,
+      "name": "Bay_1",
+      "centre": [
+        -8.9444,
+        -22.25
+      ],
+      "size": [
+        2.5556,
+        2.5
+      ],
+      "capacity": 1,
+      "parking_lane": true,
+      "down": [
+        65
+      ],
+      "up": [
+        65
+      ],
+      "docks": []
+    },
+    {
+      "id": 69,
+      "name": "Bay_2",
+      "centre": [
+        -6.3889,
+        -17.25
+      ],
+      "size": [
+        2.5556,
+        2.5
+      ],
+      "capacity": 1,
+      "parking_lane": true,
+      "down": [
+        64
+      ],
+      "up": [
+        64
+      ],
+      "docks": []
+    },
+    {
+      "id": 70,
+      "name": "Bay_3",
+      "centre": [
+        -6.3889,
+        -22.25
+      ],
+      "size": [
+        2.5556,
+        2.5
+      ],
+      "capacity": 1,
+      "parking_lane": true,
+      "down": [
+        64
+      ],
+      "up": [
+        64
+      ],
+      "docks": []
+    },
+    {
+      "id": 71,
+      "name": "Bay_4",
+      "centre": [
+        -3.8333,
+        -17.25
+      ],
+      "size": [
+        2.5556,
+        2.5
+      ],
+      "capacity": 1,
+      "parking_lane": true,
+      "down": [
+        63
+      ],
+      "up": [
+        63
+      ],
+      "docks": []
+    },
+    {
+      "id": 72,
+      "name": "Bay_5",
+      "centre": [
+        -3.8333,
+        -22.25
+      ],
+      "size": [
+        2.5556,
+        2.5
+      ],
+      "capacity": 1,
+      "parking_lane": true,
+      "down": [
+        63
+      ],
+      "up": [
+        63
+      ],
+      "docks": []
+    },
+    {
+      "id": 73,
+      "name": "Bay_6",
+      "centre": [
+        -1.2778,
+        -17.25
+      ],
+      "size": [
+        2.5556,
+        2.5
+      ],
+      "capacity": 1,
+      "parking_lane": true,
+      "down": [
+        62
+      ],
+      "up": [
+        62
+      ],
+      "docks": []
+    }
+  ],
+  "machines": [
+    {
+      "id": 0,
+      "type": "Mill",
+      "tile": 0,
+      "zones": [
+        0,
+        43
+      ],
+      "pickup_zones": [
+        0
+      ],
+      "pickup_pos": [
+        -8.75,
+        9.563
+      ],
+      "dropoff_pos": [
+        -9.25,
+        12.937
+      ],
+      "in_belts": [
+        {
+          "input_pos": [
+            -9.25,
+            12.937
+          ],
+          "capacity": 3
+        }
+      ],
+      "pos3": [
+        -9.0,
+        0.5,
+        11.25
+      ],
+      "cell": [
+        12,
+        46
+      ],
+      "capabilities": [
+        "Mill"
+      ]
+    },
+    {
+      "id": 1,
+      "type": "Lathe",
+      "tile": 0,
+      "zones": [
+        2,
+        45
+      ],
+      "pickup_zones": [
+        2
+      ],
+      "pickup_pos": [
+        -2.75,
+        9.563
+      ],
+      "dropoff_pos": [
+        -3.25,
+        12.937
+      ],
+      "in_belts": [
+        {
+          "input_pos": [
+            -3.25,
+            12.937
+          ],
+          "capacity": 3
+        }
+      ],
+      "pos3": [
+        -3.0,
+        0.5,
+        11.25
+      ],
+      "cell": [
+        26,
+        46
+      ],
+      "capabilities": [
+        "Lathe"
+      ]
+    },
+    {
+      "id": 2,
+      "type": "Weld",
+      "tile": 0,
+      "zones": [
+        4,
+        47
+      ],
+      "pickup_zones": [
+        4
+      ],
+      "pickup_pos": [
+        3.25,
+        9.563
+      ],
+      "dropoff_pos": [
+        2.75,
+        12.937
+      ],
+      "in_belts": [
+        {
+          "input_pos": [
+            2.75,
+            12.937
+          ],
+          "capacity": 3
+        }
+      ],
+      "pos3": [
+        3.0,
+        0.5,
+        11.25
+      ],
+      "cell": [
+        41,
+        46
+      ],
+      "capabilities": [
+        "Weld"
+      ]
+    },
+    {
+      "id": 3,
+      "type": "Inspect",
+      "tile": 0,
+      "zones": [
+        6,
+        49
+      ],
+      "pickup_zones": [
+        6
+      ],
+      "pickup_pos": [
+        9.25,
+        9.563
+      ],
+      "dropoff_pos": [
+        8.75,
+        12.937
+      ],
+      "in_belts": [
+        {
+          "input_pos": [
+            8.75,
+            12.937
+          ],
+          "capacity": 3
+        }
+      ],
+      "pos3": [
+        9.0,
+        0.5,
+        11.25
+      ],
+      "cell": [
+        55,
+        46
+      ],
+      "capabilities": [
+        "Inspect"
+      ]
+    },
+    {
+      "id": 4,
+      "type": "Assemble",
+      "tile": 0,
+      "zones": [
+        7,
+        0
+      ],
+      "pickup_zones": [
+        7
+      ],
+      "pickup_pos": [
+        -8.75,
+        2.063
+      ],
+      "dropoff_pos": [
+        -9.25,
+        5.437
+      ],
+      "in_belts": [
+        {
+          "input_pos": [
+            -9.25,
+            5.437
+          ],
+          "capacity": 3
+        }
+      ],
+      "pos3": [
+        -9.0,
+        0.5,
+        3.75
+      ],
+      "cell": [
+        12,
+        36
+      ],
+      "capabilities": [
+        "Assemble"
+      ]
+    },
+    {
+      "id": 5,
+      "type": "Mill",
+      "tile": 0,
+      "zones": [
+        9,
+        2
+      ],
+      "pickup_zones": [
+        9
+      ],
+      "pickup_pos": [
+        -2.75,
+        2.063
+      ],
+      "dropoff_pos": [
+        -3.25,
+        5.437
+      ],
+      "in_belts": [
+        {
+          "input_pos": [
+            -3.25,
+            5.437
+          ],
+          "capacity": 3
+        }
+      ],
+      "pos3": [
+        -3.0,
+        0.5,
+        3.75
+      ],
+      "cell": [
+        26,
+        36
+      ],
+      "capabilities": [
+        "Mill"
+      ]
+    },
+    {
+      "id": 6,
+      "type": "Lathe",
+      "tile": 0,
+      "zones": [
+        11,
+        4
+      ],
+      "pickup_zones": [
+        11
+      ],
+      "pickup_pos": [
+        3.25,
+        2.063
+      ],
+      "dropoff_pos": [
+        2.75,
+        5.437
+      ],
+      "in_belts": [
+        {
+          "input_pos": [
+            2.75,
+            5.437
+          ],
+          "capacity": 3
+        }
+      ],
+      "pos3": [
+        3.0,
+        0.5,
+        3.75
+      ],
+      "cell": [
+        41,
+        36
+      ],
+      "capabilities": [
+        "Lathe"
+      ]
+    },
+    {
+      "id": 7,
+      "type": "Weld",
+      "tile": 0,
+      "zones": [
+        13,
+        6
+      ],
+      "pickup_zones": [
+        13
+      ],
+      "pickup_pos": [
+        9.25,
+        2.063
+      ],
+      "dropoff_pos": [
+        8.75,
+        5.437
+      ],
+      "in_belts": [
+        {
+          "input_pos": [
+            8.75,
+            5.437
+          ],
+          "capacity": 3
+        }
+      ],
+      "pos3": [
+        9.0,
+        0.5,
+        3.75
+      ],
+      "cell": [
+        55,
+        36
+      ],
+      "capabilities": [
+        "Weld"
+      ]
+    },
+    {
+      "id": 8,
+      "type": "Inspect",
+      "tile": 0,
+      "zones": [
+        14,
+        7
+      ],
+      "pickup_zones": [
+        14
+      ],
+      "pickup_pos": [
+        -8.75,
+        -5.437
+      ],
+      "dropoff_pos": [
+        -9.25,
+        -2.063
+      ],
+      "in_belts": [
+        {
+          "input_pos": [
+            -9.25,
+            -2.063
+          ],
+          "capacity": 3
+        }
+      ],
+      "pos3": [
+        -9.0,
+        0.5,
+        -3.75
+      ],
+      "cell": [
+        12,
+        25
+      ],
+      "capabilities": [
+        "Inspect"
+      ]
+    },
+    {
+      "id": 9,
+      "type": "Assemble",
+      "tile": 0,
+      "zones": [
+        16,
+        9
+      ],
+      "pickup_zones": [
+        16
+      ],
+      "pickup_pos": [
+        -2.75,
+        -5.437
+      ],
+      "dropoff_pos": [
+        -3.25,
+        -2.063
+      ],
+      "in_belts": [
+        {
+          "input_pos": [
+            -3.25,
+            -2.063
+          ],
+          "capacity": 3
+        }
+      ],
+      "pos3": [
+        -3.0,
+        0.5,
+        -3.75
+      ],
+      "cell": [
+        26,
+        25
+      ],
+      "capabilities": [
+        "Assemble"
+      ]
+    },
+    {
+      "id": 10,
+      "type": "Mill",
+      "tile": 0,
+      "zones": [
+        18,
+        11
+      ],
+      "pickup_zones": [
+        18
+      ],
+      "pickup_pos": [
+        3.25,
+        -5.437
+      ],
+      "dropoff_pos": [
+        2.75,
+        -2.063
+      ],
+      "in_belts": [
+        {
+          "input_pos": [
+            2.75,
+            -2.063
+          ],
+          "capacity": 3
+        }
+      ],
+      "pos3": [
+        3.0,
+        0.5,
+        -3.75
+      ],
+      "cell": [
+        41,
+        25
+      ],
+      "capabilities": [
+        "Mill"
+      ]
+    },
+    {
+      "id": 11,
+      "type": "Lathe",
+      "tile": 0,
+      "zones": [
+        20,
+        13
+      ],
+      "pickup_zones": [
+        20
+      ],
+      "pickup_pos": [
+        9.25,
+        -5.437
+      ],
+      "dropoff_pos": [
+        8.75,
+        -2.063
+      ],
+      "in_belts": [
+        {
+          "input_pos": [
+            8.75,
+            -2.063
+          ],
+          "capacity": 3
+        }
+      ],
+      "pos3": [
+        9.0,
+        0.5,
+        -3.75
+      ],
+      "cell": [
+        55,
+        25
+      ],
+      "capabilities": [
+        "Lathe"
+      ]
+    },
+    {
+      "id": 12,
+      "type": "Weld",
+      "tile": 0,
+      "zones": [
+        50,
+        14
+      ],
+      "pickup_zones": [
+        50
+      ],
+      "pickup_pos": [
+        -8.75,
+        -12.937
+      ],
+      "dropoff_pos": [
+        -9.25,
+        -9.563
+      ],
+      "in_belts": [
+        {
+          "input_pos": [
+            -9.25,
+            -9.563
+          ],
+          "capacity": 3
+        }
+      ],
+      "pos3": [
+        -9.0,
+        0.5,
+        -11.25
+      ],
+      "cell": [
+        12,
+        15
+      ],
+      "capabilities": [
+        "Weld"
+      ]
+    },
+    {
+      "id": 13,
+      "type": "Inspect",
+      "tile": 0,
+      "zones": [
+        52,
+        16
+      ],
+      "pickup_zones": [
+        52
+      ],
+      "pickup_pos": [
+        -2.75,
+        -12.937
+      ],
+      "dropoff_pos": [
+        -3.25,
+        -9.563
+      ],
+      "in_belts": [
+        {
+          "input_pos": [
+            -3.25,
+            -9.563
+          ],
+          "capacity": 3
+        }
+      ],
+      "pos3": [
+        -3.0,
+        0.5,
+        -11.25
+      ],
+      "cell": [
+        26,
+        15
+      ],
+      "capabilities": [
+        "Inspect"
+      ]
+    },
+    {
+      "id": 14,
+      "type": "Assemble",
+      "tile": 0,
+      "zones": [
+        54,
+        18
+      ],
+      "pickup_zones": [
+        54
+      ],
+      "pickup_pos": [
+        3.25,
+        -12.937
+      ],
+      "dropoff_pos": [
+        2.75,
+        -9.563
+      ],
+      "in_belts": [
+        {
+          "input_pos": [
+            2.75,
+            -9.563
+          ],
+          "capacity": 3
+        }
+      ],
+      "pos3": [
+        3.0,
+        0.5,
+        -11.25
+      ],
+      "cell": [
+        41,
+        15
+      ],
+      "capabilities": [
+        "Assemble"
+      ]
+    }
+  ],
+  "tiles": [
+    {
+      "tile": 0,
+      "incoming_key": -1,
+      "outgoing_key": -2,
+      "incoming_zone": 21,
+      "outgoing_zone": 42,
+      "incoming_pos": [
+        -11.5,
+        15.5
+      ],
+      "outgoing_pos": [
+        11.5,
+        -16.0
+      ],
+      "incoming_pos3": [
+        -11.5,
+        0.01,
+        15.5
+      ],
+      "incoming_cell": [
+        6,
+        52
+      ]
+    }
+  ],
+  "agvs": [
+    {
+      "id": 0,
+      "tile": 0,
+      "park_pos": [
+        -8.9444,
+        -17.25
+      ],
+      "park_zone": 67,
+      "pos": [
+        -8.9444,
+        -17.25
+      ],
+      "yaw": 0.0,
+      "zone": 67
+    },
+    {
+      "id": 1,
+      "tile": 0,
+      "park_pos": [
+        -8.9444,
+        -22.25
+      ],
+      "park_zone": 68,
+      "pos": [
+        -8.9444,
+        -22.25
+      ],
+      "yaw": 0.0,
+      "zone": 68
+    },
+    {
+      "id": 2,
+      "tile": 0,
+      "park_pos": [
+        -6.3889,
+        -17.25
+      ],
+      "park_zone": 69,
+      "pos": [
+        -6.3889,
+        -17.25
+      ],
+      "yaw": 0.0,
+      "zone": 69
+    },
+    {
+      "id": 3,
+      "tile": 0,
+      "park_pos": [
+        -6.3889,
+        -22.25
+      ],
+      "park_zone": 70,
+      "pos": [
+        -6.3889,
+        -22.25
+      ],
+      "yaw": 0.0,
+      "zone": 70
+    },
+    {
+      "id": 4,
+      "tile": 0,
+      "park_pos": [
+        -3.8333,
+        -17.25
+      ],
+      "park_zone": 71,
+      "pos": [
+        -3.8333,
+        -17.25
+      ],
+      "yaw": 0.0,
+      "zone": 71
+    },
+    {
+      "id": 5,
+      "tile": 0,
+      "park_pos": [
+        -3.8333,
+        -22.25
+      ],
+      "park_zone": 72,
+      "pos": [
+        -3.8333,
+        -22.25
+      ],
+      "yaw": 0.0,
+      "zone": 72
+    },
+    {
+      "id": 6,
+      "tile": 0,
+      "park_pos": [
+        -1.2778,
+        -17.25
+      ],
+      "park_zone": 73,
+      "pos": [
+        -1.2778,
+        -17.25
+      ],
+      "yaw": 0.0,
+      "zone": 73
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "flow_time",
+  "description": "Penalize total job time in system (integral of WIP); penalty if the episode ends by deadlock or timeout.",
+  "entry": "rewards/functions/flow_time.py:FlowTimeReward",
+  "params": {
+    "time_scale": 1000.0,
+    "completion_bonus": 0.0,
+    "failure_penalty": 10.0
+  }
+}

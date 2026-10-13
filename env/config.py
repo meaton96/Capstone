@@ -211,6 +211,13 @@ class ActorCriticConfig:
     input_dim: int = 256
     hidden_dim: int = 256
     action_branches: Tuple[int, ...] = ACTION_BRANCHES
+    ## @brief Extra critic-only inputs (obs key "critic_lookahead", des_twin.lookahead, 2026-10-07): the critic reads
+    ##        [fused features, these]; the actor never does. 0 = the plain critic.
+    critic_extra_dim: int = 0
+    ## @brief Look-ahead inputs for the policy (and critic) (2026-10-07, rq3-lookahead): the same features (obs key
+    ##        "critic_lookahead") appended to the fused features before the actor-critic heads, so the actor sees the
+    ##        known future arrivals too. 0 = the policy sees the current state only. Excludes critic_extra_dim.
+    policy_extra_dim: int = 0
 
 
 @dataclass
@@ -226,6 +233,26 @@ class PPOConfig:
     ##        between instances. None = per-decision gamma (all runs before 2026-10-01).
     discount_horizon_s: Optional[float] = 3000.0
     gae_lambda: float = 0.95
+    ## @brief If set (seconds, with discount_horizon_s), λ decays over simulated time: a step spanning Δτ uses
+    ##        gae_lambda ** (Δτ / gae_lambda_time_s), so the GAE trace spans about gae_lambda_time_s / (1 - gae_lambda)
+    ##        seconds whatever the decision rate (audit M2, 2026-10-07; 900 matches a 900 s slot). None = λ per step,
+    ##        as before (per decision, or per slot in slot mode).
+    gae_lambda_time_s: Optional[float] = None
+    ## @brief Shared-instance baseline (2026-10-07, credit trace item 3; Mao et al. 2019): envs run in groups of this
+    ##        size on the same instance seeds, and a slot step's advantage is its λ-return minus the leave-one-out mean
+    ##        λ-return of the group's other envs at the same slot of the same instance. 1 = off (V only). Slot mode only.
+    shared_baseline_group: int = 1
+    ## @brief "residual" (group baseline next to V) or "return" (group baseline instead of V); see
+    ##        rollout_buffer.RolloutBuffer.apply_shared_baseline.
+    shared_baseline_mode: str = "residual"
+    ## @brief Same-future paired advantage per slot (2026-10-07, credit trace item 1; env_wrappers.paired_slot_env): each
+    ##        slot step's advantage is G(chosen pair, then the default) - G(default) on paired_futures redrawn futures
+    ##        (0 = the instance's own future only), over the slot plus a paired_tail_s tail of the default pair.
+    ##        paired_default None = prior_pair, else MDD-TECT. Twin slot mode only.
+    paired_advantage: bool = False
+    paired_futures: int = 2
+    paired_tail_s: float = 3600.0
+    paired_default: Optional[str] = None
     clip_epsilon: float = 0.2
     entropy_coef: float = 0.01
     ## @brief If set, the entropy coefficient decays linearly from entropy_coef to this value over
@@ -236,6 +263,20 @@ class PPOConfig:
     ##        normalized by running statistics, updated once per rollout with this rate (bias-corrected EMA;
     ##        0 = off, the raw-scale critic of every run before 2026-10-03). 0.05 averages over about 20 rollouts.
     value_norm_beta: float = 0.05
+    ## @brief Action prior (2026-10-06, action-prior branch): a default rule pair "JOB-MACHINE" (e.g. "MDD-TECT").
+    ##        A fresh network starts at the prior p0 (each head puts prior_prob on the pair's rule, the rest spread
+    ##        evenly), and with prior_kl_coef > 0 the loss adds prior_kl_coef * KL(pi || p0), so leaving the default
+    ##        has to pay for itself in advantage. None = no prior (every run before).
+    prior_pair: Optional[str] = None
+    prior_prob: float = 0.8
+    ## @brief How a fresh network starts at the prior: "offset" adds log p0 as a fixed logit offset on a default output
+    ##        layer (2026-10-07, audit M1); "scale" shrinks the output weights by prior_weight_scale and puts log p0 in
+    ##        the bias (the 10-06 prior runs, at 0.01), which also shrinks the policy gradient into the trunk.
+    prior_init: str = "offset"
+    prior_weight_scale: float = 0.01
+    prior_kl_coef: float = 0.0
+    ## @brief If set, the KL coefficient decays linearly to this value over total_timesteps (like entropy).
+    prior_kl_coef_final: Optional[float] = None
     max_grad_norm: float = 0.5
     num_epochs: int = 4
     batch_size: int = 64

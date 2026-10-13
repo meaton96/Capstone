@@ -1,0 +1,10 @@
+{
+  "name": "tardiness",
+  "description": "Penalize time past due dates (integral of late WIP; needs due dates and a schema-v5 player); penalty if the episode ends by deadlock or timeout.",
+  "entry": "rewards/functions/tardiness.py:TardinessReward",
+  "params": {
+    "time_scale": 1000.0,
+    "flow_weight": 0.0,
+    "failure_penalty": 10.0
+  }
+}

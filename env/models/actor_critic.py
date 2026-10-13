@@ -38,6 +38,44 @@ def branch_distributions(logits: torch.Tensor, branches: Sequence[int],
             for part, mask in zip(parts, masks)]
 
 
+def prior_log_probs(pair: str, prob: float, heads: Sequence[Sequence[str]]) -> torch.Tensor:
+    """@brief Log-probabilities of the action prior p0, branches concatenated (action-prior branch, 2026-10-06).
+
+    @param pair   Default pair "JOB-MACHINE", one rule per head (e.g. "MDD-TECT").
+    @param prob   Probability each head puts on the pair's rule; the rest is spread evenly over the head's others.
+    @param heads  Rule names of each head (config.JOB_HEAD_RULES, config.MACHINE_HEAD_RULES).
+    """
+    rules = pair.split("-")
+    if len(rules) != len(heads):
+        raise ValueError(f"prior pair {pair!r} needs one rule per head ({len(heads)})")
+    if not 0.0 < prob < 1.0:
+        raise ValueError(f"prior_prob must be in (0, 1), got {prob}")
+    out = []
+    for rule, names in zip(rules, heads):
+        if rule not in names:
+            raise ValueError(f"prior rule {rule!r} is not in head {list(names)}")
+        p = torch.full((len(names),), (1.0 - prob) / (len(names) - 1))
+        p[list(names).index(rule)] = prob
+        out.append(p.log())
+    return torch.cat(out)
+
+
+def kl_to_prior(dists: List[Categorical], prior_logp: torch.Tensor, branches: Sequence[int],
+                action_mask: Optional[torch.Tensor] = None) -> torch.Tensor:
+    """@brief KL(pi || p0) summed over the branches, (B,). Under a mask p0 is renormalized over the enabled actions,
+    so a head masked down to one action contributes 0 (as it does to log-prob and entropy)."""
+    parts = torch.split(prior_logp.to(dists[0].logits.device), list(branches))
+    masks = torch.split(action_mask > 0.5, list(branches), dim=-1) if action_mask is not None else [None] * len(parts)
+    kl = 0.0
+    for d, lp, m in zip(dists, parts, masks):
+        lp = lp.expand_as(d.logits)
+        if m is not None:
+            lp = lp.masked_fill(~m, -1e9)
+        lp = F.log_softmax(lp, dim=-1)
+        kl = kl + (d.probs * (d.logits - lp)).sum(-1)
+    return kl
+
+
 class FusionHead(nn.Module):
     """@brief Fusion MLP: projects concatenated encoder features to a
     shared representation.
@@ -111,6 +149,16 @@ class ActorHead(nn.Module):
 
         ## @brief Size of each action branch.
         self.branches = tuple(branches)
+        ## @brief Fixed logit offset added to the network's output: log p0 of the action prior, or zeros (no prior).
+        ##        A buffer, so it is saved in checkpoints and rollout, update and evaluate.py all apply it
+        ##        (2026-10-07, audit M1).
+        self.register_buffer("prior_offset", torch.zeros(num_actions))
+
+    def _load_from_state_dict(self, state_dict, prefix, *args, **kwargs):
+        # Checkpoints from before 2026-10-07 have no prior_offset: they ran without one (a scale-init prior lives in
+        # the output bias instead), so load them with zeros.
+        state_dict.setdefault(prefix + "prior_offset", torch.zeros_like(self.prior_offset))
+        super()._load_from_state_dict(state_dict, prefix, *args, **kwargs)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """@brief Compute raw action logits.
@@ -118,7 +166,7 @@ class ActorHead(nn.Module):
         @param x  Fused feature vector of shape (B, @p input_dim).
         @return Action logits of shape (B, sum(@ref branches)).
         """
-        return self.net(x)
+        return self.net(x) + self.prior_offset
 
     def get_distributions(self, x: torch.Tensor, action_mask: Optional[torch.Tensor] = None) -> List[Categorical]:
         """@brief One (masked) Categorical per branch.
@@ -127,6 +175,28 @@ class ActorHead(nn.Module):
         @param action_mask  (B, sum(branches)), 1 = enabled; None enables every action.
         """
         return branch_distributions(self.forward(x), self.branches, action_mask)
+
+    @torch.no_grad()
+    def set_prior_offset(self, prior_logp: torch.Tensor) -> None:
+        """@brief Start the policy at the prior by a fixed logit offset log p0 on a default-initialized output layer
+        (2026-10-07, the default). A default layer's logit spread across states is about 0.07, so the start is
+        about p0 (its mean W.h still tilts each logit by a few tenths of a nat: p = 0.8 starts near 0.7), and the
+        policy gradient reaches the shared trunk at full strength (audit M1: the scale init below cut it about
+        190x)."""
+        self.prior_offset.copy_(prior_logp.to(self.prior_offset.device))
+        self.net[-1].bias.zero_()     # the default layer's random bias is a state-independent tilt away from p0
+
+    @torch.no_grad()
+    def init_prior(self, prior_logp: torch.Tensor, weight_scale: float = 0.01) -> None:
+        """@brief Start the policy at the prior: output-layer weights scaled by @p weight_scale and its bias set to
+        log p0, so the logits are about log p0 for any input (action-prior branch, 2026-10-06).
+
+        @note Scaling the output weights scales the actor gradient into the trunk by the same factor (audit M1,
+        docs/experiments/review_1007/TRAINING_STACK_AUDIT_1007.md); kept for reproducing the 10-06 prior runs and
+        for the milder weight_scale 0.1-0.3. set_prior_offset is the default since 2026-10-07."""
+        last = self.net[-1]
+        last.weight.mul_(weight_scale)
+        last.bias.copy_(prior_logp.to(last.bias.device))
 
 
 class CriticHead(nn.Module):
@@ -218,30 +288,43 @@ class ActorCritic(nn.Module):
     """
 
     def __init__(self, input_dim: int = 256, hidden_dim: int = 256,
-                 branches: Sequence[int] = (4, 3)):
+                 branches: Sequence[int] = (4, 3), critic_extra_dim: int = 0):
         """@brief Construct the combined actor-critic.
 
         @param input_dim    Dimensionality of the fused feature vector.
         @param hidden_dim   Width of hidden layers in both heads.
         @param branches     Size of each discrete action branch.
+        @param critic_extra_dim  Critic-only extra inputs (asymmetric actor-critic, 2026-10-07): the critic reads
+                            [features, critic_extra]; 0 = the critic reads the features only.
         """
         super().__init__()
 
         ## @brief Policy (actor) head producing concatenated branch logits.
         self.actor = ActorHead(input_dim, hidden_dim, branches)
         ## @brief Value (critic) head producing V(s).
-        self.critic = CriticHead(input_dim, hidden_dim)
+        self.critic = CriticHead(input_dim + critic_extra_dim, hidden_dim)
+        ## @brief Width of the critic-only extra input.
+        self.critic_extra_dim = critic_extra_dim
 
-    def forward(self, features: torch.Tensor):
+    def value(self, features: torch.Tensor, critic_extra: Optional[torch.Tensor] = None) -> torch.Tensor:
+        """@brief V(s) in reward units, (B, 1); with critic_extra_dim > 0 it needs @p critic_extra (B, extra)."""
+        if self.critic_extra_dim:
+            if critic_extra is None:
+                raise ValueError("this critic reads critic-only look-ahead features (obs 'critic_lookahead'), but the "
+                                 "observation has none: train / evaluate with --critic-lookahead on the twin")
+            features = torch.cat([features, critic_extra.to(features.dtype)], dim=-1)
+        return self.critic(features)
+
+    def forward(self, features: torch.Tensor, critic_extra: Optional[torch.Tensor] = None):
         """@brief Forward pass returning both action logits and value.
 
         @param features  Fused representation of shape (B, @p input_dim).
         @return Tuple of (action_logits, value) with shapes (B, sum(branches)) and (B, 1).
         """
-        return self.actor(features), self.critic(features)
+        return self.actor(features), self.value(features, critic_extra)
 
     def act(self, features: torch.Tensor, action_mask: Optional[torch.Tensor] = None,
-            deterministic: bool = False):
+            deterministic: bool = False, critic_extra: Optional[torch.Tensor] = None):
         """@brief Select an action and return associated quantities.
 
         @param features       Fused representation of shape (B, 256).
@@ -253,7 +336,7 @@ class ActorCritic(nn.Module):
                 - @c value    (B,) — state-value estimate (squeezed).
         """
         dists = self.actor.get_distributions(features, action_mask)
-        value = self.critic(features).squeeze(-1)
+        value = self.value(features, critic_extra).squeeze(-1)
 
         if deterministic:
             action = torch.stack([d.logits.argmax(dim=-1) for d in dists], dim=-1)
@@ -264,7 +347,8 @@ class ActorCritic(nn.Module):
         return action, log_prob, value
 
     def evaluate(self, features: torch.Tensor, actions: torch.Tensor,
-                 action_mask: Optional[torch.Tensor] = None):
+                 action_mask: Optional[torch.Tensor] = None, prior_logp: Optional[torch.Tensor] = None,
+                 critic_extra: Optional[torch.Tensor] = None):
         """@brief Evaluate previously taken actions for the PPO update step.
 
         @param features     Fused representation of shape (B, 256).
@@ -276,10 +360,13 @@ class ActorCritic(nn.Module):
                 - @c values    (B,) — state-value estimates (squeezed).
                 - @c entropy   (B,) — summed branch entropy for the entropy bonus
                   (0 for a masked head).
+                - @c prior_kl  (B,) — KL(pi || p0), only when @p prior_logp is given (a 4th element).
         """
         dists = self.actor.get_distributions(features, action_mask)
-        value = self.critic(features).squeeze(-1)
+        value = self.value(features, critic_extra).squeeze(-1)
 
         log_probs = sum(d.log_prob(actions[:, i]) for i, d in enumerate(dists))
         entropy = sum(d.entropy() for d in dists)
+        if prior_logp is not None:
+            return log_probs, value, entropy, kl_to_prior(dists, prior_logp, self.actor.branches, action_mask)
         return log_probs, value, entropy

@@ -1,0 +1,22 @@
+{
+ "startup_s": 3.9840731620788574,
+ "env_s": 6156.241146326065,
+ "infer_s": 48.8635778427124,
+ "update_s": 74.45953297615051,
+ "steps": 99840,
+ "updates": 195,
+ "total_s": 6289.648656845093,
+ "loop_s": 6279.564257144928,
+ "sps_loop": 15.899192350233763,
+ "backend": "twin",
+ "num_envs": 16,
+ "twin_workers": 5,
+ "device": "cuda",
+ "torch_threads": 2,
+ "cpus": 32,
+ "gpu": "NVIDIA GeForce RTX 4070 Ti",
+ "rollout_length": 32,
+ "batch_size": 64,
+ "num_epochs": 4,
+ "host": "ubuntu"
+}

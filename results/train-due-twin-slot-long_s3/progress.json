@@ -1,0 +1,14 @@
+{
+ "run_id": "train-due-twin-slot-long_s3",
+ "label": "train-due-twin-slot-long_s3 (local on ubuntu)",
+ "update": 781,
+ "num_updates": 781,
+ "global_step": 399872,
+ "total_timesteps": 400000,
+ "sps": 16.04,
+ "eta_hours": 0.0,
+ "episodes": 16656,
+ "recent_return": -155.471,
+ "recent_mean_flow": 1983.6,
+ "updated_at": "2026-10-06T06:04:29"
+}

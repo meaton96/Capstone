@@ -1,0 +1,10 @@
+== switching headroom by slot length (B2, twin, tardiness; window 21,600 s)
+         seeds  stages  mean_tard_oracle  mean_tard_mddtect  gain_vs_mddtect_mean_%  gain_vs_mddtect_median_%  gain_vs_own_best_median_%  switches_mean  share_of_900s_gain
+segment                                                                                                                                                                    
+900         40      24           153.777            172.393                  10.799                    13.322                      7.936          5.950               1.000
+1800        40      12           155.396            172.393                   9.859                    10.560                      5.198          4.000               0.913
+3600        40       6           157.126            172.393                   8.856                     9.799                      3.839          2.350               0.820
+5400        40       4           158.324            172.393                   8.161                     9.037                      2.637          1.525               0.756
+10800       40       2           160.518            172.393                   6.888                     7.541                      0.386          0.650               0.638
+
+(seeds present at every slot length: 40; 10,800 s = 2 stages, i.e. one switch at 3 h at most)
