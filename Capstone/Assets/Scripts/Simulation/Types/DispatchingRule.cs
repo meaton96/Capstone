@@ -83,5 +83,13 @@ namespace Assets.Scripts.Simulation.Types
         EDD_SMPT, EDD_SRWT, EDD_MMUR, EDD_ECT, EDD_TECT,
         MDD_SMPT, MDD_SRWT, MDD_MMUR, MDD_ECT, MDD_TECT,
         ATC_SMPT, ATC_SRWT, ATC_MMUR, ATC_ECT, ATC_TECT,
+
+        // ── Processing-time-weighted machine rules (2026-10-10; results/dev-pect-rule, results/dev-pect-unity) ──────
+        // PECT = q / A + p + alpha g(p), PTECT = max(tr, q / A) + p + alpha g(p): ECT / TECT plus a convex penalty on
+        // the candidate's processing time (FJSSPConfig.PtimeRule, default quad g = p^2 / p_mean, alpha 3). Every job
+        // half; appended so every value above keeps its int.
+        SPT_PECT, SPT_PTECT, LPT_PECT, LPT_PTECT, SRT_PECT, SRT_PTECT, LRT_PECT, LRT_PTECT,
+        FIFO_PECT, FIFO_PTECT, PTWINQ_PECT, PTWINQ_PTECT,
+        EDD_PECT, EDD_PTECT, MDD_PECT, MDD_PTECT, ATC_PECT, ATC_PTECT,
     }
 }

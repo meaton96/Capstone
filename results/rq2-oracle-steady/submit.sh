@@ -6,7 +6,7 @@ set -euo pipefail
 source "$(dirname "$0")/../../linux_server/slurm/rit_ssh.sh"
 "${SSH[@]}" "$REMOTE" bash -s <<'REMOTE'
 set -euo pipefail
-cd ~/capstone/linux_server_v3
+cd ~/capstone/linux_server
 D=~/capstone/results/rq2-oracle-steady
 mkdir -p logs $D
 for s in $(seq 0 39) $(seq 2000 2159); do echo "--mode oracle --seed $s --setting S6"; done > $D/tasks_oracle.txt

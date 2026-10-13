@@ -86,16 +86,21 @@ def resolve_jobs(scenario, floor):
             "jobs": jobs}
 
 
-def episode_settings(scenario):
+def episode_settings(scenario, machine_failures=False):
     """Episode-control fields of a scenario: (warm-up seconds, episode duration cap, warm-up rule).
 
-    Failures, dynamic (Poisson) arrivals and bursts in the "stochastic" block are not modelled and raise."""
+    AGV failures, dynamic (Poisson) arrivals and bursts in the "stochastic" block are not modelled and raise. Machine
+    failures raise too unless machine_failures=True: the caller then builds the trace with failure_trace() and passes
+    it as TwinConfig.failures (an explicit opt-in, so scripts written before the failure model keep refusing)."""
     s = scenario.get("stochastic") or {}
-    unsupported = [k for k in ("machineFailuresEnabled", "agvFailuresEnabled", "dynamicArrivalsEnabled",
-                               "burstArrivalsEnabled") if s.get(k)]
+    keys = ("agvFailuresEnabled", "dynamicArrivalsEnabled", "burstArrivalsEnabled")
+    if not machine_failures:
+        keys = ("machineFailuresEnabled",) + keys
+    unsupported = [k for k in keys if s.get(k)]
     if unsupported:
         raise NotImplementedError(f"the twin does not model {', '.join(unsupported)}; generate scenarios with "
-                                  "these off (e.g. RandomizedParams(failure_probability=0))")
+                                  "these off (e.g. RandomizedParams(failure_probability=0)), or for machine failures "
+                                  "pass machine_failures=True and TwinConfig.failures=failure_trace(...)")
     return (float(s.get("warmupSeconds", 0.0) or 0.0), float(s.get("episodeDurationSeconds", 0.0) or 0.0),
             scenario.get("dispatchingRule", "SRT_SRWT"))
 
@@ -122,8 +127,42 @@ def assign_due_dates(jobs_data, allowance):
     return out
 
 
+PTIME_KEYS = {"ptimeAlpha": "ptime_alpha", "ptimeShape": "ptime_shape", "ptimeTau": "ptime_tau",
+              "ptimeReroute": "ptime_reroute", "ptimeAvail": "ptime_avail"}
+
+
+def ptime_settings(source):
+    """TwinConfig keyword arguments for the PECT / PTECT parameters a scenario sets (its "ptime*" keys, as Unity's
+    FJSSPConfig.PtimeRule), or a des_floor.json export's "ptime_rule" block (written by the player only when the
+    parameters differ from the defaults); {} = the defaults (config.PTIME_RULE_PARAMS)."""
+    if not source:
+        return {}
+    if "ptime_rule" in source and isinstance(source["ptime_rule"], dict):
+        return {f"ptime_{k}": (str(v) if k == "shape" else float(v)) for k, v in source["ptime_rule"].items()}
+    return {field: (str(source[key]) if key == "ptimeShape" else float(source[key]))
+            for key, field in PTIME_KEYS.items() if source.get(key) is not None}
+
+
 def agv_schedule(scenario):
     """TwinConfig.agv_schedule from the scenario's "agvSchedule" ([{"start": t, "agvCount": n}, ...], written by the
     randomized generator's regime blocks with a fleet_mix); () when it has none."""
     return tuple((float(e["start"]), int(e["agvCount"])) for e in sorted(scenario.get("agvSchedule") or [],
                                                                          key=lambda e: e["start"]))
+
+
+def failure_trace(scenario, floor, seed=None, horizon=None, initial="unity", dt=None):
+    """TwinConfig.failures for a scenario: Unity's global Weibull / lognormal model from its "stochastic" block
+    (des_twin.failures.uniform_from_stochastic, Unity's U x T initial age by default), drawn with the scenario seed
+    (or `seed`) for the floor's machines; None when machineFailuresEnabled is off. The draws are the twin's own (numpy),
+    not Unity's System.Random stream: the same model, not the same failures (CSHARP_INJECTION_SPEC.md would make them
+    the same). horizon defaults to warm-up + episode cap + 1 day (or 600,000 s uncapped)."""
+    from .failures import uniform_from_stochastic
+    s = scenario.get("stochastic") or {}
+    if not s.get("machineFailuresEnabled"):
+        return None
+    if horizon is None:
+        cap = float(s.get("episodeDurationSeconds", 0.0) or 0.0)
+        horizon = float(s.get("warmupSeconds", 0.0) or 0.0) + cap + 86400.0 if cap > 0 else 600000.0
+    seed = scenario.get("seed", 42) if seed is None else seed
+    model = uniform_from_stochastic(s, initial=initial)
+    return model.trace([m.id for m in floor.machines], int(seed), horizon, dt or floor.dt)

@@ -9,6 +9,7 @@ namespace Assets.Scripts.Simulation.Channels
         private EpisodeConfigChannel _configChannel;
         private EpisodeTelemetryChannel _telemetryChannel;
         private EpisodeSeedChannel _seedChannel;
+        private DecisionViewChannel _viewChannel;   // Python rule mode only (-pyrules)
 
         private void Awake()
         {
@@ -19,6 +20,12 @@ namespace Assets.Scripts.Simulation.Channels
             SideChannelManager.RegisterSideChannel(_configChannel);
             SideChannelManager.RegisterSideChannel(_telemetryChannel);
             SideChannelManager.RegisterSideChannel(_seedChannel);
+
+            if (PyRules.Enabled)
+            {
+                _viewChannel = new DecisionViewChannel();
+                SideChannelManager.RegisterSideChannel(_viewChannel);
+            }
         }
 
         private void OnDestroy()
@@ -26,6 +33,7 @@ namespace Assets.Scripts.Simulation.Channels
             SideChannelManager.UnregisterSideChannel(_configChannel);
             SideChannelManager.UnregisterSideChannel(_telemetryChannel);
             SideChannelManager.UnregisterSideChannel(_seedChannel);
+            if (_viewChannel != null) SideChannelManager.UnregisterSideChannel(_viewChannel);
         }
     }
 }

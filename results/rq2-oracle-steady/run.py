@@ -33,19 +33,22 @@ HERE = Path(__file__).resolve().parent
 CAPS = (15, 256)
 
 
-def oracle(seed, setting):
+def oracle(seed, setting, pair_set="heads"):
+    """pair_set "heads" (default since 10-11): the 6 RL head pairs {SRT, MDD, ATC} x {PECT, PTECT} -> data_heads/;
+    "h15": the old 15 pairs -> data/ (every result before 10-11)."""
     from des_twin.observation import ObservationBuilder
-    out = HERE / "data" / f"s{seed}.npz"
+    pairs = sim.PAIR_SETS[pair_set]
+    out = HERE / ("data" if pair_set == "h15" else f"data_{pair_set}") / f"s{seed}.npz"
     if out.exists():
         return f"exists {out}"
     t = time.time()
     ep = sim.Episode(setting, seed)
     n = sim.n_slots(setting)
-    prefix, tails = [], np.zeros((n, len(sim.PAIRS)))
+    prefix, tails = [], np.zeros((n, len(pairs)))
     for k in range(n):
-        for i, p in enumerate(sim.PAIRS):
+        for i, p in enumerate(pairs):
             tails[k, i] = ep.play(prefix + [p])[0]
-        prefix.append(sim.PAIRS[int(np.argmin(tails[k]))])
+        prefix.append(pairs[int(np.argmin(tails[k]))])
     builder = ObservationBuilder(sim.sig.floor(), *CAPS)
     obs = {}
 
@@ -62,11 +65,12 @@ def oracle(seed, setting):
     out.parent.mkdir(exist_ok=True)
     np.savez_compressed(out, **{k: np.stack([obs[i][k] for i in range(n)]).astype(
         np.float16 if k in ("factory_grid", "job_table") else np.float32) for k in keys},
-        tails=tails, schedule=np.array(prefix), pairs=np.array(sim.PAIRS), seed=seed, oracle=float(tails[-1].min()),
+        tails=tails, schedule=np.array(prefix), pairs=np.array(pairs), seed=seed, oracle=float(tails[-1].min()),
         warmup=ep.warmup, regimes=np.array([ep.regime_at(ep.warmup + (k + 0.5) * ep.cfg["slot"]) for k in range(n)]))
-    fixed = dict(zip(sim.PAIRS, tails[0]))
+    fixed = dict(zip(pairs, tails[0]))
     best = min(fixed, key=fixed.get)
-    return (f"s{seed} {setting}: best fixed {best} {fixed[best]:.1f}, MDD-TECT {fixed['MDD-TECT']:.1f}, oracle "
+    ref = "MDD-PECT" if "MDD-PECT" in fixed else "MDD-TECT"
+    return (f"s{seed} {setting}: best fixed {best} {fixed[best]:.1f}, {ref} {fixed[ref]:.1f}, oracle "
             f"{tails[-1].min():.1f} ({100 * (tails[-1].min() / fixed[best] - 1):+.1f}% vs best fixed), replay diff "
             f"{abs(replay - tails[-1].min()):.1e}, missing obs {len(missing)}, {time.time() - t:.0f} s")
 
@@ -87,6 +91,11 @@ def rollout(seed, setting, checkpoints):
     nj = len(JOB_HEAD_RULES)
     for ck in todo:
         state = torch.load(ck, map_location="cpu", weights_only=True)
+        width = state["model_state_dict"]["actor_critic.actor.net.3.bias"].shape[0]
+        if width != len(JOB_HEAD_RULES) + len(MACHINE_HEAD_RULES):
+            raise SystemExit(f"{ck}: {width} action logits, but the current heads have "
+                             f"{len(JOB_HEAD_RULES) + len(MACHINE_HEAD_RULES)} (v5 since 10-11); roll out H15 checkpoints "
+                             "with the experiment's own code snapshot")
         net = SchedulingNetwork(encoder_cfg=encoder_config_for(state["model_state_dict"]))
         net.load_state_dict(state["model_state_dict"])
         net.eval()
@@ -112,9 +121,11 @@ def main():
     ap.add_argument("--seed", type=int, required=True)
     ap.add_argument("--setting", default="S6")
     ap.add_argument("--checkpoints", default="")
+    ap.add_argument("--pairs", choices=sorted(sim.PAIR_SETS), default="heads",
+                    help="oracle pair set: heads (6 RL head pairs, default since 10-11) or h15 (the old 15)")
     a = ap.parse_args()
     if a.mode == "oracle":
-        print(oracle(a.seed, a.setting), flush=True)
+        print(oracle(a.seed, a.setting, a.pairs), flush=True)
     else:
         print(rollout(a.seed, a.setting, [c for c in a.checkpoints.split(",") if c]), flush=True)
 

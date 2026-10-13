@@ -26,7 +26,7 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[1]
 sys.path.insert(0, str(REPO / "env"))
 
-FLOOR = REPO / "linux_server_des/Results/G1/rnd_load_s0/D/agv7_SPT_ECT_s0/des_floor.json"
+FLOOR = REPO / "linux_server/Results/G1/rnd_load_s0/D/agv7_SPT_ECT_s0/des_floor.json"
 WINDOW = 21600.0
 CONFIGS = {   # name: (utilization range outside lulls, fleet)
     "u0.70-1.40_a7": ((0.70, 1.40), 7),

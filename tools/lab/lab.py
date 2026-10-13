@@ -223,12 +223,21 @@ def cluster_jobs_left(exp):
     if not ids:
         return []
     try:
-        r = ssh(f"squeue --me -h -o %i -j {','.join(ids)} 2>/dev/null; echo __ok__")
+        r = ssh(f"squeue --me -h -o %i -j {','.join(ids)} 2>&1; echo __rc=$?")
     except subprocess.TimeoutExpired:
         return None
-    if "__ok__" not in r.stdout:
+    m = re.search(r"__rc=(\d+)", r.stdout)
+    if not m:
         return None
-    return [line.strip().split("_")[0] for line in r.stdout.splitlines() if line.strip() and line.strip() != "__ok__"]
+    body = r.stdout[:m.start()]
+    if m.group(1) != "0":
+        # squeue exits 1 with "Invalid job id" once every id has left the controller; any other error (slurmctld
+        # timeout, socket error) is "cannot tell", never "ended" (dev-nokl-free was marked failed while PENDING).
+        return [] if "Invalid job id" in body else None
+    lines = [line.strip() for line in body.splitlines() if line.strip()]
+    if any(not re.fullmatch(r"\d+(_\S+)?", line) for line in lines):
+        return None
+    return [line.split("_")[0] for line in lines]
 
 
 def run_shell(cmd, cwd=None, timeout=1800):

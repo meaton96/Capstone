@@ -54,7 +54,11 @@ def lookahead_features(twin) -> np.ndarray:
     per_type = {}
     for m in machines:
         per_type[m.type] = per_type.get(m.type, 0) + 1
-    pending = twin.pending[twin.pending_i:]
+    if getattr(twin, "unc", None) is not None:
+        # uncertainty layer: the look-ahead reads the published plan, not the world's future
+        pending = twin.unc.plan_future_jobs(now, {j.id for j in twin.order})
+    else:
+        pending = twin.pending[twin.pending_i:]
     out = []
     for h in HORIZONS:
         end = now + h

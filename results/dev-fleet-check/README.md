@@ -1,6 +1,6 @@
 # dev-fleet-check: Unity fleet schedule (agvSchedule) (2026-10-04)
 
-Build `linux_server_v4/` 10-04 18:32 (`BUILD_NOTES.md`): scenario "agvSchedule" [{"start", "agvCount"}]; AGVs above the
+Build `linux_server_archive/linux_server_v4/` 10-04 18:32 (`BUILD_NOTES.md`): scenario "agvSchedule" [{"start", "agvCount"}]; AGVs above the
 active count take no new task (AGVPool.IsOffDuty -> AGVController.IsOutOfService), finish their task and park; global
 scalar 13 = AGVs on duty per machine.
 - `sched1of2`: twin parity with 2 AGVs / 1 on duty, 300 decisions, PASSED (decisions and times identical, so the

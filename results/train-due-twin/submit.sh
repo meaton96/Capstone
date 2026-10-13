@@ -7,7 +7,7 @@
 set -euo pipefail
 source "$(dirname "$0")/../../linux_server/slurm/rit_ssh.sh"
 "${SSH[@]}" "$REMOTE" bash -s <<'REMOTE'
-cd ~/capstone/linux_server_v3
+cd ~/capstone/linux_server
 export RUN_NAME=train-due-twin TOTAL_TIMESTEPS=3000000 WINDOW=21600 SEEDS=3 TIME=0-10:00:00 GPU=0   # A100 queue backed up 10-05
 export PARAMS='{"failure_probability": 0.0, "due_date_allowance_range": [1.75, 2.5], "regime_block_seconds": 5400, "horizon_seconds": 30600, "load_mix": [{"name": "normal", "utilization": [0.6, 1.2], "weight": 2}, {"name": "surge", "utilization": [1.0, 1.6]}, {"name": "short", "utilization": [0.6, 1.2], "agv_count": 2}]}'
 slurm/submit_train_twin.sh

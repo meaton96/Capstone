@@ -26,7 +26,7 @@ HEADS = (JOB_HEAD_RULES, MACHINE_HEAD_RULES)
 def test_prior_offset_starts_near_p0_and_is_saved():
     torch.manual_seed(0)
     net = SchedulingNetwork()
-    lp = prior_log_probs("MDD-TECT", 0.8, HEADS)
+    lp = prior_log_probs("MDD-PTECT", 0.8, HEADS)
     net.actor_critic.actor.set_prior_offset(lp)
     net.eval()
     with torch.no_grad():
@@ -64,7 +64,7 @@ def _trunk_pg_norm(net, obs):
 
 def test_offset_prior_keeps_the_policy_gradient_into_the_trunk():
     obs = make_dummy_obs(32)
-    lp = prior_log_probs("MDD-TECT", 0.8, HEADS)
+    lp = prior_log_probs("MDD-PTECT", 0.8, HEADS)
     norms = {}
     for mode in ("none", "offset", "scale"):
         torch.manual_seed(0)

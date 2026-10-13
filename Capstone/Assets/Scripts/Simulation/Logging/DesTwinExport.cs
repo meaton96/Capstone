@@ -50,8 +50,23 @@ namespace Assets.Scripts.Simulation.Logging
             if (!Enabled || layout == null || traffic == null || pool == null) return;
             try
             {
-                File.WriteAllText(ResultsLogger.PathFor(FloorFile),
-                    JsonConvert.SerializeObject(BuildFloor(config, layout, traffic, pool, preDispatchLeadTime), Formatting.Indented));
+                object floor = BuildFloor(config, layout, traffic, pool, preDispatchLeadTime);
+                string floorJson;
+                if (config.PtimeRule == null)
+                    floorJson = JsonConvert.SerializeObject(floor, Formatting.Indented);
+                else
+                {
+                    // Non-default PECT / PTECT parameters (2026-10-10): "ptime_rule", read by des_twin.docking. Left out
+                    // at the defaults so every other export stays byte-identical.
+                    var jo = Newtonsoft.Json.Linq.JObject.FromObject(floor);
+                    PtimeRuleParams pt = config.PtimeRule;
+                    jo["ptime_rule"] = Newtonsoft.Json.Linq.JObject.FromObject(new
+                    {
+                        alpha = pt.Alpha, shape = pt.Shape, tau = pt.Tau, reroute = pt.Reroute, avail = pt.Avail,
+                    });
+                    floorJson = jo.ToString(Formatting.Indented);
+                }
+                File.WriteAllText(ResultsLogger.PathFor(FloorFile), floorJson);
                 File.WriteAllText(ResultsLogger.PathFor(JobsFile),
                     JsonConvert.SerializeObject(BuildJobs(config, jobs, episodeSeed)));
             }

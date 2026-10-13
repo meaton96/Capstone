@@ -251,6 +251,22 @@ def plan_leg(kin, floor, start_tick, pos, yaw, zone, route, final_pos, final_kin
     return leg
 
 
+def dock_yaw_after(kin, yaw, goal, first_tick, last_tick, align_first):
+    """Heading after tick last_tick of a dock handshake that began at first_tick (handshake_done's rotation, cut
+    short): the AGV turns toward the dock's facing direction on every tick it is not yet aligned (twice on the
+    arrival tick: AlignToDock on arrival, then again as it is not facing the dock). For a task cancelled or
+    redirected mid-handshake (machine failures)."""
+    if last_tick < first_tick:
+        return yaw
+    if align_first:
+        yaw = kin.rotate(yaw, goal)
+    for _ in range(first_tick, last_tick + 1):
+        if abs(angdiff(yaw, goal)) <= kin.align_thr:
+            break
+        yaw = kin.rotate(yaw, goal)
+    return yaw
+
+
 def handshake_done(kin, yaw, goal, first_tick, align_first):
     """Tick the handshake completes at a dock reached (align_first) or re-armed at first_tick. The AGV turns
     toward the dock's facing direction and the timer only runs on ticks it is within alignment_threshold."""

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Submit (or resubmit = resume) a twin training run on one A100 per seed (slurm/train_twin.sbatch). Run on the cluster
-# from ~/capstone/linux_server_v3. Required: RUN_NAME TOTAL_TIMESTEPS PARAMS WINDOW. Optional: SEEDS (3), FLOOR
+# from ~/capstone/linux_server. Required: RUN_NAME TOTAL_TIMESTEPS PARAMS WINDOW. Optional: SEEDS (3), FLOOR
 # (~/capstone/floors/des_floor7_v3.json), ACCOUNT (drl-scheduling), PARTITION (sporc), TIME (0-08:00:00), CPUS (24),
 # NUM_ENVS, TWIN_WORKERS, GPU (1; 0 = a 36-core CPU node, CPU torch with 16 threads: twin-compute twin-cpu-e16,
 # ~150 steps/s, used when the A100 queue is backed up), DRY=1.

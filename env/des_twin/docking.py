@@ -13,6 +13,10 @@ For each Unity run ("-destrace -baselinedrain") the kinematic twin is run on the
 
 With one AGV everything should match; a first difference marks where the two models part (a tie broken the
 other way, float drift in a timer), after which the runs are different samples of the same system.
+
+Machine failures (2026-10-09): for a run of the v5 player with an injected "stochastic.failureSchedule", pass
+dock(..., failures=FailureTrace.from_schedule(schedule)); machine_failures.csv is then compared row by row with the
+twin's fail_rows as well (results/dev-csharp-failures/failparity.py drives this).
 """
 import argparse
 import csv
@@ -25,6 +29,7 @@ from .engine import TwinConfig, run_twin
 from .floor import Floor
 from .legs import compare_legs
 from .run import unity_row
+from .scenario import ptime_settings
 
 
 def _first_diff(a, b, same):
@@ -35,12 +40,44 @@ def _first_diff(a, b, same):
     return n if len(a) == len(b) else n
 
 
-def dock(run_dir, transport="kinematic"):
+FAIL_COLS = ("tick", "machine_id", "event", "active_job", "queued_rerouted", "pickups_cancelled", "redirected", "held",
+             "aborted", "predispatch_cleared", "deferred_jobs")
+
+
+def compare_failures(run_dir, tw):
+    """machine_failures.csv (Unity, "-destrace", v5 player) against the twin's fail_rows, row by row in harvest order:
+    every column equal (repair duration as float32). Returns (rows, rows matched before the first difference, that
+    Unity row or None)."""
+    path = os.path.join(run_dir, "machine_failures.csv")
+    if not os.path.exists(path):
+        return 0, 0, None
+    with open(path) as f:
+        ur = list(csv.DictReader(f))
+
+    def key_u(r):
+        return tuple(r[c] if c == "event" else int(r[c]) for c in FAIL_COLS) + (np.float32(float(r["repair_duration"])),)
+
+    def key_t(r):
+        return tuple(r[c] for c in FAIL_COLS) + (np.float32(r["repair_duration"]),)
+
+    # compared up to Unity's row count: with identical runs both logs end at the same final tick
+    tr = tw.fail_rows[:len(ur)]
+    i = _first_diff([key_u(r) for r in ur], [key_t(r) for r in tr], lambda a, b: a == b)
+    if len(tw.fail_rows) != len(ur) and i == len(ur):
+        i = min(len(ur), len(tw.fail_rows))
+    return len(ur), i, None if i >= len(ur) else ur[i]
+
+
+def dock(run_dir, transport="kinematic", failures=None, legacy_failure_quirks=False):
+    """failures: a des_twin.failures.FailureTrace for a run with an injected failureSchedule (FailureTrace.
+    from_schedule of the scenario's schedule); legacy_failure_quirks for a player run with -legacyfailurequirks."""
     u = unity_row(run_dir)
     floor = Floor.load(os.path.join(run_dir, "des_floor.json"))
     with open(os.path.join(run_dir, "des_jobs.json")) as f:
         jobs = json.load(f)
-    tw = run_twin(floor, jobs, TwinConfig(u["rule"], transport, agv_count=int(u["agvCount"])))
+    # PECT / PTECT parameters: the export's "ptime_rule" (written only when not the defaults), else the defaults
+    tw = run_twin(floor, jobs, TwinConfig(u["rule"], transport, agv_count=int(u["agvCount"]), failures=failures,
+                                          legacy_failure_quirks=legacy_failure_quirks, **ptime_settings(floor.data)))
     s = tw.summary()
 
     with open(os.path.join(run_dir, "agv_events.csv")) as f:
@@ -48,7 +85,9 @@ def dock(run_dir, transport="kinematic"):
                else r["event"], int(r["job_id"])) for r in csv.DictReader(f) if r["event"] not in ("return", "park")]
     # Same-tick milestones (an AGV dispatched while already at the pickup dock) are logged in either order.
     ue = sorted(ue, key=lambda x: (round(x[0], 2), x[1:]))
-    te = sorted(((round(t, 2), a, e, j) for t, a, e, j in tw.trace if e != "park(planned)"),
+    # A cancelled task's planned milestones are marked "(cancelled)" in the twin's trace (failures only): never logged
+    te = sorted(((round(t, 2), a, e, j) for t, a, e, j in tw.trace
+                 if e != "park(planned)" and not e.endswith("(cancelled)")),
                 key=lambda x: (x[0], x[1:]))
     same_ev = lambda x, y: x[1:] == y[1:] and abs(x[0] - y[0]) < 0.011
     i_ev = _first_diff(ue, te, same_ev)
@@ -79,7 +118,21 @@ def dock(run_dir, transport="kinematic"):
     def rel(a, b):
         return (a - b) / b if b else 0.0
 
-    return {
+    extra = {}
+    if failures is not None:
+        n_f, i_f, first = compare_failures(run_dir, tw)
+        tard = [r["tardiness"] for r in tw.job_rows() if r["tardiness"] is not None]
+        twin_tard = sum(tard) / len(tard) if tard else 0.0
+        extra = {"fail_rows": n_f, "fail_rows_matched": i_f,
+                 "fail_first_diff_t": float(first["sim_time"]) if first else None,
+                 "unity_mean_tardiness": float(u.get("mean_tardiness") or 0.0), "twin_mean_tardiness": round(twin_tard, 2),
+                 "mean_tardiness_rel": round(rel(twin_tard, float(u.get("mean_tardiness") or 0.0)), 6),
+                 "unity_failures": int(u.get("episode_failures") or 0), "twin_failures": s["episode_failures"]}
+        extra.update({f"twin_{k}": s[k] for k in ("jobs_interrupted", "queued_rerouted", "pickups_cancelled",
+                                                  "redirects", "held_to_down", "aborts", "predispatch_cleared",
+                                                  "orphans_released", "delivered_to_down", "target_down_rerouted")})
+
+    return extra | {
         "run": os.path.relpath(run_dir), "instance": u["instance"], "rule": u["rule"], "agvs": int(u["agvCount"]),
         "jobs": s["jobs"], "unity_makespan": float(u["makespan"]), "twin_makespan": round(s["makespan"], 2),
         "makespan_rel": round(rel(s["makespan"], float(u["makespan"])), 6),

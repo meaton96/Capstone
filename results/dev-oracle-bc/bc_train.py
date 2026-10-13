@@ -93,6 +93,22 @@ def label_tails(tails, fut, pairs, mode, default="MDD-TECT", z=1.0):
     return out
 
 
+def check_head_pairs(pairs):
+    """10-11 (RL heads v5 = {SRT, MDD, ATC} x {PECT, PTECT}): the labels must be pairs of the current heads. Data
+    collected over the H15 pairs (dev-oracle-bc, rq2-oracle-steady before 10-11) can only be cloned with the H15 code
+    snapshot of that experiment (results/<name>/code/env) -- recollect over the head pairs for the v5 heads."""
+    bad = [p for p in pairs if p.split("-")[0] not in JOB_HEAD_RULES or p.split("-")[1] not in MACHINE_HEAD_RULES]
+    if bad:
+        raise SystemExit(f"error: {len(bad)} label pairs are not in the current RL heads ({JOB_HEAD_RULES} x "
+                         f"{MACHINE_HEAD_RULES}), e.g. {bad[:3]}. Recollect the data over the head pairs, or run the "
+                         "experiment's own code snapshot for H15 data.")
+
+
+def reference_pair(pairs):
+    """MDD-PECT (B2 reference since 10-10) when the data has it, else MDD-TECT (H15)."""
+    return "MDD-PECT" if "MDD-PECT" in pairs else "MDD-TECT"
+
+
 def head_index(pairs):
     j = np.array([JOB_HEAD_RULES.index(p.split("-")[0]) for p in pairs])
     m = np.array([MACHINE_HEAD_RULES.index(p.split("-")[1]) for p in pairs])
@@ -179,7 +195,7 @@ def scores(logits, tails, regret, pairs):
     pj, pm = logits[:, :nj].argmax(1), logits[:, nj:].argmax(1)
     chosen = np.array([np.flatnonzero((j == a) & (m == b))[0] for a, b in zip(pj, pm)])
     best = tails.argmin(1)
-    mdd = pairs.index("MDD-TECT")
+    mdd = pairs.index(reference_pair(pairs))
     return {"pair_match_%": 100 * (chosen == best).mean(),
             "job_rule_match_%": 100 * (j[chosen] == j[best]).mean(),
             "mean_regret_%": regret[np.arange(len(chosen)), chosen].mean(),
@@ -204,7 +220,8 @@ def main():
                          "switches away from --default-pair only past z standard errors (ev-safe); ev* need "
                          "../dev-oracle-bc-ev data (added 10-07)")
     ap.add_argument("--safe-z", type=float, default=1.0, help="ev-safe: standard errors a switch must clear")
-    ap.add_argument("--default-pair", default="MDD-TECT", help="ev-safe: the pair kept unless a switch clears z SE")
+    ap.add_argument("--default-pair", default=None,
+                    help="ev-safe: the pair kept unless a switch clears z SE (default: MDD-PECT if in the data, else MDD-TECT)")
     ap.add_argument("--tag", default="", help="suffix for the outputs (bc_scores<tag>.csv, bc_full_s<k><tag>.pt), "
                     "e.g. a capacity check with --patience 1000 (added 10-07)")
     a = ap.parse_args()
@@ -216,6 +233,8 @@ def main():
     loaded = load(train_seeds, a.data_dir, with_futures=a.labels != "oracle")
     obs, tails, seed_of, slot_of, pairs = loaded[:5]
     tobs, ttails, tseed, tslot, _ = load(test, a.data_dir)
+    check_head_pairs(pairs)
+    a.default_pair = a.default_pair or reference_pair(pairs)
     ltails = label_tails(tails, loaded[5] if a.labels != "oracle" else None, pairs, a.labels, a.default_pair, a.safe_z)
     if a.labels != "oracle":
         agree = float((ltails.argmin(1) == tails.argmin(1)).mean())

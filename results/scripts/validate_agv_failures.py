@@ -27,7 +27,7 @@ per-episode totals instead (episodes.csv: agv_failures, agv_repair_time, agv_blo
 
 @par Usage
 @code{.sh}
-.venv/bin/python results/scripts/validate_agv_failures.py linux_server_dev/Results/AGVF_check
+.venv/bin/python results/scripts/validate_agv_failures.py linux_server/Results/outdated/AGVF_check
 .venv/bin/python results/scripts/validate_agv_failures.py --self-test
 @endcode
 """

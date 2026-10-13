@@ -152,7 +152,8 @@ namespace Assets.Scripts.Simulation.Jobs
             "name", "seed", "agvCount", "agvMoveSpeed", "agvHandshakeDuration", "dispatchingRule",
             "jobs", "machineTypeLayout", "parkingMethod", "ioDocks", "reservationProtocol", "routingTrigger", "stochastic", "layout", "tiling",
             "machineFlexibilityProbability", "secondaryTimeMultiplier", "travelPrice",
-            "inputBufferCapacity", "outputBufferCapacity", "agvSchedule"
+            "inputBufferCapacity", "outputBufferCapacity", "agvSchedule",
+            "ptimeAlpha", "ptimeShape", "ptimeTau", "ptimeReroute", "ptimeAvail"
         };
 
         private static FJSSPConfig BuildConfig(string json, string fileName,
@@ -250,6 +251,7 @@ namespace Assets.Scripts.Simulation.Jobs
                 TravelPrice = root["travelPrice"]?.Value<float>() ?? 0f,
                 InputBufferCapacity = root["inputBufferCapacity"]?.Value<int>() ?? 0,
                 OutputBufferCapacity = root["outputBufferCapacity"]?.Value<int>() ?? 0,
+                PtimeRule = PtimeRuleParams.FromJson(root),
                 parkingMethod = root["parkingMethod"] != null
                     ? ConfigOverrides.ValidatedParkingMethod(root["parkingMethod"].Value<string>())
                     : "lane",
@@ -303,8 +305,59 @@ namespace Assets.Scripts.Simulation.Jobs
             "machineFailuresEnabled", "weibullK", "weibullLambda", "repairLogMu", "repairLogSigma",
             "agvFailuresEnabled", "agvWeibullK", "agvWeibullLambda", "agvRepairLogMu", "agvRepairLogSigma",
             "dynamicArrivalsEnabled", "arrivalLambda", "dynamicJobCap", "burstArrivalsEnabled", "burstSizeMean",
-            "episodeDurationSeconds", "warmupSeconds",
+            "episodeDurationSeconds", "warmupSeconds", "failureSchedule",
         };
+
+        /// <summary>Keys of "stochastic.failureSchedule" and of each of its per-machine entries.</summary>
+        public static readonly string[] FailureScheduleKeys = { "dt", "machines" };
+        public static readonly string[] MachineScheduleKeys = { "initialCountdown", "repairs", "ttfs" };
+
+        /// <summary>
+        /// Reads "stochastic.failureSchedule" (env/des_twin/failures.py FailureTrace.to_schedule()): per machine id the
+        /// initial countdown, the repair durations and the post-repair times to failure, all in seconds and read as
+        /// float like the native samplers' results. Unknown keys inside it are always an error (a typo would silently
+        /// fall back to native sampling). Values are checked by ConfigValidator.
+        /// </summary>
+        public static FailureSchedule ReadFailureSchedule(JToken token)
+        {
+            if (token == null || token.Type == JTokenType.Null) return null;
+            if (!(token is JObject fs))
+                throw new ArgumentException("\"stochastic.failureSchedule\" must be an object");
+            ConfigKeyCheck.ThrowUnknown(fs, FailureScheduleKeys, "\"stochastic.failureSchedule\"");
+            var sched = new FailureSchedule();
+            if (fs["dt"] != null && fs["dt"].Type != JTokenType.Null) sched.Dt = fs["dt"].Value<float>();
+            if (!(fs["machines"] is JObject machines))
+                throw new ArgumentException("\"stochastic.failureSchedule.machines\" must be an object keyed by machine id");
+            foreach (var prop in machines.Properties())
+            {
+                string where = $"\"stochastic.failureSchedule.machines.{prop.Name}\"";
+                if (!int.TryParse(prop.Name, System.Globalization.NumberStyles.Integer,
+                                  System.Globalization.CultureInfo.InvariantCulture, out int mid))
+                    throw new ArgumentException($"{where}: the key is not a machine id");
+                if (!(prop.Value is JObject m))
+                    throw new ArgumentException($"{where} must be an object");
+                ConfigKeyCheck.ThrowUnknown(m, MachineScheduleKeys, where);
+                JToken ic = m["initialCountdown"];
+                if (ic == null || ic.Type == JTokenType.Null)
+                    throw new ArgumentException($"{where}.initialCountdown is required");
+                sched.Machines[mid] = new MachineSchedule
+                {
+                    InitialCountdown = ic.Value<float>(),
+                    Repairs = ReadFloatArray(m["repairs"], where + ".repairs"),
+                    Ttfs = ReadFloatArray(m["ttfs"], where + ".ttfs"),
+                };
+            }
+            return sched;
+        }
+
+        private static float[] ReadFloatArray(JToken token, string where)
+        {
+            if (token == null || token.Type == JTokenType.Null) return new float[0];
+            if (!(token is JArray arr)) throw new ArgumentException($"{where} must be an array of numbers");
+            var values = new float[arr.Count];
+            for (int i = 0; i < arr.Count; i++) values[i] = arr[i].Value<float>();
+            return values;
+        }
 
         public static StochasticConfig ReadStochastic(JObject root, bool strict = false)
         {
@@ -332,6 +385,7 @@ namespace Assets.Scripts.Simulation.Jobs
                 BurstSizeMean = s["burstSizeMean"]?.Value<float>() ?? defaults.BurstSizeMean,
                 EpisodeDurationSeconds = s["episodeDurationSeconds"]?.Value<double>() ?? defaults.EpisodeDurationSeconds,
                 WarmupSeconds = s["warmupSeconds"]?.Value<double>() ?? defaults.WarmupSeconds,
+                MachineFailureSchedule = ReadFailureSchedule(s["failureSchedule"]),
             };
 
             // A "stochastic" block containing only defaults (e.g. {} or a stale/no-op block) is
@@ -340,7 +394,8 @@ namespace Assets.Scripts.Simulation.Jobs
             // Stochastic config that does nothing.
             bool anyNonDefault =
                 cfg.MachineFailuresEnabled || cfg.AGVFailuresEnabled || cfg.DynamicArrivalsEnabled
-                || cfg.BurstArrivalsEnabled || cfg.EpisodeDurationSeconds > 0.0 || cfg.WarmupSeconds > 0.0;
+                || cfg.BurstArrivalsEnabled || cfg.EpisodeDurationSeconds > 0.0 || cfg.WarmupSeconds > 0.0
+                || cfg.MachineFailureSchedule != null;
             return anyNonDefault ? cfg : null;
         }
 

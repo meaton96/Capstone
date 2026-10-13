@@ -33,7 +33,7 @@ from typing import Callable, Dict, Optional, Tuple
 
 import numpy as np
 
-from config import JOB_HEAD_RULES, MACHINE_HEAD_RULES
+from config import fixed_action
 from env_wrappers.slot_env import SlotActionEnv
 from env_wrappers.twin_env import MAX_SEED, TRAIN_SEED_LOW, TwinSchedulingEnv
 
@@ -90,7 +90,8 @@ class PairedSlotEnv(SlotActionEnv):
         if futures > 0 and env.scenario_generator is None:
             raise ValueError("redrawn futures need the env's scenario generator (pass futures=0 for a fixed scenario)")
         super().__init__(env, slot_seconds, gamma_per_second)
-        self.default_action = (int(default_action[0]), int(default_action[1]))
+        self.default_action = (default_action if isinstance(default_action, str)
+                               else (int(default_action[0]), int(default_action[1])))
         self.futures = int(futures)
         self.tail_seconds = float(tail_seconds)
         branch_reward = copy.deepcopy(env.reward_fn)
@@ -175,14 +176,15 @@ class PairedSlotEnv(SlotActionEnv):
         return float(np.mean(diffs))
 
     def step(self, action):
-        action = tuple(int(x) for x in np.asarray(action).reshape(2))
+        if not isinstance(action, str):
+            action = tuple(int(x) for x in np.asarray(action).reshape(2))
         self._history[self._grid] = action
         adv = self.paired_advantage(action)
         obs, total, done, info = super().step(action)
         return obs, total, done, dict(info, paired_advantage=adv)
 
 
-def default_action_for(pair: str) -> Tuple[int, int]:
-    """@brief (job head, machine head) of a "JOB-MACHINE" pair name."""
-    job, machine = pair.split("-")
-    return JOB_HEAD_RULES.index(job), MACHINE_HEAD_RULES.index(machine)
+def default_action_for(pair: str):
+    """@brief The env action of a "JOB-MACHINE" pair: (job head, machine head) for an RL-head pair, else the rule name
+    (a fixed-rule action, config.fixed_action; e.g. MDD-TECT since the v5 heads)."""
+    return fixed_action(pair)

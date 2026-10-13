@@ -115,6 +115,55 @@ class EpisodeConfigChannel(SideChannel):
         msg.write_string(json.dumps({"scenarios": encoded, "clear": bool(clear)}))
         super().queue_message_to_send(msg)
 
+    def set_rule_override(self, rule):
+        """
+        Make the player step this fixed rule ("MDD_TECT") at every decision instead of the policy's (job head,
+        machine head), until cleared with None (2026-10-10; Unity EpisodeConfigChannel.RuleOverrideIndex). Unity
+        processes a step's side-channel data before that step's actions, so the message applies from the decision the
+        accompanying step answers. A player whose RL heads are the v5 3 x 2 set knows the message (UnitySchedulingEnv
+        checks the branch sizes); an unknown rule stops the player.
+        """
+        msg = OutgoingMessage()
+        msg.write_string(json.dumps({"ruleOverride": None if rule is None else str(rule).upper().replace("-", "_")}))
+        super().queue_message_to_send(msg)
+
+    def send_pick(self, job: int, machine: int, decision: int, job_rule: str = "", machine_rule: str = ""):
+        """
+        Python rule mode (2026-10-11, env/rules_api; player launched with -pyrules): the job (and, at a routing decision,
+        the machine) to apply to decision `decision` instead of the accompanying step's action. Unity applies it with
+        FactoryOrchestrator.StepPick, which stops the player on a pick that is not a legal choice of that decision; the
+        rule names go to decision_log.csv as "py:<name>". Per decision, not sticky.
+        """
+        msg = OutgoingMessage()
+        msg.write_string(json.dumps({"pick": {"job": int(job), "machine": int(machine), "decision": int(decision),
+                                              "jobRule": str(job_rule), "machineRule": str(machine_rule)}}))
+        super().queue_message_to_send(msg)
+
+
+class DecisionViewChannel(SideChannel):
+    """
+    Unity -> Python: the raw candidate view of each agent decision (JSON; Python rule mode, players launched with
+    -pyrules; C# Channels.DecisionViewChannel). Unity queues one message per decision while collecting its observation,
+    so after reset()/step() returns a decision the latest message is that decision's view
+    (rules_api.unity_adapter.parse_view). take() returns it once.
+    """
+
+    CHANNEL_ID = uuid.UUID("d4a5b6c7-e8f9-4a0b-9c1d-2e3f4a5b6c7d")
+
+    def __init__(self):
+        super().__init__(self.CHANNEL_ID)
+        self._latest = None
+        self.received = 0
+
+    def on_message_received(self, msg: IncomingMessage):
+        self._latest = msg.read_string()
+        self.received += 1
+
+    def take(self) -> Optional[str]:
+        """The latest view's JSON text, or None if none arrived since the last take()."""
+        raw, self._latest = self._latest, None
+        return raw
+
 
 class EpisodeTelemetryChannel(SideChannel):
     """

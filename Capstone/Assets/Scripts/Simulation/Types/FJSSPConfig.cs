@@ -144,6 +144,20 @@ namespace Assets.Scripts.Simulation.Types
         ///          See DecisionCoordinator.IsOutputBlocked.
         public int OutputBufferCapacity = 0;
 
+        // ── Processing-time-weighted machine rules (PECT / PTECT, 2026-10-10) ──
+
+        /// @brief Parameters of the PECT / PTECT machine rules (alpha, shape, tau, re-route cost, availability).
+        /// @details null = the defaults (PtimeRuleParams.Default: quad, alpha 3), the values the twin
+        ///          (env/des_twin TwinConfig.ptime_*) and the RL action heads use. Set only when a scenario or config
+        ///          message gives a ptime* key, and left out of the config fingerprint while null, so configs that do
+        ///          not use it keep their config_hash.
+        [FingerprintOmitIfNull]
+        public PtimeRuleParams PtimeRule = null;
+
+        /// @brief The PECT / PTECT parameters in effect: PtimeRule, or the defaults. A method, not a property:
+        ///        ConfigFingerprint hashes every public property, and this one must not change config hashes.
+        public PtimeRuleParams GetEffectivePtimeRule() => PtimeRule ?? PtimeRuleParams.Default;
+
         // ── Parking method ──
 
         /// @brief Parking layout: "lane" (default; reserved lane, one dedicated bay per AGV),
@@ -234,6 +248,7 @@ namespace Assets.Scripts.Simulation.Types
                 TravelPrice = TravelPrice,
                 InputBufferCapacity = InputBufferCapacity,
                 OutputBufferCapacity = OutputBufferCapacity,
+                PtimeRule = PtimeRule,
                 ProcTimeParams = new Dictionary<MachineType, (float mu, float sigma)>(ProcTimeParams),
                 Stochastic = Stochastic,
                 MachineFlexibilityProbability = MachineFlexibilityProbability,
@@ -248,5 +263,64 @@ namespace Assets.Scripts.Simulation.Types
                 ThroughputTimingWindow = ThroughputTimingWindow,
             };
         }
+    }
+
+    /// @brief Parameters of the processing-time-weighted machine rules PECT and PTECT (2026-10-10, ported from
+    ///        env/des_twin/rules.py ptime_scores; results/dev-pect-rule chose quad, alpha 3).
+    /// @details Scores, lower first, over the routed job's candidate machines (p = processing time there, q = queued
+    ///          work, tr = TECT's travel estimate, p_min / p_mean = the fastest / mean p over the candidates):
+    ///            PECT  = q / A + p + alpha g(p)
+    ///            PTECT = max(tr, q / A) + p + alpha g(p)
+    ///          g by Shape: "lin" p; "quad" p^2 / p_mean; "ratio" p (p / p_min - 1); "exp" (1 - e^(-p / tau)) (p / 2 + R).
+    ///          Doubles, as the twin's Python floats, so both sides compute the same float32 scores.
+    public class PtimeRuleParams
+    {
+        public static readonly string[] Shapes = { "lin", "quad", "ratio", "exp" };
+
+        /// @brief Scenario / config-message keys (camelCase JSON).
+        public static readonly string[] JsonKeys = { "ptimeAlpha", "ptimeShape", "ptimeTau", "ptimeReroute", "ptimeAvail" };
+
+        /// @brief The defaults: twin TwinConfig.ptime_* and env/config.py PTIME_RULE_PARAMS.
+        public static readonly PtimeRuleParams Default = new PtimeRuleParams();
+
+        public double Alpha = 3.0;
+        public string Shape = "quad";
+        public double Tau = 5544.0;
+        public double Reroute = 0.0;
+        public double Avail = 1.0;
+
+        /// @brief The params a JSON object sets: null when it has none of JsonKeys (the defaults apply), otherwise
+        ///        the defaults with the given keys replaced.
+        public static PtimeRuleParams FromJson(Newtonsoft.Json.Linq.JObject root)
+        {
+            bool any = false;
+            foreach (string k in JsonKeys) any |= root[k] != null;
+            if (!any) return null;
+            PtimeRuleParams d = Default;
+            return new PtimeRuleParams
+            {
+                Alpha = root["ptimeAlpha"] != null ? (double)root["ptimeAlpha"] : d.Alpha,
+                Shape = root["ptimeShape"] != null ? (string)root["ptimeShape"] : d.Shape,
+                Tau = root["ptimeTau"] != null ? (double)root["ptimeTau"] : d.Tau,
+                Reroute = root["ptimeReroute"] != null ? (double)root["ptimeReroute"] : d.Reroute,
+                Avail = root["ptimeAvail"] != null ? (double)root["ptimeAvail"] : d.Avail,
+            };
+        }
+
+        /// @brief Problems with these values (empty when valid); ConfigValidator reports them.
+        public System.Collections.Generic.List<string> Problems()
+        {
+            var errors = new System.Collections.Generic.List<string>();
+            if (System.Array.IndexOf(Shapes, Shape) < 0)
+                errors.Add($"ptimeShape must be one of {string.Join(", ", Shapes)} (got '{Shape}')");
+            if (double.IsNaN(Alpha) || double.IsInfinity(Alpha) || Alpha < 0) errors.Add($"ptimeAlpha must be >= 0 (got {Alpha})");
+            if (double.IsNaN(Tau) || double.IsInfinity(Tau) || Tau <= 0) errors.Add($"ptimeTau must be > 0 (got {Tau})");
+            if (double.IsNaN(Reroute) || double.IsInfinity(Reroute) || Reroute < 0) errors.Add($"ptimeReroute must be >= 0 (got {Reroute})");
+            if (double.IsNaN(Avail) || double.IsInfinity(Avail) || Avail <= 0) errors.Add($"ptimeAvail must be > 0 (got {Avail})");
+            return errors;
+        }
+
+        public override string ToString() =>
+            $"{Shape} alpha={Alpha.ToString("R", System.Globalization.CultureInfo.InvariantCulture)}";
     }
 }

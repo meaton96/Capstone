@@ -237,6 +237,8 @@ namespace Assets.Scripts.Simulation
                             job.LocationMachineId = machineId;
 
                             PhysicalMachine targetMachine = _layout.GetMachine(machineId);
+                            // AGVController.DoDropoff has already placed the job; PlaceOnIncoming is idempotent
+                            // (since 2026-10-10), so this only places it if the AGV's placement found no visual.
                             targetMachine.PlaceOnIncoming(jobId, job.Visual);
                             RefreshMachineLabels(machineId);
 
@@ -247,6 +249,9 @@ namespace Assets.Scripts.Simulation
                             if (targetMachine.HealthState != MachineHealthState.Operational)
                             {
                                 job.TransitionTo(JobState.NeedsRouting, _simTimeRef);
+                                // Not started here: free the incoming-belt slot (FailureCoordinator step 2 does the
+                                // same; FailureCoordinator.LegacyQuirks keeps the old leak).
+                                if (!FailureCoordinator.LegacyQuirks) targetMachine.ReleaseIncomingSlot(jobId);
                                 SimLogger.Medium($"[Failure] Job {jobId} delivered to machine {machineId} " +
                                                  $"as it failed — re-routed.");
                             }

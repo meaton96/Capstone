@@ -3,6 +3,9 @@
 @brief Analysis for the 2026-10-07 learning-stack dev runs (results/scripts/dev_b2_slot_train_eval.sh): learning curves,
        training diagnostics, the held-out comparison table and whether the policy leaves the MDD-TECT prior where it
        should, each next to the reference prior run (train-due-twin-slot-prior-kl s0-1, scale init, 10,800 s horizon).
+       10-11: works for both action layouts (H15 heads v4 and the v5 heads {SRT, MDD, ATC} x {PECT, PTECT}): the head
+       rule lists come from the decision log / checkpoint width, the reference pair is MDD-PECT when the evaluation
+       has it (else MDD-TECT), and "leaving the prior" compares against the best ATC pair present.
 
 @par Usage
 @code{.sh}
@@ -43,31 +46,54 @@ def scalars(run: Path, tags) -> dict:
     return out
 
 
+# Job-head rule order per action layout, keyed by the actor's output width (job + machine logits).
+JOB_HEADS = {8: ("SRT", "SPT", "MDD", "EDD", "ATC"), 5: ("SRT", "MDD", "ATC")}   # v4 (H15) / v5
+
+
 def actor_out(run: Path) -> str:
     sd = torch.load(run / "checkpoint.pt", map_location="cpu", weights_only=True)["model_state_dict"]
     w = sd["actor_critic.actor.net.3.weight"]
     off = sd.get("actor_critic.actor.prior_offset")
     b = sd["actor_critic.actor.net.3.bias"]
     lg = (b + off) if off is not None else b
-    return (f"output weight norm {w.norm():.2f}, logit offset+bias MDD {lg[2]:+.2f} ATC {lg[4]:+.2f} "
+    jobs = JOB_HEADS.get(len(b))
+    if jobs is None:
+        return f"output weight norm {w.norm():.2f} (unknown head layout, {len(b)} logits)"
+    return (f"output weight norm {w.norm():.2f}, logit offset+bias MDD {lg[jobs.index('MDD')]:+.2f} "
+            f"ATC {lg[jobs.index('ATC')]:+.2f} "
             f"(prior offset {'on' if off is not None and off.abs().sum() > 0 else 'off'})")
 
 
+def reference(pairs: pd.DataFrame) -> str:
+    """The named reference pair: MDD-PECT (B2 reference since 10-10, dev-pect-rule) when evaluated, else MDD-TECT."""
+    return "MDD-PECT" if "MDD-PECT" in pairs else "MDD-TECT"
+
+
+def best_atc(pairs: pd.DataFrame) -> str:
+    """The ATC pair with the lowest pooled tardiness among those evaluated (ATC-ECT for H15 runs)."""
+    atc = [c for c in pairs.columns if c.startswith("ATC-")]
+    return min(atc, key=lambda c: pairs[c].sum())
+
+
 def flips(dec: pd.DataFrame, pairs: pd.DataFrame, policy: str) -> str:
-    """How the policy leaves MDD: share of slots per job rule, and whether p(ATC) / ATC slots go where ATC-ECT wins."""
+    """How the policy leaves MDD: share of slots per job rule, and whether p(ATC) / ATC slots go where the best ATC pair
+    beats the reference pair."""
     a = dec[dec.policy == policy]
     if a.empty:
         return "no decisions"
     share = a.rule.value_counts(normalize=True)
-    atc_gap = 100 * (pairs["ATC-ECT"] - pairs["MDD-TECT"]) / pairs["MDD-TECT"]     # < 0: ATC-ECT wins
-    per = a.groupby("seed").agg(p_atc=("p_job_ATC", "mean"), off=("job_head", lambda h: float((h != 2).mean())))
+    jobs = [c[len("p_job_"):] for c in a.columns if c.startswith("p_job_") and a[c].notna().any()]
+    mdd = jobs.index("MDD") if "MDD" in jobs else 2
+    ref, atc = reference(pairs), best_atc(pairs)
+    atc_gap = 100 * (pairs[atc] - pairs[ref]) / pairs[ref]     # < 0: the ATC pair wins
+    per = a.groupby("seed").agg(p_atc=("p_job_ATC", "mean"), off=("job_head", lambda h: float((h != mdd).mean())))
     per = per.join(atc_gap.rename("atc_gap"), how="inner")
     rho = spearmanr(per.p_atc, per.atc_gap).statistic
     win = per[per.atc_gap < 0]
     lose = per[per.atc_gap >= 0]
     return (f"slots: " + ", ".join(f"{k} {v:.1%}" for k, v in share.head(4).items())
-            + f"\n      mean p(ATC) {a.p_job_ATC.mean():.3f}; Spearman(p(ATC), ATC-ECT gap) {rho:+.2f}; "
-            f"non-MDD slots where ATC-ECT wins ({len(win)} inst) {win.off.mean():.1%} vs elsewhere ({len(lose)}) "
+            + f"\n      mean p(ATC) {a.p_job_ATC.mean():.3f}; Spearman(p(ATC), {atc} gap vs {ref}) {rho:+.2f}; "
+            f"non-MDD slots where {atc} wins ({len(win)} inst) {win.off.mean():.1%} vs elsewhere ({len(lose)}) "
             f"{lose.off.mean():.1%}")
 
 
@@ -96,11 +122,13 @@ def main():
     summary = pd.read_csv(ev / "summary.csv")
     cols = ["policy", "return_mean", "vs_best_fixed_pct", "wins_vs_best_fixed", "losses_vs_best_fixed",
             "vs_hindsight_fixed_pct", "vs_oracle_pct", "oracle_gain_captured_pct", "discounted_return_mean"]
-    show = summary[(summary.kind == "checkpoint") | summary.policy.isin(["MDD-TECT", "ATC-ECT", "SRT-ECT"])]
+    show = summary[(summary.kind == "checkpoint") | summary.policy.isin(
+        ["MDD-PECT", "MDD-PTECT", "ATC-PTECT", "SRT-PECT", "MDD-TECT", "ATC-ECT", "SRT-ECT"])]
     pd.set_option("display.width", 220)
     print("\n== held-out B2 seeds 0-39 (cost = window tardiness / 1000; % change in mean cost, < 0 better)")
     print(show[[c for c in cols if c in show]].round(3).to_string(index=False))
-    print("   vs best = MDD-TECT (named); vs hindsight = each instance's best of the 15 pairs; oracle = rq2-twin-fleet B2")
+    print("   vs best = the named best fixed pair (MDD-PECT since 10-11, MDD-TECT before); vs hindsight = each instance's "
+          "best of the evaluated pairs; oracle = rq2-twin-fleet B2 (H15)")
 
     e = pd.read_csv(ev / "episodes.csv")
     pairs = e[e.kind == "pdr"].assign(tard=lambda d: -d["return"]).pivot(index="seed", columns="policy", values="tard")

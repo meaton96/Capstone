@@ -72,7 +72,7 @@ under the switch (time in system about 1.5% per run, tardiness 4-6%), so that se
   Plan: `docs/Plans/PDR_RULE_SET_PLAN_2026-10-02.md` §9 (the user asked for this twin test 10-02 23:30).
 - **Simulator:** the event-based twin `env/des_twin` (DES-1k: Unity's AGV motion, routes, docks and handshakes, no
   zone reservations), kinematic transport, layout D, 7 AGVs, onTransport, floor exported from Unity
-  (`linux_server_des/Results/G1/rnd_load_s0/D/agv7_SPT_ECT_s0/des_floor.json`). An episode takes 0.3-0.5 s.
+  (`linux_server/Results/G1/rnd_load_s0/D/agv7_SPT_ECT_s0/des_floor.json`). An episode takes 0.3-0.5 s.
 - **Instances:** randomized generator (rnd_load defaults) with machine failures off, seeds 0-19 (the held-out seeds;
   the jobs are identical to the default instances, only the failure block is dropped). 5,400 s agent window.
   - `warm`: random warm-up, i.e. the training distribution (= the oracle screen's mf-off regime).

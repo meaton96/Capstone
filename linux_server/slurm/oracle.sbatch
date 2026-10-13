@@ -15,7 +15,7 @@
 #SBATCH --error=logs/%x_%A_%a.err
 
 set -euo pipefail
-cd "${SLURM_SUBMIT_DIR:-$HOME/capstone/linux_server_oracle}"
+cd "${SLURM_SUBMIT_DIR:-$HOME/capstone/linux_server}"
 REPO="$(dirname "$PWD")"
 OUT="$REPO/results/${EXP:?set EXP to the results folder (e.g. rq2-oracle-screen-qfifo); there is no default}"
 

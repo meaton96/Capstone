@@ -18,6 +18,7 @@ SCENARIO_KEYS = {
     "jobs", "machineTypeLayout", "parkingMethod", "ioDocks", "reservationProtocol", "routingTrigger",
     "stochastic", "layout", "tiling", "machineFlexibilityProbability", "secondaryTimeMultiplier", "travelPrice",
     "inputBufferCapacity", "outputBufferCapacity", "agvSchedule",
+    "ptimeAlpha", "ptimeShape", "ptimeTau", "ptimeReroute", "ptimeAvail",
 }
 
 ## @brief EpisodeConfigChannel.ConfigKeys (top level of a generated-config message).
@@ -27,6 +28,7 @@ CONFIG_KEYS = {
     "machineFlexibilityProbability", "secondaryTimeMultiplier", "parkingMethod", "ioDocks",
     "reservationProtocol", "routingTrigger", "tiling", "preDispatchingMethod", "stochastic", "procTimeParams",
     "travelPrice", "inputBufferCapacity", "outputBufferCapacity",
+    "ptimeAlpha", "ptimeShape", "ptimeTau", "ptimeReroute", "ptimeAvail",
 }
 
 ## @brief ScenarioLoader.StochasticKeys.
@@ -34,15 +36,19 @@ STOCHASTIC_KEYS = {
     "machineFailuresEnabled", "weibullK", "weibullLambda", "repairLogMu", "repairLogSigma",
     "agvFailuresEnabled", "agvWeibullK", "agvWeibullLambda", "agvRepairLogMu", "agvRepairLogSigma",
     "dynamicArrivalsEnabled", "arrivalLambda", "dynamicJobCap", "burstArrivalsEnabled", "burstSizeMean",
-    "episodeDurationSeconds", "warmupSeconds",
+    "episodeDurationSeconds", "warmupSeconds", "failureSchedule",
 }
+
+## @brief ScenarioLoader.FailureScheduleKeys / MachineScheduleKeys ("stochastic.failureSchedule", 2026-10-09).
+FAILURE_SCHEDULE_KEYS = {"dt", "machines"}
+MACHINE_SCHEDULE_KEYS = {"initialCountdown", "repairs", "ttfs"}
 
 TILING_KEYS = {"tiles", "machinesPerTile", "jobScope", "agvAssignment", "releaseRule", "releaseWeights", "seamGap"}
 
 MACHINE_TYPES = ("Mill", "Lathe", "Weld", "Inspect", "Assemble")
 LAYOUTS = tuple("ABCDEFGHIJKLMNO")
 _JOB_RULES = ("SPT", "LPT", "SRT", "LRT", "FIFO", "PTWINQ", "EDD", "MDD", "ATC")
-_MACHINE_RULES = ("SMPT", "SRWT", "MMUR", "ECT", "TECT")
+_MACHINE_RULES = ("SMPT", "SRWT", "MMUR", "ECT", "TECT", "PECT", "PTECT")
 DISPATCHING_RULES = {f"{j}_{m}" for j in _JOB_RULES for m in _MACHINE_RULES} | {"Random"}
 
 ## @brief Gridlock-safe fleet per 15-machine reference floor (ConfigValidator.cs, where the sources are cited):
@@ -180,6 +186,13 @@ def _check_common(v: "_Checker", cfg: Dict[str, Any], machine_count: int) -> Non
     v.number(cfg, "travelPrice", minimum=0.0)
     v.integer(cfg, "inputBufferCapacity", minimum=0)
     v.integer(cfg, "outputBufferCapacity", minimum=0)
+    # PECT / PTECT parameters (2026-10-10; PtimeRuleParams.Problems in FJSSPConfig.cs)
+    v.number(cfg, "ptimeAlpha", minimum=0.0)
+    v.number(cfg, "ptimeTau", exclusive_min=0.0)
+    v.number(cfg, "ptimeReroute", minimum=0.0)
+    v.number(cfg, "ptimeAvail", exclusive_min=0.0)
+    if "ptimeShape" in cfg and cfg["ptimeShape"] not in ("lin", "quad", "ratio", "exp"):
+        v.fail(f"ptimeShape must be one of lin, quad, ratio, exp (got {cfg['ptimeShape']!r})")
     v.choice(cfg, "reservationProtocol", {"holdprevious", "releaseprevious"})
     v.choice(cfg, "routingTrigger", {"ontransport", "onready"})
     v.choice(cfg, "parkingMethod", {"single", "multiple", "lane"})
@@ -288,6 +301,44 @@ def _check_stochastic(v: "_Checker", s: Dict[str, Any]) -> None:
         v.number(s, "burstSizeMean", minimum=1.0, where=w)
     v.number(s, "episodeDurationSeconds", minimum=0.0, where=w)
     v.number(s, "warmupSeconds", minimum=0.0, where=w)
+    if "failureSchedule" in s:
+        _check_failure_schedule(v, s)
+
+
+def _check_failure_schedule(v: "_Checker", s: Dict[str, Any]) -> None:
+    """ConfigValidator.ValidateStochastic's failureSchedule checks (des_twin.failures.FailureTrace.to_schedule)."""
+    w = "stochastic.failureSchedule."
+    fs = s["failureSchedule"]
+    if not s.get("machineFailuresEnabled"):
+        v.fail(f"{w[:-1]} requires machineFailuresEnabled")
+    if not isinstance(fs, dict):
+        v.fail(f"{w[:-1]} must be an object")
+        return
+    v.keys(fs, FAILURE_SCHEDULE_KEYS, w)
+    v.number(fs, "dt", exclusive_min=0.0, where=w)
+    machines = fs.get("machines")
+    if not isinstance(machines, dict):
+        v.fail(f"{w}machines must be an object keyed by machine id")
+        return
+    for key, m in machines.items():
+        at = f"{w}machines.{key}."
+        if not str(key).lstrip("-").isdigit():
+            v.fail(f"{at[:-1]}: the key is not a machine id")
+        if not isinstance(m, dict):
+            v.fail(f"{at[:-1]} must be an object")
+            continue
+        v.keys(m, MACHINE_SCHEDULE_KEYS, at)
+        v.number(m, "initialCountdown", exclusive_min=0.0, required=True, where=at)
+        reps, ttfs = m.get("repairs", []), m.get("ttfs", [])
+        if not isinstance(reps, list) or not isinstance(ttfs, list):
+            v.fail(f"{at}repairs and ttfs must be arrays")
+            continue
+        if any(not _is_number(r) or r < 0 for r in reps):
+            v.fail(f"{at}repairs must be finite numbers >= 0")
+        if any(not _is_number(t) or not t > 0 for t in ttfs):
+            v.fail(f"{at}ttfs must be finite numbers > 0")
+        if len(ttfs) not in (len(reps), len(reps) + 1):
+            v.fail(f"{at}len(ttfs) must be len(repairs) or len(repairs) + 1 (got {len(ttfs)} and {len(reps)})")
 
 
 def _check_layout(v: "_Checker", layout: Any) -> None:

@@ -20,7 +20,7 @@ already has, its data/s<seed>.npz holds it). Skips seeds already written.
 
 @par Usage
 @code{.sh}
-nice -n 10 .venv/bin/python results/dev-oracle-bc-ev/collect_ev.py --seeds 0-39,2000-2159 --futures 4 --workers 16
+nice -n 10 .venv/bin/python results/archive/dev-oracle-bc-ev/collect_ev.py --seeds 0-39,2000-2159 --futures 4 --workers 16
 @endcode
 """
 import argparse

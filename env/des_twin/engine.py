@@ -15,18 +15,56 @@ With a fixed rule (run / run_twin) every decision is drained with it, as "-basel
 "-rldecisiondrain": the generator yields a Decision (Unity's DecisionRequest) and takes the rule halves to apply.
 
 Machines and AGVs act after the orchestrator in a tick, so work started at tick k runs from tick k and a flag
-raised at tick m is harvested at m + 1. Machine failures, AGV failures and multi-tile floors are not modelled:
-compare only against Unity runs without them.
+raised at tick m is harvested at m + 1. AGV failures and multi-tile floors are not modelled: compare only against
+Unity runs without them.
+
+Machine failures (2026-10-09, dev-twin-failures): with TwinConfig.failures (a des_twin.failures.FailureTrace) a step 0
+runs first in every tick, as FailureCoordinator.HarvestFailureFlags does before every other harvest: in machine order,
+a failure harvested at this tick (`_fail`, FailureCoordinator.HandleMachineFailure steps 0-6) or a repair harvested
+at this tick (`_repair_done`, then RetryDeferredJobs). Orphaned pre-dispatches are released after the AGV milestones
+(FlagHarvester.ReleaseOrphanedPreDispatches). Down machines are never routing candidates, a job whose eligible
+machines are all down is deferred, TryAssignAgv sends a job whose target went down back to routing, and a delivery to
+a machine that is down is re-routed (audit B3). With failures None every one of these paths is skipped and the engine
+is bit-identical to 84e221c3 (results/dev-twin-failures/check_exact.py).
+
+Quirk fixes (2026-10-09, dev-csharp-failures, mirrored in the C# of the v5 player): a job re-routed off a failed machine
+without being started (failure step 2, B3) frees its incoming-belt slot, and a transit with no operational alternate is
+delivered to the down machine and re-routed there by B3 instead of being aborted with a stale location.
+TwinConfig.legacy_failure_quirks restores the old handling (player flag -legacyfailurequirks). A task cancelled or
+redirected mid-handshake re-plans from the heading the AGV has turned to by then (motion.dock_yaw_after). Unity runs on
+an injected failureSchedule (FailureTrace.from_schedule) match the twin event for event at 1 AGV
+(results/dev-csharp-failures); failures-off behaviour is still bit-identical (check_exact.py there, vs 3ac76c2b).
+
+Indexes (2026-10-09, dev-twin-speed): the engine used to find live jobs, routable jobs, machine queues and machine loads
+by scanning every job that ever arrived (`self.order`), several times per tick; at 100 machines that was ~90% of the
+run time. It now keeps the live jobs (`_live_d`), the jobs per state and per machine queue / load target as indexes
+ordered by arrival position (`Job.seq` = index in `self.order`), so every scan visits the same jobs in the same order
+as before and the results are bit-identical (float32 sums included). `_to` is the only place a job's state changes and
+every location / target change happens before the `_to` that follows it, so `_to` keeps the indexes current. metrics()
+caches its left fold over the leading exited jobs (they never change). Exactness check: results/dev-twin-speed.
+
+Uncertainty layer (2026-10-11, dev-twin-uncertainty; des_twin.uncertainty, des_twin.observed): with
+TwinConfig.uncertainty (an UncertaintyTrace; the job list passed in is then its world_jobs) Job.ops keeps the PLANNED
+durations, `_start` draws the actual one f32(p_plan x b_m(now) x f_jom) from the trace, the almost-done pre-dispatch
+fires on the controllers' estimate (predispatch_on "planned"), `_to` / `_arrive` hand every transition to the view, and
+routing / dispatch / FindBestAlternateMachine read the degraded view (Twin.view; the observation reads Twin.observed)
+instead of the twin. Decisions are still triggered on the true state. pause_at / replace_pending serve the fork-based
+planner (des_twin.planner). With uncertainty None every new path is skipped; with an all-zero configuration the engine
+is still bit-identical to 95af8606 (results/dev-twin-uncertainty/check_exact.py).
 """
 import heapq
 import math
+from bisect import bisect_left, insort
 from dataclasses import dataclass
 
 import numpy as np
 
+from .failures import OnlineReliability, harvest_tick, remaining_countdown
 from .floor import Floor
-from .motion import Kinematics, f32_countdown, handshake_done, heading, plan_leg
-from .rules import f32, parse_rule, rank_jobs, select_machine
+from .motion import Kinematics, dock_yaw_after, f32_countdown, handshake_done, heading, plan_leg
+from config import PTIME_RULE_PARAMS
+
+from .rules import PTIME_RULES, RELIABILITY_RULES, f32, parse_rule, rank_jobs, select_machine
 
 NEEDS_ROUTING, WAITING_PICKUP, IN_TRANSIT, QUEUED, PROCESSING, EXITED = range(6)
 TRANSPORTS = ("instant", "geometric", "kinematic")
@@ -45,6 +83,49 @@ class TwinConfig:
     # new tasks. An AGV going off duty finishes its task and its trip back to the bay (as for charging). () = the whole
     # fleet throughout. The scenario's "agvSchedule" (des_twin.scenario.agv_schedule) gives it.
     agv_schedule: tuple = ()
+    # Machine failures (2026-10-09): a des_twin.failures.FailureTrace (exogenous, calendar-time events), None = off.
+    failures: object = None
+    # Unity's failure handling before 2026-10-09 ("-legacyfailurequirks"): a job re-routed off a failed machine keeps its
+    # incoming-belt slot, and a transit with no operational alternate is aborted (job collected later from the machine
+    # it came from). False (default) = the fixed handling of the v5 player: the slot is freed and such a transit is
+    # delivered to the down machine and re-routed there (results/dev-csharp-failures).
+    legacy_failure_quirks: bool = False
+    # Reliability-aware machine rules (RECT, RTECT, RECTA, RTECTA, HAECT; twin only): the information they get -
+    # "static" (long-run per-machine parameters), "online" (estimated from the failures observed so far) or "oracle"
+    # (the true current hazard: hidden regime and age) - the risk-term weight and the re-route cost (seconds).
+    reliability: str = "static"
+    reliability_kappa: float = 1.0
+    reroute_cost: float = 90.0
+    # R-online estimator (failures.OnlineReliability, reliability="online" only): forgetting half-life (seconds) and
+    # prior strength (pseudo-failures at the pooled floor rate).
+    reliability_half_life: float = 7200.0
+    reliability_prior: float = 2.0
+    # Machine discrimination of the reliability rules (dev-hetero-tune, 10-10): each candidate's failure rate and repair
+    # time become omega x its own + (1 - omega) x the floor mean at the information level. 1 = the per-machine values
+    # (the original rules); 0 = blind (every candidate gets the floor values, so kappa / R only weight the processing-
+    # time exposure). Decouples the exposure weight (kappa, R) from discrimination. HAECT ignores it.
+    reliability_mix: float = 1.0
+    # Processing-time-weighted machine rules (PECT, PTECT; dev-pect-rule 10-10, rules.PTIME_RULES; in Unity and the RL
+    # heads since dev-pect-unity 10-10): weight alpha of the penalty g(p), its shape (lin / quad / ratio / exp), the exp
+    # shape's time scale tau and re-route cost R (seconds), and the availability A that divides the queue (1 = the
+    # plain queue). Defaults = config.PTIME_RULE_PARAMS (quad, alpha 3), as Unity's PtimeRuleParams.Default; until
+    # dd0b3092 the defaults were lin, alpha 1 (dev-pect-rule set every value explicitly). A scenario's ptime* keys
+    # override them (des_twin.scenario.ptime_settings).
+    ptime_alpha: float = PTIME_RULE_PARAMS["alpha"]
+    ptime_shape: str = PTIME_RULE_PARAMS["shape"]
+    ptime_tau: float = PTIME_RULE_PARAMS["tau"]
+    ptime_reroute: float = PTIME_RULE_PARAMS["reroute"]
+    ptime_avail: float = PTIME_RULE_PARAMS["avail"]
+    # Uncertainty layer (2026-10-11, dev-twin-uncertainty): a des_twin.uncertainty.UncertaintyTrace built from the plan
+    # (the jobs passed to Twin are then the trace's world_jobs), None = off. Actual durations are drawn at the start
+    # of each operation, and rules / routing / dispatch read the degraded view des_twin.observed.ObservedState
+    # (Twin.view; the observation reads Twin.observed). With None every new path is skipped.
+    uncertainty: object = None
+    # Python rule (2026-10-11, rules_api / dev-pyrules): a rules_api.RulePair that replaces `rule` as the fixed rule
+    # (agent mode: the warm-up rule); `rule` is then not used. None = the built-in `rule`. In agent mode a RulePair can
+    # also be sent per decision instead of (job_rule, machine_rule). The pair picks from the decision view
+    # (rules_api.twin_adapter); the built-in path is untouched without it.
+    py_rule: object = None
 
 
 @dataclass
@@ -68,9 +149,36 @@ class Decision:
         return pool, pool or len(self.machines) > 1
 
 
+PAUSE = Decision("pause")     # yielded by agent_decisions() at a pause_at() time; the value sent back is ignored
+
+
+class _OrdIdx:
+    """Jobs kept in arrival order (Job.seq): iterating it visits them as a scan of Twin.order would."""
+    __slots__ = ("keys", "items")
+
+    def __init__(self):
+        self.keys, self.items = [], {}
+
+    def add(self, job):
+        insort(self.keys, job.seq)
+        self.items[job.seq] = job
+
+    def remove(self, job):
+        del self.keys[bisect_left(self.keys, job.seq)]
+        del self.items[job.seq]
+
+    def jobs(self):
+        items = self.items
+        return [items[k] for k in self.keys]
+
+    def __len__(self):
+        return len(self.keys)
+
+
 class Job:
     __slots__ = ("id", "arrival", "ops", "types", "cur_op", "completed_ops", "state", "since", "t_state",
-                 "location", "target", "assigned_agv", "pre_agv", "exit_time", "op_rows", "due", "op_due")
+                 "location", "target", "assigned_agv", "pre_agv", "exit_time", "op_rows", "due", "op_due",
+                 "seq", "ix_load", "ix_queue")
 
     def __init__(self, jid, arrival, ops, types, due=None, op_due=None):
         self.id, self.arrival, self.ops, self.types = jid, arrival, ops, types
@@ -81,6 +189,9 @@ class Job:
         self.location = self.target = self.assigned_agv = self.pre_agv = -1
         self.exit_time = None
         self.op_rows = []
+        self.seq = -1              # index in Twin.order once arrived
+        self.ix_load = -1          # machine whose load index holds the job (-1: none)
+        self.ix_queue = -1         # machine whose queue index holds the job (-1: none)
 
     @property
     def total_ops(self):
@@ -96,7 +207,9 @@ class Job:
 
 class MachineRT:
     __slots__ = ("id", "idle", "job", "start_tick", "dur", "proc_start", "busy", "belts", "finish_tick",
-                 "almost_tick", "info")
+                 "almost_tick", "info", "down", "fail_tick", "repair_tick", "repair_dur", "repair_start", "fptr",
+                 "events", "n_fail", "repair_sum", "downtime", "down_since", "lost_work", "life_start", "age0",
+                 "est_dur")
 
     def __init__(self, info):
         self.info, self.id = info, info.id
@@ -104,12 +217,15 @@ class MachineRT:
         self.start_tick, self.dur, self.proc_start, self.busy = 0, f32(0), None, 0.0
         self.belts = [[cap, set()] for _, cap in info.in_belts]
         self.finish_tick = self.almost_tick = None
+        self.down = False                       # Failed or Repairing (failures only)
+        self.fail_tick = self.repair_tick = None
+        self.est_dur = None                     # uncertainty: the controller's estimate of the running op's duration
 
 
 class AgvRT:
     __slots__ = ("id", "park_pos", "park_zone", "state", "pos", "yaw", "zone", "leg", "job", "source", "target",
                  "drop_pos", "dock", "milestone", "pre_arrive", "pre_yaw", "path", "idle_since", "idle_time",
-                 "trips")
+                 "trips", "hs")
 
     def __init__(self, a):
         self.id = a["id"]
@@ -121,6 +237,9 @@ class AgvRT:
         self.drop_pos = self.dock = self.milestone = None
         self.pre_arrive, self.pre_yaw = None, 0.0
         self.path, self.idle_since, self.idle_time, self.trips = 0.0, 0.0, 0.0, 0
+        # the current dock handshake (yaw in, goal, first tick, align first), kept with failures only: the heading
+        # of an AGV whose task is cancelled or redirected mid-handshake (Twin._leg_pose)
+        self.hs = None
 
 
 class Twin:
@@ -129,7 +248,14 @@ class Twin:
             raise ValueError(f"transport must be one of {TRANSPORTS}")
         self.floor, self.cfg = floor, cfg
         self.dt = floor.dt
-        self.job_rule, self.machine_rule = parse_rule(cfg.rule)
+        if cfg.py_rule is None:
+            self.job_rule, self.machine_rule = parse_rule(cfg.rule)
+            self._fixed = (self.job_rule, self.machine_rule)
+        else:
+            if not getattr(cfg.py_rule, "is_py_rule", False):
+                raise ValueError(f"py_rule must be a rules_api.RulePair, not {cfg.py_rule!r}")
+            self.job_rule = self.machine_rule = None
+            self._fixed = cfg.py_rule
         self.instant = cfg.transport == "instant"
         self.kin = None if self.instant else Kinematics(floor.agv, self.dt, cfg.transport)
         trigger = cfg.routing_trigger or floor.routing_trigger
@@ -141,27 +267,32 @@ class Twin:
         if n_agv > len(floor.agvs):
             raise ValueError(f"agv_count {n_agv} exceeds the {len(floor.agvs)} bays exported in des_floor.json")
         self.agvs = [] if self.instant else [AgvRT(a) for a in floor.agvs[:n_agv]]
+        self._agv_pos = {id(a): i for i, a in enumerate(self.agvs)}   # self.agvs.index(a)
         self.incoming_zone = floor.incoming_zone()
 
         self.jobs, self.order, self.pending = {}, [], []
+        self._live_d = {}                                  # live (arrived, not exited) jobs by seq, in arrival order
+        self._by_state = [_OrdIdx() for _ in range(6)]     # live jobs per state (EXITED unused)
+        self._queued_at = {m.id: _OrdIdx() for m in self.machines}   # QUEUED jobs by location
+        self._load_at = {m.id: _OrdIdx() for m in self.machines}     # jobs counted in machine_load(mid)
+        self._mpos = {m.id: i for i, m in enumerate(self.machines)}
+        self._dispatchable = set()                         # positions of idle machines with a non-empty queue
+        self._prearrive = {}                               # trace entry "arrive_prepickup" -> its indexes
+        self._mprefix = None                               # metrics(): fold over the leading exited jobs
+        self._pause_t = None                               # pause_at(): agent mode yields a "pause" before this time
+        self.unc = cfg.uncertainty
+        self.view = self.observed = None
+        if self.unc is not None:
+            from .observed import make_views
+            self._vcore, self.view, self.observed = make_views(self, self.unc)
+            self.dur_rows = []             # (job, op, machine, start time, planned, actual, estimated duration)
         for jd in jobs_data["jobs"]:
-            ops = [{int(m): f32(d) for m, d in op["eligible"]} for op in jd["ops"]]
-            due, op_due = jd.get("due"), jd.get("op_due")
-            if due is not None and op_due is None:
-                # Operation due dates for MOD: the allowance split by work, as scenario.assign_due_dates does
-                # (d_io = r + (d - r) x work of ops 0..o / total work).
-                work = [float(min(op.values())) for op in ops]
-                total, cum, op_due = sum(work), 0.0, []
-                for w in work:
-                    cum += w
-                    op_due.append(float(jd["arrival"]) + (float(due) - float(jd["arrival"])) * (cum / total if total > 0 else 1.0))
-            job = Job(int(jd["id"]), float(jd["arrival"]), ops, [op["type"] for op in jd["ops"]],
-                      None if due is None else float(due), op_due)
+            job = self._make_job(jd)
             self.jobs[job.id] = job
             if job.arrival > 0.0:
                 self.pending.append(job)
             else:
-                self.order.append(job)
+                self._arrive(job)
         self.pending.sort(key=lambda j: (j.arrival, j.id))
         self.pending_i = 0
 
@@ -174,6 +305,7 @@ class Twin:
         self.truncated = False
         self.makespan = None
         self.agent = False
+        self.forced = None             # (job, machine) for the next decision only; see force()
         # FixedUpdate ends the episode at the first tick with SimTime > warm-up end + cap, before harvesting
         self.cap_tick = None
         if cfg.episode_duration_seconds > 0:
@@ -184,6 +316,25 @@ class Twin:
             while k * self.dt <= limit:
                 k += 1
             self.cap_tick = k
+        self.fail = cfg.failures
+        if self.fail is not None:
+            self._init_failures()
+
+    @staticmethod
+    def _make_job(jd):
+        """A Job from a des_jobs/1 entry."""
+        ops = [{int(m): f32(d) for m, d in op["eligible"]} for op in jd["ops"]]
+        due, op_due = jd.get("due"), jd.get("op_due")
+        if due is not None and op_due is None:
+            # Operation due dates for MOD: the allowance split by work, as scenario.assign_due_dates does
+            # (d_io = r + (d - r) x work of ops 0..o / total work).
+            work = [float(min(op.values())) for op in ops]
+            total, cum, op_due = sum(work), 0.0, []
+            for w in work:
+                cum += w
+                op_due.append(float(jd["arrival"]) + (float(due) - float(jd["arrival"])) * (cum / total if total > 0 else 1.0))
+        return Job(int(jd["id"]), float(jd["arrival"]), ops, [op["type"] for op in jd["ops"]],
+                   None if due is None else float(due), op_due)
 
     # ── Clock ───────────────────────────────────────────────────────────────────────────────────
 
@@ -205,6 +356,55 @@ class Twin:
         self.agent = True
         return self._events()
 
+    def force(self, job=None, machine=None):
+        """Agent mode, while paused at a decision: the next decision takes this job (and, for a routing, this
+        machine) instead of the rule halves' pick; None leaves that half to the rule. Used for rollouts
+        (des_twin.branch); equivalent to rq2-direct-headroom's FORCE wrapper on rank_jobs / select_machine."""
+        self.forced = (job, machine)
+
+    def pause_at(self, t):
+        """Agent mode: the generator yields PAUSE (Decision kind "pause") once, before the first tick at or after sim
+        time t, i.e. in the state after every tick before t, and goes on when sent anything. Used by the planner
+        (des_twin.planner) to re-plan at fixed times without adding a tick."""
+        self._pause_t = float(t)
+
+    def replace_pending(self, jobs):
+        """Replaces the jobs that have not arrived yet by `jobs` (des_jobs/1 entries, arrival after the last processed
+        tick), e.g. a forked planner child's belief of the future (the published schedule) or a redrawn world. The
+        arrival wakes of dropped jobs are removed unless another event needs that tick, so the child processes the
+        ticks a twin built on the new job list would; the job dict is re-ordered as resolve_jobs orders it."""
+        old = self.pending[self.pending_i:]
+        dt = self.dt
+
+        def tick(j):
+            return max(1, math.ceil(j.arrival / dt - 1e-9))
+        new = [self._make_job(jd) for jd in jobs]
+        for j in new:
+            if tick(j) <= self.k:
+                raise ValueError(f"job {j.id}: arrival {j.arrival} is not after the current tick {self.k}")
+        for j in old:
+            self.jobs.pop(j.id, None)
+        for j in new:
+            if j.id in self.jobs:
+                raise ValueError(f"job {j.id} has already arrived")
+            self.jobs[j.id] = j
+        new.sort(key=lambda j: (j.arrival, j.id))
+        self.pending = self.pending[:self.pending_i] + new
+        need = {m.finish_tick for m in self.machines} | {m.almost_tick for m in self.machines}
+        need |= {a.milestone[0] for a in self.agvs if a.milestone is not None}
+        need |= {self.cap_tick, self.k + 1}
+        if self.fail is not None:
+            need |= {m.fail_tick for m in self.machines} | {m.repair_tick for m in self.machines}
+        new_ticks = {tick(j) for j in new}
+        drop = {tick(j) for j in old} - new_ticks - need
+        if drop:
+            self._heap = [t for t in self._heap if t not in drop]
+            heapq.heapify(self._heap)
+            self._queued -= drop
+        for t in sorted(new_ticks):
+            self._wake(t)
+        self.jobs = dict(sorted(self.jobs.items(), key=lambda kv: (np.float32(kv[1].arrival), kv[0])))
+
     @property
     def in_warmup(self):
         return self.now < self.cfg.warmup_seconds
@@ -221,6 +421,10 @@ class Twin:
             self._wake(self.cap_tick)
         max_tick = int(self.cfg.max_sim_seconds / self.dt)
         while self._heap:
+            if self._pause_t is not None and self._heap[0] * self.dt >= self._pause_t - 1e-9:
+                self._pause_t = None
+                yield PAUSE                    # pause_at(): the state after every tick before the pause time
+                continue
             k = heapq.heappop(self._heap)
             self._queued.discard(k)
             if k > max_tick:
@@ -238,12 +442,16 @@ class Twin:
             self.makespan = self.now
 
     def _tick(self, k):
+        if self.fail is not None:
+            self._harvest_failures(k)
         for m in self.machines:
             if m.finish_tick == k:
                 self._finish(m)
         for a in self.agvs:
             if a.milestone is not None and a.milestone[0] == k:
                 self._milestone(a)
+        if self.fail is not None and self._orphans:
+            self._release_orphans()
         waiting = None
         for m in self.machines:
             if m.almost_tick == k:
@@ -258,22 +466,67 @@ class Twin:
         while self.pending_i < len(self.pending) and self.pending[self.pending_i].arrival <= self.now + 1e-9:
             job = self.pending[self.pending_i]
             self.pending_i += 1
-            self.order.append(job)
+            self._arrive(job)
             added = True
         if added:
             self._wake(k + 1)
-        return self.pending_i >= len(self.pending) and all(j.state == EXITED for j in self.order)
+        return self.pending_i >= len(self.pending) and not self._live_d
 
     # ── Job bookkeeping ─────────────────────────────────────────────────────────────────────────
+
+    def _arrive(self, job):
+        job.seq = len(self.order)
+        self.order.append(job)
+        self._live_d[job.seq] = job
+        self._by_state[job.state].add(job)
+        self._index_load(job)
+        if self.unc is not None:
+            self._vcore.on_arrive(job)
 
     def _to(self, job, state):
         dt = self.now - job.since
         if dt > 0:
             job.t_state[job.state] += dt
+        old = job.state
         job.state, job.since = state, self.now
+        # indexes (callers set location / target before the _to that follows)
+        self._by_state[old].remove(job)
+        if job.ix_queue >= 0:
+            q = self._queued_at[job.ix_queue]
+            q.remove(job)
+            if not q.items:
+                self._dispatchable.discard(self._mpos[job.ix_queue])
+            job.ix_queue = -1
+        if state == EXITED:
+            del self._live_d[job.seq]
+        else:
+            self._by_state[state].add(job)
+        if state == QUEUED:
+            job.ix_queue = job.location
+            self._queued_at[job.location].add(job)
+            m = self.mach[job.location]
+            if m.idle and not m.down:
+                self._dispatchable.add(self._mpos[job.location])
+        self._index_load(job)
+        if self.unc is not None:
+            self._vcore.on_event(job, old, state)
+
+    def _index_load(self, job):
+        if job.state == QUEUED:
+            mid = job.location
+        elif job.state in (WAITING_PICKUP, IN_TRANSIT) and job.target >= 0:
+            mid = job.target
+        else:
+            mid = -1
+        if mid != job.ix_load:
+            if job.ix_load >= 0:
+                self._load_at[job.ix_load].remove(job)
+            if mid >= 0:
+                self._load_at[mid].add(job)
+            job.ix_load = mid
 
     def _live(self):
-        return (j for j in self.order if j.state != EXITED)
+        return iter(self._live_d.values())
 
     def remaining_work(self, jid):
         job = self.jobs[jid]
@@ -290,23 +543,19 @@ class Twin:
 
     def machine_load(self, mid):
         load = self.remaining_proc(self.mach[mid])
-        for j in self._live():
-            if (j.state == QUEUED and j.location == mid) or \
-                    (j.target == mid and j.state in (WAITING_PICKUP, IN_TRANSIT)):
-                load = f32(load + j.proc(mid))
+        # QUEUED at mid, or WAITING_PICKUP / IN_TRANSIT to mid, in arrival order (float32 sum order)
+        for j in self._load_at[mid].jobs():
+            load = f32(load + j.proc(mid))
         return load
 
     def all_machine_loads(self):
         loads = {m.id: self.remaining_proc(m) for m in self.machines}
-        for j in self._live():
-            if j.state == QUEUED:
-                mid = j.location
-            elif j.state in (WAITING_PICKUP, IN_TRANSIT):
-                mid = j.target
-            else:
-                continue
-            if mid >= 0:
-                loads[mid] = f32(loads.get(mid, f32(0)) + j.proc(mid))
+        for mid, idx in self._load_at.items():   # per machine in arrival order, as the scan added them
+            if idx.keys:
+                load = loads[mid]
+                for j in idx.jobs():
+                    load = f32(load + j.proc(mid))
+                loads[mid] = load
         return loads
 
     def work_in_next_queue(self, jid, loads):
@@ -321,20 +570,34 @@ class Twin:
         return f32(0) if best is None else best
 
     def utilization(self, m):
+        """DecisionCoordinator.MachineUtilization: busy time over operational time (sim time less downtime so far);
+        work lost to a failure is not busy (audit G10)."""
         busy = m.busy + (self.now - m.proc_start if m.proc_start is not None else 0.0)
+        if self.fail is not None:
+            up = self.now - self.downtime_so_far(m)
+            return f32(busy / up) if up > 0 else f32(0)
         return f32(busy / self.now) if self.now > 0 else f32(0)
 
     # ── Machines ────────────────────────────────────────────────────────────────────────────────
 
     def _start(self, m, job):
-        dur = job.proc(m.id)
+        dur = est = job.proc(m.id)
+        if self.unc is not None:
+            # planned duration in Job.ops; the actual one f32(p_plan x b_m(now) x f_jom) drawn now. Pre-dispatch
+            # fires on the controller's estimate (predispatch_on "planned") or on the true countdown ("actual").
+            plan = dur
+            dur = self.unc.actual_duration(plan, job.id, job.cur_op, m.id, self.now)
+            est = dur if self.unc.cfg.predispatch_on == "actual" else self._vcore.estimate(job.id, job.cur_op, m.id, plan)
+            m.est_dur = est
+            self.dur_rows.append((job.id, job.cur_op, m.id, self.now, float(plan), float(dur), float(est)))
         m.idle, m.job, m.start_tick, m.dur, m.proc_start = False, job.id, self.k, dur, self.now
         # PhysicalMachine.TickProcessing: float32 remainingTime -= dt each tick from this one; the almost-done flag at
         # remainingTime <= PreDispatchLeadTime, the finished flag at <= 0, each harvested the next tick
         m.finish_tick = self.k + max(1, f32_countdown(dur, self.dt, until=0.0)[0])
-        m.almost_tick = self.k + max(1, f32_countdown(dur, self.dt, until=self.lead)[0])
+        m.almost_tick = self.k + max(1, f32_countdown(est, self.dt, until=self.lead)[0])
         for belt in m.belts:
             belt[1].discard(job.id)
+        self._dispatchable.discard(self._mpos[m.id])
         self._wake(m.finish_tick)
         self._wake(m.almost_tick)
 
@@ -342,6 +605,10 @@ class Twin:
         job = self.jobs[m.job]
         m.busy += self.now - m.proc_start
         m.proc_start, m.idle, m.job, m.finish_tick = None, True, -1, None
+        if self.unc is not None and m.almost_tick is not None and m.almost_tick > self.k:
+            m.almost_tick = None           # finished before its (planned) almost-done: no pre-dispatch
+        if self._queued_at[m.id].keys:
+            self._dispatchable.add(self._mpos[m.id])
         job.op_rows[-1]["end"] = self.now
         job.completed_ops += 1
         job.cur_op += 1
@@ -368,6 +635,12 @@ class Twin:
             if len(jobs) < cap:
                 return pos
         return m.info.in_belts[0][0]
+
+    @staticmethod
+    def _release_slot(m, jid):
+        """PhysicalMachine.ReleaseIncomingSlot: a job re-routed off the machine without being started frees its slot."""
+        for belt in m.belts:
+            belt[1].discard(jid)
 
     def _place_on_belt(self, m, jid):
         for cap, jobs in m.belts:
@@ -397,7 +670,7 @@ class Twin:
             if t > self.now:
                 break
             n = k
-        return self.agvs.index(a) < n
+        return self._agv_pos[id(a)] < n
 
     def _available(self, a):
         return self._status(a) in ("idle", "returning") and self._on_duty(a)
@@ -455,6 +728,8 @@ class Twin:
         zid, dock = self._pickup_dock(src)
         leg = self._drive(a, zid, dock.approach, "dock")
         done, yaw = handshake_done(self.kin, leg.end_yaw, heading(*dock.facing), leg.arrive_tick, True)
+        if self.fail is not None:
+            a.hs = (leg.end_yaw, heading(*dock.facing), leg.arrive_tick, True)
         a.state, a.leg, a.dock = "to_pickup", leg, dock
         a.job, a.source, a.target, a.drop_pos = job.id, src.id if src else -1, target.id if target else -1, drop_pos
         a.pos, a.yaw, a.zone = leg.end_pos, yaw, leg.end_zone
@@ -465,7 +740,15 @@ class Twin:
         self._trace(done, a, "pickup", job.id)
 
     def _trace(self, tick, a, ev, jid):
-        self.trace.append((round(tick * self.dt, 2), a.id, ev, jid))
+        row = (round(tick * self.dt, 2), a.id, ev, jid)
+        if self.fail is not None:          # per-AGV entries, so a cancelled task's future entries can be marked
+            idx = self._agv_tr.setdefault(a.id, [])
+            idx.append(len(self.trace))
+            if len(idx) > 16:
+                del idx[:8]
+        if ev == "arrive_prepickup":
+            self._prearrive.setdefault(row, []).append(len(self.trace))
+        self.trace.append(row)
 
     def _predispatch(self, a, job, m):
         zid, dock = self._pickup_dock(m)
@@ -482,11 +765,16 @@ class Twin:
         goal = heading(*a.dock.facing)
         if a.pre_arrive <= self.k - 1:   # already waiting at the dock: re-armed handshake from this tick
             done, yaw = handshake_done(self.kin, a.pre_yaw, goal, self.k, False)
+            if self.fail is not None:
+                a.hs = (a.pre_yaw, goal, self.k, False)
         else:                            # still on the way: the normal arrival
             done, yaw = handshake_done(self.kin, a.leg.end_yaw, goal, a.pre_arrive, True)
+            if self.fail is not None:
+                a.hs = (a.leg.end_yaw, goal, a.pre_arrive, True)
             pre = (round(a.pre_arrive * self.dt, 2), a.id, "arrive_prepickup", job.id)
-            if pre in self.trace:         # it now arrives as MovingToPickup, as Unity logs it
-                self.trace[self.trace.index(pre)] = pre[:2] + ("arrive_pickup", job.id)
+            at = self._prearrive.get(pre)
+            if at:                        # it now arrives as MovingToPickup, as Unity logs it (first match)
+                self.trace[at.pop(0)] = pre[:2] + ("arrive_pickup", job.id)
         a.state, a.target, a.drop_pos, a.yaw = "to_pickup", target.id if target else -1, drop_pos, yaw
         a.milestone = (done + 1, "pickup")
         self._wake(done + 1)
@@ -510,6 +798,8 @@ class Twin:
             leg = plan_leg(self.kin, self.floor, self.k, a.pos, a.yaw, a.zone, route, dock.approach, "dock")
             a.path += leg.path_length
             done, yaw = handshake_done(self.kin, leg.end_yaw, heading(*dock.facing), leg.arrive_tick, True)
+            if self.fail is not None:
+                a.hs = (leg.end_yaw, heading(*dock.facing), leg.arrive_tick, True)
             a.state, a.leg, a.dock = "to_dropoff", leg, dock
             a.pos, a.yaw, a.zone = leg.end_pos, yaw, leg.end_zone
             a.milestone = (done + 1, "dropoff")
@@ -525,6 +815,11 @@ class Twin:
             job.location = m.id
             job.op_rows[-1]["queued"] = self.now
             self._to(job, QUEUED)
+            if m.down:                    # delivered to a machine that is down (audit B3): re-routed
+                self._to(job, NEEDS_ROUTING)
+                self.fstats["delivered_to_down"] += 1
+                if not self.cfg.legacy_failure_quirks:     # not started here: its belt slot is freed
+                    self._release_slot(m, job.id)
         else:
             self._exit(job)
         job.assigned_agv = -1
@@ -540,6 +835,11 @@ class Twin:
 
     def _try_assign(self, job):
         """FlagHarvester.TryAssignAgv: the nearest available AGV takes the job; False when none is free."""
+        if self.fail is not None and job.target >= 0 and self.mach[job.target].down:
+            job.target = -1                # the routed destination went down: back to routing
+            self._to(job, NEEDS_ROUTING)
+            self.fstats["target_down_rerouted"] += 1
+            return True
         src = self.mach[job.location] if job.location >= 0 else None
         a = self._nearest_agv(src)
         if a is None:
@@ -553,16 +853,20 @@ class Twin:
     def _assign_agvs(self):
         if self.instant:
             return
-        for job in [j for j in self._live() if j.state == WAITING_PICKUP and j.assigned_agv == -1 and j.pre_agv < 0]:
+        for job in [j for j in self._by_state[WAITING_PICKUP].jobs() if j.assigned_agv == -1 and j.pre_agv < 0]:
             if not self._try_assign(job):
                 break
 
     def _any_waiting_for_transport(self):
-        return any(j.state == NEEDS_ROUTING or
-                   (j.state == WAITING_PICKUP and j.assigned_agv == -1 and j.pre_agv < 0) for j in self._live())
+        if self.fail is not None and self.deferred:
+            if any(j.id not in self.deferred for j in self._by_state[NEEDS_ROUTING].items.values()):
+                return True
+            return any(j.assigned_agv == -1 and j.pre_agv < 0 for j in self._by_state[WAITING_PICKUP].items.values())
+        return len(self._by_state[NEEDS_ROUTING]) > 0 or \
+            any(j.assigned_agv == -1 and j.pre_agv < 0 for j in self._by_state[WAITING_PICKUP].items.values())
 
     def _almost_done(self, m, waiting):
-        if m.job < 0 or self.instant:
+        if m.job < 0 or self.instant or m.down:
             return
         job = self.jobs[m.job]
         if job.state != PROCESSING or job.pre_agv >= 0 or job.completed_ops == job.total_ops - 1:
@@ -578,53 +882,117 @@ class Twin:
     # ── Decisions ───────────────────────────────────────────────────────────────────────────────
 
     def _next_decision(self):
-        ready = [j for j in self._live() if j.state == NEEDS_ROUTING]
+        ready = self._by_state[NEEDS_ROUTING].jobs()
         if ready:
             open_ = not self.on_transport or any(self._available(a) for a in self.agvs)
-            routable = [j for j in ready if open_ or j.pre_agv >= 0]
+            if self.fail is None:
+                routable = [j for j in ready if open_ or j.pre_agv >= 0]
+            else:
+                routable = []
+                for j in ready:
+                    if not any(mid in self.mach and not self.mach[mid].down for mid in j.ops[j.cur_op]):
+                        if j.id not in self.deferred:    # every eligible machine is down: deferred
+                            self.deferred[j.id] = self.now
+                    elif open_ or j.pre_agv >= 0:
+                        routable.append(j)
             if routable:
                 yield from self._route(routable)
                 return True
-        for m in self.machines:
-            if m.idle and any(j.state == QUEUED and j.location == m.id for j in self._live()):
-                yield from self._dispatch_decision(m)
-                return True
+        if self._dispatchable:            # the first machine in floor order that is idle with a queue
+            yield from self._dispatch_decision(self.machines[min(self._dispatchable)])
+            return True
         return False
 
     def _rule_for(self, make_decision):
-        """The rule halves for this decision: the fixed rule, or (agent mode, after the warm-up) the agent's."""
+        """The rule halves for this decision: the fixed rule, or (agent mode, after the warm-up) the agent's. A Python
+        rule (rules_api.RulePair: cfg.py_rule, or sent by the agent) is returned as is."""
         if not self.agent or self.in_warmup:
-            return self.job_rule, self.machine_rule
+            return self._fixed
         rule = yield make_decision()
+        if getattr(rule, "is_py_rule", False):
+            return rule
         job_rule, machine_rule = (r.upper() for r in rule)
         parse_rule(f"{job_rule}_{machine_rule}")
         return job_rule, machine_rule
 
     def candidate_machines(self, job):
-        """BuildRoutingDecision: the job's eligible machines in floor order (all operational in the twin)."""
-        return [m.id for m in self.machines if m.id in job.ops[job.cur_op]]
+        """BuildRoutingDecision: the job's eligible machines in floor order that are operational."""
+        if self.fail is None:
+            return [m.id for m in self.machines if m.id in job.ops[job.cur_op]]
+        return [m.id for m in self.machines if m.id in job.ops[job.cur_op] and not m.down]
 
-    def _route(self, routable):
-        self.decisions += 1
-        ids = [j.id for j in routable]
-        job_rule, machine_rule = yield from self._rule_for(lambda: Decision(
-            "routing", job=ids[0], job_candidates=tuple(ids), selected_by_rule=len(ids) == 1,
-            machines=tuple(self.candidate_machines(routable[0]))))
-        jid = rank_jobs(job_rule, ids, self, lambda i: self.jobs[i].min_proc())
-        job = self.jobs[jid]
+    def _machine_lists(self, job, S):
+        """The routed job's candidate machines and the machine halves' inputs, parallel lists (BuildRoutingDecision's
+        arrays): candidates, processing times, loads, utilizations, travel estimates."""
         cands = self.candidate_machines(job)
-        times = [job.proc(mid) for mid in cands]
-        loads = [self.machine_load(mid) for mid in cands]
-        utils = [self.utilization(self.mach[mid]) for mid in cands]
+        sjob = S.jobs[job.id]
+        times = [sjob.proc(mid) for mid in cands]
+        loads = [S.machine_load(mid) for mid in cands]
+        utils = [S.utilization(S.mach[mid]) for mid in cands]
         if self.instant:
             travel = [f32(0)] * len(cands)
         else:
             speed = self.floor.agv["speed"]
             travel = [f32(self.floor.estimate_path_length(job.location, mid) / speed) for mid in cands]
-        mid = select_machine(machine_rule, cands, times, loads, utils, travel)
+        return cands, times, loads, utils, travel
+
+    def _route(self, routable):
+        self.decisions += 1
+        ids = [j.id for j in routable]
+        S = self                          # what the rule halves read: the twin, or its degraded view
+        if self.unc is not None:
+            S = self.view
+            S.set_local(ids)
+        rule = yield from self._rule_for(lambda: Decision(
+            "routing", job=ids[0], job_candidates=tuple(ids), selected_by_rule=len(ids) == 1,
+            machines=tuple(self.candidate_machines(routable[0]))))
+        if type(rule) is tuple:
+            job_rule, machine_rule = rule
+            py = None
+        else:                             # a Python rule (rules_api): it picks from the decision view
+            from rules_api.twin_adapter import routing_view
+            job_rule = machine_rule = None
+            py, pyview = rule, routing_view(self, S, ids)
+        forced, self.forced = self.forced, None
+        if forced is not None and forced[0] is not None:
+            if forced[0] not in ids:
+                raise ValueError(f"forced job {forced[0]} is not routable now ({ids})")
+            jid = forced[0]
+        elif py is not None:
+            jid = py.pick_job(pyview)
+            if jid not in ids:
+                raise ValueError(f"python rule {py.name} picked job {jid}, not in the pool {ids}")
+        else:
+            jid = rank_jobs(job_rule, ids, S, lambda i: S.jobs[i].min_proc())
+        job = self.jobs[jid]
+        if py is not None:
+            pyjob = pyview.job(jid)
+            mviews = pyjob.machines       # computed by _machine_lists (lazily, unless the job rule read them)
+            cands = [m.id for m in mviews]
+        else:
+            cands, times, loads, utils, travel = self._machine_lists(job, S)
+        if forced is not None and forced[1] is not None:
+            if forced[1] not in cands:
+                raise ValueError(f"forced machine {forced[1]} is not eligible for job {jid} ({cands})")
+            mid = forced[1]
+        elif py is not None:
+            mid = py.pick_machine(pyjob, pyview)
+            if mid not in cands:
+                raise ValueError(f"python rule {py.name} picked machine {mid}, not a candidate of job {jid} ({cands})")
+        elif machine_rule in RELIABILITY_RULES:
+            mid = select_machine(machine_rule, cands, times, loads, utils, travel,
+                                 rel=self.reliability_terms(cands))
+        elif machine_rule in PTIME_RULES:
+            mid = select_machine(machine_rule, cands, times, loads, utils, travel, pt=self.ptime_params())
+        else:
+            mid = select_machine(machine_rule, cands, times, loads, utils, travel)
+        if S is not self:
+            S.clear_local()
         self.decision_rows.append((self.now, "routing", job.id, mid, len(cands), len(ids)))
         job.op_rows.append({"job": job.id, "op": job.cur_op, "machine": mid, "routed": self.now,
                             "from": job.location, "queued": None, "start": None, "end": None})
+        if self.fail is not None:
+            job.op_rows[-1]["interrupted"] = None
         job.target = mid
         self._to(job, WAITING_PICKUP)
         if self.instant:
@@ -643,14 +1011,411 @@ class Twin:
 
     def _dispatch_decision(self, m):
         self.decisions += 1
-        queue = [j.id for j in self._live() if j.state == QUEUED and j.location == m.id]
-        job_rule, _ = yield from self._rule_for(lambda: Decision("dispatch", machine=m.id, queue=tuple(queue)))
-        jid = rank_jobs(job_rule, queue, self, lambda i: self.jobs[i].proc(m.id))
+        queue = [j.id for j in self._queued_at[m.id].jobs()]
+        S = self
+        if self.unc is not None:
+            S = self.view
+            S.set_local(queue, m.id)
+        rule = yield from self._rule_for(lambda: Decision("dispatch", machine=m.id, queue=tuple(queue)))
+        forced, self.forced = self.forced, None
+        if forced is not None and forced[0] is not None:
+            if forced[0] not in queue:
+                raise ValueError(f"forced job {forced[0]} is not queued at machine {m.id} ({queue})")
+            jid = forced[0]
+        elif type(rule) is not tuple:     # a Python rule (rules_api): it picks from the decision view
+            from rules_api.twin_adapter import dispatch_view
+            jid = rule.pick_job(dispatch_view(self, S, m.id, queue))
+            if jid not in queue:
+                raise ValueError(f"python rule {rule.name} picked job {jid}, not queued at machine {m.id} ({queue})")
+        else:
+            job_rule = rule[0]
+            jid = rank_jobs(job_rule, queue, S, lambda i: S.jobs[i].proc(m.id))
+        if S is not self:
+            S.clear_local()
         job = self.jobs[jid]
         self.decision_rows.append((self.now, "dispatch", m.id, jid, len(queue), 0))
         job.op_rows[-1]["start"] = self.now
         self._to(job, PROCESSING)
         self._start(m, job)
+
+    # ── Machine failures (FailureCoordinator) ───────────────────────────────────────────────────────
+
+    def _init_failures(self):
+        tr = self.fail
+        self.deferred = {}                 # JobStore.DeferredJobIds (job id -> time first deferred), insertion order
+        self._orphans = False              # a pre-dispatch claim was cleared: ReleaseOrphanedPreDispatches runs
+        self._agv_tr = {}
+        self.fail_log = []                 # (time, machine, event, job / -1, repair duration)
+        # Unity's machine_failures.csv rows (FailureCoordinator, "-destrace"), same columns
+        self.fail_rows = []
+        self.fstats = {k: 0 for k in ("jobs_interrupted", "queued_rerouted", "pickups_cancelled", "redirects",
+                                       "aborts", "held_to_down", "redirect_no_route", "predispatch_cleared",
+                                       "orphans_released", "delivered_to_down", "target_down_rerouted")}
+        self.deferred_seconds = 0.0
+        self.reliability_info = (OnlineReliability(self, self.cfg.reliability_half_life, self.cfg.reliability_prior)
+                                 if self.cfg.reliability == "online" else None)
+        for m in self.machines:
+            mt = tr.machines.get(m.id)
+            m.events = mt.events if mt is not None else []
+            m.fptr, m.n_fail, m.repair_sum, m.downtime, m.down_since, m.lost_work = 0, 0, 0.0, 0.0, None, 0.0
+            m.repair_dur, m.repair_start = 0.0, None
+            m.life_start, m.age0 = 1, (mt.age0 if mt is not None else 0.0)
+            if m.events:
+                m.fail_tick = max(1, m.events[0][0])
+                self._wake(m.fail_tick)
+
+    def replace_failures(self, trace):
+        """Swaps the failure trace mid-episode, e.g. for a rollout over a redrawn future
+        (FailureTrace.redraw_after(twin.k, seed)): failures already harvested and a repair in progress stay as they
+        are; each up machine's next failure comes from the new trace."""
+        if self.fail is None:
+            raise ValueError("the twin was built without failures (TwinConfig.failures is None)")
+        self.fail = trace
+        for m in self.machines:
+            mt = trace.machines.get(m.id)
+            m.events = mt.events if mt is not None else []
+            m.fptr = sum(1 for f, _ in m.events if f <= self.k)
+            if m.down:
+                m.fail_tick = None
+            else:
+                nxt = m.events[m.fptr][0] if m.fptr < len(m.events) else None
+                m.fail_tick = None if nxt is None else max(nxt, self.k + 1)
+                if m.fail_tick is not None:
+                    self._wake(m.fail_tick)
+
+    def _harvest_failures(self, k):
+        """FailureCoordinator.HarvestFailureFlags: machine order; a failure, else a repair (then RetryDeferredJobs)."""
+        for m in self.machines:
+            if m.fail_tick == k:
+                self._fail(m)
+            elif m.repair_tick == k:
+                self._repair_done(m)
+                self._retry_deferred()
+                self.fail_rows[-1]["deferred_jobs"] = len(self.deferred)
+
+    def downtime_so_far(self, m):
+        """EpisodeTracker.DowntimeSoFar: closed repair intervals plus the open one."""
+        return m.downtime + (self.now - m.down_since if m.down_since is not None else 0.0)
+
+    def remaining_repair(self, m):
+        """PhysicalMachine.RemainingRepairTime at this tick (counted down from the harvest tick on)."""
+        if not m.down:
+            return 0.0
+        return remaining_countdown(m.repair_dur, self.dt, self.k - m.repair_start)
+
+    def machine_age(self, m):
+        """Operating age since the last renewal (Unity's _ageSinceLastRepair), seconds; 0 while down."""
+        if m.down:
+            return 0.0
+        return (m.age0 if m.life_start == 1 else 0.0) + (self.k - m.life_start) * self.dt
+
+    def _fail(self, m):
+        """FailureCoordinator.HandleMachineFailure, steps 0-6, at the harvest tick."""
+        k = self.k
+        _, rep = m.events[m.fptr]
+        m.fptr += 1
+        m.fail_tick = None
+        m.n_fail += 1
+        m.repair_sum += rep
+        m.down, m.down_since = True, self.now
+        m.repair_dur, m.repair_start = rep, k
+        m.repair_tick = harvest_tick(k, rep, self.dt)
+        self._wake(m.repair_tick)
+        self.fail_log.append((self.now, m.id, "fail", m.job, rep))
+        row = self._fail_row(m, "fail", m.job, rep)
+        if self.reliability_info is not None:
+            self.reliability_info.on_fail(m)
+        # 0. the interrupted operation's elapsed time is not busy time (G10)
+        if not m.idle and m.proc_start is not None:
+            m.lost_work += self.now - m.proc_start
+        # 1. the job in process restarts: NeedsRouting at the failed machine (picked up from its dock later)
+        if m.job >= 0:
+            job = self.jobs[m.job]
+            if job.state == PROCESSING:
+                job.op_rows[-1]["interrupted"] = self.now
+                job.location = m.id
+                self._to(job, NEEDS_ROUTING)
+                self.fstats["jobs_interrupted"] += 1
+        # AcknowledgeFailure's machine reset (done before the other steps here; nothing below reads it)
+        m.idle, m.job, m.proc_start, m.dur = True, -1, None, f32(0)
+        m.finish_tick = m.almost_tick = None          # no stale finish / almost-done fires (TickProcessing stopped)
+        self._dispatchable.discard(self._mpos[m.id])
+        # 2. jobs queued at the machine are re-routed and free their incoming-belt slots (PhysicalMachine.
+        # ReleaseIncomingSlot; with legacy_failure_quirks they keep them, as Unity did before 2026-10-09)
+        legacy = self.cfg.legacy_failure_quirks
+        for job in self._queued_at[m.id].jobs():
+            self._to(job, NEEDS_ROUTING)
+            if not legacy:
+                self._release_slot(m, job.id)
+            self.fstats["queued_rerouted"] += 1
+            row["queued_rerouted"] += 1
+        # 3. pickups bound for the machine: the AGV turns back, the job is re-routed. An AGV whose handshake ended
+        # last tick is already MovingToDropoff in Unity (its PickedUpFlag is harvested after this step): skipped.
+        for a in self.agvs:
+            if a.state != "to_pickup" or (a.milestone is not None and a.milestone[0] == k):
+                continue
+            job = self.jobs[a.job]
+            if job.state != WAITING_PICKUP or job.target != m.id:
+                continue
+            self._abandon(a, "cancel")
+            job.target, job.assigned_agv = -1, -1
+            self._to(job, NEEDS_ROUTING)
+            self.fstats["pickups_cancelled"] += 1
+            row["pickups_cancelled"] += 1
+        # 4. deliveries in transit to the machine: redirected to the least-loaded operational eligible machine
+        # (a fixed heuristic, not the policy). With no alternate the delivery carries on to the down machine, where
+        # the B3 path re-routes the job on arrival (legacy_failure_quirks: aborted, the AGV goes home and the job
+        # keeps its previous location). An AGV that unloaded last tick is already returning in Unity: skipped (its
+        # delivery is re-routed by B3 in the AGV harvest).
+        for a in self.agvs:
+            if a.state != "to_dropoff" or (a.milestone is not None and a.milestone[0] == k):
+                continue
+            job = self.jobs[a.job]
+            if job.state != IN_TRANSIT or job.target != m.id:
+                continue
+            alt = self._best_alternate(job, m.id)
+            if alt is None and not legacy:
+                self.fstats["held_to_down"] += 1
+                row["held"] += 1
+                continue
+            if alt is not None:
+                job.target = alt
+                self._index_load(job)
+                job.op_rows[-1]["machine"] = alt   # the operation now goes to the alternate
+                if self._redirect(a, job, self.mach[alt]):
+                    self.fstats["redirects"] += 1
+                    row["redirected"] += 1
+                    continue
+                self.fstats["redirect_no_route"] += 1
+            job.target, job.assigned_agv = -1, -1
+            self._to(job, NEEDS_ROUTING)          # location unchanged (Unity drops the job where the AGV is)
+            row["aborted"] += 1
+            if alt is None:
+                self._abandon(a, "abort")
+                self.fstats["aborts"] += 1
+        # 5. pre-dispatches aimed at the machine lose their claim; the AGV is released after the AGV harvest
+        for job in self._live_d.values():
+            if job.pre_agv >= 0 and job.target == m.id:
+                job.pre_agv = -1
+                self._orphans = True
+                self.fstats["predispatch_cleared"] += 1
+                row["predispatch_cleared"] += 1
+
+    def _fail_row(self, m, event, job, rep):
+        """A machine_failures.csv row (FailureCoordinator.EventRecords), appended to fail_rows."""
+        row = {"sim_time": round(self.now, 2), "tick": self.k, "machine_id": m.id, "event": event, "active_job": job,
+               "repair_duration": float(np.float32(rep)), "queued_rerouted": 0, "pickups_cancelled": 0,
+               "redirected": 0, "held": 0, "aborted": 0, "predispatch_cleared": 0, "deferred_jobs": 0}
+        self.fail_rows.append(row)
+        return row
+
+    def _best_alternate(self, job, failed):
+        """FailureCoordinator.FindBestAlternateMachine: the operational eligible machine (eligible-list order) with
+        the lowest GetMachineLoad, first minimum."""
+        best, best_load = None, f32(np.finfo(np.float32).max)
+        S = self.view if self.unc is not None and self.unc.cfg.alternate_on == "view" else self
+        for mid in job.ops[job.cur_op]:
+            if mid == failed or mid not in self.mach or self.mach[mid].down:
+                continue
+            load = S.machine_load(mid)
+            if load < best_load:
+                best, best_load = mid, load
+        return best
+
+    def _repair_done(self, m):
+        """HandleMachineRepairComplete: operational again, a fresh life from this tick."""
+        k = self.k
+        m.down, m.repair_tick = False, None
+        m.downtime += self.now - m.down_since
+        m.down_since = None
+        m.life_start = k
+        self.fail_log.append((self.now, m.id, "repair_done", -1, m.repair_dur))
+        self._fail_row(m, "repair_done", -1, m.repair_dur)
+        if self.reliability_info is not None:
+            self.reliability_info.on_repair(m)
+        if m.fptr < len(m.events):
+            m.fail_tick = max(m.events[m.fptr][0], k + 1)
+            self._wake(m.fail_tick)
+        if m.idle and self._queued_at[m.id].keys:
+            self._dispatchable.add(self._mpos[m.id])
+
+    def _retry_deferred(self):
+        """FailureCoordinator.RetryDeferredJobs: a deferred job with an operational eligible machine is routable."""
+        for jid in list(self.deferred):
+            job = self.jobs[jid]
+            if job.state == EXITED or job.cur_op >= job.total_ops:
+                del self.deferred[jid]
+                continue
+            if any(mid in self.mach and not self.mach[mid].down for mid in job.ops[job.cur_op]):
+                self.deferred_seconds += self.now - self.deferred.pop(jid)
+
+    def _leg_pose(self, a):
+        """Pose after agent tick k - 1 on the AGV's current leg, with CancelCurrentRoute's commit to a zone it is
+        already inside, and the leg's undriven length (path_length was added in full when the leg was planned)."""
+        leg = a.leg
+        x, z, yaw, zone, ri = leg.state_after(self.k - 1, self.kin)
+        if self.k - 1 >= leg.arrive_tick:      # at the dock (handshake): turned toward the dock as far as by now
+            if a.state == "to_prepickup":
+                yaw = a.pre_yaw
+            elif a.hs is not None:
+                yaw = dock_yaw_after(self.kin, a.hs[0], a.hs[1], a.hs[2], self.k - 1, a.hs[3])
+            else:
+                yaw = a.yaw
+        if ri < len(leg.route):
+            ahead = leg.route[ri]
+            if ahead != zone and self.floor.zone_by_id[ahead].contains(x, z):
+                zone = ahead
+        driven = 0.0
+        for ph in leg.phases:
+            if ph[0] != "drive" or ph[1] > self.k - 1:
+                continue
+            n = min(self.k - 1, ph[2]) - ph[1] + 1
+            driven += min(n * self.kin.step, ph[8])
+        return (x, z), yaw, zone, max(0.0, leg.path_length - driven)
+
+    def _mark_cancelled(self, a):
+        """The AGV's trace entries for ticks it will now never reach are marked "(cancelled)"."""
+        t_now = round(self.k * self.dt, 2)
+        for i in self._agv_tr.get(a.id, ()):
+            row = self.trace[i]
+            if row[0] >= t_now and row[1] == a.id and not row[2].endswith("(cancelled)"):
+                if row[2] == "arrive_prepickup":
+                    lst = self._prearrive.get(row)
+                    if lst and i in lst:
+                        lst.remove(i)
+                self.trace[i] = row[:2] + (row[2] + "(cancelled)", row[3])
+
+    def _abandon(self, a, event):
+        """CancelPickup / AbortTransit / ReleaseOrphanedPrePickup: the task is dropped and the AGV drives back to its
+        bay from where it is."""
+        pos, yaw, zone, undriven = self._leg_pose(a)
+        a.path -= undriven
+        self._mark_cancelled(a)
+        self._trace(self.k, a, event, a.job)
+        a.job = a.source = a.target = -1
+        a.milestone, a.dock, a.drop_pos, a.pre_arrive = None, None, None, None
+        a.pos, a.yaw, a.zone = pos, yaw, zone
+        route = self.floor.route(zone, a.park_zone)
+        if route:
+            leg = plan_leg(self.kin, self.floor, self.k, pos, yaw, zone, route, a.park_pos, "park")
+            a.path += leg.path_length
+            a.state, a.leg = "returning", leg
+            self._trace(leg.arrive_tick, a, "park(planned)", -1)
+        else:
+            a.state, a.leg, a.idle_since = "idle", None, self.now
+
+    def _redirect(self, a, job, target):
+        """AGVController.RedirectDropoff: re-plan from where the AGV is to the new machine's dropoff dock. False when
+        there is no route (Unity: FullReset; here the AGV drives back to its bay)."""
+        pos, yaw, zone, undriven = self._leg_pose(a)
+        drop_pos = self._dropoff_pos(target)
+        zid, dock = self.floor.machine_dock(target.id, drop_pos)
+        route = self.floor.route(zone, zid) if dock is not None else None
+        if not route:
+            self._abandon(a, "redirect_failed")
+            return False
+        a.path -= undriven
+        self._mark_cancelled(a)
+        self._trace(self.k, a, "redirect", job.id)
+        leg = plan_leg(self.kin, self.floor, self.k, pos, yaw, zone, route, dock.approach, "dock")
+        a.path += leg.path_length
+        done, yaw2 = handshake_done(self.kin, leg.end_yaw, heading(*dock.facing), leg.arrive_tick, True)
+        a.hs = (leg.end_yaw, heading(*dock.facing), leg.arrive_tick, True)
+        a.leg, a.dock, a.target, a.drop_pos = leg, dock, target.id, drop_pos
+        a.pos, a.yaw, a.zone = leg.end_pos, yaw2, leg.end_zone
+        a.milestone = (done + 1, "dropoff")
+        self._wake(done + 1)
+        self._trace(leg.arrive_tick, a, "arrive_dropoff", job.id)
+        self._trace(done, a, "dropoff", job.id)
+        return True
+
+    def _release_orphans(self):
+        """FlagHarvester.ReleaseOrphanedPreDispatches: a pre-dispatched AGV whose job no longer claims it goes back."""
+        self._orphans = False
+        for a in self.agvs:
+            if a.state == "to_prepickup" and self.jobs[a.job].pre_agv != a.id:
+                self._abandon(a, "orphan")
+                self.fstats["orphans_released"] += 1
+
+    # ── Reliability information for the reliability-aware rules ──────────────────────────────────────
+
+    def _rel_info(self, mid, info):
+        """(k, lam, mtbf, mttr, age or None) of one machine at an information level."""
+        if self.fail is None or self.fail.model is None:
+            return 1.0, math.inf, math.inf, 0.0, 0.0
+        if info == "static":
+            return self.fail.model.static_rel(mid) + (self.machine_age(self.mach[mid]),)
+        m = self.mach[mid]
+        if info == "oracle":
+            return self.fail.model.current_rel(mid, self.now, self.fail) + (self.machine_age(m),)
+        if info == "online":
+            return self.reliability_info.estimate(m) + (self.machine_age(m),)
+        raise ValueError(f"reliability information must be static / online / oracle, not {info!r}")
+
+    def ptime_params(self):
+        """Parameters of the processing-time-weighted machine rules (rules.select_machine's pt=)."""
+        c = self.cfg
+        return {"alpha": c.ptime_alpha, "shape": c.ptime_shape, "tau": c.ptime_tau, "reroute": c.ptime_reroute,
+                "avail": c.ptime_avail}
+
+    def reliability_terms(self, cands):
+        """Inputs of the reliability-aware machine rules (rules.select_machine's rel=): per candidate (A, mtbf, mttr,
+        k, lam, age) at the information level cfg.reliability, the floor's median availability, kappa and the
+        re-route cost. Without failures every machine is perfectly reliable, so the rules reduce to ECT / TECT."""
+        info = self.cfg.reliability
+        omega = self.cfg.reliability_mix
+        terms = []
+        for mid in cands:
+            k, lam, mtbf_, mttr_, age = self._rel_info(mid, info)
+            a = mtbf_ / (mtbf_ + mttr_) if math.isfinite(mtbf_) else 1.0
+            terms.append((a, mtbf_, mttr_, k, lam, age))
+        avail, rates, mttrs = [], [], []
+        for m in self.machines:
+            _, _, mtbf_, mttr_, _ = self._rel_info(m.id, info)
+            avail.append(mtbf_ / (mtbf_ + mttr_) if math.isfinite(mtbf_) else 1.0)
+            rates.append(1.0 / mtbf_)
+            mttrs.append(mttr_)
+        if omega != 1.0 and self.fail is not None and self.fail.model is not None:
+            # shrink each candidate's failure rate and repair time towards the floor mean at this information level
+            r_floor, m_floor = sum(rates) / len(rates), sum(mttrs) / len(mttrs)
+            mixed = []
+            for a, mtbf_, mttr_, k, lam, age in terms:
+                rate = omega / mtbf_ + (1.0 - omega) * r_floor
+                mt = omega * mttr_ + (1.0 - omega) * m_floor
+                mb = 1.0 / rate if rate > 0 else math.inf
+                mixed.append((mb / (mb + mt) if math.isfinite(mb) else 1.0, mb, mt, k,
+                              mb / math.gamma(1.0 + 1.0 / k) if math.isfinite(mb) else math.inf, age))
+            terms = mixed
+        avail.sort()
+        n = len(avail)
+        median = avail[n // 2] if n % 2 else 0.5 * (avail[n // 2 - 1] + avail[n // 2])
+        return {"terms": terms, "kappa": self.cfg.reliability_kappa, "reroute": self.cfg.reroute_cost,
+                "median_A": median}
+
+    def machine_rows(self):
+        """Per machine: failures, sampled repair time, downtime, availability, lost work (Unity's machine CSV)."""
+        rows = []
+        for m in self.machines:
+            on = self.fail is not None
+            down = self.downtime_so_far(m) if on else 0.0
+            rows.append({"machine_id": m.id, "machine_type": m.info.type,
+                         "failure_count": m.n_fail if on else 0, "total_repair_time": m.repair_sum if on else 0.0,
+                         "downtime": down, "availability_rate": 1.0 - down / self.now if self.now > 0 else 1.0,
+                         "time_processing": m.busy, "lost_work": m.lost_work if on else 0.0})
+        return rows
+
+    def failure_summary(self):
+        """Episode failure metrics (names as Unity's results.csv where it has them)."""
+        rows = self.machine_rows()
+        s = {"episode_failures": sum(r["failure_count"] for r in rows),
+             "total_repair_time": sum(r["total_repair_time"] for r in rows),
+             "machine_downtime": sum(r["downtime"] for r in rows),
+             "machine_availability_mean": sum(r["availability_rate"] for r in rows) / len(rows) if rows else 1.0,
+             "lost_work": sum(r["lost_work"] for r in rows)}
+        if self.fail is not None:
+            s.update(self.fstats)
+            s["deferred_job_seconds"] = self.deferred_seconds + sum(self.now - t for t in self.deferred.values())
+        return s
 
     # ── Results ─────────────────────────────────────────────────────────────────────────────────
 
@@ -668,8 +1433,8 @@ class Twin:
             if self._status(a) == "idle":
                 a.idle_time += self.makespan - a.idle_since
                 a.idle_since = self.makespan
-        return {
-            "rule": self.cfg.rule,
+        s = {
+            "rule": self.cfg.rule if self.cfg.py_rule is None else f"py:{self.cfg.py_rule.name}",
             "transport": self.cfg.transport,
             "agv_count": len(self.agvs),
             "makespan": self.makespan,
@@ -689,19 +1454,46 @@ class Twin:
             "machine_util_mean": sum(m.busy for m in self.machines) / (len(self.machines) * self.makespan)
             if self.makespan else 0.0,
         }
+        if self.fail is not None:
+            s.update(self.failure_summary())
+        return s
 
     def metrics(self):
         """RewardMetrics.Fill (env/rewards/metrics.py names) for the current state, as float32 like the sensor.
         AGV travel time is the non-idle time (handshakes included) and there are no route waits or zone blocks:
         the twin has no reservations."""
         jobs = self.order                 # AllJobs: arrived jobs only
+        # The sums are a left fold over self.order. Its leading run of exited jobs never changes, so the fold up to
+        # the first live job is cached (_mprefix) and only the rest is re-summed: the same additions in the same
+        # order, so the same bits.
+        pre = self._mprefix
+        if pre is None:
+            pre = self._mprefix = [0, 0, 0.0, 0.0, 0, 0, 0, [0.0] * 6, 0, 0.0, 0.0]
+        p, with_due, tard, tard_exited, late_exited, ops_total, ops_done, t_state, exited, flow, tis = pre
+        t_state = list(t_state)
+        while p < len(jobs) and jobs[p].state == EXITED:
+            j = jobs[p]
+            if j.due is not None:
+                with_due += 1
+                late = j.exit_time - j.due
+                if late > 0:
+                    tard += late
+                    tard_exited += late
+                    late_exited += 1
+            ops_total += j.total_ops
+            ops_done += j.completed_ops
+            for s in range(5):
+                t_state[s] += j.t_state[s]
+            exited += 1
+            f = j.exit_time - j.arrival
+            flow += f
+            tis += f
+            p += 1
+        self._mprefix = [p, with_due, tard, tard_exited, late_exited, ops_total, ops_done, list(t_state), exited,
+                         flow, tis]
         n_state = [0] * 6
-        t_state = [0.0] * 6
-        flow = tis = 0.0
-        exited = ops_total = ops_done = 0
-        tard = tard_exited = 0.0
-        late_open = late_exited = with_due = 0
-        for j in jobs:
+        late_open = 0
+        for j in jobs[p:]:
             if j.due is not None:
                 with_due += 1
                 if j.state == EXITED:

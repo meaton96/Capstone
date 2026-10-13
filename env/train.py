@@ -53,12 +53,13 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from config import (
     EncoderConfig, FusionConfig, ActorCriticConfig, PPOConfig, OBS_SHAPES, OBS_LAYOUT,
-    ACTION_BRANCHES, ACTION_LAYOUT, JOB_HEAD_RULES, MACHINE_HEAD_RULES, obs_shapes as shapes_for_caps,
+    ACTION_BRANCHES, ACTION_LAYOUT, JOB_HEAD_RULES, MACHINE_HEAD_RULES, PTIME_RULE_PARAMS, obs_shapes as shapes_for_caps,
 )
 from models.actor_critic import prior_log_probs
 from models.network import SchedulingNetwork, ac_config_for, encoder_config_for
 from notify import Watchdog, notify, run_label
 from rollout_buffer import RolloutBuffer
+from scenarios.uncertainty import UNCERTAINTY_HELP
 
 ENV_ROOT = Path(__file__).resolve().parent
 REPO_ROOT = ENV_ROOT.parent
@@ -322,6 +323,14 @@ def check_action_layout(ckpt: dict, path) -> None:
         raise ValueError(
             f"{path}: checkpoint uses action schema v1 (one 8-way composite-rule branch), this code is "
             f"v{ACTION_LAYOUT['schema_version']} (job head x machine head, see env/config.py); train a new run.")
+    if saved.get("schema_version") != ACTION_LAYOUT["schema_version"]:
+        raise ValueError(
+            f"{path}: checkpoint uses action schema v{saved.get('schema_version')} (job head {saved.get('job_head')} x "
+            f"machine head {saved.get('machine_head')}), this code is v{ACTION_LAYOUT['schema_version']} (job head "
+            f"{ACTION_LAYOUT['job_head']} x machine head {ACTION_LAYOUT['machine_head']}, since 2026-10-10, "
+            "results/dev-pect-unity); its action indices would select other rules. Evaluate it with code from before "
+            "the v5 heads (action-prior dd0b3092 or earlier) and a player with the matching heads (linux_server/"
+            "archive_1010), or train a new run.")
     if saved != ACTION_LAYOUT:
         raise ValueError(f"{path}: action layout differs (checkpoint {saved} vs code {ACTION_LAYOUT}).")
 
@@ -330,7 +339,8 @@ def check_action_layout(ckpt: dict, path) -> None:
 ##        evaluate.py takes slot_seconds from here and warns when its own flags differ from the rest.
 RUN_SETTING_KEYS = ("slot_seconds", "critic_lookahead", "policy_lookahead", "twin", "twin_transport", "scenario", "scenario_generator", "params",
                     "episode_duration_seconds", "random_warmup", "warmup_dispatching_rule", "agv_move_speed",
-                    "agv_handshake_duration", "machine_flexibility", "secondary_time_multiplier", "reward_spec")
+                    "agv_handshake_duration", "machine_flexibility", "secondary_time_multiplier", "reward_spec",
+                    "uncertainty")
 
 
 def lookahead_obs(args) -> bool:
@@ -344,6 +354,8 @@ def run_settings(args) -> dict:
     for key in RUN_SETTING_KEYS:
         value = getattr(args, key, None)
         out[key] = value if value is None or isinstance(value, (bool, int, float, str)) else str(value)
+    # The machine head's PECT / PTECT parameters (also in action_layout; JSON so weights_only loading accepts it).
+    out["machine_head_params"] = json.dumps(PTIME_RULE_PARAMS, sort_keys=True)
     return out
 
 
@@ -462,6 +474,12 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
             agv_move_speed=args.agv_move_speed, agv_handshake_duration=args.agv_handshake_duration,
             machine_flexibility=args.machine_flexibility, secondary_time_multiplier=args.secondary_time_multiplier,
             **extra)
+        if getattr(args, "uncertainty", None):
+            if not args.twin:
+                raise ValueError("--uncertainty needs --twin (the uncertainty layer is twin-only)")
+            from scenarios.uncertainty import spec_from_arg, with_uncertainty
+            scenario_generator = with_uncertainty(scenario_generator, spec_from_arg(args.uncertainty))
+            print(f"Uncertainty layer: {args.uncertainty}")
         print(f"\nScenario generator: {args.scenario_generator}"
               + (f" (episode_duration_seconds={args.episode_duration_seconds})"
                  if args.episode_duration_seconds else "")
@@ -986,6 +1004,8 @@ if __name__ == "__main__":
     parser.add_argument("--slot-seconds", type=float, default=0.0,
                         help="Slot actions: hold each chosen rule pair for this many simulated seconds (all decisions "
                              "in the slot), as the switching oracle does; 0 = choose at every decision (2026-10-05)")
+    parser.add_argument("--uncertainty", type=str, default=None,
+                        help="With --twin and --scenario-generator: " + UNCERTAINTY_HELP)
     parser.add_argument("--twin-workers", type=int, default=0,
                         help="With --twin: step the envs in this many worker processes (0/1 = in this process)")
     parser.add_argument("--twin-transport", type=str, default="kinematic",

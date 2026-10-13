@@ -14,7 +14,7 @@
 #SBATCH --error=logs/%x_%A_%a.err
 set -euo pipefail
 echo "[twin_array] start on $(hostname), job ${SLURM_JOB_ID:-?}, task ${SLURM_ARRAY_TASK_ID:-0}"   # before anything can fail
-cd "${SLURM_SUBMIT_DIR:-$HOME/capstone/linux_server_v3}"
+cd "${SLURM_SUBMIT_DIR:-$HOME/capstone/linux_server}"
 REPO="$(dirname "$PWD")"
 unset PYTHONPATH
 source "$REPO/.venv/bin/activate"

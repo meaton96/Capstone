@@ -6,7 +6,7 @@
 #   blocks-u: regime blocks of 5,400 s, profiles normal (2) : surge (1, util 1.0-1.6) : short (1, 3 AGVs on duty),
 #             21,600 s window, 1,800 s slots
 #   short-u:  one regime, 5,400 s window, 900 s slots (6 stages)
-# Player linux_server_v4/ (fleet schedule, obs v3). Python: frozen env_snapshot/ (10-04 19:15). Waits for the
+# Player linux_server_archive/linux_server_v4/ (fleet schedule, obs v3). Python: frozen env_snapshot/ (10-04 19:15). Waits for the
 # rq2-oracle-due-mix launcher to exit. Resume: rerun (seeds with result.json are skipped).
 # Usage: nohup results/rq2-oracle-due-long/run.sh > results/rq2-oracle-due-long/run.out 2>&1 &
 set -uo pipefail
@@ -29,7 +29,7 @@ task() {  # setting seed worker
     esac
     [[ -f "$dir/result.json" ]] && { echo "[$(date '+%m-%d %H:%M')] skip $dir"; return; }
     mkdir -p "$dir"
-    if .venv/bin/python $HERE/env_snapshot/switch_oracle.py --unity-path linux_server_v4/capstone.x86_64 --seed "$seed" \
+    if .venv/bin/python $HERE/env_snapshot/switch_oracle.py --unity-path linux_server_archive/linux_server_v4/capstone.x86_64 --seed "$seed" \
             --scenario-generator randomized --random-warmup --episode-duration-seconds "$window" --segment-seconds "$slot" \
             --params "$params" --reward-spec $HERE/env_snapshot/config/rewards/tardiness.json \
             --pdr "$PAIRS" --base-worker-id "$wid" --out "$dir" > "$dir/oracle.log" 2>&1; then

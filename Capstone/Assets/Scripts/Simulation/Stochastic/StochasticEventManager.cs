@@ -134,6 +134,18 @@ namespace Assets.Scripts.Simulation.Stochastic
             _seed = seed;
             _rng = new System.Random(seed);
             _arrivalRng = new System.Random(seed ^ ArrivalStreamSeedOffset);
+            _repairIdx.Clear();
+            _ttfIdx.Clear();
+            _scheduleExhaustedLogged.Clear();
+            _schedule = MachineFailuresEnabled ? _cfg.MachineFailureSchedule : null;
+            if (_schedule != null)
+            {
+                SimLogger.Low($"[StochasticMgr] Machine failure schedule: {_schedule.Machines.Count} machines " +
+                              "(native machine TTF / repair sampling replaced by the schedule).");
+                if (Mathf.Abs(_schedule.Dt - Time.fixedDeltaTime) > 1e-6f)
+                    SimLogger.LogWarning($"[StochasticMgr] failureSchedule.dt={_schedule.Dt} differs from " +
+                                         $"Time.fixedDeltaTime={Time.fixedDeltaTime}: event ticks will not match the generator's.");
+            }
 
             if (IsActive)
                 SimLogger.Low($"[StochasticMgr] Initialized — seed={seed} " +
@@ -168,6 +180,72 @@ namespace Assets.Scripts.Simulation.Stochastic
         {
             if (!MachineFailuresEnabled) return 0f;
             return SampleLogNormal(_cfg.RepairLogMu, _cfg.RepairLogSigma, _rng);
+        }
+
+        // ── Machine failure schedule (scenario "failureSchedule", 2026-10-09) ──
+
+        /// <summary>The episode's machine failure schedule; null = native sampling.</summary>
+        private FailureSchedule _schedule;
+        /// <summary>Per-machine cursors into the schedule's repair and TTF queues.</summary>
+        private readonly System.Collections.Generic.Dictionary<int, int> _repairIdx =
+            new System.Collections.Generic.Dictionary<int, int>();
+        private readonly System.Collections.Generic.Dictionary<int, int> _ttfIdx =
+            new System.Collections.Generic.Dictionary<int, int>();
+        private readonly System.Collections.Generic.HashSet<int> _scheduleExhaustedLogged =
+            new System.Collections.Generic.HashSet<int>();
+
+        /// <summary>True when this episode's machine failures come from a schedule instead of the samplers.</summary>
+        public bool HasMachineSchedule => _schedule != null;
+
+        /// <summary>The schedule (null when none), for FactoryOrchestrator's floor-coverage check.</summary>
+        public FailureSchedule MachineSchedule => _schedule;
+
+        /// <summary>
+        /// Countdown to a machine's first failure at episode start from the schedule, or null when there is no
+        /// schedule (the caller then draws natively). A machine missing from the schedule never fails
+        /// (float.MaxValue; FactoryOrchestrator logs it).
+        /// </summary>
+        public float? InitialMachineCountdown(int machineId)
+        {
+            if (_schedule == null) return null;
+            return _schedule.Machines.TryGetValue(machineId, out MachineSchedule m) ? m.InitialCountdown : float.MaxValue;
+        }
+
+        /// <summary>
+        /// Time to failure for one machine after a repair: the next value of its schedule queue, else (no schedule)
+        /// the native shared-stream draw <see cref="SampleMachineTTF()"/>, so unscheduled runs consume the stream exactly
+        /// as before. A run-out queue gives float.MaxValue (the machine never fails again), logged once per machine.
+        /// </summary>
+        public float SampleMachineTTF(int machineId)
+        {
+            if (_schedule == null) return SampleMachineTTF();
+            if (!MachineFailuresEnabled) return float.MaxValue;
+            return Pop(machineId, _ttfIdx, m => m.Ttfs, "ttfs", float.MaxValue);
+        }
+
+        /// <summary>Repair duration for one machine's next failure: its schedule queue, else the native draw.</summary>
+        public float SampleMachineRepair(int machineId)
+        {
+            if (_schedule == null) return SampleMachineRepair();
+            if (!MachineFailuresEnabled) return 0f;
+            return Pop(machineId, _repairIdx, m => m.Repairs, "repairs", float.MaxValue);
+        }
+
+        private float Pop(int machineId, System.Collections.Generic.Dictionary<int, int> cursors,
+                          Func<MachineSchedule, float[]> queue, string what, float exhausted)
+        {
+            if (!_schedule.Machines.TryGetValue(machineId, out MachineSchedule m)) return exhausted;
+            float[] q = queue(m);
+            cursors.TryGetValue(machineId, out int i);
+            if (i < q.Length)
+            {
+                cursors[machineId] = i + 1;
+                return q[i];
+            }
+            if (_scheduleExhaustedLogged.Add(machineId * 2 + (what == "ttfs" ? 0 : 1)))
+                SimLogger.Low($"[StochasticMgr] failureSchedule: machine {machineId} {what} queue exhausted " +
+                              $"after {q.Length}; returning {exhausted}.");
+            return exhausted;
         }
 
         /// <summary>

@@ -53,7 +53,7 @@ namespace Assets.Scripts.Simulation
         private const double AtcK = 2.0;
 
         /// <summary>Machine-selection half of a rule: which candidate machine to route a job to.</summary>
-        private enum MachineRule { SMPT, SRWT, MMUR, ECT, TECT }
+        private enum MachineRule { SMPT, SRWT, MMUR, ECT, TECT, PECT, PTECT }
 
         /// <summary>(job half, machine half) of every non-Random rule, parsed once from its JOB_MACHINE name.</summary>
         private static readonly Dictionary<DispatchingRule, (JobRule job, MachineRule machine)> Halves =
@@ -65,17 +65,19 @@ namespace Assets.Scripts.Simulation
 
         /// <summary>
         /// RL action branch 0 (job head): the job half the agent picks. Order is the Python contract
-        /// (env/config.py JOB_HEAD_RULES, action schema v4). v4 (2026-10-03) is the H15 head of the tardiness
-        /// objective (rq2-twin-due, rq2-oracle-due): PTWINQ and FIFO left it (never a best pair or an oracle pick).
+        /// (env/config.py JOB_HEAD_RULES, action schema v5). v4 (2026-10-03) was the H15 head SRT, SPT, MDD, EDD, ATC;
+        /// v5 (2026-10-10, results/dev-pect-rule pruning, results/dev-pect-unity) keeps SRT, MDD, ATC (SPT and EDD were
+        /// never within 1% of the best pair in any twin condition).
         /// </summary>
-        private static readonly JobRule[] JobHead =
-            { JobRule.SRT, JobRule.SPT, JobRule.MDD, JobRule.EDD, JobRule.ATC };
+        private static readonly JobRule[] JobHead = { JobRule.SRT, JobRule.MDD, JobRule.ATC };
 
         /// <summary>
         /// RL action branch 1 (machine head): the machine half the agent picks. Order is the Python contract
-        /// (env/config.py MACHINE_HEAD_RULES); append only.
+        /// (env/config.py MACHINE_HEAD_RULES). v4 was ECT, TECT, SRWT; v5 is the processing-time-weighted PECT, PTECT
+        /// (they dominate ECT / TECT in every twin condition of dev-pect-rule). The old halves still run as fixed rules
+        /// (catalog indices, or SchedulingAgent's rule override for evaluate.py baselines).
         /// </summary>
-        private static readonly MachineRule[] MachineHead = { MachineRule.ECT, MachineRule.TECT, MachineRule.SRWT };
+        private static readonly MachineRule[] MachineHead = { MachineRule.PECT, MachineRule.PTECT };
 
         /// <summary>Catalog index of each (job head, machine head) pair; every pair must exist as a JOB_MACHINE rule.</summary>
         private static readonly int[,] HeadsToIndex = BuildHeadsToIndex();
@@ -139,6 +141,20 @@ namespace Assets.Scripts.Simulation
         /// <param name="index">Zero-based index of the rule.</param>
         /// <returns>The dispatching rule at the specified index.</returns>
         public static DispatchingRule RuleForIndex(int index) => AllRules[index];
+
+        /// <summary>
+        /// Parses a rule name ("MDD_TECT", case-insensitive, '-' accepted for '_') to its catalog index; false for an
+        /// unknown name. Used by the per-step rule override (SchedulingAgent.RuleOverrideIndex).
+        /// </summary>
+        public static bool TryIndexForName(string name, out int index)
+        {
+            index = -1;
+            if (string.IsNullOrEmpty(name)) return false;
+            if (!Enum.TryParse(name.Trim().Replace('-', '_'), ignoreCase: true, out DispatchingRule rule)) return false;
+            if (!Enum.IsDefined(typeof(DispatchingRule), rule)) return false;   // numeric strings parse too
+            index = IndexForRule(rule);
+            return index >= 0;
+        }
 
         /// <summary>
         /// Retrieves the index of the given dispatching rule: its RL action index for the 9 legacy rules,
@@ -296,6 +312,10 @@ namespace Assets.Scripts.Simulation
             return best;
         }
 
+        /// <summary>PTWINQ's WINQ for the Python rule view (FactoryOrchestrator.BuildPyRuleView): WorkInNextQueue over
+        /// GetAllMachineLoads, as RankJobs computes it.</summary>
+        public static float WorkInNextQueueForView(JobData job, Dictionary<int, float> loads) => WorkInNextQueue(job, loads);
+
         /// <summary>
         /// Minimum processing time for a job's current operation across its eligible machines —
         /// the best-case cost proxy used by SelectRoutingJob's SPT/LPT scoring, before a specific
@@ -359,8 +379,58 @@ namespace Assets.Scripts.Simulation
                     }
                     return candidates[ArgMinIdx(ect)];
                 }
+                // Processing-time-weighted ECT / TECT (2026-10-10, ported from env/des_twin/rules.py ptime_scores):
+                // the wait (queue / A, for PTECT at least the travel) + p + alpha g(p); see PtimeScores.
+                case MachineRule.PECT: return candidates[ArgMinIdx(PtimeScores(false, req))];
+                case MachineRule.PTECT: return candidates[ArgMinIdx(PtimeScores(true, req))];
                 default: return candidates[UnityEngine.Random.Range(0, candidates.Length)];
             }
+        }
+
+        /// <summary>
+        /// Scores (lower first) of PECT (travel = false) or PTECT (travel = true) over the request's candidates, exactly as
+        /// env/des_twin/rules.py ptime_scores: inputs are the request's float32 values widened to double, the arithmetic
+        /// is double in the twin's order, the score is rounded to float32 (ties then go to the first candidate, as
+        /// ArgMinIdx). PTECT without travel estimates (null) uses travel 0, as TECT does; the TECT travel price is not
+        /// applied (the twin refuses travelPrice &gt; 0).
+        /// </summary>
+        private static float[] PtimeScores(bool travel, DecisionRequest req)
+        {
+            PtimeRuleParams pt = req.PtimeRule ?? PtimeRuleParams.Default;
+            int n = req.CandidateMachineIds.Length;
+            var ps = new double[n];
+            double sum = 0.0, min = double.MaxValue;
+            for (int i = 0; i < n; i++)
+            {
+                ps[i] = req.CandidateJobTimes[i];
+                sum += ps[i];
+                if (ps[i] < min) min = ps[i];
+            }
+            double pMin = Math.Max(min, 1e-6);
+            double pMean = Math.Max(sum / n, 1e-6);
+            var score = new float[n];
+            for (int i = 0; i < n; i++)
+            {
+                double p = ps[i];
+                double q = req.CandidateQueueLengths[i];
+                double wait = q / pt.Avail;
+                if (travel)
+                {
+                    double tr = req.CandidateTravelTimes != null ? req.CandidateTravelTimes[i] : 0.0;
+                    wait = Math.Max(tr, wait);
+                }
+                double g;
+                switch (pt.Shape)
+                {
+                    case "lin": g = p; break;
+                    case "quad": g = p * p / pMean; break;
+                    case "ratio": g = p * (p / pMin - 1.0); break;
+                    case "exp": g = (1.0 - Math.Exp(-p / pt.Tau)) * (p / 2.0 + pt.Reroute); break;
+                    default: throw new ArgumentException($"PECT / PTECT shape must be lin, quad, ratio or exp, not '{pt.Shape}'");
+                }
+                score[i] = (float)(wait + p + pt.Alpha * g);
+            }
+            return score;
         }
 
         /// <summary>

@@ -6,7 +6,7 @@ set -euo pipefail
 source "$(dirname "$0")/../../linux_server/slurm/rit_ssh.sh"
 "${SSH[@]}" "$REMOTE" SETTINGS="'${SETTINGS:-B2 S6}'" bash -s <<'REMOTE'
 set -euo pipefail
-cd ~/capstone/linux_server_v3
+cd ~/capstone/linux_server
 D=~/capstone/results/rq2-realizable
 mkdir -p logs $D
 for st in $SETTINGS; do

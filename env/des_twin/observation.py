@@ -10,7 +10,10 @@ Differences from the player, all by design:
 - Job positions are logical (GetJobWorldPosition's fallback: the job's machine, its AGV, or the incoming belt).
   Unity prefers the job's visual, which sits on a belt slot or lerps per rendered frame, so the job channel of
   the grid and the focus distance (machine column 15) can differ by a cell or a few metres.
-- No machine failures: operational is always 1, repair time 0, no deferred jobs, no machine down.
+- Machine failures (2026-10-09, TwinConfig.failures): the operational flag (machine col 7), the squashed remaining
+  repair time (col 8), the deferred flag and the share of operational eligible machines (job cols 6 and 13), the
+  share of machines down and the deferred-job count (globals 8 and 14) and the machine-down flag (event 4) are filled
+  as ObservationBuilder does. Without failures they keep their constant values (1, 0, 0, 1, 0, 0, 0).
 - In DES-0 ("instant") there are no vehicles; `instant_fleet` reports that many AGVs parked and idle in their
   bays, so the AGV features keep the values a policy sees on the physical floor with nothing to move.
 
@@ -128,7 +131,7 @@ class ObservationBuilder:
 
     def build(self, twin, decision):
         """Observation dict (env_wrappers.unity_env.slice_obs keys plus "action_mask") at this decision."""
-        live = [j for j in twin.order if j.state != EXITED]
+        live = list(twin._live())        # live jobs in arrival order (the engine's index)
         agvs = self.agv_view(twin)
         agv_ids = [a.id for a in twin.agvs] if not twin.instant else list(range(len(agvs)))
         agv_xz = {i: xz for i, (_, xz) in zip(agv_ids, agvs)}
@@ -176,7 +179,9 @@ class ObservationBuilder:
             for c in self.mcaps[m.id]:
                 r[1 + c] = 1.0
             r[6] = 0.0 if m.idle else 1.0
-            r[7] = 1.0
+            r[7] = 0.0 if m.down else 1.0
+            if m.down:
+                r[8] = squash(twin.remaining_repair(m), TIME_SCALE)
             r[9] = squash(twin.remaining_proc(m), TIME_SCALE)
             r[10] = squash(loads.get(m.id, f32(0)), TIME_SCALE)
             r[11] = squash(queued.get(m.id, 0), COUNT_SCALE)
@@ -201,9 +206,12 @@ class ObservationBuilder:
         rows = focus + [j for j in live if j.id != focus_id and j.id in cands] + \
             [j for j in live if j.id != focus_id and j.id not in cands]
         now = twin.now
+        fail = twin.fail is not None
         for r, j in zip(t, rows[:self.max_jobs]):
             r[0] = 1.0
             r[1 + STATE_SLOT[j.state]] = 1.0
+            if fail and j.id in twin.deferred:
+                r[6] = 1.0
             r[7] = squash(now - float(f32(j.arrival)), AGE_SCALE)
             r[8] = squash(now - j.since, TIME_SCALE)
             r[9] = squash(j.total_ops - j.cur_op, OPS_SCALE)
@@ -212,7 +220,11 @@ class ObservationBuilder:
                 if el:
                     r[10] = squash(min(el.values()), TIME_SCALE)
                     r[12] = squash(len(el), COUNT_SCALE)
-                    r[13] = 1.0
+                    if fail:   # C#: (float)up / eligible.Count
+                        up = sum(1 for mid in el if mid in twin.mach and not twin.mach[mid].down)
+                        r[13] = f32(f32(up) / f32(len(el)))
+                    else:
+                        r[13] = 1.0
                 r[11] = squash(twin.remaining_work(j.id), AGE_SCALE)
             r[14] = 1.0 if j.id == focus_id else 0.0
             r[15] = 1.0 if j.id in cands else 0.0
@@ -243,6 +255,8 @@ class ObservationBuilder:
             for m in twin.machines:
                 load = f32(load + loads.get(m.id, f32(0)))
             s[7] = f32(sum(not m.idle for m in twin.machines)) / f32(n)
+            if twin.fail is not None:
+                s[8] = f32(sum(m.down for m in twin.machines)) / f32(n)
             s[10] = squash(f32(load / f32(n)), TIME_SCALE)
             s[12] = clamp01(f32(n) / f32(MACHINE_COUNT_SCALE))
         if agvs:
@@ -252,6 +266,8 @@ class ObservationBuilder:
                 s[13] = clamp01(f32(on_duty) / f32(n))
         if active > self.max_jobs:
             s[11] = f32(active - self.max_jobs) / f32(active)
+        if twin.fail is not None:
+            s[14] = squash(len(twin.deferred), COUNT_SCALE)
         options = len(dec.machines) if dec.kind == "routing" else len(dec.queue)
         s[15] = squash(options, COUNT_SCALE)
         due = [j for j in live if j.due is not None]
@@ -271,4 +287,5 @@ class ObservationBuilder:
         on_duty = [True] * len(agvs) if twin.instant else [twin._on_duty(a) for a in twin.agvs]
         f[2] = 1.0 if any(st == "idle" and ok for (st, _), ok in zip(agvs, on_duty)) else 0.0
         f[3] = 1.0 if any(m.idle and queued.get(m.id, 0) > 0 for m in twin.machines) else 0.0
+        f[4] = 1.0 if any(m.down for m in twin.machines) else 0.0
         return f

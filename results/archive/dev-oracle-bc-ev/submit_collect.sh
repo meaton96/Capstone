@@ -8,15 +8,15 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 source linux_server/slurm/rit_ssh.sh
-"${SSH[@]}" "$REMOTE" "mkdir -p ~/capstone/results/dev-oracle-bc-ev ~/capstone/results/dev-oracle-bc"
-rsync -az -e "$RSYNC_SSH" results/dev-oracle-bc-ev/collect_ev.py "$REMOTE":capstone/results/dev-oracle-bc-ev/
+"${SSH[@]}" "$REMOTE" "mkdir -p ~/capstone/results/archive/dev-oracle-bc-ev ~/capstone/results/dev-oracle-bc"
+rsync -az -e "$RSYNC_SSH" results/archive/dev-oracle-bc-ev/collect_ev.py "$REMOTE":capstone/results/archive/dev-oracle-bc-ev/
 rsync -az -e "$RSYNC_SSH" results/dev-oracle-bc/collect.py "$REMOTE":capstone/results/dev-oracle-bc/
 "${SSH[@]}" "$REMOTE" bash -s <<'REMOTE'
 set -euo pipefail
-cd ~/capstone/linux_server_v3
+cd ~/capstone/linux_server
 mkdir -p logs
-for s in $(seq 0 39) $(seq 2000 2159); do echo "--seeds $s --futures 4 --workers 1"; done > ~/capstone/results/dev-oracle-bc-ev/tasks.txt
-N=$(wc -l < ~/capstone/results/dev-oracle-bc-ev/tasks.txt)
+for s in $(seq 0 39) $(seq 2000 2159); do echo "--seeds $s --futures 4 --workers 1"; done > ~/capstone/results/archive/dev-oracle-bc-ev/tasks.txt
+N=$(wc -l < ~/capstone/results/archive/dev-oracle-bc-ev/tasks.txt)
 sbatch --account=drl-scheduling --partition=sporc --time=0-04:00:00 --array=0-$((N - 1)) --job-name=oracle-bc-ev \
-    --export=ALL,SCRIPT=results/dev-oracle-bc-ev/collect_ev.py,TASKS=$HOME/capstone/results/dev-oracle-bc-ev/tasks.txt slurm/twin_array.sbatch
+    --export=ALL,SCRIPT=results/archive/dev-oracle-bc-ev/collect_ev.py,TASKS=$HOME/capstone/results/archive/dev-oracle-bc-ev/tasks.txt slurm/twin_array.sbatch
 REMOTE

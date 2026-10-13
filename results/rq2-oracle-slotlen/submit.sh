@@ -7,7 +7,7 @@ set -euo pipefail
 source "$(dirname "$0")/../../linux_server/slurm/rit_ssh.sh"
 "${SSH[@]}" "$REMOTE" bash -s <<'REMOTE'
 set -euo pipefail
-cd ~/capstone/linux_server_v3
+cd ~/capstone/linux_server
 mkdir -p logs ~/capstone/results/rq2-oracle-slotlen
 for g in 1800 3600 5400 10800; do for s in $(seq 0 39); do echo "--seed $s --segment $g"; done; done > ~/capstone/results/rq2-oracle-slotlen/tasks.txt
 N=$(wc -l < ~/capstone/results/rq2-oracle-slotlen/tasks.txt)

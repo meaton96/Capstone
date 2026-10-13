@@ -7,7 +7,7 @@ set -euo pipefail
 source "$(dirname "$0")/../../linux_server/slurm/rit_ssh.sh"
 "${SSH[@]}" "$REMOTE" bash -s <<'REMOTE'
 set -euo pipefail
-cd ~/capstone/linux_server_v3
+cd ~/capstone/linux_server
 mkdir -p logs ~/capstone/results/dev-oracle-bc
 for s in $(seq 0 39) $(seq 2000 2159); do echo "--seeds $s --workers 1"; done > ~/capstone/results/dev-oracle-bc/tasks.txt
 N=$(wc -l < ~/capstone/results/dev-oracle-bc/tasks.txt)

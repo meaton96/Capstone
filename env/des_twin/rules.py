@@ -18,11 +18,40 @@ JOB_RULES = ("SPT", "LPT", "SRT", "LRT", "FIFO", "PTWINQ") + ("EDD", "SLACK", "C
 DUE_DATE_RULES = ("EDD", "SLACK", "CR", "MDD", "MOD", "ATC")
 ATC_K = 2.0    # ATC look-ahead parameter k (Vepsalainen & Morton 1987 report k of about 1.5-3 working well)
 MACHINE_RULES = ("SMPT", "SRWT", "MMUR", "ECT", "TECT")
+# Reliability-aware machine halves (2026-10-09, plan §3; twin only, not in the RL action heads or DispatchingEngine.cs).
+# p = processing time on the candidate, q = its load (machine_load), tr = TECT's travel estimate, A = availability,
+# MTBF / age / Weibull (k, lam) at the twin's information level (TwinConfig.reliability: static / online / oracle),
+# kappa = TwinConfig.reliability_kappa, R = TwinConfig.reroute_cost:
+#   RECT    q / A + p + kappa P (p / 2 + R),  P = 1 - exp(-p / MTBF): the chance the operation is interrupted (a
+#           restart loses about p / 2 and the job is re-routed); q / A: the queue drains at the long-run availability
+#   RTECT   max(tr, q / A) + p + kappa P (p / 2 + R)
+#   RECTA   RECT with P the Weibull conditional failure probability over the job's exposure window given the age a:
+#           1 - exp(-((a + q + p) / lam)^k + ((a + q) / lam)^k)
+#   RTECTA  RTECT with RECTA's P
+#   HAECT   hard-avoid control: ECT over the candidates with A >= the floor median (all candidates if none qualify)
+RELIABILITY_RULES = ("RECT", "RTECT", "RECTA", "RTECTA", "HAECT")
+# Processing-time-weighted machine halves (2026-10-10, dev-pect-rule; ported to DispatchingEngine.cs PtimeScores and
+# made the RL machine head, action schema v5, in dev-pect-unity the same day: keep the two in step; defaults quad,
+# alpha 3 = TwinConfig = Unity PtimeRuleParams = config.PTIME_RULE_PARAMS). dev-b2-pect-check / dev-hetero-tune found that RECT / RTECT with no reliability information
+# and no failures beat ECT / TECT by 15-25%: their risk term is a convex penalty on the candidate's processing time p.
+# These are that weighting as a rule of its own, with the shape g chosen by TwinConfig.ptime_shape:
+#   PECT    q / A + p + alpha g(p)
+#   PTECT   max(tr, q / A) + p + alpha g(p)
+# q, p, tr as ECT / TECT; alpha = TwinConfig.ptime_alpha; A = TwinConfig.ptime_avail (default 1: the plain queue; the
+# reliability rules' blind form uses the floor availability, so a value < 1 reproduces them exactly). Shapes, over the
+# routed job's eligible candidates (p_min the fastest, p_mean their mean):
+#   lin     g = p                                   (score = wait + (1 + alpha) p; p - p_min ranks identically)
+#   quad    g = p^2 / p_mean                        (scale-free: alpha is dimensionless)
+#   ratio   g = p (p / p_min - 1)                   (scale-free, zero on the fastest candidate)
+#   exp     g = (1 - exp(-p / tau)) (p / 2 + R)     (the reliability rules' risk term at a common MTBF tau and
+#                                                    re-route cost R: TwinConfig.ptime_tau / ptime_reroute, seconds)
+PTIME_RULES = ("PECT", "PTECT")
+PTIME_SHAPES = ("lin", "quad", "ratio", "exp")
 
 
 def parse_rule(name):
     parts = name.upper().split("_")
-    if len(parts) != 2 or parts[0] not in JOB_RULES or parts[1] not in MACHINE_RULES:
+    if len(parts) != 2 or parts[0] not in JOB_RULES or parts[1] not in MACHINE_RULES + RELIABILITY_RULES + PTIME_RULES:
         raise ValueError(f"unsupported rule {name!r} (expected JOB_MACHINE, e.g. SPT_ECT; Random is not modelled)")
     return parts[0], parts[1]
 
@@ -118,11 +147,79 @@ def _rank_due(job_rule, ids, sim, proc_time):
     raise ValueError(job_rule)
 
 
-def select_machine(machine_rule, cands, job_times, loads, utils, travel):
-    """DispatchingEngine.SelectMachine over parallel candidate lists (float32)."""
+def _interrupt_prob(rule, p, q, term):
+    a, mtbf, _, k, lam, age = term
+    if not math.isfinite(mtbf):
+        return 0.0
+    if rule in ("RECTA", "RTECTA"):
+        age = age or 0.0
+        return 1.0 - math.exp(-(((age + q + p) / lam) ** k - ((age + q) / lam) ** k))
+    return 1.0 - math.exp(-p / mtbf)
+
+
+def reliability_scores(machine_rule, job_times, loads, travel, rel):
+    """Scores (lower first) of a reliability-aware machine rule; rel = Twin.reliability_terms(cands)."""
+    kappa, reroute = rel["kappa"], rel["reroute"]
+    out = []
+    for p, q, tr, term in zip(job_times, loads, travel, rel["terms"]):
+        p, q, tr = float(p), float(q), float(tr)
+        a = max(term[0], 1e-6)
+        if machine_rule == "HAECT":
+            out.append(f32(q + p) if term[0] >= rel["median_A"] else math.inf)
+            continue
+        wait = q / a
+        if machine_rule in ("RTECT", "RTECTA"):
+            wait = max(tr, wait)
+        risk = _interrupt_prob(machine_rule, p, q, term) * (p / 2.0 + reroute)
+        out.append(f32(wait + p + kappa * risk))
+    if machine_rule == "HAECT" and all(math.isinf(s) for s in out):
+        out = [f32(float(q) + float(p)) for p, q in zip(job_times, loads)]
+    return out
+
+
+def ptime_scores(machine_rule, job_times, loads, travel, pt):
+    """Scores (lower first) of a processing-time-weighted machine rule (PTIME_RULES); pt = Twin.ptime_params():
+    {"alpha", "shape", "tau", "reroute", "avail"}. Float64 arithmetic, float32 score, as the reliability rules."""
+    alpha, shape, avail = pt["alpha"], pt["shape"], pt["avail"]
+    if shape not in PTIME_SHAPES:
+        raise ValueError(f"processing-time shape must be one of {PTIME_SHAPES}, not {shape!r}")
+    ps = [float(p) for p in job_times]
+    p_min = max(min(ps), 1e-6)
+    p_mean = max(sum(ps) / len(ps), 1e-6)
+    tau, reroute = pt["tau"], pt["reroute"]
+    out = []
+    for p, q, tr in zip(ps, loads, travel):
+        q, tr = float(q), float(tr)
+        wait = q / avail
+        if machine_rule == "PTECT":
+            wait = max(tr, wait)
+        if shape == "lin":
+            g = p
+        elif shape == "quad":
+            g = p * p / p_mean
+        elif shape == "ratio":
+            g = p * (p / p_min - 1.0)
+        else:
+            g = (1.0 - math.exp(-p / tau)) * (p / 2.0 + reroute)
+        out.append(f32(wait + p + alpha * g))
+    return out
+
+
+def select_machine(machine_rule, cands, job_times, loads, utils, travel, rel=None, pt=None):
+    """DispatchingEngine.SelectMachine over parallel candidate lists (float32). The reliability-aware halves
+    (RELIABILITY_RULES, twin only) also need rel = Twin.reliability_terms(cands); the processing-time-weighted
+    halves (PTIME_RULES; also in Unity) pt = Twin.ptime_params()."""
     if len(cands) == 1:
         return cands[0]
-    if machine_rule == "SMPT":
+    if machine_rule in PTIME_RULES:
+        if pt is None:
+            raise ValueError(f"machine rule {machine_rule} needs its parameters (pt=Twin.ptime_params())")
+        score = ptime_scores(machine_rule, job_times, loads, travel, pt)
+    elif machine_rule in RELIABILITY_RULES:
+        if rel is None:
+            raise ValueError(f"machine rule {machine_rule} needs reliability terms (rel=Twin.reliability_terms)")
+        score = reliability_scores(machine_rule, job_times, loads, travel, rel)
+    elif machine_rule == "SMPT":
         score = job_times
     elif machine_rule == "SRWT":
         score = loads

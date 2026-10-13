@@ -206,6 +206,10 @@ namespace Assets.Scripts.Simulation
                 return;
             }
 
+            // Python rule mode (-pyrules): the raw candidate view of this decision travels with this step.
+            if (PyRules.Enabled)
+                Channels.DecisionViewChannel.Instance.SendView(FactoryOrchestrator.Instance.BuildPyRuleView());
+
             // Get the massive 1D array containing all 5 streams
             float[] snapshot = _obsBuilder.BuildCompleteSnapshot(req);
 
@@ -253,9 +257,24 @@ namespace Assets.Scripts.Simulation
         {
             if (!FactoryOrchestrator.Instance.IsWaitingForAction) return;
 
+            // Python rule mode (-pyrules): a pick sent with this step replaces the action's rule for this decision.
+            if (PyRules.Enabled)
+            {
+                PyRules.Pick pick = Channels.EpisodeConfigChannel.TakePick();
+                if (pick != null)
+                {
+                    FactoryOrchestrator.Instance.StepPick(pick);
+                    return;
+                }
+            }
+
+            // A rule override from Python (Channels.EpisodeConfigChannel.RuleOverrideIndex, evaluate.py fixed rules outside
+            // the RL heads) replaces the policy's action; the decision path is otherwise the same.
             int index = _behavior != null && _behavior.IsInHeuristicMode()
                 ? HeuristicRuleIndex()
-                : DispatchingEngine.IndexForHeads(actions.DiscreteActions[0], actions.DiscreteActions[1]);
+                : Channels.EpisodeConfigChannel.RuleOverrideIndex >= 0
+                    ? Channels.EpisodeConfigChannel.RuleOverrideIndex
+                    : DispatchingEngine.IndexForHeads(actions.DiscreteActions[0], actions.DiscreteActions[1]);
             FactoryOrchestrator.Instance.Step(index);
         }
     }

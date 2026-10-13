@@ -90,5 +90,9 @@ namespace Assets.Scripts.Simulation.Types
         /// @brief TECT's price per second of loaded travel, λ (FJSSPConfig.TravelPrice): TECT scores a candidate
         ///        max(travel, queued work) + processing time + λ x travel. 0 = plain TECT.
         public float TravelPrice;
+
+        /// @brief Parameters of the PECT / PTECT machine rules for this episode (FJSSPConfig.GetEffectivePtimeRule);
+        ///        null = PtimeRuleParams.Default.
+        public PtimeRuleParams PtimeRule;
     }
 }

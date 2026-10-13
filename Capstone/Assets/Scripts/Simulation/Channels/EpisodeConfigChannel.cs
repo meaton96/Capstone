@@ -56,6 +56,7 @@ namespace Assets.Scripts.Simulation.Channels
             "machineFlexibilityProbability", "secondaryTimeMultiplier", "parkingMethod", "ioDocks",
             "reservationProtocol", "routingTrigger", "tiling", "preDispatchingMethod", "stochastic", "procTimeParams",
             "travelPrice", "inputBufferCapacity", "outputBufferCapacity",
+            "ptimeAlpha", "ptimeShape", "ptimeTau", "ptimeReroute", "ptimeAvail",
         };
 
         private FJSSPConfig _pendingConfig = null;
@@ -85,6 +86,16 @@ namespace Assets.Scripts.Simulation.Channels
                     ReadScenarioQueue(scenarios, root["clear"]?.Value<bool>() ?? false);
                     return;
                 }
+                if (root.Count == 1 && root.ContainsKey("ruleOverride"))
+                {
+                    SetRuleOverride(root["ruleOverride"]);
+                    return;
+                }
+                if (root.Count == 1 && root.ContainsKey("pick"))
+                {
+                    SetPick(root["pick"]);
+                    return;
+                }
 
                 FJSSPConfig cfg = DeserialiseConfig(json);
                 lock (_lock) { _pendingConfig = cfg; }
@@ -97,6 +108,91 @@ namespace Assets.Scripts.Simulation.Channels
             {
                 Reject($"config message rejected: {ex.Message}");
             }
+        }
+
+        /// <summary>
+        /// Catalog index (DispatchingEngine.RuleForIndex) that SchedulingAgent steps instead of the policy's (job head,
+        /// machine head) while set, -1 = none (2026-10-10, results/dev-pect-unity). Python sets it with
+        /// {"ruleOverride": "MDD_TECT"} and clears it with {"ruleOverride": null} (UnitySchedulingEnv.step with a rule
+        /// name, so evaluate.py can run fixed rules that are not in the RL heads through the same decision path).
+        /// Side-channel data of a step is processed before that step's actions (RpcCommunicator), so a message sent
+        /// with a step applies to that step's decision.
+        /// </summary>
+        public static int RuleOverrideIndex { get; private set; } = -1;
+
+        /// <summary>Name of the rule override, or null.</summary>
+        public static string RuleOverrideName { get; private set; }
+
+        private void SetRuleOverride(JToken value)
+        {
+            if (value == null || value.Type == JTokenType.Null)
+            {
+                RuleOverrideIndex = -1;
+                RuleOverrideName = null;
+                SimLogger.Low("[ConfigChannel] Rule override cleared.");
+                return;
+            }
+            string name = value.Value<string>();
+            if (!DispatchingEngine.TryIndexForName(name, out int index) || DispatchingEngine.RuleForIndex(index) == DispatchingRule.Random)
+            {
+                // Refuse loudly: stepping the policy's action instead would silently run another rule.
+                Reject($"ruleOverride: unknown rule '{name}'");
+                SimLogger.Error($"[ConfigChannel] ruleOverride '{name}' is not a JOB_MACHINE rule; quitting.");
+                UnityEngine.Application.Quit(2);
+                return;
+            }
+            RuleOverrideIndex = index;
+            RuleOverrideName = DispatchingEngine.RuleForIndex(index).ToString();
+            SimLogger.Low($"[ConfigChannel] Rule override -> {RuleOverrideName} (catalog index {index}).");
+        }
+
+        /// <summary>
+        /// Python rule mode (PyRules, -pyrules): the choice Python made for the decision the accompanying step answers,
+        /// or null. Set by {"pick": {"job": id, "machine": id, "decision": n, "jobRule": name, "machineRule": name}};
+        /// SchedulingAgent.OnActionReceived takes it (TakePick) and applies it with FactoryOrchestrator.StepPick. Side-channel
+        /// data of a step is processed before that step's actions (RpcCommunicator), as for the rule override.
+        /// </summary>
+        private static PyRules.Pick _pendingPick;
+
+        /// <summary>Returns and clears the pending Python pick, or null.</summary>
+        public static PyRules.Pick TakePick()
+        {
+            PyRules.Pick p = _pendingPick;
+            _pendingPick = null;
+            return p;
+        }
+
+        private void SetPick(JToken value)
+        {
+            if (!PyRules.Enabled)
+            {
+                // Refuse loudly: without -pyrules the player would silently step the action's rule instead.
+                Reject("pick: the player was not launched with -pyrules");
+                SimLogger.Error("[ConfigChannel] pick received but the player was not launched with -pyrules; quitting.");
+                UnityEngine.Application.Quit(3);
+                return;
+            }
+            if (_pendingPick != null)
+                PyRules.Fail($"pick for decision {_pendingPick.Decision} was never applied before the next pick arrived");
+            PyRules.Pick pick;
+            try
+            {
+                var o = (JObject)value;
+                pick = new PyRules.Pick
+                {
+                    JobId = o["job"].Value<int>(),
+                    MachineId = o["machine"]?.Value<int>() ?? -1,
+                    Decision = o["decision"].Value<int>(),
+                    JobRule = o["jobRule"]?.Value<string>() ?? "",
+                    MachineRule = o["machineRule"]?.Value<string>() ?? "",
+                };
+            }
+            catch (Exception ex)
+            {
+                PyRules.Fail($"malformed pick {value}: {ex.Message}");
+                return;
+            }
+            _pendingPick = pick;
         }
 
         /// <summary>
@@ -222,6 +318,7 @@ namespace Assets.Scripts.Simulation.Channels
                 routingTrigger = RoutingTriggerParser.Validated(root["routingTrigger"]?.Value<string>()),
                 Tiling = TilingSpec.FromJson(root["tiling"]),
                 preDispatchingMethod = root["preDispatchingMethod"]?.Value<string>() ?? "fixed",
+                PtimeRule = PtimeRuleParams.FromJson(root),
             };
 
             // MachineTypeLayout from machineTypes string array

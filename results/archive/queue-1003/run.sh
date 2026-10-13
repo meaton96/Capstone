@@ -3,13 +3,13 @@
 #   oracle  rq2-oracle-due seeds 8-19, then the regime screen rq2-oracle-due-agv4 / -l1500 / -utilhi (seeds 0-3)
 #   base    base-due-c2 seeds 0-19 (21 head pairs, tardiness)
 # Every task skips itself when its output exists, so rerunning resumes. Player: linux_server_due/ (frozen copy).
-# Usage: nohup results/queue-1003/run.sh > results/queue-1003/run.out 2>&1 &
+# Usage: nohup results/archive/queue-1003/run.sh > results/archive/queue-1003/run.out 2>&1 &
 set -uo pipefail
 cd "$(dirname "$0")/../.."
 WORKERS="${WORKERS:-20}"
 run_task() {  # line number in tasks.txt
     local line kind out seed wid params extra
-    line=$(sed -n "${1}p" results/queue-1003/tasks.txt)
+    line=$(sed -n "${1}p" results/archive/queue-1003/tasks.txt)
     IFS='|' read -r kind out seed wid params extra <<< "$line"
     local -a ex=(); [[ -n "$extra" ]] && read -ra ex <<< "$extra"
     case "$kind" in
@@ -18,8 +18,8 @@ run_task() {  # line number in tasks.txt
     esac
 }
 export -f run_task
-echo "[$(date '+%m-%d %H:%M')] starting $(wc -l < results/queue-1003/tasks.txt) tasks, $WORKERS workers"
-seq 1 "$(wc -l < results/queue-1003/tasks.txt)" | xargs -P "$WORKERS" -I{} bash -c 'run_task {}'
+echo "[$(date '+%m-%d %H:%M')] starting $(wc -l < results/archive/queue-1003/tasks.txt) tasks, $WORKERS workers"
+seq 1 "$(wc -l < results/archive/queue-1003/tasks.txt)" | xargs -P "$WORKERS" -I{} bash -c 'run_task {}'
 echo "[$(date '+%m-%d %H:%M')] all done"
 for d in results/rq2-oracle-due results/rq2-oracle-due-agv4 results/rq2-oracle-due-l1500 results/rq2-oracle-due-utilhi; do
     echo "== $d"; .venv/bin/python results/rq2-oracle-due/analyze.py "$d" > "$d/analysis.out" 2>&1; head -40 "$d/analysis.out"

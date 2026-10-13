@@ -292,6 +292,16 @@ namespace Assets.Scripts.Simulation.Machines
                 return;
             }
 
+            // A scenario failureSchedule gives the initial countdown (residual life) explicitly; no draw from either
+            // stream (2026-10-09, results/dev-csharp-failures).
+            float? scheduled = StochasticEventManager.Instance.InitialMachineCountdown(MachineId);
+            if (scheduled.HasValue)
+            {
+                _ttfCountdown = scheduled.Value;
+                _ageSinceLastRepair = 0f;
+                return;
+            }
+
             // Sample a full Weibull TTF, then draw the starting countdown from
             // Uniform(0, fullTtf) so machines are not all fresh at episode start.
             // This prevents the policy from exploiting a failure-free warmup period.
@@ -401,7 +411,7 @@ namespace Assets.Scripts.Simulation.Machines
 
             // Fresh TTF from repaired state — age counter resets to zero.
             _ttfCountdown = StochasticEventManager.Instance != null
-                ? StochasticEventManager.Instance.SampleMachineTTF()
+                ? StochasticEventManager.Instance.SampleMachineTTF(MachineId)
                 : float.MaxValue;
             float actualRepair = SampledRepairDuration - RemainingRepairTime; // already 0 here, so use SampledRepairDuration
             EpisodeTelemetryChannel.Instance?.RecordMachineRepairComplete(MachineId, SampledRepairDuration);
@@ -418,6 +428,15 @@ namespace Assets.Scripts.Simulation.Machines
         /// @details Prefers @ref incomingConveyor, falls back to @ref secondaryIncomingConveyor.
         /// The job visual is flagged as being on a conveyor.
         ///
+        /// Idempotent: a job already on either incoming belt is not placed again. A delivery reaches this twice,
+        /// from @c AGVController.DoDropoff and again from @c FlagHarvester.HarvestAGVFlags. Before 2026-10-10 the
+        /// second call checked only the belt @c PickIncomingBelt chose, so when the first placement had filled the
+        /// primary belt of a two-belt machine (layout A interior machines) the copy went onto the secondary belt and
+        /// was never removed (@c StartJob removes one entry): the belt stayed fuller than it was and sent later
+        /// deliveries to the other dock. One-belt machines (layout D) are unaffected: there the second call was
+        /// already a no-op, counted as @c DropoffRedundant, and still is. @c DropoffDoublePlaced is now always 0
+        /// (column kept for the CSV format).
+        ///
         /// @param jobId The ID of the job to place.
         /// @param visual The visual component to enqueue.
         public void PlaceOnIncoming(int jobId, JobVisual visual)
@@ -427,17 +446,41 @@ namespace Assets.Scripts.Simulation.Machines
             {
                 bool alreadyOnBelt = (incomingConveyor != null && incomingConveyor.Contains(jobId))
                                   || (secondaryIncomingConveyor != null && secondaryIncomingConveyor.Contains(jobId));
-                bool placed = belt.TryEnqueue(jobId, visual);
-                if (alreadyOnBelt)
-                {
-                    if (placed) handoffs.DropoffDoublePlaced++;
-                    else handoffs.DropoffRedundant++;
-                }
+                bool placed = !alreadyOnBelt && belt.TryEnqueue(jobId, visual);
+                if (alreadyOnBelt) handoffs.DropoffRedundant++;
                 else if (!placed) handoffs.DropoffBeltFull++;
                 else if (belt == secondaryIncomingConveyor) handoffs.DropoffBeltSecondary++;
                 else handoffs.DropoffBeltPrimary++;
                 visual.SetOnConveyor(true);
             }
+        }
+
+        /// @brief Frees a job's incoming-belt slot when the job is re-routed off this machine without being started
+        ///        (a queued job on a machine that failed, or a delivery that landed as it failed, audit B3).
+        ///
+        /// @details Before 2026-10-09 only @c StartJob freed the slot, so a re-routed job kept it for the rest of the
+        /// episode: the belt counted as fuller than it was and @c GetDropoffPosition could send later deliveries to
+        /// the secondary belt. The job is collected from this machine's pickup dock, so its visual is moved there.
+        /// No effect on a job that is not on an incoming belt.
+        ///
+        /// @param jobId The re-routed job.
+        /// @return True if the job held an incoming slot.
+        public bool ReleaseIncomingSlot(int jobId)
+        {
+            JobVisual visual = null;
+            bool held = false;
+            if (incomingConveyor != null && incomingConveyor.Contains(jobId))
+            {
+                visual = incomingConveyor.RemoveJob(jobId);
+                held = true;
+            }
+            else if (secondaryIncomingConveyor != null && secondaryIncomingConveyor.Contains(jobId))
+            {
+                visual = secondaryIncomingConveyor.RemoveJob(jobId);
+                held = true;
+            }
+            if (visual != null) visual.SnapToPosition(GetPickupPosition());
+            return held;
         }
 
         /// @brief Removes a job from the outgoing conveyor belt systems.
@@ -572,7 +615,7 @@ namespace Assets.Scripts.Simulation.Machines
 
             // Sample repair duration now so the observation can read it in the same frame.
             SampledRepairDuration = StochasticEventManager.Instance != null
-                ? StochasticEventManager.Instance.SampleMachineRepair()
+                ? StochasticEventManager.Instance.SampleMachineRepair(MachineId)
                 : 0f;
             RemainingRepairTime = SampledRepairDuration;
 
