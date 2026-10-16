@@ -63,7 +63,7 @@ class TwinSchedulingEnv:
                  scenario: Optional[dict] = None,
                  obs_caps: Optional[Tuple[int, int]] = None,
                  instant_fleet: Optional[int] = None, queued: bool = False, critic_lookahead: bool = False,
-                 machine_failures: bool = False):
+                 machine_failures: bool = False, future_table: Optional[Tuple[int, float]] = None):
         """
         @param floor        des_floor.json path (or a loaded Floor) for the layout and fleet size trained on.
         @param transport    "instant" (DES-0), "geometric" (DES-1g) or "kinematic" (DES-1k).
@@ -75,12 +75,17 @@ class TwinSchedulingEnv:
                             queue_scenarios in order, as the player's seed and scenario queues, and the queue position
                             is the episode's seed index. Past the end of the queue the last scenario is replayed
                             with seed index -1 (discarded by evaluate.run_evaluation, as Unity's unseeded episode).
+        @param future_table  (rows, horizon s): add obs["future_job_table"], the next `rows` jobs arriving within
+                            `horizon` as a per-job table (des_twin.future_table; rq2-oracle-bc-future, 2026-10-15).
+                            None (default): no future table.
         """
         self.queued = queued
         ## @brief Model the scenario's machine failures (des_twin.failures) instead of refusing them.
         self.machine_failures = bool(machine_failures)
         ## @brief Add obs["critic_lookahead"] (des_twin.lookahead: known future arrivals, for the critic only).
         self.critic_lookahead = critic_lookahead
+        ## @brief (rows, horizon) of obs["future_job_table"], or None.
+        self.future_table = None if future_table is None else (int(future_table[0]), float(future_table[1]))
         self._queue_seeds, self._queue_scenarios, self._queue_pos = [], [], 0
         if queued:
             seed_rng, scenario_generator = None, None
@@ -226,6 +231,9 @@ class TwinSchedulingEnv:
         if self.critic_lookahead:
             from des_twin.lookahead import lookahead_features
             obs["critic_lookahead"] = lookahead_features(self._twin)
+        if self.future_table is not None:
+            from des_twin.future_table import future_job_table
+            obs["future_job_table"] = future_job_table(self._twin, *self.future_table)
         return obs
 
     # ── Stepping ────────────────────────────────────────────────────────────────────────────────────
@@ -318,7 +326,7 @@ class VectorizedTwinEnv:
                  instant_fleet: Optional[int] = None, seed_stream: int = 0, env_indices: Optional[list] = None,
                  slot_seconds: float = 0.0, gamma_per_second: Optional[float] = None, instance_group: int = 1,
                  paired: Optional[dict] = None, critic_lookahead: bool = False,
-                 machine_failures: bool = False):
+                 machine_failures: bool = False, future_table: Optional[Tuple[int, float]] = None):
         """@param env_indices  Build only these env indices (SubprocTwinEnv's workers); None = 0 .. num_envs - 1.
         An env's id and instance-seed stream depend only on its index, so a split gives the same episodes.
         @param instance_group  Envs i with the same i // instance_group draw the same instance seeds (the shared-
@@ -337,7 +345,8 @@ class VectorizedTwinEnv:
             shared, transport=transport, reward_fn=loaded.build() if loaded is not None else None, env_id=i,
             seed_rng=None if train_seed is None else instance_seed_rng(train_seed, i // instance_group, seed_stream),
             scenario_generator=scenario_generator, scenario=scenario, obs_caps=obs_caps,
-            instant_fleet=instant_fleet, critic_lookahead=critic_lookahead, machine_failures=machine_failures)
+            instant_fleet=instant_fleet, critic_lookahead=critic_lookahead, machine_failures=machine_failures,
+            future_table=future_table)
             for i in (range(num_envs) if env_indices is None else env_indices)]
         if paired is not None:
             if slot_seconds <= 0:
