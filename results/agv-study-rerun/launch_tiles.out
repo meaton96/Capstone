@@ -1,0 +1,14 @@
+[Queue] exe /home/ubuntupc/Documents/Github/Capstone/linux_server/capstone.x86_64 -> results /home/ubuntupc/Documents/Github/Capstone/linux_server/Results
+[Queue] agv-v5-linked: shard 0/1 = 6 of 6 cells, 0 already done, 6 to run, 4 workers
+[Queue] 1/6 FAIL   0.0 min  agv-v5-linked/agv5_b2t_t7open_s0/D/agv105_MDD_PECT_s0  (eta 0.0 h)
+[Queue] 2/6 FAIL   0.0 min  agv-v5-linked/agv5_b2t_t7open_s0/D/agv105_MDD_PTECT_s0  (eta 0.0 h)
+[Queue] exe /home/ubuntupc/Documents/Github/Capstone/linux_server/capstone.x86_64 -> results /home/ubuntupc/Documents/Github/Capstone/linux_server/Results
+[Queue] agv-v5-linked: shard 0/1 = 6 of 6 cells, 0 already done, 6 to run, 4 workers
+[Queue] 1/6 FAIL   0.0 min  agv-v5-linked/agv5_b2t_t7open_s0/D/agv105_MDD_PECT_s0  (eta 0.0 h)
+[Queue] 2/6 FAIL   0.0 min  agv-v5-linked/agv5_b2t_t7open_s0/D/agv105_MDD_PTECT_s0  (eta 0.0 h)
+[Queue] exe /home/ubuntupc/Documents/Github/Capstone/linux_server/capstone.x86_64 -> results /home/ubuntupc/Documents/Github/Capstone/linux_server/Results
+[Queue] agv-v5-linked: shard 0/1 = 6 of 6 cells, 0 already done, 6 to run, 4 workers
+[Queue] 1/6 FAIL 1800.0 min  agv-v5-linked/agv5_b2t_t7open_s0/D/agv84_MDD_PECT_s0  (eta 150.0 h)
+[Queue] 2/6 FAIL 1800.0 min  agv-v5-linked/agv5_b2t_t7open_s0/D/agv84_MDD_PTECT_s0  (eta 60.0 h)
+[Queue] 3/6 FAIL 1800.0 min  agv-v5-linked/agv5_b2t_t7open_s0/D/agv70_MDD_PECT_s0  (eta 30.0 h)
+[Queue] 4/6 FAIL 1800.0 min  agv-v5-linked/agv5_b2t_t7open_s0/D/agv70_MDD_PTECT_s0  (eta 15.0 h)

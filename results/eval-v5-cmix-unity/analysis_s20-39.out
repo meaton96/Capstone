@@ -1,0 +1,42 @@
+== eval-v5-cmix-unity: Unity vs twin on B2 seeds 20-39; picks loose s2 (trained c 2.5-3.5), cmix s3 (c 1.25-3.5), base s4 (c 1.75-2.5); pooled window tardiness, < 0 better; saved = k job-s per instance
+
+-- due-loose: checks
+   Unity due-loose: pc's MDD-PTECT vs pa's (run to run): tardiness identical on 20 / 20 seeds, instance hash on 20 / 20
+   Unity due-loose: one instance hash per seed across pa / pb / pc on 20 / 20 seeds
+   twin due-loose: MDD-PTECT in the loose / cmix groups vs rq3-gen-v5: tardiness identical on 20 / 20 seeds
+-- due-loose: 20 seeds complete in both simulators
+   best v5 pair: Unity MDD-PTECT, twin MDD-PECT; pair ranking Kendall tau +0.87 (p 0.017)
+   MDD-PTECT mean: Unity 72.9 k, twin 73.4 k; Unity vs twin  -0.67 [ -4.71,  +2.91] 12/8  p=0.28    saved +0.49 k
+   pairs vs MDD-PTECT (Unity | twin): SRT-PECT +21.2|+16.9  SRT-PTECT +26.8|+20.4  MDD-PECT +1.6|-0.5  ATC-PECT +13.4|+9.0  ATC-PTECT +11.4|+6.8
+   loose s2               vs MDD-PTECT  Unity  -4.45 [-10.60,  +0.78] 14/6  p=0.12    saved +3.25 k | twin  -6.01 [-12.67,  +0.14] 17/3  p=0.012   saved +4.41 k | Unity - twin +1.55 pp [-3.57, +7.83]
+   loose s2               vs best pair  Unity  -4.45 [-10.56,  +0.80] 14/6  p=0.12    saved +3.25 k | twin  -5.49 [-11.52,  -1.02] 15/5  p=0.03    saved +4.01 k | Unity - twin +1.04 pp [-3.66, +7.39]
+   cmix s3                vs MDD-PTECT  Unity  -0.94 [ -5.01,  +2.75] 11/9  p=0.57    saved +0.69 k | twin  -6.99 [-14.63,  -0.62] 16/4  p=0.014   saved +5.13 k | Unity - twin +6.04 pp [-0.47, +12.38]
+   cmix s3                vs best pair  Unity  -0.94 [ -5.01,  +2.78] 11/9  p=0.57    saved +0.69 k | twin  -6.48 [-13.14,  -1.45] 15/5  p=0.0073  saved +4.73 k | Unity - twin +5.53 pp [+0.26, +11.66]
+   base s4                vs MDD-PTECT  Unity  +7.05 [ -2.06, +14.26] 10/10 p=0.45    saved -5.14 k | twin  +0.60 [ -8.72,  +7.77] 13/7  p=0.41    saved -0.44 k | Unity - twin +6.45 pp [+3.80, +10.68]
+   base s4                vs best pair  Unity  +7.05 [ -1.77, +14.31] 10/10 p=0.45    saved -5.14 k | twin  +1.15 [ -7.37,  +7.31] 10/10 p=0.55    saved -0.84 k | Unity - twin +5.90 pp [+1.96, +10.42]
+   hindsight best v5 pair vs MDD-PTECT  Unity  -5.26 [-11.47,  -1.97] 13/0  p=0.0015  saved +3.83 k | twin  -7.82 [-14.70,  -4.00] 17/0  p=0.00029 saved +5.74 k | Unity - twin +2.56 pp [+0.84, +4.72]
+   hindsight best v5 pair vs best pair  Unity  -5.26 [-11.45,  -2.00] 13/0  p=0.0015  saved +3.83 k | twin  -7.31 [-13.29,  -4.07] 15/0  p=0.00065 saved +5.34 k | Unity - twin +2.06 pp [-0.72, +4.90]
+   per seed, pick - MDD-PTECT (k job-s): Unity vs twin correlation; the 3 seeds with the largest |Unity - twin| and the pooled % without them
+     loose s2: r +0.51; Unity - twin +23.2 k in all, seeds [27, 23, 22] +7.7 k; without them Unity -7.43%, twin -9.32%
+     cmix s3: r +0.21; Unity - twin +88.8 k in all, seeds [22, 27, 37] +21.8 k; without them Unity -1.35%, twin -9.57%
+     base s4: r +0.95; Unity - twin +94.0 k in all, seeds [32, 25, 27] +37.5 k; without them Unity +3.22%, twin -2.37%
+
+-- base: checks
+   Unity base: pc's MDD-PTECT vs the reused rows (eval-transfer-unity-v5 / rq4 none): tardiness identical on 20 / 20 seeds, instance hash on 20 / 20
+   twin base: MDD-PTECT in the loose / cmix groups vs rq3-gen-v5: tardiness identical on 20 / 20 seeds
+-- base: 20 seeds complete in both simulators
+   best v5 pair: Unity MDD-PECT, twin MDD-PTECT; pair ranking Kendall tau +0.73 (p 0.056)
+   MDD-PTECT mean: Unity 154.7 k, twin 149.8 k; Unity vs twin  +3.26 [ +0.92,  +5.43]  7/13 p=0.07    saved -4.89 k
+   pairs vs MDD-PTECT (Unity | twin): SRT-PECT +2.9|+4.6  SRT-PTECT +5.9|+6.6  MDD-PECT -0.6|+2.2  ATC-PECT +12.5|+15.4  ATC-PTECT +13.6|+12.4
+   loose s2               vs MDD-PTECT  Unity  -0.83 [ -4.88,  +4.45]  9/11 p=0.99    saved +1.29 k | twin  -0.67 [ -3.57,  +3.30] 11/9  p=0.99    saved +1.00 k | Unity - twin -0.16 pp [-3.13, +3.19]
+   loose s2               vs best pair  Unity  -0.25 [ -4.33,  +3.65]  8/12 p=0.55    saved +0.38 k | twin  -0.67 [ -3.64,  +3.37] 11/9  p=0.99    saved +1.00 k | Unity - twin +0.42 pp [-2.70, +3.48]
+   cmix s3                vs MDD-PTECT  Unity  -2.28 [ -5.40,  +1.87] 14/6  p=0.18    saved +3.52 k | twin  -2.04 [ -4.67,  +1.32] 13/7  p=0.29    saved +3.06 k | Unity - twin -0.24 pp [-3.24, +2.50]
+   cmix s3                vs best pair  Unity  -1.70 [ -4.77,  +1.12] 12/8  p=0.39    saved +2.62 k | twin  -2.04 [ -4.62,  +1.35] 13/7  p=0.29    saved +3.06 k | Unity - twin +0.34 pp [-2.91, +3.05]
+   base s4                vs MDD-PTECT  Unity  -2.05 [ -5.10,  +1.08] 12/8  p=0.41    saved +3.17 k | twin  +0.25 [ -3.40,  +3.91]  7/13 p=0.6     saved -0.37 k | Unity - twin -2.30 pp [-4.98, +0.38]
+   base s4                vs best pair  Unity  -1.48 [ -5.25,  +2.14] 12/8  p=0.47    saved +2.27 k | twin  +0.25 [ -3.52,  +3.96]  7/13 p=0.6     saved -0.37 k | Unity - twin -1.72 pp [-5.77, +1.57]
+   hindsight best v5 pair vs MDD-PTECT  Unity  -4.16 [ -5.78,  -2.38] 15/0  p=0.00065 saved +6.44 k | twin  -2.81 [ -5.20,  -1.23] 13/0  p=0.0015  saved +4.20 k | Unity - twin -1.36 pp [-3.31, +1.24]
+   hindsight best v5 pair vs best pair  Unity  -3.60 [ -5.71,  -1.86] 15/0  p=0.00065 saved +5.54 k | twin  -2.81 [ -5.29,  -1.27] 13/0  p=0.0015  saved +4.20 k | Unity - twin -0.79 pp [-2.61, +1.08]
+   per seed, pick - MDD-PTECT (k job-s): Unity vs twin correlation; the 3 seeds with the largest |Unity - twin| and the pooled % without them
+     loose s2: r +0.77; Unity - twin -5.8 k in all, seeds [23, 22, 32] +16.3 k; without them Unity -0.68%, twin +0.30%
+     cmix s3: r +0.72; Unity - twin -9.3 k in all, seeds [39, 25, 32] -21.4 k; without them Unity -1.01%, twin -1.52%
+     base s4: r +0.70; Unity - twin -70.9 k in all, seeds [25, 39, 23] -64.0 k; without them Unity -1.77%, twin -1.53%

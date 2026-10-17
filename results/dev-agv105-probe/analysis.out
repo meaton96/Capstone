@@ -1,0 +1,17 @@
+reference 15-machine cell agv-v5-rel/agv5_b2t_s0/D/agv7_MDD_PTECT_s0: makespan 22104 sim-s in 48 wall-min = 7.7 sim-s per wall-s
+
+== agv5_b2m_t7iso_arr1h_s0 / agv21_MDD_PTECT_s0: 402 jobs
+   wall 0.53 h since start, 402 / 402 jobs exited, finished
+   exited by 0.25 wall-h: 218
+   exited by  0.5 wall-h: 401
+   makespan 7140 sim-s, 3.73 sim-s per wall-s
+   full cell agv5_b2m_t7iso_s0 (2021 jobs, arrivals over 20854 s): at least 1.6 wall-h before the drain
+
+== agv5_b2t_t7open_arr1h_s0 / agv84_MDD_PTECT_s0: 1186 jobs
+   wall 2.97 h since start, 1186 / 1186 jobs exited, finished
+   exited by 0.25 wall-h: 42
+   exited by  0.5 wall-h: 164
+   exited by    1 wall-h: 355
+   exited by    2 wall-h: 688
+   makespan 7835 sim-s, 0.73 sim-s per wall-s
+   full cell agv5_b2t_t7open_s0 (5893 jobs, arrivals over 21390 s): at least 8.1 wall-h before the drain

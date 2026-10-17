@@ -1,0 +1,78 @@
+{
+ "due-loose": {
+  "params": {
+   "failure_probability": 0.0,
+   "due_date_allowance_range": [
+    2.5,
+    3.5
+   ],
+   "regime_block_seconds": 5400,
+   "horizon_seconds": 30600,
+   "load_mix": [
+    {
+     "name": "normal",
+     "utilization": [
+      0.6,
+      1.2
+     ],
+     "weight": 2
+    },
+    {
+     "name": "surge",
+     "utilization": [
+      1.0,
+      1.6
+     ]
+    },
+    {
+     "name": "short",
+     "utilization": [
+      0.6,
+      1.2
+     ],
+     "agv_count": 2
+    }
+   ]
+  },
+  "layout": null,
+  "twin_floor": "results/rq3-gen-twin/floors/D7/des_floor.json"
+ },
+ "base": {
+  "params": {
+   "failure_probability": 0.0,
+   "due_date_allowance_range": [
+    1.75,
+    2.5
+   ],
+   "regime_block_seconds": 5400,
+   "horizon_seconds": 30600,
+   "load_mix": [
+    {
+     "name": "normal",
+     "utilization": [
+      0.6,
+      1.2
+     ],
+     "weight": 2
+    },
+    {
+     "name": "surge",
+     "utilization": [
+      1.0,
+      1.6
+     ]
+    },
+    {
+     "name": "short",
+     "utilization": [
+      0.6,
+      1.2
+     ],
+     "agv_count": 2
+    }
+   ]
+  },
+  "layout": null,
+  "twin_floor": "results/rq3-gen-twin/floors/D7/des_floor.json"
+ }
+}

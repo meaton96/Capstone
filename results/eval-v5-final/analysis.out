@@ -1,0 +1,29 @@
+== eval-v5-final: twin, B2; fitting seeds 160 (2000-2159), test seeds 40 (0-39)
+
+-- fitting seeds 2000-2159: pooled vs MDD-PTECT (seed bootstrap 95% CI, better/worse, Wilcoxon)
+  PPO s0                  -0.93 [ -1.85,  -0.04]  91/59  p=0.026 n=160  total   24404.5
+  PPO s1                  -0.61 [ -1.84,  +0.55]  96/64  p=0.071 n=160  total   24482.6
+  PPO s2                  -2.31 [ -3.31,  -1.41] 111/41  p=6.6e-08 n=160  total   24062.3
+  PPO s3                  -0.84 [ -1.80,  +0.05]  96/63  p=0.033 n=160  total   24425.5
+  PPO s4                  -2.62 [ -4.24,  -1.09] 111/49  p=1.2e-05 n=160  total   23988.2   <- selected
+  MDD-PECT                +0.58 [ -0.15,  +1.29]  65/90  p=0.036 n=160  total   24774.7
+  PPO mean of 5 seeds     -1.46 [ -2.36,  -0.64]  98/62  p=0.00021 n=160
+
+-- test seeds 0-39: pooled vs MDD-PTECT
+  PPO s0                  -0.59 [ -3.19,  +1.75]  22/17  p=0.54 n=40
+  PPO s1                  +0.09 [ -1.77,  +1.77]  19/21  p=0.81 n=40
+  PPO s2                  -1.07 [ -3.11,  +0.85]  25/12  p=0.15 n=40
+  PPO s3                  -0.31 [ -2.25,  +1.65]  22/18  p=0.64 n=40
+  PPO s4                  +0.17 [ -2.29,  +2.33]  16/24  p=0.38 n=40   <- selected (final policy)
+  MDD-PECT                -0.47 [ -2.68,  +1.63]  17/23  p=0.52 n=40
+  PPO mean of 5 seeds     -0.34 [ -1.76,  +1.05]  24/16  p=0.32 n=40
+  spread of the 5 seeds on test: -1.07 to +0.17%
+  reproduce train-v5-nokl/eval PPO s0    : max |diff| 0.00e+00 (1000 job-s)
+  reproduce train-v5-nokl/eval PPO s1    : max |diff| 0.00e+00 (1000 job-s)
+  reproduce train-v5-nokl/eval PPO s2    : max |diff| 0.00e+00 (1000 job-s)
+  reproduce train-v5-nokl/eval MDD-PTECT : max |diff| 0.00e+00 (1000 job-s)
+  reproduce train-v5-final/eval PPO s3   : max |diff| 0.00e+00
+  reproduce train-v5-final/eval PPO s4   : max |diff| 0.00e+00
+  reproduce train-v5-final/eval MDD-PTECT: max |diff| 0.00e+00
+
+selected: PPO s4 (results/train-v5-final_s4/checkpoint.pt) -> selected.txt

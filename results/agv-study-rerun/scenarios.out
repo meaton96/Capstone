@@ -1,0 +1,11 @@
+linux_server/BatchConfigs/Scenarios/agv5_b2m_s0.json: 232 jobs (232 with due dates), 15 machines, tiling None, 0.08 MiB
+linux_server/BatchConfigs/Scenarios/agv5_b2m_s1.json: 252 jobs (252 with due dates), 15 machines, tiling None, 0.09 MiB
+linux_server/BatchConfigs/Scenarios/agv5_b2t_s0.json: 570 jobs (570 with due dates), 15 machines, tiling None, 0.19 MiB
+linux_server/BatchConfigs/Scenarios/agv5_b2t_s1.json: 845 jobs (845 with due dates), 15 machines, tiling None, 0.28 MiB
+linux_server/BatchConfigs/Scenarios/agv5_b2tf_s0.json: 570 jobs (570 with due dates), 15 machines, tiling None, 0.19 MiB
+linux_server/BatchConfigs/Scenarios/agv5_b2tf_s1.json: 845 jobs (845 with due dates), 15 machines, tiling None, 0.28 MiB
+linux_server/BatchConfigs/Scenarios/agv5_b2tf_s2.json: 783 jobs (783 with due dates), 15 machines, tiling None, 0.26 MiB
+linux_server/BatchConfigs/Scenarios/agv5_b2m_t7iso_s0.json: 2021 jobs (2021 with due dates), 105 machines, tiling {'tiles': 7, 'jobScope': 'tile', 'agvAssignment': 'tile', 'releaseRule': 'roundRobin'}, 1.87 MiB
+linux_server/BatchConfigs/Scenarios/agv5_b2m_t7open_s0.json: 2021 jobs (2021 with due dates), 105 machines, tiling {'tiles': 7, 'jobScope': 'open', 'agvAssignment': 'pooled', 'releaseRule': 'roundRobin'}, 1.87 MiB
+linux_server/BatchConfigs/Scenarios/agv5_b2t_t7iso_s0.json: 5893 jobs (5893 with due dates), 105 machines, tiling {'tiles': 7, 'jobScope': 'tile', 'agvAssignment': 'tile', 'releaseRule': 'roundRobin'}, 5.27 MiB
+linux_server/BatchConfigs/Scenarios/agv5_b2t_t7open_s0.json: 5893 jobs (5893 with due dates), 105 machines, tiling {'tiles': 7, 'jobScope': 'open', 'agvAssignment': 'pooled', 'releaseRule': 'roundRobin'}, 5.27 MiB

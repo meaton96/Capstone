@@ -1,0 +1,4 @@
+== rq3-oracle-loose: 40 seeds, c ~ U[2.5, 3.5], vs MDD-PTECT (mean 69.58 k job-s)
+  switching oracle        -14.09 [-20.57,  -9.71] 40/0 p=1.8e-12; saved 9.80 k job-s per instance
+  hindsight best v5 pair   -8.45 [-13.81,  -4.87] 35/0 p=2.5e-07; saved 5.88 k job-s per instance
+  oracle pair use: ATC-PECT 35%, MDD-PECT 24%, MDD-PTECT 17%, ATC-PTECT 14%, SRT-PECT 8%, SRT-PTECT 1%

@@ -1,0 +1,9 @@
+[Queue] exe /home/ubuntupc/Documents/Github/Capstone/linux_server/capstone.x86_64 -> results /home/ubuntupc/Documents/Github/Capstone/linux_server/Results
+[Queue] agv-v5-linked: shard 0/1 = 6 of 6 cells, 0 already done, 6 to run, 3 workers
+[Queue] 1/6 ok  172.7 min  agv-v5-linked/agv5_b2m_t7open_s0/D/agv49_MDD_PTECT_s0  (eta 14.4 h)
+[Queue] 2/6 ok  173.9 min  agv-v5-linked/agv5_b2m_t7open_s0/D/agv49_MDD_PECT_s0  (eta 5.8 h)
+[Queue] 3/6 ok  206.7 min  agv-v5-linked/agv5_b2m_t7open_s0/D/agv35_MDD_PECT_s0  (eta 3.4 h)
+[Queue] 4/6 ok  175.2 min  agv-v5-linked/agv5_b2m_t7open_s0/D/agv35_MDD_PTECT_s0  (eta 2.9 h)
+[Queue] 5/6 ok  425.6 min  agv-v5-linked/agv5_b2m_t7open_s0/D/agv21_MDD_PTECT_s0  (eta 2.1 h)
+[Queue] 6/6 ok  574.4 min  agv-v5-linked/agv5_b2m_t7open_s0/D/agv21_MDD_PECT_s0  (eta 0.0 h)
+[Queue] finished agv-v5-linked in 12.47 h

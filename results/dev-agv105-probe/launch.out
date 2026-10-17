@@ -1,0 +1,8 @@
+[Queue] exe /home/ubuntupc/Documents/Github/Capstone/linux_server/capstone.x86_64 -> results /home/ubuntupc/Documents/Github/Capstone/linux_server/Results
+[Queue] dev-agv105-probe: shard 0/1 = 1 of 1 cells, 0 already done, 1 to run, 1 workers
+[Queue] exe /home/ubuntupc/Documents/Github/Capstone/linux_server/capstone.x86_64 -> results /home/ubuntupc/Documents/Github/Capstone/linux_server/Results
+[Queue] dev-agv105-probe: shard 0/1 = 1 of 1 cells, 0 already done, 1 to run, 1 workers
+[Queue] 1/1 ok   31.9 min  dev-agv105-probe/agv5_b2m_t7iso_arr1h_s0/D/agv21_MDD_PTECT_s0  (eta 0.0 h)
+[Queue] finished dev-agv105-probe in 0.53 h
+[Queue] 1/1 ok  178.4 min  dev-agv105-probe/agv5_b2t_t7open_arr1h_s0/D/agv84_MDD_PTECT_s0  (eta 0.0 h)
+[Queue] finished dev-agv105-probe in 2.97 h

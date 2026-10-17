@@ -1,0 +1,5 @@
+--run train-v5-nokl_s0 --ckpt checkpoint_step51200 --split test
+--run train-v5-nokl_s1 --ckpt checkpoint_step51200 --split test
+--run train-v5-nokl_s2 --ckpt checkpoint_step51200 --split test
+--run train-v5-final_s3 --ckpt checkpoint_step51200 --split test
+--run train-v5-final_s4 --ckpt checkpoint_step51200 --split test

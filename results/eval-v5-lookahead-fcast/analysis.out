@@ -1,0 +1,20 @@
+== eval-v5-lookahead-fcast: look-ahead PPO (train-v5-lookahead, 5 seeds) with features from a perturbed published schedule; B2 base c
+   levels with outputs: ['exact', 'jit1', 'jit10', 'jit30', 'churn10', 'churn25', 'redrawn']; family = per-instance mean of the 5 seeds; pick = s3
+
+-- pooled over the held-out seeds (fitting 2000-2159 + test 0-39): pooled % [95% CI], better / worse, p
+exact schedule             n=200 ckpts=5  vs MDD-PTECT -2.02 [-2.84, -1.28] 141/59 p=2.7e-09  | vs state-only -0.78 [-1.20, -0.39] 114/86 p=0.0005  | vs own exact +0.00 [+0.00, +0.00] 0/0 p=1  | kept 100% of the exact gain, 3.08 k job-s / inst  | pick -3.48 [-4.59, -2.46]
+arrivals ± 1 min           n=200 ckpts=5  vs MDD-PTECT -2.02 [-2.81, -1.27] 141/59 p=2.9e-09  | vs state-only -0.78 [-1.18, -0.39] 114/86 p=0.00065  | vs own exact +0.00 [-0.02, +0.03] 2/5 p=0.4  | kept 100% of the exact gain, 3.07 k job-s / inst  | pick -3.48 [-4.56, -2.47]
+arrivals ± 10 min          n=200 ckpts=5  vs MDD-PTECT -2.04 [-2.86, -1.31] 143/57 p=1.7e-09  | vs state-only -0.81 [-1.22, -0.40] 114/86 p=0.00035  | vs own exact -0.02 [-0.07, +0.02] 16/10 p=0.28  | kept 101% of the exact gain, 3.11 k job-s / inst  | pick -3.51 [-4.61, -2.51]
+arrivals ± 30 min          n=200 ckpts=5  vs MDD-PTECT -1.99 [-2.79, -1.22] 141/59 p=8.3e-09  | vs state-only -0.75 [-1.18, -0.35] 113/87 p=0.00076  | vs own exact +0.03 [-0.04, +0.11] 27/31 p=0.49  | kept 98% of the exact gain, 3.03 k job-s / inst  | pick -3.52 [-4.63, -2.52]
+10% churn + 10 min         n=200 ckpts=5  vs MDD-PTECT -2.01 [-2.82, -1.26] 142/58 p=6.1e-09  | vs state-only -0.77 [-1.18, -0.37] 114/86 p=0.00069  | vs own exact +0.01 [-0.04, +0.08] 17/18 p=0.79  | kept 99% of the exact gain, 3.05 k job-s / inst  | pick -3.50 [-4.60, -2.46]
+25% churn + 10 min         n=200 ckpts=5  vs MDD-PTECT -2.01 [-2.84, -1.22] 140/60 p=9.8e-09  | vs state-only -0.77 [-1.19, -0.38] 114/86 p=0.00066  | vs own exact +0.01 [-0.07, +0.10] 33/33 p=0.91  | kept 99% of the exact gain, 3.06 k job-s / inst  | pick -3.57 [-4.65, -2.54]
+redrawn (no information)   n=200 ckpts=5  vs MDD-PTECT -2.07 [-2.94, -1.27] 143/57 p=4.2e-09  | vs state-only -0.83 [-1.23, -0.45] 119/81 p=5.8e-05  | vs own exact -0.05 [-0.23, +0.12] 72/63 p=0.53  | kept 102% of the exact gain, 3.15 k job-s / inst  | pick -3.46 [-4.63, -2.42]
+
+-- test seeds 0-39, vs MDD-PTECT: look-ahead family vs the planner on the same published schedule
+exact schedule             look-ahead -1.42 [-2.91, -0.07]     planner 900 s -9.42 [-11.31, -7.62]    planner 300 s -11.24 [-13.54, -9.14]
+arrivals ± 1 min           look-ahead -1.41 [-2.91, -0.06]     planner 900 s -4.07 [-6.94, -1.49]     planner 300 s -
+arrivals ± 10 min          look-ahead -1.45 [-2.97, -0.03]     planner 900 s -2.19 [-4.18, -0.54]     planner 300 s -2.67 [-4.93, -0.72]
+arrivals ± 30 min          look-ahead -1.33 [-2.90, +0.03]     planner 900 s -2.77 [-5.00, -0.58]     planner 300 s -
+10% churn + 10 min         look-ahead -1.31 [-2.88, +0.09]     planner 900 s -2.23 [-4.11, -0.43]     planner 300 s -3.30 [-5.53, -1.12]
+25% churn + 10 min         look-ahead -1.32 [-2.88, +0.10]     planner 900 s -2.31 [-4.14, -0.79]     planner 300 s -
+redrawn (no information)   look-ahead -1.18 [-2.75, +0.15]     planner 900 s -1.21 [-4.07, +1.34]     planner 300 s -

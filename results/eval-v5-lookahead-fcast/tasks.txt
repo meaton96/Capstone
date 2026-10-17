@@ -1,0 +1,60 @@
+--run train-v5-lookahead_s0 --level jit1
+--run train-v5-lookahead_s0 --level jit1 --split test
+--run train-v5-lookahead_s1 --level jit1
+--run train-v5-lookahead_s1 --level jit1 --split test
+--run train-v5-lookahead_s2 --level jit1
+--run train-v5-lookahead_s2 --level jit1 --split test
+--run train-v5-lookahead_s3 --level jit1
+--run train-v5-lookahead_s3 --level jit1 --split test
+--run train-v5-lookahead_s4 --level jit1
+--run train-v5-lookahead_s4 --level jit1 --split test
+--run train-v5-lookahead_s0 --level jit10
+--run train-v5-lookahead_s0 --level jit10 --split test
+--run train-v5-lookahead_s1 --level jit10
+--run train-v5-lookahead_s1 --level jit10 --split test
+--run train-v5-lookahead_s2 --level jit10
+--run train-v5-lookahead_s2 --level jit10 --split test
+--run train-v5-lookahead_s3 --level jit10
+--run train-v5-lookahead_s3 --level jit10 --split test
+--run train-v5-lookahead_s4 --level jit10
+--run train-v5-lookahead_s4 --level jit10 --split test
+--run train-v5-lookahead_s0 --level jit30
+--run train-v5-lookahead_s0 --level jit30 --split test
+--run train-v5-lookahead_s1 --level jit30
+--run train-v5-lookahead_s1 --level jit30 --split test
+--run train-v5-lookahead_s2 --level jit30
+--run train-v5-lookahead_s2 --level jit30 --split test
+--run train-v5-lookahead_s3 --level jit30
+--run train-v5-lookahead_s3 --level jit30 --split test
+--run train-v5-lookahead_s4 --level jit30
+--run train-v5-lookahead_s4 --level jit30 --split test
+--run train-v5-lookahead_s0 --level churn10
+--run train-v5-lookahead_s0 --level churn10 --split test
+--run train-v5-lookahead_s1 --level churn10
+--run train-v5-lookahead_s1 --level churn10 --split test
+--run train-v5-lookahead_s2 --level churn10
+--run train-v5-lookahead_s2 --level churn10 --split test
+--run train-v5-lookahead_s3 --level churn10
+--run train-v5-lookahead_s3 --level churn10 --split test
+--run train-v5-lookahead_s4 --level churn10
+--run train-v5-lookahead_s4 --level churn10 --split test
+--run train-v5-lookahead_s0 --level churn25
+--run train-v5-lookahead_s0 --level churn25 --split test
+--run train-v5-lookahead_s1 --level churn25
+--run train-v5-lookahead_s1 --level churn25 --split test
+--run train-v5-lookahead_s2 --level churn25
+--run train-v5-lookahead_s2 --level churn25 --split test
+--run train-v5-lookahead_s3 --level churn25
+--run train-v5-lookahead_s3 --level churn25 --split test
+--run train-v5-lookahead_s4 --level churn25
+--run train-v5-lookahead_s4 --level churn25 --split test
+--run train-v5-lookahead_s0 --level redrawn
+--run train-v5-lookahead_s0 --level redrawn --split test
+--run train-v5-lookahead_s1 --level redrawn
+--run train-v5-lookahead_s1 --level redrawn --split test
+--run train-v5-lookahead_s2 --level redrawn
+--run train-v5-lookahead_s2 --level redrawn --split test
+--run train-v5-lookahead_s3 --level redrawn
+--run train-v5-lookahead_s3 --level redrawn --split test
+--run train-v5-lookahead_s4 --level redrawn
+--run train-v5-lookahead_s4 --level redrawn --split test

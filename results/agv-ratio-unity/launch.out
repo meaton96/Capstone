@@ -1,0 +1,64 @@
+[Queue] exe /home/ubuntupc/Documents/Github/Capstone/linux_server/capstone.x86_64 -> results /home/ubuntupc/Documents/Github/Capstone/linux_server/Results
+[Queue] agv-ratio-unity: shard 0/1 = 1 of 1 cells, 0 already done, 1 to run, 1 workers
+[Queue] exe /home/ubuntupc/Documents/Github/Capstone/linux_server/capstone.x86_64 -> results /home/ubuntupc/Documents/Github/Capstone/linux_server/Results
+[Queue] agv-ratio-unity: shard 0/1 = 1 of 1 cells, 0 already done, 1 to run, 1 workers
+[Queue] exe /home/ubuntupc/Documents/Github/Capstone/linux_server/capstone.x86_64 -> results /home/ubuntupc/Documents/Github/Capstone/linux_server/Results
+[Queue] agv-ratio-unity: shard 0/1 = 1 of 1 cells, 0 already done, 1 to run, 1 workers
+[Queue] exe /home/ubuntupc/Documents/Github/Capstone/linux_server/capstone.x86_64 -> results /home/ubuntupc/Documents/Github/Capstone/linux_server/Results
+[Queue] agv-ratio-unity: shard 0/1 = 1 of 1 cells, 0 already done, 1 to run, 1 workers
+[Queue] 1/1 ok  173.1 min  agv-ratio-unity/agvratio5_m100_u0.85_op240_s1/D/agv45_MDD_PTECT_s1  (eta 0.0 h)
+[Queue] finished agv-ratio-unity in 2.89 h
+[Queue] exe /home/ubuntupc/Documents/Github/Capstone/linux_server/capstone.x86_64 -> results /home/ubuntupc/Documents/Github/Capstone/linux_server/Results
+[Queue] agv-ratio-unity: shard 0/1 = 1 of 1 cells, 0 already done, 1 to run, 1 workers
+[Queue] 1/1 ok  180.5 min  agv-ratio-unity/agvratio5_m100_u0.85_op240_s1/D/agv70_MDD_PTECT_s1  (eta 0.0 h)
+[Queue] finished agv-ratio-unity in 3.01 h
+[Queue] exe /home/ubuntupc/Documents/Github/Capstone/linux_server/capstone.x86_64 -> results /home/ubuntupc/Documents/Github/Capstone/linux_server/Results
+[Queue] agv-ratio-unity: shard 0/1 = 1 of 1 cells, 0 already done, 1 to run, 1 workers
+[Queue] 1/1 ok  242.5 min  agv-ratio-unity/agvratio5_m100_u0.85_op240_s0/D/agv70_MDD_PTECT_s0  (eta 0.0 h)
+[Queue] finished agv-ratio-unity in 4.04 h
+[Queue] exe /home/ubuntupc/Documents/Github/Capstone/linux_server/capstone.x86_64 -> results /home/ubuntupc/Documents/Github/Capstone/linux_server/Results
+[Queue] agv-ratio-unity: shard 0/1 = 1 of 1 cells, 0 already done, 1 to run, 1 workers
+[Queue] 1/1 ok  293.2 min  agv-ratio-unity/agvratio5_m100_u0.85_op240_s0/D/agv45_MDD_PTECT_s0  (eta 0.0 h)
+[Queue] finished agv-ratio-unity in 4.89 h
+[Queue] exe /home/ubuntupc/Documents/Github/Capstone/linux_server/capstone.x86_64 -> results /home/ubuntupc/Documents/Github/Capstone/linux_server/Results
+[Queue] agv-ratio-unity: shard 0/1 = 1 of 1 cells, 0 already done, 1 to run, 1 workers
+[Queue] 1/1 ok  137.7 min  agv-ratio-unity/agvratio5_m100_u0.85_op480_s0/D/agv40_MDD_PTECT_s0  (eta 0.0 h)
+[Queue] finished agv-ratio-unity in 2.30 h
+[Queue] exe /home/ubuntupc/Documents/Github/Capstone/linux_server/capstone.x86_64 -> results /home/ubuntupc/Documents/Github/Capstone/linux_server/Results
+[Queue] agv-ratio-unity: shard 0/1 = 1 of 1 cells, 0 already done, 1 to run, 1 workers
+[Queue] 1/1 ok  137.5 min  agv-ratio-unity/agvratio5_m100_u0.85_op480_s0/D/agv25_MDD_PTECT_s0  (eta 0.0 h)
+[Queue] finished agv-ratio-unity in 2.29 h
+[Queue] exe /home/ubuntupc/Documents/Github/Capstone/linux_server/capstone.x86_64 -> results /home/ubuntupc/Documents/Github/Capstone/linux_server/Results
+[Queue] agv-ratio-unity: shard 0/1 = 1 of 1 cells, 0 already done, 1 to run, 1 workers
+[Queue] 1/1 ok  130.9 min  agv-ratio-unity/agvratio5_m100_u0.85_op480_s1/D/agv40_MDD_PTECT_s1  (eta 0.0 h)
+[Queue] finished agv-ratio-unity in 2.18 h
+[Queue] exe /home/ubuntupc/Documents/Github/Capstone/linux_server/capstone.x86_64 -> results /home/ubuntupc/Documents/Github/Capstone/linux_server/Results
+[Queue] agv-ratio-unity: shard 0/1 = 1 of 1 cells, 0 already done, 1 to run, 1 workers
+[Queue] 1/1 ok   86.0 min  agv-ratio-unity/agvratio5_m50_u0.85_op240_s0/D/agv30_MDD_PTECT_s0  (eta 0.0 h)
+[Queue] finished agv-ratio-unity in 1.43 h
+[Queue] exe /home/ubuntupc/Documents/Github/Capstone/linux_server/capstone.x86_64 -> results /home/ubuntupc/Documents/Github/Capstone/linux_server/Results
+[Queue] agv-ratio-unity: shard 0/1 = 1 of 1 cells, 0 already done, 1 to run, 1 workers
+[Queue] 1/1 ok   84.9 min  agv-ratio-unity/agvratio5_m50_u0.85_op240_s0/D/agv21_MDD_PTECT_s0  (eta 0.0 h)
+[Queue] finished agv-ratio-unity in 1.41 h
+[Queue] exe /home/ubuntupc/Documents/Github/Capstone/linux_server/capstone.x86_64 -> results /home/ubuntupc/Documents/Github/Capstone/linux_server/Results
+[Queue] agv-ratio-unity: shard 0/1 = 1 of 1 cells, 0 already done, 1 to run, 1 workers
+[Queue] 1/1 ok  128.3 min  agv-ratio-unity/agvratio5_m100_u0.85_op480_s1/D/agv25_MDD_PTECT_s1  (eta 0.0 h)
+[Queue] finished agv-ratio-unity in 2.14 h
+[Queue] exe /home/ubuntupc/Documents/Github/Capstone/linux_server/capstone.x86_64 -> results /home/ubuntupc/Documents/Github/Capstone/linux_server/Results
+[Queue] agv-ratio-unity: shard 0/1 = 1 of 1 cells, 0 already done, 1 to run, 1 workers
+[Queue] 1/1 ok   63.8 min  agv-ratio-unity/agvratio5_m50_u0.85_op480_s0/D/agv16_MDD_PTECT_s0  (eta 0.0 h)
+[Queue] finished agv-ratio-unity in 1.06 h
+[Queue] exe /home/ubuntupc/Documents/Github/Capstone/linux_server/capstone.x86_64 -> results /home/ubuntupc/Documents/Github/Capstone/linux_server/Results
+[Queue] agv-ratio-unity: shard 0/1 = 1 of 1 cells, 0 already done, 1 to run, 1 workers
+[Queue] 1/1 ok  102.7 min  agv-ratio-unity/agvratio5_m50_u0.85_op240_s1/D/agv30_MDD_PTECT_s1  (eta 0.0 h)
+[Queue] finished agv-ratio-unity in 1.71 h
+[Queue] exe /home/ubuntupc/Documents/Github/Capstone/linux_server/capstone.x86_64 -> results /home/ubuntupc/Documents/Github/Capstone/linux_server/Results
+[Queue] agv-ratio-unity: shard 0/1 = 1 of 1 cells, 0 already done, 1 to run, 1 workers
+[Queue] 1/1 ok   63.3 min  agv-ratio-unity/agvratio5_m50_u0.85_op480_s0/D/agv10_MDD_PTECT_s0  (eta 0.0 h)
+[Queue] finished agv-ratio-unity in 1.05 h
+[Queue] 1/1 ok  102.0 min  agv-ratio-unity/agvratio5_m50_u0.85_op240_s1/D/agv21_MDD_PTECT_s1  (eta 0.0 h)
+[Queue] finished agv-ratio-unity in 1.70 h
+[Queue] 1/1 ok   61.3 min  agv-ratio-unity/agvratio5_m50_u0.85_op480_s1/D/agv16_MDD_PTECT_s1  (eta 0.0 h)
+[Queue] finished agv-ratio-unity in 1.02 h
+[Queue] 1/1 ok   57.9 min  agv-ratio-unity/agvratio5_m50_u0.85_op480_s1/D/agv10_MDD_PTECT_s1  (eta 0.0 h)
+[Queue] finished agv-ratio-unity in 0.97 h

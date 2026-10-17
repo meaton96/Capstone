@@ -1,0 +1,37 @@
+
+== fitting seeds 2000-2159: vs MDD-PTECT (pooled %, CI, better / worse, Wilcoxon; share of the oracle's gain)
+                   policy   n  pooled_%  ci_lo  ci_hi  better  worse        p  share_of_oracle_%
+oracle (900 s, hindsight) 160    -10.68 -12.11  -9.39     159      1 5.34e-28             100.00
+            look-ahead s3 160     -3.75  -5.01  -2.58     116     43 5.88e-11              35.16
+            look-ahead s2 160     -3.06  -4.19  -2.07     118     42 5.72e-10              28.65
+            look-ahead s0 160     -2.70  -3.88  -1.59     112     47 1.18e-08              25.29
+            state-only s4 160     -2.62  -4.25  -1.16     111     49 1.24e-05              24.50
+            state-only s2 160     -2.31  -3.31  -1.37     111     41 6.64e-08              21.68
+     look-ahead mean of 5 160     -2.16  -3.12  -1.29     116     44 1.33e-08              20.26
+     state-only mean of 5 160     -1.46  -2.35  -0.63      98     62 0.000211              13.68
+            look-ahead s4 160     -1.30  -2.27  -0.33     105     52 3.98e-05              12.18
+            state-only s0 160     -0.93  -1.83  -0.04      91     59     0.03               8.67
+            state-only s3 160     -0.84  -1.81   0.08      96     63     0.03               7.87
+            state-only s1 160     -0.61  -1.88   0.56      96     64     0.07               5.70
+            look-ahead s1 160  -0.00476  -1.16   1.15      89     71     0.40               0.04
+                 MDD-PECT 160      0.58  -0.14   1.31      65     90     0.04              -5.41
+   look-ahead mean vs state-only mean (paired): -0.71 [-1.15, -0.27] 90/70 p=0.0058
+
+== test seeds 0-39: vs MDD-PTECT (pooled %, CI, better / worse, Wilcoxon; share of the oracle's gain)
+                        policy  n  pooled_%  ci_lo  ci_hi  better  worse        p  share_of_oracle_%
+planner, exact schedule, 300 s 40    -11.24 -13.55  -9.11      40      0 1.82e-12             119.32
+     oracle (900 s, hindsight) 40     -9.42 -11.42  -7.62      40      0 1.82e-12             100.00
+                 look-ahead s2 40     -3.01  -5.16  -1.22      30     10  0.00057              32.00
+                 look-ahead s3 40     -2.33  -4.29  -0.50      29     11  0.00206              24.75
+                 look-ahead s4 40     -2.27  -4.43  -0.57      22     18     0.10              24.11
+          look-ahead mean of 5 40     -1.42  -2.90  -0.10      25     15     0.06              15.05
+                 state-only s2 40     -1.07  -3.04   0.86      25     12     0.15              11.32
+                 look-ahead s0 40     -1.00  -2.69   0.78      24     15     0.17              10.63
+                 state-only s0 40     -0.59  -3.21   1.76      22     17     0.54               6.29
+                      MDD-PECT 40     -0.47  -2.71   1.62      17     23     0.52               4.96
+          state-only mean of 5 40     -0.34  -1.75   1.02      24     16     0.32               3.62
+                 state-only s3 40     -0.31  -2.27   1.72      22     18     0.64               3.25
+                 state-only s1 40      0.09  -1.77   1.78      19     21     0.81              -0.99
+                 state-only s4 40      0.17  -2.19   2.42      16     24     0.38              -1.78
+                 look-ahead s1 40      1.53  -1.78   4.44      19     21     0.82             -16.23
+   look-ahead mean vs state-only mean (paired): -1.08 [-2.06, -0.14] 24/16 p=0.021

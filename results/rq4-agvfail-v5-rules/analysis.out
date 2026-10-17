@@ -1,0 +1,102 @@
+== rq4-agvfail-v5: Unity, B2 test seeds 0-39, window tardiness (1000 job-s), AGV breakdowns (Weibull lambda 3000 / 1500 s); vs MDD-PTECT at the same level, < 0 better
+   episodes per level x source:
+source  eval-transfer-unity-v5  policy  rules
+level                                        
+l1500                        0     360    320
+l3000                        0     360    320
+none                       360      80    200
+
+== run-to-run checks (repeated MDD-PTECT; the player is deterministic per seed, so expect identical)
+level  a    b  n  max_abs_diff_1000js  identical
+l1500 pa   pb 40                  0.0         40
+l1500 pa ppoa 40                  0.0         40
+l3000 pa   pb 40                  0.0         40
+l3000 pa ppoa 40                  0.0         40
+ none pn  ppo 40                  0.0         40
+
+== every policy vs MDD-PTECT at the same level (pooled %, seed bootstrap 95% CI, paired Wilcoxon)
+   final policy (eval-v5-final, chosen on fitting seeds): PPO s4
+
+-- none
+                 policy  n  pooled_%  ci_lo  ci_hi  better  worse  wilcoxon_p  mean_tard
+               ATC-PECT 40     14.10   8.28  19.51      18     22        0.02     168.14
+              ATC-PTECT 40     12.69   7.32  17.65      17     23     0.00487     166.06
+                  BC s0 40     -0.23  -2.78   2.54      24     16        0.27     147.02
+                  BC s1 40      1.05  -2.41   4.62      22     18        0.79     148.90
+                  BC s2 40     -0.45  -3.61   2.93      25     15        0.32     146.69
+               MDD-PECT 40     -0.16  -1.83   1.45      21     18        0.72     147.12
+               MDD-TECT 40     19.66  15.28  25.54       3     37    3.07e-10     176.33
+                 PPO s0 40     -1.32  -3.71   1.44      19     19        0.30     145.41
+                 PPO s1 40      0.23  -2.46   3.40      26     14        0.34     147.69
+                 PPO s2 40     -0.72  -2.86   1.43      25     13        0.12     146.29
+                 PPO s3 40      0.87  -2.01   3.91      22     18        0.87     148.63
+PPO s4 (selected final) 40      0.29  -2.67   3.41      22     18        0.73     147.79
+               SRT-PECT 40      4.33   1.97   7.49       8     32    0.000101     153.73
+              SRT-PTECT 40      5.99   3.35   9.26       4     36    8.85e-06     156.19
+ hindsight best v5 pair 40     -3.81  -5.23  -2.61      31      0    1.17e-06     141.75
+    PPO mean of 5 seeds 40     -0.13  -2.32   2.29      24     16        0.34     147.16
+     BC mean of 3 seeds 40      0.12  -2.67   2.99      23     17        0.48     147.54
+
+-- l3000
+                 policy  n  pooled_%  ci_lo  ci_hi  better  worse  wilcoxon_p  mean_tard
+               ATC-PECT 40     14.16   8.47  18.76      16     24     0.00465     203.07
+              ATC-PTECT 40     13.80   8.32  18.19      13     27     0.00239     202.42
+                  BC s0 40     -0.51  -3.04   1.48      24     15        0.28     176.97
+                  BC s1 40      0.59  -1.46   2.48      22     17        1.00     178.92
+                  BC s2 40      1.89  -2.12   6.09      24     16        0.77     181.25
+               MDD-PECT 40      0.95  -1.09   2.94      18     22        0.31     179.57
+               MDD-TECT 40     16.56  11.47  23.07       3     37    1.39e-09     207.32
+                 PPO s0 40      1.09  -0.96   3.28      18     20        0.52     179.81
+                 PPO s1 40      0.30  -2.90   2.94      24     16        0.95     178.42
+                 PPO s2 40     -0.69  -2.96   1.29      24     14        0.27     176.65
+                 PPO s3 40      1.58  -0.56   3.46      18     22        0.36     180.69
+PPO s4 (selected final) 40     -1.16  -4.06   1.48      22     18        0.49     175.82
+               SRT-PECT 40      5.55   3.04   8.73       7     33    1.43e-05     187.75
+              SRT-PTECT 40      5.42   2.95   8.47       9     31    6.27e-05     187.52
+ hindsight best v5 pair 40     -3.65  -5.55  -2.26      26      0     8.3e-06     171.39
+    PPO mean of 5 seeds 40      0.23  -1.67   2.02      23     17        0.86     178.28
+     BC mean of 3 seeds 40      0.66  -1.91   3.16      24     16        0.70     179.05
+
+-- l1500
+                 policy  n  pooled_%  ci_lo  ci_hi  better  worse  wilcoxon_p  mean_tard
+               ATC-PECT 40     16.07   9.28  21.37      15     25        0.01     228.95
+              ATC-PTECT 40     14.27   7.52  19.64      21     19        0.03     225.40
+                  BC s0 40     -0.63  -2.99   1.32      22     18        0.53     196.02
+                  BC s1 40      0.08  -2.48   2.43      19     20        0.93     197.41
+                  BC s2 40      1.32  -2.58   5.14      24     16        0.38     199.86
+               MDD-PECT 40      0.96  -0.97   3.04      12     27        0.15     199.14
+               MDD-TECT 40     13.69   9.79  18.46       2     38    1.82e-11     224.26
+                 PPO s0 40     -0.66  -2.57   1.01      19     18        0.26     195.95
+                 PPO s1 40     -0.84  -3.11   1.08      25     15        0.40     195.60
+                 PPO s2 40     -0.86  -3.08   1.00      22     16        0.28     195.57
+                 PPO s3 40     -0.72  -2.41   0.85      23     17        0.43     195.84
+PPO s4 (selected final) 40     -0.54  -2.94   1.38      25     15        0.44     196.19
+               SRT-PECT 40      3.11   0.76   6.00      12     28        0.01     203.40
+              SRT-PTECT 40      2.88   1.10   5.34      11     29     0.00424     202.93
+ hindsight best v5 pair 40     -4.60  -6.54  -3.06      29      0    2.56e-06     188.18
+    PPO mean of 5 seeds 40     -0.72  -2.52   0.74      27     13        0.15     195.83
+     BC mean of 3 seeds 40      0.26  -2.29   2.43      25     15        0.51     197.76
+
+== pair ranking per level (pooled tardiness, best first) and Kendall tau vs no breakdowns
+  none   (40 seeds) best MDD-PECT: MDD-PECT +0.0%  MDD-PTECT +0.2%  SRT-PECT +4.5%  SRT-PTECT +6.2%  ATC-PTECT +12.9%  ATC-PECT +14.3%  MDD-TECT +19.9%
+  l3000  (40 seeds) best MDD-PTECT: MDD-PTECT +0.0%  MDD-PECT +1.0%  SRT-PTECT +5.4%  SRT-PECT +5.5%  ATC-PTECT +13.8%  ATC-PECT +14.2%  MDD-TECT +16.6%   tau vs none +0.81 (p 0.011, 7 pairs)
+  l1500  (40 seeds) best MDD-PTECT: MDD-PTECT +0.0%  MDD-PECT +1.0%  SRT-PTECT +2.9%  SRT-PECT +3.1%  MDD-TECT +13.7%  ATC-PTECT +14.3%  ATC-PECT +16.1%   tau vs none +0.62 (p 0.069, 7 pairs)
+
+== degradation from no breakdowns (pooled tardiness on the same seeds, % increase)
+level      l1500  l3000
+policy                 
+ATC-PECT   36.17  20.77
+ATC-PTECT  35.74  21.90
+BC s0      33.33  20.38
+BC s1      32.57  20.16
+BC s2      36.25  23.55
+MDD-PECT   35.36  22.05
+MDD-PTECT  33.86  20.71
+MDD-TECT   27.18  17.58
+PPO s0     34.76  23.66
+PPO s1     32.44  20.80
+PPO s2     33.68  20.75
+PPO s3     31.76  21.57
+PPO s4     32.75  18.97
+SRT-PECT   32.31  22.13
+SRT-PTECT  29.93  20.06

@@ -1,0 +1,28 @@
+== start 2026-10-14T16:32:24-04:00
+git HEAD 3acade155cfffd2b6aa92623b5490c5de425e031
+Simulation.dll 5e6e0f8713e186a3c5555975ce0fa2d9
+des_twin f2578625334d2054dfce5737573e8868
+scenarios 04b8e3fd29420c1ff1f01b366875b750
+== start 2026-10-14T16:33:46-04:00
+git HEAD 3acade155cfffd2b6aa92623b5490c5de425e031
+Simulation.dll 5e6e0f8713e186a3c5555975ce0fa2d9
+des_twin f2578625334d2054dfce5737573e8868
+scenarios 04b8e3fd29420c1ff1f01b366875b750
+== start 2026-10-14T16:36:24-04:00
+git HEAD 3acade155cfffd2b6aa92623b5490c5de425e031
+Simulation.dll 5e6e0f8713e186a3c5555975ce0fa2d9
+des_twin f2578625334d2054dfce5737573e8868
+scenarios 04b8e3fd29420c1ff1f01b366875b750
+== layouts + failures-on start 2026-10-15T22:41:41-04:00 (launch_layouts_fail.sh)
+git HEAD 3acade155cfffd2b6aa92623b5490c5de425e031
+Simulation.dll 5e6e0f8713e186a3c5555975ce0fa2d9
+scenarios 04b8e3fd29420c1ff1f01b366875b750
+== 105-machine start 2026-10-16T01:46:11-04:00 (launch_105.sh, W=2)
+git HEAD 3acade155cfffd2b6aa92623b5490c5de425e031
+Simulation.dll 5e6e0f8713e186a3c5555975ce0fa2d9
+scenarios c3ed5a8d207b8b6d2f4e7db3d467456e
+== 105-machine start 2026-10-16T18:45:30-04:00 (launch_105.sh, W=2)
+git HEAD 3acade155cfffd2b6aa92623b5490c5de425e031
+Simulation.dll 5e6e0f8713e186a3c5555975ce0fa2d9
+scenarios c3ed5a8d207b8b6d2f4e7db3d467456e
+== end 2026-10-16T20:33:21-04:00 Simulation.dll 5e6e0f8713e186a3c5555975ce0fa2d9

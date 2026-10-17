@@ -1,0 +1,56 @@
+=== train-v5-nokl: 3 training seeds
+
+== learning curve: mean episode return (= -window tardiness / 1000) by fifth of training
+  train-v5-nokl_s0                   -140.0  -153.8  -154.8  -159.4  -150.9   (4096 episodes)
+  (ref) train-due-twin-slot-prior-kl_s0 -179.4  -187.1  -195.8  -185.3  -194.6   (4160 episodes)
+  train-v5-nokl_s1                   -164.7  -161.9  -157.5  -152.4  -147.6   (4096 episodes)
+  (ref) train-due-twin-slot-prior-kl_s1 -199.9  -196.2  -186.9  -190.8  -180.5   (4160 episodes)
+  train-v5-nokl_s2                   -142.5  -138.2  -151.8  -134.7  -135.2   (4096 episodes)
+  (ref) train-due-twin-slot-prior-kl_s2 -187.6  -190.6  -198.5  -184.6  -179.5   (4160 episodes)
+
+== training diagnostics (first update -> mean of the last quarter)
+  train-v5-nokl_s0                   explained_variance -0.000->0.819  entropy 1.733->1.071  adv_var_before 542.338->278.079  adv_var_after 9.992->20.263  shared_baseline_share 1.000->1.000
+/home/ubuntupc/Documents/Github/Capstone/.venv/lib/python3.10/site-packages/torch/_utils.py:831: UserWarning: TypedStorage is deprecated. It will be removed in the future and UntypedStorage will be the only storage class. This should only matter to you if you are using storages directly.  To access UntypedStorage directly, use tensor.untyped_storage() instead of tensor.storage()
+  return self.fget.__get__(instance, owner)()
+                                     output weight norm 1.31, logit offset+bias MDD -0.05 ATC -0.01 (prior offset off)
+  train-due-twin-slot-prior-kl_s0    explained_variance 0.000->0.747  prior_kl 0.003->0.049  entropy 1.390->1.163
+                                     output weight norm 0.55, logit offset+bias MDD -0.21 ATC -2.99 (prior offset off)
+  train-v5-nokl_s1                   explained_variance -0.001->0.806  entropy 1.695->1.111  adv_var_before 828.733->301.825  adv_var_after 7.998->21.692  shared_baseline_share 1.000->1.000
+                                     output weight norm 1.31, logit offset+bias MDD -0.03 ATC +0.01 (prior offset off)
+  train-due-twin-slot-prior-kl_s1    explained_variance -0.000->0.740  prior_kl 0.004->0.084  entropy 1.474->1.101
+                                     output weight norm 0.71, logit offset+bias MDD -0.20 ATC -3.01 (prior offset off)
+  train-v5-nokl_s2                   explained_variance 0.001->0.798  entropy 1.730->0.994  adv_var_before 1115.397->269.558  adv_var_after 9.070->21.629  shared_baseline_share 1.000->1.000
+                                     output weight norm 1.27, logit offset+bias MDD -0.01 ATC -0.07 (prior offset off)
+  train-due-twin-slot-prior-kl_s2    explained_variance -0.002->0.726  prior_kl 0.003->0.117  entropy 1.370->1.013
+                                     output weight norm 0.66, logit offset+bias MDD -0.20 ATC -3.01 (prior offset off)
+
+== held-out B2 seeds 0-39 (cost = window tardiness / 1000; % change in mean cost, < 0 better)
+                          policy  return_mean  vs_best_fixed_pct  wins_vs_best_fixed  losses_vs_best_fixed  vs_hindsight_fixed_pct  vs_oracle_pct  oracle_gain_captured_pct  discounted_return_mean
+ckpt:train-v5-nokl_s2/checkpoint     -143.972             -0.602                  27                    13                   3.837         -6.376                    -9.768                 -25.342
+ckpt:train-v5-nokl_s1/checkpoint     -145.659              0.563                  23                    17                   5.054         -5.279                     9.124                 -25.955
+ckpt:train-v5-nokl_s0/checkpoint     -144.661             -0.127                  23                    17                   4.334         -5.928                    -2.053                 -25.291
+                       MDD-PTECT     -145.524              0.469                  23                    17                   4.956         -5.367                     7.606                 -25.319
+                        MDD-PECT     -144.845              0.000                   0                     0                   4.466         -5.809                     0.000                 -25.314
+                       ATC-PTECT     -161.900             11.775                  15                    25                  16.767          5.282                   190.938                 -28.948
+                        SRT-PECT     -152.523              5.301                   8                    32                  10.004         -0.816                    85.959                 -26.889
+                        MDD-TECT     -172.393             19.019                   2                    38                  24.335         12.106                   308.414                 -28.438
+                         ATC-ECT     -195.649             35.075                   2                    38                  41.108         27.229                   568.776                 -32.985
+                         SRT-ECT     -179.468             23.904                   3                    37                  29.438         16.707                   387.628                 -29.557
+   vs best = the named best fixed pair (MDD-PECT since 10-11, MDD-TECT before); vs hindsight = each instance's best of the evaluated pairs; oracle = rq2-twin-fleet B2 (H15)
+
+== leaving the prior (deterministic slot choices, job head; MDD = 2)
+  ckpt:train-v5-nokl_s2/checkpoint
+      slots: ATC-PECT 50.4%, MDD-PTECT 31.5%, MDD-PECT 18.1%
+      mean p(ATC) 0.434; Spearman(p(ATC), ATC-PTECT gap vs MDD-PECT) -0.53; non-MDD slots where ATC-PTECT wins (15 inst) 70.3% vs elsewhere (25) 38.5%
+  ckpt:train-v5-nokl_s1/checkpoint
+      slots: ATC-PECT 65.4%, SRT-PECT 15.0%, SRT-PTECT 12.2%, MDD-PECT 7.4%
+      mean p(ATC) 0.586; Spearman(p(ATC), ATC-PTECT gap vs MDD-PECT) -0.61; non-MDD slots where ATC-PTECT wins (15 inst) 94.2% vs elsewhere (25) 91.7%
+  ckpt:train-v5-nokl_s0/checkpoint
+      slots: MDD-PECT 40.7%, ATC-PECT 35.3%, MDD-PTECT 24.0%
+      mean p(ATC) 0.302; Spearman(p(ATC), ATC-PTECT gap vs MDD-PECT) -0.42; non-MDD slots where ATC-PTECT wins (15 inst) 48.6% vs elsewhere (25) 27.3%
+  (ref) ckpt:train-due-twin-slot-prior-kl_s0/checkpoint
+      slots: MDD-TECT 100.0%
+      mean p(ATC) 0.060; Spearman(p(ATC), ATC-PTECT gap vs MDD-PECT) -0.44; non-MDD slots where ATC-PTECT wins (15 inst) 0.0% vs elsewhere (25) 0.0%
+  (ref) ckpt:train-due-twin-slot-prior-kl_s1/checkpoint
+      slots: MDD-TECT 100.0%
+      mean p(ATC) 0.042; Spearman(p(ATC), ATC-PTECT gap vs MDD-PECT) -0.47; non-MDD slots where ATC-PTECT wins (15 inst) 0.0% vs elsewhere (25) 0.0%

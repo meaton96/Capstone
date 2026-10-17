@@ -1,0 +1,128 @@
+== rq2-oracle-bc-future: behaviour cloning of the v5 switching oracle (B2), state vs state + future job table (64 / 128 rows, 2 h)
+
+-- 1. per slot, held-out evaluation slots (test 0-39 + fitting 2000-2159 = 4,800 slots; deterministic argmax pair), mean (sd) over BC seeds
+                         epochs train:pair_match_% val:pair_match_% eval_all:pair_match_% eval_all:job_rule_match_% eval_all:mean_regret_% eval_test:pair_match_% eval_fit:pair_match_% eval_all:share_mddptect_%  models
+n_train arm                                                                                                                                                                                                              
+2000    future128  34.67 (1.53)       30.46 (3.94)      29.49 (4.5)          29.12 (4.72)              60.76 (0.29)            4.19 (0.22)           30.21 (3.18)          28.85 (5.41)              37.6 (13.46)       3
+        future64     37.0 (1.0)        32.66 (5.4)      30.9 (5.59)          31.16 (6.39)               61.1 (0.52)            4.33 (0.09)           29.58 (1.62)           31.55 (7.6)              30.92 (16.6)       3
+        state      46.33 (4.04)       31.69 (2.26)     30.28 (2.45)          31.06 (2.43)              60.14 (0.19)            4.79 (0.04)           28.85 (2.66)          31.61 (2.55)              32.0 (11.81)       3
+4000    future128   44.2 (8.53)       33.54 (1.22)     32.41 (0.83)          32.55 (0.87)               62.0 (0.56)            4.07 (0.27)           30.96 (2.11)          32.95 (0.99)               29.8 (7.11)       5
+        future64    46.0 (3.67)       32.83 (3.07)     31.88 (3.38)          31.85 (3.16)              61.89 (0.26)             4.26 (0.3)           30.54 (2.42)          32.17 (3.93)             27.62 (13.02)       5
+        state       50.2 (5.07)       31.96 (2.73)     31.63 (3.18)          31.11 (2.57)              60.82 (0.43)            4.66 (0.12)           29.23 (1.97)          31.58 (2.78)               31.72 (9.7)       5
+   always MDD-PTECT: mean hold-to-end regret 5.66% per slot; chance pair match 16.7%
+
+   the same slots with the redrawn (unrelated) future in the table (future arms):
+                  eval_all:pair_match_% eval_all_redrawn:pair_match_% eval_all:mean_regret_% eval_all_redrawn:mean_regret_% redrawn_pick_changed_%
+n_train arm                                                                                                                                       
+2000    future128          29.12 (4.72)                  27.73 (3.81)            4.19 (0.22)                    4.75 (0.27)           25.68 (6.64)
+        future64           31.16 (6.39)                   30.43 (5.5)            4.33 (0.09)                     4.8 (0.27)           26.76 (3.45)
+4000    future128          32.55 (0.87)                  29.88 (1.77)            4.07 (0.27)                     4.92 (0.1)           32.48 (9.33)
+        future64           31.85 (3.16)                  30.38 (2.83)             4.26 (0.3)                     4.65 (0.2)           31.82 (6.85)
+   pair match future64 vs state across BC seeds: 31.85 vs 31.11, Welch p 0.698, Mann-Whitney p 0.841
+   per-slot regret future64 vs state across BC seeds: 4.26 vs 4.66, Welch p 0.038, Mann-Whitney p 0.0159
+   pair match future128 vs state across BC seeds: 32.55 vs 31.11, Welch p 0.29, Mann-Whitney p 0.548
+   per-slot regret future128 vs state across BC seeds: 4.07 vs 4.66, Welch p 0.00554, Mann-Whitney p 0.00794
+
+-- 2. rollouts, all 200 (n = 200): pooled % vs MDD-PTECT [95% CI] better/worse Wilcoxon p; switching oracle -10.44%
+   state (BC on state only)                     family  +0.44 [ -1.04,  +2.05] 125/75  p=0.054  oracle share  -4.2%  [5 seeds]
+   future64 exact schedule                      family  -2.20 [ -3.17,  -1.28] 142/58  p=1e-08  oracle share  21.1% | vs state  -2.64 [ -3.85,  -1.50] 117/82  p=0.0008
+   future64 arrivals ± 1 min                    family  -2.26 [ -3.21,  -1.36] 142/58  p=6.2e-09  oracle share  21.7% | vs state  -2.71 [ -3.92,  -1.57] 119/80  p=0.00037 | vs own exact  -0.06 [ -0.19,  +0.06]  63/42  p=0.019
+   future64 arrivals ± 10 min                   family  -2.49 [ -3.49,  -1.58] 143/57  p=8.6e-10  oracle share  23.9% | vs state  -2.94 [ -4.11,  -1.88] 127/72  p=7.7e-06 | vs own exact  -0.30 [ -0.58,  -0.03]  97/82  p=0.07
+   future64 arrivals ± 30 min                   family  -2.68 [ -3.64,  -1.73] 149/51  p=7.2e-11  oracle share  25.6% | vs state  -3.12 [ -4.27,  -2.07] 124/75  p=4.1e-06 | vs own exact  -0.48 [ -0.88,  -0.11] 108/85  p=0.024
+   future64 10% churn + 10 min                  family  -2.35 [ -3.33,  -1.41] 138/61  p=5.4e-09  oracle share  22.5% | vs state  -2.79 [ -4.02,  -1.67] 108/92  p=0.0013 | vs own exact  -0.15 [ -0.60,  +0.20]  97/94  p=0.8
+   future64 25% churn + 10 min                  family  -2.11 [ -3.04,  -1.13] 147/53  p=8e-09  oracle share  20.2% | vs state  -2.55 [ -3.70,  -1.43] 118/82  p=0.0013 | vs own exact  +0.09 [ -0.37,  +0.54] 101/95  p=0.84
+   future64 redrawn (no information)            family  +0.10 [ -1.28,  +1.46] 126/74  p=0.028  oracle share  -0.9% | vs state  -0.34 [ -1.23,  +0.53]  86/113 p=0.27 | vs own exact  +2.30 [ +1.33,  +3.33]  72/128 p=3.6e-05
+   future128 exact schedule                     family  -2.55 [ -3.54,  -1.64] 146/53  p=1.5e-10  oracle share  24.4% | vs state  -2.99 [ -4.35,  -1.84] 123/76  p=1.2e-05
+   future128 arrivals ± 1 min                   family  -2.54 [ -3.50,  -1.56] 144/55  p=3.2e-10  oracle share  24.3% | vs state  -2.98 [ -4.27,  -1.78] 123/76  p=1.5e-05 | vs own exact  +0.01 [ -0.21,  +0.19]  53/66  p=0.55
+   future128 arrivals ± 10 min                  family  -2.51 [ -3.56,  -1.55] 148/51  p=2e-10  oracle share  24.1% | vs state  -2.95 [ -4.20,  -1.74] 131/68  p=4.9e-07 | vs own exact  +0.04 [ -0.24,  +0.32]  92/89  p=0.77
+   future128 arrivals ± 30 min                  family  -2.68 [ -3.76,  -1.70] 149/48  p=1.5e-10  oracle share  25.7% | vs state  -3.12 [ -4.37,  -1.96] 135/63  p=3.9e-08 | vs own exact  -0.13 [ -0.48,  +0.23] 104/91  p=0.26
+   future128 10% churn + 10 min                 family  -2.36 [ -3.38,  -1.36] 144/54  p=1.5e-08  oracle share  22.6% | vs state  -2.80 [ -4.02,  -1.65] 134/64  p=4e-07 | vs own exact  +0.19 [ -0.14,  +0.52]  87/102 p=0.29
+   future128 25% churn + 10 min                 family  -2.42 [ -3.46,  -1.33] 140/59  p=1.7e-08  oracle share  23.1% | vs state  -2.86 [ -4.18,  -1.80] 125/73  p=5.3e-06 | vs own exact  +0.13 [ -0.39,  +0.62]  90/105 p=0.46
+   future128 redrawn (no information)           family  -0.39 [ -1.88,  +1.09] 122/76  p=0.0034  oracle share   3.7% | vs state  -0.83 [ -1.65,  +0.02] 101/98  p=0.32 | vs own exact  +2.16 [ +1.07,  +3.37]  78/121 p=0.00085
+
+-- 2. rollouts, test 0-39 (n = 40): pooled % vs MDD-PTECT [95% CI] better/worse Wilcoxon p; switching oracle -9.42%
+   state (BC on state only)                     family  +1.71 [ -0.62,  +4.08]  16/24  p=0.25  oracle share -18.2%  [5 seeds]
+   future64 exact schedule                      family  -1.84 [ -3.74,  -0.32]  27/13  p=0.015  oracle share  19.5% | vs state  -3.55 [ -5.93,  -1.59]  27/13  p=0.0044 | planner 900 s -9.42, 300 s -11.24
+   future64 arrivals ± 1 min                    family  -1.62 [ -3.46,  -0.14]  28/12  p=0.021  oracle share  17.2% | vs state  -3.34 [ -5.84,  -1.29]  26/14  p=0.0083 | vs own exact  +0.22 [ -0.14,  +0.66]  12/13  p=0.79 | planner 900 s -4.07
+   future64 arrivals ± 10 min                   family  -2.22 [ -3.99,  -0.73]  28/12  p=0.0053  oracle share  23.6% | vs state  -3.94 [ -6.36,  -1.98]  28/12  p=0.0015 | vs own exact  -0.38 [ -1.13,  +0.22]  24/13  p=0.32 | planner 900 s -2.19, 300 s -2.67
+   future64 arrivals ± 30 min                   family  -1.94 [ -4.09,  -0.40]  28/12  p=0.017  oracle share  20.6% | vs state  -3.66 [ -6.08,  -1.69]  26/14  p=0.0086 | vs own exact  -0.10 [ -0.66,  +0.40]  22/17  p=0.84 | planner 900 s -2.77
+   future64 10% churn + 10 min                  family  -1.83 [ -3.88,  -0.28]  27/13  p=0.014  oracle share  19.4% | vs state  -3.55 [ -6.29,  -1.43]  22/18  p=0.031 | vs own exact  +0.01 [ -0.90,  +0.76]  20/20  p=0.7 | planner 900 s -2.23, 300 s -3.30
+   future64 25% churn + 10 min                  family  -1.55 [ -3.06,  -0.31]  28/12  p=0.022  oracle share  16.4% | vs state  -3.26 [ -5.49,  -1.28]  28/12  p=0.013 | vs own exact  +0.29 [ -0.70,  +1.39]  17/23  p=0.3 | planner 900 s -2.31
+   future64 redrawn (no information)            family  +0.90 [ -1.89,  +3.68]  22/18  p=0.88  oracle share  -9.6% | vs state  -0.81 [ -2.66,  +0.88]  21/19  p=0.67 | vs own exact  +2.74 [ +0.42,  +5.20]  13/27  p=0.0061 | planner 900 s -1.21
+   future128 exact schedule                     family  -1.23 [ -3.12,  +0.36]  28/12  p=0.025  oracle share  13.1% | vs state  -2.94 [ -5.17,  -1.05]  30/10  p=0.0024 | planner 900 s -9.42, 300 s -11.24
+   future128 arrivals ± 1 min                   family  -1.06 [ -3.07,  +0.59]  28/12  p=0.05  oracle share  11.2% | vs state  -2.77 [ -5.05,  -0.87]  28/12  p=0.0073 | vs own exact  +0.17 [ -0.26,  +0.61]  11/17  p=0.45 | planner 900 s -4.07
+   future128 arrivals ± 10 min                  family  -0.98 [ -3.32,  +0.90]  26/14  p=0.082  oracle share  10.4% | vs state  -2.69 [ -4.99,  -0.76]  31/9   p=0.0035 | vs own exact  +0.25 [ -0.42,  +0.94]  18/19  p=0.57 | planner 900 s -2.19, 300 s -2.67
+   future128 arrivals ± 30 min                  family  -1.37 [ -3.66,  +0.45]  27/13  p=0.087  oracle share  14.5% | vs state  -3.08 [ -5.24,  -1.29]  28/12  p=0.0018 | vs own exact  -0.14 [ -0.93,  +0.63]  19/20  p=0.96 | planner 900 s -2.77
+   future128 10% churn + 10 min                 family  -0.78 [ -3.15,  +1.07]  25/15  p=0.22  oracle share   8.3% | vs state  -2.50 [ -4.75,  -0.68]  29/11  p=0.021 | vs own exact  +0.45 [ -0.55,  +1.37]  13/24  p=0.1 | planner 900 s -2.23, 300 s -3.30
+   future128 25% churn + 10 min                 family  -0.76 [ -2.97,  +1.08]  21/19  p=0.49  oracle share   8.1% | vs state  -2.47 [ -4.61,  -0.64]  25/15  p=0.045 | vs own exact  +0.47 [ -0.45,  +1.40]  13/27  p=0.11 | planner 900 s -2.31
+   future128 redrawn (no information)           family  +0.09 [ -2.32,  +2.26]  22/18  p=0.42  oracle share  -0.9% | vs state  -1.63 [ -3.33,  -0.03]  26/14  p=0.045 | vs own exact  +1.32 [ -0.33,  +3.05]  16/24  p=0.11 | planner 900 s -1.21
+   reference: rq2-oracle-bc-v5 (state, 160 seeds) family  -1.04 [ -3.30,  +1.17]  25/15  p=0.23
+
+-- 2. rollouts, fit 2000-2159 (n = 160): pooled % vs MDD-PTECT [95% CI] better/worse Wilcoxon p; switching oracle -10.68%
+   state (BC on state only)                     family  +0.14 [ -1.67,  +2.00] 109/51  p=0.011  oracle share  -1.3%  [5 seeds]
+   future64 exact schedule                      family  -2.28 [ -3.43,  -1.23] 115/45  p=1.8e-07  oracle share  21.4% | vs state  -2.43 [ -3.79,  -1.17]  90/69  p=0.019
+   future64 arrivals ± 1 min                    family  -2.41 [ -3.46,  -1.42] 114/46  p=9.2e-08  oracle share  22.6% | vs state  -2.56 [ -3.92,  -1.35]  93/66  p=0.0073 | vs own exact  -0.13 [ -0.25,  -0.02]  51/29  p=0.0032
+   future64 arrivals ± 10 min                   family  -2.56 [ -3.70,  -1.53] 115/45  p=5.2e-08  oracle share  24.0% | vs state  -2.70 [ -4.15,  -1.43]  99/60  p=0.00054 | vs own exact  -0.28 [ -0.55,  +0.01]  73/69  p=0.14
+   future64 arrivals ± 30 min                   family  -2.85 [ -3.98,  -1.79] 121/39  p=2e-09  oracle share  26.7% | vs state  -2.99 [ -4.38,  -1.75]  98/61  p=0.00013 | vs own exact  -0.56 [ -1.03,  -0.12]  86/68  p=0.02
+   future64 10% churn + 10 min                  family  -2.47 [ -3.62,  -1.46] 111/48  p=1.6e-07  oracle share  23.2% | vs state  -2.62 [ -4.08,  -1.32]  86/74  p=0.013 | vs own exact  -0.19 [ -0.67,  +0.24]  77/74  p=0.63
+   future64 25% churn + 10 min                  family  -2.24 [ -3.38,  -1.23] 119/41  p=1.9e-07  oracle share  21.0% | vs state  -2.38 [ -3.78,  -1.12]  90/70  p=0.02 | vs own exact  +0.04 [ -0.47,  +0.55]  84/72  p=0.42
+   future64 redrawn (no information)            family  -0.09 [ -1.68,  +1.40] 104/56  p=0.018  oracle share   0.9% | vs state  -0.23 [ -1.21,  +0.70]  65/94  p=0.15 | vs own exact  +2.19 [ +1.15,  +3.28]  59/101 p=0.0011
+   future128 exact schedule                     family  -2.86 [ -4.05,  -1.77] 118/41  p=1.8e-09  oracle share  26.8% | vs state  -3.00 [ -4.46,  -1.64]  93/66  p=0.00068
+   future128 arrivals ± 1 min                   family  -2.89 [ -4.04,  -1.82] 116/43  p=1.6e-09  oracle share  27.1% | vs state  -3.03 [ -4.50,  -1.63]  95/64  p=0.00045 | vs own exact  -0.03 [ -0.27,  +0.17]  42/49  p=0.85
+   future128 arrivals ± 10 min                  family  -2.87 [ -4.01,  -1.74] 122/37  p=6.5e-10  oracle share  26.9% | vs state  -3.01 [ -4.46,  -1.61] 100/59  p=3.2e-05 | vs own exact  -0.01 [ -0.32,  +0.27]  74/70  p=0.56
+   future128 arrivals ± 30 min                  family  -2.99 [ -4.17,  -1.87] 122/35  p=5.1e-10  oracle share  28.0% | vs state  -3.13 [ -4.62,  -1.85] 107/51  p=3.8e-06 | vs own exact  -0.13 [ -0.55,  +0.27]  85/71  p=0.2
+   future128 10% churn + 10 min                 family  -2.74 [ -3.89,  -1.67] 119/39  p=1.8e-08  oracle share  25.6% | vs state  -2.88 [ -4.35,  -1.60] 105/53  p=7.5e-06 | vs own exact  +0.12 [ -0.25,  +0.49]  74/78  p=0.66
+   future128 25% churn + 10 min                 family  -2.81 [ -4.14,  -1.64] 119/40  p=1.3e-08  oracle share  26.3% | vs state  -2.95 [ -4.51,  -1.51] 100/58  p=4.7e-05 | vs own exact  +0.05 [ -0.55,  +0.64]  77/78  p=0.98
+   future128 redrawn (no information)           family  -0.50 [ -2.28,  +1.21] 100/58  p=0.0039  oracle share   4.7% | vs state  -0.64 [ -1.66,  +0.31]  75/84  p=0.93 | vs own exact  +2.36 [ +1.03,  +3.76]  62/97  p=0.0031
+
+-- 3. training-seed level (one pooled % vs MDD-PTECT per trained model, all 200 seeds)
+   state      exact    +1.17 / +2.09 / -0.73 / -0.46 / +0.14  mean +0.44 sd 1.17
+   future64   exact    -1.98 / -1.94 / -1.94 / -2.54 / -2.59  mean -2.20 sd 0.33
+   future64   jit1     -1.97 / -2.11 / -1.88 / -2.47 / -2.88  mean -2.26 sd 0.41
+   future64   jit10    -2.31 / -2.08 / -2.69 / -2.78 / -2.61  mean -2.49 sd 0.29
+   future64   jit30    -2.69 / -2.55 / -2.66 / -2.63 / -2.85  mean -2.68 sd 0.11
+   future64   churn10  -2.12 / -1.82 / -2.66 / -2.54 / -2.61  mean -2.35 sd 0.37
+   future64   churn25  -1.97 / -1.36 / -2.57 / -1.88 / -2.76  mean -2.11 sd 0.56
+   future64   redrawn  +0.39 / +1.11 / -0.04 / -0.53 / -0.45  mean +0.10 sd 0.67
+   future128  exact    -2.67 / -2.45 / -2.33 / -2.83 / -2.46  mean -2.55 sd 0.20
+   future128  jit1     -2.96 / -2.34 / -1.90 / -2.75 / -2.74  mean -2.54 sd 0.42
+   future128  jit10    -2.68 / -2.61 / -1.84 / -2.83 / -2.60  mean -2.51 sd 0.38
+   future128  jit30    -2.52 / -2.98 / -2.31 / -2.83 / -2.78  mean -2.68 sd 0.26
+   future128  churn10  -2.28 / -2.47 / -2.37 / -3.03 / -1.66  mean -2.36 sd 0.49
+   future128  churn25  -2.41 / -2.48 / -2.58 / -2.53 / -2.08  mean -2.42 sd 0.20
+   future128  redrawn  -0.27 / -0.28 / +0.46 / -0.93 / -0.94  mean -0.39 sd 0.58
+   future64 exact vs state: Welch p 0.00575, Mann-Whitney p 0.00794
+   future64 redrawn vs state: Welch p 0.589, Mann-Whitney p 0.841
+   future64 exact - redrawn per model: -2.37 / -3.05 / -1.91 / -2.01 / -2.14  (paired t p 0.000353)
+   future128 exact vs state: Welch p 0.00418, Mann-Whitney p 0.00794
+   future128 redrawn vs state: Welch p 0.207, Mann-Whitney p 0.31
+   future128 exact - redrawn per model: -2.40 / -2.18 / -2.79 / -1.91 / -1.52  (paired t p 0.000556)
+
+-- pairs played (share of slots, exact; all seeds)
+   state      ATC-PECT 50%, MDD-PTECT 27%, MDD-PECT 12%, ATC-PTECT 10%, SRT-PTECT 0%, SRT-PECT 0%
+   future64   ATC-PECT 35%, MDD-PTECT 28%, MDD-PECT 20%, ATC-PTECT 15%, SRT-PTECT 1%, SRT-PECT 1%
+   future128  ATC-PECT 40%, MDD-PTECT 30%, MDD-PECT 19%, ATC-PTECT 11%, SRT-PTECT 1%, SRT-PECT 0%
+
+-- 4. data scaling: per-slot learning curve, all 4,800 evaluation slots, mean (sd) over BC seeds
+                  eval_all:pair_match_% eval_all:mean_regret_% eval_all_redrawn:mean_regret_% redrawn_pick_changed_%  models
+arm       n_train                                                                                                           
+future128 1000             30.89 (3.22)            4.57 (0.05)                    4.98 (0.16)            24.62 (4.3)       5
+          2000             29.12 (4.72)            4.19 (0.22)                    4.75 (0.27)           25.68 (6.64)       3
+          4000             32.55 (0.87)            4.07 (0.27)                     4.92 (0.1)           32.48 (9.33)       5
+future64  250              29.59 (1.22)             5.47 (0.3)                    5.63 (0.33)            23.3 (5.12)       3
+          500              31.12 (5.03)            4.89 (0.14)                    4.95 (0.26)           24.73 (3.95)       3
+          1000             30.01 (2.32)            4.66 (0.19)                    4.98 (0.22)            27.25 (5.7)       5
+          2000             31.16 (6.39)            4.33 (0.09)                     4.8 (0.27)           26.76 (3.45)       3
+          4000             31.85 (3.16)             4.26 (0.3)                     4.65 (0.2)           31.82 (6.85)       5
+state     250              27.83 (3.92)            5.18 (0.12)                      nan (nan)              nan (nan)       3
+          500              30.19 (0.81)             5.0 (0.14)                      nan (nan)              nan (nan)       3
+          1000             30.58 (1.49)            4.94 (0.09)                      nan (nan)              nan (nan)       5
+          2000             31.06 (2.43)            4.79 (0.04)                      nan (nan)              nan (nan)       3
+          4000             31.11 (2.57)            4.66 (0.12)                      nan (nan)              nan (nan)       5
+
+-- 5. rollouts, 1,000 vs 4,000 training seeds (one pooled % vs MDD-PTECT per model, all 200 seeds)
+   state      exact    1k mean +1.08 (sd 1.09)  4k mean +0.44 (sd 1.17)  Welch p 0.4, MW p 0.421
+   future64   exact    1k mean -0.51 (sd 0.90)  4k mean -2.20 (sd 0.33)  Welch p 0.0108, MW p 0.00794
+   future64   redrawn  1k mean +1.17 (sd 0.58)  4k mean +0.10 (sd 0.67)  Welch p 0.028, MW p 0.0317
+   future128  exact    1k mean -0.89 (sd 0.67)  4k mean -2.55 (sd 0.20)  Welch p 0.00383, MW p 0.00794
+   future128  redrawn  1k mean -0.19 (sd 0.81)  4k mean -0.39 (sd 0.58)  Welch p 0.67, MW p 0.548

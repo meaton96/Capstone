@@ -1,0 +1,29 @@
+== rq3-gen-v5-unity: Unity vs twin on B2 seeds 0-19, v5 pairs + the final policy (PPO s4); pooled window tardiness, < 0 better
+
+-- base: Unity 20 seeds, twin 20 seeds
+   best v5 pair: Unity MDD-PTECT, twin MDD-PECT; pair ranking Kendall tau +0.73 (p 0.056); MDD-PTECT Unity vs twin  -0.87 [ -4.41,  +1.97]  9/11 p=0.99 n=20
+   pairs vs MDD-PTECT (Unity | twin): SRT-PECT +5.9|+5.0  SRT-PTECT +6.0|+4.7  MDD-PECT +0.3|-3.3  ATC-PECT +15.9|+10.8  ATC-PTECT +11.7|+10.0
+   PPO s4 vs best pair:  Unity  +2.88 [ -1.35,  +7.40] 10/10 p=0.7 n=20 | twin  +3.55 [ -1.15,  +7.62] 10/10 p=0.37 n=20
+   PPO s4 vs MDD-PTECT:  Unity  +2.88 [ -1.55,  +7.42] 10/10 p=0.7 n=20 | twin  +0.08 [ -3.04,  +2.27]  9/11 p=0.6 n=20
+   hindsight best v5 vs best pair: Unity  -3.41 [ -5.90,  -2.00] 16/0  p=0.00044 n=20 | twin  -3.08 [ -5.83,  -1.51] 14/0  p=0.00098 n=20
+
+-- load-1.2: Unity 20 seeds, twin 20 seeds
+   best v5 pair: Unity MDD-PECT, twin MDD-PTECT; pair ranking Kendall tau +0.60 (p 0.14); MDD-PTECT Unity vs twin  +4.29 [ +1.38,  +7.71]  4/16 p=0.0056 n=20
+   pairs vs MDD-PTECT (Unity | twin): SRT-PECT +2.2|+4.3  SRT-PTECT +1.7|+4.9  MDD-PECT -1.7|+0.1  ATC-PECT +9.3|+11.4  ATC-PTECT +11.2|+11.1
+   PPO s4 vs best pair:  Unity  -0.62 [ -4.48,  +2.61] 10/10 p=0.65 n=20 | twin  +0.18 [ -3.35,  +3.26] 11/9  p=0.73 n=20
+   PPO s4 vs MDD-PTECT:  Unity  -2.29 [ -5.10,  +0.26] 14/6  p=0.083 n=20 | twin  +0.18 [ -3.32,  +3.21] 11/9  p=0.73 n=20
+   hindsight best v5 vs best pair: Unity  -2.95 [ -4.89,  -1.50] 12/0  p=0.0022 n=20 | twin  -2.56 [ -4.15,  -1.27] 14/0  p=0.00098 n=20
+
+-- due-tight: Unity 20 seeds, twin 20 seeds
+   best v5 pair: Unity SRT-PECT, twin MDD-PTECT; pair ranking Kendall tau +0.33 (p 0.47); MDD-PTECT Unity vs twin  +3.88 [ +1.27,  +6.51]  7/13 p=0.03 n=20
+   pairs vs MDD-PTECT (Unity | twin): SRT-PECT -2.7|+0.7  SRT-PTECT -2.6|+0.7  MDD-PECT -1.4|+0.2  ATC-PECT +8.1|+10.9  ATC-PTECT +7.7|+10.0
+   PPO s4 vs best pair:  Unity  -0.15 [ -2.17,  +1.62] 10/10 p=0.7 n=20 | twin  +0.07 [ -3.08,  +3.19] 14/6  p=0.26 n=20
+   PPO s4 vs MDD-PTECT:  Unity  -2.86 [ -5.41,  -0.46] 11/9  p=0.14 n=20 | twin  +0.07 [ -3.12,  +3.14] 14/6  p=0.26 n=20
+   hindsight best v5 vs best pair: Unity  -3.03 [ -4.73,  -1.89] 18/0  p=0.0002 n=20 | twin  -3.71 [ -5.28,  -2.42] 17/0  p=0.00029 n=20
+
+-- lay-g: Unity 20 seeds, twin 20 seeds
+   best v5 pair: Unity MDD-PTECT, twin MDD-PECT; pair ranking Kendall tau +0.60 (p 0.14); MDD-PTECT Unity vs twin  +0.66 [ -2.48,  +3.76] 11/9  p=0.9 n=20
+   pairs vs MDD-PTECT (Unity | twin): SRT-PECT +5.4|+1.7  SRT-PTECT +4.0|+2.1  MDD-PECT +0.1|-1.2  ATC-PECT +11.6|+12.0  ATC-PTECT +11.9|+10.8
+   PPO s4 vs best pair:  Unity  -1.74 [ -5.83,  +2.16] 13/7  p=0.43 n=20 | twin  +0.40 [ -2.83,  +2.76] 11/9  p=0.87 n=20
+   PPO s4 vs MDD-PTECT:  Unity  -1.74 [ -5.77,  +2.13] 13/7  p=0.43 n=20 | twin  -0.84 [ -5.14,  +2.75] 13/7  p=0.45 n=20
+   hindsight best v5 vs best pair: Unity  -4.29 [ -7.06,  -2.05] 16/0  p=0.00044 n=20 | twin  -4.90 [ -7.90,  -3.07] 17/0  p=0.00029 n=20

@@ -1,0 +1,6 @@
+[Queue] exe /home/ubuntupc/Documents/Github/Capstone/linux_server/capstone.x86_64 -> results /home/ubuntupc/Documents/Github/Capstone/linux_server/Results
+[Queue] agv-v5-tiles: shard 0/1 = 3 of 3 cells, 0 already done, 3 to run, 1 workers
+[Queue] 1/3 ok  209.0 min  agv-v5-tiles/agv5_b2m_t7iso_s0/D/agv49_MDD_PTECT_s0  (eta 7.0 h)
+[Queue] 2/3 ok  190.2 min  agv-v5-tiles/agv5_b2m_t7iso_s0/D/agv35_MDD_PTECT_s0  (eta 3.3 h)
+[Queue] 3/3 ok  184.8 min  agv-v5-tiles/agv5_b2m_t7iso_s0/D/agv21_MDD_PTECT_s0  (eta 0.0 h)
+[Queue] finished agv-v5-tiles in 9.73 h

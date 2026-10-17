@@ -1,0 +1,10 @@
+--run train-v5-lookahead_s0 --ckpt checkpoint
+--run train-v5-lookahead_s0 --ckpt checkpoint --split test
+--run train-v5-lookahead_s1 --ckpt checkpoint
+--run train-v5-lookahead_s1 --ckpt checkpoint --split test
+--run train-v5-lookahead_s2 --ckpt checkpoint
+--run train-v5-lookahead_s2 --ckpt checkpoint --split test
+--run train-v5-lookahead_s3 --ckpt checkpoint
+--run train-v5-lookahead_s3 --ckpt checkpoint --split test
+--run train-v5-lookahead_s4 --ckpt checkpoint
+--run train-v5-lookahead_s4 --ckpt checkpoint --split test

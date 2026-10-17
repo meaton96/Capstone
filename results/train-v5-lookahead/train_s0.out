@@ -1,0 +1,45 @@
+============================================================
+DRL Scheduling Network — PPO Training
+============================================================
+
+Reward: tardiness (rewards/functions/tardiness.py:TardinessReward)
+
+Scenario generator: randomized (episode_duration_seconds=21600.0) (random_warmup, rule=default) (params {"failure_probability": 0.0, "due_date_allowance_range": [1.75, 2.5], "regime_block_seconds": 5400, "horizon_seconds": 30600, "load_mix": [{"name": "normal", "utilization": [0.6, 1.2], "weight": 2}, {"name": "surge", "utilization": [1.0, 1.6]}, {"name": "short", "utilization": [0.6, 1.2], "agv_count": 2}]})
+Observation row caps: 15 machines, 256 jobs
+Twin envs: 16 over 2 worker processes
+
+Policy look-ahead: 15 features (des_twin/lookahead.py) appended to the fused features; actor and critic both read them
+
+Parameter counts:
+  encoder_factory_cnn               168,352
+  encoder_machine_set                38,400
+  encoder_job_set                    38,720
+  encoder_global_mlp                  3,488
+  encoder_event_embed                   848
+  fusion_head                       420,096
+  actor                              71,429
+  critic                             70,401
+  total                             811,734
+Discount: gamma_s = 0.999815 per simulated second (horizon 5,400 s)
+
+Backend: twin (kinematic, results/dev-popart-smoke/floor7/des_floor.json)
+Run directory: results/train-v5-lookahead_s0
+Training for 100,000 timesteps
+  48 updates × 128 steps × 16 envs
+  Device: cpu
+
+Update    1/48 | Step    2,048 | SPS      4 | Ep    80 | EpRet -209.645 | Makespan  26557 | R_avg -5.0228 | Ret -21.638 | PG 0.0215 | VL 1.2230 | EV +0.00 | Ent 1.564 | T 487.05s
+Update    5/48 | Step   10,240 | SPS      5 | Ep   416 | EpRet -114.308 | Makespan  26629 | R_avg -4.6476 | Ret -34.729 | PG -0.0005 | VL 0.1977 | EV +0.77 | Ent 1.656 | T 413.73s
+Update   10/48 | Step   20,480 | SPS      5 | Ep   848 | EpRet -136.296 | Makespan  24425 | R_avg -6.4965 | Ret -50.996 | PG -0.0017 | VL 0.2028 | EV +0.87 | Ent 1.455 | T 408.88s
+Update   15/48 | Step   30,720 | SPS      5 | Ep  1280 | EpRet -134.901 | Makespan  24402 | R_avg -5.7752 | Ret -41.708 | PG 0.0009 | VL 0.1400 | EV +0.91 | Ent 1.366 | T 416.56s
+Update   20/48 | Step   40,960 | SPS      5 | Ep  1696 | EpRet -139.665 | Makespan  23196 | R_avg -5.3579 | Ret -32.741 | PG -0.0006 | VL 0.0686 | EV +0.89 | Ent 1.345 | T 445.19s
+Update   25/48 | Step   51,200 | SPS      5 | Ep  2128 | EpRet -84.624 | Makespan  25422 | R_avg -4.9843 | Ret -32.825 | PG 0.0012 | VL 0.0763 | EV +0.92 | Ent 1.227 | T 442.32s
+Update   30/48 | Step   61,440 | SPS      5 | Ep  2560 | EpRet -218.769 | Makespan  25742 | R_avg -7.4536 | Ret -48.167 | PG 0.0014 | VL 0.0914 | EV +0.94 | Ent 1.080 | T 463.18s
+Update   35/48 | Step   71,680 | SPS      5 | Ep  2976 | EpRet -113.907 | Makespan  24182 | R_avg -6.4633 | Ret -46.182 | PG -0.0008 | VL 0.0728 | EV +0.93 | Ent 1.223 | T 467.30s
+Update   40/48 | Step   81,920 | SPS      5 | Ep  3408 | EpRet -67.928 | Makespan  25074 | R_avg -6.1266 | Ret -39.868 | PG -0.0002 | VL 0.0874 | EV +0.92 | Ent 1.154 | T 428.10s
+Update   45/48 | Step   92,160 | SPS      5 | Ep  3840 | EpRet -123.706 | Makespan  23976 | R_avg -6.0996 | Ret -36.777 | PG -0.0005 | VL 0.0596 | EV +0.93 | Ent 1.191 | T 452.55s
+Timing: env 18428s, inference 479s, update 2316s, startup 5s; 4.6 steps/s in the loop
+
+Checkpoint saved to results/train-v5-lookahead_s0/checkpoint.pt
+Total training time: 21240.6s
+Average SPS: 5

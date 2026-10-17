@@ -1,0 +1,46 @@
+=== train-v5-final: 2 training seeds
+
+== learning curve: mean episode return (= -window tardiness / 1000) by fifth of training
+  train-v5-final_s3                  -162.8  -156.7  -134.7  -150.8  -151.6   (4096 episodes)
+  (ref) train-due-twin-slot-prior-kl_s3 -192.4  -191.2  -199.9  -189.6  -188.1   (4160 episodes)
+  train-v5-final_s4                  -147.7  -155.5  -158.5  -134.1  -153.3   (4096 episodes)
+  (ref) train-due-twin-slot-prior-kl_s4 -184.2  -199.3  -194.4  -179.9  -189.7   (4160 episodes)
+
+== training diagnostics (first update -> mean of the last quarter)
+  train-v5-final_s3                  explained_variance -0.001->0.800  entropy 1.571->1.328  adv_var_before 780.868->254.988  adv_var_after 6.288->20.236  shared_baseline_share 1.000->1.000
+/home/ubuntupc/Documents/Github/Capstone/.venv/lib/python3.10/site-packages/torch/_utils.py:831: UserWarning: TypedStorage is deprecated. It will be removed in the future and UntypedStorage will be the only storage class. This should only matter to you if you are using storages directly.  To access UntypedStorage directly, use tensor.untyped_storage() instead of tensor.storage()
+  return self.fget.__get__(instance, owner)()
+                                     output weight norm 1.30, logit offset+bias MDD +0.02 ATC +0.02 (prior offset off)
+  train-due-twin-slot-prior-kl_s3    explained_variance 0.000->0.731  prior_kl 0.003->0.080  entropy 1.420->1.117
+                                     output weight norm 0.71, logit offset+bias MDD -0.20 ATC -3.00 (prior offset off)
+  train-v5-final_s4                  explained_variance 0.002->0.809  entropy 1.753->0.992  adv_var_before 716.472->267.245  adv_var_after 4.552->21.116  shared_baseline_share 1.000->1.000
+                                     output weight norm 1.27, logit offset+bias MDD -0.02 ATC +0.03 (prior offset off)
+  train-due-twin-slot-prior-kl_s4    explained_variance 0.001->0.736  prior_kl 0.005->0.065  entropy 1.524->1.318
+                                     output weight norm 0.58, logit offset+bias MDD -0.21 ATC -2.99 (prior offset off)
+
+== held-out B2 seeds 0-39 (cost = window tardiness / 1000; % change in mean cost, < 0 better)
+                           policy  return_mean  vs_best_fixed_pct  wins_vs_best_fixed  losses_vs_best_fixed  vs_hindsight_fixed_pct  vs_oracle_pct  oracle_gain_captured_pct  discounted_return_mean
+ckpt:train-v5-final_s4/checkpoint     -145.767              0.637                  21                    19                   5.132         -5.208                    10.331                 -25.885
+ckpt:train-v5-final_s3/checkpoint     -145.079              0.162                  24                    16                   4.635         -5.656                     2.624                 -25.471
+                        MDD-PTECT     -145.524              0.469                  23                    17                   4.956         -5.367                     7.606                 -25.319
+                         MDD-PECT     -144.845              0.000                   0                     0                   4.466         -5.809                     0.000                 -25.314
+                        ATC-PTECT     -161.900             11.775                  15                    25                  16.767          5.282                   190.938                 -28.948
+                         SRT-PECT     -152.523              5.301                   8                    32                  10.004         -0.816                    85.959                 -26.889
+                         MDD-TECT     -172.393             19.019                   2                    38                  24.335         12.106                   308.414                 -28.438
+                          ATC-ECT     -195.649             35.075                   2                    38                  41.108         27.229                   568.776                 -32.985
+                          SRT-ECT     -179.468             23.904                   3                    37                  29.438         16.707                   387.628                 -29.557
+   vs best = the named best fixed pair (MDD-PECT since 10-11, MDD-TECT before); vs hindsight = each instance's best of the evaluated pairs; oracle = rq2-twin-fleet B2 (H15)
+
+== leaving the prior (deterministic slot choices, job head; MDD = 2)
+  ckpt:train-v5-final_s4/checkpoint
+      slots: ATC-PECT 67.9%, SRT-PTECT 16.5%, ATC-PTECT 7.4%, MDD-PTECT 6.0%
+      mean p(ATC) 0.721; Spearman(p(ATC), ATC-PTECT gap vs MDD-PECT) -0.75; non-MDD slots where ATC-PTECT wins (15 inst) 96.7% vs elsewhere (25) 92.3%
+  ckpt:train-v5-final_s3/checkpoint
+      slots: ATC-PECT 41.5%, MDD-PTECT 29.6%, SRT-PTECT 17.5%, MDD-PECT 11.5%
+      mean p(ATC) 0.350; Spearman(p(ATC), ATC-PTECT gap vs MDD-PECT) -0.46; non-MDD slots where ATC-PTECT wins (15 inst) 58.9% vs elsewhere (25) 59.0%
+  (ref) ckpt:train-due-twin-slot-prior-kl_s0/checkpoint
+      slots: MDD-TECT 100.0%
+      mean p(ATC) 0.060; Spearman(p(ATC), ATC-PTECT gap vs MDD-PECT) -0.44; non-MDD slots where ATC-PTECT wins (15 inst) 0.0% vs elsewhere (25) 0.0%
+  (ref) ckpt:train-due-twin-slot-prior-kl_s1/checkpoint
+      slots: MDD-TECT 100.0%
+      mean p(ATC) 0.042; Spearman(p(ATC), ATC-PTECT gap vs MDD-PECT) -0.47; non-MDD slots where ATC-PTECT wins (15 inst) 0.0% vs elsewhere (25) 0.0%
