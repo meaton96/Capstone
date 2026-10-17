@@ -1,0 +1,40 @@
+== rq4-agvfail-v5-cmix: Unity, B2 seeds 0-39, AGV breakdowns none / lambda 3000 / 1500 s; final policy = cmix s3
+source  cmix  eval-v5-cmix-unity
+level                           
+l1500    280                   0
+l3000    280                   0
+none     280                 120
+
+-- run-to-run checks (identical seeds / compared)
+   cmixa MDD-PTECT vs rules half: 120 / 120
+   cmix s3 at none, cmixb vs eval-v5-cmix-unity: 40 / 40
+   loose s2 at none, cmixb vs eval-v5-cmix-unity: 40 / 40
+
+-- vs MDD-PTECT at the same level: pooled % [95% CI] better/worse p
+   none   cmix s3                   +0.50 [ -2.59,  +3.63] 24/16 p=0.65 n=40
+   none   cmix mean of 5            -0.83 [ -2.78,  +1.39] 23/17 p=0.23 n=40
+   none   loose s2                  -0.43 [ -3.58,  +3.06] 21/19 p=1 n=40
+   none   PPO s4                    +0.29 [ -2.55,  +3.31] 22/18 p=0.73 n=40
+   none   B2-trained mean of 5      -0.13 [ -2.33,  +2.28] 24/16 p=0.34 n=40
+   none   MDD-PECT                  -0.16 [ -1.83,  +1.45] 21/18 p=0.72 n=40
+   none   hindsight best v5 pair    -3.81 [ -5.21,  -2.60] 31/0  p=1.2e-06 n=40
+   l3000  cmix s3                   -1.97 [ -4.58,  +0.16] 25/13 p=0.071 n=40
+   l3000  cmix mean of 5            -0.57 [ -2.36,  +1.09] 23/17 p=0.38 n=40
+   l3000  loose s2                  -0.69 [ -3.49,  +1.98] 22/17 p=0.61 n=40
+   l3000  PPO s4                    -1.16 [ -4.06,  +1.43] 22/18 p=0.49 n=40
+   l3000  B2-trained mean of 5      +0.23 [ -1.71,  +1.95] 23/17 p=0.86 n=40
+   l3000  MDD-PECT                  +0.95 [ -1.05,  +2.95] 18/22 p=0.31 n=40
+   l3000  hindsight best v5 pair    -3.65 [ -5.42,  -2.27] 26/0  p=8.3e-06 n=40
+   l1500  cmix s3                   -2.08 [ -4.37,  -0.23] 26/13 p=0.021 n=40
+   l1500  cmix mean of 5            -1.17 [ -3.03,  +0.33] 24/16 p=0.15 n=40
+   l1500  loose s2                  -1.20 [ -4.11,  +1.67] 24/15 p=0.3 n=40
+   l1500  PPO s4                    -0.54 [ -2.99,  +1.40] 25/15 p=0.44 n=40
+   l1500  B2-trained mean of 5      -0.72 [ -2.46,  +0.73] 27/13 p=0.15 n=40
+   l1500  MDD-PECT                  +0.96 [ -1.00,  +2.92] 12/27 p=0.15 n=40
+   l1500  hindsight best v5 pair    -4.60 [ -6.59,  -3.06] 29/0  p=2.6e-06 n=40
+
+-- degradation from no breakdowns (pooled, same seeds)
+   cmix s3    l3000 +17.7% (n 40), l1500 +30.4% (n 40)
+   loose s2   l3000 +20.4% (n 40), l1500 +32.8% (n 40)
+   PPO s4     l3000 +19.0% (n 40), l1500 +32.8% (n 40)
+   MDD-PTECT  l3000 +20.7% (n 40), l1500 +33.9% (n 40)
