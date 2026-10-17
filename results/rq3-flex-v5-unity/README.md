@@ -1,6 +1,6 @@
 # rq3-flex-v5-unity: machine flexibility in Unity for the v5 rules and the final policy (2026-10-17, user)
 
-Status: **smoke queued** (lab `dev-flex-unity-smoke`, then `rq3-flex-v5-unity`, cluster, 120 Unity tasks).
+Status: **running** (smoke OK 10-17 15:57: flexibility applied, 3 episodes; full run `rq3-flex-v5-unity`, cluster, 120 Unity tasks).
 
 ## Why
 RQ3's conditions include machine flexibility. The twin refuses it, because Unity draws each machine's secondary

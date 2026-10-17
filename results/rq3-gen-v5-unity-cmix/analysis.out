@@ -1,0 +1,37 @@
+== rq3-gen-v5-unity-cmix: Unity vs twin on B2 seeds 0-19; final policy = cmix pick s3
+
+-- load-1.2: pc runs 20 seeds; MDD-PTECT vs rq3-gen-v5-unity's run: identical on 20 / 20 seeds
+   Unity: best pair MDD-PECT
+     cmix s3              vs MDD-PTECT  -4.13 [ -7.19,  -1.22] 14/5  p=0.0089 n=20   vs best pair  -2.48 [ -6.51,  +0.86] 14/6  p=0.13 n=20
+     loose s2             vs MDD-PTECT  -0.83 [ -3.79,  +2.06] 11/8  p=0.52 n=20   vs best pair  +0.87 [ -3.36,  +4.65] 10/10 p=0.81 n=20
+     B2-trained s4        vs MDD-PTECT  -2.29 [ -5.04,  +0.16] 14/6  p=0.083 n=20   vs best pair  -0.62 [ -4.58,  +2.71] 10/10 p=0.65 n=20
+     hindsight best pair  vs MDD-PTECT  -4.58 [ -6.53,  -2.72] 14/0  p=0.00098 n=20   vs best pair  -2.95 [ -4.83,  -1.48] 12/0  p=0.0022 n=20
+   twin: best pair MDD-PTECT
+     cmix s3              vs MDD-PTECT  -1.77 [ -4.90,  +1.01] 11/8  p=0.26 n=20   vs best pair  -1.77 [ -4.95,  +1.10] 11/8  p=0.26 n=20
+     loose s2             vs MDD-PTECT  +0.21 [ -3.14,  +3.69] 12/7  p=0.87 n=20   vs best pair  +0.21 [ -3.01,  +3.68] 12/7  p=0.87 n=20
+     B2-trained s4        vs MDD-PTECT  +0.18 [ -3.40,  +3.17] 11/9  p=0.73 n=20   vs best pair  +0.18 [ -3.39,  +3.25] 11/9  p=0.73 n=20
+     hindsight best pair  vs MDD-PTECT  -2.56 [ -4.12,  -1.31] 14/0  p=0.00098 n=20   vs best pair  -2.56 [ -4.19,  -1.30] 14/0  p=0.00098 n=20
+
+-- due-tight: pc runs 20 seeds; MDD-PTECT vs rq3-gen-v5-unity's run: identical on 20 / 20 seeds
+   Unity: best pair SRT-PECT
+     cmix s3              vs MDD-PTECT  -2.76 [ -5.50,  -0.38] 11/8  p=0.11 n=20   vs best pair  -0.05 [ -2.37,  +1.68] 10/10 p=0.93 n=20
+     loose s2             vs MDD-PTECT  -1.29 [ -4.37,  +1.78] 12/8  p=0.47 n=20   vs best pair  +1.46 [ -1.38,  +4.18] 10/10 p=0.52 n=20
+     B2-trained s4        vs MDD-PTECT  -2.86 [ -5.39,  -0.40] 11/9  p=0.14 n=20   vs best pair  -0.15 [ -2.14,  +1.62] 10/10 p=0.7 n=20
+     hindsight best pair  vs MDD-PTECT  -5.66 [ -8.09,  -3.40] 16/0  p=0.00044 n=20   vs best pair  -3.03 [ -4.77,  -1.88] 18/0  p=0.0002 n=20
+   twin: best pair MDD-PTECT
+     cmix s3              vs MDD-PTECT  -0.52 [ -3.79,  +2.81] 14/5  p=0.13 n=20   vs best pair  -0.52 [ -3.82,  +2.83] 14/5  p=0.13 n=20
+     loose s2             vs MDD-PTECT  +0.25 [ -2.30,  +2.69] 11/9  p=0.9 n=20   vs best pair  +0.25 [ -2.40,  +2.73] 11/9  p=0.9 n=20
+     B2-trained s4        vs MDD-PTECT  +0.07 [ -3.12,  +3.19] 14/6  p=0.26 n=20   vs best pair  +0.07 [ -3.12,  +3.16] 14/6  p=0.26 n=20
+     hindsight best pair  vs MDD-PTECT  -3.71 [ -5.29,  -2.43] 17/0  p=0.00029 n=20   vs best pair  -3.71 [ -5.29,  -2.45] 17/0  p=0.00029 n=20
+
+-- lay-g: pc runs 20 seeds; MDD-PTECT vs rq3-gen-v5-unity's run: identical on 20 / 20 seeds
+   Unity: best pair MDD-PTECT
+     cmix s3              vs MDD-PTECT  -2.87 [ -5.42,  -1.16] 15/5  p=0.0037 n=20   vs best pair  -2.87 [ -5.47,  -1.12] 15/5  p=0.0037 n=20
+     loose s2             vs MDD-PTECT  -0.52 [ -4.20,  +2.70] 13/7  p=0.45 n=20   vs best pair  -0.52 [ -4.15,  +2.80] 13/7  p=0.45 n=20
+     B2-trained s4        vs MDD-PTECT  -1.74 [ -5.76,  +2.25] 13/7  p=0.43 n=20   vs best pair  -1.74 [ -5.72,  +2.12] 13/7  p=0.43 n=20
+     hindsight best pair  vs MDD-PTECT  -4.29 [ -7.06,  -2.06] 16/0  p=0.00044 n=20   vs best pair  -4.29 [ -7.10,  -2.04] 16/0  p=0.00044 n=20
+   twin: best pair MDD-PECT
+     cmix s3              vs MDD-PTECT  -3.17 [ -7.04,  +0.70] 14/6  p=0.18 n=20   vs best pair  -1.96 [ -4.73,  +0.97] 11/9  p=0.26 n=20
+     loose s2             vs MDD-PTECT  -0.73 [ -5.96,  +4.38] 14/6  p=0.35 n=20   vs best pair  +0.51 [ -3.48,  +4.13] 11/9  p=0.93 n=20
+     B2-trained s4        vs MDD-PTECT  -0.84 [ -5.19,  +2.84] 13/7  p=0.45 n=20   vs best pair  +0.40 [ -2.89,  +2.76] 11/9  p=0.87 n=20
+     hindsight best pair  vs MDD-PTECT  -6.07 [ -9.61,  -3.14] 16/0  p=0.00044 n=20   vs best pair  -4.90 [ -8.00,  -3.06] 17/0  p=0.00029 n=20
