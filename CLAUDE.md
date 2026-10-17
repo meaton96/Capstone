@@ -39,29 +39,36 @@ Name every new experiment, results folder and cluster run `<purpose>-<what>[-<va
   those folders (under `results/outdated/` since 2026-10-03). Refer to them by the new name with the old one in parentheses, e.g. "twin-gap (G1)". The registry in
   `docs/WIP/EXPERIMENT_REGISTRY.md` maps old to new.
 
-## Tracking experiments: the lab (`tools/lab/`, since 2026-10-04)
+## Tracking experiments: the lab (labwatch, since 2026-10-13; `tools/lab/` 10-04 to 10-13)
 
-Experiments are tracked and run by the lab service, not by hand-edited docs. Spec (data model, service loop, CLI, web API, new-session workflow): `tools/lab/README.md`. `tools/lab/lab.py serve` (keep it
-running; web page http://127.0.0.1:8765) holds every experiment in `tools/lab/state/lab.db` with a status
-(future -> queued -> running -> done / failed / cancelled), watches running ones (local process + done-glob, or Slurm
-job ids over the shared SSH connection), pulls and analyzes on finish, notifies Discord, starts the next queued
-experiment when worker slots free up, promotes futures whose `waits_on` experiments are done, fires `check_at` /
-ETA timers, and regenerates `docs/WIP/LAB_STATUS.md`.
+Experiments are tracked and run by the lab service, not by hand-edited docs. The code is its own repo, labwatch
+(`~/Documents/Github/labwatch`; its README is the spec: CLI, fields, service loop, page, remote API), installed as
+`lab` (`~/.local/bin`). Capstone's lab directory is `tools/lab/state/` (`lab.db`, `token`, `logs/`, `config.json`:
+20 local slots, Slurm via `rit-research`, writes `docs/WIP/LAB_STATUS.md`); the repo-root symlink `.lab` points at
+it, so `lab ...` works from anywhere in the repo, and `python3 tools/lab/lab.py ...` forwards to `lab`. Service:
+systemd user unit `capstone-lab` (page http://127.0.0.1:8765). It starts queued experiments when slots free up,
+watches them (local process + done-glob / exit code, or Slurm ids), pulls and analyzes on finish, promotes futures
+whose `waits_on` are done, fires `check_at` / ETA timers.
 
-- **Plan an experiment:** `lab.py add <name> --status future --waits-on <names> --waits-note "<what else>" --note ...`
-  (a free-text `waits_note` blocks auto-queueing until cleared with `lab.py set <name> --waits-note ""`).
+- **Watch the lab** (user says so, or after queueing something): `lab status`, then `lab wait` with
+  `run_in_background`; when it exits handle each event (write up finished runs, diagnose failures) and start
+  `lab wait` again. Exit code 3 = service down: tell the user.
+- **Plan an experiment:** `lab add <name> --status future --waits-on <names> --waits-note "<what else>" --note ...`
+  (a free-text `waits_note` blocks auto-queueing until cleared with `lab set <name> --waits-note ""`).
 - **Queue / start:** give it a launch command, done-check, worker slots and analysis command, then `--status queued`
-  (the service starts it) or `lab.py start <name>`. A launcher must skip finished outputs, so rerunning resumes.
-  Never start a long run outside the lab: add it so it is tracked.
-- **Check on experiments:** `lab.py status`; verify against reality as before (`pgrep -af`, `squeue --me`) when in
-  doubt, and fix the record with `lab.py set`.
-- **Results to Claude:** run `lab.py wait` in the background (one notification per finished / failed / timer event,
-  with the analysis output); `lab.py inbox` shows unread events.
+  (the service starts it at once if slots are free) or `lab start <name>`. A launcher must skip finished outputs, so
+  rerunning resumes. Never start a long run outside the lab (nohup, `&`, a background Bash call): it cannot be
+  watched or cancelled, and runs started from Claude's Bash tool die when the session's tasks are stopped.
+- **Cancel:** `lab cancel <name>` stops the whole process tree, including Unity players in their own session (the
+  old tools/lab cancel missed them), or scancels the Slurm jobs.
+- **Check on experiments:** `lab status` / `lab show <name>`; verify against reality (`pgrep -af '[c]apstone.x86_64'`,
+  `squeue --me`) when in doubt, and fix the record with `lab set`.
 - **On finish:** check the results are written up (findings doc or results `README.md`); record it with
-  `lab.py set <name> --writeup <path>`. Still keep `EXPERIMENT_REGISTRY.md` (old -> new names, history) and the
+  `lab set <name> --writeup <path>`. Still keep `EXPERIMENT_REGISTRY.md` (old -> new names, history) and the
   prose sections of `FUTURE_EXPERIMENTS.md` (known issues, writeups owed, open decisions) current by hand.
 - `RUNNING_EXPERIMENTS.md` is retired (see LAB_STATUS.md). `docs/` is gitignored; the lab database is not in git.
-- The service cannot pass Duo: if the cluster connection drops it notifies; log in once (`ssh rit-research`).
+- The service cannot pass Duo: if the cluster connection drops it sends a `cluster` event; log in once
+  (`ssh rit-research`).
 
 ## Measuring headroom and targets
 

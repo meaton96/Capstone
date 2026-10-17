@@ -101,5 +101,6 @@ __pycache__/
 linux_server_archive/
 CLAUDE.md
 tools/lab/state/
+/.lab
 
 results/
