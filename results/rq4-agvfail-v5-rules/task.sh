@@ -13,6 +13,8 @@
 #               did not run; MDD-PTECT again as a run-to-run check against it)
 #           ppoa PPO train-v5-nokl s0 / s1 / s2 + MDD-PTECT     ppob PPO train-v5-final s3 / s4
 #           bc   BC rq2-oracle-bc-v5 bc_full_s0 / s1 / s2
+#           cmixa PPO train-v5-cmix s0 / s1 / s2 + MDD-PTECT   cmixb PPO train-v5-cmix s3 (final, 10-17) / s4 + train-v5-loose s2
+#                (rq4-agvfail-v5-cmix, 10-17)
 #   (pb's MDD-PTECT and ppoa's MDD-PTECT repeat pa's: run-to-run checks under breakdowns.)
 # Skips a finished task (DONE). Usage: bash results/rq4-agvfail-v5-rules/task.sh ROOT LEVEL GROUP SEED WORKER_ID
 set -uo pipefail
@@ -35,6 +37,10 @@ case $G in
                 --checkpoint results/train-v5-nokl_s1/checkpoint.pt --checkpoint results/train-v5-nokl_s2/checkpoint.pt); N=4 ;;
     ppob) ARGS=(--pdr none --checkpoint results/train-v5-final_s3/checkpoint.pt
                 --checkpoint results/train-v5-final_s4/checkpoint.pt); N=2 ;;
+    cmixa) ARGS=(--pdr MDD-PTECT --checkpoint results/train-v5-cmix_s0/checkpoint.pt
+                --checkpoint results/train-v5-cmix_s1/checkpoint.pt --checkpoint results/train-v5-cmix_s2/checkpoint.pt); N=4 ;;
+    cmixb) ARGS=(--pdr none --checkpoint results/train-v5-cmix_s3/checkpoint.pt
+                --checkpoint results/train-v5-cmix_s4/checkpoint.pt --checkpoint results/train-v5-loose_s2/checkpoint.pt); N=3 ;;
     bc)   ARGS=(--pdr none --checkpoint results/rq2-oracle-bc-v5/bc/bc_full_s0.pt
                 --checkpoint results/rq2-oracle-bc-v5/bc/bc_full_s1.pt --checkpoint results/rq2-oracle-bc-v5/bc/bc_full_s2.pt); N=3 ;;
     *) echo "unknown group $G"; exit 2 ;;

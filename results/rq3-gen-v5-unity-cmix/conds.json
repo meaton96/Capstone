@@ -1,0 +1,128 @@
+{
+ "load-1.2": {
+  "params": {
+   "failure_probability": 0.0,
+   "due_date_allowance_range": [
+    1.75,
+    2.5
+   ],
+   "regime_block_seconds": 5400,
+   "horizon_seconds": 30600,
+   "load_mix": [
+    {
+     "name": "normal",
+     "utilization": [
+      0.72,
+      1.44
+     ],
+     "weight": 2,
+     "lull_utilization": [
+      0.24,
+      0.48
+     ]
+    },
+    {
+     "name": "surge",
+     "utilization": [
+      1.2,
+      1.92
+     ],
+     "lull_utilization": [
+      0.24,
+      0.48
+     ]
+    },
+    {
+     "name": "short",
+     "utilization": [
+      0.72,
+      1.44
+     ],
+     "agv_count": 2,
+     "lull_utilization": [
+      0.24,
+      0.48
+     ]
+    }
+   ]
+  },
+  "layout": null,
+  "twin_floor": "results/rq3-gen-twin/floors/D7/des_floor.json"
+ },
+ "due-tight": {
+  "params": {
+   "failure_probability": 0.0,
+   "due_date_allowance_range": [
+    1.25,
+    1.75
+   ],
+   "regime_block_seconds": 5400,
+   "horizon_seconds": 30600,
+   "load_mix": [
+    {
+     "name": "normal",
+     "utilization": [
+      0.6,
+      1.2
+     ],
+     "weight": 2
+    },
+    {
+     "name": "surge",
+     "utilization": [
+      1.0,
+      1.6
+     ]
+    },
+    {
+     "name": "short",
+     "utilization": [
+      0.6,
+      1.2
+     ],
+     "agv_count": 2
+    }
+   ]
+  },
+  "layout": null,
+  "twin_floor": "results/rq3-gen-twin/floors/D7/des_floor.json"
+ },
+ "lay-g": {
+  "params": {
+   "failure_probability": 0.0,
+   "due_date_allowance_range": [
+    1.75,
+    2.5
+   ],
+   "regime_block_seconds": 5400,
+   "horizon_seconds": 30600,
+   "load_mix": [
+    {
+     "name": "normal",
+     "utilization": [
+      0.6,
+      1.2
+     ],
+     "weight": 2
+    },
+    {
+     "name": "surge",
+     "utilization": [
+      1.0,
+      1.6
+     ]
+    },
+    {
+     "name": "short",
+     "utilization": [
+      0.6,
+      1.2
+     ],
+     "agv_count": 2
+    }
+   ]
+  },
+  "layout": "G",
+  "twin_floor": "results/rq3-gen-twin/floors/G7/des_floor.json"
+ }
+}

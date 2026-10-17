@@ -1,0 +1,3 @@
+train-v5-cmix_s3 results/train-v5-cmix_s3/checkpoint.pt
+# Final policy (user 10-17): PPO trained on mixed due dates (c 1.25-3.5), seed picked on the fitting seeds 2000-2159 by
+# eval-v5-cmix (lowest mean ratio to MDD-PTECT over due-tight / base / due-loose). Report every family next to it.

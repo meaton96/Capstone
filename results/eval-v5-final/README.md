@@ -22,6 +22,11 @@ as their effect.
   `../train-v5-final/eval`. A local check on 10-14 reproduced seed 0 (MDD-PTECT 95.842, PPO s0 91.369).
 - The 20 chunks of 10 seeds take about 5 min each. The run uses 4 processes beside the AGV sweeps (lab workers 0).
 
+> **Final policy changed 10-17 (user):** the thesis's final policy is the PPO trained on mixed due dates,
+> train-v5-cmix **s3** (`../eval-v5-cmix/final_policy.txt`). PPO s4 below stays the B2-trained pick and is reported
+> next to it. The RQ3 / RQ4 evaluations of the final policy are `../rq3-gen-v5-cmix`, `../rq3-gen-v5-unity-cmix`,
+> `../rq3-size-v5`, `../rq3-flex-v5-unity`, `../rq4-agvfail-v5-cmix` and `../rq4-uncert-v5-policy`.
+
 ## Results
 
 **Final policy: PPO s4** (`results/train-v5-final_s4/checkpoint.pt`), the lowest pooled tardiness on the fitting
