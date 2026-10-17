@@ -1,0 +1,33 @@
+== rq3-flex-v5-unity: machine flexibility in Unity, B2 seeds 0-19; final policy = cmix pick s3
+
+-- no flexibility (B2): n 20 seeds; MDD-PTECT mean 140.0 k job-s; best pair MDD-PTECT; pairs vs MDD-PTECT: MDD-PTECT +0.0%, MDD-PECT +0.3%, SRT-PECT +5.9%, SRT-PTECT +6.0%, ATC-PTECT +11.7%, ATC-PECT +15.9%
+   cmix s3              vs MDD-PTECT  +3.56 [ -0.59,  +7.10] 10/10 p=0.52 n=20   vs best pair  +3.56 [ -0.63,  +7.14] 10/10 p=0.52 n=20
+   loose s2             vs MDD-PTECT  +0.02 [ -4.88,  +4.49] 12/8  p=0.96 n=20   vs best pair  +0.02 [ -4.78,  +4.41] 12/8  p=0.96 n=20
+   B2-trained s4        vs MDD-PTECT  +2.88 [ -1.33,  +7.54] 10/10 p=0.7 n=20   vs best pair  +2.88 [ -1.46,  +7.44] 10/10 p=0.7 n=20
+   hindsight best pair  vs MDD-PTECT  -3.41 [ -5.90,  -2.03] 16/0  p=0.00044 n=20   vs best pair  -3.41 [ -5.89,  -2.00] 16/0  p=0.00044 n=20
+
+   flex-p0.3: fc's MDD-PTECT vs fa's identical on 20 / 20 seeds
+
+-- flex-p0.3: n 20 seeds; MDD-PTECT mean 115.6 k job-s; best pair MDD-PECT; pairs vs MDD-PTECT: MDD-PECT -1.5%, MDD-PTECT +0.0%, SRT-PECT +3.6%, SRT-PTECT +7.2%, ATC-PECT +17.4%, ATC-PTECT +17.6%
+   pair ranking vs no flexibility: Kendall tau +0.73 (p 0.056)
+   cmix s3              vs MDD-PTECT  -1.98 [ -5.79,  +0.30] 13/7  p=0.083 n=20   vs best pair  -0.52 [ -4.08,  +1.98] 15/5  p=0.13 n=20
+   loose s2             vs MDD-PTECT  +2.08 [ -1.70,  +5.97] 10/10 p=0.55 n=20   vs best pair  +3.60 [ -0.16,  +7.73]  9/11 p=0.28 n=20
+   B2-trained s4        vs MDD-PTECT  -0.41 [ -6.73,  +5.07] 13/7  p=0.47 n=20   vs best pair  +1.07 [ -4.62,  +6.70] 12/8  p=0.84 n=20
+   hindsight best pair  vs MDD-PTECT  -4.27 [ -7.30,  -2.10] 14/0  p=0.00098 n=20   vs best pair  -2.84 [ -5.02,  -1.60] 17/0  p=0.00029 n=20
+   cost of flexibility cmix s3         -21.8% (n 20)
+   cost of flexibility loose s2        -15.7% (n 20)
+   cost of flexibility B2-trained s4   -20.1% (n 20)
+   cost of flexibility MDD-PTECT       -17.4% (n 20)
+
+   flex-p0.5: fc's MDD-PTECT vs fa's identical on 20 / 20 seeds
+
+-- flex-p0.5: n 20 seeds; MDD-PTECT mean 106.6 k job-s; best pair MDD-PECT; pairs vs MDD-PTECT: MDD-PECT -2.1%, MDD-PTECT +0.0%, SRT-PTECT +3.5%, SRT-PECT +7.2%, ATC-PTECT +22.7%, ATC-PECT +26.2%
+   pair ranking vs no flexibility: Kendall tau +0.73 (p 0.056)
+   cmix s3              vs MDD-PTECT  +0.20 [ -3.44,  +3.41] 12/8  p=1 n=20   vs best pair  +2.31 [ -1.95,  +5.72] 10/10 p=0.57 n=20
+   loose s2             vs MDD-PTECT  +6.51 [ +2.69,  +8.56]  8/12 p=0.048 n=20   vs best pair  +8.75 [ +3.26, +13.19]  8/12 p=0.053 n=20
+   B2-trained s4        vs MDD-PTECT  +3.19 [ -0.18,  +7.33]  9/11 p=0.25 n=20   vs best pair  +5.36 [ +1.72,  +9.03]  9/11 p=0.07 n=20
+   hindsight best pair  vs MDD-PTECT  -4.84 [ -7.73,  -2.39] 15/0  p=0.00065 n=20   vs best pair  -2.84 [ -5.35,  -1.44] 16/0  p=0.00044 n=20
+   cost of flexibility cmix s3         -26.3% (n 20)
+   cost of flexibility loose s2        -18.9% (n 20)
+   cost of flexibility B2-trained s4   -23.6% (n 20)
+   cost of flexibility MDD-PTECT       -23.8% (n 20)
