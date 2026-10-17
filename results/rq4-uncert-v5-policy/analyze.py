@@ -6,6 +6,12 @@
        best v5 pair (in-sample), the degradation from none, and the reproduction check against the screen (MDD-PTECT
        here vs MDD-PTECT@3 in ../rq4-uncert-screen/out/rules: only where it matches do the screen's planner / oracle /
        level-tuned-rule numbers carry over). -> analysis.out, summary.csv
+@details E3 / mix cells (incl. mix I1) are reported on the screen's window-tardiness measure (2026-10-17, user): every
+         policy's value + the per-seed offset B - A of screen_offset.csv (screen_diff.py offset; the same for every
+         policy, so paired differences and tests are unchanged, levels and percentages move). evaluate.py's own measure
+         (Twin.metrics() delta, arrived jobs only) leaks pre-window lateness of late-arriving jobs and drops overdue
+         jobs not arrived by the window end (README, "Root cause"). The I1 cells still do not match the screen: the
+         screen read the I1 estimator unsynced (cause 2), so its I1 numbers do not carry over.
 """
 import importlib.util
 import io
@@ -27,6 +33,7 @@ sys.path.insert(0, str(HERE))
 import task as T                                 # noqa: E402  (CELLS, cell_dir)
 SEEDS = list(range(40))
 SCREEN = R / "rq4-uncert-screen" / "out" / "rules"
+OFFSET = pd.read_csv(HERE / "screen_offset.csv")  # screen_diff.py offset: B - A per (cell, seed), 1000 job-s
 POLS = ["cmix s3", "cmix mean of 5", "loose s2", "loose mean of 5", "PPO s4", "PPO mean of 5", "hindsight best v5 pair"]
 
 
@@ -34,6 +41,18 @@ def cell_table(cell):
     if cell == "none":
         return size.floor_table("m15")
     return size.table([HERE / T.cell_dir(cell) / "base" / g / "episodes.csv" for g in ("pdr", "ppo", "cmix", "loose")])
+
+
+def screen_measure(cell, t):
+    """(t on the screen's measure, shifted?): E3 / mix cells get the per-seed offset added to every policy column; the
+    other cells are returned as run (the two measures agree when no job arrives after its due date)."""
+    o = OFFSET[OFFSET.cell == cell].set_index("seed")["offset_B_minus_A"]
+    if o.empty:
+        return t, False
+    missing = sorted(set(t.index) - set(o.index))
+    if missing:
+        raise ValueError(f"{cell}: no screen_offset.csv rows for seeds {missing} (run screen_diff.py offset)")
+    return t.add(o.reindex(t.index), axis=0), True
 
 
 def screen_match(cell, t):
@@ -56,6 +75,7 @@ def main():
         if len(pairs) < 6 or rq3.REF not in t.columns:
             print(f"\n-- {cell}: pairs not complete yet")
             continue
+        t, shifted = screen_measure(cell, t)
         for fam in ("cmix", "loose", "PPO"):
             mem = [f"{fam} s{k}" for k in range(5)]
             if all(m in t.columns for m in mem):
@@ -67,14 +87,16 @@ def main():
             base = t
         deg = 100 * (t[rq3.REF].sum() / base[rq3.REF].reindex(t.index).sum() - 1)
         print(f"\n-- {cell}: MDD-PTECT mean {t[rq3.REF].mean():.1f} k job-s ({deg:+.1f}% vs none); best pair {best}; "
-              f"MDD-PTECT = screen's on {ok} / {n} seeds{'' if ok == n else '  (screen numbers do NOT carry over)'}")
+              f"MDD-PTECT = screen's on {ok} / {n} seeds{'' if ok == n else '  (screen numbers do NOT carry over)'}"
+              + ("; screen's measure (+ screen_offset.csv)" if shifted else ""))
         for pol in POLS:
             if pol not in t.columns:
                 continue
             for vs, b in (("MDD-PTECT", rq3.REF), ("best pair", best)):
                 c = rq3.compare(t[pol].to_dict(), t[b].to_dict(), rng)
                 if c:
-                    rows.append({"cell": cell, "policy": pol, "vs": vs, "best_pair": best, "screen_match": f"{ok}/{n}", **c})
+                    rows.append({"cell": cell, "policy": pol, "vs": vs, "best_pair": best, "screen_match": f"{ok}/{n}",
+                                 "measure": "screen (offset)" if shifted else "as run", **c})
                     if vs == "MDD-PTECT":
                         print(f"   {pol:24s} vs MDD-PTECT {c['pooled_%']:+6.2f} [{c['ci_lo']:+6.2f}, {c['ci_hi']:+6.2f}] "
                               f"{c['better']:2d}/{c['worse']:<2d} p={c['wilcoxon_p']:.2g}")

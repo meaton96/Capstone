@@ -413,6 +413,28 @@ def test_i1_estimator_converges_on_a_static_bias():
     assert err < 0.25 * base
 
 
+@pytest.mark.parametrize("seed,spec", [(15, "E2=severe,info=I1"), (16, "E2d=severe,info=I1"),
+                                       (17, "E2=realistic,O1=realistic,info=I1")])
+def test_i1_estimate_does_not_depend_on_who_synced_the_view(seed, spec):
+    """The I1 estimate includes every completion visible by now, whoever read the view before. Until 2026-10-17
+    ViewCore.bias_estimate / ObservedState._ops read it unsynced, so an episode changed with an extra ViewCore.sync()
+    per decision (what TwinSchedulingEnv's observation build does; results/rq4-uncert-v5-policy, screen_diff.py)."""
+    def play(extra_sync):
+        tw = _twin(seed, spec, rule="MDD_PTECT")
+        gen = tw.agent_decisions()
+        try:
+            gen.send(None)
+            while True:
+                if extra_sync:
+                    tw._vcore.sync()
+                gen.send(("MDD", "PTECT"))
+        except StopIteration:
+            pass
+        return _fp(tw), list(tw.dur_rows), tw.view.bias_estimates()
+
+    assert play(False) == play(True)
+
+
 def test_i2_view_equals_a_plan_with_the_bias_baked_in():
     """With static bias only and perfect bias information the controllers see the true durations."""
     import copy

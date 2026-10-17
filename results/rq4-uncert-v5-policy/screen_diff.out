@@ -1,0 +1,80 @@
+screen_diff.py outputs (2026-10-17), window tardiness in 1000 job-s, seed-level, MDD-PTECT alpha 3 unless noted.
+Path A = evaluate.py --twin --uncertainty (TwinSchedulingEnv; values from task.py, seed 0); path B = uc.UEpisode.play
+(= the screen's rules output). Variants change path B by one thing: A-measure = Twin.metrics() tardiness_sum delta;
+dec-sync = ViewCore.sync() before each decision; full = every I1 estimator read syncs; fullwin = full from t0 on.
+
+== 1. Seed 0, the 10 cells that differ
+cell                      path A    path B  B+A-meas B+decsync    B+both    full(B) fullwin(B)
+E2=realistic,info=I1     109.414   109.416   109.416   109.414   109.414    109.414    109.414
+E2=severe,info=I1        122.773   121.240   121.240   122.773   122.773    111.924    122.773
+E2d=realistic,info=I1    103.068    97.711    97.711   103.068   103.068    103.119    103.068
+E2d=severe,info=I1       115.740   115.135   115.135   115.740   115.740    115.720    115.740
+E3=realistic             172.870   173.484   172.870   173.484   172.870    173.484        nan
+E3=severe                279.026   328.381   279.026   328.381   279.026    328.381        nan
+mix=realistic            170.929   171.537   170.929   171.537   170.929    171.537        nan
+mix=realistic,info=I1    173.211   172.315   171.706   173.819   173.211    173.819    173.819
+mix=severe               306.352   355.644   306.352   355.644   306.352    355.644        nan
+mix=severe,info=I1       380.701   450.805   401.512   429.993   380.701    429.993    429.993
+control E1=severe: path A 111.544, path B 111.544, every variant 111.544
+
+== 2. E3 gap is policy-independent: B - A of one play vs the warm-up-only offset (screen_offset.csv)
+E3=realistic  s0 ATC-PTECT  A   162.648  B   163.262  B-A    0.615  offset    0.615
+E3=realistic  s1 ATC-PTECT  A    46.717  B    48.905  B-A    2.188  offset    2.188
+E3=realistic  s0 MDD-PTECT  A   172.870  B   173.484  B-A    0.615  offset    0.615
+E3=realistic  s1 MDD-PTECT  A    51.524  B    53.712  B-A    2.188  offset    2.188
+E3=realistic  s0 SRT-PECT   A   190.591  B   191.206  B-A    0.615  offset    0.615
+E3=realistic  s1 SRT-PECT   A    56.736  B    58.924  B-A    2.188  offset    2.188
+E3=severe     s0 ATC-PTECT  A   273.910  B   323.266  B-A   49.355  offset   49.355
+E3=severe     s1 ATC-PTECT  A   149.624  B   184.886  B-A   35.262  offset   35.262
+E3=severe     s0 MDD-PTECT  A   279.026  B   328.381  B-A   49.355  offset   49.355
+E3=severe     s1 MDD-PTECT  A   149.541  B   184.803  B-A   35.262  offset   35.262
+E3=severe     s0 SRT-PECT   A   293.430  B   342.785  B-A   49.355  offset   49.355
+E3=severe     s1 SRT-PECT   A   152.971  B   188.233  B-A   35.262  offset   35.262
+mix=severe    s0 ATC-PTECT  A   290.549  B   339.841  B-A   49.292  offset   49.292
+mix=severe    s1 ATC-PTECT  A   135.074  B   152.718  B-A   17.644  offset   17.644
+mix=severe    s0 MDD-PTECT  A   306.352  B   355.644  B-A   49.292  offset   49.292
+mix=severe    s1 MDD-PTECT  A   141.919  B   159.563  B-A   17.644  offset   17.644
+mix=severe    s0 SRT-PECT   A   341.468  B   390.760  B-A   49.292  offset   49.292
+mix=severe    s1 SRT-PECT   A   151.825  B   169.468  B-A   17.644  offset   17.644
+
+== 3. I1 cells, seeds 0-5: path B (no sync), path A's pattern (dec-sync), full, fullwin (all on measure B)
+cell                   seed    path B  dec-sync      full   fullwin  B vs full  A vs full  t0 moves (full)
+E2=realistic,info=I1      0   109.416   109.414   109.414   109.414    +0.00%    +0.00%  
+E2=realistic,info=I1      1    28.577    26.123    26.123    26.123    +9.40%    +0.00%  
+E2=realistic,info=I1      2   278.316   267.332   285.058   267.332    -2.37%    -6.22%  
+E2=realistic,info=I1      3   122.968   122.758   122.279   122.758    +0.56%    +0.39%  
+E2=realistic,info=I1      4    19.388    19.387    19.774    19.387    -1.95%    -1.96%  
+E2=realistic,info=I1      5   259.384   256.383   259.098   256.383    +0.11%    -1.05%  
+E2=severe,info=I1         0   121.240   122.773   111.924   122.773    +8.32%    +9.69%  yes
+E2=severe,info=I1         1    30.770    29.050    29.050    29.050    +5.92%    +0.00%  
+E2=severe,info=I1         2   332.555   325.260   328.350   325.260    +1.28%    -0.94%  
+E2=severe,info=I1         3   150.332   157.991   157.979   157.991    -4.84%    +0.01%  
+E2=severe,info=I1         4    19.275    17.448    17.448    17.448   +10.48%    +0.00%  
+E2=severe,info=I1         5   237.689   242.355   238.473   242.355    -0.33%    +1.63%  
+E2d=realistic,info=I1     0    97.711   103.068   103.119   103.068    -5.24%    -0.05%  
+E2d=realistic,info=I1     1    24.251    24.271    24.271    24.271    -0.08%    +0.00%  
+E2d=realistic,info=I1     2   231.181   227.272   227.272   227.272    +1.72%    +0.00%  
+E2d=realistic,info=I1     3   130.778   132.749   132.749   132.749    -1.48%    -0.00%  
+E2d=realistic,info=I1     4    22.043    22.334    22.334    22.334    -1.30%    +0.00%  
+E2d=realistic,info=I1     5   253.581   255.316   247.593   255.316    +2.42%    +3.12%  
+E2d=severe,info=I1        0   115.135   115.740   115.720   115.740    -0.51%    +0.02%  
+E2d=severe,info=I1        1    31.268    29.672    29.672    29.672    +5.38%    +0.00%  
+E2d=severe,info=I1        2   197.940   198.149   206.234   198.149    -4.02%    -3.92%  yes
+E2d=severe,info=I1        3   141.236   148.548   147.389   148.548    -4.17%    +0.79%  
+E2d=severe,info=I1        4    19.623    18.175    18.175    18.175    +7.97%    +0.00%  
+E2d=severe,info=I1        5   262.245   262.458   262.458   262.458    -0.08%    +0.00%  
+mix=realistic,info=I1     0   172.315   173.819   173.819   173.819    -0.87%    +0.00%  
+mix=realistic,info=I1     1    63.967    65.140    65.140    65.140    -1.80%    +0.00%  
+mix=realistic,info=I1     2   331.974   331.974   331.974   331.974    +0.00%    +0.00%  
+mix=realistic,info=I1     3   272.912   272.990   271.516   272.990    +0.51%    +0.54%  
+mix=realistic,info=I1     4    67.378    69.437    69.437    69.437    -2.97%    +0.00%  
+mix=realistic,info=I1     5   445.192   411.880   411.880   411.880    +8.09%    +0.00%  
+mix=severe,info=I1        0   450.805   429.993   429.993   429.993    +4.84%    +0.00%  
+mix=severe,info=I1        1   157.740   166.343   166.343   166.343    -5.17%    +0.00%  
+mix=severe,info=I1        2   592.383   583.548   583.548   583.548    +1.51%    +0.00%  
+mix=severe,info=I1        3   458.061   458.838   458.838   458.838    -0.17%    +0.00%  
+mix=severe,info=I1        4   196.557   186.461   186.461   186.461    +5.41%    +0.00%  
+mix=severe,info=I1        5   602.198   584.414   584.414   584.414    +3.04%    +0.00%  
+dec-sync == fullwin 36/36; dec-sync == full 21/36; path B == full 1/36
+path B             vs full: mean |dev| 3.18%, max |dev| 10.48%
+dec-sync (path A)  vs full: mean |dev| 0.84%, max |dev| 9.69%

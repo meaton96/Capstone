@@ -30,7 +30,11 @@ failure flags are local alarms; failures are off in the uncertainty study).
 **Information level I1.** A per-machine estimate of the execution bias from reported completions (actual / planned of
 finished ops, log scale, exponential forgetting with half-life cfg.bias_half_life, shrunk to 1 by cfg.bias_prior
 pseudo-observations). At I1 every planned duration the view hands out becomes p_hat = f32(p_plan x b_hat): rules,
-remaining work, loads, the observation (unless cfg.info_obs is False) and the planner's belief.
+remaining work, loads, the observation (unless cfg.info_obs is False) and the planner's belief. Every estimator read
+syncs first, so b_hat includes every completion visible by now whoever read the view before (fix of 2026-10-17: until
+then `bias_estimate` / `bhat` / `_ops` read it unsynced, and the estimate was as fresh as the last syncing read: an
+agent's observation build synced at every decision, a bare rule play or the warm-up did not;
+results/rq4-uncert-v5-policy, "Root cause").
 
 **Exactness.** With all delays 0 every entry is applied before any query in the same tick, the reported state equals
 the true state and every value is computed with the engine's float32 operations in the engine's order, so a zero-
@@ -185,7 +189,9 @@ class ViewCore:
         self.n_updates += 1
 
     def bias_estimate(self, mid, t=None):
-        """(b_hat, effective number of observations) of machine mid at time t (default now)."""
+        """(b_hat, effective number of observations) of machine mid at time t (default now), from every completion
+        visible by now (it syncs first; see the module docstring, I1)."""
+        self.sync()
         e = self.est[mid]
         if e[0] <= 0.0:
             return 1.0, 0.0
@@ -198,6 +204,7 @@ class ViewCore:
     def bhat(self, mid):
         if self.cfg.info == "I2":
             return self.tr.bias_at(mid, self.tw.now)
+        self.sync()                     # n_updates as of now (2026-10-17 fix)
         return self.bias_estimate(mid)[0] if self.n_updates else 1.0
 
     def estimate(self, jid, op, mid, plan, i1=None):
@@ -362,6 +369,8 @@ class ObservedState:
     # ── planned durations at the information level ──────────────────────────────────────────────────
 
     def _ops(self, job):
+        if self.i1:
+            self.core.sync()            # n_updates / b_hat as of now (2026-10-17 fix)
         if not self.i1 or (not self.core.n_updates and self.core.cfg.info == "I1"):
             return job.ops
         key = (self.core.n_updates, self.tw.now)
