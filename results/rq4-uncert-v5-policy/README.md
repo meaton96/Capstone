@@ -1,6 +1,6 @@
 # rq4-uncert-v5-policy: the final policy under the twin uncertainty layer (2026-10-17, user)
 
-Status: **queued** (lab `rq4-uncert-v5-policy`, cluster, 96 twin tasks).
+Status: **done** 2026-10-17 18:19 (cluster array 21909921, 3 h 8 min, 96 / 96). `analysis.out`, `summary.csv`.
 
 ## Why
 RQ4's scope was open: breakdowns only, or "disruptions and uncertainty". The user (10-17) asked to set up the
@@ -181,4 +181,53 @@ experiment:
   experiment's I1 cells need no rerun.
 
 ## Results
-Pending.
+Numbers are pooled window tardiness vs MDD-PTECT in the same cell, test seeds 0-39, * = Wilcoxon p < 0.05. The E3 / mix
+cells are on the screen's measure (+ `screen_offset.csv`). MDD-PTECT matches the screen on 40 / 40 seeds in all 18
+I0 cells after that offset. In the I1 cells it does not (cause 2: the screen's stale estimator read), so the screen's
+I1 numbers do not carry over.
+
+| cell | MDD-PTECT vs none | final policy cmix s3 | cmix mean of 5 | loose mean of 5 | B2-trained mean of 5 | hindsight best pair |
+|---|---|---|---|---|---|---|
+| none | – | −1.7 | −1.7* | −1.5 | −0.3 | −4.5* |
+| E1 realistic / severe | +3.5 / +9.8% | −3.4* / −3.0 | −2.1 / −2.1 | −2.0 / −2.3 | −1.9 / −2.4 | −4.7* / −5.8* |
+| E2 realistic / severe | +3.1 / +8.5% | −1.2 / −0.9 | −1.3* / −1.3* | −0.1 / −1.4 | +0.4 / −0.9 | −3.6* / −5.3* |
+| E2d realistic / severe | +3.0 / +6.1% | −3.5* / −3.7* | −2.3* / −1.9* | −2.8* / −2.6* | −2.0* / −1.3* | −4.8* / −5.5* |
+| E3 realistic / severe | +28.9 / +143% | −1.7* / −0.6* | −0.5 / −0.6* | −0.4 / −0.1 | +0.3 / +0.4 | −2.8* / −1.4* |
+| E4n realistic / severe | −1.4 / +5.4% | −0.5 / −2.9* | −0.2 / −1.9* | +1.1 / −1.1 | +0.2 / −0.5 | −3.7* / −4.9* |
+| O1 realistic / severe | +6.1 / +16.9% | −1.9 / −1.9 | −1.2 / −0.9 | −1.3 / −1.8 | +0.1 / −0.5 | −4.3* / −4.8* |
+| O2 realistic / severe | +6.0 / +30.0% | −1.4 / −2.9* | −0.8 / −0.5 | −0.8 / −2.2 | +0.4 / −0.5 | −4.1* / −5.6* |
+| O3 realistic / severe | +2.1 / +3.1% | −2.3 / −2.1* | −2.1* / −1.3 | −1.7 / −0.9 | −0.7 / −0.8 | −4.6* / −3.9* |
+| mix realistic / severe | +46.9 / +175% | −0.8 / −1.7* | −0.8 / −0.4 | −0.8 / −1.2* | +0.3 / +0.8 | −4.1* / −3.3* |
+| E2 I1 realistic / severe | +5.9 / +14.2% | −3.3* / −4.0* | −2.1* / −1.7* | −1.8* / −2.1* | −1.2 / −1.0 | −4.7* / −4.3* |
+| E2d I1 realistic / severe | +3.9 / +10.1% | −1.9 / −3.0* | −1.7* / −2.4* | −1.4 / −0.9 | −0.7 / −0.8 | −4.4* / −5.2* |
+| mix I1 realistic / severe | +48.4 / +180% | −1.7* / +0.3 | −1.1* / +0.6 | −1.1 / −0.5 | +0.1 / +1.6* | −4.0* / −3.0* |
+
+**Significantly better than MDD-PTECT, of 24 cells:**
+- cmix s3: 13;
+- cmix mean of 5: 12;
+- loose mean of 5: 5;
+- B2-trained mean of 5: 2, and it is significantly *worse* in mix severe I1 (+1.6*).
+
+No cmix row is significantly worse than MDD-PTECT anywhere. The best fixed pair is MDD-PTECT or MDD-PECT in every
+cell.
+
+## Reading
+1. **The final policy keeps its edge under noise it was never trained on.** It is trained noise-free and acts on the
+   noisy observed state, yet it beats MDD-PTECT by 1-4% in about half the cells (13 / 24 for the pick, 12 / 24 for the
+   5-seed family). It is never significantly worse.
+   - The B2-trained family manages that in 2 / 24.
+   - So training on varied due dates also buys robustness to execution and observation noise.
+2. **The gains are largest where processing-time noise hits the rule's estimates:**
+   - E2d (drifting bias): −3.5 / −3.7%;
+   - E2 with the online estimator: −3.3 / −4.0%;
+   - E1: −3.4%.
+3. **They shrink where the noise dominates:** E3 arrival lateness and mix at severe (MDD-PTECT +143% / +175%). The
+   policy is then −0.6 / −1.7%. With the online estimator and every noise type at severe, no policy beats MDD-PTECT.
+4. **For RQ4 (disruptions and uncertainty):**
+   - Uncertainty degrades every rule and policy, but it does not reorder the fixed pairs: the best pair stays MDD-PTECT /
+     MDD-PECT.
+   - It does not remove the final policy's small advantage. That advantage sits at 25-50% of the hindsight best pair's
+     margin in most cells.
+   - With rq4-agvfail-v5-cmix (AGV breakdowns, running) and rq4-mfail-ccal (machine failures), this is RQ4's policy
+     answer.
+
