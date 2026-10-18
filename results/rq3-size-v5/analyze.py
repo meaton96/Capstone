@@ -49,7 +49,9 @@ def floor_table(cond):
     if cond == "m15":
         return table([R / "rq3-gen-v5" / "base" / g / "episodes.csv" for g in ("pdr", "ppo")]
                      + [R / "eval-v5-cmix" / "test" / "base" / g / "episodes.csv" for g in ("cmix", "loose")])
-    return table([HERE / cond / g / "episodes.csv" for g in ("pdr", "ppo", "cmix", "loose")])
+    files = [HERE / cond / g / "episodes.csv" for g in ("pdr", "ppo", "cmix", "loose")]
+    files += sorted((HERE / cond).glob("*_s*-*/episodes.csv"))           # m100 seed chunks
+    return table(files)
 
 
 def main():

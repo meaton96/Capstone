@@ -45,6 +45,13 @@ for name, run in (("loose", "train-v5-loose"), ("cmix", "train-v5-cmix")):
     ck = [f"results/{run}_s{k}/checkpoint.pt" for k in range(5)]
     rt.GROUPS[name] = (900, ["--pdr", "MDD-PTECT"] + [a for c in ck for a in ("--checkpoint", c)])
 rt.GROUPS.pop("bc", None)
+# m100 runs in 10-seed chunks (10-17: a full 40-seed m100 task needs 12-13 h, over the 10 h limit, and episodes.csv
+# is only written at the end). A chunk is the same group under the name "<group>_s<a>-<b>", so it lands in
+# m100/<group>_s<a>-<b>/ next to the unchunked layout.
+CHUNKS = ["0-9", "10-19", "20-29", "30-39"]
+for g in list(rt.GROUPS):
+    for c in CHUNKS:
+        rt.GROUPS[f"{g}_s{c}"] = rt.GROUPS[g]
 
 
 def main(argv=None):
@@ -52,9 +59,11 @@ def main(argv=None):
     ap.add_argument("--cond", required=True, choices=["m50", "m100"])
     ap.add_argument("--group", required=True, choices=["pdr", "ppo", "cmix", "loose"])
     ap.add_argument("--seeds", default="0-39")
+    ap.add_argument("--chunk", choices=CHUNKS, default=None, help="run seeds a-b into <cond>/<group>_s<a>-<b>/")
     ap.add_argument("--out-root", default=str(HERE))
     a = ap.parse_args(argv)
-    rt.main(["--cond", a.cond, "--group", a.group, "--seeds", a.seeds, "--out-root", a.out_root])
+    group, seeds = (f"{a.group}_s{a.chunk}", a.chunk) if a.chunk else (a.group, a.seeds)
+    rt.main(["--cond", a.cond, "--group", group, "--seeds", seeds, "--out-root", a.out_root])
 
 
 if __name__ == "__main__":

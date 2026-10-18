@@ -1,6 +1,6 @@
 #!/bin/bash
-# rq3-size-v5 (10-17): {m50, m100} x {pdr, ppo, cmix, loose} = 8 twin tasks on the cluster (twin_array.sbatch; m50
-# ~30-45 min, m100 2-4 h per task). Ships task.py, analyze.py and rq3-gen-v5's run_task.py, plus the two floor exports.
+# rq3-size-v5 (10-17): m50 x {pdr, ppo, cmix, loose} (4 tasks, ~1-1.5 h) + m100 x {pdr, ppo, cmix, loose} x 4 seed
+# chunks of 10 (16 tasks, ~3 h; one 40-seed m100 task needs 12-13 h, over the limit). twin_array.sbatch. Ships task.py, analyze.py and rq3-gen-v5's run_task.py, plus the two floor exports.
 # Checkpoints and frozen code are on the cluster. Only unfinished tasks are listed, so resubmitting resumes.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
@@ -22,11 +22,12 @@ for f in results/train-v5-nokl_s{0,1,2}/checkpoint.pt results/train-v5-final_s{3
     [[ -f $f ]] || { echo "missing $f"; exit 1; }
 done
 D=~/capstone/results/rq3-size-v5
-for c in m100 m50; do for g in pdr ppo cmix loose; do
-    [[ -f $D/$c/$g/DONE ]] || echo "--cond $c --group $g"
-done; done > $D/tasks.txt
+{ for g in pdr ppo cmix loose; do for k in 0-9 10-19 20-29 30-39; do
+    [[ -f $D/m100/${g}_s$k/DONE ]] || echo "--cond m100 --group $g --chunk $k"
+  done; done
+  for g in pdr ppo cmix loose; do [[ -f $D/m50/$g/DONE ]] || echo "--cond m50 --group $g"; done; } > $D/tasks.txt
 N=$(wc -l < $D/tasks.txt); [[ $N -gt 0 ]] || { echo "nothing to run"; exit 0; }
 cd linux_server; mkdir -p logs
-sbatch --account=drl-scheduling --partition=sporc --time=0-10:00:00 --mem=8g --array=0-$((N - 1)) --job-name=rq3-size \
+sbatch --account=drl-scheduling --partition=sporc --time=0-06:00:00 --mem=8g --array=0-$((N - 1)) --job-name=rq3-size \
     --export=ALL,SCRIPT=results/rq3-size-v5/task.py,TASKS=$D/tasks.txt slurm/twin_array.sbatch
 REMOTE

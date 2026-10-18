@@ -1,6 +1,6 @@
 # rq3-size-v5: floor size in the twin (50 and 100 machines) for the v5 rules and the final policy (2026-10-17, user)
 
-Status: **queued** (lab `rq3-size-v5`, cluster, 8 twin tasks).
+Status: **running** (lab `rq3-size-v5`, cluster; m50 done 4 / 4; m100 rerun 10-17 21:04 as 16 ten-seed chunks after the 40-seed tasks hit the 10 h limit).
 
 ## Why
 RQ3's conditions include floor size, which had no current result. The 10-14 claims doc said "the twin can't run it",
