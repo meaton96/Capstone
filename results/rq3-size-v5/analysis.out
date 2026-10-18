@@ -1,0 +1,30 @@
+== rq3-size-v5: floor size in the twin, B2 test seeds 0-39; final policy = cmix pick s3 (trained on 15 machines)
+
+-- m15: MDD-PTECT mean 145.5 k job-s; best pair MDD-PECT; pairs vs MDD-PTECT: MDD-PECT -0.5%, MDD-PTECT +0.0%, SRT-PECT +4.8%, SRT-PTECT +5.7%, ATC-PTECT +11.3%, ATC-PECT +13.1%
+   cmix s3                  vs MDD-PTECT  -1.71 [ -3.92,  +0.44] 24/16 p=0.18
+   cmix mean of 5           vs MDD-PTECT  -1.69 [ -2.84,  -0.54] 28/12 p=0.0058
+   loose s2                 vs MDD-PTECT  -1.17 [ -3.49,  +1.35] 26/14 p=0.29
+   loose mean of 5          vs MDD-PTECT  -1.47 [ -3.40,  +0.58] 25/15 p=0.21
+   PPO s4                   vs MDD-PTECT  +0.17 [ -2.27,  +2.33] 16/24 p=0.38
+   PPO mean of 5            vs MDD-PTECT  -0.34 [ -1.77,  +1.08] 24/16 p=0.32
+   hindsight best v5 pair   vs MDD-PTECT  -4.51 [ -6.53,  -2.84] 32/0  p=8e-07
+
+-- m50: MDD-PTECT mean 158.2 k job-s; best pair MDD-PTECT; pairs vs MDD-PTECT: MDD-PTECT +0.0%, MDD-PECT +2.0%, ATC-PTECT +2.6%, ATC-PECT +4.6%, SRT-PTECT +8.0%, SRT-PECT +10.5%
+   pair ranking vs 15 machines: Kendall tau +0.20 (p 0.72)
+   cmix s3                  vs MDD-PTECT  -2.12 [ -4.56,  +0.09] 29/11 p=0.019
+   cmix mean of 5           vs MDD-PTECT  -1.29 [ -2.57,  +0.06] 26/14 p=0.058
+   loose s2                 vs MDD-PTECT  -2.02 [ -5.03,  +1.71] 26/14 p=0.14
+   loose mean of 5          vs MDD-PTECT  -1.54 [ -3.61,  +1.21] 28/12 p=0.029
+   PPO s4                   vs MDD-PTECT  -1.54 [ -5.52,  +3.64] 23/17 p=0.48
+   PPO mean of 5            vs MDD-PTECT  +0.26 [ -1.47,  +2.24] 23/17 p=0.69
+   hindsight best v5 pair   vs MDD-PTECT  -4.57 [ -7.06,  -2.78] 31/0  p=1.2e-06
+
+-- m100: MDD-PTECT mean 456.0 k job-s; best pair MDD-PTECT; pairs vs MDD-PTECT: MDD-PTECT +0.0%, SRT-PTECT +5.1%, MDD-PECT +5.6%, SRT-PECT +11.1%, ATC-PTECT +23.4%, ATC-PECT +31.5%
+   pair ranking vs 15 machines: Kendall tau +0.60 (p 0.14)
+   cmix s3                  vs MDD-PTECT  +0.44 [ -0.67,  +1.65] 21/19 p=0.98
+   cmix mean of 5           vs MDD-PTECT  +2.60 [ +1.30,  +3.90] 16/24 p=0.0061
+   loose s2                 vs MDD-PTECT  +5.79 [ +2.93,  +9.16] 16/24 p=0.002
+   loose mean of 5          vs MDD-PTECT  +4.60 [ +2.47,  +6.91] 15/25 p=0.0012
+   PPO s4                   vs MDD-PTECT +11.46 [ +7.48, +16.41] 11/29 p=5.4e-05
+   PPO mean of 5            vs MDD-PTECT  +4.93 [ +2.97,  +7.43] 14/26 p=0.00054
+   hindsight best v5 pair   vs MDD-PTECT  -0.72 [ -1.29,  -0.36] 20/0  p=8.9e-05
