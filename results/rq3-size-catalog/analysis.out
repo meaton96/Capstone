@@ -1,0 +1,106 @@
+== rq3-size-catalog: 84 catalog pairs (12 job x 7 machine rules) as fixed pairs, by floor size; vs MDD-PTECT, pooled; < 0 better. Proxies: inst / block = hindsight best per instance / per regime block; map = one pair per regime (observable). Fitting seeds 2000-2039 | test 0-39.
+
+-- m15 (15 machines): 40 / 40 fitting, 40 / 40 test seeds
+   best fixed pairs (test): MDD-PECT -0.5, MDD-PTECT +0.0, SRT-PECT +4.8, SRT-PTECT +5.7, ATC-PTECT +11.3, CR-PTECT +12.4, ATC-PECT +13.1, CR-PECT +13.6
+   v5 ranks: MDD-PECT #1, MDD-PTECT #2, SRT-PECT #3, SRT-PTECT #4, ATC-PTECT #5, ATC-PECT #7; best outside v5: CR-PTECT +12.4% (#6)
+   best per regime, normal: MDD-PECT -0.9, MDD-PTECT +0.0, SRT-PTECT +5.0
+   best per regime, short : MDD-PECT -0.4, MDD-PTECT +0.0, SRT-PECT +2.9
+   best per regime, surge : MDD-PTECT +0.0, MDD-PECT +0.2, SRT-PECT +5.9
+   per-block winners (test, 200 blocks): MDD-PECT 25, MDD-PTECT 20, ATC-PECT 17, SRT-PECT 14, ATC-PTECT 10, SRT-PTECT 9
+   proxies, full pool : fit map  -0.71 block -15.76 inst  -8.14 | test map  -0.53 block -11.19 inst  -5.42
+   proxies, v5        : fit map  -0.71 block -11.41 inst  -6.70 | test map  -0.53 block  -7.91 inst  -4.51
+   greedy 'block' portfolio (fitting, start MDD-PTECT):
+     K=1 MDD-PTECT                                                      fit block  -0.00 | test map  +0.00 block  +0.00 inst  +0.00
+     K=2 MDD-PTECT/ATC-PECT                                             fit block  -9.26 | test map  +0.00 block  -4.24 inst  -1.63
+     K=3 MDD-PTECT/ATC-PECT/MOD-PECT                                    fit block -10.92 | test map  +0.00 block  -4.84 inst  -1.95
+     K=4 MDD-PTECT/ATC-PECT/MOD-PECT/SRT-PTECT                          fit block -11.92 | test map  +0.00 block  -6.55 inst  -2.84
+     K=5 MDD-PTECT/ATC-PECT/MOD-PECT/SRT-PTECT/FIFO-PECT                fit block -12.66 | test map  +0.00 block  -7.29 inst  -2.84
+     K=6 MDD-PTECT/ATC-PECT/MOD-PECT/SRT-PTECT/FIFO-PECT/PTWINQ-PTECT   fit block -13.26 | test map  +0.00 block  -7.31 inst  -2.84
+   greedy 'map' portfolio (fitting, start MDD-PTECT):
+     K=1 MDD-PTECT                                                      fit map  +0.00 | test map  +0.00 block  +0.00 inst  +0.00
+     K=2 MDD-PTECT/ATC-PTECT                                            fit map  -0.61 | test map  +0.00 block  -4.04 inst  -1.36
+     K=3 MDD-PTECT/ATC-PTECT/MDD-PECT                                   fit map  -0.71 | test map  -0.53 block  -6.17 inst  -3.53
+     K=4 MDD-PTECT/ATC-PTECT/MDD-PECT/SPT-SMPT                          fit map  -0.71 | test map  -0.53 block  -6.17 inst  -3.53
+     K=5 MDD-PTECT/ATC-PTECT/MDD-PECT/SPT-SMPT/SPT-SRWT                 fit map  -0.71 | test map  -0.53 block  -6.17 inst  -3.53
+     K=6 MDD-PTECT/ATC-PTECT/MDD-PECT/SPT-SMPT/SPT-SRWT/SPT-MMUR        fit map  -0.71 | test map  -0.53 block  -6.17 inst  -3.53
+
+-- m30 (30 machines): 40 / 40 fitting, 40 / 40 test seeds
+   best fixed pairs (test): ATC-PTECT -5.2, ATC-PECT -4.4, MDD-PECT -1.8, MDD-PTECT +0.0, MOD-PECT +3.2, MOD-PTECT +6.0, SRT-PTECT +7.8, SRT-PECT +8.5
+   v5 ranks: ATC-PTECT #1, ATC-PECT #2, MDD-PECT #3, MDD-PTECT #4, SRT-PTECT #7, SRT-PECT #8; best outside v5: MOD-PECT +3.2% (#5)
+   best per regime, normal: ATC-PTECT -7.2, ATC-PECT -6.9, MDD-PECT -2.1
+   best per regime, short : MDD-PECT -1.7, MDD-PTECT +0.0, ATC-PTECT +1.8
+   best per regime, surge : ATC-PTECT -8.4, ATC-PECT -7.4, MDD-PECT -1.5
+   per-block winners (test, 200 blocks): ATC-PTECT 32, ATC-PECT 22, MOD-PECT 13, SPT-ECT 12, MDD-PECT 12, MDD-PTECT 7
+   proxies, full pool : fit map  -4.18 block -13.59 inst  -8.12 | test map  -6.11 block -15.53 inst -10.03
+   proxies, v5        : fit map  -4.18 block -11.59 inst  -7.79 | test map  -6.11 block -13.19 inst  -9.57
+   greedy 'block' portfolio (fitting, start MDD-PTECT):
+     K=1 MDD-PTECT                                                      fit block  +0.00 | test map  +0.00 block  +0.00 inst  +0.00
+     K=2 MDD-PTECT/ATC-PECT                                             fit block  -8.83 | test map  -5.25 block -10.16 inst  -7.27
+     K=3 MDD-PTECT/ATC-PECT/ATC-PTECT                                   fit block -10.36 | test map  -5.68 block -12.01 inst  -8.60
+     K=4 MDD-PTECT/ATC-PECT/ATC-PTECT/MDD-PECT                          fit block -11.31 | test map  -6.11 block -12.90 inst  -9.37
+     K=5 MDD-PTECT/ATC-PECT/ATC-PTECT/MDD-PECT/MOD-PTECT                fit block -12.13 | test map  -6.11 block -13.59 inst  -9.50
+     K=6 MDD-PTECT/ATC-PECT/ATC-PTECT/MDD-PECT/MOD-PTECT/MOD-PECT       fit block -12.43 | test map  -6.11 block -13.91 inst  -9.67
+   greedy 'map' portfolio (fitting, start MDD-PTECT):
+     K=1 MDD-PTECT                                                      fit map  +0.00 | test map  +0.00 block  +0.00 inst  +0.00
+     K=2 MDD-PTECT/ATC-PECT                                             fit map  -3.98 | test map  -5.25 block -10.16 inst  -7.27
+     K=3 MDD-PTECT/ATC-PECT/MDD-PECT                                    fit map  -4.18 | test map  -5.68 block -11.28 inst  -8.26
+     K=4 MDD-PTECT/ATC-PECT/MDD-PECT/SPT-SMPT                           fit map  -4.18 | test map  -5.68 block -11.28 inst  -8.26
+     K=5 MDD-PTECT/ATC-PECT/MDD-PECT/SPT-SMPT/SPT-SRWT                  fit map  -4.18 | test map  -5.68 block -11.29 inst  -8.26
+     K=6 MDD-PTECT/ATC-PECT/MDD-PECT/SPT-SMPT/SPT-SRWT/SPT-MMUR         fit map  -4.18 | test map  -5.68 block -11.29 inst  -8.26
+
+-- m50 (50 machines): 40 / 40 fitting, 40 / 40 test seeds
+   best fixed pairs (test): MDD-PTECT +0.0, MDD-PECT +2.0, ATC-PTECT +2.6, ATC-PECT +4.6, EDD-PTECT +6.5, CR-PTECT +7.7, SRT-PTECT +8.0, EDD-PECT +8.9
+   v5 ranks: MDD-PTECT #1, MDD-PECT #2, ATC-PTECT #3, ATC-PECT #4, SRT-PTECT #7, SRT-PECT #11; best outside v5: EDD-PTECT +6.5% (#5)
+   best per regime, normal: ATC-PECT -5.6, ATC-PTECT -5.2, MDD-PTECT +0.0
+   best per regime, short : MDD-PTECT +0.0, MDD-PECT +1.0, SRT-PTECT +4.3
+   best per regime, surge : ATC-PTECT -0.8, MDD-PTECT +0.0, ATC-PECT +1.3
+   per-block winners (test, 200 blocks): ATC-PTECT 21, ATC-PECT 21, MOD-PECT 15, MDD-PTECT 14, SLACK-TECT 11, SPT-TECT 11
+   proxies, full pool : fit map  -2.21 block -12.04 inst  -7.27 | test map  -2.33 block -14.85 inst  -8.21
+   proxies, v5        : fit map  -2.21 block  -9.19 inst  -6.45 | test map  -2.33 block  -8.88 inst  -4.57
+   greedy 'block' portfolio (fitting, start MDD-PTECT):
+     K=1 MDD-PTECT                                                      fit block  -0.00 | test map  -0.00 block  -0.00 inst  +0.00
+     K=2 MDD-PTECT/ATC-PTECT                                            fit block  -7.02 | test map  -2.18 block  -6.63 inst  -3.74
+     K=3 MDD-PTECT/ATC-PTECT/CR-TECT                                    fit block  -8.40 | test map  -2.18 block  -9.14 inst  -5.14
+     K=4 MDD-PTECT/ATC-PTECT/CR-TECT/MDD-PECT                           fit block  -9.16 | test map  -2.18 block  -9.58 inst  -5.24
+     K=5 MDD-PTECT/ATC-PTECT/CR-TECT/MDD-PECT/ATC-PECT                  fit block  -9.79 | test map  -2.33 block -10.62 inst  -5.82
+     K=6 MDD-PTECT/ATC-PTECT/CR-TECT/MDD-PECT/ATC-PECT/SLACK-TECT       fit block -10.20 | test map  -2.33 block -11.24 inst  -6.28
+   greedy 'map' portfolio (fitting, start MDD-PTECT):
+     K=1 MDD-PTECT                                                      fit map  -0.00 | test map  -0.00 block  -0.00 inst  +0.00
+     K=2 MDD-PTECT/ATC-PTECT                                            fit map  -1.82 | test map  -2.18 block  -6.63 inst  -3.74
+     K=3 MDD-PTECT/ATC-PTECT/MDD-PECT                                   fit map  -2.21 | test map  -2.18 block  -7.33 inst  -3.96
+     K=4 MDD-PTECT/ATC-PTECT/MDD-PECT/SPT-SMPT                          fit map  -2.21 | test map  -2.18 block  -7.33 inst  -3.96
+     K=5 MDD-PTECT/ATC-PTECT/MDD-PECT/SPT-SMPT/SPT-SRWT                 fit map  -2.21 | test map  -2.18 block  -7.33 inst  -3.96
+     K=6 MDD-PTECT/ATC-PTECT/MDD-PECT/SPT-SMPT/SPT-SRWT/SPT-MMUR        fit map  -2.21 | test map  -2.18 block  -7.33 inst  -3.96
+
+-- m100 (100 machines): 40 / 40 fitting, 40 / 40 test seeds
+   best fixed pairs (test): MDD-TECT -1.9, MDD-PTECT +0.0, SRT-TECT +3.8, SRT-PTECT +5.1, MDD-PECT +5.6, EDD-TECT +8.6, CR-TECT +9.3, CR-PTECT +9.7
+   v5 ranks: MDD-PTECT #2, SRT-PTECT #4, MDD-PECT #5, SRT-PECT #10, ATC-PTECT #18, ATC-PECT #21; best outside v5: MDD-TECT -1.9% (#1)
+   best per regime, normal: MDD-PTECT +0.0, CR-PTECT +4.6, EDD-PTECT +4.7
+   best per regime, short : MDD-TECT -11.5, SRT-TECT -6.8, MDD-PTECT +0.0
+   best per regime, surge : MDD-TECT -0.1, MDD-PTECT +0.0, SRT-TECT +3.1
+   per-block winners (test, 200 blocks): MDD-TECT 23, EDD-TECT 19, SLACK-TECT 12, ATC-PTECT 11, ATC-PECT 11, SRT-TECT 11
+   proxies, full pool : fit map  -2.24 block -12.63 inst  -7.18 | test map  -3.53 block -12.99 inst  -8.47
+   proxies, v5        : fit map  -0.00 block  -4.08 inst  -2.17 | test map  +0.00 block  -2.66 inst  -0.72
+   greedy 'block' portfolio (fitting, start MDD-PTECT):
+     K=1 MDD-PTECT                                                      fit block  -0.00 | test map  +0.00 block  +0.00 inst  +0.00
+     K=2 MDD-PTECT/MDD-TECT                                             fit block  -5.96 | test map  -3.53 block  -8.85 inst  -7.01
+     K=3 MDD-PTECT/MDD-TECT/ATC-PTECT                                   fit block  -8.95 | test map  -3.53 block -10.62 inst  -7.38
+     K=4 MDD-PTECT/MDD-TECT/ATC-PTECT/FIFO-PTECT                        fit block  -9.94 | test map  -3.53 block -10.98 inst  -7.38
+     K=5 MDD-PTECT/MDD-TECT/ATC-PTECT/FIFO-PTECT/SLACK-TECT             fit block -10.61 | test map  -3.53 block -11.49 inst  -7.57
+     K=6 MDD-PTECT/MDD-TECT/ATC-PTECT/FIFO-PTECT/SLACK-TECT/MOD-PTECT   fit block -11.07 | test map  -3.53 block -11.60 inst  -7.57
+   greedy 'map' portfolio (fitting, start MDD-PTECT):
+     K=1 MDD-PTECT                                                      fit map  -0.00 | test map  +0.00 block  +0.00 inst  +0.00
+     K=2 MDD-PTECT/MDD-TECT                                             fit map  -2.24 | test map  -3.53 block  -8.85 inst  -7.01
+     K=3 MDD-PTECT/MDD-TECT/SPT-SMPT                                    fit map  -2.24 | test map  -3.53 block  -8.85 inst  -7.01
+     K=4 MDD-PTECT/MDD-TECT/SPT-SMPT/SPT-SRWT                           fit map  -2.24 | test map  -3.53 block  -8.85 inst  -7.01
+     K=5 MDD-PTECT/MDD-TECT/SPT-SMPT/SPT-SRWT/SPT-MMUR                  fit map  -2.24 | test map  -3.53 block  -8.85 inst  -7.01
+     K=6 MDD-PTECT/MDD-TECT/SPT-SMPT/SPT-SRWT/SPT-MMUR/SPT-ECT          fit map  -2.24 | test map  -3.53 block  -8.87 inst  -7.01
+
+-- m200 (200 machines): 0 / 40 fitting, 0 / 40 test seeds
+
+== by floor size (test seeds): best fixed pair; hindsight proxies of the full pool, v5 and the greedy block portfolio (K = 6, chosen on fitting seeds)
+floor best_pair  best_pair_% best_outside_v5  best_outside_v5_%  full_test_block_%  v5_test_block_%  block6_test_block_%  full_test_inst_%  v5_test_inst_%  full_test_map_%  v5_test_map_%
+  m15  MDD-PECT        -0.47        CR-PTECT              12.39             -11.19            -7.91                -7.31             -5.42           -4.51            -0.53          -0.53
+  m30 ATC-PTECT        -5.20        MOD-PECT               3.24             -15.53           -13.19               -13.91            -10.03           -9.57            -6.11          -6.11
+  m50 MDD-PTECT         0.00       EDD-PTECT               6.49             -14.85            -8.88               -11.24             -8.21           -4.57            -2.33          -2.33
+ m100  MDD-TECT        -1.91        MDD-TECT              -1.91             -12.99            -2.66               -11.60             -8.47           -0.72            -3.53           0.00
