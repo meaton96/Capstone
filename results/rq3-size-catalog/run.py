@@ -2,7 +2,7 @@
 @file run.py
 @brief rq3-size-catalog (2026-10-20, user: do the rules that give switching headroom change with floor size?): the
        84-pair catalog screen of ../rq2-portfolio-screen (12 job rules x 7 machine rules, each held as a fixed pair,
-       window tardiness split by 1.5 h regime block) at 30, 50 and 100 machines, on the floor-size grid's conditions
+       window tardiness split by 1.5 h regime block) at 30, 50 and 100 machines (200 added 10-20, run last), on the floor-size grid's conditions
        through ../rq3-size-oracle/sizesim.py (frozen v5 code and sim.py of rq2-rebase-v5; MDD-PTECT = the grid's).
 Seeds: test 0-39 (reporting) and fitting 2000-2039 (portfolio selection for the step-3 oracle). 15 machines = the
 original screen (its fitting seeds 2000-2039 are used for comparability).
@@ -10,7 +10,7 @@ Output <cond>/out/s<seed>.json in rq2-portfolio-screen's format (so its select_p
 @par Usage
 @code{.sh}
 python results/rq3-size-catalog/run.py run m50 0 [out_root]
-python results/rq3-size-catalog/run.py list              # task lines, m100 first
+python results/rq3-size-catalog/run.py list [m200 ...]    # task lines (default m100 m50 m30, m100 first)
 @endcode
 """
 import importlib.util
@@ -70,7 +70,7 @@ def run(cond, seed, root=HERE):
 
 def main(argv):
     if argv[0] == "list":
-        for c in CONDS:
+        for c in argv[1:] or CONDS:
             for s in SEEDS:
                 print("run", c, s)
     else:

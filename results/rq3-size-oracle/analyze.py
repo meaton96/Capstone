@@ -1,7 +1,7 @@
 """
 @file analyze.py
 @brief rq3-size-oracle (2026-10-20): the v5 switching-oracle ceiling by floor size. Per floor (m15 = ../rq2-rebase-v5's
-       B2 oracle, same oracle and code; m50 / m100 = out/): the oracle and the hindsight best v5 pair per instance vs
+       B2 oracle, same oracle and code; m50 / m100 / m200 = out/): the oracle and the hindsight best v5 pair per instance vs
        MDD-PTECT (pooled window tardiness over B2 test seeds 0-39, seed-bootstrap 95% CI, Wilcoxon), switching beyond
        the per-instance pick (oracle vs hindsight best pair), and the oracle's slot use. Reproduction check: MDD-PTECT
        held all episode (the oracle's slot-0 tail) = the grid's MDD-PTECT on the same seed.
@@ -28,7 +28,7 @@ ss = importlib.util.module_from_spec(_s)
 _s.loader.exec_module(ss)
 V5 = rq3.V5
 REF = rq3.REF
-FLOORS = {"m15": 15, "m50": 50, "m100": 100}
+FLOORS = {"m15": 15, "m50": 50, "m100": 100, "m200": 200}
 
 
 def load(cond):

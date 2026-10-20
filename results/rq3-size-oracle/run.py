@@ -4,14 +4,15 @@
        and 100 machines, the training sizes of train-size-m50 / -m100 (the check CLAUDE.md asks for before training on
        a regime, done late: those runs were queued 10-19). Same greedy oracle as ../rq2-rebase-v5 and
        ../rq3-oracle-loose (6 v5 pairs, 900 s slots, hold-to-end tails; the frozen code and sim.py of rq2-rebase-v5),
-       on the floor-size grid's conditions through sizesim.py. B2 test seeds 0-39.
+       on the floor-size grid's conditions through sizesim.py. B2 test seeds 0-39. 200 machines added 10-20 (user),
+       run after the 50 / 100-machine oracle and the catalog screen (launch_m200.sh).
        Output out/<cond>/s<seed>.json: per-slot tails, the oracle schedule, the oracle and every fixed pair's window
        tardiness (1000 job-s), seconds.
 @par Usage
 @code{.sh}
 python results/rq3-size-oracle/run.py check m50          # MDD-PTECT via the oracle's simulator = the grid's, seeds 0-2
 python results/rq3-size-oracle/run.py oracle m100 7
-python results/rq3-size-oracle/run.py list               # task lines, m100 first
+python results/rq3-size-oracle/run.py list [m200 ...]     # task lines (default m100 m50, m100 first)
 @endcode
 """
 import importlib.util
@@ -79,7 +80,7 @@ def oracle(cond, seed):
 
 def main(argv):
     if argv[0] == "list":
-        for c in CONDS:
+        for c in argv[1:] or CONDS:
             for s in SEEDS:
                 print("oracle", c, s)
     elif argv[0] == "check":

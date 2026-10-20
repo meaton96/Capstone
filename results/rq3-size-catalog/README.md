@@ -1,6 +1,8 @@
-# rq3-size-catalog: the 84-pair rule catalog at 30, 50 and 100 machines (2026-10-20, user)
+# rq3-size-catalog: the 84-pair rule catalog at 30, 50, 100 and 200 machines (2026-10-20, user)
 
-Status: **queued in the lab after `rq3-size-oracle` (local, 240 tasks, 16 at a time).** Step 2 of the size rule sweep
+Status: **queued in the lab after `rq3-size-oracle` (local, 240 tasks, 16 at a time). 200 machines
+(`rq3-size-catalog-m200`: `launch.sh 16 m200`, 80 tasks, ~93 core-hours) added by the user 10-20, runs last, after
+`rq3-size-oracle-m200`.** Step 2 of the size rule sweep
 (step 1: `../rq3-size-oracle`). Step 3, the exact oracle for a size-specific portfolio, is decided after this.
 
 ## Question

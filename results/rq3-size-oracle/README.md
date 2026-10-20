@@ -1,6 +1,8 @@
-# rq3-size-oracle: the v5 switching-oracle ceiling at 50 and 100 machines (2026-10-20, user)
+# rq3-size-oracle: the v5 switching-oracle ceiling at 50, 100 and 200 machines (2026-10-20, user)
 
-Status: **running locally since 10-20 ~14:30 (lab `rq3-size-oracle`, 80 tasks, 16 at a time).** Step 1 of the size
+Status: **50 / 100 machines running locally since 10-20 ~14:30 (lab `rq3-size-oracle`, 80 tasks, 16 at a time);
+200 machines (`rq3-size-oracle-m200`, `launch_m200.sh`, 40 tasks, ~80 core-hours) added by the user 10-20, queued
+after `rq3-size-catalog`.** Step 1 of the size
 rule sweep; step 2 is `../rq3-size-catalog`; step 3 (the exact oracle for a size-specific portfolio) waits on step 2.
 
 ## Why

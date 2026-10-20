@@ -1,7 +1,7 @@
 """
 @file analyze.py
 @brief rq3-size-catalog (2026-10-20): which rule pairs are strong and which are complementary, by floor size. Per floor
-       (m15 = ../rq2-portfolio-screen's runs; m30 / m50 / m100 = <cond>/out), with ../rq2-portfolio-screen's own
+       (m15 = ../rq2-portfolio-screen's runs; m30 / m50 / m100 / m200 = <cond>/out), with ../rq2-portfolio-screen's own
        proxy and greedy functions (select_portfolios.py), all vs MDD-PTECT, pooled over seeds, < 0 better:
        - the best fixed pairs on test seeds 0-39 (where the v5 pairs rank; the best pair outside v5);
        - the best pair per regime (normal / surge / short fleet), test seeds;
@@ -29,7 +29,7 @@ sp = importlib.util.module_from_spec(_s)
 _s.loader.exec_module(sp)
 FIT = list(range(2000, 2040))
 TEST = list(range(40))
-FLOORS = {"m15": 15, "m30": 30, "m50": 50, "m100": 100}
+FLOORS = {"m15": 15, "m30": 30, "m50": 50, "m100": 100, "m200": 200}
 V5 = sp.V5
 BF = sp.BF
 
