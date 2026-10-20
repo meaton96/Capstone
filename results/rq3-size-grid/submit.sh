@@ -1,7 +1,7 @@
 #!/bin/bash
 # rq3-size-grid (10-20): cluster submit, twin_array.sbatch, one CPU per task. Only unfinished tasks are listed, so
 # resubmitting resumes.
-#   ref   pdr + cmix on the new floors m20 m30 m75 (10-seed chunks, 6 h) and m150 m200 (5-seed chunks, 9 h): 56 tasks.
+#   ref   pdr + cmix on the new floors m20 m30 m75 (10-seed chunks, 6 h) and m150 m200 (5-seed chunks, 10 h): 56 tasks.
 #         m15 / m50 / m100 pdr and cmix come from rq3-gen-v5, eval-v5-cmix and rq3-size-v5.
 #   arms  size50 / size100 / sizemix (train-size-m50 / -m100 / -mix s0-s4) on all 8 floors: 120 tasks. Needs the
 #         checkpoints on the cluster (results/train-size-*_s<k>/checkpoint.pt).
@@ -45,7 +45,7 @@ cd linux_server; mkdir -p logs
 for sz in small big; do
     T=$D/tasks_${PART}_$sz.txt; N=$(wc -l < $T)
     [[ $N -gt 0 ]] || { echo "$sz: nothing to run"; continue; }
-    LIM=0-06:00:00; [[ $sz == big ]] && LIM=0-09:00:00
+    LIM=0-06:00:00; [[ $sz == big ]] && LIM=0-10:00:00
     echo "$sz: $N tasks, limit $LIM"
     sbatch --account=drl-scheduling --partition=sporc --time=$LIM --mem=8g --array=0-$((N - 1)) \
         --job-name=rq3-grid-$PART --export=ALL,SCRIPT=$H/task.py,TASKS=$T slurm/twin_array.sbatch

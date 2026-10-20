@@ -38,7 +38,7 @@ Does a policy carry over to floor sizes it was not trained on, and how far? Hypo
   | Tmix | `sizemix` | 15 + 50 + 100 | `train-size-mix_s0-4` |
 
   Plus `pdr`: the 6 v5 pairs + MDD-TECT per floor.
-- **Chunks:** 10 test seeds per task up to m100, 5 on m150 / m200. One m200 episode takes 5-10+ minutes locally
+- **Chunks:** 10 test seeds per task up to m100, 5 on m150 / m200. One m200 episode takes 5-13 minutes locally (peak memory 0.74 GB)
   (rule or policy alike; the random warm-up length varies by seed), and an m100 10-seed chunk took ~2.6 h on the
   cluster, so 10-seed m200 chunks of 7 policies would come close to the cluster's 10 h limit.
 - **1000 machines** is left out for now: `../dev-size-1000-probe` measured ~6 h and 7.7 GB per episode (a full cell
