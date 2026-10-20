@@ -1,7 +1,8 @@
 # rq3-size-m1000: reduced 1000-machine column of the floor-size grid (2026-10-20, user: "yes")
 
-Status: **reference half (`rq3-size-m1000-ref`) queued on the cluster 10-20 14:19 (array 21932264); arms half
-(`rq3-size-m1000`) waits on `rq3-size-grid`.** Part of the floor-size study (`../rq3-size-train/README.md`); grid up to
+Status: **final policy (`rq3-size-m1000-ref`) queued on the cluster 10-20 14:19 (array 21932264_[10-14]); the rule
+groups (`rq3-size-m1000-sim`) run locally in the oracle simulator (moved 10-20, user); arms half (`rq3-size-m1000`)
+waits on `rq3-size-grid`.** Part of the floor-size study (`../rq3-size-train/README.md`); grid up to
 200 machines: `../rq3-size-grid/README.md`.
 
 ## Why
@@ -31,7 +32,16 @@ can show whether a policy does anything different from MDD-PTECT there and in wh
   cluster), and episode time varies ±50% by seed (seed 0 was the fastest of those ten). So expect ~10-16 h per task,
   ~30 tasks ≈ 300-450 core-hours (above the ~180 quoted before the speed check). Limits: 2 days, 20 GB per task.
   The reference half runs with `--nice=100` so the queued training jobs stay ahead.
-- **Reproduction check:** seed 0 of MDD-PTECT and the final policy repeats the local probe on the cluster.
+- **Reproduction check:** seed 0 of the final policy repeats the local probe on the cluster.
+- **Rule groups in the simulator (10-20, user):** `../rq3-size-oracle` found the oracle's frozen simulator
+  (`../rq3-size-oracle/sizesim.py`) gives the grid's MDD-PTECT exactly at 15-200 machines and runs rule episodes
+  ~5-10x faster than evaluate.py, which builds the policy's observations even for rule episodes. So `mdd` and `srt`
+  (array tasks 0-9, still pending) were cancelled on the cluster and run locally with `sim_rules.py` /
+  `launch_sim.sh`, saving roughly 100-160 cluster core-hours. Output format and folders are unchanged
+  (`episodes.csv` with `harness` = oracle simulator, `DONE`, `run.json`). Check first: MDD-PTECT seed 0 in the
+  simulator must equal the probe's evaluate.py value (53,335.636 k job-s), else the run stops. The launcher sizes its
+  parallelism from that episode's peak memory. The `sizesim.py` floor fallback gives m1000 the same definition as
+  `task.py` (checked: same parameters, floor and fleet).
 
 ## Analysis (`analyze.py` -> `analysis.out`, `summary.csv`)
 Per policy vs MDD-PTECT over the 5 seeds: pooled %, each seed's %, wins / losses / identical, exact sign test over the

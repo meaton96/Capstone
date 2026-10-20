@@ -1,6 +1,7 @@
 #!/bin/bash
 # rq3-size-m1000 (10-20): cluster submit, twin_array.sbatch, one (policy, seed) episode per task, test seeds 0-4.
-#   ref   mdd, srt, t15 (15 tasks; --nice=100 so the queued train-size-* jobs stay ahead)
+#   ref   t15 (5 tasks; --nice=100 so the queued train-size-* jobs stay ahead). The rule groups mdd / srt run locally
+#         in the oracle simulator since 10-20 (user; sim_rules.py, launch_sim.sh); array 21932264 tasks 0-9 cancelled.
 #   arms  t50, t100, tmix (15 tasks; runs pick.py first: needs rq3-size-grid's m200 arms in its summary.csv)
 # Limits: 2 days, 20 GB per task (one episode ~6 h / 7.7 GB locally on seed 0; ~1.6x slower on the cluster's nodes;
 # episode time varies +-50% by seed). Only unfinished tasks are listed, so resubmitting resumes.
@@ -9,7 +10,7 @@ PART="${1:?usage: submit.sh ref|arms}"
 cd "$(dirname "$0")/../.."
 H=results/rq3-size-m1000
 case $PART in
-    ref)  GRPS="mdd srt t15"; NICE="--nice=100"; RUNS="train-v5-cmix" ;;
+    ref)  GRPS="t15"; NICE="--nice=100"; RUNS="train-v5-cmix" ;;
     arms) GRPS="t50 t100 tmix"; NICE=""; RUNS="train-size-m50 train-size-m100 train-size-mix"
           .venv/bin/python $H/pick.py ;;
     *) echo "usage: submit.sh ref|arms"; exit 1 ;;

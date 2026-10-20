@@ -23,12 +23,25 @@ def grid_task():
     return gt
 
 
+def register(gt, cond):
+    """A floor size the grid does not define (e.g. m1000): the grid's per-machine scaling on the dev-size-floors
+    export, M / 5 machines per type, round(0.52 M) AGVs on duty, short blocks half (as ../rq3-size-m1000/task.py)."""
+    m = int(cond.lstrip("m"))
+    floor = gt.FLOORS / cond / "des_floor.json"
+    if not floor.exists():
+        raise FileNotFoundError(floor)
+    fleet = round(0.52 * m)
+    gt.rt.CONDITIONS[cond] = (gt.st.size_params(m // 5, fleet, round(fleet / 2)), floor, None, (fleet, m))
+
+
 def apply(sim, cond):
     """Point sim (a loaded frozen sim.py module) at condition `cond` of the floor-size grid."""
     if _applied:
         raise RuntimeError(f"sizesim.apply already called for {_applied[0]} in this process")
     _applied.append(cond)
     gt = grid_task()
+    if cond not in gt.rt.CONDITIONS:
+        register(gt, cond)
     params, floor, layout, fleet = gt.rt.CONDITIONS[cond]
     if layout:
         raise ValueError(f"{cond}: layout overrides are not supported here")
