@@ -1,0 +1,27 @@
+== rq3-size-oracle: v5 switching-oracle ceiling by floor size (6 v5 pairs, 900 s slots, hold-to-end tails), B2 test seeds 0-39, window tardiness; < 0 better
+
+-- m15 (15 machines): 40 / 40 seeds
+   MDD-PTECT mean 145.5 k job-s; = the grid's MDD-PTECT on 40 / 40 seeds
+   switching oracle                -9.42 [-11.33,  -7.61] 40/0  p=1.8e-12  (13.7 k job-s per instance)
+   hindsight best v5 pair          -4.51 [ -6.47,  -2.84] 32/0  p=8e-07  (6.6 k job-s per instance)
+   oracle vs hindsight best pair   -5.14 [ -6.43,  -3.95] 39/0  p=5.3e-08  (7.1 k job-s per instance)
+   oracle slot use: MDD-PECT 29%, MDD-PTECT 20%, ATC-PTECT 17%, ATC-PECT 17%, SRT-PECT 9%, SRT-PTECT 7%
+   fixed pairs vs MDD-PTECT (pooled): MDD-PECT -0.5%, MDD-PTECT +0.0%, SRT-PECT +4.8%, SRT-PTECT +5.7%, ATC-PTECT +11.3%, ATC-PECT +13.1%
+
+-- m50 (50 machines): 40 / 40 seeds
+   MDD-PTECT mean 158.2 k job-s; = the grid's MDD-PTECT on 40 / 40 seeds
+   switching oracle               -10.27 [-13.77,  -7.78] 40/0  p=1.8e-12  (16.2 k job-s per instance)
+   hindsight best v5 pair          -4.57 [ -7.11,  -2.78] 31/0  p=1.2e-06  (7.2 k job-s per instance)
+   oracle vs hindsight best pair   -5.97 [ -8.34,  -4.42] 40/0  p=1.8e-12  (9.0 k job-s per instance)
+   oracle slot use: ATC-PTECT 31%, ATC-PECT 25%, MDD-PTECT 22%, MDD-PECT 11%, SRT-PECT 7%, SRT-PTECT 4%
+   fixed pairs vs MDD-PTECT (pooled): MDD-PTECT +0.0%, MDD-PECT +2.0%, ATC-PTECT +2.6%, ATC-PECT +4.6%, SRT-PTECT +8.0%, SRT-PECT +10.5%
+
+-- m100 (100 machines): 40 / 40 seeds
+   MDD-PTECT mean 456.0 k job-s; = the grid's MDD-PTECT on 40 / 40 seeds
+   switching oracle                -3.29 [ -4.65,  -2.20] 38/0  p=7.7e-08  (15.0 k job-s per instance)
+   hindsight best v5 pair          -0.72 [ -1.35,  -0.37] 20/0  p=8.9e-05  (3.3 k job-s per instance)
+   oracle vs hindsight best pair   -2.59 [ -3.73,  -1.71] 38/0  p=7.7e-08  (11.7 k job-s per instance)
+   oracle slot use: MDD-PTECT 39%, ATC-PTECT 23%, ATC-PECT 15%, SRT-PTECT 11%, MDD-PECT 8%, SRT-PECT 5%
+   fixed pairs vs MDD-PTECT (pooled): MDD-PTECT +0.0%, SRT-PTECT +5.1%, MDD-PECT +5.6%, SRT-PECT +11.1%, ATC-PTECT +23.4%, ATC-PECT +31.5%
+
+-- m200 (200 machines): 0 / 40 seeds
