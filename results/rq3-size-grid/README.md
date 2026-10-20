@@ -40,9 +40,11 @@ Does a policy carry over to floor sizes it was not trained on, and how far? Hypo
   Plus `pdr`: the 6 v5 pairs + MDD-TECT per floor.
 - **Chunks:** 10 test seeds per task up to m100, 5 on m150 / m200. One m200 episode takes 5-13 minutes locally (peak memory 0.74 GB)
   (rule or policy alike; the random warm-up length varies by seed), and an m100 10-seed chunk took ~2.6 h on the
-  cluster, so 10-seed m200 chunks of 7 policies would come close to the cluster's 10 h limit.
-- **1000 machines** is left out for now: `../dev-size-1000-probe` measured ~6 h and 7.7 GB per episode (a full cell
-  would be ~6,000 core-hours). A reduced cell is a decision for the user.
+  cluster, which is ~1.6x slower per core than the local machine. A job's time limit cannot be raised after
+  submission (the partition itself allows 20 days), so the big floors use short chunks and generous limits.
+- **1000 machines:** `../dev-size-1000-probe` measured ~6 h and 7.7 GB per episode (a full cell would be ~6,000
+  core-hours). The user chose a reduced column (10-20): `../rq3-size-m1000` (5 test seeds, MDD-PTECT, SRT-PTECT, the
+  final policy and one seed of each new arm).
 
 ## Parts and lab experiments
 - `rq3-size-grid-ref`: `pdr` + `cmix` on m20 / m30 / m75 / m150 / m200, 56 tasks, local (`launch_local.sh ref 16`;
