@@ -1,0 +1,86 @@
+== rq3-size-grid: floor-size cross-evaluation, twin, test seeds 0-39, window tardiness; < 0 better
+   arms: T15 = final-policy family (train-v5-cmix), T50 / T100 / Tmix = train-size-m50 / -m100 / -mix
+
+-- m15 (15 machines): MDD-PTECT mean 145.5 k job-s; best pair MDD-PECT; pairs vs MDD-PTECT: MDD-PECT -0.5%, MDD-PTECT +0.0%, SRT-PECT +4.8%, SRT-PTECT +5.7%, ATC-PTECT +11.3%, ATC-PECT +13.1%
+   run-to-run: MDD-PTECT in the policy groups = the pdr group's on 40 / 40 seed-runs
+   hindsight best v5 pair      -4.51 [ -6.49,  -2.82] 32/0  p=8e-07   (vs MDD-PTECT)
+   T15 mean of 5               -1.69 [ -2.86,  -0.54] 28/12 p=0.0058   | vs MDD-PECT  -1.23   | training seeds -0.3 -2.3 -1.0 -1.7 -3.2 (mean -1.69, sd 1.13, t-test p=0.028)
+   T50                        not complete yet
+   T100                       not complete yet
+   Tmix                       not complete yet
+
+-- m20 (20 machines): MDD-PTECT mean 76.4 k job-s; best pair ATC-PECT; pairs vs MDD-PTECT: ATC-PECT -3.8%, ATC-PTECT -3.2%, MDD-PTECT +0.0%, MDD-PECT +0.6%, SRT-PECT +9.1%, SRT-PTECT +9.8%
+   run-to-run: MDD-PTECT in the policy groups = the pdr group's on 40 / 40 seed-runs
+   hindsight best v5 pair      -8.06 [-12.02,  -5.12] 36/0  p=1.7e-07   (vs MDD-PTECT)
+   T15 mean of 5               -5.28 [ -9.05,  -1.99] 34/6  p=1.5e-05   | vs ATC-PECT  -1.54   | training seeds -2.3 -3.8 -7.7 -7.1 -5.4 (mean -5.28, sd 2.25, t-test p=0.0064)
+   T50                        not complete yet
+   T100                       not complete yet
+   Tmix                       not complete yet
+
+-- m30 (30 machines): MDD-PTECT mean 92.8 k job-s; best pair ATC-PTECT; pairs vs MDD-PTECT: ATC-PTECT -5.2%, ATC-PECT -4.4%, MDD-PECT -1.8%, MDD-PTECT +0.0%, SRT-PTECT +7.8%, SRT-PECT +8.5%
+   run-to-run: MDD-PTECT in the policy groups = the pdr group's on 40 / 40 seed-runs
+   hindsight best v5 pair      -9.57 [-13.42,  -6.62] 37/0  p=1.1e-07   (vs MDD-PTECT)
+   T15 mean of 5               -4.59 [ -7.05,  -2.96] 36/4  p=2.4e-08   | vs ATC-PTECT  +0.64   | training seeds -2.8 -3.4 -5.7 -5.7 -5.3 (mean -4.59, sd 1.35, t-test p=0.0016)
+   T50                        not complete yet
+   T100                       not complete yet
+   Tmix                       not complete yet
+
+-- m50 (50 machines): MDD-PTECT mean 158.2 k job-s; best pair MDD-PTECT; pairs vs MDD-PTECT: MDD-PTECT +0.0%, MDD-PECT +2.0%, ATC-PTECT +2.6%, ATC-PECT +4.6%, SRT-PTECT +8.0%, SRT-PECT +10.5%
+   run-to-run: MDD-PTECT in the policy groups = the pdr group's on 40 / 40 seed-runs
+   hindsight best v5 pair      -4.57 [ -7.02,  -2.78] 31/0  p=1.2e-06   (vs MDD-PTECT)
+   T15 mean of 5               -1.29 [ -2.55,  +0.03] 26/14 p=0.058   | vs MDD-PTECT  -1.29   | training seeds -0.0 -0.9 -2.6 -2.1 -0.9 (mean -1.29, sd 1.03, t-test p=0.049)
+   T50                        not complete yet
+   T100                       not complete yet
+   Tmix                       not complete yet
+
+-- m75 (75 machines): MDD-PTECT mean 302.8 k job-s; best pair MDD-PTECT; pairs vs MDD-PTECT: MDD-PTECT +0.0%, MDD-PECT +2.9%, SRT-PTECT +6.3%, SRT-PECT +9.6%, ATC-PTECT +14.6%, ATC-PECT +22.2%
+   run-to-run: MDD-PTECT in the policy groups = the pdr group's on 40 / 40 seed-runs
+   hindsight best v5 pair      -2.28 [ -4.51,  -0.75] 25/0  p=1.2e-05   (vs MDD-PTECT)
+   T15 mean of 5               +1.24 [ -0.24,  +2.77] 22/18 p=0.46   | vs MDD-PTECT  +1.24   | training seeds +2.8 +2.0 -0.5 -0.1 +2.0 (mean +1.24, sd 1.44, t-test p=0.13)
+   T50                        not complete yet
+   T100                       not complete yet
+   Tmix                       not complete yet
+
+-- m100 (100 machines): MDD-PTECT mean 456.0 k job-s; best pair MDD-PTECT; pairs vs MDD-PTECT: MDD-PTECT +0.0%, SRT-PTECT +5.1%, MDD-PECT +5.6%, SRT-PECT +11.1%, ATC-PTECT +23.4%, ATC-PECT +31.5%
+   run-to-run: MDD-PTECT in the policy groups = the pdr group's on 40 / 40 seed-runs
+   hindsight best v5 pair      -0.72 [ -1.31,  -0.36] 20/0  p=8.9e-05   (vs MDD-PTECT)
+   T15 mean of 5               +2.60 [ +1.27,  +3.88] 16/24 p=0.0061   | vs MDD-PTECT  +2.60   | training seeds +3.8 +3.4 +1.0 +0.4 +4.4 (mean +2.60, sd 1.76, t-test p=0.03)
+   T50                        not complete yet
+   T100                       not complete yet
+   Tmix                       not complete yet
+
+-- m150 (150 machines): MDD-PTECT mean 1634.9 k job-s; best pair MDD-PTECT; pairs vs MDD-PTECT: MDD-PTECT +0.0%, SRT-PTECT +2.1%, MDD-PECT +11.7%, SRT-PECT +13.9%, ATC-PTECT +36.4%, ATC-PECT +55.9%
+   run-to-run: MDD-PTECT in the policy groups = the pdr group's on 40 / 40 seed-runs
+   hindsight best v5 pair      -0.26 [ -0.53,  -0.08] 11/0  p=0.0033   (vs MDD-PTECT)
+   T15 mean of 5               +6.51 [ +5.68,  +7.45]  3/37 p=3.8e-10   | vs MDD-PTECT  +6.51   | training seeds +8.1 +9.9 +1.3 +1.5 +11.7 (mean +6.51, sd 4.83, t-test p=0.039)
+   T50                        not complete yet
+   T100                       not complete yet
+   Tmix                       not complete yet
+
+-- m200 (200 machines): MDD-PTECT mean 2848.9 k job-s; best pair MDD-PTECT; pairs vs MDD-PTECT: MDD-PTECT +0.0%, SRT-PTECT +1.9%, MDD-PECT +17.7%, SRT-PECT +19.1%, ATC-PTECT +42.6%, ATC-PECT +71.1%
+   run-to-run: MDD-PTECT in the policy groups = the pdr group's on 40 / 40 seed-runs
+   hindsight best v5 pair      -0.17 [ -0.33,  -0.06] 10/0  p=0.0051   (vs MDD-PTECT)
+   T15 mean of 5               +9.54 [ +8.80, +10.44]  0/40 p=1.8e-12   | vs MDD-PTECT  +9.54   | training seeds +11.2 +13.8 +2.9 +2.7 +17.1 (mean +9.54, sd 6.51, t-test p=0.031)
+   T50                        not complete yet
+   T100                       not complete yet
+   Tmix                       not complete yet
+
+== family mean of 5 vs MDD-PTECT, pooled % (rows: training size, columns: test floor)
+       m15   m20   m30   m50   m75  m100  m150  m200
+T15  -1.69 -5.28 -4.59 -1.29  1.24   2.6  6.51  9.54
+T50      .     .     .     .     .     .     .     .
+T100     .     .     .     .     .     .     .     .
+Tmix     .     .     .     .     .     .     .     .
+
+== transfer curve (single-size arms): gap vs |log10(test / train)|
+   vs_ref  Spearman rho +0.93 (p 0.00086, 8 arm-floor cells)
+   vs_best Spearman rho +0.88 (p 0.0039, 8 arm-floor cells)
+arm floor     d  vs_ref  vs_best
+T15   m15 0.000  -1.692   -1.231
+T15   m20 0.125  -5.280   -1.541
+T15   m30 0.301  -4.587    0.641
+T15   m50 0.523  -1.292   -1.292
+T15   m75 0.699   1.241    1.241
+T15  m100 0.824   2.597    2.597
+T15  m150 1.000   6.510    6.510
+T15  m200 1.125   9.535    9.535

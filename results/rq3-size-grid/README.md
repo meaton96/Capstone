@@ -1,6 +1,6 @@
 # rq3-size-grid: floor-size cross-evaluation grid (2026-10-20, user: floor-size study phase 3)
 
-Status: **reference half (fixed pairs + final-policy family on the new floors) running locally; arms half waits on
+Status: **reference half done 10-20 14:05 (local, 8 h, 56 / 56 tasks); arms half (`rq3-size-grid`) waits on
 `train-size-m50` / `-m100` / `-mix`.** Umbrella: `../rq3-size-train/README.md`.
 
 ## Question
@@ -60,5 +60,66 @@ group equals the pdr group's on the same floor and seeds.
 Already in place before the run (from `../rq3-size-v5`, reproduced here): T15 family −1.69% at 15, −1.29% at 50,
 +2.60% at 100 machines.
 
-## Results
-Pending.
+## Results: reference half (10-20)
+Twin, test seeds 0-39, window tardiness; % vs MDD-PTECT, pooled over test seeds, < 0 better. Run-to-run check:
+MDD-PTECT in the policy groups equals the pdr group's on 40 / 40 seeds on every floor. `analysis.out`, `summary.csv`,
+`grid.csv`.
+
+### Rule landscape by floor size
+
+| floor | MDD-PTECT mean (k job-s) | per machine | best pair (vs MDD-PTECT) | worst pair | hindsight best pair |
+|---|---|---|---|---|---|
+| m15 (B2) | 145.5 | 9.7 | MDD-PECT −0.5% | ATC-PECT +13.1% | −4.5% |
+| m20 | 76.4 | 3.8 | ATC-PECT −3.8% | SRT-PTECT +9.8% | −8.1% |
+| m30 | 92.8 | 3.1 | ATC-PTECT −5.2% | SRT-PECT +8.5% | −9.6% |
+| m50 | 158.2 | 3.2 | MDD-PTECT | SRT-PECT +10.5% | −4.6% |
+| m75 | 302.8 | 4.0 | MDD-PTECT | ATC-PECT +22.2% | −2.3% |
+| m100 | 456.0 | 4.6 | MDD-PTECT | ATC-PECT +31.5% | −0.7% |
+| m150 | 1,634.9 | 10.9 | MDD-PTECT | ATC-PECT +55.9% | −0.26% |
+| m200 | 2,848.9 | 14.2 | MDD-PTECT | ATC-PECT +71.1% | −0.17% |
+
+- The room for any rule choice shrinks with size. The per-instance best of the 6 pairs in hindsight gains 8-10% over
+  MDD-PTECT at 20-30 machines, 0.7% at 100 and under 0.3% at 150-200.
+- ATC goes from the best pair (20-30 machines) to by far the worst (+36-71% at 150-200). SRT-PTECT stays within ~2%
+  of MDD-PTECT on the big floors.
+- Tardiness per machine is flat from 20 to 100 machines (3-5 k job-s) and rises 2-3x at 150-200: the large floors run
+  in a more congested regime at the same 0.52 AGVs per machine (likely longer AGV trips on a bigger floor; not
+  measured here).
+- m15 is B2 itself (full load, 7 AGVs = 0.47 per machine); m20 and up use B2 load × 0.9 and 0.52 AGVs per machine.
+  So the m15 → m20 step changes load as well as size.
+
+### T15: the policies trained on 15 machines (train-v5-cmix)
+
+| floor | size ratio vs 15 | family mean of 5 (95% CI), W/L | training seeds s0 / s1 / s2 / s3 / s4 | final policy s3 (95% CI), W/L |
+|---|---|---|---|---|
+| m15 | 1 | **−1.69** [−2.86, −0.54], 28/12 | −0.3 / −2.3 / −1.0 / −1.7 / −3.2 | −1.71 [−3.92, +0.44], 24/16 |
+| m20 | 1.3 | **−5.28** [−9.05, −1.99], 34/6 | −2.3 / −3.8 / −7.7 / −7.1 / −5.4 | **−7.11** [−12.27, −2.55], 33/7 |
+| m30 | 2 | **−4.59** [−7.05, −2.96], 36/4 | −2.8 / −3.4 / −5.7 / −5.7 / −5.3 | **−5.69** [−8.60, −3.60], 35/5 |
+| m50 | 3.3 | −1.29 [−2.55, +0.03], 26/14 | −0.0 / −0.9 / −2.6 / −2.1 / −0.9 | −2.12 [−4.56, +0.11], 29/11 |
+| m75 | 5 | +1.24 [−0.24, +2.77], 22/18 | +2.8 / +2.0 / −0.5 / −0.1 / +2.0 | −0.09 [−1.60, +1.82], 22/18 |
+| m100 | 6.7 | **+2.60** [+1.27, +3.88], 16/24 | +3.8 / +3.4 / +1.0 / +0.4 / +4.4 | +0.44 [−0.64, +1.70], 21/19 |
+| m150 | 10 | **+6.51** [+5.68, +7.45], 3/37 | +8.1 / +9.9 / +1.3 / +1.5 / +11.7 | **+1.48** [+0.73, +2.50], 8/28 |
+| m200 | 13.3 | **+9.54** [+8.80, +10.44], 0/40 | +11.2 / +13.8 / +2.9 / +2.7 / +17.1 | **+2.68** [+1.88, +3.66], 3/34 |
+
+Bold: CI excludes 0. Training-seed-level t-test of the 5 seeds against 0: p 0.028 (m15), 0.006 (m20), 0.002 (m30),
+0.049 (m50), 0.13 (m75), 0.03 (m100), 0.039 (m150), 0.031 (m200).
+
+- **Transfer falls with the size ratio.** Family gap vs |log10(test / 15)|: Spearman ρ +0.93 (p 0.0009, 8 floors;
+  ρ +0.88 vs the floor's best pair). Up to 2x the training size (20-30 machines) the policies beat MDD-PTECT by
+  5-7% and roughly match the floor's own best pair (family −1.5% vs ATC-PECT at m20, +0.6% vs ATC-PTECT at m30).
+  At 3x (m50) the edge is −1.3%, at 5x (m75) it is gone, and from 6.7x (m100) on they are worse than MDD-PTECT,
+  increasingly so (+6.5% at 10x, +9.5% at 13x, losing on 37-40 of 40 instances).
+- **The training seeds split in two on large floors.** s2 and s3 (the final policy) degrade gently (+1.3-2.9% at
+  150-200); s0, s1 and s4 lose 8-17%. On small floors all five gain. So the size limit depends on the training seed,
+  not only on the recipe; with 5 seeds this cannot be pinned to anything measurable yet.
+- **The final policy (s3)** is significantly better than MDD-PTECT up to 30 machines, ties it at 50-100 (CIs
+  include 0) and is 1.5-2.7% worse at 150-200.
+- **Reading:** above ~75 machines MDD-PTECT is close to the per-instance best rule, so a rule-selecting policy can
+  only lose, and any choice of ATC or PECT costs a lot there. The losses are what a 15-machine policy does when it
+  keeps choosing rules that pay off on small floors. This is consistent with `../rq3-size-remap` (input scaling is
+  not the cause). Whether training on 50 / 100 / mixed sizes fixes it is the arms half.
+
+### Thesis reading (so far)
+The proposal's "any floor size" claim does not hold for the 15-machine-trained policy. It holds within about 3x of
+the training size (15-50 machines: better than or equal to MDD-PTECT, family and final policy), and fails beyond
+~5x. The arms half tests whether a policy trained on larger or mixed floors moves or widens that window.
