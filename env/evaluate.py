@@ -175,17 +175,19 @@ class CheckpointPolicy:
     kind = "checkpoint"
 
     def __init__(self, path, device: str = "cpu", deterministic: bool = True):
-        from models.network import SchedulingNetwork, ac_config_for, encoder_config_for
+        from models.future_net import network_for
+        from models.network import ac_config_for, encoder_config_for
 
         path = Path(path)
         from train import check_action_layout, check_obs_schema, load_checkpoint
         checkpoint = load_checkpoint(path, device)
         check_obs_schema(checkpoint, path)
         check_action_layout(checkpoint, path)
-        # The policy uses the actor only; a look-ahead critic (ac_config_for) is loaded but never called here.
-        self.net = SchedulingNetwork(encoder_config_for(checkpoint["model_state_dict"]), FusionConfig(),
-                                     ac_config_for(checkpoint["model_state_dict"])).to(device)
-        self.net.load_state_dict(checkpoint["model_state_dict"])
+        # The policy uses the actor only; a look-ahead critic (ac_config_for) is loaded but never called here. A network
+        # with a future-job encoder (models.future_net, 10-20) reads obs "future_job_table".
+        sd = checkpoint["model_state_dict"]
+        self.net = network_for(sd, encoder_config_for(sd), ac_config_for(sd)).to(device)
+        self.net.load_state_dict(sd)
         self.net.eval()
         self.device = device
         self.deterministic = deterministic
@@ -194,6 +196,16 @@ class CheckpointPolicy:
         ##        PPO config, so main() can take slot_seconds and the discount from them and warn on mismatches.
         self.settings = dict(checkpoint.get("run_settings") or {})
         self.ppo = dict((checkpoint.get("config") or {}).get("ppo") or {})
+        ## @brief (rows, horizon s) of the future job table the network reads, or None (train.py --future-table, or a
+        ##        rq2-oracle-bc-future BC clone's future_rows / future_horizon).
+        self.future_table = None
+        if hasattr(self.net, "future_encoder"):
+            rows = self.settings.get("future_table") or self.settings.get("future_rows")
+            horizon = self.settings.get("future_horizon_s") or self.settings.get("future_horizon") or 7200.0
+            if not rows:
+                raise ValueError(f"{path}: the network reads a future job table but the checkpoint does not say how "
+                                 "many rows (run_settings future_table / future_rows)")
+            self.future_table = (int(rows), float(horizon))
         ## @brief Per-head action probabilities from the latest call (for decision logging).
         self.last_probs = None
 
@@ -931,8 +943,13 @@ def main(argv=None):
         from env_wrappers.twin_env import TwinSchedulingEnv
         # Look-ahead features (des_twin.lookahead) only when a checkpoint's policy reads them (rq3-lookahead).
         lookahead = any(p.kind == "checkpoint" and p.net.ac_cfg.policy_extra_dim for p in policies)
+        # The future job table (des_twin.future_table) only when a checkpoint reads it; one size for all of them.
+        tables = {p.future_table for p in policies if p.kind == "checkpoint" and p.future_table}
+        if len(tables) > 1:
+            raise SystemExit(f"checkpoints read future job tables of different sizes {sorted(tables)}: evaluate them "
+                             "separately")
         env = TwinSchedulingEnv(args.twin, transport=args.twin_transport, reward_fn=reward_fn, obs_caps=obs_caps,
-                                queued=True, critic_lookahead=lookahead)
+                                queued=True, critic_lookahead=lookahead, future_table=next(iter(tables), None))
     else:
         env = None
     env = env or UnitySchedulingEnv(
