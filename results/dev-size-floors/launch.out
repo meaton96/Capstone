@@ -1,0 +1,7 @@
+m50 rc=0 wall=118s des_floor=yes
+m30 rc=0 wall=150s des_floor=yes
+m75 rc=0 wall=193s des_floor=yes
+m100 rc=0 wall=432s des_floor=yes
+m150 rc=0 wall=660s des_floor=yes
+m200 rc=0 wall=761s des_floor=yes
+m1000 rc=0 wall=13640s des_floor=yes

@@ -1,0 +1,10 @@
+m20    machines    20  bays    20  zones    101  footprint (x, z) m (24.0, 22.5)  obs frame True
+m30    machines    30  bays    30  zones    146  footprint (x, z) m (30.0, 30.0)  obs frame True
+m50    machines    50  bays    50  zones    247  footprint (x, z) m (42.0, 45.0)  obs frame True
+m75    machines    75  bays    75  zones    357  footprint (x, z) m (48.0, 60.0)  obs frame True
+m100   machines   100  bays   100  zones    449  footprint (x, z) m (54.0, 67.5)  obs frame True
+m150   machines   150  bays   150  zones    670  footprint (x, z) m (72.0, 82.5)  obs frame True
+m200   machines   200  bays   200  zones    887  footprint (x, z) m (84.0, 97.5)  obs frame True
+m1000  machines  1000  bays  1000  zones   4198  footprint (x, z) m (186.0, 232.5)  obs frame True
+m50 new vs v4: differing top-level fields none
+m100 new vs v4: differing top-level fields none
