@@ -3,8 +3,10 @@
 @brief rq3-size-m1000 (2026-10-20): the reduced 1000-machine column of the floor-size grid. 5 test seeds, so per policy
        vs MDD-PTECT: pooled % over the 5 seeds, each seed's %, wins / losses / identical (|diff| < 1e-6 k job-s), and
        an exact sign test over the non-identical seeds (no CI: 5 seeds). Next to it, the same pick's pooled % at
-       200 machines in ../rq3-size-grid (seeds 0-39) for the trend. Reproduction check: seed 0 of MDD-PTECT and the final
-       policy here (cluster) vs ../dev-size-1000-probe (local). -> analysis.out, summary.csv
+       200 machines in ../rq3-size-grid (seeds 0-39) for the trend. Reproduction checks against ../dev-size-1000-probe
+       (local evaluate.py), seed 0: MDD-PTECT from the oracle simulator (mdd / srt run there since 10-20) and the final
+       policy from the cluster's evaluate.py; match = relative difference <= 1e-6 (float32 metrics).
+       -> analysis.out, summary.csv
 """
 import io
 import json
@@ -22,6 +24,7 @@ H = {"config_hash": str, "instance_hash": str}
 LABEL = {"mdd": "MDD-PTECT", "srt": "SRT-PTECT", "t15": "T15 s3 (final policy)", "t50": "T50", "t100": "T100",
          "tmix": "Tmix"}
 GRID_ARM = {"t15": "T15", "t50": "T50", "t100": "T100", "tmix": "Tmix"}
+SIM_GROUPS = {"mdd", "srt"}                      # run in the oracle simulator since 10-20 (sim_rules.py)
 
 
 def load():
@@ -51,8 +54,11 @@ def main():
         f = probe / pg / "episodes.csv"
         if f.exists() and g in t.columns and 0 in t.index and not np.isnan(t.loc[0, g]):
             v = float(pd.read_csv(f, dtype=H).window_tardiness.iloc[0]) / 1000.0
-            print(f"   reproduction, seed 0 {LABEL[g]}: cluster {t.loc[0, g]:,.3f} vs local probe {v:,.3f} k job-s"
-                  + ("  (identical)" if abs(v - t.loc[0, g]) < 1e-6 else "  ** DIFFERS **"))
+            where = "oracle simulator" if g in SIM_GROUPS else "cluster evaluate.py"
+            ok = abs(v - t.loc[0, g]) <= 1e-6 * abs(v) + 1e-4       # float32 rounding of evaluate.py's metrics
+            print(f"   reproduction, seed 0 {LABEL[g]}: {where} {t.loc[0, g]:,.4f} vs local probe (evaluate.py) "
+                  f"{v:,.4f} k job-s, relative difference {abs(v - t.loc[0, g]) / abs(v):.1e}"
+                  + ("  (match)" if ok else "  ** DIFFERS **"))
     out = []
     for g in ("srt", "t15", "t50", "t100", "tmix"):
         if g not in t.columns:

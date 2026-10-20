@@ -56,4 +56,17 @@ non-identical seeds (no CI with 5 seeds), and the same pick's pooled % at 200 ma
   rc=1).
 
 ## Results
-Pending.
+### Rules (10-20, `rq3-size-m1000-sim`, oracle simulator, done 18:43)
+- **Check:** MDD-PTECT seed 0 in the simulator = the probe's evaluate.py value (53,335.6343 vs 53,335.6359 k job-s,
+  relative difference 3.1e-8: float32 rounding of evaluate.py's metrics).
+- **Cost:** 41-107 min and 5.0-6.3 GB per episode in the simulator with all 20 local slots busy (MDD-PTECT seed 0
+  alone: 46 min), against 5.9 h through evaluate.py.
+- **MDD-PTECT** mean window tardiness 93,516.9 k job-s per instance, about 94 k per machine (14 k at 200 machines,
+  3-5 k at 20-100): the floor is heavily overloaded.
+- **SRT-PTECT vs MDD-PTECT: −0.29%** over the 5 seeds, better on all 5 (−0.68 / −0.06 / −0.18 / −0.50 / −0.25%;
+  sign test p 0.062, the smallest possible with 5 seeds). At 150 / 200 machines SRT-PTECT was +2.1% / +1.9% worse.
+  The two strongest rules converge (within 0.7% on every seed) and their order flips slightly.
+
+### Policies
+Pending: the final policy on the cluster (`rq3-size-m1000-ref`, array 21932264_[10-14]); the new arms after
+`rq3-size-grid` (`rq3-size-m1000`).
