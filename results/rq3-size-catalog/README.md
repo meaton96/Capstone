@@ -1,6 +1,6 @@
 # rq3-size-catalog: the 84-pair rule catalog at 30, 50, 100 and 200 machines (2026-10-20, user)
 
-Status: **30 / 50 / 100 machines done 10-20 19:10 (local, 2 h 41 min, 240 / 240, every task's MDD-PTECT = the grid's). 200 machines
+Status: **30 / 50 / 100 machines done 10-20 19:10 (local, 2 h 41 min, 240 / 240, every task's MDD-PTECT = the grid's); 200 machines done 10-21 07:04 (5 h 21 min, 80 / 80). 200 machines
 (`rq3-size-catalog-m200`: `launch.sh 16 m200`, 80 tasks, ~93 core-hours) added by the user 10-20, runs last, after
 `rq3-size-oracle-m200`.** Step 2 of the size rule sweep
 (step 1: `../rq3-size-oracle`). Step 3, the exact oracle for a size-specific portfolio, is decided after this.
@@ -92,3 +92,40 @@ fitting seeds, is observable. `analysis.out`, `summary.csv`, `<cond>/portfolios.
   allows.
 - **The user's hypothesis holds:** the rules that give switching headroom change with floor size. ATC carries it at
   30-50 machines (within v5), TECT at 100 (outside v5).
+
+## Results: 200 machines (10-21)
+**The TECT machine rule now wins everywhere, by a wide margin.** These are fixed pairs held all episode, so the numbers
+are exact measurements, not proxies (each run's MDD-PTECT equals the grid's).
+
+| floor | MDD-TECT vs MDD-PTECT (fixed, exact) | SRT-TECT vs MDD-PTECT |
+|---|---|---|
+| m15 | +18.5% [+14.7, +22.9], 2/38 | +22.5% |
+| m30 | +31.9% [+26.0, +39.2], 6/34 | +41.1% |
+| m50 | +29.9% [+21.4, +38.1], 11/29 | +38.3% |
+| m100 | −1.9% [−7.5, +4.1], 23/17, p 0.79 (median −3.0%) | +3.8% |
+| m200 | **−19.0% [−21.0, −16.9], 36/4, p 3e-9** (median −17.7%) | **−17.2%**, 35/5 |
+
+- **Best fixed pairs at 200 machines:** MDD-TECT −19.0, SRT-TECT −17.2, CR-TECT −6.9, EDD-TECT −4.8, then
+  MDD-PTECT 0 (v5's best is 5th; ATC-PECT is 36th).
+- **Every regime:** MDD-TECT −20.2% (normal), −16.2% (surge), −19.8% (short fleet). At 100 machines TECT paid only in
+  short-fleet blocks; at 200 it pays in all of them.
+- **Per-block winners:** MDD-TECT 58 of 200, SRT-TECT 32, SLACK-TECT 24, EDD-TECT 20, ATC-TECT 10 (all TECT).
+- **The v5 set has no room left** (block −0.6%, per instance −0.2%, map 0.0), while one fixed pair outside it gains 19%.
+  The full catalog's per-instance best is −19.7%, barely more than MDD-TECT alone: at 200 machines switching adds little;
+  choosing the right machine rule is almost everything.
+- **The policies:** the final policy (15-machine training, v5 actions) is +2.7% vs MDD-PTECT at 200 machines
+  (`../rq3-size-grid`), so +26.8% [+23.6, +30.3] vs MDD-TECT (3/37). No policy over the v5 set can reach MDD-TECT.
+
+### Reading across sizes
+- **The best machine rule flips with floor size:** PECT / PTECT (processing-time weighted, α 3) up to 50 machines,
+  a tie at 100, TECT (travel-aware earliest completion, no processing-time weighting) at 200. MDD stays the best job
+  rule throughout.
+- **Likely mechanism (hypothesis):** PTECT weights machine speed (quad α 3) against travel. On a small floor every
+  machine is close, so preferring fast machines costs little travel. On a big floor the fast machines are often far
+  away, and the extra AGV trips cost more than the faster processing saves. At 100 machines this binds only when the
+  fleet is short; at 200, always. This matches the α-curve result (α* falls with speed spread, `../rq3-alpha-curve`): the
+  best α should also fall with floor size, towards 0 (= TECT). A size-dependent α is an untested candidate.
+- **For the thesis:** the 15-machine policies' size limit is mostly an action-set limit. The rule set they choose from
+  was fixed on the 15-machine floor, and on large floors the best rule is outside it. Training on larger floors with
+  the same v5 actions (`train-size-m100`, `-mix`) cannot fix that.
+
