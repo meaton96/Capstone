@@ -1,6 +1,6 @@
 # rq3-alpha-size: auto-tuned α across floor size and machine heterogeneity (2026-10-21, user: paper B gate)
 
-Status: **running locally since 10-21 11:20 (lab `rq3-alpha-size`, 1,520 tasks, 16 at a time; ETA about 15:20).**
+Status: **done 10-21 13:46 (lab `rq3-alpha-size`, local, 2 h 26 min, 1,520 / 1,520). Gate: G1 pass, G2 FAIL (narrowly), G3 pass.**
 Paper plan: `docs/Plans/PAPER_PLAN_2026-10-21.md` (paper B).
 
 ## Question
@@ -79,3 +79,74 @@ guideline (α* by size and spread) without a deployable formula.
 1,520 tasks (18 cells × 80 seeds + 2 × 40), 18 episodes each, in the fast simulator. Measured: about 1 s per episode at 15
 machines, 3 s at 50, and 7-16 s at 100 (seed-dependent). About 40-50 core-hours: ~3 h on 16 local workers, largest
 floors first. Lab: `rq3-alpha-size` (local).
+
+## Results (10-21)
+B2-family instances on the grid's floors, window tardiness; % vs α 3 (MDD-PTECT), pooled; < 0 better.
+`analysis.out`, `summary.csv`, `alpha_curves.csv`, `fit.json`.
+
+### α curves (fitting seeds 2000-2039, PTECT; the full table is in analysis.out)
+
+| floor | s 0: α* (within 1%) | s 0.5: α*, gain vs α 3 | s 1.0: α*, gain vs α 3 |
+|---|---|---|---|
+| 15 | 2 (2, 4) | 0.75, −4.6% | 0.75, −15.0% |
+| 20 | 4 (2, 4) | 0.75, −13.1% | 0.5, −26.7% |
+| 30 | 4 (2-4) | 1, −18.5% | 0.5, −28.7% |
+| 50 | 1.5 (1.5-3) | 0.75, −20.9% | 0.25, −29.1% |
+| 75 | 2 (2) | 0.75, −20.1% | 0.25, −25.8% |
+| 100 | 1 (0.75-2), −2.1% | 0.25, −23.3% | 0.25, −28.1% |
+
+- **On homogeneous floors α hardly matters between 1.5 and 4**, and the best α moves only from about 2-4 at 15-30
+  machines to about 1 at 100. TECT (α 0) is 8-38% worse there.
+- **Machine-speed spread dominates:** α* ≈ 0.75-1 at s 0.5 and 0.25-0.75 at s 1.0, worth 5-29% over α 3. The gain
+  grows with floor size at the same spread (s 1.0: −15% at 15 machines, −26 to −29% from 20 up).
+
+### Formulas (fitting seeds; regret = % over each cell's best α)
+
+| model | α | in-sample regret | leave-one-cell-out |
+|---|---|---|---|
+| M0 constant | 0.75 | 3.02% | 3.29% |
+| M1 spread | max(0, 1.8 − 4.0 σ) | 0.86% | 1.49% |
+| M2 size | max(0, 1.3 − 5.5 τ) | 2.78% | 3.98% |
+| **M3 spread + size** (selected) | max(0, 2.3 − 3.5 σ − 7.0 τ) | 0.37% | **0.68%** |
+
+σ = std of log machine speed factors; τ = mean travel time to a candidate machine / mean op time (0.04 at 15 machines,
+0.12 at 100).
+
+### Test seeds 0-39 (selected formula M3)
+- **Within 0.1% of each cell's best α** (chosen on fitting seeds), mean over the 18 cells (−0.09%).
+- **Better than α 3 in 13 of 18 cells (Holm-significant), never significantly worse.**
+  - −7 to −30% on every cell with speed spread;
+  - −1.4% / −2.7% at 75 / 100 machines without spread;
+  - not significant at 15-50 machines without spread.
+- **Held-out cells:** −26.0% (30 machines, s 0.75) and −26.1% (75 machines, s 0.75) vs α 3, within 0.3% / 1.2% of the
+  hindsight best α there.
+
+### Gate (pre-declared)
+- **G1 size matters, PASS (at the threshold):** α* at s 0 falls from 2 (15 machines) to 1 (100 machines).
+- **G2 the formula works, FAIL:** every test criterion passes (gap −0.09% ≤ 2; 13 / 18 Holm-significant ≥ 9; none
+  worse), but the size term improves leave-one-cell-out regret over the spread-only formula by 0.81 points, short of
+  the declared 1.0.
+- **G3 it transfers, PASS.**
+
+**So the pre-declared claim, a size-aware static α formula, is not supported at the declared margin.** Per the rule above,
+the deliverable is the α curves as a design guideline.
+
+### Post-hoc (not pre-declared; 10-21)
+- **The spread-only formula is almost as good on test seeds.** M1 lands within 1.16% of the hindsight best α on average
+  over the 18 cells (M3: 0.82%), and within 0.49% / 1.20% on the held-out cells (M3: 0.30% / 1.22%). Both are 15-30%
+  better than α 3 on every floor with speed spread.
+  - The size term helps most at 100 machines: gap 2.7 → 1.7% at s 0, 3.6 → 2.1% at s 0.5.
+  - It hurts at 50 machines without spread: 0 → 1.9%.
+- **Where floor size does matter is the regime, not the floor.** α* per regime block on homogeneous floors (fitting
+  seeds), at 75 / 100 machines: normal 2 / 1.5, surge 2 / 2, **short fleet 0.5 / 0.25**. At 15-30 machines the
+  short-fleet α* is 1.5-4. This matches two earlier results:
+  - `../rq3-size-portfolio`'s exact map rule at 100 machines: MDD-TECT (α 0) while the fleet is short, −12.2%;
+  - the catalog's 200-machine result: TECT best everywhere, −19.0%.
+
+### Reading for paper B
+- **The deployable static rule is the spread law, α ≈ max(0, 1.8 − 4σ).** It holds from 15 to 100 machines (extending
+  the 15-machine `../rq3-alpha-curve` result), lands within about 1% of the best α in every cell, and beats α 3 by
+  15-30% wherever machine speeds differ.
+- **Floor size enters through fleet scarcity:** on large floors α should drop when the fleet is short. That points to
+  an **online α per regime** (or per measured AGV availability) as the next test, not a static size term. The exact map
+  rule (−12.2% at 100 machines) is its first data point.
