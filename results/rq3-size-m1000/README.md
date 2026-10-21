@@ -73,8 +73,11 @@ non-identical seeds (no CI with 5 seeds), and the same pick's pooled % at 200 ma
   job-s on totals of 45-175 M job-s, i.e. float32 rounding between evaluate.py and the simulator; 57-71 k decisions per
   episode). At 200 machines it was +2.7% (`../rq3-size-grid`); at 1000 it no longer deviates from MDD-PTECT at all,
   which suggests its inputs saturate and it settles on one choice.
-- **MDD-TECT** (added 10-21, `rq3-size-m1000-tect`, simulator): the catalog found it the best pair at 200 machines
-  (−19.0% vs MDD-PTECT, `../rq3-size-catalog`), so it is this column's "best pair". Pending.
+- **MDD-TECT** (added 10-21, `rq3-size-m1000-tect`, simulator, done 10:33): the catalog found it the best pair at 200
+  machines (−19.0% vs MDD-PTECT, `../rq3-size-catalog`), so it is this column's "best pair". At 1000 machines it is
+  **−6.20%** vs MDD-PTECT, better on all 5 seeds (−11.44 / −6.80 / −3.04 / −5.30 / −13.15%; sign test p 0.062, the
+  minimum with 5 seeds). Smaller than at 200 machines: on this heavily overloaded floor the rules converge (SRT-PTECT
+  −0.29%), but TECT still leads on every seed. The final policy, identical to MDD-PTECT, is about 6.6% behind it.
 - **New arms** (`rq3-size-m1000`): after `rq3-size-grid`.
 
 Analysis fix (10-21): runs count as identical when their relative difference is ≤ 1e-6 (was an absolute 1e-6 k
