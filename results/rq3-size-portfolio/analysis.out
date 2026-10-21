@@ -1,0 +1,36 @@
+== rq3-size-portfolio: exact checks of the catalog's proxies; B2 test seeds 0-39, window tardiness vs MDD-PTECT held all episode; < 0 better
+
+-- 3a: fitted regime maps (normal / surge / short fleet), exact
+
+   m15: map {'normal': 'ATC-PTECT', 'surge': 'MDD-PTECT', 'short': 'MDD-PECT'}; 40 / 40 seeds
+   map vs MDD-PTECT (exact)            -0.96 [ -3.35,  +1.20] 22/17 p=0.3   | proxy -0.53
+   v5 switching oracle vs MDD-PTECT    -9.42 [-11.36,  -7.62] 40/0  p=1.8e-12   | map reaches 10% of it
+   map vs v5 oracle (paired)           +9.34 [ +7.39, +11.33]  5/35 p=2.4e-08
+   map vs ATC-PTECT held all episode  -10.98 [-13.95,  -7.08] 27/10 p=0.00021
+   map vs MDD-PECT held all episode    -0.50 [ -2.77,  +1.36] 25/15 p=0.44
+
+   m30: map {'normal': 'ATC-PECT', 'surge': 'ATC-PECT', 'short': 'MDD-PECT'}; 40 / 40 seeds
+   map vs MDD-PTECT (exact)            -5.01 [ -7.91,  -2.31] 31/9  p=0.00057   | proxy -6.11
+   map vs ATC-PECT held all episode    -0.66 [ -4.32,  +2.53] 14/18 p=0.93
+   map vs MDD-PECT held all episode    -3.27 [ -6.90,  -0.04] 25/15 p=0.066
+
+   m50: map {'normal': 'ATC-PTECT', 'surge': 'MDD-PTECT', 'short': 'MDD-PECT'}; 40 / 40 seeds
+   map vs MDD-PTECT (exact)            -0.55 [ -3.39,  +2.11] 27/13 p=0.16   | proxy -2.33
+   v5 switching oracle vs MDD-PTECT   -10.27 [-13.73,  -7.73] 40/0  p=1.8e-12   | map reaches 5% of it
+   map vs v5 oracle (paired)          +10.83 [ +7.40, +15.49]  0/40 p=1.8e-12
+   map vs ATC-PTECT held all episode   -3.05 [ -8.09,  +1.78] 18/21 p=0.64
+   map vs MDD-PECT held all episode    -2.53 [ -5.58,  -0.22] 28/12 p=0.0039
+
+   m100: map {'normal': 'MDD-PTECT', 'surge': 'MDD-PTECT', 'short': 'MDD-TECT'}; 40 / 40 seeds
+   map vs MDD-PTECT (exact)           -12.21 [-16.27,  -8.08] 28/6  p=4.2e-05   | proxy -3.53
+   v5 switching oracle vs MDD-PTECT    -3.29 [ -4.67,  -2.21] 38/0  p=7.7e-08   | map reaches 371% of it
+   map vs v5 oracle (paired)           -9.22 [-14.00,  -4.06] 19/21 p=0.14
+   map vs MDD-TECT held all episode   -10.51 [-13.21,  -7.78] 29/11 p=1.7e-06
+
+-- 3b: switching oracle over size portfolios, exact
+
+   m100 / v5tect: SRT-PECT/SRT-PTECT/MDD-PECT/MDD-PTECT/ATC-PECT/ATC-PTECT/MDD-TECT; 0 / 40 seeds
+
+   m100 / block6: MDD-PTECT/MDD-TECT/ATC-PTECT/FIFO-PTECT/SLACK-TECT/MOD-PTECT; 0 / 40 seeds
+
+   m50 / block6: MDD-PTECT/ATC-PTECT/CR-TECT/MDD-PECT/ATC-PECT/SLACK-TECT; 0 / 40 seeds
