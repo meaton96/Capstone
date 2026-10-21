@@ -1,7 +1,7 @@
 # rq3-size-portfolio: exact checks of the size rule sweep's proxies (2026-10-20, user: step 3)
 
-Status: **3a (regime maps) done 10-20 22:50 (`rq3-size-portfolio-map`, local, 5 min, 160 / 160); 3b (portfolio
-oracles, `rq3-size-portfolio`, 120 tasks, ~60 core-hours) queued after `rq3-size-catalog-m200`.** Steps 1-2:
+Status: **done. 3a (regime maps) 10-20 22:50 (`rq3-size-portfolio-map`, local, 5 min, 160 / 160); 3b (portfolio
+oracles) 10-21 10:24 (`rq3-size-portfolio`, local, 3 h 19 min, 120 / 120).** Steps 1-2:
 `../rq3-size-oracle`, `../rq3-size-catalog`.
 
 ## Why
@@ -78,5 +78,31 @@ B2 test seeds 0-39, vs MDD-PTECT held all episode, pooled; < 0 better. `analysis
     AGVs per machine are not scarcer on the big floor. The difference is distance: trips are much longer on a
     100-machine layout, so choosing the machine the AGV reaches soonest (TECT) pays, while processing-time weighting
     (PECT / PTECT) does not. This is a hypothesis; the 200-machine catalog (running) is the next check.
-- **3b** (queued) measures the switching ceiling once MDD-TECT is in the portfolio (`v5tect`) and with the catalog's
-  6-pair sets.
+
+### 3b: switching oracle over size portfolios, exact (10-21)
+MDD-PTECT held all episode equals the catalog's on 40 / 40 seeds in every run.
+
+| floor / portfolio | oracle vs MDD-PTECT | vs the v5 oracle (paired) | block proxy | slot use |
+|---|---|---|---|---|
+| m50 v5 (`../rq3-size-oracle`) | −10.27% [−13.73, −7.73], 40/0 | | | ATC 56%, MDD 33% |
+| m50 block6 | **−11.97%** [−16.66, −8.85], 40/0 | −1.89% [−4.65, −0.39], 26/7, p 0.001 | −11.24% | ATC-PTECT 26, ATC-PECT 22, MDD-PTECT 18, SLACK-TECT 14, CR-TECT 11, MDD-PECT 9% |
+| m100 v5 (`../rq3-size-oracle`) | −3.29% [−4.67, −2.21], 38/0 | | | MDD 47%, ATC 38% |
+| m100 v5tect (v5 + MDD-TECT) | **−10.62%** [−14.22, −7.53], 40/0 | **−7.57%** [−11.81, −3.64], 29/3, p 3e-6 | | MDD-TECT 45, ATC-PTECT 16, MDD-PTECT 14, ATC-PECT 13, MDD-PECT 6, SRT 6% |
+| m100 block6 | −9.56% [−13.80, −5.72], 40/0 | −6.49% [−11.31, −1.83], 26/14, p 0.013 | −11.60% | MDD-TECT 35, MDD-PTECT 24, ATC-PTECT 22, SLACK-TECT 17, FIFO / MOD-PTECT 1% |
+
+- **At 100 machines one added rule triples the switching ceiling:** v5 + MDD-TECT gives −10.6% against v5's −3.3%. The
+  oracle then uses MDD-TECT in 45% of slots. The ceiling at 100 machines is back at the 15- and 50-machine level
+  (−9.4%, −10.3%) once TECT is available. The catalog's 6-pair set does no better (−9.6%).
+- **At 50 machines a size-chosen set adds a little** (−12.0% vs v5's −10.3%, paired −1.9%, p 0.001), mainly through
+  SLACK-TECT and CR-TECT (25% of slots).
+- **The simple map rule ties the greedy oracle at 100 machines.** Map (−12.2%) vs the v5tect oracle (−10.6%):
+  pooled −1.8% [−3.8, +1.3], p 0.7. The oracle wins on 26 / 40 instances (median +3.4% in its favour), the map on the
+  heaviest. The greedy oracle picks each slot's pair assuming it is then held to the end, so it can miss coordinated
+  plans: on seed 13 it leaves TECT four slots before the short-fleet block ends and loses 6% to the map
+  (1,855 vs 1,749 k job-s). **So the "oracle" figures in this sweep are a greedy heuristic, not an upper bound.**
+  The thesis should call them a greedy switching ceiling.
+- **Conclusion for the size study:** the policies' room to improve on large floors depends on their rule set. With v5
+  the switching headroom shrinks with size (−9.4 / −10.3 / −3.3 / −1.0% at 15 / 50 / 100 / 200 machines), but that is a
+  property of v5: with MDD-TECT added, the headroom at 100 machines is −10.6%, and at 200 machines MDD-TECT alone is
+  already −19.0% (`../rq3-size-catalog`). A policy that is to work across floor sizes needs TECT (or a size-tuned α)
+  in its action set.

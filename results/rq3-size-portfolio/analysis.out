@@ -29,8 +29,20 @@
 
 -- 3b: switching oracle over size portfolios, exact
 
-   m100 / v5tect: SRT-PECT/SRT-PTECT/MDD-PECT/MDD-PTECT/ATC-PECT/ATC-PTECT/MDD-TECT; 0 / 40 seeds
+   m100 / v5tect: SRT-PECT/SRT-PTECT/MDD-PECT/MDD-PTECT/ATC-PECT/ATC-PTECT/MDD-TECT; 40 / 40 seeds
+   MDD-PTECT held all episode = the catalog's on 40 / 40 seeds
+   oracle vs MDD-PTECT                -10.62 [-14.22,  -7.53] 40/0  p=1.8e-12
+   oracle vs v5 oracle (paired)        -7.57 [-11.81,  -3.64] 29/3  p=2.5e-06
+   slot use: MDD-TECT 45%, ATC-PTECT 16%, MDD-PTECT 14%, ATC-PECT 13%, MDD-PECT 6%, SRT-PTECT 3%, SRT-PECT 3%
 
-   m100 / block6: MDD-PTECT/MDD-TECT/ATC-PTECT/FIFO-PTECT/SLACK-TECT/MOD-PTECT; 0 / 40 seeds
+   m100 / block6: MDD-PTECT/MDD-TECT/ATC-PTECT/FIFO-PTECT/SLACK-TECT/MOD-PTECT; 40 / 40 seeds
+   MDD-PTECT held all episode = the catalog's on 40 / 40 seeds
+   oracle vs MDD-PTECT                 -9.56 [-13.80,  -5.72] 40/0  p=1.8e-12   | block proxy -11.60
+   oracle vs v5 oracle (paired)        -6.49 [-11.31,  -1.83] 26/14 p=0.013
+   slot use: MDD-TECT 35%, MDD-PTECT 24%, ATC-PTECT 22%, SLACK-TECT 17%, FIFO-PTECT 1%, MOD-PTECT 1%
 
-   m50 / block6: MDD-PTECT/ATC-PTECT/CR-TECT/MDD-PECT/ATC-PECT/SLACK-TECT; 0 / 40 seeds
+   m50 / block6: MDD-PTECT/ATC-PTECT/CR-TECT/MDD-PECT/ATC-PECT/SLACK-TECT; 40 / 40 seeds
+   MDD-PTECT held all episode = the catalog's on 40 / 40 seeds
+   oracle vs MDD-PTECT                -11.97 [-16.66,  -8.85] 40/0  p=1.8e-12   | block proxy -11.24
+   oracle vs v5 oracle (paired)        -1.89 [ -4.65,  -0.39] 26/7  p=0.00098
+   slot use: ATC-PTECT 26%, ATC-PECT 22%, MDD-PTECT 18%, SLACK-TECT 14%, CR-TECT 11%, MDD-PECT 9%
