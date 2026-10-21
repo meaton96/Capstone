@@ -3,7 +3,8 @@
 # resubmitting resumes.
 #   ref   pdr + cmix on the new floors m20 m30 m75 (10-seed chunks, 6 h) and m150 m200 (5-seed chunks, 10 h): 56 tasks.
 #         m15 / m50 / m100 pdr and cmix come from rq3-gen-v5, eval-v5-cmix and rq3-size-v5.
-#   arms  size50 / size100 / sizemix (train-size-m50 / -m100 / -mix s0-s4) on all 8 floors: 120 tasks. Needs the
+#   arms  size50 / size100 / sizemix (train-size-m50 / -m100 / -mix s0-s4) on m15-m100 (6 floors, 72 tasks; m150 / m200
+#         dropped 10-21 after the advisor meeting: 50-100 machines is the realistic range). Needs the
 #         checkpoints on the cluster (results/train-size-*_s<k>/checkpoint.pt).
 # Ships task.py, analyze.py, rq3-size-v5's task.py, rq3-gen-v5's run_task.py and the floor exports.
 set -euo pipefail
@@ -30,7 +31,7 @@ if [[ $PART == ref ]]; then
 else
     GRPS="size50 size100 sizemix"; SMALL="m15 m20 m30 m50 m75 m100"; RUNS="train-size-m50 train-size-m100 train-size-mix"
 fi
-BIG="m150 m200"
+BIG="m150 m200"; [[ $PART == arms ]] && BIG=""      # arms: floors up to 100 machines only (10-21)
 for r in $RUNS; do for k in 0 1 2 3 4; do
     [[ -f results/${r}_s$k/checkpoint.pt ]] || { echo "missing results/${r}_s$k/checkpoint.pt"; exit 1; }
 done; done

@@ -49,8 +49,10 @@ Does a policy carry over to floor sizes it was not trained on, and how far? Hypo
 ## Parts and lab experiments
 - `rq3-size-grid-ref`: `pdr` + `cmix` on m20 / m30 / m75 / m150 / m200, 56 tasks, local (`launch_local.sh ref 16`;
   the local machine was idle while the cluster queue held the training jobs).
-- `rq3-size-grid`: `size50` / `size100` / `sizemix` on all 8 floors, 120 tasks, cluster (`submit.sh arms`), after
-  training.
+- `rq3-size-grid`: `size50` / `size100` / `sizemix` on the floors up to 100 machines (m15-m100), 72 tasks, cluster
+  (`submit.sh arms`), after training. Narrowed 10-21 after the advisor meeting (50-100 machines is the realistic range;
+  m150 / m200 keep their reference half). The 1000-machine arms (`rq3-size-m1000` future) were cancelled for the same
+  reason.
 
 ## Analysis (`analyze.py` -> `analysis.out`, `summary.csv`, `grid.csv`)
 Per floor: the pairs vs MDD-PTECT and the best pair; the hindsight best pair; each arm's family mean of 5 vs MDD-PTECT
