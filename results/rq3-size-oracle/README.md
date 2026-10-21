@@ -1,8 +1,8 @@
 # rq3-size-oracle: the v5 switching-oracle ceiling at 50, 100 and 200 machines (2026-10-20, user)
 
 Status: **50 / 100 machines done 10-20 16:29 (lab `rq3-size-oracle`, local, 1 h 59 min, 80 / 80);
-200 machines (`rq3-size-oracle-m200`, `launch_m200.sh`, 40 tasks, ~80 core-hours) added by the user 10-20, queued
-after `rq3-size-catalog`.** Step 1 of the size
+200 machines (`rq3-size-oracle-m200`, `launch_m200.sh`, added by the user 10-20) done 10-21 01:43 (6 h 33 min,
+40 / 40).** Step 1 of the size
 rule sweep; step 2 is `../rq3-size-catalog`; step 3 (the exact oracle for a size-specific portfolio) waits on step 2.
 
 ## Why
@@ -40,7 +40,7 @@ beyond the per-instance pick (oracle vs hindsight best pair), the oracle's slot 
 −4.51%, oracle vs hindsight best pair −5.14%; slot use MDD-PECT 29%, MDD-PTECT 20%, ATC-PTECT 17%, ATC-PECT 17%,
 SRT-PECT 9%, SRT-PTECT 7%.
 
-## Results: 50 and 100 machines (10-20)
+## Results: 50, 100 and 200 machines (10-20 / 10-21)
 B2 test seeds 0-39, window tardiness, vs MDD-PTECT held all episode; < 0 better. MDD-PTECT here equals the grid's on
 40 / 40 seeds at every floor. `analysis.out`, `summary.csv`.
 
@@ -49,6 +49,7 @@ B2 test seeds 0-39, window tardiness, vs MDD-PTECT held all episode; < 0 better.
 | m15 (rq2-rebase-v5) | 145.5 | **−9.42%** [−11.33, −7.61], 40/0 | −4.51%, 32/0 | −5.14%, 39/0 | 13.7 k job-s |
 | m50 | 158.2 | **−10.27%** [−13.77, −7.78], 40/0 | −4.57%, 31/0 | −5.97%, 40/0 | 16.2 k job-s |
 | m100 | 456.0 | **−3.29%** [−4.65, −2.20], 38/0 | −0.72%, 20/0 | −2.59%, 38/0 | 15.0 k job-s |
+| m200 | 2,848.9 | **−1.01%** [−1.39, −0.68], 40/0 | −0.17%, 10/0 | −0.84%, 40/0 | 28.8 k job-s |
 
 All p < 1e-4 (Wilcoxon). 95% seed-bootstrap CIs in brackets.
 
@@ -59,6 +60,7 @@ All p < 1e-4 (Wilcoxon). 95% seed-bootstrap CIs in brackets.
 | m15 | 20% | 29% | 17% | 17% | 7% | 9% | |
 | m50 | 22% | 11% | 31% | 25% | 4% | 7% | 6.0 |
 | m100 | 39% | 8% | 23% | 15% | 11% | 5% | 5.5 |
+| m200 | 59% | 1% | 14% | 0% | 25% | 1% | |
 
 Runtime: ~14 min per instance at m50, ~32 min at m100 (max 48 min).
 
@@ -76,6 +78,10 @@ Runtime: ~14 min per instance at m50, ~32 min at m100 (max 48 min).
   at 50 machines on ATC (56%), although both ATC pairs are worse than MDD-PTECT when held all episode (+2.6% /
   +4.6%); at 100 machines MDD and ATC share it (47% / 38%), although held all episode the ATC pairs are 23-31% worse. ATC is a situational rule on big floors: very costly as a fixed choice, valuable in some slots.
   The machine rule moves too: PECT gets 55% of slots at 15 machines, 43% at 50, 28% at 100 (PTECT the rest).
+- **At 200 machines the v5 ceiling is −1.0%** (40 / 40 instances better). The oracle saves more tardiness per instance
+  than on any smaller floor (28.8 k job-s), but against 2.85 M job-s of tardiness. It drops PECT almost entirely
+  (2% of slots) and uses MDD-PTECT (59%), SRT-PTECT (25%) and ATC-PTECT (14%). The relative ceiling of the v5 set
+  falls with size: −9.4 / −10.3 / −3.3 / −1.0% at 15 / 50 / 100 / 200 machines.
 - **For the training arms:** the ceiling is the yardstick. T50 has the same room as the final policy had at 15
   machines; T100 has a third of it in relative terms. If T100 ends near 0%, that is close to what the ceiling allows,
   not necessarily a failure to learn.

@@ -24,4 +24,10 @@
    oracle slot use: MDD-PTECT 39%, ATC-PTECT 23%, ATC-PECT 15%, SRT-PTECT 11%, MDD-PECT 8%, SRT-PECT 5%
    fixed pairs vs MDD-PTECT (pooled): MDD-PTECT +0.0%, SRT-PTECT +5.1%, MDD-PECT +5.6%, SRT-PECT +11.1%, ATC-PTECT +23.4%, ATC-PECT +31.5%
 
--- m200 (200 machines): 0 / 40 seeds
+-- m200 (200 machines): 40 / 40 seeds
+   MDD-PTECT mean 2,848.9 k job-s; = the grid's MDD-PTECT on 40 / 40 seeds
+   switching oracle                -1.01 [ -1.39,  -0.68] 40/0  p=1.8e-12  (28.8 k job-s per instance)
+   hindsight best v5 pair          -0.17 [ -0.33,  -0.06] 10/0  p=0.0051  (4.9 k job-s per instance)
+   oracle vs hindsight best pair   -0.84 [ -1.13,  -0.58] 40/0  p=1.8e-12  (23.8 k job-s per instance)
+   oracle slot use: MDD-PTECT 59%, SRT-PTECT 25%, ATC-PTECT 14%, MDD-PECT 1%, SRT-PECT 1%, ATC-PECT 0%
+   fixed pairs vs MDD-PTECT (pooled): MDD-PTECT +0.0%, SRT-PTECT +1.9%, MDD-PECT +17.7%, SRT-PECT +19.1%, ATC-PTECT +42.6%, ATC-PECT +71.1%
