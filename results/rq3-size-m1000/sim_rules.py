@@ -23,7 +23,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 R = HERE.parent
-PAIRS = {"mdd": "MDD-PTECT", "srt": "SRT-PTECT"}
+PAIRS = {"mdd": "MDD-PTECT", "srt": "SRT-PTECT", "tect": "MDD-TECT"}   # tect added 10-21
 PROBE = R / "dev-size-1000-probe" / "m1000" / "ref" / "episodes.csv"
 
 

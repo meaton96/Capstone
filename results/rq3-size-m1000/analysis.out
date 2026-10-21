@@ -1,4 +1,6 @@
 == rq3-size-m1000: 1000 machines, 520 AGVs on duty, twin, test seeds 0-4, window tardiness; < 0 better
 MDD-PTECT: 5 / 5 seeds, mean 93,516.9 k job-s
    reproduction, seed 0 MDD-PTECT: oracle simulator 53,335.6343 vs local probe (evaluate.py) 53,335.6359 k job-s, relative difference 3.1e-08  (match)
+   reproduction, seed 0 T15 s3 (final policy): cluster evaluate.py 53,335.6359 vs local probe (evaluate.py) 53,335.6359 k job-s, relative difference 0.0e+00  (match)
    SRT-PTECT                 -0.29% over 5 seeds | per seed -0.68 -0.06 -0.18 -0.50 -0.25 | W/L/same 5/0/0, sign test p=0.062
+   T15 s3 (final policy)     -0.00% over 5 seeds | per seed +0.00 -0.00 +0.00 -0.00 -0.00 | W/L/same 0/0/5, sign test p=1 | at 200 machines +2.68%

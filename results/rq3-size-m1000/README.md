@@ -67,6 +67,15 @@ non-identical seeds (no CI with 5 seeds), and the same pick's pooled % at 200 ma
   sign test p 0.062, the smallest possible with 5 seeds). At 150 / 200 machines SRT-PTECT was +2.1% / +1.9% worse.
   The two strongest rules converge (within 0.7% on every seed) and their order flips slightly.
 
-### Policies
-Pending: the final policy on the cluster (`rq3-size-m1000-ref`, array 21932264_[10-14]); the new arms after
-`rq3-size-grid` (`rq3-size-m1000`).
+### Final policy (10-21, `rq3-size-m1000-ref`, cluster evaluate.py, done 08:51)
+- **Check:** seed 0 on the cluster = the local probe exactly (53,335.6359 k job-s, relative difference 0).
+- **The final policy plays exactly like MDD-PTECT at 1000 machines:** identical on all 5 seeds (differences of ±0.3-2.0
+  job-s on totals of 45-175 M job-s, i.e. float32 rounding between evaluate.py and the simulator; 57-71 k decisions per
+  episode). At 200 machines it was +2.7% (`../rq3-size-grid`); at 1000 it no longer deviates from MDD-PTECT at all,
+  which suggests its inputs saturate and it settles on one choice.
+- **MDD-TECT** (added 10-21, `rq3-size-m1000-tect`, simulator): the catalog found it the best pair at 200 machines
+  (−19.0% vs MDD-PTECT, `../rq3-size-catalog`), so it is this column's "best pair". Pending.
+- **New arms** (`rq3-size-m1000`): after `rq3-size-grid`.
+
+Analysis fix (10-21): runs count as identical when their relative difference is ≤ 1e-6 (was an absolute 1e-6 k
+job-s, which split float rounding into 3 wins / 2 losses).
