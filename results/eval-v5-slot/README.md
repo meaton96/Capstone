@@ -57,5 +57,10 @@ with the simulated time an update covers. Per run (3 seeds in parallel, ~12 core
 
 About 57 run-hours for the 8 new arms; about 30-35 h wall with two runs at a time once `rq2-replan` is done.
 
+**Actual (10-21 / 10-22):** all 8 runs finished between 05:20 and 15:40 on 10-22, faster than estimated. Wall time per
+seed: 15.0-15.6 h (60 s), 8.1-8.3 h (120 s), 5.7-5.8 h (180 s), 4.2 h (300 s), 2.9-3.0 h (600 s), 2.3 h (1200 s), 2.1 h
+(1500 s), 2.0-2.1 h (1800 s). Every seed completed with its checkpoint; critic explained variance at the end 0.71-0.97.
+The evaluation (`eval-v5-slot`) started 15:40.
+
 ## Results
 Pending.
