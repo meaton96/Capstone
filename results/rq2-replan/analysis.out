@@ -1,0 +1,37 @@
+== rq2-replan: twin planner v2, v5 pairs, B2 test seeds 0-39; 41 / 41 variants complete
+
+-- 1a granularity, exact forecast (the greedy switching oracle at decision interval Δ); % vs MDD-PTECT
+   Δ    60 s  -11.46 [-13.90,  -9.33] 40/0   re-plans 360.0  switches  8.2  planning   1098 s
+   Δ   120 s  -11.37 [-13.98,  -9.14] 40/0   re-plans 180.0  switches  7.7  planning    553 s
+   Δ   180 s  -11.03 [-13.69,  -8.68] 40/0   re-plans 120.0  switches  6.8  planning    356 s
+   Δ   300 s  -11.24 [-13.58,  -9.15] 40/0   re-plans  72.0  switches  6.0  planning    220 s
+   Δ   600 s   -9.68 [-12.02,  -7.66] 40/0   re-plans  36.0  switches  5.0  planning    118 s
+   Δ   900 s   -9.42 [-11.30,  -7.59] 40/0   re-plans  24.0  switches  4.3  planning     80 s
+   Δ  1200 s   -9.12 [-11.28,  -7.17] 40/0   re-plans  18.0  switches  3.8  planning     57 s
+   Δ  1800 s   -7.99 [-10.10,  -6.21] 39/0   re-plans  12.0  switches  2.7  planning     39 s
+   Δ  3600 s   -7.77 [ -9.89,  -5.96] 38/0   re-plans   6.0  switches  1.7  planning     21 s
+
+-- 1b forecast error x interval; % vs MDD-PTECT (share of the exact ceiling at the same Δ)
+   jit1     Δ 120: -5.04 (44%) | Δ 300: -3.90 (35%) | Δ 900: -4.07 (43%) | Δ 1800: -2.14 (27%)
+   jit10    Δ 120: -2.85 (25%) | Δ 300: -2.67 (24%) | Δ 900: -2.19 (23%) | Δ 1800: -1.35 (17%)
+   jit30    Δ 120: -1.75 (15%) | Δ 300: -2.93 (26%) | Δ 900: -2.77 (29%) | Δ 1800: -2.48 (31%)
+   churn10  Δ 120: -2.39 (21%) | Δ 300: -3.30 (29%) | Δ 900: -2.23 (24%) | Δ 1800: -2.94 (37%)
+   proc10   Δ 120: -5.64 (50%) | Δ 300: -5.78 (51%) | Δ 900: -3.38 (36%) | Δ 1800: -1.70 (21%)
+
+-- 1c event-triggered vs periodic re-planning, switches allowed every 300 s
+   exact    periodic every 300 s   -11.24 [-13.58,  -9.15] 40/0   re-plans  72.0  switches  6.0  planning    220 s
+   exact    ev2                    -4.51 [ -6.51,  -2.89] 32/0   re-plans   1.0  switches  0.0  planning      6 s  | vs periodic +7.58 [+5.82, +9.52] p=1.8e-12
+   exact    ev10                   -4.51 [ -6.54,  -2.89] 32/0   re-plans   1.0  switches  0.0  planning      6 s  | vs periodic +7.58 [+5.91, +9.52] p=1.8e-12
+   exact    hyb10                  -7.99 [-10.11,  -6.12] 39/0   re-plans  12.0  switches  2.7  planning     40 s  | vs periodic +3.66 [+2.34, +5.24] p=1.7e-05
+   jit10    periodic every 300 s    -2.67 [ -4.99,  -0.74] 25/15  re-plans  72.0  switches 39.7  planning    228 s
+   jit10    ev2                    -1.58 [ -3.79,  +0.39] 25/15  re-plans  64.6  switches 38.2  planning    208 s  | vs periodic +1.12 [-0.29, +3.12] p=0.1
+   jit10    ev10                   -2.81 [ -4.42,  -1.34] 27/13  re-plans  51.3  switches 31.4  planning    163 s  | vs periodic -0.14 [-1.74, +1.77] p=0.92
+   jit10    hyb10                  -2.76 [ -4.45,  -1.26] 27/13  re-plans  52.0  switches 31.5  planning    165 s  | vs periodic -0.09 [-1.74, +1.89] p=0.99
+   jit30    periodic every 300 s    -2.93 [ -5.05,  -1.24] 30/10  re-plans  72.0  switches 43.4  planning    228 s
+   jit30    ev2                    -1.73 [ -3.56,  -0.23] 27/13  re-plans  68.1  switches 41.6  planning    215 s  | vs periodic +1.24 [+0.44, +2.28] p=0.0025
+   jit30    ev10                   -1.97 [ -4.09,  -0.31] 26/14  re-plans  66.2  switches 40.5  planning    214 s  | vs periodic +0.99 [+0.28, +1.87] p=0.0038
+   jit30    hyb10                  -1.97 [ -4.06,  -0.30] 26/14  re-plans  66.3  switches 40.5  planning    218 s  | vs periodic +0.99 [+0.32, +1.85] p=0.0038
+   churn10  periodic every 300 s    -3.30 [ -5.58,  -1.04] 29/11  re-plans  72.0  switches 38.6  planning    232 s
+   churn10  ev2                    -3.50 [ -5.85,  -1.17] 30/10  re-plans  66.4  switches 37.7  planning    214 s  | vs periodic -0.21 [-0.68, +0.13] p=0.43
+   churn10  ev10                   -2.37 [ -4.71,  -0.01] 28/12  re-plans  58.2  switches 34.2  planning    191 s  | vs periodic +0.96 [+0.03, +2.08] p=0.061
+   churn10  hyb10                  -2.37 [ -4.72,  -0.02] 28/12  re-plans  58.4  switches 34.2  planning    191 s  | vs periodic +0.96 [+0.05, +2.09] p=0.061

@@ -177,7 +177,11 @@ def plan_triggered(tw, pairs, slot, warmup, window, plan_source, trigger):
 
                     def child(pair, prefix=prefix, fut=fut):
                         belief_transform(tw, fut)
-                        return _play_tail(tw, gen, prefix, pair, t0, slot, warmup)
+                        try:
+                            return _play_tail(tw, gen, prefix, pair, t0, slot, warmup)
+                        except StopIteration:   # no agent decision left before the window ends (1-2 min slots,
+                            # last boundary): the fork ran to the end; its tail is the end state, the same for all pairs
+                            return window_tardiness(tw, warmup if t0 is None else t0)
                     t_start = time.time()
                     res = branch.fork_map(child, list(pairs), max_parallel=1)
                     plan_s.append(time.time() - t_start)
