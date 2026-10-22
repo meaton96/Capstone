@@ -1,8 +1,6 @@
 # eval-v5-slot: PPO decision interval (slot length) sweep (2026-10-21, user after the advisor meeting)
 
-Status: **queued 10-21 (user).** The 8 training runs `train-v5-slot<X>` are lab futures behind `rq3-alpha-size` (8 workers
-each, longest first: one alongside `rq2-replan`, two at a time after it); `eval-v5-slot` waits on all 8. Expected done
-about 05:00 on 10-23.
+Status: **done 10-22 17:23 (8 training runs + evaluation, local). Figure: `slot_sweep.png`.**
 
 ## Why
 The final policy chooses a rule pair every 15 minutes because that was the slot length its stack inherited. The only
@@ -34,7 +32,7 @@ intervals) this gives one figure: ceiling, planner with forecast error, and lear
 - **Evaluation (`task.py`):** every arm's seeds + MDD-PTECT on B2 test seeds 0-39 (condition `base`, c ~ U[1.75, 2.5])
   through `../rq3-gen-v5/run_task.py`, the harness that scored the final policy, at the arm's own slot length.
 
-## Analysis (to write before the evaluation lands)
+## Analysis (`analyze.py`, `plot.py`)
 Per arm: the family mean (and each seed) vs MDD-PTECT, pooled over test seeds (seed-bootstrap CI, Wilcoxon), the
 spread over training seeds, training wall time. Then the joint figure with `../rq2-replan` 1a / 1b.
 
@@ -62,5 +60,51 @@ seed: 15.0-15.6 h (60 s), 8.1-8.3 h (120 s), 5.7-5.8 h (180 s), 4.2 h (300 s), 2
 (1500 s), 2.0-2.1 h (1800 s). Every seed completed with its checkpoint; critic explained variance at the end 0.71-0.97.
 The evaluation (`eval-v5-slot`) started 15:40.
 
-## Results
-Pending.
+## Results (10-22)
+B2 test seeds 0-39, window tardiness vs MDD-PTECT, pooled (95% seed-bootstrap CI, test seeds better / worse,
+Wilcoxon); < 0 better. `analysis.out`, `summary.csv`, `curve.csv`, figure `slot_sweep.png` (`plot.py`).
+
+**Checks:**
+- The 15-min arm reproduces `../eval-v5-cmix` (test / base) exactly: 240 / 240 episodes identical.
+- MDD-PTECT is identical in every arm, so the reference does not depend on the slot length.
+
+| slot | PPO family vs MDD-PTECT | training seeds | seed sd | ceiling, exact forecast | share of ceiling |
+|---|---|---|---|---|---|
+| 1 min | **+6.22** [+3.47, +8.74], 11/29, p 0.002 | +7.1 / +13.9 / −2.3 | 8.2 | −11.46 | — |
+| 2 min | +0.32 [−1.73, +2.33], n.s. | +1.8 / +0.7 / −1.5 | 1.7 | −11.37 | — |
+| 3 min | −1.69 [−3.43, −0.18], p 0.07 | −1.7 / −1.2 / −2.2 | 0.5 | −11.03 | 15% |
+| 5 min | −1.83 [−3.52, −0.18], p 0.04 | −2.1 / −2.2 / −1.3 | 0.5 | −11.24 | 16% |
+| **10 min** | **−2.97** [−4.98, −1.48], 29/11, p 8e-5 | −3.0 / −2.7 / −3.2 | **0.25** | −9.68 | **31%** |
+| 15 min (final policy's run, 5 seeds) | −1.69 [−2.83, −0.51], p 0.006 | −0.3 / −2.3 / −1.0 / −1.7 / −3.2 | 1.1 | −9.42 | 18% |
+| 20 min | −1.52 [−2.81, −0.47], p 0.01 | −2.3 / −1.4 / −0.9 | 0.7 | −9.12 | 17% |
+| 25 min | −1.41 [−3.07, +0.02], p 0.03 | +0.7 / −1.1 / −3.8 | 2.3 | — | — |
+| 30 min | −1.63 [−3.25, −0.19], p 0.01 | −2.6 / −1.7 / −0.7 | 0.9 | −7.99 | 20% |
+
+Neighbour comparisons for the 10-min arm (family, paired over test instances | training-seed level):
+- vs 5 min: −1.16% [−3.01, +0.46], p 0.10 | Welch p 0.04;
+- vs 15 min: −1.30% [−3.01, +0.05], p 0.053 | Welch p 0.06;
+- vs 20 min: −1.47% [−3.29, −0.09], p 0.16 | Welch p 0.05.
+
+Short slots against 5 min: 1 min +8.20% (p 7e-7), 2 min +2.19% (p 0.03).
+
+### Reading
+- **Deciding more often does not help PPO; it breaks down below 3 minutes.** At 1-min slots the family is 6% worse
+  than MDD-PTECT and the training seeds range from −2% to +14%. At 2 min it is at parity. This is the same
+  instability as per-decision PPO in the H15 era, now with the point where it starts: below about 3 minutes.
+- **From 3 to 30 minutes PPO sits on a plateau of −1.4 to −3.0%.** 10 minutes is the best arm (−3.0%, p 8e-5, the
+  tightest seed spread, 31% of the ceiling at that interval). Its edge over 5 / 15 / 20 minutes (1.2-1.5 points) is
+  borderline with 3 training seeds per arm (p ≈ 0.04-0.16). The 15-minute slot the final policy uses is on the
+  plateau, about 1.3 points short of the best arm.
+- **The ceiling and the learner pull in opposite directions** (figure). The exact-forecast planner gains most with
+  frequent decisions (−11.2% at ≤ 5 min), while PPO gets worse below 3 minutes. Only 15-31% of the ceiling is
+  realized anywhere, and most of what is missing is foresight: the planner with ±10-min arrival errors sits at
+  −1.4 to −2.9%, about where PPO is.
+- **Why short slots fail (hypothesis):** the recipe's GAE λ = 0.95 is per decision and its rollouts are 128 decisions.
+  At 1-min slots credit therefore reaches back only about 20 minutes of simulated time (about 5 h at 15 min), and the
+  same experience is split into 15x more, noisier decisions. A follow-up arm with λ fixed in simulated time
+  (`--gae-lambda-time-s 900`) at 1-2 min would separate "too many decisions" from "too short a credit horizon".
+- **Answer to the advisor:**
+  - for the planner, 5 minutes (finer adds nothing);
+  - for the learned policy, 5-20 minutes all work, about 10 minutes looks best, and below 3 minutes learning becomes
+    unstable;
+  - "continuous" decisions are not better for either, and are much worse for PPO.
