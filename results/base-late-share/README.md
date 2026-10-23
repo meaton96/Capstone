@@ -46,7 +46,7 @@ Among only the jobs that leave in the window, the shares are within about 2 poin
 - **The thesis's "about half of the jobs late" still holds for the current benchmark and reference rule.** Under
   MDD-PTECT on B2, 51.8% of the jobs due in the window are late (50.0% on the test seeds); at c = 2 exactly, 56.9%.
 - **The rule changes the share only slightly; the allowance sets it.**
-  - Across c = 1.5-3 the three rules stay within 3-6 points of each other: SRT-ECT lowest, SPT-ECT highest.
+  - Across c = 1.5-3 the three rules stay within 3-7 points of each other: SRT-ECT lowest, SPT-ECT highest.
   - MDD-PTECT has 3 points more late jobs than SRT-ECT but 21% less tardiness (152.7 vs 193.5 k job-s): it lets more
     jobs be a little late and fewer very late, as a due-date rule should.
 - **Over B2's range the share runs from 69% (c = 1.75) to 39% (c = 2.5)**, so B2's due dates mix tight and moderate
