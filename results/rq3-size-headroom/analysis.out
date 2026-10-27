@@ -1,0 +1,50 @@
+rq3-size-headroom analysis (B2 test seeds; window tardiness, k job-s; % vs MDD-PTECT held, pooled, < 0 better; 95% paired seed-bootstrap CI, ** = excludes 0)
+
+seeds per cell (desc + both oracles present): m50/r035 20, m50/r052 20, m50/r080 20, m100/r035 20, m100/r052 20, m100/r080 20, m200/r035 20, m200/r052 20, m200/r080 20
+checks: all passed (job stream equal across ratios; held rules = oracle slot-0 tails)
+
+## Ceilings per cell
+| floor | AGVs on duty (short) | n | MDD-PTECT mean | v5 oracle | v5 + MDD-TECT oracle | MDD-TECT adds (vs v5 oracle) | MDD-TECT held | hindsight best v5 / v5+TECT | saving per instance v5 / v5+TECT |
+|---|---|---|---|---|---|---|---|---|---|
+| m50 r0.35 | 18 (9) | 20 | 284.4 | **-6.99** [-10.97, -4.57] | **-12.99** [-20.05, -8.29] | **-6.45** [-10.95, -3.21] | +1.12 | -1.05 / -7.18 | 19.9 / 36.9 |
+| m50 r0.52 | 26 (13) | 20 | 96.8 | **-11.62** [-16.59, -8.25] | **-15.59** [-20.99, -12.44] | **-4.49** [-7.95, -1.61] | +21.50 | -6.43 / -8.09 | 11.2 / 15.1 |
+| m50 r0.80 | 40 (20) | 20 | 73.6 | **-14.15** [-20.55, -9.64] | **-14.50** [-21.08, -10.00] | **-0.41** [-0.91, -0.12] | +39.89 | -8.51 / -8.57 | 10.4 / 10.7 |
+| m100 r0.35 | 35 (18) | 20 | 2,141.2 | **-1.18** [-1.67, -0.74] | **-13.59** [-17.18, -11.45] | **-12.56** [-15.94, -10.34] | -13.15 | -0.54 / -13.25 | 25.2 / 291.1 |
+| m100 r0.52 | 52 (26) | 20 | 609.1 | **-3.15** [-4.74, -1.85] | **-10.40** [-15.13, -6.19] | **-7.48** [-13.39, -1.88] | -2.02 | -0.69 / -7.52 | 19.2 / 63.3 |
+| m100 r0.80 | 80 (40) | 20 | 258.2 | **-6.06** [-10.09, -4.25] | **-6.42** [-10.90, -4.51] | **-0.38** [-1.08, -0.09] | +21.65 | -3.00 / -3.10 | 15.6 / 16.6 |
+| m200 r0.35 | 70 (35) | 20 | 8,374.0 | **-0.74** [-1.06, -0.42] | **-16.56** [-20.19, -14.26] | **-15.94** [-19.58, -13.67] | -16.56 | -0.34 / -16.56 | 62.3 / 1386.9 |
+| m200 r0.52 | 104 (52) | 20 | 2,890.4 | **-1.03** [-1.48, -0.63] | **-20.67** [-22.74, -18.91] | **-19.85** [-21.81, -18.13] | -20.24 | -0.18 / -20.29 | 29.8 / 597.5 |
+| m200 r0.80 | 160 (80) | 20 | 756.8 | **-1.87** [-3.06, -1.08] | **-16.62** [-24.32, -9.84] | **-15.03** [-23.47, -7.49] | -12.03 | -0.52 / -15.04 | 14.2 / 125.8 |
+
+## Oracle behaviour and descriptors (MDD-PTECT held; means over instances)
+| floor | switches v5 / v5+TECT | per-slot tail spread v5 % | TECT slot share % | AGV util | AGV util under MDD-TECT | machine util | backlog / machine (s) | backlog CV over slots | backlog CV over machines | surge contrast | short contrast | waiting per AGV | path per trip (m) | short-fleet slots |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| m50 r0.35 | 6.2 / 6.2 | 23.68 | 30 | 0.82 | 0.81 | 0.60 | 205 | 0.60 | 1.20 | -0.12 | -0.74 | 1.54 | 323 | 29% |
+| m50 r0.52 | 5.5 / 6.2 | 28.28 | 23 | 0.62 | 0.61 | 0.60 | 198 | 0.53 | 1.18 | +0.13 | -0.41 | 0.39 | 315 | 29% |
+| m50 r0.80 | 4.3 / 4.5 | 28.37 | 14 | 0.42 | 0.41 | 0.60 | 199 | 0.55 | 1.20 | +0.14 | -0.36 | 0.15 | 311 | 29% |
+| m100 r0.35 | 4.3 / 3.5 | 28.02 | 72 | 0.94 | 0.93 | 0.54 | 159 | 0.54 | 1.15 | +0.05 | -0.67 | 5.05 | 460 | 29% |
+| m100 r0.52 | 5.6 / 5.5 | 14.38 | 37 | 0.75 | 0.73 | 0.60 | 210 | 0.54 | 1.08 | +0.29 | -0.48 | 1.01 | 451 | 29% |
+| m100 r0.80 | 6.3 / 6.2 | 14.83 | 26 | 0.52 | 0.50 | 0.61 | 206 | 0.51 | 1.08 | +0.47 | -0.20 | 0.25 | 448 | 29% |
+| m200 r0.35 | 3.6 / 0.6 | 36.90 | 98 | 0.99 | 0.99 | 0.38 | 107 | 0.47 | 1.33 | +0.07 | -0.60 | 9.22 | 718 | 29% |
+| m200 r0.52 | 3.6 / 2.2 | 29.09 | 80 | 0.91 | 0.88 | 0.53 | 166 | 0.51 | 1.05 | -0.16 | -0.66 | 2.61 | 711 | 29% |
+| m200 r0.80 | 3.6 / 3.1 | 15.39 | 56 | 0.68 | 0.65 | 0.58 | 187 | 0.48 | 1.01 | +0.13 | -0.17 | 0.59 | 701 | 29% |
+
+## Test A, averaging (pre-declared): at each ratio, (a) backlog CV over slots falls from m50 to m200 (Mann-Whitney, one-sided) and (b) the v5 + MDD-TECT ceiling still shrinks from m50 to m200 (per-instance %, Mann-Whitney, one-sided: m200 less negative). Supported if (a) and (b) hold at r 0.80.
+- r0.35: backlog CV m50 0.60 -> m200 0.47 (p 0.00256); v5+TECT ceiling per instance m50 -11.51% -> m200 -20.49% median (p 0.993)
+- r0.52: backlog CV m50 0.53 -> m200 0.51 (p 0.318); v5+TECT ceiling per instance m50 -19.50% -> m200 -19.21% median (p 0.484)
+- r0.80: backlog CV m50 0.55 -> m200 0.48 (p 0.0169); v5+TECT ceiling per instance m50 -19.55% -> m200 -11.00% median (p 0.0234)
+  -> averaging SUPPORTED at r 0.80 (a True, b True)
+
+## Test B, transport scarcity (pre-declared): on m100 and m200, (c) the v5 ceiling at r 0.80 is larger than at r 0.52 (same instances, per-instance %, Wilcoxon) and (d) what MDD-TECT adds over the v5 oracle is larger at r 0.35 than at r 0.80 (paired, Wilcoxon). Supported if (c) and (d) hold on both floors.
+- m100 (n 20): v5 ceiling per instance, median r0.35 / 0.52 / 0.80: -1.36 / -4.93 / -10.84%; (c) r0.80 - r0.52 median -2.12 pts, p 0.0483 -> True. MDD-TECT adds, median r0.35 / 0.52 / 0.80: -11.85 / -1.29 / -0.04%; (d) r0.35 - r0.80 median -11.24 pts, p 5.34e-05 -> True
+- m200 (n 20): v5 ceiling per instance, median r0.35 / 0.52 / 0.80: -0.97 / -1.14 / -2.61%; (c) r0.80 - r0.52 median -1.28 pts, p 0.00639 -> True. MDD-TECT adds, median r0.35 / 0.52 / 0.80: -20.24 / -18.66 / -6.26%; (d) r0.35 - r0.80 median -14.40 pts, p 0.0121 -> True
+  -> transport scarcity SUPPORTED (m100 True, m200 True)
+
+## How much of the size drop does a larger fleet recover? (pooled v5 ceiling, pts)
+- m100: m50 r0.52 -11.62% -> m100 r0.52 -3.15% (drop +8.47); r0.80 -6.06%: recovers 34% of the drop; r0.35 -1.18%
+- m200: m50 r0.52 -11.62% -> m200 r0.52 -1.03% (drop +10.59); r0.80 -1.87%: recovers 8% of the drop; r0.35 -0.74%
+
+## Instance level: Spearman of the v5 oracle gain (per-instance %, < 0 better) with the descriptors, within each floor size (all ratios pooled)
+- m50 (n 60): agv_util +0.48 (p 9.6e-05); load_cv_time +0.22 (p 0.086); load_cv_machines -0.11 (p 0.39); wait_per_agv +0.58 (p 1.3e-06); spread_v5 -0.64 (p 3.3e-08); switches_v5 +0.22 (p 0.097)
+- m100 (n 60): agv_util +0.71 (p 2.4e-10); load_cv_time +0.23 (p 0.079); load_cv_machines -0.23 (p 0.081); wait_per_agv +0.79 (p 5.4e-14); spread_v5 +0.18 (p 0.16); switches_v5 -0.37 (p 0.0037)
+- m200 (n 60): agv_util +0.54 (p 8.6e-06); load_cv_time +0.19 (p 0.15); load_cv_machines +0.20 (p 0.13); wait_per_agv +0.57 (p 2.2e-06); spread_v5 +0.35 (p 0.0056); switches_v5 -0.41 (p 0.0011)

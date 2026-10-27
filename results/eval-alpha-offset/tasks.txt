@@ -1,0 +1,10 @@
+0 off-het 0-39
+0 off-b2 0-39
+0.25 off-het 0-39
+0.25 off-b2 0-39
+0.5 off-het 0-39
+0.5 off-b2 0-39
+0.75 off-het 0-39
+0.75 off-b2 0-39
+1 off-het 0-39
+1 off-b2 0-39
