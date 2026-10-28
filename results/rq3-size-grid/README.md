@@ -1,7 +1,7 @@
 # rq3-size-grid: floor-size cross-evaluation grid (2026-10-20, user: floor-size study phase 3)
 
-Status: **reference half done 10-20 14:05 (local, 8 h, 56 / 56 tasks); arms half (`rq3-size-grid`) waits on
-`train-size-m50` / `-m100` / `-mix`.** Umbrella: `../rq3-size-train/README.md`.
+Status: **done 10-24 05:31.** Reference half 10-20 (local, 56 / 56 tasks). Arms half 10-24 (lab `rq3-size-grid`, cluster
+Slurm 21959231, 72 / 72 tasks, 3 h 42 min). Umbrella: `../rq3-size-train/README.md`.
 
 ## Question
 Does a policy carry over to floor sizes it was not trained on, and how far? Hypotheses (from the umbrella README):
@@ -123,7 +123,81 @@ Bold: CI excludes 0. Training-seed-level t-test of the 5 seeds against 0: p 0.02
   keeps choosing rules that pay off on small floors. This is consistent with `../rq3-size-remap` (input scaling is
   not the cause). Whether training on 50 / 100 / mixed sizes fixes it is the arms half.
 
+## Results: arms half (10-24)
+Policies trained on 50 (T50), 100 (T100) or 15 + 50 + 100 machines (Tmix), 5 training seeds each, on the floors up to 100
+machines. Same measure as above. Run-to-run check: MDD-PTECT in every policy group equals the pdr group's on 160 / 160
+seed-runs on every floor. `analysis.out`, `summary.csv`, `grid.csv`.
+
+**Family mean of 5 vs MDD-PTECT, pooled % (bold: 95% CI excludes 0):**
+
+| trained on \ test floor | m15 | m20 | m30 | m50 | m75 | m100 |
+|---|---|---|---|---|---|---|
+| hindsight best v5 pair | −4.51 | −8.06 | −9.57 | −4.57 | −2.28 | −0.72 |
+| T15 (final-policy family) | **−1.69** | **−5.28** | **−4.59** | −1.29 | +1.24 | **+2.60** |
+| T50 | **−1.38** | **−2.52** | **−3.00** | **−1.42** | +0.21 | **+1.48** |
+| T100 | −1.02 | **−3.79** | **−4.38** | **−3.70** | −0.55 | −0.08 |
+| Tmix | −0.65 | **−1.96** | **−1.78** | **−1.04** | −0.12 | +0.06 |
+
+Training-seed spread (each seed's pooled %, s0-s4):
+- **T100:** m15 −0.4 / −1.1 / −1.1 / −0.2 / −2.2; m50 −5.9 / −2.1 / −2.8 / −4.1 / −3.7; m100 −0.3 / −0.2 / −0.6 / +0.6 / +0.1.
+- **T50:** m100 +6.0 / +1.7 / +0.3 / −0.2 / −0.3.
+- **Tmix:** m15 +0.0 / −0.2 / +0.0 / −2.1 / −0.9; m30 +0.0 / −0.9 / +0.0 / −5.9 / −2.1; m100 +0.0 / +0.1 / +0.0 / −1.0 / +1.1.
+
+**Two of the five Tmix seeds collapsed to MDD-PTECT.**
+- s0 and s2 give exactly MDD-PTECT's tardiness on all 40 test instances of every floor checked (m15 / m30 / m50 / m100).
+  Played deterministically, they choose MDD-PTECT at every slot.
+- s1 equals it on 2-23 of the 40 instances, depending on the floor.
+- Only s3 and s4 act on their own. s3 is good on every floor: −2.1 / −6.0 / −5.9 / −4.1 / −0.8 / −1.0% at 15-100
+  machines. That is better than the best family mean on every floor, though one seed against 5-seed means is a weak
+  comparison.
+- So Tmix's flat profile is mostly this collapse, not a size-robust policy.
+- A likely cause, not tested: tardiness at 100 machines is about 3x that at 15 (456 vs 146 k job-s per window), and
+  every deviation from MDD-PTECT is costly there (ATC +23-31%). The large floors' advantages may dominate the policy
+  gradient and push the mixed policy to the 100-machine best response. T100 itself did not collapse: its seeds differ
+  from MDD-PTECT.
+
+**Paired, Tmix vs the single-size arms (+ = Tmix worse):**
+
+| floor | Tmix vs T15 | Tmix vs T50 | Tmix vs T100 |
+|---|---|---|---|
+| m15 | **+1.06** (p 0.005) | +0.74 | +0.38 |
+| m20 | **+3.50** (p 3e-5) | +0.57 | **+1.90** (p 0.005) |
+| m30 | **+2.94** (p 5e-8) | **+1.26** (p 0.004) | **+2.73** (p 5e-6) |
+| m50 | +0.25 | +0.38 | **+2.76** (p 2e-7) |
+| m75 | −1.35 (p 0.08) | −0.33 | +0.42 |
+| m100 | **−2.48** (p 0.004) | **−1.40** (p 0.013) | +0.13 |
+
+**Transfer curve (single-size arms):** gap vs |log10(test / train)|, Spearman ρ +0.40 vs MDD-PTECT (p 0.08) and +0.54
+vs the floor's best pair (p 0.013), over 20 arm-floor cells. T15 alone gave ρ +0.93 over its 8 floors (reference half).
+
+### Hypotheses (umbrella README)
+1. **Performance falls with the size ratio: only upward.**
+   - Policies trained on small floors degrade on larger ones: T15 +2.6% and T50 +1.5% at 100 machines.
+   - Policies trained on large floors carry over down. T100 is better than MDD-PTECT at 20-50 machines (−3.7 to −4.4%)
+     and never significantly worse anywhere from 15 to 100.
+   - Pooled over the arms the ratio correlation is weak (ρ +0.40); it is strong only for T15 going up.
+2. **Mixed-size training stays flat across 15-100: formally yes (−0.65 to +0.06), but not as hoped.** The flatness
+   comes mainly from 2 of 5 seeds collapsing to MDD-PTECT. Tmix is the weakest arm on 15-30-machine floors, 1-3.5 points
+   behind T15 there.
+3. **Beyond 100 machines:** not tested. The arms half was narrowed to 15-100 machines after the 10-21 advisor meeting.
+
+### Reading
+- **For 15-100 machines, the policy trained on the largest floor is the best single policy.** T100 gains where the
+  rule choice matters (20-50 machines) and costs nothing where it does not (75-100).
+- **The 15-machine family (the final policy's) is best at 15-30 machines** but loses 2.6% at 100.
+- **The ceiling at 75-100 machines is small for every arm.** The hindsight best v5 pair is only −2.3 / −0.7% there,
+  because the v5 action set lacks what helps on large floors: TECT under a short fleet gives −12.2% at 100 machines
+  (`../rq3-size-portfolio`). So the remaining gap is the action set, not transfer (see `../rq3-alpha-size` and
+  `../eval-alpha-spread` for α as an action).
+- **Mixed-size training needs a fix before it can be the transfer recipe** (user 10-25: not pursued; the claim is
+  "train at the largest deployment size"). Candidates were: per-floor return
+  normalization, so a large floor's tardiness does not dominate; or one floor size per shared-baseline group with
+  advantages normalized per group. The one non-collapsed Tmix seed (s3) shows the recipe can work.
+
 ### Thesis reading (so far)
-The proposal's "any floor size" claim does not hold for the 15-machine-trained policy. It holds within about 3x of
-the training size (15-50 machines: better than or equal to MDD-PTECT, family and final policy), and fails beyond
-~5x. The arms half tests whether a policy trained on larger or mixed floors moves or widens that window.
+- **The 15-machine policy:** the proposal's "any floor size" claim does not hold for it. It holds within about 3x of the
+  training size (15-50 machines: better than or equal to MDD-PTECT, family and final policy), and fails beyond ~5x.
+- **Arms half (10-24):** training on the largest floor fixes the upward failure within 15-100 machines. T100 is never
+  significantly worse than MDD-PTECT and gains 3.7-4.4% at 20-50 machines.
+- **Mixed-size training:** as run, it mostly collapses to MDD-PTECT (2 of 5 seeds exactly).
+- **What can be claimed:** train at the largest deployment size. Transfer runs downward, not upward.

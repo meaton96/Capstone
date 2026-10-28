@@ -19,6 +19,7 @@ python results/rq2-oracle-bc-future/collect.py label 3000-3009
 python results/rq2-oracle-bc-future/collect.py future 0-39
 python results/rq2-oracle-bc-future/collect.py list > results/rq2-oracle-bc-future/tasks_collect.txt
 python results/rq2-oracle-bc-future/collect.py list4k   # data scaling (10-16): label tasks for seeds 4000-6999
+python results/rq2-oracle-bc-future/collect.py list8k   # data scaling (10-18): label tasks for seeds 7000-10999
 @endcode
 """
 import json
@@ -150,6 +151,10 @@ def future_level(level, seed):
 def main(argv):
     if argv[0] == "list4k":                        # data scaling (10-16): 3,000 more training seeds 4000-6999
         for lo in range(4000, 7000, 10):
+            print(f"label {lo}-{lo + 9}")
+        return
+    if argv[0] == "list8k":                        # data scaling (10-18): 4,000 more training seeds 7000-10999
+        for lo in range(7000, 11000, 10):
             print(f"label {lo}-{lo + 9}")
         return
     if argv[0] == "list":

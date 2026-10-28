@@ -19,3 +19,5 @@ Episode returns in the logs are not comparable across seeds (each update draws d
 
 Yardstick (`../rq3-size-oracle`): the v5 switching oracle at 50 machines is −10.3% vs MDD-PTECT, the same room as at 15
 machines (−9.4%); the best observable v5 regime map is only −0.6% exact there (`../rq3-size-portfolio`).
+
+**Evaluated 10-24 in `rq3-size-grid` (arms half):** −1.4 to −3.0% vs MDD-PTECT at 15-50 machines, +1.5% at 100.

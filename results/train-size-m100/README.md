@@ -22,3 +22,6 @@ Yardsticks at 100 machines:
 - v5 switching ceiling −3.3% vs MDD-PTECT (`../rq3-size-oracle`);
 - the observable rule "short fleet → MDD-TECT" −12.2% (`../rq3-size-portfolio`);
 - this arm chooses among v5 pairs only, so TECT is outside its action set.
+
+**Evaluated 10-24 in `rq3-size-grid` (arms half):** never significantly worse than MDD-PTECT from 15 to 100 machines;
+−3.7 to −4.4% at 20-50. The best single policy for 15-100 machines in the study.

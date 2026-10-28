@@ -2,8 +2,9 @@
 @file analyze.py
 @brief rq2-oracle-bc-future (2026-10-15): does BC of the v5 switching oracle use a future job table?
        -> analysis.out, summary.csv
-       --variant 4k (data scaling, 10-16): the arms retrained on 4,000 seeds (bc4k/, out/rollout4k/) -> analysis4k.out,
-       summary4k.csv, plus the learning curve over 250-4,000 seeds and the 1,000- vs 4,000-seed models side by side.
+       --variant 4k / 8k (data scaling, 10-16 / 10-18): the arms retrained on 4,000 / 8,000 seeds (bc4k/, bc8k/,
+       out/rollout4k/, out/rollout8k/) -> analysis<v>.out, summary<v>.csv, plus the learning curve over every training
+       size and the 1,000 / 4,000 / 8,000-seed models side by side.
 
 1. Per slot (bc/scores_*.json): oracle-pair match, job-rule match and hold-to-end regret of the clone's pick on the
    held-out evaluation slots, per arm (mean and sd over BC seeds), and the learning curve (250 / 500 / 1000 seeds).
@@ -272,38 +273,51 @@ def main():
 
 
 def scaling(m, idx):
-    """Data scaling (10-16): per-slot learning curve over bc/ (250-1,000 seeds) and bc4k/ (2,000-4,000), and the
-    rollouts of the 1,000- vs 4,000-seed models (one pooled % vs MDD-PTECT per model, 200 seeds)."""
+    """Data scaling (10-16 / 10-18): per-slot learning curve over bc/ (250-1,000 seeds), bc4k/ (2,000-4,000) and bc8k/
+    (8,000), and the rollouts of the 1,000 / 4,000 / 8,000-seed models (one pooled % vs MDD-PTECT per model, 200 seeds),
+    each step tested with Welch and Mann-Whitney."""
     print("\n-- 4. data scaling: per-slot learning curve, all 4,800 evaluation slots, mean (sd) over BC seeds")
-    ps = pd.concat([per_slot("bc"), per_slot("bc4k")])
+    ps = pd.concat([per_slot(d) for d in ("bc", "bc4k", "bc8k") if (HERE / d).exists()])
     cols = ["eval_all:pair_match_%", "eval_all:mean_regret_%", "eval_all_redrawn:mean_regret_%",
             "redrawn_pick_changed_%"]
     g = ps.groupby(["arm", "n_train"])[cols]
     tab = g.mean().round(2).astype(str) + " (" + g.std().round(2).astype(str) + ")"
     tab["models"] = g.size()
     print(tab.to_string())
-    print("\n-- 5. rollouts, 1,000 vs 4,000 training seeds (one pooled % vs MDD-PTECT per model, all 200 seeds)")
+    print("\n-- 5. rollouts by training size (one pooled % vs MDD-PTECT per model, all 200 seeds); p: Welch / MW vs the "
+          "previous size")
     runs = {}
-    for name, sub in (("1k", "rollout"), ("4k", "rollout4k")):
-        VARIANT["rollout"] = sub
-        runs[name] = rollouts()
+    keep = VARIANT["rollout"]
+    for name, sub in (("1k", "rollout"), ("4k", "rollout4k"), ("8k", "rollout8k")):
+        if (HERE / "out" / sub).exists():
+            VARIANT["rollout"] = sub
+            runs[name] = rollouts()
     for arm in ARMS:
         for lv in (["exact"] if arm == "state" else ["exact", "redrawn"]):
             vals = {}
             for name, ro in runs.items():
                 vals[name] = [pct(ro[(lv, ck)].reindex(idx), m) for (l, ck) in sorted(ro)
                               if l == lv and ck.startswith(f"bc_{arm}_s") and ro[(lv, ck)].reindex(idx).notna().all()]
-            a, b = vals["1k"], vals["4k"]
-            if len(a) > 1 and len(b) > 1:
-                print(f"   {arm:<10} {lv:<8} 1k mean {np.mean(a):+.2f} (sd {np.std(a, ddof=1):.2f})  4k mean "
-                      f"{np.mean(b):+.2f} (sd {np.std(b, ddof=1):.2f})  Welch p "
-                      f"{stats.ttest_ind(b, a, equal_var=False).pvalue:.3g}, MW p {stats.mannwhitneyu(b, a).pvalue:.3g}")
-    VARIANT["rollout"] = "rollout4k"
+            parts, prev = [], None
+            for name, v in vals.items():
+                if len(v) < 2:
+                    continue
+                part = f"{name} {np.mean(v):+.2f} (sd {np.std(v, ddof=1):.2f})"
+                if prev is not None:
+                    part += (f" [p {stats.ttest_ind(v, prev, equal_var=False).pvalue:.2g} / "
+                             f"{stats.mannwhitneyu(v, prev).pvalue:.2g}]")
+                parts.append(part)
+                prev = v
+            if parts:
+                print(f"   {arm:<10} {lv:<8} " + "  ".join(parts))
+    VARIANT["rollout"] = keep
 
 
 if __name__ == "__main__":
-    if "--variant" in sys.argv and sys.argv[sys.argv.index("--variant") + 1] == "4k":
-        VARIANT.update(bc="bc4k", rollout="rollout4k", suffix="4k")
+    if "--variant" in sys.argv:
+        v = sys.argv[sys.argv.index("--variant") + 1]
+        assert v in ("4k", "8k"), v
+        VARIANT.update(bc=f"bc{v}", rollout=f"rollout{v}", suffix=v)
     buf = io.StringIO()
     with redirect_stdout(buf):
         main()

@@ -7,14 +7,21 @@ Status: **done**.
 - 4,000 label seeds (data scaling, user 10-16): 2026-10-17 03:31. Labs `rq2-oracle-bc-future-data4k` (Slurm
   21901807, 2:37) and `rq2-oracle-bc-future-4k` (Slurm 21902618 for 24 A100 models + 21902619 for rollouts; 13 h,
   mostly A100 queue). Outputs `analysis4k.out`, `summary4k.csv`.
+- 8,000 label seeds (data scaling step 2, user 10-18): 2026-10-20 01:58. Labs `rq2-oracle-bc-future-data8k` (Slurm
+  21916561, 3:29), `rq2-oracle-bc-future-8k-local` (11 models on the local GPU, 3:38) and `rq2-oracle-bc-future-8k`
+  (Slurm 21919270 for 4 A100 models, then 21919271 for the rollouts). Outputs `analysis8k.out`, `summary8k.csv`.
 
-**Answer: yes, a policy can use the full future schedule as a per-job table, and with enough labels the gain is
-real.** Cloned from 4,000 oracle-labelled instances, BC with a 128-row table is −2.55% [−3.54, −1.64] vs MDD-PTECT
-on 200 held-out seeds (24% of the oracle's gain). That is 3.0 points better than BC without the table: all 5 vs all 5
-models, Welch p 0.004, Mann-Whitney p 0.008. An unrelated (redrawn) future takes the gain away (−0.39%, every model
-loses 1.5-2.8 points, p 0.0006). The gain holds under 1-30 min arrival error and 10-25% churn (−2.4 to −2.7%), where
-the planner keeps −2.2 to −2.8% on the test seeds. With 1,000 seeds the same arms gave only −0.5 / −0.9%. The gain
-grew with data and the learning curve has not flattened.
+**Answer: yes, a policy can use the full future schedule as a per-job table, and the gain is real, but data scaling
+saturates by about 4,000 labels.**
+- **The gain:** cloned from 4,000 oracle-labelled instances, BC with the table is −2.2 to −2.55% vs MDD-PTECT on 200
+  held-out seeds (21-24% of the oracle's gain). That is 2.6-3.0 points better than BC without the table: all 5 vs all
+  5 models, Mann-Whitney p 0.008.
+- **It is forecast use:** an unrelated (redrawn) future takes the gain away, and every model loses 1.5-3 points.
+- **Robust to forecast error:** it holds under 1-30 min arrival error and 10-25% churn (−2.1 to −2.7%). The planner
+  keeps −2.2 to −2.8% at the same error on the test seeds.
+- **Saturation:** 1,000 seeds gave −0.5 / −0.9%. Doubling to 8,000 seeds gives no more: −2.12 / −2.13% vs −2.20 /
+  −2.55%, and the clones' per-slot regret is flat (future128 4.07 → 4.10%). The BC estimate of the table's value is
+  about −2.1 to −2.6% vs MDD-PTECT, 3 points over state-only BC.
 
 ## Why
 
@@ -311,7 +318,7 @@ Family = per-instance mean over the 5 BC seeds; seed bootstrap 95% CI; Wilcoxon 
    - A cloned network gets most of the planner's realistic-forecast value without simulating at decision time.
 4. **The test seeds (n = 40) agree in sign but are weaker:** future64 −1.84% (p 0.015), future128 −1.23% (CI crosses
    0). The 200-seed pool is the reference; the test set alone has the ±2-point clone noise noted above.
-5. **Not saturated.** Per-slot regret is still falling at 4,000 seeds (future128 4.57 → 4.19 → 4.07%), and the
+5. **Not saturated (superseded by the 8,000-seed run: it is saturated).** Per-slot regret is still falling at 4,000 seeds (future128 4.57 → 4.19 → 4.07%), and the
    rollout gain more than doubled from 1,000 to 4,000 seeds. Labels cost about 3 CPU-min per seed (3,000 seeds in
    2.6 h of cluster time).
 6. **For the thesis (RQ2 information row):**
@@ -323,38 +330,132 @@ Family = per-instance mean over the 5 BC seeds; seed bootstrap 95% CI; Wilcoxon 
    The future table is the first learned input that carries forecast value. This replaces the 1,000-seed reading
    ("worth little").
 
-## Proposal (not started): PPO with the future table, and more labels
+## Data scaling, step 2: 8,000 label seeds (10-18, user)
 
-The decision rule is met, so PPO with the table is worth proposing. Two options, cheapest first. **Neither is
-started.**
+The user chose option 1 of the 4,000-seed proposal: 4,000 more oracle labels (B2 seeds 7000-10999), then the same three
+arms × BC seeds 0-4 on all 8,000 seeds (3000-10999), with the same protocol.
+- **Data:** `submit_collect8k.sh` (`collect.py list8k`). 4,000 / 4,000 files; every replay equals its oracle value;
+  the oracle is −10.5% vs MDD-PTECT on these seeds; one stamp (des_twin a3638018, future code b4c9a54b).
+- **BC:** `submit_bc8k.sh` → `bc8k/`. The A100 array trained state s0-s3 (32-47 min each, 20 GB), then Slurm put the
+  other 11 behind other jobs until 10-20 17:40.
+  - `train_local8k.sh` (lab `rq2-oracle-bc-future-8k-local`) trained those 11 on the local RTX 4070 Ti in 14-27 min
+    each, with the same script and arguments. It pushed each to the cluster and cancelled the array when all 15 were
+    there.
+  - The device and host are in each `scores_*.json`: state s0-s3 on A100s, state s4 and every future model locally.
+    Same code and recipe; only GPU numerics differ.
+- **Rollouts:** `out/rollout8k/`, 200 / 200 files, every level. **Analysis:** `analyze.py --variant 8k` →
+  `analysis8k.out`, `summary8k.csv`.
 
-1. **More labels (cheap, likely gain):** 4,000 more oracle labels (seeds 7000-10999, about 3.5 h on the cluster),
-   then the same three arms on 8,000 seeds (models about 25-40 min each on an A100, plus the GPU queue). This tests
-   whether BC keeps improving. It is also the strongest candidate method so far: a network that imitates the
-   planner's hindsight choices from a published schedule.
-2. **`train-v5-future` (PPO):** train-v5-lookahead's stack (train-v5-nokl's frozen code, no prior, no KL, B2, 900 s
-   slots, 100k steps, seeds 0-4, one 7-CPU job per seed, about 6-10 h) with `--future-table 128` instead of
-   `--policy-lookahead`. Two arms:
-   - **(a) from scratch:** the clean test of whether RL finds the forecast use;
-   - **(b) actor warm-started from the 4,000-seed future128 BC clones:** whether PPO keeps or improves on what BC
-     found. This is the more promising arm, given that PPO from scratch has stayed in the state-only band.
+### Results at 8,000 seeds
 
-   Evaluate as `eval-v5-future` with eval-v5-lookahead-fcast's protocol: 200 seeds, exact + 6 published-schedule
-   levels, the redrawn control, per-model Welch / MW against the future128 BC clones (−2.55%) and the state-only PPO
-   family (−1.25%).
-   - **Code to write first:** `train.py --future-table N` (obs shape, network choice, run settings, BC warm start
-     from a `bc_future128_s<k>.pt`); `evaluate.py` loading via `models.future_net.network_for`, with the twin's
-     `future_table` turned on from the checkpoint; tests; a `dev-` smoke. The obs key, network and overlay exist.
-   - **Timing:** code + smoke about half a day, training about 10 h, evaluation about 1 h. That fits before the
-     10-25 freeze if started by about 10-21.
+**Pooled % vs MDD-PTECT, all 200 held-out seeds** (family = per-instance mean of 5 BC seeds; switching oracle −10.44%):
+
+| arm, published schedule | vs MDD-PTECT | vs state BC (paired) | vs its own exact run (paired) | share of the oracle's gain |
+|---|---|---|---|---|
+| state BC | +1.06 [−0.39, +2.70], p 0.26 | – | – | −10% |
+| future64, exact | −2.12 [−3.20, −1.06] | −3.19 [−4.49, −1.99] | – | 20% |
+| future64, ± 1 / 10 / 30 min | −2.07 / −2.26 / −2.43 | −3.13 / −3.33 / −3.49 | +0.05 / −0.14 / −0.31 (n.s.) | 20-23% |
+| future64, 10 / 25% churn | −1.99 / −1.60 | −3.05 / −2.66 | +0.14 / +0.53 (p 0.09) | 15-19% |
+| future64, **redrawn** | **+0.52** [−0.99, +2.07] | −0.55 (n.s.) | **+2.64** [+1.49, +3.91], p 5e-5 | −5% |
+| future128, exact | −2.13 [−3.18, −1.19] | −3.19 [−4.61, −1.93] | – | 20% |
+| future128, ± 1 / 10 / 30 min | −2.08 / −2.29 / −2.79 | −3.15 / −3.35 / −3.85 | +0.04 / −0.16 / −0.66 (p 0.01) | 20-27% |
+| future128, 10 / 25% churn | −2.13 / −1.89 | −3.19 / −2.95 | −0.00 / +0.24 (n.s.) | 18-20% |
+| future128, **redrawn** | **+0.54** [−1.10, +2.14] | −0.53 (n.s.) | **+2.66** [+1.40, +4.01], p 3e-5 | −5% |
+
+- Fitting seeds alone (n = 160): future128 −2.47%, future64 −2.32%, state +0.77%.
+- Test seeds alone (n = 40): future64 −1.28% (p 0.025), future128 −0.68% (n.s.), state +2.30%. On the test seeds at
+  30 min error: future64 −1.90%, future128 −1.78%; the planner −2.77%.
+
+**Training-seed level** (one pooled % per model, 200 seeds):
+- state: +1.57 / +0.88 / +1.61 / +0.07 / +1.20, mean +1.06 (sd 0.63).
+- future64: −2.68 / −1.28 / −2.47 / −1.86 / −2.33, mean −2.12 (0.56). Exact minus redrawn per model −4.09 / −2.72 /
+  −1.84 / −2.17 / −2.38 (paired t p 0.0025).
+- future128: −2.30 / −2.55 / −1.86 / −1.91 / −2.02, mean −2.13 (0.29). Exact minus redrawn −2.37 / −3.79 / −2.08 /
+  −2.09 / −3.00 (p 0.0012).
+- Both vs state: Welch p 3e-5 / 7e-5, Mann-Whitney p 0.008 (no overlap). Redrawn vs state: p 0.19-0.31.
+
+**Learning curve** (per-slot hold-to-end regret on the 4,800 evaluation slots, mean over BC seeds):
+
+| training seeds | 250 | 500 | 1,000 | 2,000 | 4,000 | 8,000 |
+|---|---|---|---|---|---|---|
+| state | 5.18 | 5.00 | 4.94 | 4.79 | 4.66 | 4.62 |
+| future64 | 5.47 | 4.89 | 4.66 | 4.33 | 4.26 | 4.31 |
+| future128 | – | – | 4.57 | 4.19 | **4.07** | **4.10** |
+
+**Rollouts by training size** (mean of the 5 per-model pooled % vs MDD-PTECT; p = Welch / Mann-Whitney vs the
+previous size):
+
+| arm | 1,000 | 4,000 | 8,000 |
+|---|---|---|---|
+| state | +1.08 | +0.44 (p 0.40 / 0.42) | +1.06 (p 0.34 / 0.42) |
+| future64, exact | −0.51 | **−2.20** (p 0.011 / 0.008) | −2.12 (p 0.80 / 0.84) |
+| future128, exact | −0.89 | **−2.55** (p 0.004 / 0.008) | −2.13 (p 0.033 / 0.056) |
+| future128, redrawn | −0.19 | −0.39 | +0.54 |
+
+### Reading (8,000 seeds)
+
+1. **Data scaling saturates by about 4,000 labels.**
+   - From 1,000 to 4,000 seeds the future arms gained 1.7 points.
+   - From 4,000 to 8,000 they gained nothing: future64 −2.20 → −2.12% (n.s.), future128 −2.55 → −2.13% (slightly
+     worse, p 0.03 / 0.06, within the 4,000-seed run's spread).
+   - Per-slot regret is flat from 4,000 to 8,000 (future128 4.07 → 4.10%, future64 4.26 → 4.31%), and so is state
+     BC's (4.66 → 4.62%).
+   - More oracle labels will not raise this design's result. Its BC value is about −2.1 to −2.6% vs MDD-PTECT.
+2. **Everything else from the 4,000-seed run holds on new models.**
+   - The table beats state-only BC by 3.2 points, with no overlap between the five models of each arm.
+   - A redrawn future removes the whole gain (p 0.001-0.003 per model).
+   - 1-30 min jitter and 10% churn leave it in place; 30 min jitter is again slightly better than exact.
+   - 25% churn costs future64 0.5 points (n.s.) and future128 0.2.
+3. **The plateau is about 20-25% of the oracle's gain.** That is what an imitation network extracts from the full
+   schedule with this table, encoder and recipe. The planner on the exact schedule stays at −9.4 / −11.2%. At
+   realistic error the planner (−2.2 to −2.8%) and the clones (−2.0 to −2.8%) are now about level.
+4. **The test seeds alone are weaker than at 4,000** (future64 −1.28%, future128 −0.68% n.s.) and the fitting seeds
+   are similar (−2.3 / −2.5%). With 40 seeds the test set alone cannot separate −0.7 from −1.8%. The 200-seed pool is
+   the reference.
+5. **What could still raise the ceiling** (not run): a different model rather than more data. Options are a larger
+   or attention-based future encoder, labels from the 300 s planner (−11.2%) instead of the 900 s greedy oracle, or
+   training on noisy published schedules. Or PPO from the BC clones, which optimizes tardiness directly instead of
+   imitating one-future labels.
+
+## Proposal: PPO with the future table (DECIDED 10-20, user: running as train-v5-future / -bc, eval-v5-future)
+
+More labels are ruled out: the 8,000-seed run shows the BC gain saturated by 4,000 seeds. The remaining proposal is
+PPO with the table, best warm-started from the BC clones. **The user chose to run it (10-20):** see
+`../train-v5-future/README.md` and `../eval-v5-future/README.md`.
+
+**Outcome (eval-v5-future, 10-21):**
+- PPO with the table: −2.62% from scratch, −3.02% warm-started from the 4k clones (vs −2.55% for the clones). These are
+  the best learned policies, robust to forecast error.
+- Its forecast use is small. A redrawn future costs the PPO policies 0.43 points (p 0.002) against 2.2 for the
+  clones. PPO fine-tuning traded the clones' forecast dependence for robustness.
+
+
+- **`train-v5-future`:** train-v5-lookahead's stack (train-v5-nokl's frozen code, no prior, no KL, B2, 900 s slots,
+  100k steps, seeds 0-4, one 7-CPU job per seed, about 6-10 h) with `--future-table 128` instead of
+  `--policy-lookahead`. Two arms:
+  - **(a) from scratch:** does RL find the forecast use on its own?
+  - **(b) actor warm-started from the 4,000-seed future128 BC clones** (`bc4k/bc_future128_s<k>.pt`, −2.55%): does
+    optimizing tardiness directly push past the imitation plateau? This is the more promising arm.
+- **`eval-v5-future`:** eval-v5-lookahead-fcast's protocol: 200 seeds, exact + 6 published-schedule levels, the
+  redrawn control. Per-model Welch / Mann-Whitney against the BC clones (−2.1 to −2.55%) and the state-only PPO family
+  (−1.25%).
+- **Code to write first:**
+  - `train.py --future-table N`: obs shape, `FutureSchedulingNetwork`, run settings, actor warm start from a BC
+    checkpoint;
+  - `evaluate.py`: load via `models.future_net.network_for` and turn on the twin's `future_table` from the checkpoint;
+  - tests, and a `dev-` smoke.
+  - The obs key, network and frozen-code overlay exist (branch `claude/peaceful-pike-a3b399`).
+- **Timing:** code + smoke about half a day, training about 10 h (more if the cluster is as busy as on 10-19),
+  evaluation about 1 h. That is very tight against the 10-25 freeze. If PPO is not run, the thesis result is the BC
+  plateau above.
 
 ## Files
 
 | file | what |
 |---|---|
 | `common.py`, `code/` | frozen v5 code + the two new files; published-schedule adapter |
-| `collect.py`, `submit_collect.sh`, `submit_collect4k.sh` | training labels (3000-3999, then 4000-6999) and evaluation future tables |
-| `bc_train.py`, `gpu_array.sbatch`, `submit_bc.sh`, `submit_bc4k.sh` | BC models (A100 array), then the rollout array (1,000 / 4,000 seeds) |
-| `rollout.py`, `analyze.py` | rollouts at every level; analysis → `analysis.out`, `summary.csv` (`--variant 4k` → `analysis4k.out`, `summary4k.csv`) |
+| `collect.py`, `submit_collect.sh`, `submit_collect4k.sh`, `submit_collect8k.sh` | training labels (3000-3999, 4000-6999, 7000-10999) and evaluation future tables |
+| `bc_train.py`, `gpu_array.sbatch`, `submit_bc.sh`, `submit_bc4k.sh`, `submit_bc8k.sh`, `train_local8k.sh` | BC models (A100 array; the 8k models partly on the local GPU), then the rollout array (1,000 / 4,000 / 8,000 seeds) |
+| `rollout.py`, `analyze.py` | rollouts at every level; analysis → `analysis.out`, `summary.csv` (`--variant 4k` / `8k` → `analysis4k.out` / `analysis8k.out`, `summary4k.csv` / `summary8k.csv`) |
 | `checks.py`, `smoke/` | local checks |
-| `bc/`, `bc4k/`, `bc_fit160/`, `bc_preview/`, `out/` | models and scores (1,000 / 4,000 seeds), early read (160 seeds), local 1-seed preview, data and rollouts (`out/rollout`, `out/rollout4k`) |
+| `bc/`, `bc4k/`, `bc8k/`, `bc_fit160/`, `bc_preview/`, `out/` | models and scores (1,000 / 4,000 / 8,000 seeds), early read (160 seeds), local 1-seed preview, data and rollouts (`out/rollout`, `out/rollout4k`, `out/rollout8k`) |
