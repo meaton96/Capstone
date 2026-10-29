@@ -20,11 +20,14 @@ namespace Assets.Scripts.Simulation.Machines
     /// Failure lifecycle (stochastic mode only):
     ///   1. @c _ttfCountdown reaches zero in @c Update.
     ///   2. Repair duration is sampled immediately; @c FailedFlag is raised.
-    ///   3. @c SimulationBridge detects @c FailedFlag, handles job return and AGV
-    ///      re-routing, then calls @c AcknowledgeFailure() to move to Repairing.
+    ///   3. @c SimulationBridge detects @c FailedFlag, handles the queued jobs and AGV
+    ///      re-routing, then calls @c AcknowledgeFailure() to move to Repairing. The job in
+    ///      process stays on the machine with its countdown stopped (preempt-resume, since
+    ///      2026-10-28); with "-failurerestart" it is handed back for re-routing and restarts.
     ///   4. @c _repairCountdown counts down in @c Update; @c RepairCompleteFlag is raised.
     ///   5. @c SimulationBridge calls @c AcknowledgeRepairComplete(); machine samples a
-    ///      fresh TTF (age reset to zero post-repair) and returns to Operational.
+    ///      fresh TTF (age reset to zero post-repair) and returns to Operational. A held job's
+    ///      countdown continues from where it stopped.
     [RequireComponent(typeof(Collider))]
     [RequireComponent(typeof(Rigidbody))]
     [DefaultExecutionOrder(FactoryOrchestrator.ExecutionOrderMachines)]   // after the orchestrator (H2)
@@ -367,26 +370,34 @@ namespace Assets.Scripts.Simulation.Machines
 
         /// @brief Transitions the machine from Failed to Repairing state.
         ///
-        /// @details Called by @c SimulationBridge after it has handled job return
+        /// @details Called by @c SimulationBridge after it has handled the queued jobs
         /// and AGV re-routing. The repair countdown (already sampled into @c SampledRepairDuration)
-        /// begins here. The machine is left idle but unavailable for new work until repair completes.
+        /// begins here. The machine is unavailable for new work until repair completes.
+        ///
+        /// @param keepActiveJob True (preempt-resume, the default since 2026-10-28): the job in process
+        /// stays on the machine and @c remainingTime is kept; @c TickProcessing is stopped while the
+        /// machine is down, so the operation continues from where it stopped after the repair. The
+        /// almost-done flag is re-armed, so a pre-dispatch cleared by the failure fires again then.
+        /// False ("-failurerestart"): the job has been returned for re-routing and the machine is left idle.
         ///
         /// @post @c FailedFlag is cleared, @c HealthState is set to Repairing,
         /// and @c visualLayer.BeginRepair() is called with the sampled duration.
-        public void AcknowledgeFailure()
+        public void AcknowledgeFailure(bool keepActiveJob = false)
         {
             FailedFlag = false;
             HealthState = MachineHealthState.Repairing;
             SimLogger.Medium($"[PhysicalMachine] Machine [{MachineId}] failure");
-            // Clear any processing state — the active job has been returned by SimulationBridge.
-            IsIdle = true;
-            ActiveJobId = -1;
             FinishedFlag = false;
             AlmostDoneFlag = false;
             AlmostDoneJobId = -1;
             almostDoneFired = false;
-            remainingTime = 0f;
-
+            if (!keepActiveJob || IsIdle)
+            {
+                // Clear any processing state — the active job has been returned by SimulationBridge.
+                IsIdle = true;
+                ActiveJobId = -1;
+                remainingTime = 0f;
+            }
 
 
             // exposes a repair animation (e.g. a maintenance icon / colour tint).
@@ -419,6 +430,12 @@ namespace Assets.Scripts.Simulation.Machines
 
             SimLogger.Medium($"Machine [{MachineId}] repair complete");
             visualLayer?.EndRepair();
+            if (!IsIdle && visualLayer != null)
+            {
+                // A job held through the repair resumes (TickProcessing runs again from this tick).
+                visualLayer.BeginOperation(ActiveJobId, Time.time, remainingTime);
+                visualLayer.UpdateProgress(1f - (remainingTime / Mathf.Max(totalDuration, 0.001f)));
+            }
         }
 
         // ── Conveyor helpers ──────────────────────────────────────────────────

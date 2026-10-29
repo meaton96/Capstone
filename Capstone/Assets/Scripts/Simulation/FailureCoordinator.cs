@@ -50,6 +50,16 @@ namespace Assets.Scripts.Simulation
         public static bool LegacyQuirks =
             System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "-legacyfailurequirks") >= 0;
 
+        /// <summary>
+        /// "-failurerestart": the interrupted-operation model of every build before 2026-10-28. The job in process on a
+        /// failed machine goes back to NeedsRouting at that machine, may be routed to another one, and its operation
+        /// restarts from zero; the elapsed work is lost (not busy time). The default since 2026-10-28 is preempt-resume:
+        /// the job stays on the machine (Processing) with its remaining time frozen through the repair and finishes the
+        /// rest afterwards; the elapsed work counts as busy time. Kept to reproduce results made before the change.
+        /// </summary>
+        public static bool RestartOnFailure =
+            System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "-failurerestart") >= 0;
+
         /// <summary>Failure / repair events of this episode (machine_failures.csv); collected under "-destrace".</summary>
         public readonly List<MachineFailureEventRecord> EventRecords = new List<MachineFailureEventRecord>();
 
@@ -139,8 +149,8 @@ namespace Assets.Scripts.Simulation
         }
 
         /// <summary>
-        /// Handles all consequences of a machine failure, including re-routing active jobs,
-        /// canceling pickups and transits, and redirecting or aborting in-flight AGVs.
+        /// Handles all consequences of a machine failure, including suspending (or, with "-failurerestart",
+        /// re-routing) the job in process, canceling pickups and transits, and redirecting or aborting in-flight AGVs.
         /// </summary>
         /// <param name="machine">The physical machine that has failed.</param>
         private void HandleMachineFailure(PhysicalMachine machine)
@@ -148,9 +158,15 @@ namespace Assets.Scripts.Simulation
             int machineId = machine.MachineId;
             SimLogger.Medium($"[Orchestrator] Machine {machineId} FAILED. RepairTime={machine.SampledRepairDuration:F1}s");
 
-            // The interrupted operation's elapsed time is dropped, not added to busy time: utilization counts
-            // completed (and, at episode end, in-progress) work only; work lost to a failure is not busy
-            // (user decision 10-03, audit G10).
+            JobData processingJob = machine.ActiveJobId >= 0 ? _jobs.Get(machine.ActiveJobId) : null;
+            if (processingJob != null && processingJob.State != JobState.Processing) processingJob = null;
+            bool holdJob = processingJob != null && !RestartOnFailure;
+
+            // Busy time. Preempt-resume: the work done so far is kept, so it is busy time, and the interval reopens at
+            // the repair (HandleMachineRepairComplete). "-failurerestart": the interrupted operation's elapsed time is
+            // dropped, not added to busy time; work lost to a failure is not busy (user decision 10-03, audit G10).
+            if (holdJob && _machineProcessingStartTime.TryGetValue(machineId, out double procStart))
+                _tracker.AddProcessingTime(machineId, _simTimeRef - procStart);
             _machineProcessingStartTime.Remove(machineId);
             _tracker.RecordMachineFailure(machineId, machine.SampledRepairDuration, _simTimeRef);
             var rec = new MachineFailureEventRecord
@@ -161,16 +177,19 @@ namespace Assets.Scripts.Simulation
             if (DesTwinExport.Enabled) EventRecords.Add(rec);
 
             // Step 1: Handle job actively being processed on this machine
-            if (machine.ActiveJobId >= 0)
+            if (holdJob)
             {
-                JobData processingJob = _jobs.Get(machine.ActiveJobId);
-                if (processingJob != null && processingJob.State == JobState.Processing)
-                {
-                    processingJob.TransitionTo(JobState.NeedsRouting, _simTimeRef);
-                    processingJob.LocationMachineId = machineId;
-                    SimLogger.Medium($"[Failure] Job {processingJob.JobId} returned to NeedsRouting " +
-                                  $"(was Processing on failed machine {machineId}).");
-                }
+                // Preempt-resume: the job stays Processing on the machine; AcknowledgeFailure keeps its remaining
+                // time. Its pre-dispatched AGV, if any, is released by step 5 (TargetMachineId is this machine).
+                SimLogger.Medium($"[Failure] Job {processingJob.JobId} suspended on failed machine {machineId} " +
+                                 $"({machine.RemainingProcessingTime:F1}s left, resumes after the repair).");
+            }
+            else if (processingJob != null)
+            {
+                processingJob.TransitionTo(JobState.NeedsRouting, _simTimeRef);
+                processingJob.LocationMachineId = machineId;
+                SimLogger.Medium($"[Failure] Job {processingJob.JobId} returned to NeedsRouting " +
+                              $"(was Processing on failed machine {machineId}).");
             }
 
             // Step 2: Handle jobs physically queued at this machine
@@ -290,7 +309,7 @@ namespace Assets.Scripts.Simulation
                 rec.PredispatchCleared++;
             }
 
-            machine.AcknowledgeFailure();
+            machine.AcknowledgeFailure(keepActiveJob: holdJob);
             _refreshLabels?.Invoke(machineId);
             _onMachineFailedInvalidateDecision?.Invoke(machineId);
         }
@@ -355,12 +374,19 @@ namespace Assets.Scripts.Simulation
                 rec = new MachineFailureEventRecord
                 {
                     SimTime = _simTimeRef, Tick = _tickRef, MachineId = machine.MachineId, Event = "repair_done",
-                    ActiveJob = -1, RepairDuration = machine.SampledRepairDuration,
+                    ActiveJob = machine.ActiveJobId, RepairDuration = machine.SampledRepairDuration,
                 };
                 EventRecords.Add(rec);
             }
             machine.AcknowledgeRepairComplete();
             _tracker.RecordRepairComplete(machine.MachineId, _simTimeRef);
+            // Preempt-resume: a job held through the repair is processed again from this tick; reopen its busy interval.
+            if (!machine.IsIdle && machine.ActiveJobId >= 0)
+            {
+                _machineProcessingStartTime[machine.MachineId] = _simTimeRef;
+                SimLogger.Medium($"[Failure] Job {machine.ActiveJobId} resumes on machine {machine.MachineId} " +
+                                 $"({machine.RemainingProcessingTime:F1}s left).");
+            }
             _refreshLabels?.Invoke(machine.MachineId);
             return rec;
         }
