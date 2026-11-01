@@ -120,9 +120,9 @@ state     250              27.83 (3.92)            5.18 (0.12)                  
           2000             31.06 (2.43)            4.79 (0.04)                      nan (nan)              nan (nan)       3
           4000             31.11 (2.57)            4.66 (0.12)                      nan (nan)              nan (nan)       5
 
--- 5. rollouts, 1,000 vs 4,000 training seeds (one pooled % vs MDD-PTECT per model, all 200 seeds)
-   state      exact    1k mean +1.08 (sd 1.09)  4k mean +0.44 (sd 1.17)  Welch p 0.4, MW p 0.421
-   future64   exact    1k mean -0.51 (sd 0.90)  4k mean -2.20 (sd 0.33)  Welch p 0.0108, MW p 0.00794
-   future64   redrawn  1k mean +1.17 (sd 0.58)  4k mean +0.10 (sd 0.67)  Welch p 0.028, MW p 0.0317
-   future128  exact    1k mean -0.89 (sd 0.67)  4k mean -2.55 (sd 0.20)  Welch p 0.00383, MW p 0.00794
-   future128  redrawn  1k mean -0.19 (sd 0.81)  4k mean -0.39 (sd 0.58)  Welch p 0.67, MW p 0.548
+-- 5. rollouts by training size (one pooled % vs MDD-PTECT per model, all 200 seeds); p: Welch / MW vs the previous size
+   state      exact    1k +1.08 (sd 1.09)  4k +0.44 (sd 1.17) [p 0.4 / 0.42]
+   future64   exact    1k -0.51 (sd 0.90)  4k -2.20 (sd 0.33) [p 0.011 / 0.0079]
+   future64   redrawn  1k +1.17 (sd 0.58)  4k +0.10 (sd 0.67) [p 0.028 / 0.032]
+   future128  exact    1k -0.89 (sd 0.67)  4k -2.55 (sd 0.20) [p 0.0038 / 0.0079]
+   future128  redrawn  1k -0.19 (sd 0.81)  4k -0.39 (sd 0.58) [p 0.67 / 0.55]

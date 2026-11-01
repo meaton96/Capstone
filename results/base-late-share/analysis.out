@@ -1,0 +1,48 @@
+== base-late-share: share of late jobs on B2 (15 machines, 7 AGVs, 6 h window), seeds 0-39 + 1000-1039
+   late share = jobs due in the window that finish late or are still open at its end / jobs due in it
+
+-- B2: c ~ U[1.75, 2.5] per 1.5 h block (80 instances)
+   MDD-PTECT  late share  51.8% [ 48.5,  54.9] (test seeds 0-39:  50.0%) | among jobs that exit in the window  50.6% | mean window tardiness  152.7 k job-s
+   SRT-ECT    late share  48.5% [ 45.7,  51.2] (test seeds 0-39:  47.2%) | among jobs that exit in the window  46.6% | mean window tardiness  193.5 k job-s
+   SPT-ECT    late share  55.6% [ 52.5,  58.6] (test seeds 0-39:  54.2%) | among jobs that exit in the window  53.8% | mean window tardiness  226.9 k job-s
+
+-- c = 1.5 (80 instances)
+   MDD-PTECT  late share  80.7% [ 78.8,  82.5] (test seeds 0-39:  79.9%) | among jobs that exit in the window  80.2% | mean window tardiness  251.6 k job-s
+   SRT-ECT    late share  81.1% [ 79.1,  82.9] (test seeds 0-39:  80.1%) | among jobs that exit in the window  80.3% | mean window tardiness  288.9 k job-s
+   SPT-ECT    late share  84.2% [ 82.1,  86.1] (test seeds 0-39:  82.9%) | among jobs that exit in the window  83.5% | mean window tardiness  327.9 k job-s
+
+-- c = 1.75 (80 instances)
+   MDD-PTECT  late share  68.6% [ 66.1,  71.2] (test seeds 0-39:  67.5%) | among jobs that exit in the window  67.8% | mean window tardiness  206.4 k job-s
+   SRT-ECT    late share  66.7% [ 64.0,  69.2] (test seeds 0-39:  65.4%) | among jobs that exit in the window  65.4% | mean window tardiness  245.1 k job-s
+   SPT-ECT    late share  72.3% [ 69.4,  75.1] (test seeds 0-39:  70.9%) | among jobs that exit in the window  71.1% | mean window tardiness  282.2 k job-s
+
+-- c = 2 (80 instances)
+   MDD-PTECT  late share  56.9% [ 53.8,  60.0] (test seeds 0-39:  55.6%) | among jobs that exit in the window  55.9% | mean window tardiness  168.9 k job-s
+   SRT-ECT    late share  54.2% [ 51.4,  57.0] (test seeds 0-39:  53.1%) | among jobs that exit in the window  52.5% | mean window tardiness  208.9 k job-s
+   SPT-ECT    late share  60.6% [ 57.4,  63.7] (test seeds 0-39:  59.4%) | among jobs that exit in the window  59.0% | mean window tardiness  243.6 k job-s
+
+-- c = 2.25 (80 instances)
+   MDD-PTECT  late share  47.7% [ 44.2,  51.1] (test seeds 0-39:  46.2%) | among jobs that exit in the window  46.5% | mean window tardiness  136.2 k job-s
+   SRT-ECT    late share  44.0% [ 41.2,  46.7] (test seeds 0-39:  42.7%) | among jobs that exit in the window  42.0% | mean window tardiness  178.9 k job-s
+   SPT-ECT    late share  50.7% [ 47.5,  53.9] (test seeds 0-39:  49.5%) | among jobs that exit in the window  48.7% | mean window tardiness  211.4 k job-s
+
+-- c = 2.5 (80 instances)
+   MDD-PTECT  late share  39.1% [ 35.7,  42.5] (test seeds 0-39:  37.6%) | among jobs that exit in the window  38.0% | mean window tardiness  107.9 k job-s
+   SRT-ECT    late share  36.0% [ 33.4,  38.6] (test seeds 0-39:  34.8%) | among jobs that exit in the window  33.9% | mean window tardiness  153.7 k job-s
+   SPT-ECT    late share  42.9% [ 39.7,  45.9] (test seeds 0-39:  41.8%) | among jobs that exit in the window  40.7% | mean window tardiness  184.3 k job-s
+
+-- c = 3 (80 instances)
+   MDD-PTECT  late share  26.3% [ 23.1,  29.6] (test seeds 0-39:  25.3%) | among jobs that exit in the window  25.1% | mean window tardiness   66.7 k job-s
+   SRT-ECT    late share  25.0% [ 22.7,  27.2] (test seeds 0-39:  24.1%) | among jobs that exit in the window  22.7% | mean window tardiness  114.3 k job-s
+   SPT-ECT    late share  30.7% [ 27.9,  33.5] (test seeds 0-39:  30.0%) | among jobs that exit in the window  28.3% | mean window tardiness  142.3 k job-s
+
+== late share by setting (pooled, 80 instances)
+pair     MDD-PTECT  SPT-ECT  SRT-ECT
+setting                             
+B2            51.8     55.6     48.5
+c1.5          80.7     84.2     81.1
+c1.75         68.6     72.3     66.7
+c2            56.9     60.6     54.2
+c2.25         47.7     50.7     44.0
+c2.5          39.1     42.9     36.0
+c3            26.3     30.7     25.0

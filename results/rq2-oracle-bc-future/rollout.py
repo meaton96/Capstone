@@ -44,9 +44,17 @@ def load_policy(path):
     net = C.future_net.network_for(sd, encoder_cfg=encoder_config_for(sd))
     net.load_state_dict(sd)
     net.eval()
-    rows = int(state.get("run_settings", {}).get("future_rows", 0))
+    settings = state.get("run_settings") or {}
+    rows = int(settings.get("future_rows") or settings.get("future_table") or 0)   # BC clone / train.py --future-table
     assert bool(rows) == C.future_net.reads_future_table(sd), f"{path}: future rows {rows} vs the weights"
     return net, rows
+
+
+def ck_key(path):
+    """Result key of a checkpoint: its file name (bc_<arm>_s<k>.pt), or <run>__checkpoint for train.py's generic
+    checkpoint.pt (eval-v5-future, 10-20)."""
+    p = Path(path)
+    return f"{p.parent.name}__{p.stem}" if p.name == "checkpoint.pt" else p.name
 
 
 def play(ep, net, rows, view, builder):
@@ -70,7 +78,7 @@ def rollout(seed, nets, levels, out_dir):
     out = out_dir / f"s{seed}.json"
     res = json.loads(out.read_text()) if out.exists() else {}
     todo = [(ck, lv) for ck, (_, rows) in nets.items() for lv in levels
-            if (rows or lv == "exact") and Path(ck).name not in res.get(lv, {})]   # the state arm reads no future
+            if (rows or lv == "exact") and ck_key(ck) not in res.get(lv, {})]   # the state arm reads no future
     if not todo:
         return f"s{seed}: done"
     t0 = time.time()
@@ -79,7 +87,7 @@ def rollout(seed, nets, levels, out_dir):
     for ck, lv in todo:
         net, rows = nets[ck]
         tard, played = play(ep, net, rows, C.Published(seed, lv), builder)
-        res.setdefault(lv, {})[Path(ck).name] = {"tard": tard, "played": played}
+        res.setdefault(lv, {})[ck_key(ck)] = {"tard": tard, "played": played}
     res["_stamp"] = C.stamp()
     C.write_atomic(out, json.dumps(res))
     return f"s{seed}: {len(todo)} runs, {time.time() - t0:.0f} s"

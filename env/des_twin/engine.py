@@ -35,6 +35,14 @@ redirected mid-handshake re-plans from the heading the AGV has turned to by then
 an injected failureSchedule (FailureTrace.from_schedule) match the twin event for event at 1 AGV
 (results/dev-csharp-failures); failures-off behaviour is still bit-identical (check_exact.py there, vs 3ac76c2b).
 
+Preempt-resume (2026-10-28, mirrored in PhysicalMachine / FailureCoordinator): the job in process on a machine that fails
+stays on it (PROCESSING) with its float32 countdown stopped, and finishes the rest after the repair. Unity skips the
+processing decrement from the tick the failure fires in (harvest tick - 1) up to the repair harvest tick, so the
+finish and almost-done ticks move back by exactly that many ticks (MachineRT.susp). The almost-done flag is re-armed
+(its pre-dispatch was cleared by step 5): if it had already fired, it fires again on the first tick after the repair.
+The work done before the failure is busy time. TwinConfig.failure_restart restores the old model (player flag
+-failurerestart): the job goes back to routing and its operation restarts from zero.
+
 Indexes (2026-10-09, dev-twin-speed): the engine used to find live jobs, routable jobs, machine queues and machine loads
 by scanning every job that ever arrived (`self.order`), several times per tick; at 100 machines that was ~90% of the
 run time. It now keeps the live jobs (`_live_d`), the jobs per state and per machine queue / load target as indexes
@@ -90,6 +98,10 @@ class TwinConfig:
     # it came from). False (default) = the fixed handling of the v5 player: the slot is freed and such a transit is
     # delivered to the down machine and re-routed there (results/dev-csharp-failures).
     legacy_failure_quirks: bool = False
+    # The interrupted operation before 2026-10-28 ("-failurerestart"): it restarts from zero, its job re-routed from
+    # the failed machine and the elapsed work lost. False (default) = preempt-resume: the job waits on the machine and
+    # the operation continues after the repair.
+    failure_restart: bool = False
     # Reliability-aware machine rules (RECT, RTECT, RECTA, RTECTA, HAECT; twin only): the information they get -
     # "static" (long-run per-machine parameters), "online" (estimated from the failures observed so far) or "oracle"
     # (the true current hazard: hidden regime and age) - the risk-term weight and the re-route cost (seconds).
@@ -209,7 +221,7 @@ class MachineRT:
     __slots__ = ("id", "idle", "job", "start_tick", "dur", "proc_start", "busy", "belts", "finish_tick",
                  "almost_tick", "info", "down", "fail_tick", "repair_tick", "repair_dur", "repair_start", "fptr",
                  "events", "n_fail", "repair_sum", "downtime", "down_since", "lost_work", "life_start", "age0",
-                 "est_dur")
+                 "est_dur", "susp")
 
     def __init__(self, info):
         self.info, self.id = info, info.id
@@ -220,6 +232,7 @@ class MachineRT:
         self.down = False                       # Failed or Repairing (failures only)
         self.fail_tick = self.repair_tick = None
         self.est_dur = None                     # uncertainty: the controller's estimate of the running op's duration
+        self.susp = None                        # preempt-resume: a job held while down (see Twin._fail)
 
 
 class AgvRT:
@@ -538,8 +551,10 @@ class Twin:
     def remaining_proc(self, m):
         if m.idle:
             return f32(0)
-        # PhysicalMachine.remainingTime after one float32 decrement per tick since the start
-        return f32(max(0.0, float(f32_countdown(m.dur, self.dt, steps=self.k - m.start_tick)[1])))
+        # PhysicalMachine.remainingTime after one float32 decrement per tick since the start (frozen while a held job's
+        # machine is down)
+        now = self.k if m.susp is None else m.susp[0]
+        return f32(max(0.0, float(f32_countdown(m.dur, self.dt, steps=now - m.start_tick)[1])))
 
     def machine_load(self, mid):
         load = self.remaining_proc(self.mach[mid])
@@ -992,7 +1007,8 @@ class Twin:
         job.op_rows.append({"job": job.id, "op": job.cur_op, "machine": mid, "routed": self.now,
                             "from": job.location, "queued": None, "start": None, "end": None})
         if self.fail is not None:
-            job.op_rows[-1]["interrupted"] = None
+            job.op_rows[-1]["interrupted"] = None       # failure_restart: the time the operation was abandoned
+            job.op_rows[-1]["paused"] = 0.0             # preempt-resume: seconds it was held on a down machine
         job.target = mid
         self._to(job, WAITING_PICKUP)
         if self.instant:
@@ -1125,20 +1141,34 @@ class Twin:
         row = self._fail_row(m, "fail", m.job, rep)
         if self.reliability_info is not None:
             self.reliability_info.on_fail(m)
-        # 0. the interrupted operation's elapsed time is not busy time (G10)
+        job = self.jobs[m.job] if m.job >= 0 else None
+        if job is not None and job.state != PROCESSING:
+            job = None
+        hold = job is not None and not self.cfg.failure_restart
+        # 0. busy time: under preempt-resume the work done so far is busy and the interval reopens at the repair;
+        # under failure_restart the interrupted operation's elapsed time is lost work, not busy (G10)
         if not m.idle and m.proc_start is not None:
-            m.lost_work += self.now - m.proc_start
-        # 1. the job in process restarts: NeedsRouting at the failed machine (picked up from its dock later)
-        if m.job >= 0:
-            job = self.jobs[m.job]
-            if job.state == PROCESSING:
+            if hold:
+                m.busy += self.now - m.proc_start
+            else:
+                m.lost_work += self.now - m.proc_start
+        # 1. the job in process: held on the machine (preempt-resume), or with failure_restart it restarts:
+        # NeedsRouting at the failed machine (picked up from its dock later)
+        if job is not None:
+            self.fstats["jobs_interrupted"] += 1
+            if not hold:
                 job.op_rows[-1]["interrupted"] = self.now
                 job.location = m.id
                 self._to(job, NEEDS_ROUTING)
-                self.fstats["jobs_interrupted"] += 1
-        # AcknowledgeFailure's machine reset (done before the other steps here; nothing below reads it)
-        m.idle, m.job, m.proc_start, m.dur = True, -1, None, f32(0)
-        m.finish_tick = m.almost_tick = None          # no stale finish / almost-done fires (TickProcessing stopped)
+        # AcknowledgeFailure's machine reset (done before the other steps here; nothing below reads it). No finish or
+        # almost-done fires while the machine is down (TickProcessing stopped); a held job's are kept to be moved back
+        # at the repair: (first tick without a decrement, finish tick, almost-done tick or None if it already fired)
+        if hold:
+            m.susp = (k - 1, m.finish_tick, m.almost_tick)
+            m.proc_start = None
+        else:
+            m.idle, m.job, m.proc_start, m.dur = True, -1, None, f32(0)
+        m.finish_tick = m.almost_tick = None
         self._dispatchable.discard(self._mpos[m.id])
         # 2. jobs queued at the machine are re-routed and free their incoming-belt slots (PhysicalMachine.
         # ReleaseIncomingSlot; with legacy_failure_quirks they keep them, as Unity did before 2026-10-09)
@@ -1223,14 +1253,26 @@ class Twin:
         return best
 
     def _repair_done(self, m):
-        """HandleMachineRepairComplete: operational again, a fresh life from this tick."""
+        """HandleMachineRepairComplete: operational again, a fresh life from this tick; a held job resumes."""
         k = self.k
         m.down, m.repair_tick = False, None
         m.downtime += self.now - m.down_since
+        if m.susp is not None:
+            # the countdown restarts this tick: every pending tick moves back by the ticks it stood still
+            sus, fin, alm = m.susp
+            shift = k - sus
+            m.susp = None
+            m.start_tick += shift
+            m.proc_start = self.now
+            m.finish_tick = fin + shift
+            m.almost_tick = alm + shift if alm is not None else k + 1    # re-armed: fires again after one decrement
+            self.jobs[m.job].op_rows[-1]["paused"] += self.now - m.down_since
+            self._wake(m.finish_tick)
+            self._wake(m.almost_tick)
         m.down_since = None
         m.life_start = k
-        self.fail_log.append((self.now, m.id, "repair_done", -1, m.repair_dur))
-        self._fail_row(m, "repair_done", -1, m.repair_dur)
+        self.fail_log.append((self.now, m.id, "repair_done", m.job, m.repair_dur))
+        self._fail_row(m, "repair_done", m.job, m.repair_dur)
         if self.reliability_info is not None:
             self.reliability_info.on_repair(m)
         if m.fptr < len(m.events):

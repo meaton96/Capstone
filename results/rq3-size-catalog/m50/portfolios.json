@@ -1,0 +1,470 @@
+{
+ "v5": {
+  "pairs": [
+   "SRT-PECT",
+   "SRT-PTECT",
+   "MDD-PECT",
+   "MDD-PTECT",
+   "ATC-PECT",
+   "ATC-PTECT"
+  ],
+  "fit": {
+   "map_%": -2.2085453163334545,
+   "block_%": -9.188402617742685,
+   "inst_%": -6.454704650048382,
+   "map": {
+    "short": "MDD-PECT",
+    "normal": "ATC-PTECT",
+    "surge": "MDD-PTECT"
+   }
+  },
+  "test": {
+   "map_%": -2.3322140676116265,
+   "block_%": -8.8813635650547,
+   "inst_%": -4.5718948325620845,
+   "map": {
+    "surge": "ATC-PTECT",
+    "normal": "ATC-PECT",
+    "short": "MDD-PTECT"
+   }
+  }
+ },
+ "full": {
+  "pairs": [
+   "SPT-SMPT",
+   "SPT-SRWT",
+   "SPT-MMUR",
+   "SPT-ECT",
+   "SPT-TECT",
+   "SPT-PECT",
+   "SPT-PTECT",
+   "LPT-SMPT",
+   "LPT-SRWT",
+   "LPT-MMUR",
+   "LPT-ECT",
+   "LPT-TECT",
+   "LPT-PECT",
+   "LPT-PTECT",
+   "SRT-SMPT",
+   "SRT-SRWT",
+   "SRT-MMUR",
+   "SRT-ECT",
+   "SRT-TECT",
+   "SRT-PECT",
+   "SRT-PTECT",
+   "LRT-SMPT",
+   "LRT-SRWT",
+   "LRT-MMUR",
+   "LRT-ECT",
+   "LRT-TECT",
+   "LRT-PECT",
+   "LRT-PTECT",
+   "FIFO-SMPT",
+   "FIFO-SRWT",
+   "FIFO-MMUR",
+   "FIFO-ECT",
+   "FIFO-TECT",
+   "FIFO-PECT",
+   "FIFO-PTECT",
+   "PTWINQ-SMPT",
+   "PTWINQ-SRWT",
+   "PTWINQ-MMUR",
+   "PTWINQ-ECT",
+   "PTWINQ-TECT",
+   "PTWINQ-PECT",
+   "PTWINQ-PTECT",
+   "EDD-SMPT",
+   "EDD-SRWT",
+   "EDD-MMUR",
+   "EDD-ECT",
+   "EDD-TECT",
+   "EDD-PECT",
+   "EDD-PTECT",
+   "SLACK-SMPT",
+   "SLACK-SRWT",
+   "SLACK-MMUR",
+   "SLACK-ECT",
+   "SLACK-TECT",
+   "SLACK-PECT",
+   "SLACK-PTECT",
+   "CR-SMPT",
+   "CR-SRWT",
+   "CR-MMUR",
+   "CR-ECT",
+   "CR-TECT",
+   "CR-PECT",
+   "CR-PTECT",
+   "MDD-SMPT",
+   "MDD-SRWT",
+   "MDD-MMUR",
+   "MDD-ECT",
+   "MDD-TECT",
+   "MDD-PECT",
+   "MDD-PTECT",
+   "MOD-SMPT",
+   "MOD-SRWT",
+   "MOD-MMUR",
+   "MOD-ECT",
+   "MOD-TECT",
+   "MOD-PECT",
+   "MOD-PTECT",
+   "ATC-SMPT",
+   "ATC-SRWT",
+   "ATC-MMUR",
+   "ATC-ECT",
+   "ATC-TECT",
+   "ATC-PECT",
+   "ATC-PTECT"
+  ],
+  "fit": {
+   "map_%": -2.2085453163334545,
+   "block_%": -12.036540968894316,
+   "inst_%": -7.268812811055181,
+   "map": {
+    "short": "MDD-PECT",
+    "normal": "ATC-PTECT",
+    "surge": "MDD-PTECT"
+   }
+  },
+  "test": {
+   "map_%": -2.3322140676116265,
+   "block_%": -14.84550835652575,
+   "inst_%": -8.206605641034637,
+   "map": {
+    "surge": "ATC-PTECT",
+    "normal": "ATC-PECT",
+    "short": "MDD-PTECT"
+   }
+  }
+ },
+ "block1": {
+  "pairs": [
+   "MDD-PTECT"
+  ],
+  "fit": {
+   "map_%": -3.3306690738754696e-14,
+   "block_%": -1.1102230246251565e-14,
+   "inst_%": 0.0,
+   "map": {
+    "short": "MDD-PTECT",
+    "normal": "MDD-PTECT",
+    "surge": "MDD-PTECT"
+   }
+  },
+  "test": {
+   "map_%": -1.1102230246251565e-14,
+   "block_%": -1.1102230246251565e-14,
+   "inst_%": 0.0,
+   "map": {
+    "surge": "MDD-PTECT",
+    "normal": "MDD-PTECT",
+    "short": "MDD-PTECT"
+   }
+  }
+ },
+ "block2": {
+  "pairs": [
+   "MDD-PTECT",
+   "ATC-PTECT"
+  ],
+  "fit": {
+   "map_%": -1.8221591846030116,
+   "block_%": -7.020580338028326,
+   "inst_%": -4.9989490244800034,
+   "map": {
+    "short": "MDD-PTECT",
+    "normal": "ATC-PTECT",
+    "surge": "MDD-PTECT"
+   }
+  },
+  "test": {
+   "map_%": -2.182202679161882,
+   "block_%": -6.627953414130417,
+   "inst_%": -3.7437411190990644,
+   "map": {
+    "surge": "ATC-PTECT",
+    "normal": "ATC-PTECT",
+    "short": "MDD-PTECT"
+   }
+  }
+ },
+ "block3": {
+  "pairs": [
+   "MDD-PTECT",
+   "ATC-PTECT",
+   "CR-TECT"
+  ],
+  "fit": {
+   "map_%": -1.8221591846030116,
+   "block_%": -8.397345127199973,
+   "inst_%": -5.582201831573618,
+   "map": {
+    "short": "MDD-PTECT",
+    "normal": "ATC-PTECT",
+    "surge": "MDD-PTECT"
+   }
+  },
+  "test": {
+   "map_%": -2.182202679161882,
+   "block_%": -9.13887572821267,
+   "inst_%": -5.139308267353549,
+   "map": {
+    "surge": "ATC-PTECT",
+    "normal": "ATC-PTECT",
+    "short": "MDD-PTECT"
+   }
+  }
+ },
+ "block4": {
+  "pairs": [
+   "MDD-PTECT",
+   "ATC-PTECT",
+   "CR-TECT",
+   "MDD-PECT"
+  ],
+  "fit": {
+   "map_%": -2.2085453163334545,
+   "block_%": -9.16141884650462,
+   "inst_%": -6.394853023708313,
+   "map": {
+    "short": "MDD-PECT",
+    "normal": "ATC-PTECT",
+    "surge": "MDD-PTECT"
+   }
+  },
+  "test": {
+   "map_%": -2.182202679161882,
+   "block_%": -9.584982317451129,
+   "inst_%": -5.24041635699477,
+   "map": {
+    "surge": "ATC-PTECT",
+    "normal": "ATC-PTECT",
+    "short": "MDD-PTECT"
+   }
+  }
+ },
+ "block5": {
+  "pairs": [
+   "MDD-PTECT",
+   "ATC-PTECT",
+   "CR-TECT",
+   "MDD-PECT",
+   "ATC-PECT"
+  ],
+  "fit": {
+   "map_%": -2.2085453163334545,
+   "block_%": -9.790941193718039,
+   "inst_%": -6.834256913229176,
+   "map": {
+    "short": "MDD-PECT",
+    "normal": "ATC-PTECT",
+    "surge": "MDD-PTECT"
+   }
+  },
+  "test": {
+   "map_%": -2.3322140676116265,
+   "block_%": -10.617179628978867,
+   "inst_%": -5.824090706093077,
+   "map": {
+    "surge": "ATC-PTECT",
+    "normal": "ATC-PECT",
+    "short": "MDD-PTECT"
+   }
+  }
+ },
+ "block6": {
+  "pairs": [
+   "MDD-PTECT",
+   "ATC-PTECT",
+   "CR-TECT",
+   "MDD-PECT",
+   "ATC-PECT",
+   "SLACK-TECT"
+  ],
+  "fit": {
+   "map_%": -2.2085453163334545,
+   "block_%": -10.200979181234226,
+   "inst_%": -6.923866971705827,
+   "map": {
+    "short": "MDD-PECT",
+    "normal": "ATC-PTECT",
+    "surge": "MDD-PTECT"
+   }
+  },
+  "test": {
+   "map_%": -2.3322140676116265,
+   "block_%": -11.240346233031417,
+   "inst_%": -6.279522440230845,
+   "map": {
+    "surge": "ATC-PTECT",
+    "normal": "ATC-PECT",
+    "short": "MDD-PTECT"
+   }
+  }
+ },
+ "map1": {
+  "pairs": [
+   "MDD-PTECT"
+  ],
+  "fit": {
+   "map_%": -3.3306690738754696e-14,
+   "block_%": -1.1102230246251565e-14,
+   "inst_%": 0.0,
+   "map": {
+    "short": "MDD-PTECT",
+    "normal": "MDD-PTECT",
+    "surge": "MDD-PTECT"
+   }
+  },
+  "test": {
+   "map_%": -1.1102230246251565e-14,
+   "block_%": -1.1102230246251565e-14,
+   "inst_%": 0.0,
+   "map": {
+    "surge": "MDD-PTECT",
+    "normal": "MDD-PTECT",
+    "short": "MDD-PTECT"
+   }
+  }
+ },
+ "map2": {
+  "pairs": [
+   "MDD-PTECT",
+   "ATC-PTECT"
+  ],
+  "fit": {
+   "map_%": -1.8221591846030116,
+   "block_%": -7.020580338028326,
+   "inst_%": -4.9989490244800034,
+   "map": {
+    "short": "MDD-PTECT",
+    "normal": "ATC-PTECT",
+    "surge": "MDD-PTECT"
+   }
+  },
+  "test": {
+   "map_%": -2.182202679161882,
+   "block_%": -6.627953414130417,
+   "inst_%": -3.7437411190990644,
+   "map": {
+    "surge": "ATC-PTECT",
+    "normal": "ATC-PTECT",
+    "short": "MDD-PTECT"
+   }
+  }
+ },
+ "map3": {
+  "pairs": [
+   "MDD-PTECT",
+   "ATC-PTECT",
+   "MDD-PECT"
+  ],
+  "fit": {
+   "map_%": -2.2085453163334545,
+   "block_%": -7.981955422476339,
+   "inst_%": -5.844877589698116,
+   "map": {
+    "short": "MDD-PECT",
+    "normal": "ATC-PTECT",
+    "surge": "MDD-PTECT"
+   }
+  },
+  "test": {
+   "map_%": -2.182202679161882,
+   "block_%": -7.326841240351511,
+   "inst_%": -3.9627955854425467,
+   "map": {
+    "surge": "ATC-PTECT",
+    "normal": "ATC-PTECT",
+    "short": "MDD-PTECT"
+   }
+  }
+ },
+ "map4": {
+  "pairs": [
+   "MDD-PTECT",
+   "ATC-PTECT",
+   "MDD-PECT",
+   "SPT-SMPT"
+  ],
+  "fit": {
+   "map_%": -2.2085453163334545,
+   "block_%": -7.981955422476339,
+   "inst_%": -5.844877589698116,
+   "map": {
+    "short": "MDD-PECT",
+    "normal": "ATC-PTECT",
+    "surge": "MDD-PTECT"
+   }
+  },
+  "test": {
+   "map_%": -2.182202679161882,
+   "block_%": -7.326841240351511,
+   "inst_%": -3.9627955854425467,
+   "map": {
+    "surge": "ATC-PTECT",
+    "normal": "ATC-PTECT",
+    "short": "MDD-PTECT"
+   }
+  }
+ },
+ "map5": {
+  "pairs": [
+   "MDD-PTECT",
+   "ATC-PTECT",
+   "MDD-PECT",
+   "SPT-SMPT",
+   "SPT-SRWT"
+  ],
+  "fit": {
+   "map_%": -2.2085453163334545,
+   "block_%": -7.981955422476339,
+   "inst_%": -5.844877589698116,
+   "map": {
+    "short": "MDD-PECT",
+    "normal": "ATC-PTECT",
+    "surge": "MDD-PTECT"
+   }
+  },
+  "test": {
+   "map_%": -2.182202679161882,
+   "block_%": -7.327921060971876,
+   "inst_%": -3.9627955854425467,
+   "map": {
+    "surge": "ATC-PTECT",
+    "normal": "ATC-PTECT",
+    "short": "MDD-PTECT"
+   }
+  }
+ },
+ "map6": {
+  "pairs": [
+   "MDD-PTECT",
+   "ATC-PTECT",
+   "MDD-PECT",
+   "SPT-SMPT",
+   "SPT-SRWT",
+   "SPT-MMUR"
+  ],
+  "fit": {
+   "map_%": -2.2085453163334545,
+   "block_%": -7.981955422476339,
+   "inst_%": -5.844877589698116,
+   "map": {
+    "short": "MDD-PECT",
+    "normal": "ATC-PTECT",
+    "surge": "MDD-PTECT"
+   }
+  },
+  "test": {
+   "map_%": -2.182202679161882,
+   "block_%": -7.327921060971876,
+   "inst_%": -3.9627955854425467,
+   "map": {
+    "surge": "ATC-PTECT",
+    "normal": "ATC-PTECT",
+    "short": "MDD-PTECT"
+   }
+  }
+ }
+}

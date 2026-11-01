@@ -1,0 +1,8 @@
+{
+    "files.watcherExclude": {
+        "**/.venv/**": true,
+        "**/results/**": true,
+        "**/linux_server/**": true,
+        "**/.claude/**": true
+    }
+}

@@ -112,6 +112,11 @@ def build_env(args, ppo_cfg, run_dir: Path, reward, scenario_generator=None, see
         if lookahead_obs(args):
             from des_twin.lookahead import LOOKAHEAD_DIM
             obs_shapes["critic_lookahead"] = (LOOKAHEAD_DIM,)
+        if future_rows(args):
+            from des_twin.future_table import FUTURE_JOB_FEATURES
+            obs_shapes["future_job_table"] = (future_rows(args), FUTURE_JOB_FEATURES)
+            print(f"Future job table: next {future_rows(args)} jobs within {args.future_horizon_s:,.0f} s "
+                  "(des_twin/future_table.py, models/future_net.py)")
         print(f"Observation row caps: {obs_caps[0]} machines, {obs_caps[1]} jobs")
         scenario = None
         if args.scenario:
@@ -132,6 +137,7 @@ def build_env(args, ppo_cfg, run_dir: Path, reward, scenario_generator=None, see
             instance_group=getattr(ppo_cfg, "shared_baseline_group", 1),
             paired=paired_settings(ppo_cfg),
             critic_lookahead=lookahead_obs(args),
+            future_table=(future_rows(args), args.future_horizon_s) if future_rows(args) else None,
         )
         if getattr(args, "twin_workers", 0) > 1:
             from env_wrappers.twin_env import SubprocTwinEnv
@@ -141,9 +147,9 @@ def build_env(args, ppo_cfg, run_dir: Path, reward, scenario_generator=None, see
             vec_env = VectorizedTwinEnv(num_envs=ppo_cfg.num_envs, **twin_kwargs)
         shutil.copy2(args.twin, run_dir / "des_floor.json")
     elif args.unity:
-        if lookahead_obs(args):
-            raise ValueError("--critic-lookahead / --policy-lookahead are twin only (the player does not export future "
-                             "arrivals)")
+        if lookahead_obs(args) or future_rows(args):
+            raise ValueError("--critic-lookahead / --policy-lookahead / --future-table are twin only (the player does "
+                             "not export future arrivals)")
         if getattr(args, "slot_seconds", 0.0) > 0:
             raise ValueError("--slot-seconds is implemented for --twin only so far (VectorizedUnityEnv wraps per env "
                              "the same way; add it before training on Unity)")
@@ -337,10 +343,16 @@ def check_action_layout(ckpt: dict, path) -> None:
 
 ## @brief CLI settings that decide what a checkpoint's policy was trained on, saved with it (audit m2, 2026-10-07):
 ##        evaluate.py takes slot_seconds from here and warns when its own flags differ from the rest.
-RUN_SETTING_KEYS = ("slot_seconds", "critic_lookahead", "policy_lookahead", "twin", "twin_transport", "scenario", "scenario_generator", "params",
+RUN_SETTING_KEYS = ("slot_seconds", "critic_lookahead", "policy_lookahead", "future_table", "future_horizon_s",
+                    "init_from", "critic_warmup_steps", "twin", "twin_transport", "scenario", "scenario_generator", "params",
                     "episode_duration_seconds", "random_warmup", "warmup_dispatching_rule", "agv_move_speed",
                     "agv_handshake_duration", "machine_flexibility", "secondary_time_multiplier", "reward_spec",
                     "uncertainty")
+
+
+def future_rows(args) -> int:
+    """@brief Rows of the future job table (obs "future_job_table", des_twin.future_table) the policy reads; 0 = none."""
+    return int(getattr(args, "future_table", 0) or 0)
 
 
 def lookahead_obs(args) -> bool:
@@ -540,11 +552,35 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
               "features; actor and critic both read them")
     if ac_cfg.critic_extra_dim:
         print(f"\nCritic-only look-ahead: {ac_cfg.critic_extra_dim} features (des_twin/lookahead.py); the actor never sees them")
-    net = SchedulingNetwork(
-        encoder_cfg=encoder_cfg,
-        fusion_cfg=FusionConfig(),
-        ac_cfg=ac_cfg,
-    ).to(device)
+    from models.future_net import FutureSchedulingNetwork, reads_future_table
+    if ckpt and reads_future_table(ckpt["model_state_dict"]) != bool(future_rows(args)):
+        raise ValueError(f"the checkpoint {'reads' if future_rows(args) == 0 else 'does not read'} the future job "
+                         f"table; {'pass' if future_rows(args) == 0 else 'drop'} --future-table to match it")
+    if future_rows(args):
+        net = FutureSchedulingNetwork(encoder_cfg=encoder_cfg, fusion_cfg=FusionConfig(), ac_cfg=ac_cfg).to(device)
+        print(f"\nFuture job table: {future_rows(args)} rows, second set encoder ({net.future_out}-D) before the fusion "
+              "head; actor and critic both read it")
+    else:
+        net = SchedulingNetwork(
+            encoder_cfg=encoder_cfg,
+            fusion_cfg=FusionConfig(),
+            ac_cfg=ac_cfg,
+        ).to(device)
+    if args.init_from and not args.resume_from:
+        # Warm start (rq2-oracle-bc-future, 10-20): weights only, e.g. a behaviour-cloned actor; fresh optimizer, step 0.
+        init = load_checkpoint(args.init_from, "cpu")
+        check_obs_schema(init, args.init_from)
+        check_action_layout(init, args.init_from)
+        if reads_future_table(init["model_state_dict"]) != bool(future_rows(args)):
+            raise ValueError(f"--init-from {args.init_from}: its network {'reads' if future_rows(args) == 0 else 'does not read'} "
+                             "the future job table; match --future-table to it")
+        net.load_state_dict(init["model_state_dict"])
+        init_rows = (init.get("run_settings") or {}).get("future_rows") or (init.get("run_settings") or {}).get("future_table")
+        if init_rows and int(init_rows) != future_rows(args):
+            print(f"[WARNING] --init-from was trained on {init_rows} future rows, this run uses {future_rows(args)}")
+        print(f"\nWarm start: network weights from {args.init_from} (optimizer and step start fresh)")
+    elif args.init_from:
+        print(f"\n[NOTE] --init-from {args.init_from} ignored: resuming from {args.resume_from}")
 
     param_summary = net.get_param_summary()
     print("\nParameter counts:")
@@ -798,6 +834,13 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
 
             ent_coef = entropy_coef_at(ppo_cfg, global_step)
             kl_coef = prior_kl_coef_at(ppo_cfg, global_step)
+            # Critic warm-up (10-20, for warm-started actors): until --critic-warmup-steps only the value head learns;
+            # the shared encoder, fusion and actor stay as loaded, so a random critic cannot pull the policy around.
+            critic_warmup = global_step <= getattr(args, "critic_warmup_steps", 0)
+            critic_ids = {id(prm) for prm in critic.parameters()} if critic_warmup else set()
+            if critic_warmup:
+                print(f"Critic warm-up: update {update} trains the value head only (step {global_step:,} <= "
+                      f"{args.critic_warmup_steps:,})")
             for epoch in range(ppo_cfg.num_epochs):
                 for batch in buffer.get_batches(ppo_cfg.batch_size):
                     out = net.evaluate(batch["obs"], batch["actions"], prior_logp)
@@ -825,6 +868,8 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
                         + ppo_cfg.value_coef * v_loss
                         + ent_coef * ent_loss
                     )
+                    if critic_warmup:
+                        loss = ppo_cfg.value_coef * v_loss      # value head only (the rest is frozen below)
                     if prior_kl is not None:
                         if kl_coef > 0:
                             loss = loss + kl_coef * prior_kl.mean()
@@ -832,6 +877,10 @@ def train(ppo_cfg: PPOConfig, args, device: str = "cpu"):
 
                     optimizer.zero_grad()
                     loss.backward()
+                    if critic_warmup:
+                        for prm in net.parameters():
+                            if id(prm) not in critic_ids:
+                                prm.grad = None
                     nn.utils.clip_grad_norm_(
                         net.parameters(), ppo_cfg.max_grad_norm
                     )
@@ -1106,6 +1155,19 @@ if __name__ == "__main__":
     parser.add_argument("--policy-lookahead", action="store_true",
                         help="Twin: give the policy (and critic) the same look-ahead features as --critic-lookahead, "
                              "appended to the fused features (rq3-lookahead, real schedule; excludes --critic-lookahead)")
+    parser.add_argument("--future-table", type=int, default=0, metavar="ROWS",
+                        help="Twin: give the policy (and critic) the next ROWS arriving jobs within --future-horizon-s as a "
+                             "per-job table (obs future_job_table, des_twin/future_table.py), encoded by a second set "
+                             "encoder before the fusion head (models/future_net.py; rq2-oracle-bc-future). 0 = off")
+    parser.add_argument("--future-horizon-s", type=float, default=7200.0,
+                        help="Horizon of --future-table, simulated seconds")
+    parser.add_argument("--init-from", type=str, default=None,
+                        help="Start from this checkpoint's network weights (e.g. a behaviour-cloned policy, "
+                             "results/rq2-oracle-bc-future/bc4k/bc_future128_s0.pt); optimizer and step start fresh. "
+                             "Ignored when --resume-from is given")
+    parser.add_argument("--critic-warmup-steps", type=int, default=0,
+                        help="Until this many agent steps only the value head is updated (encoder, fusion and actor "
+                             "frozen): for --init-from, so the fresh critic learns before it moves the policy. 0 = off")
     parser.add_argument("--paired-advantage", action="store_true",
                         help="Same-future paired advantage per slot (--twin --slot-seconds): G(chosen, then default) - "
                              "G(default) on redrawn futures replaces the GAE advantage (env_wrappers/paired_slot_env.py)")
@@ -1137,6 +1199,8 @@ if __name__ == "__main__":
         parser.error("--twin and --unity are mutually exclusive")
     if args.policy_lookahead and args.critic_lookahead:
         parser.error("--policy-lookahead already gives the critic the look-ahead features; drop --critic-lookahead")
+    if args.future_table < 0 or (args.future_table and not args.twin):
+        parser.error("--future-table needs --twin and a row count > 0")
 
     cfg = PPOConfig(
         total_timesteps=args.total_timesteps,

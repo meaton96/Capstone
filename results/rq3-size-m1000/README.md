@@ -1,0 +1,84 @@
+# rq3-size-m1000: reduced 1000-machine column of the floor-size grid (2026-10-20, user: "yes")
+
+Status: **final policy (`rq3-size-m1000-ref`) queued on the cluster 10-20 14:19 (array 21932264_[10-14]); the rule
+groups (`rq3-size-m1000-sim`) run locally in the oracle simulator (moved 10-20, user); arms half (`rq3-size-m1000`)
+waits on `rq3-size-grid`.** Part of the floor-size study (`../rq3-size-train/README.md`); grid up to
+200 machines: `../rq3-size-grid/README.md`.
+
+## Why
+In the grid the policies trained on 15 machines lose more the bigger the floor (family vs MDD-PTECT +2.6% at 100,
++6.5% at 150, +9.5% at 200; final policy s3 +0.4%, +1.5%, +2.7%). The user asked (10-19) whether a policy trained on
+100 machines can go to 1000. This column shows how the 4 training arms behave at 1000 machines. With 5 test seeds it
+can show whether a policy does anything different from MDD-PTECT there and in which direction, not rank the arms.
+
+## Design
+- **Floor:** `../dev-size-floors/floors/m1000` (layout D, 1000 bays, 186 × 232.5 m). The grid's per-machine scaling:
+  200 machines per type, 520 AGVs on duty (short blocks 260), B2 load × 0.9, arrival cap off, c ~ U[1.75, 2.5]. Twin,
+  B2 window / slots / reward, frozen v5 code, through the grid's harness (`../rq3-size-grid/task.py`).
+- **Test seeds 0-4**, one episode per task.
+
+  | group | policy |
+  |---|---|
+  | `mdd` | MDD-PTECT (reference; the best pair at 50-200 machines) |
+  | `srt` | SRT-PTECT (the runner-up at 150-200 machines, within ~2% of MDD-PTECT) |
+  | `t15` | the final policy (train-v5-cmix s3) |
+  | `t50` / `t100` / `tmix` | one seed of train-size-m50 / -m100 / -mix |
+
+- **Seed pick for the new arms** (`pick.py`, before any of them runs at 1000): the seed with the lowest tardiness vs
+  MDD-PTECT at 200 machines in `../rq3-size-grid`. The same rule gives s3 for the 15-machine arm (+2.68% vs s2 +2.9%),
+  which is also the final policy.
+- **Cost:** `../dev-size-1000-probe` took 5.9 h and 7.7 GB per episode locally (seed 0). The cluster's nodes are ~1.6x
+  slower than the local Ryzen 9 7950X (ten m100 MDD-PTECT episodes, seeds 0-9: 92 s locally vs 149 s on the
+  cluster), and episode time varies ±50% by seed (seed 0 was the fastest of those ten). So expect ~10-16 h per task,
+  ~30 tasks ≈ 300-450 core-hours (above the ~180 quoted before the speed check). Limits: 2 days, 20 GB per task.
+  The reference half runs with `--nice=100` so the queued training jobs stay ahead.
+- **Reproduction check:** seed 0 of the final policy repeats the local probe on the cluster.
+- **Rule groups in the simulator (10-20, user):** `../rq3-size-oracle` found the oracle's frozen simulator
+  (`../rq3-size-oracle/sizesim.py`) gives the grid's MDD-PTECT exactly at 15-200 machines and runs rule episodes
+  ~5-10x faster than evaluate.py, which builds the policy's observations even for rule episodes. So `mdd` and `srt`
+  (array tasks 0-9, still pending) were cancelled on the cluster and run locally with `sim_rules.py` /
+  `launch_sim.sh`, saving roughly 100-160 cluster core-hours. Output format and folders are unchanged
+  (`episodes.csv` with `harness` = oracle simulator, `DONE`, `run.json`). Check first: MDD-PTECT seed 0 in the
+  simulator must equal the probe's evaluate.py value (53,335.636 k job-s), else the run stops. The launcher sizes its
+  parallelism from that episode's peak memory. The `sizesim.py` floor fallback gives m1000 the same definition as
+  `task.py` (checked: same parameters, floor and fleet).
+
+## Analysis (`analyze.py` -> `analysis.out`, `summary.csv`)
+Per policy vs MDD-PTECT over the 5 seeds: pooled %, each seed's %, wins / losses / identical, exact sign test over the
+non-identical seeds (no CI with 5 seeds), and the same pick's pooled % at 200 machines in the grid for the trend.
+
+## Notes
+- At 1000 machines the floor is far more congested: MDD-PTECT's window tardiness on seed 0 is 53,336 k job-s, about
+  53 k per machine, against 14 k at 200 machines and 3-5 k at 20-100. The column tests the policies in that regime,
+  which the size-only reading has to keep in mind.
+- In the probe (seed 0) the final policy's tardiness equals MDD-PTECT's exactly.
+- The task file corrects run_task's episode count for `--pdr none` (it counted it as one pair; that gave the probe's
+  rc=1).
+
+## Results
+### Rules (10-20, `rq3-size-m1000-sim`, oracle simulator, done 18:43)
+- **Check:** MDD-PTECT seed 0 in the simulator = the probe's evaluate.py value (53,335.6343 vs 53,335.6359 k job-s,
+  relative difference 3.1e-8: float32 rounding of evaluate.py's metrics).
+- **Cost:** 41-107 min and 5.0-6.3 GB per episode in the simulator with all 20 local slots busy (MDD-PTECT seed 0
+  alone: 46 min), against 5.9 h through evaluate.py.
+- **MDD-PTECT** mean window tardiness 93,516.9 k job-s per instance, about 94 k per machine (14 k at 200 machines,
+  3-5 k at 20-100): the floor is heavily overloaded.
+- **SRT-PTECT vs MDD-PTECT: −0.29%** over the 5 seeds, better on all 5 (−0.68 / −0.06 / −0.18 / −0.50 / −0.25%;
+  sign test p 0.062, the smallest possible with 5 seeds). At 150 / 200 machines SRT-PTECT was +2.1% / +1.9% worse.
+  The two strongest rules converge (within 0.7% on every seed) and their order flips slightly.
+
+### Final policy (10-21, `rq3-size-m1000-ref`, cluster evaluate.py, done 08:51)
+- **Check:** seed 0 on the cluster = the local probe exactly (53,335.6359 k job-s, relative difference 0).
+- **The final policy plays exactly like MDD-PTECT at 1000 machines:** identical on all 5 seeds (differences of ±0.3-2.0
+  job-s on totals of 45-175 M job-s, i.e. float32 rounding between evaluate.py and the simulator; 57-71 k decisions per
+  episode). At 200 machines it was +2.7% (`../rq3-size-grid`); at 1000 it no longer deviates from MDD-PTECT at all,
+  which suggests its inputs saturate and it settles on one choice.
+- **MDD-TECT** (added 10-21, `rq3-size-m1000-tect`, simulator, done 10:33): the catalog found it the best pair at 200
+  machines (−19.0% vs MDD-PTECT, `../rq3-size-catalog`), so it is this column's "best pair". At 1000 machines it is
+  **−6.20%** vs MDD-PTECT, better on all 5 seeds (−11.44 / −6.80 / −3.04 / −5.30 / −13.15%; sign test p 0.062, the
+  minimum with 5 seeds). Smaller than at 200 machines: on this heavily overloaded floor the rules converge (SRT-PTECT
+  −0.29%), but TECT still leads on every seed. The final policy, identical to MDD-PTECT, is about 6.6% behind it.
+- **New arms** (`rq3-size-m1000`): after `rq3-size-grid`.
+
+Analysis fix (10-21): runs count as identical when their relative difference is ≤ 1e-6 (was an absolute 1e-6 k
+job-s, which split float rounding into 3 wins / 2 losses).

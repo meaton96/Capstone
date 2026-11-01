@@ -18,6 +18,7 @@ source linux_server/slurm/rit_ssh.sh
 "${SSH[@]}" "$REMOTE" "mkdir -p capstone/results/scripts capstone/results/$NAME"
 TRAIN_SCRIPT="${TRAIN_SCRIPT:-dev_b2_slot_train_eval_cluster.sh}"   # 10-14: optional variant (e.g. ..._c.sh); default unchanged
 MEM="${MEM:-48g}"                # 10-15: per-seed jobs ask for less (MEM=16g)
+JOB_TIME="${JOB_TIME:-1-00:00:00}"   # 10-25: shorter limits backfill sooner (train-ft-m100: JOB_TIME=0-16:00:00)
 rsync -az -e "$RSYNC_SSH" "results/scripts/$TRAIN_SCRIPT" "$REMOTE:capstone/results/scripts/"
 if [ -d "results/$NAME/code/env" ]; then     # a run queued locally already has its snapshot: ship that one
     rsync -az -e "$RSYNC_SSH" "results/$NAME/code/" "$REMOTE:capstone/results/$NAME/code/"
@@ -42,7 +43,7 @@ if [ ! -d results/$NAME/code/env ]; then
     { echo "snapshot \$(date -Is) (cluster, at submit)"; echo "git_head $HEAD"; echo "diff_sha $DIFF"; } > results/$NAME/code/STAMP
 fi
 cd linux_server
-sbatch --account=drl-scheduling --partition=sporc --time=1-00:00:00 $RES --cpus-per-task=$CPUS \
+sbatch --account=drl-scheduling --partition=sporc --time=$JOB_TIME $RES --cpus-per-task=$CPUS \
     --mem=${MEM:-48g} --job-name=$NAME --output=logs/%x_%j.out --error=logs/%x_%j.err \
     --wrap "cd \$HOME/capstone && DEVICE=$DEVICE PY=\$HOME/capstone/$VENV/bin/python bash results/scripts/$TRAIN_SCRIPT $ARGS"
 REMOTE

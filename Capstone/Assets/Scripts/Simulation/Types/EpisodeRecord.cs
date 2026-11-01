@@ -620,7 +620,8 @@ namespace Assets.Scripts.Simulation.Types
         public int Tick;                // FactoryOrchestrator._episodeTicks at the harvest
         public int MachineId;
         public string Event;            // "fail" or "repair_done"
-        public int ActiveJob;           // fail: job interrupted in process, -1 if none
+        public int ActiveJob;           // fail: job interrupted in process; repair_done: job held through the
+                                        // repair that resumes now (preempt-resume); -1 if none
         public float RepairDuration;    // sampled (or scheduled) repair seconds of this failure
         public int QueuedRerouted;      // HandleMachineFailure step 2
         public int PickupsCancelled;    // step 3

@@ -1,0 +1,118 @@
+== Unity vs twin, injected schedule, 1 AGV (resume cells: twin default; *_restart: twin failure_restart)
+x1_s0_het_MDD_TECT                 EXACT events 806/806  decisions 232/232  fail rows 123/123  makespan +0.0000%  flow +0.0001%  tard +0.0001%  failures 64/64  machines equal True  failure process to common end equal True (123 events)  handlers U/T q10/10 c0/0 r0/0 h0/0 a0/0 p2/2 i18/18 defer 0 b3 0
+x1_s0_het_PTWINQ_SRWT              EXACT events 805/805  decisions 234/234  fail rows 117/117  makespan -0.0000%  flow +0.0001%  tard +0.0007%  failures 59/59  machines equal True  failure process to common end equal True (117 events)  handlers U/T q12/12 c0/0 r0/0 h0/0 a0/0 p0/0 i21/21 defer 0 b3 0
+x1_s0_het_SPT_ECT                  EXACT events 807/807  decisions 233/233  fail rows 123/123  makespan +0.0000%  flow -0.0001%  tard +0.0007%  failures 64/64  machines equal True  failure process to common end equal True (123 events)  handlers U/T q10/10 c1/1 r2/2 h0/0 a0/0 p1/1 i16/16 defer 0 b3 0
+x1_s0_uni_MDD_TECT                 EXACT events 764/764  decisions 227/227  fail rows 144/144  makespan -0.0000%  flow +0.0002%  tard +0.0006%  failures 74/74  machines equal True  failure process to common end equal True (144 events)  handlers U/T q3/3 c2/2 r3/3 h0/0 a0/0 p0/0 i20/20 defer 2 b3 0
+x1_s0_uni_PTWINQ_SRWT              EXACT events 796/796  decisions 231/231  fail rows 167/167  makespan +0.0000%  flow +0.0001%  tard +0.0001%  failures 85/85  machines equal True  failure process to common end equal True (167 events)  handlers U/T q9/9 c0/0 r2/2 h0/0 a0/0 p0/0 i27/27 defer 0 b3 0
+x1_s0_uni_SPT_ECT                  EXACT events 780/780  decisions 228/228  fail rows 143/143  makespan -0.0000%  flow +0.0001%  tard -0.0007%  failures 74/74  machines equal True  failure process to common end equal True (143 events)  handlers U/T q6/6 c0/0 r1/1 h0/0 a0/0 p1/1 i20/20 defer 1 b3 0
+x1_s0_uni_SPT_ECT_restart          EXACT events 947/947  decisions 289/289  fail rows 150/150  makespan +0.0000%  flow -0.0001%  tard +0.0001%  failures 77/77  machines equal True  failure process to common end equal True (150 events)  handlers U/T q9/9 c2/2 r4/4 h0/0 a0/0 p1/1 i28/28 defer 3 b3 0
+x1_s0_wkx_MDD_TECT                 EXACT events 763/763  decisions 225/225  fail rows 71/71  makespan -0.0000%  flow +0.0001%  tard -0.0017%  failures 37/37  machines equal True  failure process to common end equal True (71 events)  handlers U/T q3/3 c0/0 r0/0 h0/0 a0/0 p0/0 i14/14 defer 0 b3 0
+x1_s0_wkx_PTWINQ_SRWT              EXACT events 776/776  decisions 226/226  fail rows 71/71  makespan -0.0000%  flow -0.0000%  tard +0.0010%  failures 37/37  machines equal True  failure process to common end equal True (71 events)  handlers U/T q4/4 c0/0 r2/2 h0/0 a0/0 p0/0 i13/13 defer 0 b3 0
+x1_s0_wkx_SPT_ECT                  EXACT events 747/747  decisions 222/222  fail rows 70/70  makespan -0.0000%  flow -0.0001%  tard -0.0014%  failures 37/37  machines equal True  failure process to common end equal True (70 events)  handlers U/T q0/0 c0/0 r0/0 h0/0 a0/0 p0/0 i9/9 defer 0 b3 0
+x1_s2_het_MDD_TECT                 EXACT events 570/570  decisions 161/161  fail rows 137/137  makespan +0.0000%  flow -0.0002%  tard -0.0281%  failures 71/71  machines equal True  failure process to common end equal True (137 events)  handlers U/T q0/0 c1/1 r1/1 h0/0 a0/0 p0/0 i11/11 defer 0 b3 0
+x1_s2_het_PTWINQ_SRWT              EXACT events 572/572  decisions 161/161  fail rows 131/131  makespan +0.0000%  flow +0.0001%  tard -0.0029%  failures 67/67  machines equal True  failure process to common end equal True (131 events)  handlers U/T q1/1 c0/0 r1/1 h0/0 a0/0 p0/0 i15/15 defer 0 b3 0
+x1_s2_het_SPT_ECT                  EXACT events 573/573  decisions 161/161  fail rows 129/129  makespan +0.0000%  flow +0.0001%  tard -0.0019%  failures 66/66  machines equal True  failure process to common end equal True (129 events)  handlers U/T q0/0 c0/0 r1/1 h1/1 a0/0 p0/0 i12/12 defer 0 b3 1
+x1_s2_het_SPT_ECT_restart          EXACT events 652/652  decisions 196/196  fail rows 150/150  makespan +0.0000%  flow -0.0002%  tard -0.0023%  failures 77/77  machines equal True  failure process to common end equal True (150 events)  handlers U/T q0/0 c2/2 r1/1 h0/0 a0/0 p0/0 i17/17 defer 0 b3 0
+x1_s2_uni_MDD_TECT                 EXACT events 577/577  decisions 162/162  fail rows 161/161  makespan +0.0000%  flow -0.0002%  tard +0.0036%  failures 82/82  machines equal True  failure process to common end equal True (161 events)  handlers U/T q2/2 c0/0 r1/1 h0/0 a0/0 p0/0 i20/20 defer 0 b3 0
+x1_s2_uni_PTWINQ_SRWT              EXACT events 580/580  decisions 163/163  fail rows 157/157  makespan +0.0000%  flow -0.0000%  tard -0.0004%  failures 80/80  machines equal True  failure process to common end equal True (157 events)  handlers U/T q2/2 c1/1 r1/1 h0/0 a0/0 p0/0 i20/20 defer 0 b3 0
+x1_s2_uni_SPT_ECT                  EXACT events 581/581  decisions 163/163  fail rows 162/162  makespan +0.0000%  flow +0.0002%  tard +0.0006%  failures 82/82  machines equal True  failure process to common end equal True (162 events)  handlers U/T q3/3 c0/0 r1/1 h0/0 a0/0 p1/1 i18/18 defer 0 b3 0
+x1_s4_het_MDD_TECT                 EXACT events 772/772  decisions 221/221  fail rows 116/116  makespan -0.0000%  flow -0.0002%  tard +0.0009%  failures 59/59  machines equal True  failure process to common end equal True (116 events)  handlers U/T q0/0 c1/1 r1/1 h0/0 a0/0 p0/0 i9/9 defer 0 b3 0
+x1_s4_het_PTWINQ_SRWT              EXACT events 766/766  decisions 220/220  fail rows 125/125  makespan +0.0000%  flow -0.0000%  tard -0.0021%  failures 65/65  machines equal True  failure process to common end equal True (125 events)  handlers U/T q0/0 c0/0 r1/1 h0/0 a0/0 p0/0 i13/13 defer 0 b3 0
+x1_s4_het_SPT_ECT                  EXACT events 773/773  decisions 220/220  fail rows 116/116  makespan -0.0000%  flow -0.0003%  tard -0.0056%  failures 59/59  machines equal True  failure process to common end equal True (116 events)  handlers U/T q0/0 c0/0 r1/1 h0/0 a0/0 p0/0 i9/9 defer 0 b3 0
+x1_s4_uni_MDD_TECT                 EXACT events 804/804  decisions 226/226  fail rows 142/142  makespan -0.0000%  flow +0.0001%  tard +0.0007%  failures 73/73  machines equal True  failure process to common end equal True (142 events)  handlers U/T q4/4 c1/1 r4/4 h1/1 a0/0 p0/0 i15/15 defer 1 b3 1
+x1_s4_uni_PTWINQ_SRWT              EXACT events 793/793  decisions 224/224  fail rows 163/163  makespan +0.0000%  flow +0.0001%  tard -0.0016%  failures 82/82  machines equal True  failure process to common end equal True (163 events)  handlers U/T q3/3 c1/1 r0/0 h0/0 a0/0 p0/0 i18/18 defer 2 b3 0
+x1_s4_uni_SPT_ECT                  EXACT events 789/789  decisions 223/223  fail rows 142/142  makespan -0.0000%  flow -0.0001%  tard +0.0018%  failures 73/73  machines equal True  failure process to common end equal True (142 events)  handlers U/T q2/2 c1/1 r4/4 h0/0 a0/0 p0/0 i14/14 defer 2 b3 0
+x1_s4_wkx_MDD_TECT                 EXACT events 771/771  decisions 220/220  fail rows 73/73  makespan -0.0000%  flow +0.0002%  tard +0.0040%  failures 38/38  machines equal True  failure process to common end equal True (73 events)  handlers U/T q0/0 c0/0 r1/1 h0/0 a0/0 p1/1 i8/8 defer 0 b3 0
+x1_s4_wkx_PTWINQ_SRWT              EXACT events 779/779  decisions 221/221  fail rows 77/77  makespan +0.0000%  flow +0.0001%  tard -0.0064%  failures 39/39  machines equal True  failure process to common end equal True (77 events)  handlers U/T q0/0 c1/1 r0/0 h0/0 a0/0 p0/0 i7/7 defer 0 b3 0
+x1_s4_wkx_SPT_ECT                  EXACT events 772/772  decisions 220/220  fail rows 73/73  makespan -0.0000%  flow +0.0003%  tard -0.0086%  failures 38/38  machines equal True  failure process to common end equal True (73 events)  handlers U/T q0/0 c0/0 r1/1 h0/0 a0/0 p0/0 i6/6 defer 0 b3 0
+x1_s4_wkx_SPT_ECT_restart          EXACT events 801/801  decisions 232/232  fail rows 73/73  makespan -0.0000%  flow -0.0002%  tard +0.0126%  failures 38/38  machines equal True  failure process to common end equal True (73 events)  handlers U/T q0/0 c0/0 r1/1 h0/0 a0/0 p1/1 i6/6 defer 0 b3 0
+
+== -failurerestart / failures off on the new player vs the current player (must be identical)
+-- exact/x1_s0_uni_SPT_ECT_restart vs base/x1_s0_uni_SPT_ECT
+/home/ubuntupc/Documents/Github/Capstone-resume/results/dev-failure-resume/runs/exact/x1_s0_uni_SPT_ECT_restart
+  vs /home/ubuntupc/Documents/Github/Capstone-resume/results/dev-failure-resume/runs/base/x1_s0_uni_SPT_ECT
+  results.csv              IDENTICAL
+  decision_log.csv         IDENTICAL
+  agv_events.csv           IDENTICAL
+  job_completions.csv      IDENTICAL
+  job_operations.csv       IDENTICAL
+  machine_utilization.csv  IDENTICAL
+  agv_performance.csv      IDENTICAL
+  machine_handoffs.csv     IDENTICAL
+  des_jobs.json            IDENTICAL
+  des_floor.json           IDENTICAL
+ALL IDENTICAL
+-- exact/x1_s2_het_SPT_ECT_restart vs base/x1_s2_het_SPT_ECT
+/home/ubuntupc/Documents/Github/Capstone-resume/results/dev-failure-resume/runs/exact/x1_s2_het_SPT_ECT_restart
+  vs /home/ubuntupc/Documents/Github/Capstone-resume/results/dev-failure-resume/runs/base/x1_s2_het_SPT_ECT
+  results.csv              IDENTICAL
+  decision_log.csv         IDENTICAL
+  agv_events.csv           IDENTICAL
+  job_completions.csv      IDENTICAL
+  job_operations.csv       IDENTICAL
+  machine_utilization.csv  IDENTICAL
+  agv_performance.csv      IDENTICAL
+  machine_handoffs.csv     IDENTICAL
+  des_jobs.json            IDENTICAL
+  des_floor.json           IDENTICAL
+ALL IDENTICAL
+-- exact/x1_s4_wkx_SPT_ECT_restart vs base/x1_s4_wkx_SPT_ECT
+/home/ubuntupc/Documents/Github/Capstone-resume/results/dev-failure-resume/runs/exact/x1_s4_wkx_SPT_ECT_restart
+  vs /home/ubuntupc/Documents/Github/Capstone-resume/results/dev-failure-resume/runs/base/x1_s4_wkx_SPT_ECT
+  results.csv              IDENTICAL
+  decision_log.csv         IDENTICAL
+  agv_events.csv           IDENTICAL
+  job_completions.csv      IDENTICAL
+  job_operations.csv       IDENTICAL
+  machine_utilization.csv  IDENTICAL
+  agv_performance.csv      IDENTICAL
+  machine_handoffs.csv     IDENTICAL
+  des_jobs.json            IDENTICAL
+  des_floor.json           IDENTICAL
+ALL IDENTICAL
+-- regress/restart_fail_s0_SPT_ECT vs base/fail_s0_SPT_ECT
+/home/ubuntupc/Documents/Github/Capstone-resume/results/dev-failure-resume/runs/regress/restart_fail_s0_SPT_ECT
+  vs /home/ubuntupc/Documents/Github/Capstone-resume/results/dev-failure-resume/runs/base/fail_s0_SPT_ECT
+  results.csv              IDENTICAL
+  decision_log.csv         IDENTICAL
+  agv_events.csv           IDENTICAL
+  job_completions.csv      IDENTICAL
+  job_operations.csv       IDENTICAL
+  machine_utilization.csv  IDENTICAL
+  agv_performance.csv      IDENTICAL
+  machine_handoffs.csv     IDENTICAL
+  des_jobs.json            IDENTICAL
+  des_floor.json           IDENTICAL
+ALL IDENTICAL
+-- regress/restart_fail_s1_MDD_TECT vs base/fail_s1_MDD_TECT
+/home/ubuntupc/Documents/Github/Capstone-resume/results/dev-failure-resume/runs/regress/restart_fail_s1_MDD_TECT
+  vs /home/ubuntupc/Documents/Github/Capstone-resume/results/dev-failure-resume/runs/base/fail_s1_MDD_TECT
+  results.csv              IDENTICAL
+  decision_log.csv         IDENTICAL
+  agv_events.csv           IDENTICAL
+  job_completions.csv      IDENTICAL
+  job_operations.csv       IDENTICAL
+  machine_utilization.csv  IDENTICAL
+  agv_performance.csv      IDENTICAL
+  machine_handoffs.csv     IDENTICAL
+  des_jobs.json            IDENTICAL
+  des_floor.json           IDENTICAL
+ALL IDENTICAL
+-- regress/resume_nofail_s0_SPT_ECT vs base/nofail_s0_SPT_ECT
+/home/ubuntupc/Documents/Github/Capstone-resume/results/dev-failure-resume/runs/regress/resume_nofail_s0_SPT_ECT
+  vs /home/ubuntupc/Documents/Github/Capstone-resume/results/dev-failure-resume/runs/base/nofail_s0_SPT_ECT
+  results.csv              IDENTICAL
+  decision_log.csv         IDENTICAL
+  agv_events.csv           IDENTICAL
+  job_completions.csv      IDENTICAL
+  job_operations.csv       IDENTICAL
+  machine_utilization.csv  IDENTICAL
+  agv_performance.csv      IDENTICAL
+  machine_handoffs.csv     IDENTICAL
+  des_jobs.json            IDENTICAL
+  des_floor.json           IDENTICAL
+ALL IDENTICAL
+
+== resume vs restart (current player) with Unity's native failure samplers, 7 AGVs
+fail_s0_SPT_ECT: makespan 7438.22 -> 6321.78; mean_flow_time 2599.49 -> 2538.85; mean_tardiness 845.29 -> 774.52; jobs_completed 40 -> 40; episode_failures 20 -> 17
+fail_s1_MDD_TECT: makespan 4492.42 -> 4510.68; mean_flow_time 1009.36 -> 1022.04; mean_tardiness 0.00 -> 2.23; jobs_completed 20 -> 20; episode_failures 14 -> 14

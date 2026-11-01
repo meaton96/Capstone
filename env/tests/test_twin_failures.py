@@ -1,7 +1,8 @@
 """Machine failures in the event-based twin (2026-10-09, dev-twin-failures): des_twin.failures (models, traces,
 conditional redraw), the engine's FailureCoordinator port, the observation's failure columns, the reliability-aware
 rules and the scenario plumbing; the 2026-10-09 quirk fixes (belt slot, no-alternate hold, legacy mode) and the
-mid-handshake heading (dev-csharp-failures). Exactness with failures off against 84e221c3 is results/dev-twin-failures/
+mid-handshake heading (dev-csharp-failures); preempt-resume of the interrupted operation (2026-10-28, failure_restart the
+old model). Exactness with failures off against 84e221c3 is results/dev-twin-failures/
 check_exact.py; here only the cheap version (an empty trace changes nothing)."""
 import json
 import math
@@ -224,11 +225,12 @@ def _heavy_trace(floor, seed=1):
     return _trace(model, floor, seed)
 
 
+@pytest.mark.parametrize("restart", [False, True])
 @pytest.mark.parametrize("rule", ["SPT_ECT", "MDD_TECT", "FIFO_SRWT"])
-def test_engine_invariants_with_failures(rule):
+def test_engine_invariants_with_failures(rule, restart):
     floor = _floor()
     trace = _heavy_trace(floor)
-    tw = _run(rule, trace, floor=floor)
+    tw = _run(rule, trace, floor=floor, failure_restart=restart)
     s = tw.summary()
     assert not s["timed_out"]
     assert s["episode_failures"] > 20 and s["jobs_interrupted"] > 0 and s["queued_rerouted"] > 0
@@ -241,28 +243,90 @@ def test_engine_invariants_with_failures(rule):
         iv = [(f, r) for f, r in trace.intervals(m.id) if f <= end_tick]
         assert m.n_fail == len(iv)
         assert tw.downtime_so_far(m) == pytest.approx(sum(min(r, end_tick) - f for f, r in iv) * floor.dt, abs=1e-6)
-    # no operation runs on a machine while it is down, and an interrupted operation restarts from scratch
     down = {m.id: [(f * floor.dt, r * floor.dt) for f, r in trace.intervals(m.id)] for m in tw.machines}
-    restarted = 0
+    if restart:
+        # no operation runs on a machine while it is down, and an interrupted operation restarts from scratch
+        restarted = 0
+        for row in tw.op_rows():
+            if row["start"] is None:
+                continue
+            end = row["end"] if row["end"] is not None else (row["interrupted"] if row["interrupted"] is not None
+                                                             else tw.makespan)
+            for f, r in down[row["machine"]]:
+                assert not (row["start"] < r - 1e-9 and end > f + 1e-9), (row, f, r)
+            if row["interrupted"] is not None:
+                job = tw.jobs[row["job"]]
+                later = [o for o in job.op_rows if o["op"] == row["op"] and o["routed"] >= row["interrupted"]]
+                assert later, row                                     # re-routed: a new op row for the same operation
+                done = [o for o in later if o["end"] is not None]
+                if done:
+                    restarted += 1
+                    p = job.ops[row["op"]][done[0]["machine"]]
+                    # the full duration again (within the float32 countdown drift, ~1e-4 relative)
+                    assert done[0]["end"] - done[0]["start"] >= float(p) * (1 - 1e-3)
+            assert row["paused"] == 0.0
+        assert restarted > 0
+        assert all(not m.down or m.idle for m in tw.machines)
+        assert s["lost_work"] > 0
+        return
+    # preempt-resume: an operation is never abandoned; it neither starts nor finishes while its machine is down, it
+    # stands still through each failure that falls inside it, and its processing time outside those is p (one tick of
+    # slack per pause: the countdown also stands still in the tick the failure fires in)
+    resumed = 0
     for row in tw.op_rows():
+        assert row["interrupted"] is None
         if row["start"] is None:
             continue
-        end = row["end"] if row["end"] is not None else (row["interrupted"] if row["interrupted"] is not None
-                                                         else tw.makespan)
+        end = row["end"] if row["end"] is not None else tw.makespan
+        inside = 0
         for f, r in down[row["machine"]]:
-            assert not (row["start"] < r - 1e-9 and end > f + 1e-9), (row, f, r)
-        if row["interrupted"] is not None:
-            job = tw.jobs[row["job"]]
-            later = [o for o in job.op_rows if o["op"] == row["op"] and o["routed"] >= row["interrupted"]]
-            assert later, row                                     # re-routed: a new op row for the same operation
-            done = [o for o in later if o["end"] is not None]
-            if done:
-                restarted += 1
-                p = job.ops[row["op"]][done[0]["machine"]]
-                # the full duration again (within the float32 countdown drift, ~1e-4 relative)
-                assert done[0]["end"] - done[0]["start"] >= float(p) * (1 - 1e-3)
-    assert restarted > 0
-    assert all(not m.down or m.idle for m in tw.machines)
+            assert not (f - 1e-9 < row["start"] < r - 1e-9), (row, f, r)
+            if row["end"] is not None:
+                assert not (f - 1e-9 < row["end"] < r + 1e-9), (row, f, r)
+            if row["start"] < f and end > f:
+                inside += 1
+                if row["end"] is not None:
+                    assert row["end"] > r
+        if row["end"] is None:
+            continue
+        p = float(tw.jobs[row["job"]].ops[row["op"]][row["machine"]])
+        work = row["end"] - row["start"] - row["paused"]
+        assert p * (1 - 1e-3) <= work <= p * (1 + 1e-3) + inside * floor.dt + 1e-6, (row, p, inside)
+        assert (row["paused"] > 0) == (inside > 0), row
+        resumed += inside > 0
+    assert resumed > 0
+    assert s["lost_work"] == 0.0
+    assert all(not m.down or m.idle or tw.jobs[m.job].state == PROCESSING for m in tw.machines)
+
+
+@pytest.mark.parametrize("frac", [0.05, 0.5, 0.97])
+def test_resume_moves_the_finish_back_by_the_stopped_ticks(frac):
+    """One failure inside one operation, nothing else: that operation's end moves back by exactly the ticks the
+    countdown stood still (R - F + 1: the tick the failure fires in, F - 1, up to the repair harvest R), whatever
+    else changes on the floor; with failure_restart the operation is abandoned at F."""
+    floor = _floor()
+    base = _run("SPT_ECT", None, floor=floor)
+    dt = floor.dt
+    rows = [r for r in base.op_rows() if r["end"] is not None and r["end"] - r["start"] > 60.0 and r["start"] > 600.0]
+    row = rows[len(rows) // 2]
+    s_k, e_k = round(row["start"] / dt), round(row["end"] / dt)
+    f_k = s_k + 1 + int(frac * (e_k - s_k - 1))          # harvest tick; the failure fires in tick f_k - 1 >= s_k
+    trace = _one_failure(floor, row["machine"], f_k, 300.0)
+    (_, r_k), = trace.intervals(row["machine"])
+    tw = _run("SPT_ECT", trace, floor=floor)
+    got = [o for o in tw.jobs[row["job"]].op_rows if o["op"] == row["op"]]
+    assert len(got) == 1 and got[0]["machine"] == row["machine"] and got[0]["start"] == row["start"]
+    assert round(got[0]["end"] / dt) == e_k + (r_k - f_k + 1)
+    assert got[0]["paused"] == pytest.approx((r_k - f_k) * dt)
+    m = tw.mach[row["machine"]]
+    assert tw.fail_rows[0]["active_job"] == row["job"] and tw.fail_rows[1]["active_job"] == row["job"]
+    assert tw.summary()["jobs_interrupted"] == 1 and m.lost_work == 0.0
+    # restart: abandoned at F, re-routed, and the operation runs in full later
+    tr = _run("SPT_ECT", trace, floor=floor, failure_restart=True)
+    got = [o for o in tr.jobs[row["job"]].op_rows if o["op"] == row["op"]]
+    assert len(got) == 2 and got[0]["interrupted"] == pytest.approx(f_k * dt) and got[0]["end"] is None
+    assert tr.fail_rows[1]["active_job"] == -1
+    assert tr.mach[row["machine"]].lost_work == pytest.approx((f_k - s_k) * dt)
 
 
 @pytest.mark.parametrize("legacy", [False, True])
@@ -412,7 +476,7 @@ def test_empty_trace_changes_nothing():
     for rule in ("SPT_ECT", "MDD_TECT"):
         a, b = _run(rule, None, floor=floor), _run(rule, empty, floor=floor)
         assert a.decision_rows == b.decision_rows and a.trace == b.trace and a.job_rows() == b.job_rows()
-        assert [{k: v for k, v in r.items() if k != "interrupted"} for r in b.op_rows()] == a.op_rows()
+        assert [{k: v for k, v in r.items() if k not in ("interrupted", "paused")} for r in b.op_rows()] == a.op_rows()
         sa, sb = a.summary(), b.summary()
         assert all(sa[k] == sb[k] for k in sa)
         assert a.metrics() == b.metrics()
@@ -466,13 +530,15 @@ def test_fork_rollouts_with_failures_equal_replay():
     assert [e for e in r1[0][1] if e[0] <= tw.now] == [e for e in tw.fail_log if e[0] <= tw.now]
 
 
-def test_utilization_counts_operational_time_and_not_lost_work():
+@pytest.mark.parametrize("restart", [False, True])
+def test_utilization_counts_operational_time_and_not_lost_work(restart):
     floor = _floor()
-    tw = _run("SPT_ECT", _heavy_trace(floor), floor=floor)
+    tw = _run("SPT_ECT", _heavy_trace(floor), floor=floor, failure_restart=restart)
     for m in tw.machines:
         up = tw.now - tw.downtime_so_far(m)
         assert float(tw.utilization(m)) == pytest.approx(m.busy / up, rel=1e-5)
-    assert sum(m.lost_work for m in tw.machines) > 0
+    # only a restart loses work; under preempt-resume the work before a failure is busy time
+    assert (sum(m.lost_work for m in tw.machines) > 0) == restart
 
 
 # ── Observation ──────────────────────────────────────────────────────────────────────────────────

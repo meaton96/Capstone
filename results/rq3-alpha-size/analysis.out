@@ -1,0 +1,78 @@
+== rq3-alpha-size: best PECT / PTECT α vs floor size and machine-speed spread; pre-declared analysis and gate
+cells complete: 18 / 18 fitting cells; held-out m30_s0.75 40/40, m75_s0.75 40/40
+
+-- 1. α curves, fitting seeds, pooled % vs MDD-PTECT@3 (PTECT row; PECT's best in brackets)
+   cell             0   0.25    0.5   0.75      1    1.5      2      3      4   α*PTECT  α*PECT  within 1% (PTECT)   σ     τ
+   m15_s0      +24.7  +15.6   +8.8   +6.6   +4.4   +1.0   -1.5   +0.0   -1.5        2       4 [-1.3]  2,4                0.00 0.046
+   m15_s0.5     +5.9   +0.4   -2.1   -4.6   -3.8   -4.5   -3.2   +0.0   +6.3     0.75     1.5 [-5.5]  0.75,1,1.5         0.22 0.045
+   m15_s1       -8.5  -14.5  -14.9  -15.0  -13.6  -11.4   -8.3   +0.0   +7.2     0.75    0.75 [-15.4]  0.25,0.5,0.75      0.38 0.042
+   m20_s0      +33.3  +21.3  +12.3   +7.8   +2.7   +2.3   -1.5   +0.0   -2.3        4       2 [-1.8]  2,4                0.00 0.054
+   m20_s0.5     -1.3   -8.7  -11.5  -13.1  -12.7  -12.0   -9.0   +0.0  +11.4     0.75       1 [-13.9]  0.75,1             0.22 0.052
+   m20_s1      -21.6  -24.6  -26.7  -25.0  -25.0  -20.4  -13.5   +0.0  +12.3      0.5     0.5 [-26.6]  0.5                0.38 0.048
+   m30_s0      +38.0  +24.3  +13.6   +7.8   +3.3   +1.2   -0.2   +0.0   -0.9        4       3 [-1.3]  2,3,4              0.00 0.075
+   m30_s0.5     -8.5  -15.3  -17.2  -18.1  -18.5  -14.9  -11.9   +0.0  +11.4        1       1 [-20.4]  0.75,1             0.23 0.072
+   m30_s1      -24.6  -27.6  -28.7  -28.3  -24.8  -20.0  -14.5   +0.0  +13.5      0.5     0.5 [-29.0]  0.5,0.75           0.39 0.066
+   m50_s0      +28.6  +18.2   +9.3   +5.2   +3.4   -0.8   -0.1   +0.0   +1.2      1.5       3 [-0.3]  1.5,2,3            0.00 0.099
+   m50_s0.5    -13.3  -18.6  -20.8  -20.9  -20.0  -17.2  -12.8   +0.0  +12.5     0.75       1 [-20.8]  0.5,0.75           0.23 0.095
+   m50_s1      -26.0  -29.1  -28.9  -27.5  -25.3  -19.4  -12.8   +0.0  +13.2     0.25     0.5 [-29.6]  0.25,0.5           0.39 0.087
+   m75_s0      +18.0   +7.8   +4.9   +2.8   +0.9   +0.1   -1.2   +0.0   +1.2        2       2 [+2.7]  2                  0.00 0.115
+   m75_s0.5    -16.8  -19.5  -19.9  -20.1  -18.1  -14.9  -10.4   +0.0  +11.3     0.75    0.75 [-19.0]  0.25,0.5,0.75      0.23 0.109
+   m75_s1      -24.2  -25.8  -24.3  -23.0  -21.5  -16.1  -11.2   +0.0  +10.4     0.25     0.5 [-24.4]  0.25               0.40 0.099
+   m100_s0      +7.8   +1.7   -0.5   -1.7   -2.1   -1.8   -2.1   +0.0   +2.3        1       3 [+6.1]  0.75,1,1.5,2       0.00 0.124
+   m100_s0.5   -22.3  -23.3  -22.9  -21.4  -20.1  -15.8  -11.1   +0.0  +12.7     0.25    0.75 [-19.0]  0.25,0.5           0.23 0.118
+   m100_s1     -27.9  -28.1  -27.0  -24.9  -23.1  -17.3  -11.8   +0.0  +11.5     0.25    0.25 [-26.0]  0,0.25             0.40 0.107
+
+-- 2. formulas for the PTECT α (fitting seeds; regret = % over the cell's best α, mean over cells)
+   M0: params (0.75,)  in-sample regret 3.02%  leave-one-cell-out 3.29%
+   M1: params (1.8, 4.0)  in-sample regret 0.86%  leave-one-cell-out 1.49%
+   M2: params (1.3, 5.5)  in-sample regret 2.78%  leave-one-cell-out 3.98%
+   M3: params (2.3, 3.5, 7.0)  in-sample regret 0.37%  leave-one-cell-out 0.68%
+   selected: M3 (simplest within 0.5 points of the best leave-one-cell-out regret 0.68%)
+
+-- 3. test seeds 0-39: selected formula vs references (pooled %, 95% CI, W/L, Wilcoxon)
+   m15_s0     formula α ≈ 1.97 | vs α 3  +0.16 [-2.13, +2.45] 21/19 p=0.9 | vs α 0 -15.45 | vs M0  -5.16 | vs cell best α 2 (fitting)  +0.00
+   m15_s0.5   formula α ≈ 1.20 | vs α 3  -7.14 [-10.51, -4.54] 34/6 p=7.3e-08 | vs α 0  -5.62 | vs M0  -1.55 | vs cell best α 0.75 (fitting)  -1.55
+   m15_s1     formula α ≈ 0.67 | vs α 3 -17.91 [-21.74, -14.83] 40/0 p=1.8e-12 | vs α 0  -5.43 | vs M0  -1.42 | vs cell best α 0.75 (fitting)  -1.42
+   m20_s0     formula α ≈ 1.91 | vs α 3  +0.60 [-3.48, +4.51] 23/17 p=0.18 | vs α 0 -25.68 | vs M0  -6.02 | vs cell best α 4 (fitting)  -0.81
+   m20_s0.5   formula α ≈ 1.12 | vs α 3 -15.88 [-21.28, -11.84] 40/0 p=1.8e-12 | vs α 0 -12.78 | vs M0  -1.23 | vs cell best α 0.75 (fitting)  -1.23
+   m20_s1     formula α ≈ 0.57 | vs α 3 -28.93 [-35.54, -23.66] 40/0 p=1.8e-12 | vs α 0  -4.22 | vs M0  -0.40 | vs cell best α 0.5 (fitting)  +0.30
+   m30_s0     formula α ≈ 1.77 | vs α 3  -0.36 [-2.75, +1.57] 23/17 p=0.17 | vs α 0 -24.48 | vs M0  -5.91 | vs cell best α 4 (fitting)  -1.46
+   m30_s0.5   formula α ≈ 0.97 | vs α 3 -19.21 [-26.34, -13.80] 38/2 p=1e-10 | vs α 0 -10.90 | vs M0  +0.71 | vs cell best α 1 (fitting)  -0.52
+   m30_s1     formula α ≈ 0.44 | vs α 3 -30.38 [-39.39, -23.23] 38/2 p=1.8e-11 | vs α 0  -2.13 | vs M0  -0.29 | vs cell best α 0.5 (fitting)  +1.63
+   m50_s0     formula α ≈ 1.60 | vs α 3  +0.16 [-3.04, +2.74] 21/19 p=0.47 | vs α 0 -22.91 | vs M0  -4.71 | vs cell best α 1.5 (fitting)  +0.00
+   m50_s0.5   formula α ≈ 0.81 | vs α 3 -21.22 [-27.23, -16.85] 40/0 p=1.8e-12 | vs α 0  -6.60 | vs M0  +0.20 | vs cell best α 0.75 (fitting)  +0.20
+   m50_s1     formula α ≈ 0.29 | vs α 3 -28.55 [-35.56, -22.95] 40/0 p=1.8e-12 | vs α 0  -2.93 | vs M0  -1.06 | vs cell best α 0.25 (fitting)  +0.10
+   m75_s0     formula α ≈ 1.48 | vs α 3  -1.43 [-3.13, -0.17] 28/12 p=0.016 | vs α 0  -6.12 | vs M0  -0.51 | vs cell best α 2 (fitting)  +0.17
+   m75_s0.5   formula α ≈ 0.70 | vs α 3 -20.69 [-31.06, -13.46] 39/1 p=1e-10 | vs α 0  -1.09 | vs M0  -0.05 | vs cell best α 0.75 (fitting)  -0.05
+   m75_s1     formula α ≈ 0.20 | vs α 3 -26.93 [-37.87, -18.60] 39/1 p=1.3e-11 | vs α 0  +0.25 | vs M0  -3.38 | vs cell best α 0.25 (fitting)  +0.29
+   m100_s0    formula α ≈ 1.42 | vs α 3  -2.65 [-3.98, -1.48] 31/9 p=0.00017 | vs α 0  -0.75 | vs M0  +1.71 | vs cell best α 1 (fitting)  +1.06
+   m100_s0.5  formula α ≈ 0.64 | vs α 3 -21.72 [-27.62, -17.31] 40/0 p=1.8e-12 | vs α 0  +1.33 | vs M0  -1.24 | vs cell best α 0.25 (fitting)  +2.14
+   m100_s1    formula α ≈ 0.14 | vs α 3 -28.61 [-35.34, -23.23] 40/0 p=1.8e-12 | vs α 0  +0.20 | vs M0  -4.88 | vs cell best α 0.25 (fitting)  -0.46
+   m30_s0.75  formula α ≈ 0.69 | vs α 3 -26.00 [-34.18, -19.16] 38/2 p=1.6e-10 | vs α 0  -6.01 | vs M0  +0.30 | vs hindsight best α 0.75 (test)  +0.30
+   m75_s0.75  formula α ≈ 0.43 | vs α 3 -26.09 [-36.81, -18.25] 40/0 p=1.8e-12 | vs α 0  -0.75 | vs M0  -2.56 | vs hindsight best α 0.25 (test)  +1.22
+
+-- 4. α* per regime block (PTECT, fitting seeds)
+   m15_s0     normal 4, surge 4, short 1.5
+   m15_s0.5   normal 0.75, surge 1.5, short 0.75
+   m15_s1     normal 0.25, surge 0.75, short 0.5
+   m20_s0     normal 2, surge 4, short 4
+   m20_s0.5   normal 1, surge 0.75, short 0.75
+   m20_s1     normal 0.5, surge 0.5, short 0.5
+   m30_s0     normal 3, surge 4, short 4
+   m30_s0.5   normal 1, surge 0.5, short 1
+   m30_s1     normal 0.5, surge 0.5, short 0.5
+   m50_s0     normal 1.5, surge 3, short 1.5
+   m50_s0.5   normal 0.75, surge 1, short 0.5
+   m50_s1     normal 0.25, surge 0.25, short 0.25
+   m75_s0     normal 2, surge 2, short 0.5
+   m75_s0.5   normal 0.75, surge 0.75, short 0.25
+   m75_s1     normal 0.25, surge 0.25, short 0.25
+   m100_s0    normal 1.5, surge 2, short 0.25
+   m100_s0.5  normal 0.5, surge 0.25, short 0
+   m100_s1    normal 0.25, surge 0.25, short 0
+
+-- 5. gate (README)
+   G1 size matters at s 0: α*(15) − α*(100) = 2 − 1 = 1 -> PASS (need ≥ 1.0)
+   G2 the formula works: selected M3 (size term: True); LOO regret 0.68 vs M1 1.49 (need ≥ 1 point better: False); test gap to the cell's best α -0.09% (need ≤ 2); Holm-significantly better than α 3 in 13 / 18 cells (need ≥ half); significantly worse in 0 -> FAIL
+   G3 it transfers (held-out cells): m30_s0.75 vs α 3 -26.00 [CI hi -19.16], vs hindsight best α +0.30; m75_s0.75 vs α 3 -26.09 [CI hi -18.25], vs hindsight best α +1.22 -> PASS
+   overall: see README: report the α curves as a guideline

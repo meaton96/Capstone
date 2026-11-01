@@ -162,7 +162,8 @@ experiment:
 - **Unaffected:**
   - every E1 / E2 / E2d / E4n / O1 / O2 / O3 row at I0;
   - `none`;
-  - `none,info=I1`, where b_hat stays exactly 1.
+  - `none,info=I1` only marginally: b_hat ≈ 1 from tick rounding, and seed values change at ~1e-6 relative
+    (corrected 10-19: `../rq4-uncert-i1sync/check_fix.out`; it is rerun there with the other I1 cells).
 
 **Decided and done (user, 10-17):**
 - **`analyze.py` reports the E3 / mix cells on the screen's measure** (see Method). Smoke check on the path-A values at
@@ -177,8 +178,8 @@ experiment:
   - **Other tests:** the 33 uncertainty tests and the 111 other twin tests pass.
   - **Exactness:** `../dev-twin-uncertainty/check_exact.py` (zero config, bit-exact vs 95af8606) on the fixed code:
     PASS, 110 / 110 cases.
-- **The screen's I1 cells are not rerun (yet).** Until they are, cite them only with the caveat above. This
-  experiment's I1 cells need no rerun.
+- **The screen's I1 cells are rerun (user, 10-19)** in `../rq4-uncert-i1sync`, on 6d13412a + the fix. Until those
+  results land, cite the screen's I1 rows only with the caveat above. This experiment's I1 cells need no rerun.
 
 ## Results
 Numbers are pooled window tardiness vs MDD-PTECT in the same cell, test seeds 0-39, * = Wilcoxon p < 0.05. The E3 / mix

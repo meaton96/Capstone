@@ -68,16 +68,18 @@ def compare_failures(run_dir, tw):
     return len(ur), i, None if i >= len(ur) else ur[i]
 
 
-def dock(run_dir, transport="kinematic", failures=None, legacy_failure_quirks=False):
+def dock(run_dir, transport="kinematic", failures=None, legacy_failure_quirks=False, failure_restart=False):
     """failures: a des_twin.failures.FailureTrace for a run with an injected failureSchedule (FailureTrace.
-    from_schedule of the scenario's schedule); legacy_failure_quirks for a player run with -legacyfailurequirks."""
+    from_schedule of the scenario's schedule); legacy_failure_quirks for a player run with -legacyfailurequirks,
+    failure_restart for one with -failurerestart (or a player built before 2026-10-28)."""
     u = unity_row(run_dir)
     floor = Floor.load(os.path.join(run_dir, "des_floor.json"))
     with open(os.path.join(run_dir, "des_jobs.json")) as f:
         jobs = json.load(f)
     # PECT / PTECT parameters: the export's "ptime_rule" (written only when not the defaults), else the defaults
     tw = run_twin(floor, jobs, TwinConfig(u["rule"], transport, agv_count=int(u["agvCount"]), failures=failures,
-                                          legacy_failure_quirks=legacy_failure_quirks, **ptime_settings(floor.data)))
+                                          legacy_failure_quirks=legacy_failure_quirks, failure_restart=failure_restart,
+                                          **ptime_settings(floor.data)))
     s = tw.summary()
 
     with open(os.path.join(run_dir, "agv_events.csv")) as f:

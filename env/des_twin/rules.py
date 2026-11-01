@@ -23,7 +23,9 @@ MACHINE_RULES = ("SMPT", "SRWT", "MMUR", "ECT", "TECT")
 # MTBF / age / Weibull (k, lam) at the twin's information level (TwinConfig.reliability: static / online / oracle),
 # kappa = TwinConfig.reliability_kappa, R = TwinConfig.reroute_cost:
 #   RECT    q / A + p + kappa P (p / 2 + R),  P = 1 - exp(-p / MTBF): the chance the operation is interrupted (a
-#           restart loses about p / 2 and the job is re-routed); q / A: the queue drains at the long-run availability
+#           restart loses about p / 2 and the job is re-routed); q / A: the queue drains at the long-run availability.
+#           The risk term was written for the restart model of the engine before 2026-10-28 (TwinConfig.failure_restart);
+#           under preempt-resume (the default since) an interrupted job loses no work and waits out the repair instead
 #   RTECT   max(tr, q / A) + p + kappa P (p / 2 + R)
 #   RECTA   RECT with P the Weibull conditional failure probability over the job's exposure window given the age a:
 #           1 - exp(-((a + q + p) / lam)^k + ((a + q) / lam)^k)
