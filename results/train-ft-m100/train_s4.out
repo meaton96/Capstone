@@ -1,0 +1,42 @@
+============================================================
+DRL Scheduling Network — PPO Training
+============================================================
+
+Reward: tardiness (rewards/functions/tardiness.py:TardinessReward)
+/home/me3870/capstone/.venv/lib/python3.10/site-packages/torch/_utils.py:831: UserWarning: TypedStorage is deprecated. It will be removed in the future and UntypedStorage will be the only storage class. This should only matter to you if you are using storages directly.  To access UntypedStorage directly, use tensor.untyped_storage() instead of tensor.storage()
+  return self.fget.__get__(instance, owner)()
+
+Scenario generator: randomized (episode_duration_seconds=21600.0) (random_warmup, rule=default) (params {"failure_probability": 0.0, "due_date_allowance_range": [1.25, 3.5], "regime_block_seconds": 5400, "horizon_seconds": 30600, "load_mix": [{"name": "normal", "utilization": [0.54, 1.08], "weight": 2}, {"name": "surge", "utilization": [0.9, 1.44]}, {"name": "short", "utilization": [0.54, 1.08], "agv_count": 26}], "machines_per_type": 20, "agv_count": 52, "agv_max_utilization": 10.0})
+Observation row caps: 100 machines, 1792 jobs
+Twin envs: 16 over 16 worker processes
+
+Parameter counts:
+  encoder_factory_cnn               168,352
+  encoder_machine_set                38,400
+  encoder_job_set                    38,720
+  encoder_global_mlp                  3,488
+  encoder_event_embed                   848
+  fusion_head                       420,096
+  actor                              67,589
+  critic                             66,561
+  total                             804,054
+
+Resumed from results/train-v5-cmix_s4/checkpoint.pt at step 98,304 (checkpoint reward: tardiness)
+Discount: gamma_s = 0.999815 per simulated second (horizon 5,400 s)
+
+Backend: twin (kinematic, /home/me3870/capstone/results/agv-ratio-scale/floors/m100/des_floor.json)
+Run directory: results/train-ft-m100_s4
+Resuming at step 98,304 — 49,152 more of 147,456 target timesteps
+  24 updates × 128 steps × 16 envs
+  Device: cpu
+
+Update    1/24 | Step  100,352 | SPS      1 | Ep    80 | EpRet -491.017 | Makespan  25983 | R_avg -14.9796 | Ret -73.157 | PG 0.0721 | VL 2.7509 | EV +0.23 | Ent 0.866 | T 1588.43s
+Update    5/24 | Step  108,544 | SPS      1 | Ep   416 | EpRet -339.465 | Makespan  27191 | R_avg -15.9533 | Ret -86.376 | PG -0.0010 | VL 0.8475 | EV +0.74 | Ent 0.943 | T 1471.78s
+Update   10/24 | Step  118,784 | SPS      1 | Ep   848 | EpRet -219.549 | Makespan  26844 | R_avg -18.2373 | Ret -100.916 | PG 0.0154 | VL 0.8780 | EV +0.72 | Ent 0.969 | T 1484.11s
+Update   15/24 | Step  129,024 | SPS      1 | Ep  1280 | EpRet -145.643 | Makespan  23879 | R_avg -10.5456 | Ret -62.263 | PG 0.0010 | VL 0.1581 | EV +0.62 | Ent 0.956 | T 1449.53s
+Update   20/24 | Step  139,264 | SPS      1 | Ep  1696 | EpRet -499.615 | Makespan  27521 | R_avg -13.2116 | Ret -93.633 | PG 0.0011 | VL 0.3249 | EV +0.58 | Ent 1.089 | T 1617.40s
+Timing: env 33627s, inference 308s, update 2051s, startup 11s; 1.4 steps/s in the loop
+
+Checkpoint saved to results/train-ft-m100_s4/checkpoint.pt
+Total training time: 35992.4s
+Average SPS: 1

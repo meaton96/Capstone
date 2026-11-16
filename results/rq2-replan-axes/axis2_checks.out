@@ -1,0 +1,66 @@
+(1) seed noise in the reference of R_ℓ / R_c / R_mix (the centre's grid edge: 300 s at 5,400 s blocks, 180 s at 1,350 s): 4000 paired resamples, 2000 cross-fit splits, X 15%
+cell                        best         kept at the edge: grid  boot-bias  cross-fit  non-incr  P>=85%   (5,400 s blocks: kept at 180 s)
+l0.7-c1.5-b5400             +5.61 @  60    87.1%    87.9%      92.5%    87.1%     62%    91.1%
+l0.7-c2.125-b5400          +11.19 @  60    85.0%    85.6%      87.3%    85.0%     50%    93.9%
+l0.7-c3-b5400              +16.24 @ 120    86.5%    88.1%      92.3%    87.8%     56%    99.2%
+l1-c1.5-b5400               +5.65 @  60    87.2%    87.4%      89.7%    87.2%     64%    91.5%
+l1-c2.125-b5400             +7.28 @  60    96.8%    98.7%     101.7%    96.8%     95%    93.7%
+l1-c3-b5400                 +8.85 @  60    81.6%    85.2%      87.2%    81.6%     32%    85.6%
+l1.3-c1.5-b5400             +3.94 @  60    87.9%    89.4%      92.7%    87.9%     64%    80.9%
+l1.3-c2.125-b5400           +6.83 @  60    80.4%    80.6%      82.6%    80.4%     26%    93.6%
+l1.3-c3-b5400               +6.47 @  60    81.7%    84.4%      86.1%    81.7%     27%    85.8%
+l0.7-c1.5-b1350             +6.95 @ 180   100.0%   103.1%     106.0%   102.1%     99%
+l0.7-c2.125-b1350           +8.62 @  60    99.2%   104.2%     103.0%    99.2%     96%
+l0.7-c3-b1350              +19.47 @ 300    96.5%   103.4%     100.1%   100.6%     92%
+l1-c1.5-b1350               +5.64 @  60    87.0%    87.6%      90.3%    87.0%     60%
+l1-c2.125-b1350            +10.04 @ 120    87.7%    89.2%      89.1%    87.9%     66%
+l1-c3-b1350                +14.10 @  60    88.8%    90.2%      90.9%    88.8%     77%
+l1.3-c1.5-b1350             +4.06 @  60    96.2%    98.3%     101.2%    96.2%     94%
+l1.3-c2.125-b1350           +7.44 @  60    90.1%    92.0%      91.8%    90.1%     79%
+l1.3-c3-b1350               +8.39 @ 120    87.9%    90.2%      88.5%    88.0%     68%
+l1-c2.125-b5400-nosurge     +8.14 @  60    83.3%    83.7%      87.6%    83.3%     40%    82.4%
+l1-c2.125-b5400-noshort     +6.99 @  60    66.4%    66.3%      67.3%    66.4%      0%    84.5%
+l1-c2.125-b1350-nosurge    +13.70 @ 120    96.5%    98.2%      99.7%    97.2%    100%
+l1-c2.125-b1350-noshort     +6.69 @ 180   100.0%   101.0%     105.9%   102.5%    100%
+   block 5400 R_ℓ: passes in 17% of resamples; worst kept share: grid 80.4%, bias-corrected 80.6%, cross-fit 82.6%, non-increasing 80.4%
+   block 5400 R_c: passes in 19% of resamples; worst kept share: grid 81.6%, bias-corrected 85.2%, cross-fit 87.2%, non-increasing 81.6%
+   block 5400 R_mix: passes in 0% of resamples; worst kept share: grid 66.4%, bias-corrected 66.3%, cross-fit 67.3%, non-increasing 66.4%
+   block 1350 R_ℓ: passes in 76% of resamples; worst kept share: grid 90.1%, bias-corrected 92.0%, cross-fit 91.8%, non-increasing 90.1%
+   block 1350 R_c: passes in 47% of resamples; worst kept share: grid 87.0%, bias-corrected 87.6%, cross-fit 90.3%, non-increasing 87.0%
+   block 1350 R_mix: passes in 100% of resamples; worst kept share: grid 96.5%, bias-corrected 98.2%, cross-fit 99.7%, non-increasing 97.2%
+
+(2) the low-tardiness corner (ℓ 0.7, c 3.0) and the reported slopes with one 3 x 3 cell left out
+   l0.7-c3-b5400      plan-once tardiness     179 (1000 job-s over 40 seeds); seeds at 0: 5; the top 5 seeds carry 70%, the top 10 82%
+   l1-c2.125-b5400    plan-once tardiness    5558 (1000 job-s over 40 seeds); seeds at 0: 0; the top 5 seeds carry 37%, the top 10 56%
+   l0.7-c3-b1350      plan-once tardiness      50 (1000 job-s over 40 seeds); seeds at 0: 5; the top 5 seeds carry 61%, the top 10 78%
+   l1-c2.125-b1350    plan-once tardiness    4029 (1000 job-s over 40 seeds); seeds at 0: 0; the top 5 seeds carry 33%, the top 10 55%
+   block 5400: Δ*/p̄ per cell (u = machine busy share; * = upper bound, rule 9): ℓ0.7 c1.5 0.36* (u 0.52), ℓ0.7 c2.125 0.92* (u 0.52), ℓ0.7 c3 1.39 (u 0.52), ℓ1 c1.5 1.23* (u 0.68), ℓ1 c2.125 1.29* (u 0.68), ℓ1 c3 0.60* (u 0.68), ℓ1.3 c1.5 0.48* (u 0.78), ℓ1.3 c2.125 0.76* (u 0.77), ℓ1.3 c3 0.60* (u 0.78)
+      all 9 cells            u -0.43 [-2.82, +1.14]   c +0.41 [-1.45, +1.01]
+      without ℓ0.7 c1.5      u -1.62 [-2.75, +0.36]   c -0.23 [-1.65, +0.65]
+      without ℓ0.7 c2.125    u -0.33 [-3.68, +1.57]   c +0.41 [-1.45, +1.01]
+      without ℓ0.7 c3        u +0.17 [-2.85, +1.96]   c +0.08 [-1.99, +1.15]
+      without ℓ1 c1.5        u -0.58 [-2.90, +1.15]   c +0.83 [-1.35, +1.25]
+      without ℓ1 c2.125      u -0.53 [-2.88, +1.09]   c +0.41 [-1.45, +1.01]
+      without ℓ1 c3          u -0.34 [-2.87, +1.25]   c +0.66 [-1.46, +1.16]
+      without ℓ1.3 c1.5      u -0.12 [-2.61, +0.98]   c +0.20 [-1.45, +0.98]
+      without ℓ1.3 c2.125    u -0.49 [-2.61, +1.39]   c +0.41 [-1.46, +1.01]
+      without ℓ1.3 c3        u -0.04 [-2.91, +1.47]   c +0.66 [-1.36, +1.40]
+   block 1350: Δ*/p̄ per cell (u = machine busy share; * = upper bound, rule 9): ℓ0.7 c1.5 1.66 (u 0.52), ℓ0.7 c2.125 1.10* (u 0.52), ℓ0.7 c3 3.12 (u 0.52), ℓ1 c1.5 0.84* (u 0.71), ℓ1 c2.125 0.61 (u 0.71), ℓ1 c3 1.11* (u 0.71), ℓ1.3 c1.5 0.82* (u 0.79), ℓ1.3 c2.125 0.91* (u 0.79), ℓ1.3 c3 0.70 (u 0.80)
+      all 9 cells            u -1.96 [-3.17, -0.86]   c +0.36 [-0.51, +1.30]
+      without ℓ0.7 c1.5      u -1.83 [-3.31, -0.31]   c +0.43 [-0.58, +1.63]
+      without ℓ0.7 c2.125    u -2.52 [-3.56, -1.20]   c +0.36 [-0.51, +1.30]
+      without ℓ0.7 c3        u -1.21 [-2.98, -0.27]   c -0.08 [-0.93, +1.08]
+      without ℓ1 c1.5        u -1.97 [-3.06, -0.80]   c +0.37 [-0.74, +1.15]
+      without ℓ1 c2.125      u -1.86 [-3.10, -0.74]   c +0.36 [-0.51, +1.30]
+      without ℓ1 c3          u -1.98 [-3.09, -0.93]   c +0.32 [-0.48, +1.27]
+      without ℓ1.3 c1.5      u -2.20 [-3.62, -0.94]   c +0.54 [-0.37, +1.68]
+      without ℓ1.3 c2.125    u -2.13 [-3.40, -0.90]   c +0.36 [-0.51, +1.30]
+      without ℓ1.3 c3        u -1.78 [-3.26, -0.57]   c +0.50 [-0.65, +1.53]
+
+(3) D1 60 s against each condition's best gain, every distinct condition of axes 1, 2 and 6 (aliases counted once)
+   proc   5 conditions: D1 60 s keeps 92.0%-100.0% (lowest at proc k 16, best +8.22 at 120 s); best at 60 s at 4
+   reg    4 conditions: D1 60 s keeps 99.7%-100.0% (lowest at reg k 0.25, best +10.04 at 120 s); best at 60 s at 3
+   size   4 conditions: D1 60 s keeps 94.4%-100.0% (lowest at size m 30, best +6.30 at 450 s); best at 60 s at 2
+   fleet  2 conditions: D1 60 s keeps 100.0%-100.0% (lowest at fleet r 0.35, best +6.56 at 60 s); best at 60 s at 2
+   ax2   20 conditions: D1 60 s keeps 93.7%-100.0% (lowest at ax2 ℓ 0.7 c 3 block 1350, best +19.47 at 300 s); best at 60 s at 14
+   all 35 conditions: D1 60 s keeps >= 92.0% (lowest at proc k 16); best at 60 s at 25; best gain +3.94 to +19.47 points

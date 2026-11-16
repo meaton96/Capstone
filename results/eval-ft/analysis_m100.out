@@ -1,0 +1,44 @@
+== eval-ft m100: the final policy fine-tuned on 100 machines (train-ft-m100), test seeds 0-39, window tardiness, % vs MDD-PTECT [95% CI] better/worse Wilcoxon
+-- m100: MDD-PTECT mean 456.0 k job-s; run-to-run MDD-PTECT = reference on 160 / 160 seed-runs
+   SRT-PECT                                     +11.14 [ +7.68, +15.71]  1/39 p=5.5e-12
+   SRT-PTECT                                     +5.15 [ +3.05,  +8.36]  3/37 p=2.7e-08
+   MDD-PECT                                      +5.60 [ +3.88,  +7.55]  7/33 p=1.6e-07
+   ATC-PECT                                     +31.46 [+23.48, +38.23] 11/29 p=3.8e-05
+   ATC-PTECT                                    +23.37 [+16.79, +29.18] 15/25 p=0.00026
+   MDD-TECT                                      -1.91 [ -7.40,  +4.20] 23/17 p=0.79
+   per-instance best static v5 pair (hindsight)  -0.72 [ -1.30,  -0.35] 20/0  p=8.9e-05
+   v5 switching ceiling (rq3-size-oracle)        -3.30 (quoted)
+   short fleet -> MDD-TECT (rq3-size-portfolio) -12.20 (quoted)
+   budget (fine-tune updates; 0 = final policy), family mean of 5 vs MDD-PTECT:
+   b0                                            +2.60 [ +1.24,  +3.85] 16/24 p=0.0061   | seeds +3.8 +3.4 +1.0 +0.4 +4.4 (sd 1.76, t-test p=0.03)
+   b2                                            +2.47 [ +1.27,  +3.59] 13/27 p=0.007   | seeds +3.1 +3.8 +1.9 -0.9 +4.5 (sd 2.13, t-test p=0.06)
+   b5                                            +2.59 [ +1.41,  +3.80] 15/25 p=0.0032   | seeds +2.8 +3.4 +0.9 +0.6 +5.2 (sd 1.88, t-test p=0.037)
+   b10                                           +1.99 [ +0.91,  +3.16] 16/24 p=0.021   | seeds +3.1 +3.7 -1.0 -0.7 +4.9 (sd 2.67, t-test p=0.17)
+   b24                                           +1.52 [ +0.61,  +2.38] 18/22 p=0.073   | seeds +3.1 +1.9 -0.1 -1.2 +3.9 (sd 2.13, t-test p=0.19)
+   T100 (from scratch, 48 updates)               -0.08 [ -0.94,  +0.76] 23/17 p=0.82   | seeds -0.3 -0.2 -0.6 +0.6 +0.1 (sd 0.48, t-test p=0.74)
+   paired: each budget vs the final policy and vs T100; share of the way from the final policy to T100:
+   b2 vs final                                   -0.13 [ -0.55,  +0.25] 19/21 p=0.76
+   b2 vs T100                                    +2.55 [ +1.81,  +3.28] 10/30 p=2.1e-05   | share +5% [-11, +17]
+   b5 vs final                                   -0.01 [ -0.29,  +0.28] 16/24 p=0.4
+   b5 vs T100                                    +2.67 [ +1.92,  +3.50]  8/32 p=1.2e-05   | share +0% [-14, +10]
+   b10 vs final                                  -0.59 [ -1.19,  -0.04] 24/16 p=0.16
+   b10 vs T100                                   +2.07 [ +1.46,  +2.70]  9/31 p=4.1e-05   | share +23% [+2, +38]
+   b24 vs final                                  -1.05 [ -1.90,  -0.33] 26/14 p=0.0098
+   b24 vs T100                                   +1.60 [ +1.21,  +1.94]  8/32 p=2.8e-05   | share +40% [+19, +56]
+-- B2 (s0): MDD-PTECT mean 145.5 k job-s; run-to-run MDD-PTECT = reference on 160 / 160 seed-runs (= rq3-gen-v5 pdr: yes)
+   b0                                            -1.69 [ -2.85,  -0.51] 28/12 p=0.0058   | seeds -0.3 -2.3 -1.0 -1.7 -3.2 (sd 1.13, t-test p=0.028)
+   b2                                            -1.80 [ -2.91,  -0.68] 28/12 p=0.0058   | seeds -1.0 -1.7 -0.6 -2.2 -3.5 (sd 1.14, t-test p=0.025)   | retention 1.06
+   b2 vs final (paired)                          -0.11 [ -0.84,  +0.66] 20/20 p=0.74
+   b5                                            -1.59 [ -2.64,  -0.58] 30/10 p=0.0034   | seeds -0.4 -2.7 -1.0 -0.9 -3.1 (sd 1.20, t-test p=0.042)   | retention 0.94
+   b5 vs final (paired)                          +0.11 [ -0.51,  +0.75] 21/19 p=0.94
+   b10                                           -1.79 [ -3.01,  -0.60] 26/14 p=0.0098   | seeds +0.1 -3.5 -1.3 -1.5 -2.7 (sd 1.38, t-test p=0.044)   | retention 1.06
+   b10 vs final (paired)                         -0.10 [ -0.75,  +0.55] 22/18 p=0.58
+   b24                                           -1.54 [ -2.57,  -0.52] 29/11 p=0.0021   | seeds -0.3 -1.6 -1.0 -2.4 -2.4 (sd 0.92, t-test p=0.02)   | retention 0.91
+   b24 vs final (paired)                         +0.16 [ -0.54,  +0.92] 19/21 p=0.84
+-- criteria (pre-declared)
+   A1 adapts: b24 beats the final policy on m100 (pooled < 0, Wilcoxon p < 0.05): -1.05%, p=0.0098 -> PASS
+   A2 reaches the from-scratch arm: b24 vs T100 within +1 point and not significantly worse: +1.60%, p=2.8e-05 -> FAIL
+   A3 keeps the B2 edge at b2: vs the final policy on B2 within +1 point and not significantly worse: -0.11%, p=0.74 -> PASS
+   A3 keeps the B2 edge at b5: vs the final policy on B2 within +1 point and not significantly worse: +0.11%, p=0.94 -> PASS
+   A3 keeps the B2 edge at b10: vs the final policy on B2 within +1 point and not significantly worse: -0.10%, p=0.58 -> PASS
+   A3 keeps the B2 edge at b24: vs the final policy on B2 within +1 point and not significantly worse: +0.16%, p=0.84 -> PASS

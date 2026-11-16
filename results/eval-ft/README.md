@@ -1,9 +1,8 @@
 # eval-ft: evaluation of the fine-tune arms (2026-10-25, plan §2b)
 
-Status: **het arm done 10-26 (`analysis_het.out`): A1 fails, A3 passes from 5 updates.** The m100 arm waits on its
-cluster training (ETA ~10-30). Lab:
-- `eval-ft-het` waits on `train-ft-het` (local, 8 tasks, ~20 min each);
-- `eval-ft-m100` waits on `train-ft-m100` (cluster training, checkpoints pulled; local, 20 tasks).
+Status: **done.** het arm 10-26 (`analysis_het.out`): A1 fails, A3 passes from 5 updates. m100 arm 10-28
+(`analysis_m100.out`): A1 passes (24 updates −1.05 points vs the final policy, 40% of the way to T100), A2 fails
+(+1.60 vs T100), A3 passes at every budget.
 
 Design of the fine-tune runs: `../train-ft-m100/README.md`.
 
@@ -136,5 +135,71 @@ reference on 160 / 160 seed-runs per cell, and s0 equals `../rq3-gen-v5`'s B2 pd
 - **For the plan:** fine-tuning the v5 policy is not the route to the spread floor. The α-offset arm
   (`train-alpha-off-het` / `-b2`, running 10-26) tests the action-set route with the B2 edge as its guard.
 
-### m100 arm
-Pending (`train-ft-m100` on the cluster, ETA ~10-30).
+### m100 arm (10-28; `eval-ft-m100`, 20 tasks, 1 h 50 min; `analysis_m100.out`, `summary_m100.csv`)
+Checks:
+- All 20 tasks are complete (60 episodes per m100 task = 6 policies × 10 seeds, 240 per s0 task).
+- Each budget loaded the intended checkpoints (`cond.json` / `task.json`: `checkpoint_step102400/108544/118784.pt`,
+  `checkpoint.pt` for b 24).
+- MDD-PTECT matches the reference on 160 / 160 seed-runs in both cells, and s0 equals `../rq3-gen-v5`'s B2 pdr run.
+- The final policy (b 0, from `../rq3-size-v5`) reproduces the grid's +2.60%.
+
+**Target cell m100** (window tardiness, % vs MDD-PTECT, family of 5, test seeds 0-39; MDD-PTECT mean 456.0 k job-s):
+
+| budget (updates) | family [95% CI] | test seeds better / worse | vs the final policy, paired | vs T100, paired | share of the way to T100 | training seeds |
+|---|---|---|---|---|---|---|
+| 0 (final policy) | +2.60 [+1.24, +3.85] | 16 / 24 | | | | +0.4 to +4.4 |
+| 2 | +2.47 [+1.27, +3.59] | 13 / 27 | −0.13 (p 0.76) | +2.55 (p 2e-5) | +5% [−11, +17] | −0.9 to +4.5 |
+| 5 | +2.59 [+1.41, +3.80] | 15 / 25 | −0.01 (p 0.40) | +2.67 (p 1e-5) | +0% [−14, +10] | +0.6 to +5.2 |
+| 10 | +1.99 [+0.91, +3.16] | 16 / 24 | −0.59 (p 0.16) | +2.07 (p 4e-5) | +23% [+2, +38] | −1.0 to +4.9 |
+| 24 | +1.52 [+0.61, +2.38] | 18 / 22 | **−1.05** [−1.90, −0.33] (p 0.0098) | **+1.60** [+1.21, +1.94] (p 3e-5) | +40% [+19, +56] | −1.2 to +3.9 |
+| T100 (from scratch, 48 updates) | −0.08 [−0.94, +0.76] | 23 / 17 | | | | −0.6 to +0.6 |
+
+- **References on m100:**
+  - MDD-PTECT is the best v5 pair held. The per-instance best static v5 pair is −0.72%, and the v5 switching
+    ceiling is −3.3%.
+  - MDD-TECT is −1.91% (n.s.). "Short fleet → MDD-TECT", outside v5, is −12.2%.
+- **T100 beats the 24-update family on 32 of 40 test seeds.**
+- **Per training seed, the fine-tune moves each by 0.5-1.6 points** (b 0 → b 24): s0 +3.8 → +3.1, s1 +3.4 → +1.9,
+  s2 +1.0 → −0.1, s3 +0.4 → −1.2, s4 +4.4 → +3.9.
+  - The seeds keep their order, so a seed that starts far from T100 stays far.
+  - The 5 seeds still spread 5.1 points at b 24 (T100: 1.2).
+
+**B2 (s0):** the final policy is −1.69% [−2.85, −0.51].
+
+| budget | family [95% CI] | vs the final policy, paired | retention | training seeds |
+|---|---|---|---|---|
+| 2 | −1.80 [−2.91, −0.68] | −0.11 (p 0.74) | 1.06 | −0.6 to −3.5 |
+| 5 | −1.59 [−2.64, −0.58] | +0.11 (p 0.94) | 0.94 | −0.4 to −3.1 |
+| 10 | −1.79 [−3.01, −0.60] | −0.10 (p 0.58) | 1.06 | +0.1 to −3.5 |
+| 24 | −1.54 [−2.57, −0.52] | +0.16 (p 0.84) | 0.91 | −0.3 to −2.4 (all < 0, t-test p 0.02) |
+
+**Criteria (pre-declared):**
+- **A1, adapts: PASS.** At 24 updates the family beats the final policy on m100 by 1.05 points (p 0.0098).
+- **A2, reaches the from-scratch arm: FAIL.** At 24 updates it is still 1.60 points worse than T100 (p 3e-5, above the
+  +1 point margin).
+- **A3, keeps the B2 edge: PASS at every budget** (−0.11 / +0.11 / −0.10 / +0.16, all n.s.).
+- **Read-out:**
+  - No budget reaches 50% of the way to T100. At 24 updates the share is 40% [19, 56], with B2 retention 0.91.
+  - The 24-update family is 4.8 points short of the v5 switching ceiling (−3.3%), and 2.2 points short of the
+    per-instance best static v5 pair.
+
+**Reading:**
+- **On 100 machines the fine-tune adapts, but slowly.** Nothing moves in the first 5 updates. After that the family
+  improves steadily (+2.60 → +1.99 → +1.52 at 10 / 24 updates).
+  - At 24 updates it has covered 40% of the way to T100 in half of T100's 48 updates.
+  - It costs about 10 h per seed (T100: 18.6-20.6 h).
+- **It does not catch up with training from scratch at 24 updates.** The family is still worse than holding
+  MDD-PTECT (+1.52%, CI above 0, Wilcoxon p 0.073). The seeds that start worst stay worst, so the start, not just the
+  budget, limits the result.
+- **B2 is kept cleanly.** Unlike the het arm, no budget dips, and every training seed but one (b 10 s0, +0.1) stays
+  below MDD-PTECT on B2. Training on 100 machines does not erase what the policy does on B2.
+- **Both arms together (§2b):**
+  - Fine-tuning the v5 weights is safe for B2 from 5 updates in both arms.
+  - It recovers part of the gap where the gap lies inside v5 (m100: 40% of the way to T100, A1 PASS).
+  - It recovers little where the room lies in the rule parameters v5 fixes (s1: 18%, A1 FAIL).
+  - Even at m100 the large room is outside v5: the v5 switching ceiling is −3.3%, against −12.2% for "short fleet →
+    MDD-TECT" and −13 to −21% for v5 + MDD-TECT (`../rq3-size-headroom`).
+- **Caveats:**
+  - T100 has no intermediate checkpoints, so there is no from-scratch result at 24 updates. Whether starting from the
+    15-machine policy beats starting from scratch at equal cost is not measured here.
+  - The share's CI is wide (the gap is only 2.7 points).

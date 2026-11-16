@@ -1,0 +1,250 @@
+== rq2-replan-axes: 16030 task outputs under rq2-replan-axes/out; X = 15% (sensitivity 10%, 20%); gain over plan-once
+
+-- C0 units (the `all` arm): PASS
+   all k 0.125 d1 300 s0: real/k 81.378669 vs k=1 81.378671 (rel -1.77e-08), schedule same PASS
+   all k 0.125 d1 300 s1: real/k 22.219748 vs k=1 22.219750 (rel -8.64e-08), schedule same PASS
+   all k 0.125 d1 300 s2: real/k 212.443368 vs k=1 212.443364 (rel +2.07e-08), schedule same PASS
+   all k 0.125 d1 300 s3: real/k 88.406390 vs k=1 88.406371 (rel +2.13e-07), schedule same PASS
+   all k 0.125 d1 300 s4: real/k 15.976762 vs k=1 15.976758 (rel +2.25e-07), schedule same PASS
+   all k 0.125 d1 900 s0: real/k 79.971499 vs k=1 79.971484 (rel +1.81e-07), schedule same PASS
+   all k 0.125 d1 900 s1: real/k 22.361690 vs k=1 22.361694 (rel -1.57e-07), schedule same PASS
+   all k 0.125 d1 900 s2: real/k 210.120269 vs k=1 210.120264 (rel +2.09e-08), schedule same PASS
+   all k 0.125 d1 900 s3: real/k 93.411455 vs k=1 93.411458 (rel -2.91e-08), schedule same PASS
+   all k 0.125 d1 900 s4: real/k 16.001851 vs k=1 16.001848 (rel +2.25e-07), schedule same PASS
+   all k 10 d1 300 s0: real/k 81.233989 vs k=1 81.378671 (rel -1.78e-03), schedule DIFFERS (k not a power of 2: reported only)
+   all k 10 d1 300 s1: real/k 23.529980 vs k=1 22.219750 (rel +5.90e-02), schedule DIFFERS (k not a power of 2: reported only)
+   all k 10 d1 300 s2: real/k 225.482253 vs k=1 212.443364 (rel +6.14e-02), schedule DIFFERS (k not a power of 2: reported only)
+   all k 10 d1 300 s3: real/k 90.326807 vs k=1 88.406371 (rel +2.17e-02), schedule DIFFERS (k not a power of 2: reported only)
+   all k 10 d1 300 s4: real/k 15.849948 vs k=1 15.976758 (rel -7.94e-03), schedule DIFFERS (k not a power of 2: reported only)
+   all k 10 d1 900 s0: real/k 80.897008 vs k=1 79.971484 (rel +1.16e-02), schedule DIFFERS (k not a power of 2: reported only)
+   all k 10 d1 900 s1: real/k 23.966341 vs k=1 22.361694 (rel +7.18e-02), schedule DIFFERS (k not a power of 2: reported only)
+   all k 10 d1 900 s2: real/k 226.680701 vs k=1 210.120264 (rel +7.88e-02), schedule DIFFERS (k not a power of 2: reported only)
+   all k 10 d1 900 s3: real/k 90.210555 vs k=1 93.411458 (rel -3.43e-02), schedule DIFFERS (k not a power of 2: reported only)
+   all k 10 d1 900 s4: real/k 15.949288 vs k=1 16.001848 (rel -3.28e-03), schedule DIFFERS (k not a power of 2: reported only)
+   all k 32 d1 300 s0: real/k 81.378677 vs k=1 81.378671 (rel +6.91e-08), schedule same PASS
+   all k 32 d1 300 s1: real/k 22.219746 vs k=1 22.219750 (rel -1.41e-07), schedule same PASS
+   all k 32 d1 300 s2: real/k 212.443376 vs k=1 212.443364 (rel +5.74e-08), schedule same PASS
+   all k 32 d1 300 s3: real/k 88.406371 vs k=1 88.406371 (rel +2.22e-16), schedule same PASS
+   all k 32 d1 300 s4: real/k 15.976764 vs k=1 15.976758 (rel +3.91e-07), schedule same PASS
+   all k 32 d1 900 s0: real/k 79.971483 vs k=1 79.971484 (rel -1.95e-08), schedule same PASS
+   all k 32 d1 900 s1: real/k 22.361689 vs k=1 22.361694 (rel -1.96e-07), schedule same PASS
+   all k 32 d1 900 s2: real/k 210.120274 vs k=1 210.120264 (rel +4.76e-08), schedule same PASS
+   all k 32 d1 900 s3: real/k 93.411455 vs k=1 93.411458 (rel -3.01e-08), schedule same PASS
+   all k 32 d1 900 s4: real/k 16.001854 vs k=1 16.001848 (rel +4.30e-07), schedule same PASS
+
+-- C1 regression vs rq2-replan: PASS
+   proc k 1 d1 60 s0: 81.296783 vs rq2-replan 81.296783, MDD-PTECT 95.842006 vs 95.842006: PASS
+   proc k 1 d1 60 s1: 22.219750 vs rq2-replan 22.219750, MDD-PTECT 29.594482 vs 29.594482: PASS
+   proc k 1 d1 60 s2: 211.125246 vs rq2-replan 211.125246, MDD-PTECT 246.213539 vs 246.213539: PASS
+   proc k 1 d1 60 s3: 84.506699 vs rq2-replan 84.506699, MDD-PTECT 96.560802 vs 96.560802: PASS
+   proc k 1 d1 60 s4: 15.912888 vs rq2-replan 15.912888, MDD-PTECT 18.953886 vs 18.953886: PASS
+   proc k 1 d1 60 s5: 240.310221 vs rq2-replan 240.310221, MDD-PTECT 275.864514 vs 275.864514: PASS
+   320 tasks compared
+
+-- gain curves per B2-equivalent interval D1: re-planning gain over plan-once [% vs MDD-PTECT]
+   proc k 0.5 (n 40, p̄ 163 s, transport 33 s, AGV busy 0.63; plan-once +2.59% vs MDD-PTECT, best pairs MDD-PECT 14, MDD-PTECT 8, SRT-PECT 7, SRT-PTECT 4, ATC-PECT 4, ATC-PTECT 3):
+      60: +4.90 [+7.36]  120: +4.47 [+6.95]  180: +4.32 [+6.79]  300: +4.06 [+6.54]  450: +3.87 [+6.36]  600: +3.90 [+6.39]  900: +3.39 [+5.89]  1800: +2.73 [+5.25]  3600: +2.45 [+4.98]
+      Δ* 243 s B2-eq = 122 s = 0.75 p̄ [boot 90% 0.44-1.85 p̄]; best D1 60 (+4.90), plateau edge on the grid 180, width 4.1x (left-censored); X 10%: 0.43 p̄, X 20%: 1.23 p̄
+   proc k 1 (n 40, p̄ 326 s, transport 32 s, AGV busy 0.37; plan-once +4.51% vs MDD-PTECT, best pairs MDD-PECT 10, ATC-PTECT 8, ATC-PECT 8, MDD-PTECT 8, SRT-PTECT 4, SRT-PECT 2):
+      60: +7.28 [+11.46]  120: +7.18 [+11.37]  180: +6.82 [+11.03]  300: +7.05 [+11.24]  450: +6.01 [+10.26]  600: +5.41 [+9.68]  900: +5.14 [+9.42]  1800: +3.64 [+7.99]  3600: +3.42 [+7.77]
+      Δ* 420 s B2-eq = 420 s = 1.29 p̄ [boot 90% 0.54-1.59 p̄]; best D1 60 (+7.28), plateau edge on the grid 300, width 7.0x (left-censored); X 10%: 1.12 p̄, X 20%: 1.51 p̄
+   proc k 2 (n 40, p̄ 652 s, transport 32 s, AGV busy 0.20; plan-once +5.94% vs MDD-PTECT, best pairs ATC-PECT 21, MDD-PECT 10, MDD-PTECT 4, ATC-PTECT 4, SRT-PECT 1):
+      60: +7.17 [+12.68]  120: +6.58 [+12.13]  180: +6.23 [+11.80]  300: +6.01 [+11.59]  450: +5.69 [+11.29]  600: +5.25 [+10.87]  900: +4.31 [+9.99]  1800: +2.71 [+8.48]  3600: +1.80 [+7.63]
+      Δ* 248 s B2-eq = 497 s = 0.76 p̄ [boot 90% 0.42-1.42 p̄]; best D1 60 (+7.17), plateau edge on the grid 180, width 4.1x (left-censored); X 10%: 0.43 p̄, X 20%: 1.30 p̄
+   proc k 4 (n 40, p̄ 1303 s, transport 32 s, AGV busy 0.11; plan-once +6.13% vs MDD-PTECT, best pairs ATC-PECT 17, MDD-PECT 11, ATC-PTECT 7, MDD-PTECT 5):
+      60: +7.84 [+13.49]  120: +7.34 [+13.02]  180: +6.83 [+12.54]  300: +7.00 [+12.70]  450: +6.28 [+12.02]  600: +6.11 [+11.87]  900: +5.01 [+10.84]  1800: +3.35 [+9.27]  3600: +2.30 [+8.29]
+      Δ* 363 s B2-eq = 1450 s = 1.11 p̄ [boot 90% 0.42-2.02 p̄]; best D1 60 (+7.84), plateau edge on the grid 300, width 6.0x (left-censored); X 10%: 0.46 p̄, X 20%: 1.40 p̄
+   proc k 16 (n 40, p̄ 5214 s, transport 32 s, AGV busy 0.03; plan-once +5.83% vs MDD-PTECT, best pairs ATC-PECT 28, MDD-PECT 7, MDD-PTECT 3, ATC-PTECT 2):
+      60: +7.56 [+12.95]  120: +8.22 [+13.57]  180: +7.85 [+13.23]  300: +7.05 [+12.47]  450: +6.97 [+12.39]  600: +5.97 [+11.46]  900: +6.12 [+11.60]  1800: +4.22 [+9.81]  3600: +3.09 [+8.74]
+      Δ* 417 s B2-eq = 6678 s = 1.28 p̄ [boot 90% 0.56-1.66 p̄]; best D1 120 (+8.22), plateau edge on the grid 300, width 7.0x (left-censored); X 10%: 0.74 p̄, X 20%: 1.55 p̄
+   reg k 0.25 (n 40, p̄ 335 s, transport 32 s, AGV busy 0.38; plan-once +9.23% vs MDD-PTECT, best pairs ATC-PTECT 15, ATC-PECT 12, MDD-PTECT 7, MDD-PECT 5, SRT-PECT 1):
+      60: +10.01 [+18.31]  120: +10.04 [+18.34]  180: +8.81 [+17.22]  300: +7.70 [+16.21]  450: +6.92 [+15.51]  600: +7.03 [+15.61]  900: +7.12 [+15.69]  1800: +5.79 [+14.48]  3600: +3.63 [+12.52]
+      Δ* 204 s B2-eq = 204 s = 0.61 p̄ [boot 90% 0.46-0.90 p̄]; best D1 120 (+10.04), plateau edge on the grid 180, width 3.4x (left-censored); X 10%: 0.50 p̄, X 20%: 0.77 p̄
+   reg k 0.5 (n 40, p̄ 334 s, transport 32 s, AGV busy 0.36; plan-once +4.56% vs MDD-PTECT, best pairs ATC-PECT 14, ATC-PTECT 9, MDD-PTECT 8, MDD-PECT 7, SRT-PTECT 2):
+      60: +9.77 [+13.89]  120: +9.27 [+13.42]  180: +8.28 [+12.47]  300: +7.55 [+11.77]  450: +7.75 [+11.96]  600: +7.80 [+12.01]  900: +6.55 [+10.82]  1800: +5.91 [+10.20]  3600: +4.78 [+9.13]
+      Δ* 178 s B2-eq = 178 s = 0.53 p̄ [boot 90% 0.42-1.03 p̄]; best D1 60 (+9.77), plateau edge on the grid 120, width 3.0x (left-censored); X 10%: 0.44 p̄, X 20%: 0.74 p̄
+   reg k 1 (n 40, p̄ 326 s, transport 32 s, AGV busy 0.37; plan-once +4.51% vs MDD-PTECT, best pairs MDD-PECT 10, ATC-PTECT 8, ATC-PECT 8, MDD-PTECT 8, SRT-PTECT 4, SRT-PECT 2):
+      60: +7.28 [+11.46]  120: +7.18 [+11.37]  180: +6.82 [+11.03]  300: +7.05 [+11.24]  450: +6.01 [+10.26]  600: +5.41 [+9.68]  900: +5.14 [+9.42]  1800: +3.64 [+7.99]  3600: +3.42 [+7.77]
+      Δ* 420 s B2-eq = 420 s = 1.29 p̄ [boot 90% 0.55-1.59 p̄]; best D1 60 (+7.28), plateau edge on the grid 300, width 7.0x (left-censored); X 10%: 1.12 p̄, X 20%: 1.51 p̄
+   reg k 2 (n 40, p̄ 327 s, transport 33 s, AGV busy 0.36; plan-once +6.68% vs MDD-PTECT, best pairs ATC-PECT 12, ATC-PTECT 9, MDD-PECT 8, MDD-PTECT 6, SRT-PECT 4, SRT-PTECT 1):
+      60: +7.29 [+13.48]  120: +7.17 [+13.38]  180: +7.17 [+13.38]  300: +5.76 [+12.06]  450: +5.10 [+11.45]  600: +5.20 [+11.53]  900: +4.89 [+11.24]  1800: +4.22 [+10.62]  3600: +3.53 [+9.97]
+      Δ* 257 s B2-eq = 257 s = 0.78 p̄ [boot 90% 0.58-0.94 p̄]; best D1 60 (+7.29), plateau edge on the grid 180, width 4.3x (left-censored); X 10%: 0.69 p̄, X 20%: 0.89 p̄
+   reg k 4 (n 40, p̄ 332 s, transport 33 s, AGV busy 0.36; plan-once +4.77% vs MDD-PTECT, best pairs MDD-PTECT 12, ATC-PECT 11, ATC-PTECT 8, SRT-PTECT 4, MDD-PECT 4, SRT-PECT 1):
+      60: +8.38 [+12.76]  120: +7.12 [+11.55]  180: +7.67 [+12.07]  300: +6.97 [+11.41]  450: +7.43 [+11.85]  600: +5.81 [+10.31]  900: +5.31 [+9.83]  1800: +4.98 [+9.52]  3600: +3.20 [+7.82]
+      Δ* 120 s B2-eq = 120 s = 0.36 p̄ [boot 90% 0.28-1.59 p̄]; best D1 60 (+8.38), plateau edge on the grid 60, width 2.0x (left-censored); X 10%: 0.29 p̄, X 20%: 1.54 p̄
+   size m 15 (n 40, p̄ 326 s, transport 32 s, τ / p̄ 0.099, AGV busy on duty - (all bays 0.37), jobs 287; plan-once +4.51% vs MDD-PTECT, best pairs MDD-PECT 10, ATC-PTECT 8, ATC-PECT 8, MDD-PTECT 8, SRT-PTECT 4, SRT-PECT 2):
+      60: +7.28 [+11.46]  120: +7.18 [+11.37]  180: +6.82 [+11.03]  300: +7.05 [+11.24]  450: +6.01 [+10.26]  600: +5.41 [+9.68]  900: +5.14 [+9.42]  1800: +3.64 [+7.99]  3600: +3.42 [+7.77]
+      Δ* 420 s B2-eq = 420 s = 1.29 p̄ [boot 90% 0.55-1.57 p̄]; best D1 60 (+7.28), plateau edge on the grid 300, width 7.0x (left-censored); X 10%: 1.12 p̄, X 20%: 1.51 p̄
+   size m 20 (n 40, p̄ 328 s, transport 35 s, τ / p̄ 0.108, AGV busy on duty 0.44 (all bays 0.19), jobs 363; plan-once +8.06% vs MDD-PTECT, best pairs ATC-PECT 17, ATC-PTECT 12, MDD-PECT 6, MDD-PTECT 4, SRT-PECT 1):
+      60: +7.84 [+15.27]  120: +7.22 [+14.69]  180: +7.18 [+14.66]  300: +6.55 [+14.08]  450: +6.29 [+13.84]  600: +5.46 [+13.08]  900: +6.40 [+13.94]  1800: +5.52 [+13.13]  3600: +5.04 [+12.69]
+      Δ* 273 s B2-eq = 273 s = 0.83 p̄ [boot 90% 0.50-1.44 p̄]; best D1 60 (+7.84), plateau edge on the grid 180, width 4.6x (left-censored); X 10%: 0.61 p̄, X 20%: 1.38 p̄
+   size m 30 (n 40, p̄ 325 s, transport 45 s, τ / p̄ 0.138, AGV busy on duty 0.47 (all bays 0.22), jobs 541; plan-once +9.57% vs MDD-PTECT, best pairs ATC-PTECT 15, ATC-PECT 15, MDD-PECT 5, MDD-PTECT 3, SRT-PTECT 2):
+      60: +5.95 [+14.94]  120: +5.84 [+14.85]  180: +5.76 [+14.78]  300: +5.54 [+14.57]  450: +6.30 [+15.26]  600: +4.99 [+14.08]  900: +5.06 [+14.14]  1800: +4.07 [+13.25]  3600: +2.81 [+12.11]
+      Δ* 554 s B2-eq = 554 s = 1.70 p̄ [boot 90% 0.83-2.83 p̄]; best D1 450 (+6.30), plateau edge on the grid 450, width 9.2x (left-censored); X 10%: 1.59 p̄, X 20%: 1.83 p̄
+   size m 50 (n 40, p̄ 327 s, transport 59 s, τ / p̄ 0.180, AGV busy on duty 0.58 (all bays 0.26), jobs 905; plan-once +4.57% vs MDD-PTECT, best pairs ATC-PTECT 14, ATC-PECT 10, MDD-PTECT 9, MDD-PECT 5, SRT-PECT 2):
+      60: +10.19 [+14.30]  120: +8.56 [+12.74]  180: +8.58 [+12.76]  300: +8.39 [+12.58]  450: +8.04 [+12.24]  600: +6.97 [+11.22]  900: +5.97 [+10.27]  1800: +5.51 [+9.83]  3600: +4.15 [+8.53]
+      Δ* 115 s B2-eq = 115 s = 0.35 p̄ [boot 90% 0.30-1.46 p̄]; best D1 60 (+10.19), plateau edge on the grid 60, width 1.9x (left-censored); X 10%: 0.28 p̄, X 20%: 1.20 p̄
+   size m 100 (n 40, p̄ 328 s, transport 79 s, τ / p̄ 0.242, AGV busy on duty 0.69 (all bays 0.31), jobs 1805; plan-once +0.72% vs MDD-PTECT, best pairs MDD-PTECT 20, ATC-PTECT 11, ATC-PECT 6, SRT-PTECT 2, MDD-PECT 1):
+      60: +4.47 [+5.16]  120: +4.55 [+5.24]  180: +3.93 [+4.62]  300: +3.44 [+4.14]  450: +2.92 [+3.62]  600: +2.98 [+3.68]  900: +2.59 [+3.29]  1800: +1.97 [+2.68]  3600: +1.77 [+2.48]
+      Δ* 192 s B2-eq = 192 s = 0.58 p̄ [boot 90% 0.48-0.75 p̄]; best D1 120 (+4.55), plateau edge on the grid 180, width 3.2x (left-censored); X 10%: 0.49 p̄, X 20%: 0.74 p̄
+   fleet r 0.35 (n 40, p̄ 327 s, transport 63 s, τ / p̄ 0.192, AGV busy on duty 0.79 (all bays 0.25), jobs 905; plan-once +0.96% vs MDD-PTECT, best pairs MDD-PTECT 19, ATC-PTECT 7, ATC-PECT 6, MDD-PECT 5, SRT-PTECT 3):
+      60: +6.56 [+7.46]  120: +5.54 [+6.44]  180: +6.23 [+7.12]  300: +5.65 [+6.56]  450: +4.91 [+5.82]  600: +4.32 [+5.24]  900: +3.85 [+4.77]  1800: +3.38 [+4.31]  3600: +2.10 [+3.04]
+      Δ* 117 s B2-eq = 117 s = 0.36 p̄ [boot 90% 0.29-1.23 p̄]; best D1 60 (+6.56), plateau edge on the grid 60, width 1.9x (left-censored); X 10%: 0.29 p̄, X 20%: 1.14 p̄
+   fleet r 0.52 (n 40, p̄ 327 s, transport 59 s, τ / p̄ 0.180, AGV busy on duty 0.58 (all bays 0.26), jobs 905; plan-once +4.57% vs MDD-PTECT, best pairs ATC-PTECT 14, ATC-PECT 10, MDD-PTECT 9, MDD-PECT 5, SRT-PECT 2):
+      60: +10.19 [+14.30]  120: +8.56 [+12.74]  180: +8.58 [+12.76]  300: +8.39 [+12.58]  450: +8.04 [+12.24]  600: +6.97 [+11.22]  900: +5.97 [+10.27]  1800: +5.51 [+9.83]  3600: +4.15 [+8.53]
+      Δ* 115 s B2-eq = 115 s = 0.35 p̄ [boot 90% 0.30-1.47 p̄]; best D1 60 (+10.19), plateau edge on the grid 60, width 1.9x (left-censored); X 10%: 0.28 p̄, X 20%: 1.20 p̄
+   fleet r 0.8 (n 40, p̄ 327 s, transport 57 s, τ / p̄ 0.173, AGV busy on duty 0.38 (all bays 0.27), jobs 905; plan-once +9.14% vs MDD-PTECT, best pairs ATC-PECT 21, ATC-PTECT 15, MDD-PECT 3, MDD-PTECT 1):
+      60: +7.23 [+15.71]  120: +6.66 [+15.19]  180: +6.60 [+15.14]  300: +6.42 [+14.97]  450: +5.24 [+13.90]  600: +5.10 [+13.78]  900: +5.19 [+13.85]  1800: +3.54 [+12.35]  3600: +3.73 [+12.53]
+      Δ* 329 s B2-eq = 329 s = 1.01 p̄ [boot 90% 0.31-1.38 p̄]; best D1 60 (+7.23), plateau edge on the grid 300, width 5.5x (left-censored); X 10%: 0.71 p̄, X 20%: 1.14 p̄
+   ax2 ℓ 0.7 c 1.5 block 5400 (n 40, p̄ 328 s, transport 32 s, machine busy 0.52, AGV busy on duty 0.36 (all bays 0.29), jobs 209, plan-once tardiness 2592 (1000 job-s, summed); plan-once +4.87% vs MDD-PTECT, best pairs ATC-PECT 14, MDD-PECT 10, MDD-PTECT 7, ATC-PTECT 5, SRT-PECT 3, SRT-PTECT 1):
+      60: +5.61 [+10.21]  120: +4.75 [+9.39]  180: +5.11 [+9.73]  300: +4.89 [+9.52]  450: +4.58 [+9.22]  600: +4.11 [+8.78]  900: +4.81 [+9.45]  1800: +3.93 [+8.62]  3600: +3.55 [+8.25]
+      Δ* 119 s B2-eq = 119 s = 0.36 p̄ [boot 90% 0.27-4.44 p̄]; best D1 60 (+5.61), plateau edge on the grid 60, width 2.0x (left-censored); X 10%: 0.29 p̄, X 20%: 1.45 p̄
+   ax2 ℓ 0.7 c 2.125 block 5400 (n 40, p̄ 328 s, transport 32 s, machine busy 0.52, AGV busy on duty 0.36 (all bays 0.29), jobs 209, plan-once tardiness 905 (1000 job-s, summed); plan-once +8.85% vs MDD-PTECT, best pairs ATC-PECT 14, MDD-PECT 10, ATC-PTECT 9, MDD-PTECT 6, SRT-PTECT 1):
+      60: +11.19 [+19.05]  120: +10.51 [+18.43]  180: +10.51 [+18.43]  300: +9.51 [+17.52]  450: +8.25 [+16.37]  600: +7.27 [+15.47]  900: +5.18 [+13.56]  1800: +5.29 [+13.66]  3600: +4.74 [+13.16]
+      Δ* 300 s B2-eq = 300 s = 0.92 p̄ [boot 90% 0.61-1.18 p̄]; best D1 60 (+11.19), plateau edge on the grid 180, width 5.0x (left-censored); X 10%: 0.69 p̄, X 20%: 1.10 p̄
+   ax2 ℓ 0.7 c 3 block 5400 (n 40, p̄ 328 s, transport 32 s, machine busy 0.52, AGV busy on duty 0.36 (all bays 0.29), jobs 209, plan-once tardiness 179 (1000 job-s, summed); plan-once +20.60% vs MDD-PTECT, best pairs ATC-PECT 12, ATC-PTECT 11, MDD-PECT 11, MDD-PTECT 4, SRT-PECT 1, SRT-PTECT 1):
+      60: +15.67 [+33.04]  120: +16.24 [+33.50]  180: +16.11 [+33.39]  300: +14.06 [+31.76]  450: +13.85 [+31.60]  600: +12.51 [+30.53]  900: +11.72 [+29.91]  1800: +11.23 [+29.52]  3600: +9.32 [+28.00]
+      Δ* 454 s B2-eq = 454 s = 1.39 p̄ [boot 90% 0.72-1.96 p̄]; best D1 120 (+16.24), plateau edge on the grid 450, width 7.6x (left-censored); X 10%: 0.80 p̄, X 20%: 1.65 p̄
+   ax2 ℓ 1 c 1.5 block 5400 (n 40, p̄ 326 s, transport 32 s, machine busy 0.68, AGV busy on duty 0.46 (all bays 0.37), jobs 287, plan-once tardiness 9306 (1000 job-s, summed); plan-once +3.15% vs MDD-PTECT, best pairs MDD-PECT 9, SRT-PECT 8, SRT-PTECT 7, MDD-PTECT 7, ATC-PTECT 6, ATC-PECT 3):
+      60: +5.65 [+8.62]  120: +5.35 [+8.33]  180: +5.17 [+8.16]  300: +4.93 [+7.92]  450: +4.75 [+7.75]  600: +4.28 [+7.30]  900: +4.25 [+7.26]  1800: +2.96 [+6.01]  3600: +2.36 [+5.43]
+      Δ* 400 s B2-eq = 400 s = 1.23 p̄ [boot 90% 0.50-2.25 p̄]; best D1 60 (+5.65), plateau edge on the grid 300, width 6.7x (left-censored); X 10%: 0.66 p̄, X 20%: 1.59 p̄
+   ax2 ℓ 1 c 2.125 block 5400 (n 40, p̄ 326 s, transport 32 s, machine busy 0.68, AGV busy on duty - (all bays 0.37), jobs 287, plan-once tardiness 5558 (1000 job-s, summed); plan-once +4.51% vs MDD-PTECT, best pairs MDD-PECT 10, ATC-PTECT 8, ATC-PECT 8, MDD-PTECT 8, SRT-PTECT 4, SRT-PECT 2):
+      60: +7.28 [+11.46]  120: +7.18 [+11.37]  180: +6.82 [+11.03]  300: +7.05 [+11.24]  450: +6.01 [+10.26]  600: +5.41 [+9.68]  900: +5.14 [+9.42]  1800: +3.64 [+7.99]  3600: +3.42 [+7.77]
+      Δ* 420 s B2-eq = 420 s = 1.29 p̄ [boot 90% 0.74-1.57 p̄]; best D1 60 (+7.28), plateau edge on the grid 300, width 7.0x (left-censored); X 10%: 1.12 p̄, X 20%: 1.51 p̄
+   ax2 ℓ 1 c 3 block 5400 (n 40, p̄ 326 s, transport 32 s, machine busy 0.68, AGV busy on duty 0.46 (all bays 0.37), jobs 287, plan-once tardiness 2524 (1000 job-s, summed); plan-once +9.84% vs MDD-PTECT, best pairs ATC-PTECT 13, ATC-PECT 12, MDD-PECT 7, MDD-PTECT 7, SRT-PECT 1):
+      60: +8.85 [+17.82]  120: +8.57 [+17.56]  180: +7.58 [+16.67]  300: +7.23 [+16.35]  450: +7.77 [+16.84]  600: +5.70 [+14.97]  900: +6.44 [+15.64]  1800: +3.63 [+13.11]  3600: +2.73 [+12.30]
+      Δ* 194 s B2-eq = 194 s = 0.60 p̄ [boot 90% 0.37-1.66 p̄]; best D1 60 (+8.85), plateau edge on the grid 180, width 3.2x (left-censored); X 10%: 0.47 p̄, X 20%: 1.52 p̄
+   ax2 ℓ 1.3 c 1.5 block 5400 (n 40, p̄ 332 s, transport 33 s, machine busy 0.78, AGV busy on duty 0.52 (all bays 0.42), jobs 348, plan-once tardiness 18765 (1000 job-s, summed); plan-once +1.79% vs MDD-PTECT, best pairs SRT-PECT 10, MDD-PECT 9, SRT-PTECT 8, MDD-PTECT 8, ATC-PECT 4, ATC-PTECT 1):
+      60: +3.94 [+5.66]  120: +3.71 [+5.44]  180: +3.18 [+4.92]  300: +3.46 [+5.19]  450: +3.64 [+5.37]  600: +3.13 [+4.86]  900: +2.65 [+4.40]  1800: +2.19 [+3.95]  3600: +1.81 [+3.57]
+      Δ* 159 s B2-eq = 159 s = 0.48 p̄ [boot 90% 0.39-1.95 p̄]; best D1 60 (+3.94), plateau edge on the grid 120, width 2.6x (left-censored); X 10%: 0.41 p̄, X 20%: 1.79 p̄
+   ax2 ℓ 1.3 c 2.125 block 5400 (n 40, p̄ 332 s, transport 32 s, machine busy 0.77, AGV busy on duty 0.52 (all bays 0.42), jobs 348, plan-once tardiness 13420 (1000 job-s, summed); plan-once +2.45% vs MDD-PTECT, best pairs MDD-PECT 10, MDD-PTECT 9, SRT-PTECT 7, ATC-PECT 6, ATC-PTECT 4, SRT-PECT 4):
+      60: +6.83 [+9.12]  120: +6.03 [+8.34]  180: +6.39 [+8.69]  300: +5.50 [+7.82]  450: +4.80 [+7.14]  600: +4.91 [+7.25]  900: +3.83 [+6.19]  1800: +2.38 [+4.77]  3600: +2.12 [+4.52]
+      Δ* 251 s B2-eq = 251 s = 0.76 p̄ [boot 90% 0.30-1.10 p̄]; best D1 60 (+6.83), plateau edge on the grid 180, width 4.2x (left-censored); X 10%: 0.33 p̄, X 20%: 0.92 p̄
+   ax2 ℓ 1.3 c 3 block 5400 (n 40, p̄ 332 s, transport 32 s, machine busy 0.78, AGV busy on duty 0.52 (all bays 0.42), jobs 348, plan-once tardiness 7811 (1000 job-s, summed); plan-once +4.07% vs MDD-PTECT, best pairs ATC-PECT 13, MDD-PECT 10, MDD-PTECT 8, ATC-PTECT 8, SRT-PECT 1):
+      60: +6.47 [+10.28]  120: +6.27 [+10.09]  180: +5.55 [+9.40]  300: +5.29 [+9.14]  450: +4.76 [+8.64]  600: +3.80 [+7.72]  900: +3.86 [+7.77]  1800: +2.84 [+6.80]  3600: +2.07 [+6.06]
+      Δ* 198 s B2-eq = 198 s = 0.60 p̄ [boot 90% 0.34-1.44 p̄]; best D1 60 (+6.47), plateau edge on the grid 180, width 3.3x (left-censored); X 10%: 0.47 p̄, X 20%: 0.98 p̄
+   ax2 ℓ 0.7 c 1.5 block 1350 (n 40, p̄ 330 s, transport 32 s, machine busy 0.52, AGV busy on duty 0.35 (all bays 0.29), jobs 203, plan-once tardiness 1678 (1000 job-s, summed); plan-once +8.69% vs MDD-PTECT, best pairs ATC-PECT 14, ATC-PTECT 7, MDD-PECT 7, SRT-PECT 6, MDD-PTECT 5, SRT-PTECT 1):
+      60: +6.77 [+14.87]  120: +6.60 [+14.72]  180: +6.95 [+15.03]  300: +6.91 [+14.99]  450: +6.32 [+14.46]  600: +5.71 [+13.90]  900: +5.54 [+13.75]  1800: +4.73 [+13.01]  3600: +3.56 [+11.93]
+      Δ* 547 s B2-eq = 547 s = 1.66 p̄ [boot 90% 1.20-2.83 p̄]; best D1 180 (+6.95), plateau edge on the grid 450, width 9.1x (left-censored); X 10%: 1.41 p̄, X 20%: 2.62 p̄
+   ax2 ℓ 0.7 c 2.125 block 1350 (n 40, p̄ 330 s, transport 32 s, machine busy 0.52, AGV busy on duty 0.35 (all bays 0.29), jobs 203, plan-once tardiness 387 (1000 job-s, summed); plan-once +23.98% vs MDD-PTECT, best pairs ATC-PECT 21, MDD-PECT 8, ATC-PTECT 7, MDD-PTECT 3, SRT-PTECT 1):
+      60: +8.62 [+30.53]  120: +8.46 [+30.41]  180: +8.55 [+30.48]  300: +7.79 [+29.90]  450: +6.78 [+29.13]  600: +7.04 [+29.33]  900: +6.34 [+28.80]  1800: +4.57 [+27.45]  3600: +3.16 [+26.38]
+      Δ* 362 s B2-eq = 362 s = 1.10 p̄ [boot 90% 0.71-2.89 p̄]; best D1 60 (+8.62), plateau edge on the grid 300, width 6.0x (left-censored); X 10%: 0.92 p̄, X 20%: 1.30 p̄
+   ax2 ℓ 0.7 c 3 block 1350 (n 40, p̄ 330 s, transport 32 s, machine busy 0.52, AGV busy on duty 0.35 (all bays 0.29), jobs 203, plan-once tardiness 50 (1000 job-s, summed); plan-once +39.90% vs MDD-PTECT, best pairs MDD-PECT 12, ATC-PECT 10, ATC-PTECT 7, MDD-PTECT 6, SRT-PTECT 3, SRT-PECT 2):
+      60: +18.25 [+50.86]  120: +18.15 [+50.81]  180: +18.78 [+51.18]  300: +19.47 [+51.60]  450: +18.37 [+50.94]  600: +17.60 [+50.47]  900: +16.91 [+50.06]  1800: +15.05 [+48.94]  3600: +11.38 [+46.73]
+      Δ* 1030 s B2-eq = 1030 s = 3.12 p̄ [boot 90% 1.17-5.69 p̄]; best D1 300 (+19.47), plateau edge on the grid 900, width 17.2x (left-censored); X 10%: 1.90 p̄, X 20%: 4.49 p̄
+   ax2 ℓ 1 c 1.5 block 1350 (n 40, p̄ 335 s, transport 32 s, machine busy 0.71, AGV busy on duty 0.46 (all bays 0.38), jobs 283, plan-once tardiness 7781 (1000 job-s, summed); plan-once +5.14% vs MDD-PTECT, best pairs ATC-PTECT 15, MDD-PECT 7, ATC-PECT 7, SRT-PECT 6, SRT-PTECT 3, MDD-PTECT 2):
+      60: +5.64 [+10.49]  120: +4.97 [+9.86]  180: +4.90 [+9.80]  300: +4.78 [+9.68]  450: +3.86 [+8.81]  600: +3.79 [+8.74]  900: +3.46 [+8.43]  1800: +2.54 [+7.55]  3600: +2.58 [+7.59]
+      Δ* 282 s B2-eq = 282 s = 0.84 p̄ [boot 90% 0.28-1.11 p̄]; best D1 60 (+5.64), plateau edge on the grid 180, width 4.7x (left-censored); X 10%: 0.32 p̄, X 20%: 1.01 p̄
+   ax2 ℓ 1 c 2.125 block 1350 (n 40, p̄ 335 s, transport 32 s, machine busy 0.71, AGV busy on duty - (all bays 0.38), jobs 283, plan-once tardiness 4029 (1000 job-s, summed); plan-once +9.23% vs MDD-PTECT, best pairs ATC-PTECT 15, ATC-PECT 12, MDD-PTECT 7, MDD-PECT 5, SRT-PECT 1):
+      60: +10.01 [+18.31]  120: +10.04 [+18.34]  180: +8.81 [+17.22]  300: +7.70 [+16.21]  450: +6.92 [+15.51]  600: +7.03 [+15.61]  900: +7.12 [+15.69]  1800: +5.79 [+14.48]  3600: +3.63 [+12.52]
+      Δ* 204 s B2-eq = 204 s = 0.61 p̄ [boot 90% 0.46-0.88 p̄]; best D1 120 (+10.04), plateau edge on the grid 180, width 3.4x (left-censored); X 10%: 0.50 p̄, X 20%: 0.77 p̄
+   ax2 ℓ 1 c 3 block 1350 (n 40, p̄ 335 s, transport 32 s, machine busy 0.71, AGV busy on duty 0.46 (all bays 0.38), jobs 283, plan-once tardiness 1325 (1000 job-s, summed); plan-once +20.26% vs MDD-PTECT, best pairs ATC-PECT 24, ATC-PTECT 13, MDD-PECT 2, MDD-PTECT 1):
+      60: +14.10 [+31.50]  120: +13.18 [+30.77]  180: +12.51 [+30.24]  300: +12.23 [+30.02]  450: +11.75 [+29.63]  600: +12.10 [+29.92]  900: +9.93 [+28.18]  1800: +9.04 [+27.47]  3600: +5.83 [+24.91]
+      Δ* 370 s B2-eq = 370 s = 1.11 p̄ [boot 90% 0.32-2.18 p̄]; best D1 60 (+14.10), plateau edge on the grid 300, width 6.2x (left-censored); X 10%: 0.48 p̄, X 20%: 2.09 p̄
+   ax2 ℓ 1.3 c 1.5 block 1350 (n 40, p̄ 337 s, transport 32 s, machine busy 0.79, AGV busy on duty 0.51 (all bays 0.42), jobs 334, plan-once tardiness 15156 (1000 job-s, summed); plan-once +3.27% vs MDD-PTECT, best pairs SRT-PECT 9, MDD-PECT 9, MDD-PTECT 8, SRT-PTECT 6, ATC-PTECT 6, ATC-PECT 2):
+      60: +4.06 [+7.19]  120: +3.93 [+7.07]  180: +3.90 [+7.04]  300: +3.37 [+6.53]  450: +3.34 [+6.50]  600: +2.77 [+5.95]  900: +2.58 [+5.77]  1800: +2.04 [+5.24]  3600: +1.46 [+4.68]
+      Δ* 278 s B2-eq = 278 s = 0.82 p̄ [boot 90% 0.42-1.41 p̄]; best D1 60 (+4.06), plateau edge on the grid 180, width 4.6x (left-censored); X 10%: 0.68 p̄, X 20%: 1.40 p̄
+   ax2 ℓ 1.3 c 2.125 block 1350 (n 40, p̄ 337 s, transport 32 s, machine busy 0.79, AGV busy on duty 0.51 (all bays 0.42), jobs 334, plan-once tardiness 9806 (1000 job-s, summed); plan-once +4.83% vs MDD-PTECT, best pairs ATC-PECT 11, SRT-PECT 8, ATC-PTECT 7, MDD-PTECT 5, MDD-PECT 5, SRT-PTECT 4):
+      60: +7.44 [+11.92]  120: +7.42 [+11.90]  180: +6.70 [+11.21]  300: +6.38 [+10.90]  450: +5.62 [+10.18]  600: +5.51 [+10.07]  900: +4.82 [+9.42]  1800: +4.06 [+8.70]  3600: +2.75 [+7.45]
+      Δ* 308 s B2-eq = 308 s = 0.91 p̄ [boot 90% 0.48-1.22 p̄]; best D1 60 (+7.44), plateau edge on the grid 300, width 5.1x (left-censored); X 10%: 0.54 p̄, X 20%: 1.12 p̄
+   ax2 ℓ 1.3 c 3 block 1350 (n 40, p̄ 337 s, transport 32 s, machine busy 0.80, AGV busy on duty 0.51 (all bays 0.42), jobs 334, plan-once tardiness 4665 (1000 job-s, summed); plan-once +10.18% vs MDD-PTECT, best pairs ATC-PECT 17, MDD-PECT 12, ATC-PTECT 7, MDD-PTECT 3, SRT-PECT 1):
+      60: +8.38 [+17.70]  120: +8.39 [+17.71]  180: +7.38 [+16.81]  300: +6.90 [+16.38]  450: +6.37 [+15.90]  600: +5.75 [+15.34]  900: +5.74 [+15.33]  1800: +3.29 [+13.13]  3600: +2.94 [+12.82]
+      Δ* 234 s B2-eq = 234 s = 0.70 p̄ [boot 90% 0.47-1.22 p̄]; best D1 120 (+8.39), plateau edge on the grid 180, width 3.9x (left-censored); X 10%: 0.50 p̄, X 20%: 1.03 p̄
+   ax2 ℓ 1 c 2.125 block 5400 nosurge (n 40, p̄ 322 s, transport 33 s, machine busy 0.64, AGV busy on duty 0.47 (all bays 0.34), jobs 267, plan-once tardiness 4667 (1000 job-s, summed); plan-once +4.62% vs MDD-PTECT, best pairs MDD-PTECT 11, MDD-PECT 9, ATC-PTECT 9, ATC-PECT 8, SRT-PECT 2, SRT-PTECT 1):
+      60: +8.14 [+12.39]  120: +7.37 [+11.65]  180: +6.71 [+11.02]  300: +6.78 [+11.09]  450: +5.37 [+9.75]  600: +5.66 [+10.02]  900: +4.39 [+8.81]  1800: +3.73 [+8.18]  3600: +2.55 [+7.06]
+      Δ* 158 s B2-eq = 158 s = 0.49 p̄ [boot 90% 0.30-1.22 p̄]; best D1 60 (+8.14), plateau edge on the grid 120, width 2.6x (left-censored); X 10%: 0.38 p̄, X 20%: 1.01 p̄
+   ax2 ℓ 1 c 2.125 block 5400 noshort (n 40, p̄ 325 s, transport 31 s, machine busy 0.71, AGV busy on duty 0.41 (all bays 0.41), jobs 299, plan-once tardiness 4826 (1000 job-s, summed); plan-once +8.50% vs MDD-PTECT, best pairs ATC-PECT 17, ATC-PTECT 11, MDD-PTECT 7, MDD-PECT 3, SRT-PECT 1, SRT-PTECT 1):
+      60: +6.99 [+14.90]  120: +6.22 [+14.20]  180: +5.91 [+13.91]  300: +4.65 [+12.75]  450: +5.09 [+13.16]  600: +4.84 [+12.93]  900: +3.97 [+12.14]  1800: +2.96 [+11.22]  3600: +1.82 [+10.16]
+      Δ* 172 s B2-eq = 172 s = 0.53 p̄ [boot 90% 0.30-0.69 p̄]; best D1 60 (+6.99), plateau edge on the grid 120, width 2.9x (left-censored); X 10%: 0.35 p̄, X 20%: 0.63 p̄
+   ax2 ℓ 1 c 2.125 block 1350 nosurge (n 40, p̄ 330 s, transport 33 s, machine busy 0.66, AGV busy on duty 0.46 (all bays 0.35), jobs 266, plan-once tardiness 1993 (1000 job-s, summed); plan-once +13.62% vs MDD-PTECT, best pairs ATC-PECT 17, ATC-PTECT 14, MDD-PECT 4, MDD-PTECT 3, SRT-PECT 1, SRT-PTECT 1):
+      60: +13.50 [+25.29]  120: +13.70 [+25.46]  180: +13.22 [+25.04]  300: +12.53 [+24.45]  450: +10.54 [+22.73]  600: +10.96 [+23.09]  900: +9.57 [+21.89]  1800: +8.38 [+20.87]  3600: +5.76 [+18.60]
+      Δ* 359 s B2-eq = 359 s = 1.09 p̄ [boot 90% 0.81-1.26 p̄]; best D1 120 (+13.70), plateau edge on the grid 300, width 6.0x (left-censored); X 10%: 0.95 p̄, X 20%: 1.25 p̄
+   ax2 ℓ 1 c 2.125 block 1350 noshort (n 40, p̄ 332 s, transport 31 s, machine busy 0.72, AGV busy on duty 0.41 (all bays 0.41), jobs 295, plan-once tardiness 3336 (1000 job-s, summed); plan-once +12.13% vs MDD-PTECT, best pairs ATC-PECT 15, ATC-PTECT 15, MDD-PECT 5, SRT-PECT 2, MDD-PTECT 2, SRT-PTECT 1):
+      60: +6.53 [+17.87]  120: +6.23 [+17.61]  180: +6.69 [+18.02]  300: +6.03 [+17.43]  450: +5.65 [+17.09]  600: +5.37 [+16.85]  900: +6.03 [+17.43]  1800: +4.34 [+15.95]  3600: +3.07 [+14.83]
+      Δ* 430 s B2-eq = 430 s = 1.30 p̄ [boot 90% 0.78-3.81 p̄]; best D1 180 (+6.69), plateau edge on the grid 300, width 7.2x (left-censored); X 10%: 0.91 p̄, X 20%: 3.58 p̄
+
+-- readings (README §6): S = shape (slope), R = transfer regret of B2's interval
+   proc S: slope of log2(Δ*/p̄) on log2 k = +0.114 [90% -0.226, +0.285] over k 0.5, 1, 2, 4, 16 (seeds 40, 2000 resamples) -> INDETERMINATE at 40 seeds (rule 5 spent): README §11, decision a
+      best gain still at the finest point run, D1 60 s, at k 0.5, 1, 2, 4: Δ* stays an upper bound there (README §11, decision b)
+      R at k 0.5: B2's plateau edge D1 300 s keeps 83% of the best re-planning gain (+4.06 of +4.90 points)
+      R at k 1: B2's plateau edge D1 300 s keeps 97% of the best re-planning gain (+7.05 of +7.28 points)
+      R at k 2: B2's plateau edge D1 300 s keeps 84% of the best re-planning gain (+6.01 of +7.17 points)
+      R at k 4: B2's plateau edge D1 300 s keeps 89% of the best re-planning gain (+7.00 of +7.84 points)
+      R at k 16: B2's plateau edge D1 300 s keeps 86% of the best re-planning gain (+7.05 of +8.22 points)
+   proc R: FAIL (worst regret 17% of the best gain; PASS = within X = 15% at every non-flat level)
+   reg S: slope of log2(Δ*/p̄) on log2 k = -0.096 [90% -0.255, +0.361] over k 0.25, 0.5, 1, 2, 4 (seeds 40, 2000 resamples) -> INDETERMINATE at 40 seeds (rule 5 spent): README §11, decision a
+      best gain still at the finest point run, D1 60 s, at k 0.5, 1, 2, 4: Δ* stays an upper bound there (README §11, decision b)
+      R at k 0.25: B2's plateau edge D1 300 s keeps 77% of the best re-planning gain (+7.70 of +10.04 points)
+      R at k 0.5: B2's plateau edge D1 300 s keeps 77% of the best re-planning gain (+7.55 of +9.77 points)
+      R at k 1: B2's plateau edge D1 300 s keeps 97% of the best re-planning gain (+7.05 of +7.28 points)
+      R at k 2: B2's plateau edge D1 300 s keeps 79% of the best re-planning gain (+5.76 of +7.29 points)
+      R at k 4: B2's plateau edge D1 300 s keeps 83% of the best re-planning gain (+6.97 of +8.38 points)
+   reg R: FAIL (worst regret 23% of the best gain; PASS = within X = 15% at every non-flat level)
+
+-- axis 6 (README §13): C2 instances = the floor-size grid's: PASS
+   size m 20 s0: MDD-PTECT 62.188611 vs the grid's 62.188612: PASS
+   size m 20 s1: MDD-PTECT 117.256399 vs the grid's 117.256398: PASS
+   size m 20 s2: MDD-PTECT 160.530273 vs the grid's 160.530268: PASS
+   size m 20 s3: MDD-PTECT 155.385780 vs the grid's 155.385772: PASS
+   200 instances compared with the grid, 2160 planner tasks with their fixed-pair task; 0 mismatches
+
+-- axis 6 readings (README §13): S_m = slope on log2 m, R = B2's grid edge, R120 = D1 120 s; T_c / Δ = single-core planning time of one re-plan over the interval
+   size S (all levels): slope of log2(Δ*/p̄) on log2 m = -0.511 [90% -0.701, -0.164] over m 15, 20, 30, 50, 100 (seeds 40, 2000 resamples) -> MOVES Δ* (90% CI excludes 0): log m enters the fit as a primary variable (§13 rule 4)
+      attribution: τ / p̄ 0.099 -> 0.242 (+0.49 octaves per octave of m); axis 1's proc bound lets transport alone move the slope by at most ±0.14: the CI lies beyond it (more than transport alone)
+   size S (grid floors only, m20-m100): slope of log2(Δ*/p̄) on log2 m = -0.487 [90% -0.837, -0.140] over m 20, 30, 50, 100 (seeds 40, 2000 resamples) -> sensitivity: MOVES Δ*
+      best gain at the finest point, D1 60 s, at size m 15, size m 20, size m 50: Δ* an upper bound there (rule 9)
+   size R: B2's plateau edge D1 300 s keeps 96.8% (size m 15), 83.5% (size m 20), 87.9% (size m 30), 82.3% (size m 50), 75.5% (size m 100) of the best gain -> FAIL (>= 85% at every non-flat level)
+   size R120: D1 120 s keeps 98.6% (size m 15), 92.1% (size m 20), 92.7% (size m 30), 83.9% (size m 50), 100.0% (size m 100) of the best gain -> FAIL (>= 85% at every non-flat level)
+      T_c / Δ size m 15: 60: 0.080  120: 0.040  300: 0.016  900: 0.005
+      T_c / Δ size m 20: 60: 0.111  120: 0.056  300: 0.022  900: 0.008
+      T_c / Δ size m 30: 60: 0.185  120: 0.093  300: 0.038  900: 0.013
+      T_c / Δ size m 50: 60: 0.400  120: 0.181  300: 0.076  900: 0.026
+      T_c / Δ size m 100: 60: 1.048  120: 0.512  300: 0.199  900: 0.077
+   fleet S (all levels): slope of log2(Δ*/p̄) on log2 r = +1.270 [90% -0.600, +1.544] over r 0.35, 0.52, 0.8 (seeds 40, 2000 resamples) -> reported, not read (README §13: R decides the fleet arm)
+      best gain at the finest point, D1 60 s, at fleet r 0.35, fleet r 0.52, fleet r 0.8: Δ* an upper bound there (rule 9)
+   fleet R: B2's plateau edge D1 300 s keeps 86.1% (fleet r 0.35), 82.3% (fleet r 0.52), 88.7% (fleet r 0.8) of the best gain -> FAIL (>= 85% at every non-flat level) -> §13 rule 6: on-duty AGV utilization enters the fit as a covariate
+   fleet R120: D1 120 s keeps 84.4% (fleet r 0.35), 83.9% (fleet r 0.52), 92.2% (fleet r 0.8) of the best gain -> FAIL (>= 85% at every non-flat level)
+      T_c / Δ fleet r 0.35: 60: 0.394  120: 0.201  300: 0.076  900: 0.026
+      T_c / Δ fleet r 0.52: 60: 0.400  120: 0.181  300: 0.076  900: 0.026
+      T_c / Δ fleet r 0.8: 60: 0.378  120: 0.192  300: 0.075  900: 0.026
+
+-- axis 2 (README §15): C3 instances: PASS
+   7200 planner tasks compared with their fixed-pair task, 0 mismatches; 240 (ℓ, block, mix, seed) groups with two or more c levels, 0 with different job sets; 200 tasks compared with the local dry run, 0 differ
+
+-- axis 2 readings (README §15): R_ℓ / R_c / R_mix = the centre cell's own grid edge along each line through the centre, per block length; R = B2's grid edge, R120 = D1 120 s (reported); slopes reported
+   block 5400 R_ℓ: the centre's grid edge D1 300 s keeps 85.0% (ax2 ℓ 0.7 c 2.125 block 5400), 80.4% (ax2 ℓ 1.3 c 2.125 block 5400) -> FAIL (>= 85% at every non-flat cell)
+   block 5400 R_c: the centre's grid edge D1 300 s keeps 87.2% (ax2 ℓ 1 c 1.5 block 5400), 81.6% (ax2 ℓ 1 c 3 block 5400) -> FAIL (>= 85% at every non-flat cell)
+   block 5400 R_mix: the centre's grid edge D1 300 s keeps 83.3% (ax2 ℓ 1 c 2.125 block 5400 nosurge), 66.4% (ax2 ℓ 1 c 2.125 block 5400 noshort) -> FAIL (>= 85% at every non-flat cell)
+   block 1350 R_ℓ: the centre's grid edge D1 180 s keeps 99.2% (ax2 ℓ 0.7 c 2.125 block 1350), 90.1% (ax2 ℓ 1.3 c 2.125 block 1350) -> PASS (>= 85% at every non-flat cell)
+   block 1350 R_c: the centre's grid edge D1 180 s keeps 87.0% (ax2 ℓ 1 c 1.5 block 1350), 88.8% (ax2 ℓ 1 c 3 block 1350) -> PASS (>= 85% at every non-flat cell)
+   block 1350 R_mix: the centre's grid edge D1 180 s keeps 96.5% (ax2 ℓ 1 c 2.125 block 1350 nosurge), 100.0% (ax2 ℓ 1 c 2.125 block 1350 noshort) -> PASS (>= 85% at every non-flat cell)
+   R_ℓ: FAIL at one block length -> covariate in §8's fit: u (the measured machine busy share) (§15 rules 2-4)
+   R_c: FAIL at one block length -> covariate in §8's fit: the mean c (§15 rules 2-4)
+   R_mix: FAIL at one block length -> covariate in §8's fit: the surge and short-fleet time shares (§15 rules 2-4)
+   R (B2's grid edge D1 300 s, reported): l0.7-c1.5-b5400 87.1%, l0.7-c2.125-b5400 85.0%, l0.7-c3-b5400 86.5%, l1-c1.5-b5400 87.2%, l1-c2.125-b5400 96.8%, l1-c3-b5400 81.6%, l1.3-c1.5-b5400 87.9%, l1.3-c2.125-b5400 80.4%, l1.3-c3-b5400 81.7%, l0.7-c1.5-b1350 99.4%, l0.7-c2.125-b1350 90.4%, l0.7-c3-b1350 100.0%, l1-c1.5-b1350 84.7%, l1-c2.125-b1350 76.7%, l1-c3-b1350 86.8%, l1.3-c1.5-b1350 83.0%, l1.3-c2.125-b1350 85.6%, l1.3-c3-b1350 82.2%, l1-c2.125-b5400-nosurge 83.3%, l1-c2.125-b5400-noshort 66.4%, l1-c2.125-b1350-nosurge 91.5%, l1-c2.125-b1350-noshort 90.1% -> FAIL
+   R120 (D1 120 s, reported): l0.7-c1.5-b5400 84.7%, l0.7-c2.125-b5400 93.9%, l0.7-c3-b5400 100.0%, l1-c1.5-b5400 94.6%, l1-c2.125-b5400 98.6%, l1-c3-b5400 96.8%, l1.3-c1.5-b5400 94.3%, l1.3-c2.125-b5400 88.2%, l1.3-c3-b5400 96.9%, l0.7-c1.5-b1350 95.0%, l0.7-c2.125-b1350 98.2%, l0.7-c3-b1350 93.2%, l1-c1.5-b1350 88.2%, l1-c2.125-b1350 100.0%, l1-c3-b1350 93.5%, l1.3-c1.5-b1350 96.9%, l1.3-c2.125-b1350 99.7%, l1.3-c3-b1350 100.0%, l1-c2.125-b5400-nosurge 90.5%, l1-c2.125-b5400-noshort 89.0%, l1-c2.125-b1350-nosurge 100.0%, l1-c2.125-b1350-noshort 93.1% -> FAIL
+      best gain at the finest point run (D1 60 s on the full grid) at 15 of 22 cells (l0.7-c1.5-b5400, l0.7-c2.125-b5400, l1-c1.5-b5400, l1-c2.125-b5400, l1-c3-b5400, l1.3-c1.5-b5400, l1.3-c2.125-b5400, l1.3-c3-b5400, l0.7-c2.125-b1350, l1-c1.5-b1350, l1-c3-b1350, l1.3-c1.5-b1350, l1.3-c2.125-b1350, l1-c2.125-b5400-nosurge, l1-c2.125-b5400-noshort): Δ* an upper bound there (rule 9)
+   block 5400 slopes (reported, not read): log2(Δ*/p̄) on log2 u -0.431 [90% -2.714, +1.208] and on log2 c +0.408 [-1.436, +1.049] over 9 cells (u = machine busy share 0.52-0.78; seeds 40, 2000 resamples; upper-bound cells at their bound)
+   block 1350 slopes (reported, not read): log2(Δ*/p̄) on log2 u -1.965 [90% -3.164, -0.901] and on log2 c +0.356 [-0.547, +1.301] over 9 cells (u = machine busy share 0.52-0.80; seeds 40, 2000 resamples; upper-bound cells at their bound)
+      T_c / Δ l0.7-c1.5-b5400: 60: 0.046  120: 0.023  300: 0.012  900: 0.004
+      T_c / Δ l0.7-c2.125-b5400: 60: 0.048  120: 0.026  300: 0.012  900: 0.004
+      T_c / Δ l0.7-c3-b5400: 60: 0.046  120: 0.025  300: 0.012  900: 0.004
+      T_c / Δ l1-c1.5-b5400: 60: 0.070  120: 0.037  300: 0.014  900: 0.005
+      T_c / Δ l1-c2.125-b5400: 60: 0.080  120: 0.040  300: 0.016  900: 0.005
+      T_c / Δ l1-c3-b5400: 60: 0.074  120: 0.034  300: 0.014  900: 0.005
+      T_c / Δ l1.3-c1.5-b5400: 60: 0.091  120: 0.041  300: 0.016  900: 0.007
+      T_c / Δ l1.3-c2.125-b5400: 60: 0.080  120: 0.037  300: 0.016  900: 0.006
+      T_c / Δ l1.3-c3-b5400: 60: 0.059  120: 0.038  300: 0.015  900: 0.006
+      T_c / Δ l0.7-c1.5-b1350: 60: 0.048  120: 0.025  300: 0.011  900: 0.004
+      T_c / Δ l0.7-c2.125-b1350: 60: 0.044  120: 0.025  300: 0.012  900: 0.004
+      T_c / Δ l0.7-c3-b1350: 60: 0.053  120: 0.025  300: 0.011  900: 0.004
+      T_c / Δ l1-c1.5-b1350: 60: 0.076  120: 0.033  300: 0.014  900: 0.005
+      T_c / Δ l1-c2.125-b1350: 60: 0.080  120: 0.040  300: 0.016  900: 0.005
+      T_c / Δ l1-c3-b1350: 60: 0.069  120: 0.035  300: 0.013  900: 0.005
+      T_c / Δ l1.3-c1.5-b1350: 60: 0.072  120: 0.038  300: 0.016  900: 0.006
+      T_c / Δ l1.3-c2.125-b1350: 60: 0.077  120: 0.036  300: 0.016  900: 0.006
+      T_c / Δ l1.3-c3-b1350: 60: 0.063  120: 0.046  300: 0.014  900: 0.006
+      T_c / Δ l1-c2.125-b5400-nosurge: 60: 0.066  120: 0.033  300: 0.012  900: 0.005
+      T_c / Δ l1-c2.125-b5400-noshort: 60: 0.057  120: 0.032  300: 0.014  900: 0.006
+      T_c / Δ l1-c2.125-b1350-nosurge: 60: 0.058  120: 0.031  300: 0.013  900: 0.005
+      T_c / Δ l1-c2.125-b1350-noshort: 60: 0.072  120: 0.033  300: 0.015  900: 0.006

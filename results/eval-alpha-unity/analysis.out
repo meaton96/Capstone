@@ -1,0 +1,72 @@
+== eval-alpha-unity: the static law + gate (train-alpha-off-het, v7) and the law alone in Unity (Python rule mode), next to the twin; seeds 0-39
+   window tardiness, % vs MDD-PTECT in the same simulator, pooled over instances [95% CI] better/worse Wilcoxon p; family = per-instance mean of s0-s4
+
+-- 0. checks
+   K1 b2: Python MDD-PTECT@3 equals C# MDD-PTECT on 40 / 40 seeds (tardiness, jobs exited, decisions, makespan, instance hash)
+   K2 b2: C# MDD-PTECT equals eval-v5-cmix-unity's base rows (player 5e6e0f87) on 40 / 40 seeds (tardiness and instance hash)
+   K3 m100_r052: gated checkpoint slots off MDD-PTECT on the pair heads: 0 of 4800
+   K4 every measured decision picked in Python (picks >= decisions; the extra picks are Unity's discarded startup episode): 264 / 264 policy and Python-rule tasks
+   K5 deadlock / time-out / tick error rows: 0
+   b2: law alpha 3.0; Unity episodes done 280
+   m100_r052: law alpha 1.431; Unity episodes done 280
+   K1 PASS, K2 PASS, K3 PASS, K4 PASS, K5 PASS
+
+-- 1. per cell, % vs MDD-PTECT
+   b2 Unity (MDD-PTECT mean 147.4 k job-s, n 40)
+     ck0                                                        +0.04 [ -2.07,  +2.19] 19/21 p=0.84
+     ck1                                                        +0.71 [ -0.98,  +2.51] 20/20 p=0.51
+     ck2                                                        -1.06 [ -3.53,  +1.26] 25/15 p=0.12
+     ck3                                                        +0.10 [ -2.71,  +2.59] 26/14 p=0.53
+     ck4                                                        -0.61 [ -3.40,  +2.01] 29/11 p=0.12
+     family s0-s4 (the static law + gate)                       -0.16 [ -2.08,  +1.57] 22/18 p=0.56
+     MDD-PTECT@3 (Python; = MDD-PTECT)                          +0.00 [ +0.00,  +0.00]  0/0  p=1
+   b2 twin (MDD-PTECT mean 145.5 k job-s, n 40)
+     ck0                                                        -0.68 [ -2.68,  +1.51] 22/18 p=0.4
+     ck1                                                        +1.20 [ -0.79,  +3.35] 14/26 p=0.17
+     ck2                                                        -2.12 [ -4.62,  -0.00] 27/13 p=0.051
+     ck3                                                        -0.70 [ -3.52,  +1.68] 26/14 p=0.14
+     ck4                                                        -2.73 [ -5.89,  +0.02] 28/12 p=0.016
+     family s0-s4 (the static law + gate)                       -1.01 [ -3.07,  +0.62] 25/15 p=0.12
+     MDD-PTECT@x1 (= alpha 3)                                   +0.00 [ +0.00,  +0.00]  0/0  p=1
+     MDD-PTECT Unity vs twin (the Unity premium)                +1.26 [ -0.99,  +3.18] 16/24 p=0.2
+     family: Unity % minus twin %                             +0.84 pp [-0.83, +2.67] n 40
+   m100_r052 Unity (MDD-PTECT mean 685.9 k job-s, n 40)
+     ck0                                                        -3.66 [ -6.68,  -1.05] 30/10 p=0.0028
+     ck1                                                        -2.98 [ -5.70,  -0.73] 33/7  p=0.00064
+     ck2                                                        -5.31 [ -7.88,  -3.17] 32/8  p=2.1e-05
+     ck3                                                        -6.54 [ -9.83,  -3.56] 31/9  p=7.2e-05
+     ck4                                                        -5.57 [ -8.48,  -2.81] 34/6  p=7.7e-05
+     family s0-s4 (the static law + gate)                       -4.81 [ -7.49,  -2.33] 31/9  p=0.00026
+     the law alone, MDD-PTECT@1.431                             -4.20 [ -6.54,  -2.13] 34/6  p=7.5e-06
+   m100_r052 twin (MDD-PTECT mean 456.0 k job-s, n 40)
+     ck0                                                        -3.59 [ -5.95,  -1.08] 29/11 p=0.011
+     ck1                                                        -2.65 [ -4.64,  -1.06] 30/10 p=0.0029
+     ck2                                                        -4.50 [ -7.12,  -1.83] 29/11 p=0.0042
+     ck3                                                        -5.55 [ -9.10,  -2.20] 27/13 p=0.009
+     ck4                                                        -4.98 [ -7.47,  -2.42] 29/11 p=0.0049
+     family s0-s4 (the static law + gate)                       -4.25 [ -6.74,  -1.90] 28/12 p=0.0056
+     the law alone, MDD-PTECT@1.431                             -2.90 [ -4.14,  -1.88] 34/6  p=8.8e-06
+     MDD-PTECT Unity vs twin (the Unity premium)               +50.42 [+39.90, +64.14]  0/40 p=1.8e-12
+     family: Unity % minus twin %                             -0.56 pp [-3.05, +1.35] n 40
+     law alone: Unity % minus twin %                          -1.29 pp [-3.60, +0.69] n 40
+   b2 Unity, reported: the final policy (train-v5-cmix s3, eval-v5-cmix-unity base rows)
+     final policy cmix s3 vs MDD-PTECT                          +0.50 [ -2.56,  +3.53] 24/16 p=0.65
+     family vs the final policy                                 -0.66 [ -2.78,  +1.39] 21/19 p=0.81
+
+-- 2. pre-declared criteria (Unity, family of 5, paired over test seeds)
+     U1 b2 family vs MDD-PTECT (not significantly worse)        -0.16 [ -2.08,  +1.63] 22/18 p=0.56
+     U2 m100 family vs MDD-PTECT (significantly better)         -4.81 [ -7.55,  -2.38] 31/9  p=0.00026
+     U3 m100 the law alone vs MDD-PTECT (significantly better)   -4.20 [ -6.58,  -2.19] 34/6  p=7.5e-06
+     U4 m100 family keeps at least half its twin gain: Unity -4.81% vs half of twin -2.13%
+   U1 PASS, U2 PASS, U3 PASS, U4 PASS
+   N -> the static law + gate and the law alone hold in Unity on B2 and at 100 machines: paper B states both as Unity results; no further Unity work for paper B
+
+-- 3. what the checkpoints play, by fleet state: offset shares x1 / x0.5 / x0.25 / x1.5 / x2, mean played alpha (law alpha x offset, capped at 4)
+   b2         Unity full    3612 slots  0.16 / 0.58 / 0.05 / 0.11 / 0.09 | played 2.20
+   b2         Unity short   1188 slots  0.12 / 0.67 / 0.11 / 0.02 / 0.09 | played 1.87
+   b2         twin  full    3618 slots  0.16 / 0.59 / 0.05 / 0.11 / 0.09 | played 2.20
+   b2         twin  short   1182 slots  0.11 / 0.66 / 0.12 / 0.03 / 0.08 | played 1.86
+   m100_r052  Unity full    3570 slots  0.15 / 0.66 / 0.13 / 0.02 / 0.04 | played 0.88
+   m100_r052  Unity short   1230 slots  0.10 / 0.67 / 0.17 / 0.00 / 0.06 | played 0.85
+   m100_r052  twin  full    3570 slots  0.16 / 0.66 / 0.13 / 0.02 / 0.03 | played 0.87
+   m100_r052  twin  short   1230 slots  0.12 / 0.68 / 0.16 / 0.00 / 0.04 | played 0.83

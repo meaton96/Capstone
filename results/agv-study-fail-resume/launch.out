@@ -1,0 +1,36 @@
+[Queue] exe /home/ubuntupc/Documents/Github/Capstone/linux_server/capstone.x86_64 -> results /home/ubuntupc/Documents/Github/Capstone/linux_server/Results
+[Queue] agv-study-fail-resume-rel: shard 0/1 = 15 of 15 cells, 0 already done, 15 to run, 6 workers
+[Queue] 1/15 ok   30.3 min  agv-study-fail-resume-rel/agv5_b2tf_s0/D/agv15_MDD_PTECT_s0  (eta 7.1 h)
+[Queue] 2/15 ok   30.7 min  agv-study-fail-resume-rel/agv5_b2tf_s0/D/agv20_MDD_PTECT_s0  (eta 3.3 h)
+[Queue] 3/15 ok   41.4 min  agv-study-fail-resume-rel/agv5_b2tf_s2/D/agv15_MDD_PTECT_s2  (eta 2.8 h)
+[Queue] 4/15 ok   42.3 min  agv-study-fail-resume-rel/agv5_b2tf_s2/D/agv20_MDD_PTECT_s2  (eta 1.9 h)
+[Queue] 5/15 ok   43.5 min  agv-study-fail-resume-rel/agv5_b2tf_s1/D/agv15_MDD_PTECT_s1  (eta 1.5 h)
+[Queue] 6/15 ok   44.4 min  agv-study-fail-resume-rel/agv5_b2tf_s1/D/agv20_MDD_PTECT_s1  (eta 1.1 h)
+[Queue] 7/15 ok   29.5 min  agv-study-fail-resume-rel/agv5_b2tf_s0/D/agv10_MDD_PTECT_s0  (eta 1.1 h)
+[Queue] 8/15 ok   29.5 min  agv-study-fail-resume-rel/agv5_b2tf_s0/D/agv7_MDD_PTECT_s0  (eta 1.1 h)
+[Queue] 9/15 ok   43.2 min  agv-study-fail-resume-rel/agv5_b2tf_s1/D/agv10_MDD_PTECT_s1  (eta 0.8 h)
+[Queue] 10/15 ok   41.2 min  agv-study-fail-resume-rel/agv5_b2tf_s2/D/agv10_MDD_PTECT_s2  (eta 0.7 h)
+[Queue] 11/15 ok   31.3 min  agv-study-fail-resume-rel/agv5_b2tf_s0/D/agv5_MDD_PTECT_s0  (eta 0.6 h)
+[Queue] 12/15 ok   55.9 min  agv-study-fail-resume-rel/agv5_b2tf_s1/D/agv7_MDD_PTECT_s1  (eta 0.4 h)
+[Queue] 13/15 ok   41.3 min  agv-study-fail-resume-rel/agv5_b2tf_s2/D/agv7_MDD_PTECT_s2  (eta 0.3 h)
+[Queue] 14/15 ok   93.0 min  agv-study-fail-resume-rel/agv5_b2tf_s1/D/agv5_MDD_PTECT_s1  (eta 0.2 h)
+[Queue] 15/15 ok   64.4 min  agv-study-fail-resume-rel/agv5_b2tf_s2/D/agv5_MDD_PTECT_s2  (eta 0.0 h)
+[Queue] finished agv-study-fail-resume-rel in 2.30 h
+[Queue] exe /home/ubuntupc/Documents/Github/Capstone/linux_server/capstone.x86_64 -> results /home/ubuntupc/Documents/Github/Capstone/linux_server/Results
+[Queue] agv-study-fail-resume-hold: shard 0/1 = 15 of 15 cells, 0 already done, 15 to run, 6 workers
+[Queue] 1/15 ok   82.3 min  agv-study-fail-resume-hold/agv5_b2tf_s1/D/agv15_MDD_PTECT_s1  (eta 19.2 h)
+[Queue] 2/15 ok   86.9 min  agv-study-fail-resume-hold/agv5_b2tf_s2/D/agv15_MDD_PTECT_s2  (eta 9.4 h)
+[Queue] 3/15 ok   29.2 min  agv-study-fail-resume-hold/agv5_b2tf_s0/D/agv10_MDD_PTECT_s0  (eta 7.7 h)
+[Queue] 4/15 ok   47.8 min  agv-study-fail-resume-hold/agv5_b2tf_s1/D/agv10_MDD_PTECT_s1  (eta 6.0 h)
+[Queue] 5/15 ok   46.0 min  agv-study-fail-resume-hold/agv5_b2tf_s2/D/agv10_MDD_PTECT_s2  (eta 5.4 h)
+[Queue] 6/15 ok   61.0 min  agv-study-fail-resume-hold/agv5_b2tf_s1/D/agv7_MDD_PTECT_s1  (eta 4.8 h)
+[Queue] 7/15 ok   29.8 min  agv-study-fail-resume-hold/agv5_b2tf_s0/D/agv7_MDD_PTECT_s0  (eta 3.7 h)
+[Queue] 8/15 ok   31.5 min  agv-study-fail-resume-hold/agv5_b2tf_s0/D/agv5_MDD_PTECT_s0  (eta 3.3 h)
+[Queue] 9/15 ok   44.9 min  agv-study-fail-resume-hold/agv5_b2tf_s2/D/agv7_MDD_PTECT_s2  (eta 3.0 h)
+[Queue] 10/15 ok  100.8 min  agv-study-fail-resume-hold/agv5_b2tf_s1/D/agv5_MDD_PTECT_s1  (eta 2.4 h)
+[Queue] 11/15 ok  334.6 min  agv-study-fail-resume-hold/agv5_b2tf_s0/D/agv15_MDD_PTECT_s0  (eta 2.0 h)
+[Queue] 12/15 ok   69.4 min  agv-study-fail-resume-hold/agv5_b2tf_s2/D/agv5_MDD_PTECT_s2  (eta 1.4 h)
+[Queue] 13/15 ok  390.5 min  agv-study-fail-resume-hold/agv5_b2tf_s0/D/agv20_MDD_PTECT_s0  (eta 1.0 h)
+[Queue] 14/15 ok  1081.2 min  agv-study-fail-resume-hold/agv5_b2tf_s2/D/agv20_MDD_PTECT_s2  (eta 1.3 h)
+[Queue] 15/15 FAIL 1200.0 min  agv-study-fail-resume-hold/agv5_b2tf_s1/D/agv20_MDD_PTECT_s1  (eta 0.0 h)
+[Queue] finished agv-study-fail-resume-hold in 20.00 h

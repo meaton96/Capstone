@@ -1,0 +1,33 @@
+floor,row,n,pct,lo,hi,better,worse,p
+m50,MDD-PTECT@1.5 (offset x0.5),40,0.1553,-3.171,2.6567,21,19,0.468
+m50,MDD-PTECT@0.75 (offset x0.25),40,5.1071,1.1259,8.6094,16,24,0.1316
+m50,best fixed reachable alpha (hindsight): MDD-PTECT,40,0.0,0.0,0.0,0,0,1.0
+m50,per-instance best of alpha 3 / 1.5 / 0.75 (hindsight),40,-3.7667,-6.641,-2.0298,25,0,0.0
+m50,"MDD-TECT (alpha 0, outside the head's reach)",40,29.9122,21.5504,38.1842,11,29,0.0
+m50,best v5 pair (in sample): MDD-PTECT,40,0.0,0.0,0.0,0,0,1.0
+m50,per-instance best v5 pair (hindsight),40,-4.5719,-7.0022,-2.764,31,0,0.0
+m50,"final policy T15 (train-v5-cmix), mean of 5",40,-1.2923,-2.6171,0.0542,26,14,0.0584
+m50,"T100 (train-size-m100), mean of 5",40,-3.702,-5.8958,-2.2336,32,8,0.0
+m50,"train-alpha-off-b2, mean of 5",40,-2.304,-3.4834,-1.3018,28,12,0.0005
+m50,"train-alpha-off-het, mean of 5",40,-0.8963,-3.2048,0.72,27,13,0.0498
+m100,MDD-PTECT@1.5 (offset x0.5),40,-2.6461,-4.0371,-1.4798,31,9,0.0002
+m100,MDD-PTECT@0.75 (offset x0.25),40,-4.2834,-6.959,-1.6821,29,11,0.0061
+m100,best fixed reachable alpha (hindsight): MDD-PTECT@0.75,40,-4.2834,-7.0511,-1.6785,29,11,0.0061
+m100,per-instance best of alpha 3 / 1.5 / 0.75 (hindsight),40,-5.5273,-7.9764,-3.3688,35,0,0.0
+m100,"MDD-TECT (alpha 0, outside the head's reach)",40,-1.9068,-7.2382,4.2652,23,17,0.7852
+m100,best v5 pair (in sample): MDD-PTECT,40,0.0,0.0,0.0,0,0,1.0
+m100,per-instance best v5 pair (hindsight),40,-0.7234,-1.3184,-0.3579,20,0,0.0001
+m100,"final policy T15 (train-v5-cmix), mean of 5",40,2.5971,1.3313,3.9066,16,24,0.0061
+m100,"T100 (train-size-m100), mean of 5",40,-0.0773,-0.9251,0.7793,23,17,0.816
+m100,"train-alpha-off-b2, mean of 5",40,0.664,-0.4752,2.074,22,18,0.6753
+m100,"train-alpha-off-het, mean of 5",40,-1.0709,-2.1869,0.0268,28,12,0.0918
+m200,MDD-PTECT@1.5 (offset x0.5),40,-6.0097,-6.8687,-5.2762,38,2,0.0
+m200,MDD-PTECT@0.75 (offset x0.25),40,-10.878,-11.9284,-9.9719,38,2,0.0
+m200,best fixed reachable alpha (hindsight): MDD-PTECT@0.75,40,-10.878,-11.9743,-10.01,38,2,0.0
+m200,per-instance best of alpha 3 / 1.5 / 0.75 (hindsight),40,-10.9354,-12.014,-10.0542,38,0,0.0
+m200,"MDD-TECT (alpha 0, outside the head's reach)",40,-19.0324,-20.9858,-16.9864,36,4,0.0
+m200,best v5 pair (in sample): MDD-PTECT,40,0.0,0.0,0.0,0,0,1.0
+m200,per-instance best v5 pair (hindsight),40,-0.1727,-0.3272,-0.0611,10,0,0.0051
+m200,"final policy T15 (train-v5-cmix), mean of 5",40,9.5353,8.7836,10.4316,0,40,0.0
+m200,"train-alpha-off-b2, mean of 5",40,3.9904,3.1305,5.141,0,40,0.0
+m200,"train-alpha-off-het, mean of 5",40,-0.2745,-1.0774,0.3611,25,15,0.2371

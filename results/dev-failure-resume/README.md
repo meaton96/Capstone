@@ -59,7 +59,7 @@ Code:
 ## Unity parity: PASS (`cells.sh`, `analyze.sh` → `analysis.out`, `parity_exact.csv`; lab `dev-failure-resume`)
 
 On dev-csharp-failures' scenarios (layout D, release, lane parking, injected `failureSchedule`), 38 runs in `runs/`
-(`build.sh` and `cells.sh` still point at the worktree, where they ran):
+(`build.sh` ran from the failure-resume worktree, removed 11-01; its code is commit 09f53cbb on main):
 - **24/24 resume cells exact** (1 AGV, 8 schedules x SPT_ECT / MDD_TECT / PTWINQ_SRWT): the twin matches Unity event
   for event (`failparity.py`: every event, decision and failure row, 37-85 failures per run; summary metrics within
   float noise, |tardiness| ≤ 0.03%).

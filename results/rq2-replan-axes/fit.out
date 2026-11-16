@@ -1,0 +1,46 @@
+§8's fit on axes 1, 2 and 6 (README §17), lab rq2-replan-axes-fit: 35 conditions, 25 upper bounds (rule 9), 0 right-censored; X 15%, margin target 90%, pass line 30 of 35; bootstrap 2000 resamples (M0-M2), 200 (variants), stream 1709; fit.py md5 75feba5c
+   fits at the point estimate: 468, not converged 0, σ at its floor 0, a coefficient at its bound 0; in the bootstrap: 288000, 0, 3, 62
+
+(1) coefficients of log2(Δ* / p̄) (per octave of a ratio, per unit of a share; full fit on all conditions), 90% bootstrap intervals; σ = residual scatter (octaves); h = the margin of the rule
+   M0                 σ 1.49 [1.02, 1.84], h 0.00: intercept -1.47 [-1.78, -0.77]
+   M1                 σ 1.48 [0.99, 1.80], h 0.00: intercept -1.43 [-1.70, -0.70]; log2(m/15) -0.09 [-1.12, +0.35]
+   M2                 σ 0.72 [0.71, 1.35], h 0.00: intercept +7.15 [-10.18, +6.73]; log2(m/15) +0.90 [-0.92, +0.83]; log2 τ/p̄ -0.09 [-0.77, +0.40]; log2 T_reg/p̄ -0.83 [-1.09, +0.04]; log2 c +1.62 [-0.72, +2.19]; AGV on duty -5.50 [-6.05, +3.16]; u -5.51 [-9.94, +0.87]; surge share -4.07 [-5.07, +22.69]; short share -4.64 [-6.10, +34.99]
+   M1 + tau_p         σ 1.44 [0.98, 1.80], h 0.00: intercept -2.80 [-3.17, -0.83]; log2(m/15) +0.15 [-12.43, +0.48]; log2 τ/p̄ -0.39 [-0.47, -0.00]
+   M1 + treg_p        σ 1.28 [0.94, 1.76], h 0.00: intercept +1.06 [-1.00, +1.14]; log2(m/15) +0.23 [-12.55, +0.54]; log2 T_reg/p̄ -0.74 [-0.74, -0.04]
+   M1 + c             σ 1.42 [0.96, 1.80], h 0.00: intercept -2.94 [-3.59, -0.22]; log2(m/15) -0.07 [-12.73, +0.32]; log2 c +1.38 [-0.73, +1.92]
+   M1 + agv           σ 1.28 [0.97, 1.72], h 0.00: intercept +0.71 [-0.49, +1.07]; log2(m/15) +0.39 [-12.78, +0.72]; AGV on duty -4.87 [-5.77, -1.14]
+   M1 + u             σ 1.34 [0.92, 1.63], h 0.00: intercept +2.56 [-0.84, +5.37]; log2(m/15) -0.27 [-11.64, +0.16]; u -5.89 [-10.32, -0.29]
+   M1 + surge         σ 1.48 [0.98, 1.81], h 0.00: intercept -1.34 [-3.43, -0.04]; log2(m/15) -0.09 [-12.90, +0.31]; surge share -0.44 [-4.40, +9.23]
+   M1 + short         σ 1.47 [0.98, 1.80], h 0.00: intercept -0.72 [-3.54, +0.26]; log2(m/15) -0.05 [-11.52, +0.34]; short share -3.03 [-5.96, +9.81]
+   M2 without tau_p   σ 0.71 [0.75, 1.36], h 0.00: intercept +7.42 [-6.43, +6.77]; log2(m/15) +0.91 [-8.47, +0.90]; log2 T_reg/p̄ -0.82 [-1.00, -0.05]; log2 c +1.61 [-0.72, +1.91]; AGV on duty -6.17 [-5.46, -0.65]; u -5.07 [-8.64, +0.78]; surge share -4.06 [-4.61, +19.08]; short share -4.46 [-5.93, +32.44]
+   M2 without agv     σ 0.81 [0.77, 1.36], h 0.00: intercept +4.90 [-7.41, +5.63]; log2(m/15) +0.63 [-7.41, +0.75]; log2 τ/p̄ -0.71 [-0.68, -0.12]; log2 T_reg/p̄ -0.84 [-1.07, -0.05]; log2 c +1.62 [-0.72, +1.93]; u -8.64 [-10.40, -1.17]; surge share -3.72 [-4.65, +21.36]; short share -5.58 [-7.09, +32.81]
+   M3                 σ 0.72 [0.65, 1.27], h 0.00: intercept +3.22 [-16.35, +12.21]; log2(m/15) +0.97 [-6.21, +0.93]; log2 τ/p̄ -0.14 [-0.63, +0.38]; log2 T_reg/p̄ +0.28 [-4.42, +1.82]; log2 c +2.49 [-4.50, +13.36]; AGV on duty -5.84 [-6.56, +2.34]; u +1.18 [-23.25, +17.17]; surge share -4.12 [-4.99, +30.49]; short share -4.65 [-7.11, +25.14]; u × log2 c -1.58 [-19.50, +9.10]; u × log2 T_reg/p̄ -1.85 [-3.29, +5.68]
+
+(2) condition-out: each condition predicted from the other 34; coverage = held-out conditions keeping >= 85% of the best gain; compute C = mean of 60 s / Δ_rec (1 = always D1 60 s)
+   M0                 coverage 34 of 35 [86%, 97%]   C 0.506 [0.373, 0.634]   margin h 0.00-0.00
+   M1                 coverage 34 of 35 [83%, 94%]   C 0.508 [0.382, 0.634]   margin h 0.00-0.00
+   M2                 coverage 31 of 35 [77%, 89%]   C 0.576 [0.444, 0.666]   margin h 0.00-0.00
+   M1 + tau_p         coverage 34 of 35 [83%, 94%]   C 0.529 [0.397, 0.662]   margin h 0.00-0.00
+   M1 + treg_p        coverage 32 of 35 [83%, 92%]   C 0.554 [0.422, 0.672]   margin h 0.00-0.00
+   M1 + c             coverage 32 of 35 [83%, 94%]   C 0.529 [0.401, 0.656]   margin h 0.00-0.00
+   M1 + agv           coverage 31 of 35 [83%, 94%]   C 0.506 [0.376, 0.669]   margin h 0.00-0.03
+   M1 + u             coverage 34 of 35 [83%, 94%]   C 0.519 [0.386, 0.644]   margin h 0.00-0.00
+   M1 + surge         coverage 33 of 35 [80%, 94%]   C 0.520 [0.390, 0.643]   margin h 0.00-0.00
+   M1 + short         coverage 33 of 35 [83%, 94%]   C 0.526 [0.402, 0.652]   margin h 0.00-0.00
+   M2 without tau_p   coverage 32 of 35 [77%, 89%]   C 0.561 [0.449, 0.660]   margin h 0.00-0.03
+   M2 without agv     coverage 33 of 35 [77%, 91%]   C 0.577 [0.442, 0.680]   margin h 0.00-0.02
+   M3                 coverage 32 of 35 [74%, 89%]   C 0.602 [0.464, 0.672]   margin h 0.00-0.03
+   reference, untuned and in sample (fit_inputs.out (4)): constant D1 60 s keeps 35 of 35 at C 1.00; 120 s keeps 31 of 35 at C 0.50; 180 s keeps 30 of 35 at C 0.33; 300 s keeps 17 of 35 at C 0.20
+
+(3) READINGS (pre-declared, README §17)
+   F1 (the size law carries condition-out, M1 vs M0): FAIL. C(M1) - C(M0) +0.002 [90% -0.082, +0.066], coverage(M1) 34 of 35 (line 30); in 40% of resamples M1 beats M0 at the line
+   F2 (the covariates carry condition-out, M2 vs M0): FAIL. C(M2) - C(M0) +0.070 [90% -0.066, +0.179], coverage(M2) 31 of 35 (line 30); in 8% of resamples M2 beats M0 at the line
+   F3 (coarser than the finest interval is safe; selected rule M0): FAIL. coverage 34 of 35 (line 30), C 0.506 (line 0.5); both hold in 54% of resamples
+
+(4) reported beside them
+   overshoot: kept share at 2 Δ* median 75.3% (range 65.0%-90.4%); plateau width lower bound Δ* / 60 s median 4.55 (range 1.91-17.16)
+   real time, selected rule M0 fitted on all conditions: T_c / Δ_rec (serial re-plan) median 0.036; highest size m 100 0.53, size m 50 0.20, fleet r 0.35 0.20
+   sensitivity X 10%: M0 coverage 35 of 35, C 0.742; M1 coverage 33 of 35, C 0.747; M2 coverage 30 of 35, C 0.720
+   sensitivity X 20%: M0 coverage 34 of 35, C 0.268; M1 coverage 33 of 35, C 0.271; M2 coverage 30 of 35, C 0.476
+   sensitivity bounds as exact: M0 coverage 31 of 35, C 0.346; M1 coverage 31 of 35, C 0.367; M2 coverage 27 of 35, C 0.338
+   sensitivity p̄ fastest machine: M0 coverage 34 of 35, C 0.502; M1 coverage 34 of 35, C 0.508; M2 coverage 32 of 35, C 0.577

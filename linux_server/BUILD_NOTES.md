@@ -4,7 +4,7 @@ Installed in `linux_server/` on 2026-10-28 (user 10-28: land failure-resume, ins
 build it replaces (pyrules, Simulation.dll `5e6e0f87`, 10-11) are in `linux_server_archive/notes/linux_server_pyrules_1011/`;
 that player is also in git at df03817d.
 
-- **Source:** worktree `~/Documents/Github/Capstone-resume` (branch `failure-resume`) = main df03817d plus the
+- **Source:** worktree `~/Documents/Github/Capstone-resume` (branch `failure-resume`; worktree removed 11-01, the code is commit 09f53cbb) = main df03817d plus the
   uncommitted failure-resume change, now applied to the main checkout (uncommitted as of 10-28). No C# changed on main
   between the pyrules player (71e34bdb) and df03817d, so this build = the pyrules player + the failure-resume change.
   `git diff df03817d -- Capstone/Assets Capstone/Packages Capstone/ProjectSettings | sha256sum` =

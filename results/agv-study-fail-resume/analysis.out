@@ -1,0 +1,49 @@
+== cells: restart hold 15, restart release 15, resume hold 14, resume release 15
+
+== total tardiness (1000 job-s), mean over seeds 0-2, by fleet
+proto    hold          release        
+model restart   resume restart  resume
+agvs                                  
+5      2097.0   2053.2  1964.8  1905.2
+7       999.6    945.8   889.9   829.1
+10      715.0    755.0   587.5   524.1
+15     9945.3   5443.5   566.3   524.0
+20     3381.5  15814.3   583.8   547.0
+
+== machine failures per run / deadlocks / collisions / stalls (means)
+      collisions                       deadlock                       failures                         stalls                        
+proto       hold        release            hold        release            hold         release           hold          release       
+model    restart resume restart resume  restart resume restart resume  restart  resume restart resume restart   resume restart resume
+agvs                                                                                                                                 
+5            0.0    0.0     0.0    0.0      0.0    0.0     0.0    0.0    57.67   57.67   56.33  57.00    0.00     0.00     0.0    0.0
+7            0.0    0.0     0.0    0.0      0.0    0.0     0.0    0.0    52.00   50.33   50.67  49.33    0.00     0.00     0.0    0.0
+10           0.0    0.0     0.0    0.0      0.0    0.0     0.0    0.0    50.33   49.33   49.00  49.33    0.33     2.67     0.0    0.0
+15           0.0    0.0     0.0    0.0      0.0    0.0     0.0    0.0   120.67   92.00   48.67  49.00  846.67   680.33     0.0    0.0
+20           0.0    0.0     0.0    0.0      0.0    0.0     0.0    0.0    59.33  162.00   49.00  49.33  605.67  1888.00     0.0    0.0
+
+== incomplete runs (deadlock or censored jobs)
+proto    model  
+hold     restart    6
+         resume     5
+release  restart    0
+         resume     0
+
+== cost of machine failures under release (same jobs, seeds 0-1), restart vs resume
+           no failures  restart  resume  cost_restart_%  cost_resume_%
+inst agvs                                                             
+0    2          5745.8      NaN     NaN             NaN            NaN
+     3          2570.4      NaN     NaN             NaN            NaN
+     5           493.7    530.8   527.1             7.5            6.8
+     7           253.6    361.9   345.4            42.7           36.2
+     10          207.2    335.1   313.1            61.7           51.1
+     15          209.9    318.5   308.4            51.8           47.0
+     20          214.8    337.6   322.4            57.2           50.1
+     25          220.3      NaN     NaN             NaN            NaN
+1    2         15399.5      NaN     NaN             NaN            NaN
+     3          8516.6      NaN     NaN             NaN            NaN
+     5          3241.5   3425.6  3361.7             5.7            3.7
+     7          1210.0   1524.1  1432.6            26.0           18.4
+     10          355.7    804.5   684.1           126.2           92.3
+     15          262.1    732.2   726.0           179.3          177.0
+     20          245.8    761.3   729.7           209.8          196.9
+     25          252.0      NaN     NaN             NaN            NaN

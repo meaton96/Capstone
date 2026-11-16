@@ -1,0 +1,85 @@
+== rq3-alpha-transport stage 1: the alpha law's size / transport term (MDD-PTECT, homogeneous floors)
+   fitting seeds 2000-2039; pooled window tardiness; regret = % over the cell's best grid alpha
+
+-- 0. checks
+   m15_b2     statistics from 40 fitting instances; curve on 40 fitting seeds; util rerun = ../rq3-alpha-size at alpha 3 on 40 / 40
+   m20_r052   statistics from 40 fitting instances; curve on 40 fitting seeds; util rerun = ../rq3-alpha-size at alpha 3 on 40 / 40
+   m30_r052   statistics from 40 fitting instances; curve on 40 fitting seeds; util rerun = ../rq3-alpha-size at alpha 3 on 40 / 40
+   m50_r052   statistics from 40 fitting instances; curve on 40 fitting seeds; util rerun = ../rq3-alpha-size at alpha 3 on 40 / 40
+   m75_r052   statistics from 40 fitting instances; curve on 40 fitting seeds; util rerun = ../rq3-alpha-size at alpha 3 on 40 / 40
+   m100_r052  statistics from 40 fitting instances; curve on 40 fitting seeds; util rerun = ../rq3-alpha-size at alpha 3 on 40 / 40
+   m150_r052  statistics from 40 fitting instances; curve on 40 fitting seeds
+   m200_r052  statistics from 40 fitting instances; curve on 40 fitting seeds
+   m50_r035   statistics from 40 fitting instances; curve on 40 fitting seeds
+   m50_r080   statistics from 40 fitting instances; curve on 40 fitting seeds
+   m100_r035  statistics from 40 fitting instances; curve on 40 fitting seeds
+   m100_r080  statistics from 40 fitting instances; curve on 40 fitting seeds
+   m200_r035  statistics from 40 fitting instances; curve on 40 fitting seeds
+   m200_r080  statistics from 40 fitting instances; curve on 40 fitting seeds
+   m75_r035   statistics from 40 fitting instances
+   m150_r080  statistics from 40 fitting instances
+   all complete and reproduced: True
+
+-- 1. alpha curves (fitting seeds), % vs alpha 3; floor statistics (means over fitting instances)
+   cell        tau     a     tau/a  util  | alpha*  within 1%      |      0   0.25    0.5   0.75      1    1.5      2      3      4
+   m15_b2     0.0462 0.467 0.0990 0.477 |     2  2-4          |  +24.7  +15.6   +8.8   +6.6   +4.4   +1.0   -1.5   +0.0   -1.5
+   m20_r052   0.0542 0.500 0.1084 0.457 |     4  2-4          |  +33.3  +21.3  +12.3   +7.8   +2.7   +2.3   -1.5   +0.0   -2.3
+   m30_r052   0.0753 0.533 0.1411 0.484 |     4  2-4          |  +38.0  +24.3  +13.6   +7.8   +3.3   +1.2   -0.2   +0.0   -0.9
+   m50_r052   0.0995 0.520 0.1913 0.588 |   1.5  1.5-3          |  +28.6  +18.2   +9.3   +5.2   +3.4   -0.8   -0.1   +0.0   +1.2
+   m75_r052   0.1147 0.520 0.2205 0.642 |     2  2-2          |  +18.0   +7.8   +4.9   +2.8   +0.9   +0.1   -1.2   +0.0   +1.2
+   m100_r052  0.1242 0.520 0.2389 0.701 |     1  0.75-2          |   +7.8   +1.7   -0.5   -1.7   -2.1   -1.8   -2.1   +0.0   +2.3
+   m150_r052  0.1612 0.520 0.3100 0.793 |     0  0-0          |  -13.4  -11.6  -10.3   -7.9   -6.9   -4.7   -2.9   +0.0   +2.1
+   m200_r052  0.1869 0.520 0.3595 0.885 |     0  0-0          |  -15.8  -13.5  -11.7   -9.6   -8.2   -5.5   -3.5   +0.0   +2.1
+   m50_r035   0.0995 0.360 0.2763 0.801 |   0.5  0.5-2          |   +4.3   +0.8   -1.3   -0.4   -1.3   -0.7   -0.4   +0.0   +2.4
+   m50_r080   0.0995 0.800 0.1243 0.390 |     4  3-4          |  +39.1  +23.4  +14.1   +9.2   +5.7   +0.9   +1.4   +0.0   -0.3
+   m100_r035  0.1242 0.350 0.3550 0.910 |     0  0-0          |  -13.2  -11.1   -9.5   -7.9   -6.7   -4.1   -1.9   +0.0   +1.7
+   m100_r080  0.1242 0.800 0.1553 0.474 |     3  3-3          |  +30.2  +19.0  +11.9   +8.0   +5.1   +2.5   +1.1   +0.0   +2.4
+   m200_r035  0.1869 0.350 0.5341 0.981 |     0  0-0          |  -15.2  -12.3  -10.0   -8.1   -6.7   -4.3   -2.6   +0.0   +1.6
+   m200_r080  0.1869 0.800 0.2337 0.642 |     1  0.5-1.5          |   +1.7   -0.9   -2.4   -2.6   -2.9   -2.5   -1.7   +0.0   +1.7
+   m75_r035   0.1147 0.347 0.3308 0.876 | held out (curve on test seeds only, stage 2)
+   m150_r080  0.1612 0.800 0.2015 0.553 | held out (curve on test seeds only, stage 2)
+
+-- 2. candidate laws (alpha = 3 h(x), h = clip((x1 - x) / (x1 - x0), 0, 1), x0 >= B2's x)
+   L0 alpha 3 everywhere: mean regret 5.80%, leave-one-cell-out 5.80%
+   L1 x = travel / op time: x0 0.1031, x1 0.1373; mean regret 1.78%, leave-one-cell-out 2.71%
+   L2 x = travel / op time / AGVs per machine: x0 0.1751, x1 0.2971; mean regret 0.51%, leave-one-cell-out 1.26%
+   L3 x = AGV utilization under MDD-PTECT: x0 0.4769, x1 0.8646; mean regret 0.85%, leave-one-cell-out 1.29%
+
+   per cell: regret % (in sample / leave-one-out) and the law's alpha
+   cell        L0                       L1                    L2                    L3
+   m15_b2      1.56    1.56 /  1.56 a3.00    1.56 /  1.56 a3.00    1.56 /  1.56 a3.00
+   m20_r052    2.38    2.38 /  2.38 a3.00    2.38 /  2.38 a3.00    2.38 /  2.38 a3.00
+   m30_r052    0.93    0.93 /  0.93 a3.00    0.93 /  0.93 a3.00    0.91 /  0.92 a2.94
+   m50_r052    0.84    0.84 /  0.84 a3.00    0.80 /  0.80 a2.60    0.75 /  0.75 a2.14
+   m75_r052    1.26    0.05 /  1.79 a1.98    0.32 /  1.52 a1.88    0.76 /  0.77 a1.72
+   m100_r052   2.17    0.10 /  0.16 a1.14    0.30 /  0.30 a1.43    0.19 /  0.17 a1.27
+   m150_r052  15.51    0.00 /  0.00 a0.00    0.00 /  3.45 a0.00    4.15 /  4.33 a0.55
+   m200_r052  18.77    0.00 /  0.00 a0.00    0.00 /  0.00 a0.00    0.00 /  0.00 a0.00
+   m50_r035    1.32    1.32 /  1.32 a3.00    0.05 /  5.69 a0.51    0.09 /  5.69 a0.49
+   m50_r080    0.30    0.30 /  0.30 a3.00    0.30 /  0.30 a3.00    0.30 /  0.30 a3.00
+   m100_r035  15.20    8.38 / 12.74 a1.14    0.00 /  0.00 a0.00    0.00 /  0.00 a0.00
+   m100_r080   0.00    4.38 / 11.26 a1.14    0.00 /  0.00 a3.00    0.00 /  0.00 a3.00
+   m200_r035  17.97    0.00 /  0.00 a0.00    0.00 /  0.00 a0.00    0.00 /  0.00 a0.00
+   m200_r080   2.94    4.66 /  4.66 a0.00    0.51 /  0.68 a1.56    0.78 /  1.13 a1.72
+
+-- 3. selection: lowest leave-one-cell-out L2 (1.26%); simplest within 0.5 points: L2
+-- 4. gate F1, selected law's leave-one-cell-out regret <= L0's - 1.0: 1.26 vs 5.80 -> PASS
+
+   selected law L2: alpha = max(0, 3 - 6 sigma) x clip((0.2971 - x) / (0.2971 - 0.1751), 0, 1), x = travel / op time / AGVs per machine
+   cell        x        h      alpha   best alpha (fitting seeds)
+   m15_b2     0.0990  1.000  3.000   2.0
+   m20_r052   0.1084  1.000  3.000   4.0
+   m30_r052   0.1411  1.000  3.000   4.0
+   m50_r052   0.1913  0.868  2.603   1.5
+   m75_r052   0.2205  0.628  1.883   2.0
+   m100_r052  0.2389  0.477  1.431   1.0
+   m150_r052  0.3100  0.000  0.000   0.0
+   m200_r052  0.3595  0.000  0.000   0.0
+   m50_r035   0.2763  0.171  0.513   0.5
+   m50_r080   0.1243  1.000  3.000   4.0
+   m100_r035  0.3550  0.000  0.000   0.0
+   m100_r080  0.1553  1.000  3.000   3.0
+   m200_r035  0.5341  0.000  0.000   0.0
+   m200_r080  0.2337  0.520  1.560   1.0
+   m75_r035   0.3308  0.000  0.000   None
+   m150_r080  0.2015  0.784  2.351   None

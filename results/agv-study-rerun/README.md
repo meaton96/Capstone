@@ -183,6 +183,9 @@ Layouts are in 2b above. The last fail-hold cell (b2tf_s1, 15 AGVs) took about 1
 timeout.
 
 **3. Machine failures on** (b2tf, seeds 0-2, D, MDD-PTECT; total tardiness 1000 job-s, mean over seeds):
+*(Superseded 10-30: these cells used the restart failure model. Under preempt-resume (`agv-study-fail-resume`) the
+claims below hold; release is 1,905 / 829 / 524 / 524 / 547 ks at 5-20 AGVs and failures cost +4-7% at 5 AGVs and
++18-197% at 7-20. Quote those.)*
 
 | fleet | 5 | 7 | 10 | 15 | 20 |
 |---|---|---|---|---|---|

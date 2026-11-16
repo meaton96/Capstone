@@ -1,0 +1,21 @@
+(1) F3 against its line (C <= 0.5, i.e. a harmonic-mean interval of at least 120 s; coverage >= 30 of 35)
+   M0's held-out intervals: D1 107-129 s, harmonic mean 118.6 s; Δ_rec / p̄ = 2^-1.47 = 0.36 (full fit), margin h 0 in every fold
+   C(M0) 0.506; over 2000 resamples: 5% 0.373, median 0.480, 95% 0.634; C <= 0.5 in 54%, coverage at the line in 95%, both in 54%
+   C over the line by +0.006: the rule's harmonic-mean interval is 1.1% shorter than 120 s
+
+(2) held-out misses (kept share below 85%) and the spread of the held-out intervals
+   M0: D1 107-129 s, 0 clipped at 60 s; misses: size m 50 (D1 128 s keeps 84.0%)
+   M1: D1 60-136 s, 1 clipped at 60 s; misses: size m 50 (D1 136 s keeps 84.0%)
+   M2: D1 60-958 s, 9 clipped at 60 s; misses: size m 50 (D1 163 s keeps 84.1%); fleet r 0.8 (D1 737 s keeps 71.2%); ax2 ℓ 0.7 c 1.5 block 5400 (D1 122 s keeps 84.9%); ax2 ℓ 0.7 c 2.125 block 1350 (D1 737 s keeps 77.6%)
+
+(3) the size slope of log2(Δ* / p̄) on log2(m / 15), M1's term, under four treatments
+   all 35 conditions              censored (Tobit, as the fit)   slope -0.09, σ 1.48
+   all 35 conditions              bounds taken as exact          slope -0.25, σ 0.69
+   size arm m15-m100 (5 levels)   censored (Tobit, as the fit)   slope +0.07, σ 1.29
+   size arm m15-m100 (5 levels)   bounds taken as exact          slope -0.51, σ 0.64
+   axis 6's S_m (§14): −0.51 [90% −0.70, −0.16], size arm, bounds at their value (OLS)
+
+(4) what an overshoot costs: kept share at a multiple of each condition's Δ* (D1 clipped to 3600 s)
+   1.5 Δ*: median 79.8%, range 71.0%-94.2%
+   2 Δ*: median 75.3%, range 65.0%-90.4%
+   4 Δ*: median 64.0%, range 46.7%-84.5%

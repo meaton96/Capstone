@@ -1,0 +1,92 @@
+== rq2-replan-axes: 1830 task outputs under rq2-replan-axes/out; X = 15% (sensitivity 10%, 20%); gain over plan-once
+
+-- C0 units (the `all` arm): PASS
+   all k 0.125 d1 300 s0: real/k 81.378669 vs k=1 81.378671 (rel -1.77e-08), schedule same PASS
+   all k 0.125 d1 300 s1: real/k 22.219748 vs k=1 22.219750 (rel -8.64e-08), schedule same PASS
+   all k 0.125 d1 300 s2: real/k 212.443368 vs k=1 212.443364 (rel +2.07e-08), schedule same PASS
+   all k 0.125 d1 300 s3: real/k 88.406390 vs k=1 88.406371 (rel +2.13e-07), schedule same PASS
+   all k 0.125 d1 300 s4: real/k 15.976762 vs k=1 15.976758 (rel +2.25e-07), schedule same PASS
+   all k 0.125 d1 900 s0: real/k 79.971499 vs k=1 79.971484 (rel +1.81e-07), schedule same PASS
+   all k 0.125 d1 900 s1: real/k 22.361690 vs k=1 22.361694 (rel -1.57e-07), schedule same PASS
+   all k 0.125 d1 900 s2: real/k 210.120269 vs k=1 210.120264 (rel +2.09e-08), schedule same PASS
+   all k 0.125 d1 900 s3: real/k 93.411455 vs k=1 93.411458 (rel -2.91e-08), schedule same PASS
+   all k 0.125 d1 900 s4: real/k 16.001851 vs k=1 16.001848 (rel +2.25e-07), schedule same PASS
+   all k 10 d1 300 s0: real/k 81.233989 vs k=1 81.378671 (rel -1.78e-03), schedule DIFFERS (k not a power of 2: reported only)
+   all k 10 d1 300 s1: real/k 23.529980 vs k=1 22.219750 (rel +5.90e-02), schedule DIFFERS (k not a power of 2: reported only)
+   all k 10 d1 300 s2: real/k 225.482253 vs k=1 212.443364 (rel +6.14e-02), schedule DIFFERS (k not a power of 2: reported only)
+   all k 10 d1 300 s3: real/k 90.326807 vs k=1 88.406371 (rel +2.17e-02), schedule DIFFERS (k not a power of 2: reported only)
+   all k 10 d1 300 s4: real/k 15.849948 vs k=1 15.976758 (rel -7.94e-03), schedule DIFFERS (k not a power of 2: reported only)
+   all k 10 d1 900 s0: real/k 80.897008 vs k=1 79.971484 (rel +1.16e-02), schedule DIFFERS (k not a power of 2: reported only)
+   all k 10 d1 900 s1: real/k 23.966341 vs k=1 22.361694 (rel +7.18e-02), schedule DIFFERS (k not a power of 2: reported only)
+   all k 10 d1 900 s2: real/k 226.680701 vs k=1 210.120264 (rel +7.88e-02), schedule DIFFERS (k not a power of 2: reported only)
+   all k 10 d1 900 s3: real/k 90.210555 vs k=1 93.411458 (rel -3.43e-02), schedule DIFFERS (k not a power of 2: reported only)
+   all k 10 d1 900 s4: real/k 15.949288 vs k=1 16.001848 (rel -3.28e-03), schedule DIFFERS (k not a power of 2: reported only)
+   all k 32 d1 300 s0: real/k 81.378677 vs k=1 81.378671 (rel +6.91e-08), schedule same PASS
+   all k 32 d1 300 s1: real/k 22.219746 vs k=1 22.219750 (rel -1.41e-07), schedule same PASS
+   all k 32 d1 300 s2: real/k 212.443376 vs k=1 212.443364 (rel +5.74e-08), schedule same PASS
+   all k 32 d1 300 s3: real/k 88.406371 vs k=1 88.406371 (rel +2.22e-16), schedule same PASS
+   all k 32 d1 300 s4: real/k 15.976764 vs k=1 15.976758 (rel +3.91e-07), schedule same PASS
+   all k 32 d1 900 s0: real/k 79.971483 vs k=1 79.971484 (rel -1.95e-08), schedule same PASS
+   all k 32 d1 900 s1: real/k 22.361689 vs k=1 22.361694 (rel -1.96e-07), schedule same PASS
+   all k 32 d1 900 s2: real/k 210.120274 vs k=1 210.120264 (rel +4.76e-08), schedule same PASS
+   all k 32 d1 900 s3: real/k 93.411455 vs k=1 93.411458 (rel -3.01e-08), schedule same PASS
+   all k 32 d1 900 s4: real/k 16.001854 vs k=1 16.001848 (rel +4.30e-07), schedule same PASS
+
+-- C1 regression vs rq2-replan: PASS
+   proc k 1 d1 120 s0: 81.378671 vs rq2-replan 81.378671, MDD-PTECT 95.842006 vs 95.842006: PASS
+   proc k 1 d1 120 s1: 22.219750 vs rq2-replan 22.219750, MDD-PTECT 29.594482 vs 29.594482: PASS
+   proc k 1 d1 120 s2: 211.125246 vs rq2-replan 211.125246, MDD-PTECT 246.213539 vs 246.213539: PASS
+   proc k 1 d1 120 s3: 87.220157 vs rq2-replan 87.220157, MDD-PTECT 96.560802 vs 96.560802: PASS
+   proc k 1 d1 120 s4: 15.921888 vs rq2-replan 15.921888, MDD-PTECT 18.953886 vs 18.953886: PASS
+   proc k 1 d1 120 s5: 240.310221 vs rq2-replan 240.310221, MDD-PTECT 275.864514 vs 275.864514: PASS
+   140 tasks compared
+
+-- gain curves per B2-equivalent interval D1: re-planning gain over plan-once [% vs MDD-PTECT]
+   proc k 0.5 (n 20, p̄ 163 s, transport 33 s, AGV busy 0.61; plan-once +2.53% vs MDD-PTECT, best pairs MDD-PECT 8, MDD-PTECT 4, SRT-PTECT 3, ATC-PTECT 2, ATC-PECT 2, SRT-PECT 1):
+      120: +3.83 [+6.26]  180: +3.87 [+6.30]  300: +3.56 [+6.00]  450: +3.19 [+5.64]  600: +2.97 [+5.42]  900: +2.49 [+4.95]  1800: +2.36 [+4.83]  3600: +2.09 [+4.56]
+      Δ* 405 s B2-eq = 202 s = 1.24 p̄ [boot 90% 0.76-1.84 p̄]; best D1 180 (+3.87), plateau edge on the grid 300, width 3.4x (left-censored); X 10%: 1.01 p̄, X 20%: 1.57 p̄
+   proc k 1 (n 20, p̄ 326 s, transport 32 s, AGV busy 0.36; plan-once +6.32% vs MDD-PTECT, best pairs ATC-PECT 7, MDD-PECT 6, ATC-PTECT 4, SRT-PTECT 2, MDD-PTECT 1):
+      120: +7.46 [+13.31]  180: +7.23 [+13.09]  300: +5.98 [+11.93]  450: +5.83 [+11.78]  600: +5.01 [+11.01]  900: +5.28 [+11.26]  1800: +3.85 [+9.93]  3600: +3.83 [+9.91]
+      Δ* 259 s B2-eq = 259 s = 0.80 p̄ [boot 90% 0.54-1.78 p̄]; best D1 120 (+7.46), plateau edge on the grid 180, width 2.2x (left-censored); X 10%: 0.68 p̄, X 20%: 0.96 p̄
+   proc k 2 (n 20, p̄ 652 s, transport 32 s, AGV busy 0.20; plan-once +7.40% vs MDD-PTECT, best pairs ATC-PECT 12, MDD-PECT 3, ATC-PTECT 3, MDD-PTECT 2):
+      120: +7.64 [+14.47]  180: +7.19 [+14.06]  300: +6.57 [+13.48]  450: +6.47 [+13.39]  600: +5.09 [+12.11]  900: +4.06 [+11.16]  1800: +2.81 [+10.00]  3600: +2.00 [+9.25]
+      Δ* 403 s B2-eq = 806 s = 1.24 p̄ [boot 90% 0.50-1.51 p̄]; best D1 120 (+7.64), plateau edge on the grid 300, width 3.4x (left-censored); X 10%: 0.72 p̄, X 20%: 1.49 p̄
+   proc k 4 (n 20, p̄ 1303 s, transport 32 s, AGV busy 0.11; plan-once +9.12% vs MDD-PTECT, best pairs ATC-PECT 11, ATC-PTECT 4, MDD-PECT 4, MDD-PTECT 1):
+      120: +7.04 [+15.52]  180: +6.38 [+14.92]  300: +7.03 [+15.51]  450: +5.03 [+13.69]  600: +5.15 [+13.80]  900: +3.12 [+11.95]  1800: +1.57 [+10.55]  3600: +1.20 [+10.21]
+      Δ* 371 s B2-eq = 1484 s = 1.14 p̄ [boot 90% 0.46-1.91 p̄]; best D1 120 (+7.04), plateau edge on the grid 300, width 3.1x (left-censored); X 10%: 1.06 p̄, X 20%: 1.22 p̄
+   proc k 16 (n 20, p̄ 5213 s, transport 32 s, AGV busy 0.03; plan-once +7.88% vs MDD-PTECT, best pairs ATC-PECT 15, MDD-PECT 3, ATC-PTECT 2):
+      120: +7.71 [+14.98]  180: +6.70 [+14.06]  300: +5.97 [+13.37]  450: +4.99 [+12.48]  600: +4.97 [+12.45]  900: +4.66 [+12.17]  1800: +3.44 [+11.05]  3600: +2.78 [+10.44]
+      Δ* 200 s B2-eq = 3202 s = 0.61 p̄ [boot 90% 0.46-1.13 p̄]; best D1 120 (+7.71), plateau edge on the grid 180, width 1.7x (left-censored); X 10%: 0.50 p̄, X 20%: 0.80 p̄
+   reg k 0.25 (n 20, p̄ 332 s, transport 32 s, AGV busy 0.38; plan-once +4.36% vs MDD-PTECT, best pairs ATC-PECT 7, ATC-PTECT 6, MDD-PTECT 4, MDD-PECT 3):
+      120: +10.26 [+14.18]  180: +8.78 [+12.76]  300: +7.66 [+11.69]  450: +6.22 [+10.31]  600: +7.37 [+11.42]  900: +6.86 [+10.92]  1800: +6.29 [+10.37]  3600: +3.51 [+7.72]
+      Δ* 184 s B2-eq = 184 s = 0.56 p̄ [boot 90% 0.46-0.92 p̄]; best D1 120 (+10.26), plateau edge on the grid 180, width 1.5x (left-censored); X 10%: 0.48 p̄, X 20%: 0.70 p̄
+   reg k 0.5 (n 20, p̄ 331 s, transport 32 s, AGV busy 0.37; plan-once +4.69% vs MDD-PTECT, best pairs ATC-PECT 9, ATC-PTECT 4, MDD-PTECT 4, MDD-PECT 2, SRT-PTECT 1):
+      120: +8.55 [+12.84]  180: +8.25 [+12.56]  300: +7.46 [+11.81]  450: +7.42 [+11.77]  600: +8.03 [+12.35]  900: +6.18 [+10.58]  1800: +5.59 [+10.02]  3600: +4.57 [+9.05]
+      Δ* 709 s B2-eq = 709 s = 2.14 p̄ [boot 90% 0.68-2.36 p̄]; best D1 120 (+8.55), plateau edge on the grid 600, width 5.9x (left-censored); X 10%: 0.78 p̄, X 20%: 2.35 p̄
+   reg k 1 (n 20, p̄ 326 s, transport 32 s, AGV busy 0.36; plan-once +6.32% vs MDD-PTECT, best pairs ATC-PECT 7, MDD-PECT 6, ATC-PTECT 4, SRT-PTECT 2, MDD-PTECT 1):
+      120: +7.46 [+13.31]  180: +7.23 [+13.09]  300: +5.98 [+11.93]  450: +5.83 [+11.78]  600: +5.01 [+11.01]  900: +5.28 [+11.26]  1800: +3.85 [+9.93]  3600: +3.83 [+9.91]
+      Δ* 259 s B2-eq = 259 s = 0.80 p̄ [boot 90% 0.55-1.88 p̄]; best D1 120 (+7.46), plateau edge on the grid 180, width 2.2x (left-censored); X 10%: 0.68 p̄, X 20%: 0.96 p̄
+   reg k 2 (n 20, p̄ 328 s, transport 33 s, AGV busy 0.35; plan-once +6.56% vs MDD-PTECT, best pairs ATC-PTECT 7, MDD-PECT 6, SRT-PECT 3, ATC-PECT 2, SRT-PTECT 1, MDD-PTECT 1):
+      120: +7.19 [+13.28]  180: +6.73 [+12.85]  300: +5.90 [+12.07]  450: +5.37 [+11.58]  600: +5.49 [+11.69]  900: +4.91 [+11.15]  1800: +3.86 [+10.17]  3600: +3.03 [+9.39]
+      Δ* 263 s B2-eq = 263 s = 0.80 p̄ [boot 90% 0.53-1.08 p̄]; best D1 120 (+7.19), plateau edge on the grid 180, width 2.2x (left-censored); X 10%: 0.64 p̄, X 20%: 1.02 p̄
+   reg k 4 (n 20, p̄ 331 s, transport 33 s, AGV busy 0.35; plan-once +2.87% vs MDD-PTECT, best pairs MDD-PTECT 7, ATC-PECT 5, SRT-PTECT 3, ATC-PTECT 2, MDD-PECT 2, SRT-PECT 1):
+      120: +7.75 [+10.40]  180: +8.68 [+11.30]  300: +7.64 [+10.29]  450: +8.15 [+10.79]  600: +6.15 [+8.84]  900: +6.16 [+8.85]  1800: +5.14 [+7.86]  3600: +3.38 [+6.15]
+      Δ* 503 s B2-eq = 503 s = 1.52 p̄ [boot 90% 0.73-1.61 p̄]; best D1 180 (+8.68), plateau edge on the grid 450, width 4.2x (left-censored); X 10%: 0.83 p̄, X 20%: 1.62 p̄
+
+-- readings (README §6): S = shape (slope), R = transfer regret of B2's interval
+   proc S: slope of log2(Δ*/p̄) on log2 k = -0.147 [90% -0.346, +0.125] over k 0.5, 1, 2, 4, 16 (seeds 20, 2000 resamples) -> INDETERMINATE: extend to seeds 20-39 (README §6 rule 5)
+      censored at a grid end (rule 6, add D1 60 / 7200 there): k 0.5, 1, 2, 4, 16
+      R at k 0.5: B2's plateau edge D1 180 s keeps 100% of the best re-planning gain (+3.87 of +3.87 points)
+      R at k 1: B2's plateau edge D1 180 s keeps 97% of the best re-planning gain (+7.23 of +7.46 points)
+      R at k 2: B2's plateau edge D1 180 s keeps 94% of the best re-planning gain (+7.19 of +7.64 points)
+      R at k 4: B2's plateau edge D1 180 s keeps 91% of the best re-planning gain (+6.38 of +7.04 points)
+      R at k 16: B2's plateau edge D1 180 s keeps 87% of the best re-planning gain (+6.70 of +7.71 points)
+   proc R: PASS (worst regret 13% of the best gain; PASS = within X = 15% at every non-flat level)
+   reg S: slope of log2(Δ*/p̄) on log2 k = +0.148 [90% -0.063, +0.319] over k 0.25, 0.5, 1, 2, 4 (seeds 20, 2000 resamples) -> INDETERMINATE: extend to seeds 20-39 (README §6 rule 5)
+      censored at a grid end (rule 6, add D1 60 / 7200 there): k 0.25, 0.5, 1, 2, 4
+      R at k 0.25: B2's plateau edge D1 180 s keeps 86% of the best re-planning gain (+8.78 of +10.26 points)
+      R at k 0.5: B2's plateau edge D1 180 s keeps 97% of the best re-planning gain (+8.25 of +8.55 points)
+      R at k 1: B2's plateau edge D1 180 s keeps 97% of the best re-planning gain (+7.23 of +7.46 points)
+      R at k 2: B2's plateau edge D1 180 s keeps 94% of the best re-planning gain (+6.73 of +7.19 points)
+      R at k 4: B2's plateau edge D1 180 s keeps 100% of the best re-planning gain (+8.68 of +8.68 points)
+   reg R: PASS (worst regret 14% of the best gain; PASS = within X = 15% at every non-flat level)

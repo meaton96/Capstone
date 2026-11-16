@@ -1,0 +1,175 @@
+== eval-alpha-online: train-alpha-off-het with the online alpha law and the size gate (twin, test seeds 0-39)
+   online law (O1): alpha = min(4, max(0, 3 - 6 sigma) x h(tau / a_t)), full-fleet knots [0.17511990993179777, 0.2971443740693568], short-fleet knots [0.17511990993179777, 0.2971443740693568]; gate G1 PASS
+   window tardiness, % vs MDD-PTECT pooled over instances [95% CI] better/worse Wilcoxon p
+
+-- 0. checks
+   m15_b2     pair static (3.0, 3.0) -> online (3.0, 0.0); law runs static 40, online 40, map 40; og: 5 policies, seeds [40, 40, 40, 40, 40]; MDD-PTECT = reference on 40 / 40; MDD-PTECT@x1 = simulator online law on 40 / 40
+   m15_s1     pair static (0.702422936285592, 0.702422936285592) -> online (0.702, 0.0); law runs static 40, online 40, map 40; og: 5 policies, seeds [40, 40, 40, 40, 40]; MDD-PTECT = reference on 40 / 40; MDD-PTECT@x1 = simulator online law on 40 / 40; held out: best test-seed pair 0.5|0.5 (40 seeds)
+   m50_r052   pair static (2.6029892625277373, 2.6029892625277373) -> online (2.603, 0.0); law runs static 40, online 40, map 40; og: 5 policies, seeds [40, 40, 40, 40, 40]; MDD-PTECT = reference on 40 / 40; MDD-PTECT@x1 = simulator online law on 40 / 40
+   m75_r052   pair static (1.8831052402799107, 1.8831052402799107) -> online (1.883, 0.0); law runs static 40, online 40, map 40; og: 5 policies, seeds [40, 40, 40, 40, 40]; MDD-PTECT = reference on 40 / 40; MDD-PTECT@x1 = simulator online law on 40 / 40; gated, decisions not MDD-PTECT: 0 of 4800
+   m100_r080  pair static (3.0, 3.0) -> online (3.0, 0.0); law runs static 40, online 40, map 40; og: 5 policies, seeds [40, 40, 40, 40, 40]; MDD-PTECT = reference on 40 / 40; MDD-PTECT@x1 = simulator online law on 40 / 40; gated, decisions not MDD-PTECT: 0 of 4800
+   m100_r052  pair static (1.4314713475150087, 1.4314713475150087) -> online (1.431, 0.0); law runs static 40, online 40, map 40; og: 5 policies, seeds [40, 40, 40, 40, 40]; MDD-PTECT = reference on 40 / 40; MDD-PTECT@x1 = simulator online law on 40 / 40; gated, decisions not MDD-PTECT: 0 of 4800
+   m100_r035  pair static (0.0, 0.0) -> online (0.0, 0.0) (unchanged); law runs static 40, online 40, map 40
+   m200_r052  pair static (0.0, 0.0) -> online (0.0, 0.0) (unchanged); law runs static 40, online 40, map 40
+   m75_r035   pair static (0.0, 0.0) -> online (0.0, 0.0) (unchanged); law runs static 40, online 40, map 40; held out: best test-seed pair 0.5|0 (40 seeds)
+   m150_r080  pair static (2.351211986687572, 2.351211986687572) -> online (2.351, 0.0) (unchanged); law runs static 40, online 40, map 40; held out: best test-seed pair 2|0 (40 seeds)
+   m50_s1     pair static (0.6477237318929525, 0.6477237318929525) -> online (0.648, 0.0) (unchanged); law runs static 40, online 40, map 40; held out: best test-seed pair 0.5|0 (40 seeds)
+   m100_s0.5  pair static (0.9249063100247371, 0.9249063100247371) -> online (0.925, 0.0) (unchanged); law runs static 40, online 40, map 40; held out: best test-seed pair 0.5|0 (40 seeds)
+   m100_s1    pair static (0.46449433205317714, 0.46449433205317714) -> online (0.464, 0.0) (unchanged); law runs static 40, online 40, map 40; held out: best test-seed pair 0.25|0 (40 seeds)
+
+-- 1. per cell, % vs MDD-PTECT (alpha 3; held-out cells: vs the static law alone)
+   m15_b2 (reference mean 145.5 k job-s, n 40; pairs static (3.0, 3.0) online (3.0, 0.0))
+     static law alone                                       +0.00 [ -0.00,  +0.00] 21/19 p=0.9
+     online law alone                                       -0.66 [ -3.22,  +1.97] 20/20 p=0.75
+     map law alone                                          -0.66 [ -3.21,  +2.09] 20/20 p=0.75
+     final policy T15, mean of 5                            -1.69 [ -2.88,  -0.50] 28/12 p=0.0058
+     static law + gate, mean of 5                           -1.01 [ -3.09,  +0.66] 25/15 p=0.12
+     og: online law + gate, mean of 5                       -0.90 [ -2.63,  +1.10] 25/15 p=0.21
+     og harness: MDD-PTECT@x1 (online law alone)            -0.66 [ -3.27,  +1.99] 14/16 p=0.78
+   m15_s1 (reference mean 253.8 k job-s, n 40; pairs static (0.702422936285592, 0.702422936285592) online (0.702, 0.0))
+     static law alone                                      -16.05 [-20.31, -12.50] 38/2  p=2.5e-11
+     online law alone                                      -16.68 [-20.80, -13.09] 38/2  p=1.8e-11
+     map law alone                                         -16.68 [-20.70, -13.18] 38/2  p=1.8e-11
+     best test-seed pair 0.5|0.5 (hindsight)               -17.22 [-21.70, -13.60] 39/1  p=7.8e-11
+     final policy T15, mean of 5                            -2.89 [ -4.33,  -1.67] 32/8  p=4.5e-06
+     static law + gate, mean of 5                          -16.40 [-20.58, -13.01] 40/0  p=1.8e-12
+     og: online law + gate, mean of 5                      -16.67 [-20.84, -13.32] 40/0  p=1.8e-12
+     og harness: MDD-PTECT@x1 (online law alone)           -16.68 [-20.80, -13.13] 38/2  p=1.8e-11
+   m50_r052 (reference mean 158.2 k job-s, n 40; pairs static (2.6029892625277373, 2.6029892625277373) online (2.603, 0.0))
+     static law alone                                       -0.98 [ -2.50,  +0.62] 24/16 p=0.17
+     online law alone                                       -3.57 [ -7.03,  +0.31] 26/14 p=0.022
+     map law alone                                          -3.57 [ -7.13,  +0.25] 26/14 p=0.022
+     final policy T15, mean of 5                            -1.29 [ -2.62,  +0.08] 26/14 p=0.058
+     static law + gate, mean of 5                           +0.21 [ -2.20,  +1.92] 25/15 p=0.42
+     og: online law + gate, mean of 5                       -0.77 [ -5.65,  +3.10] 28/12 p=0.066
+     og harness: MDD-PTECT@x1 (online law alone)            -3.57 [ -7.14,  +0.25] 26/14 p=0.022
+   m75_r052 (reference mean 302.8 k job-s, n 40; pairs static (1.8831052402799107, 1.8831052402799107) online (1.883, 0.0))
+     static law alone                                       -0.46 [ -2.58,  +1.25] 25/15 p=0.064
+     online law alone                                       -8.72 [-13.29,  -4.94] 36/4  p=5.7e-08
+     map law alone                                          -8.72 [-13.33,  -5.02] 36/4  p=5.7e-08
+     final policy T15, mean of 5                            +1.24 [ -0.26,  +2.79] 22/18 p=0.46
+     static law + gate, mean of 5                           -2.30 [ -4.52,  -0.54] 28/12 p=0.0053
+     og: online law + gate, mean of 5                       -8.34 [-13.01,  -4.22] 33/7  p=3.2e-06
+     og harness: MDD-PTECT@x1 (online law alone)            -8.72 [-13.37,  -4.95] 36/4  p=5.7e-08
+   m100_r080 (reference mean 194.7 k job-s, n 40; pairs static (3.0, 3.0) online (3.0, 0.0))
+     static law alone                                       -0.00 [ -0.00,  +0.00] 16/24 p=0.34
+     online law alone                                       +1.61 [ -0.96,  +5.55] 23/17 p=0.98
+     map law alone                                          +1.61 [ -1.02,  +5.54] 23/17 p=0.98
+     static law + gate, mean of 5                           -0.14 [ -1.36,  +1.09] 26/14 p=0.37
+     og: online law + gate, mean of 5                       +2.52 [ +0.22,  +6.20] 22/18 p=0.44
+     og harness: MDD-PTECT@x1 (online law alone)            +1.61 [ -1.02,  +5.59] 20/14 p=0.83
+   m100_r052 (reference mean 456.0 k job-s, n 40; pairs static (1.4314713475150087, 1.4314713475150087) online (1.431, 0.0))
+     static law alone                                       -2.90 [ -4.12,  -1.88] 34/6  p=8.8e-06
+     online law alone                                      -12.36 [-16.49,  -8.07] 33/7  p=5.8e-06
+     map law alone                                         -12.36 [-16.35,  -8.00] 33/7  p=5.8e-06
+     final policy T15, mean of 5                            +2.60 [ +1.30,  +3.97] 16/24 p=0.0061
+     static law + gate, mean of 5                           -4.25 [ -6.71,  -1.87] 28/12 p=0.0056
+     og: online law + gate, mean of 5                      -10.23 [-14.49,  -5.83] 29/11 p=0.0014
+     og harness: MDD-PTECT@x1 (online law alone)           -12.36 [-16.48,  -8.18] 33/7  p=5.8e-06
+   m100_r035 (reference mean 1,645.1 k job-s, n 40; pairs static (0.0, 0.0) online (0.0, 0.0))
+     static law alone                                      -14.30 [-17.06, -12.26] 36/4  p=1.6e-09
+     online law alone                                      -14.30 [-16.97, -12.28] 36/4  p=1.6e-09
+     map law alone                                         -14.30 [-16.98, -12.34] 36/4  p=1.6e-09
+     static law + gate, mean of 5                          -14.30 [-16.92, -12.29] 36/4  p=1.6e-09
+   m200_r052 (reference mean 2,848.9 k job-s, n 40; pairs static (0.0, 0.0) online (0.0, 0.0))
+     static law alone                                      -19.03 [-20.99, -17.03] 36/4  p=3.2e-09
+     online law alone                                      -19.03 [-21.06, -16.93] 36/4  p=3.2e-09
+     map law alone                                         -19.03 [-21.03, -17.03] 36/4  p=3.2e-09
+     final policy T15, mean of 5                            +9.54 [ +8.78, +10.48]  0/40 p=1.8e-12
+     static law + gate, mean of 5                          -19.03 [-21.06, -17.09] 36/4  p=3.2e-09
+   m75_r035 (reference mean 947.4 k job-s, n 40; pairs static (0.0, 0.0) online (0.0, 0.0))
+     static law alone                                       +0.00 [ +0.00,  +0.00]  0/0  p=1
+     online law alone                                       +0.00 [ +0.00,  +0.00]  0/0  p=1
+     map law alone                                          +0.00 [ +0.00,  +0.00]  0/0  p=1
+     best test-seed pair 0.5|0 (hindsight)                  -0.96 [ -2.67,  +0.43] 25/15 p=0.13
+   m150_r080 (reference mean 513.2 k job-s, n 40; pairs static (2.351211986687572, 2.351211986687572) online (2.351, 0.0))
+     static law alone                                       +0.00 [ +0.00,  +0.00]  0/0  p=1
+     online law alone                                      -11.40 [-15.09,  -7.75] 29/4  p=5.4e-06
+     map law alone                                         -11.40 [-15.06,  -7.67] 29/4  p=5.4e-06
+     best test-seed pair 2|0 (hindsight)                   -11.67 [-15.67,  -7.82] 34/6  p=3.2e-06
+   m50_s1 (reference mean 342.7 k job-s, n 40; pairs static (0.6477237318929525, 0.6477237318929525) online (0.648, 0.0))
+     static law alone                                       +0.00 [ +0.00,  +0.00]  0/0  p=1
+     online law alone                                       -1.35 [ -2.81,  +0.02] 20/13 p=0.081
+     map law alone                                          -1.35 [ -2.85,  +0.03] 20/13 p=0.081
+     best test-seed pair 0.5|0 (hindsight)                  -3.05 [ -5.13,  -1.17] 25/15 p=0.0073
+   m100_s0.5 (reference mean 739.1 k job-s, n 40; pairs static (0.9249063100247371, 0.9249063100247371) online (0.925, 0.0))
+     static law alone                                       +0.00 [ +0.00,  +0.00]  0/0  p=1
+     online law alone                                       -5.03 [ -6.51,  -3.63] 31/3  p=1.3e-06
+     map law alone                                          -5.03 [ -6.49,  -3.62] 31/3  p=1.3e-06
+     best test-seed pair 0.5|0 (hindsight)                  -5.85 [ -7.47,  -4.40] 36/4  p=2.3e-09
+   m100_s1 (reference mean 827.7 k job-s, n 40; pairs static (0.46449433205317714, 0.46449433205317714) online (0.464, 0.0))
+     static law alone                                       +0.00 [ +0.00,  +0.00]  0/0  p=1
+     online law alone                                       -2.15 [ -2.98,  -1.25] 26/8  p=0.00017
+     map law alone                                          -2.15 [ -2.98,  -1.27] 26/8  p=0.00017
+     best test-seed pair 0.25|0 (hindsight)                 -3.06 [ -4.20,  -1.90] 32/8  p=4.9e-06
+
+-- 2. pre-declared criteria (family of 5, paired over test seeds)
+   changed policy cells: ['m15_b2', 'm15_s1', 'm50_r052', 'm75_r052', 'm100_r080', 'm100_r052']
+     Q1 m15_b2 og vs static law + gate                            +0.11 [ -1.89,  +2.39] 10/20 p=0.4
+     Q1 m15_s1 og vs static law + gate                            -0.32 [ -1.25,  +0.43] 17/14 p=0.65
+     Q1 m50_r052 og vs static law + gate                          -0.98 [ -4.13,  +2.18] 22/11 p=0.12
+     Q1 m75_r052 og vs static law + gate                          -6.18 [ -8.93,  -3.58] 27/7  p=0.00012
+     Q1 m100_r080 og vs static law + gate                         +2.66 [ +0.62,  +5.86] 16/18 p=0.12
+     Q1 m100_r052 og vs static law + gate                         -6.24 [ -8.81,  -3.55] 26/8  p=0.00021
+     Q1: better after Holm on 2 of 6 changed cells; none worse: True
+     Q2 m15_b2 og vs static (off-het)                             +0.11 [ -1.80,  +2.23] 10/20 p=0.4
+     Q2 m15_b2 og vs final T15                                    +0.81 [ -0.75,  +2.68] 19/21 p=0.4
+     Q3 m15_b2 og vs MDD-PTECT                                    -0.90 [ -2.67,  +1.13] 25/15 p=0.21
+     Q3 m15_s1 og vs MDD-PTECT                                   -16.67 [-20.82, -13.43] 40/0  p=1.8e-12
+     Q3 m50_r052 og vs MDD-PTECT                                  -0.77 [ -5.50,  +3.20] 28/12 p=0.066
+     Q3 m75_r052 og vs MDD-PTECT                                  -8.34 [-12.85,  -4.56] 33/7  p=3.2e-06
+     Q3 m100_r080 og vs MDD-PTECT                                 +2.52 [ +0.26,  +6.23] 22/18 p=0.44
+     Q3 m100_r052 og vs MDD-PTECT                                -10.23 [-14.57,  -5.80] 29/11 p=0.0014
+     Q4 m15_b2 og vs the online law alone                         -0.24 [ -2.42,  +1.86] 24/16 p=0.48
+     Q4 m15_s1 og vs the online law alone                         +0.01 [ -2.03,  +1.84] 22/18 p=0.86
+     Q4 m50_r052 og vs the online law alone                       +2.90 [ +0.39,  +4.67] 18/22 p=0.45
+     Q4 m75_r052 og vs the online law alone                       +0.42 [ -0.93,  +1.94] 19/21 p=0.6
+     Q4 m100_r080 og vs the online law alone                      +0.89 [ -0.62,  +2.42] 24/16 p=0.76
+     Q4 m100_r052 og vs the online law alone                      +2.44 [ +1.53,  +3.55] 10/30 p=0.00012
+     H' m75_r035 online law vs best pair 0.5|0                    +0.96 [ -0.38,  +2.70] 15/25 p=0.13
+     H' m75_r035 online law vs static law                         +0.00 [ +0.00,  +0.00]  0/0  p=1
+     H' m150_r080 online law vs best pair 2|0                     +0.31 [ -0.55,  +1.17] 17/23 p=0.48
+     H' m150_r080 online law vs static law                       -11.40 [-15.28,  -7.83] 29/4  p=5.4e-06
+       (static law is +13.21% vs the best pair there, so the online law must beat it)
+     H' m15_s1 online law vs best pair 0.5|0.5                    +0.65 [ -1.91,  +3.26] 17/23 p=0.62
+     H' m15_s1 online law vs static law                           -0.75 [ -2.04,  +0.62] 16/14 p=0.5
+     H' m50_s1 online law vs best pair 0.5|0                      +1.75 [ +0.80,  +2.77] 10/28 p=0.0029
+     H' m50_s1 online law vs static law                           -1.35 [ -2.92,  +0.05] 20/13 p=0.081
+       (static law is +3.15% vs the best pair there, so the online law must beat it)
+     H' m100_s0.5 online law vs best pair 0.5|0                   +0.86 [ -0.10,  +2.16] 14/26 p=0.06
+     H' m100_s0.5 online law vs static law                        -5.03 [ -6.51,  -3.53] 31/3  p=1.3e-06
+       (static law is +6.21% vs the best pair there, so the online law must beat it)
+     H' m100_s1 online law vs best pair 0.25|0                    +0.93 [ -0.01,  +2.08] 12/28 p=0.022
+     H' m100_s1 online law vs static law                          -2.15 [ -2.99,  -1.25] 26/8  p=0.00017
+       (static law is +3.16% vs the best pair there, so the online law must beat it)
+   reported: the online law alone vs the static law alone on every law cell
+        L m15_b2 online vs static law alone                       -0.66 [ -3.19,  +2.01] 14/16 p=0.78
+        L m15_s1 online vs static law alone                       -0.75 [ -1.98,  +0.61] 16/14 p=0.5
+        L m50_r052 online vs static law alone                     -2.61 [ -5.55,  +0.54] 22/11 p=0.095
+        L m75_r052 online vs static law alone                     -8.30 [-12.12,  -4.84] 26/8  p=3.4e-05
+        L m100_r080 online vs static law alone                    +1.61 [ -0.93,  +5.61] 20/14 p=0.83
+        L m100_r052 online vs static law alone                    -9.74 [-13.40,  -5.99] 30/4  p=2.5e-05
+        L m100_r035 online vs static law alone                    +0.00 [ +0.00,  +0.00]  0/0  p=1
+        L m200_r052 online vs static law alone                    +0.00 [ +0.00,  +0.00]  0/0  p=1
+        L m75_r035 online vs static law alone                     +0.00 [ +0.00,  +0.00]  0/0  p=1
+        L m150_r080 online vs static law alone                   -11.40 [-15.21,  -7.62] 29/4  p=5.4e-06
+        L m50_s1 online vs static law alone                       -1.35 [ -2.89,  +0.04] 20/13 p=0.081
+        L m100_s0.5 online vs static law alone                    -5.03 [ -6.51,  -3.63] 31/3  p=1.3e-06
+        L m100_s1 online vs static law alone                      -2.15 [ -2.98,  -1.29] 26/8  p=0.00017
+   Q1 FAIL, Q2 PASS, Q3 PASS, Q4 FAIL, H' FAIL
+   N -> the online law adds nothing in the policy: keep the static law + gate
+   N (H' FAIL) -> the online law is a fit to the fitted floors, not a shown transfer rule
+
+-- 3. what the og policies play, by fleet state: offset shares x1 / x0.5 / x0.25 / x1.5 / x2, law alpha, mean played alpha
+   m15_b2     full    3617 slots  0.16 / 0.58 / 0.05 / 0.11 / 0.09 | law 3.00 | played 2.20
+   m15_b2     short   1183 slots  0.12 / 0.66 / 0.11 / 0.03 / 0.08 | law 0.00 | played 0.00
+   m15_s1     full    3613 slots  0.16 / 0.52 / 0.05 / 0.14 / 0.13 | law 0.70 | played 0.63
+   m15_s1     short   1187 slots  0.13 / 0.59 / 0.12 / 0.04 / 0.12 | law 0.00 | played 0.00
+   m50_r052   full    3565 slots  0.17 / 0.67 / 0.10 / 0.03 / 0.03 | law 2.60 | played 1.62
+   m50_r052   short   1235 slots  0.15 / 0.69 / 0.14 / 0.01 / 0.02 | law 0.00 | played 0.00
+   m75_r052   full    3500 slots  0.17 / 0.65 / 0.13 / 0.02 / 0.03 | law 1.88 | played 1.17
+   m75_r052   short   1300 slots  0.13 / 0.69 / 0.15 / 0.00 / 0.03 | law 0.00 | played 0.00
+   m100_r080  full    3570 slots  0.17 / 0.66 / 0.14 / 0.00 / 0.02 | law 3.00 | played 1.72
+   m100_r080  short   1230 slots  0.16 / 0.68 / 0.14 / 0.00 / 0.01 | law 0.00 | played 0.00
+   m100_r052  full    3570 slots  0.16 / 0.66 / 0.13 / 0.01 / 0.03 | law 1.43 | played 0.87
+   m100_r052  short   1230 slots  0.12 / 0.70 / 0.15 / 0.00 / 0.03 | law 0.00 | played 0.00

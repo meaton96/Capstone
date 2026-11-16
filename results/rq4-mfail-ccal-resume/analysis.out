@@ -1,0 +1,42 @@
+== calibration (seeds 1000-1029, MDD-PTECT): failure-free late share 0.273, mean tardiness 122.2 ks; S* = 1.252 (c range 2.19-3.13)
+   S 1.00: failures late share 0.453, mean tardiness 292.2 ks
+   S 1.25: failures late share 0.274, mean tardiness 175.4 ks
+   S 1.50: failures late share 0.162, mean tardiness 98.3 ks
+   S 1.75: failures late share 0.100, mean tardiness 54.9 ks
+   S 2.00: failures late share 0.057, mean tardiness 27.3 ks
+   S 2.50: failures late share 0.018, mean tardiness 6.6 ks
+   S 3.00: failures late share 0.006, mean tardiness 2.0 ks
+
+== none (c scale 1.000), 40 test seeds: MDD-PTECT mean tardiness 158.2 ks, late share 0.328
+   MDD-PECT   vs MDD-PTECT   +2.0 [  +0.6,   +3.7] 13/27 p=0.009
+   ATC-PTECT  vs MDD-PTECT   +2.6 [  -2.4,   +8.3] 23/17 p=0.83
+   ATC-PECT   vs MDD-PTECT   +4.6 [  -0.1,  +10.2] 24/16 p=0.84
+   SRT-PTECT  vs MDD-PTECT   +8.0 [  +5.4,  +11.4]  1/39 p=3.6e-12
+   SRT-PECT   vs MDD-PTECT  +10.5 [  +7.7,  +14.0]  3/37 p=3.8e-10
+   MDD-TECT   vs MDD-PTECT  +29.9 [ +21.4,  +38.2] 11/29 p=5.8e-06
+   hindsight best v5 pair   -4.6 [  -7.0,   -2.8] 31/0  p=1.2e-06
+   ranking: MDD-PTECT +0.0%  MDD-PECT +2.0%  ATC-PTECT +2.6%  ATC-PECT +4.6%  SRT-PTECT +8.0%  SRT-PECT +10.5%  MDD-TECT +29.9%
+
+== unif (c scale 1.000), 40 test seeds: MDD-PTECT mean tardiness 381.9 ks, late share 0.509
+   MDD-PECT   vs MDD-PTECT   +0.1 [  -1.7,   +1.6] 20/20 p=0.71
+   SRT-PTECT  vs MDD-PTECT   +2.3 [  +0.8,   +4.1] 10/30 p=0.0012
+   SRT-PECT   vs MDD-PTECT   +2.9 [  +1.1,   +4.8]  8/32 p=0.00017
+   ATC-PECT   vs MDD-PTECT   +3.6 [  -1.2,   +7.7] 21/19 p=0.66
+   ATC-PTECT  vs MDD-PTECT   +5.0 [  +0.5,   +8.9] 18/22 p=0.11
+   MDD-TECT   vs MDD-PTECT  +26.9 [ +22.0,  +32.3]  6/34 p=1.9e-09
+   hindsight best v5 pair   -4.4 [  -6.6,   -2.8] 30/0  p=1.7e-06
+   ranking: MDD-PTECT +0.0%  MDD-PECT +0.1%  SRT-PTECT +2.3%  SRT-PECT +2.9%  ATC-PECT +3.6%  ATC-PTECT +5.0%  MDD-TECT +26.9%
+
+== unif-cal (c scale 1.252), 40 test seeds: MDD-PTECT mean tardiness 240.1 ks, late share 0.317
+   MDD-PECT   vs MDD-PTECT   +1.1 [  -1.6,   +3.5] 18/22 p=0.54
+   ATC-PTECT  vs MDD-PTECT   +3.0 [  -4.2,   +9.6] 24/16 p=0.35
+   ATC-PECT   vs MDD-PTECT   +4.0 [  -3.1,   +9.9] 23/17 p=0.87
+   SRT-PTECT  vs MDD-PTECT  +11.2 [  +7.7,  +16.7]  1/39 p=9.1e-12
+   SRT-PECT   vs MDD-PTECT  +12.5 [  +8.7,  +18.1]  2/38 p=5.6e-10
+   MDD-TECT   vs MDD-PTECT  +38.7 [ +31.0,  +49.5]  4/36 p=2.5e-10
+   hindsight best v5 pair   -6.4 [  -9.7,   -3.8] 30/0  p=1.7e-06
+   ranking: MDD-PTECT +0.0%  MDD-PECT +1.1%  ATC-PTECT +3.0%  ATC-PECT +4.0%  SRT-PTECT +11.2%  SRT-PECT +12.5%  MDD-TECT +38.7%
+
+-- unif vs none: ranking Kendall tau +0.52 (p 0.14, 7 rules); MDD-PTECT tardiness x2.41
+
+-- unif-cal vs none: ranking Kendall tau +1.00 (p 0.0004, 7 rules); MDD-PTECT tardiness x1.52

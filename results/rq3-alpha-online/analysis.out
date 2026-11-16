@@ -1,0 +1,97 @@
+== rq3-alpha-online stage 1: per-regime alpha surfaces and the online law (MDD-PTECT, frozen v5 simulator)
+
+-- 0. checks
+   m15_b2     seeds  40, stats n 40: tau 0.046, a 0.467 / 0.133, x 0.099 / 0.346, sigma 0.000
+   m20_r052   seeds  40, stats n 40: tau 0.054, a 0.500 / 0.250, x 0.108 / 0.217, sigma 0.000
+   m30_r052   seeds  40, stats n 40: tau 0.075, a 0.533 / 0.267, x 0.141 / 0.282, sigma 0.000
+   m50_r052   seeds  40, stats n 40: tau 0.099, a 0.520 / 0.260, x 0.191 / 0.383, sigma 0.000
+   m75_r052   seeds  40, stats n 40: tau 0.115, a 0.520 / 0.267, x 0.221 / 0.430, sigma 0.000
+   m100_r052  seeds  40, stats n 40: tau 0.124, a 0.520 / 0.260, x 0.239 / 0.478, sigma 0.000
+   m150_r052  seeds  40, stats n 40: tau 0.161, a 0.520 / 0.260, x 0.310 / 0.620, sigma 0.000
+   m200_r052  seeds  40, stats n 40: tau 0.187, a 0.520 / 0.260, x 0.360 / 0.719, sigma 0.000
+   m50_r035   seeds  40, stats n 40: tau 0.099, a 0.360 / 0.180, x 0.276 / 0.553, sigma 0.000
+   m50_r080   seeds  40, stats n 40: tau 0.099, a 0.800 / 0.400, x 0.124 / 0.249, sigma 0.000
+   m100_r035  seeds  40, stats n 40: tau 0.124, a 0.350 / 0.180, x 0.355 / 0.690, sigma 0.000
+   m100_r080  seeds  40, stats n 40: tau 0.124, a 0.800 / 0.400, x 0.155 / 0.311, sigma 0.000
+   m200_r080  seeds  40, stats n 40: tau 0.187, a 0.800 / 0.400, x 0.234 / 0.467, sigma 0.000
+   m75_r035   seeds  40, stats n 40: tau 0.115, a 0.347 / 0.173, x 0.331 / 0.662, sigma 0.000
+   m150_r080  seeds  40, stats n 40: tau 0.161, a 0.800 / 0.400, x 0.202 / 0.403, sigma 0.000
+   m15_s1     seeds  40, stats n 40: tau 0.042, a 0.467 / 0.133, x 0.089 / 0.313, sigma 0.383
+   m50_s1     seeds  40, stats n 40: tau 0.087, a 0.520 / 0.260, x 0.167 / 0.333, sigma 0.392
+   m100_s0.5  seeds  40, stats n 40: tau 0.118, a 0.520 / 0.260, x 0.227 / 0.454, sigma 0.232
+   m100_s1    seeds  40, stats n 40: tau 0.107, a 0.520 / 0.260, x 0.206 / 0.412, sigma 0.396
+   diagonal (a | a) = the earlier fixed-alpha run of the same instance: 5320 / 5320 equal, 19 cells
+
+-- 1. surfaces (% vs alpha 3 | 3; best pair, best single alpha, room = best single over best pair)
+   m15_b2     (fit     ) best pair 4 | 2  -2.75%   best single 2  -1.54%   room  1.24
+   m20_r052   (fit     ) best pair 4 | 2  -2.87%   best single 4  -2.32%   room  0.56
+   m30_r052   (fit     ) best pair 4 | 2  -2.08%   best single 4  -0.92%   room  1.19
+   m50_r052   (fit     ) best pair 3 | 0.5  -1.88%   best single 2  -0.10%   room  1.81
+   m75_r052   (fit     ) best pair 2 | 0  -6.94%   best single 2  -1.24%   room  6.12
+   m100_r052  (fit     ) best pair 2 | 0 -10.40%   best single 1  -2.12%   room  9.24
+   m150_r052  (fit     ) best pair 0.5 | 0 -14.23%   best single 0 -13.43%   room  0.94
+   m200_r052  (fit     ) best pair 0 | 0 -15.80%   best single 0 -15.80%   room  0.00
+   m50_r035   (fit     ) best pair 3 | 0  -5.71%   best single 0.5  -1.30%   room  4.68
+   m50_r080   (fit     ) best pair 4 | 2  -0.32%   best single 4  -0.30%   room  0.02
+   m100_r035  (fit     ) best pair 0 | 0 -13.20%   best single 0 -13.20%   room  0.00
+   m100_r080  (fit     ) best pair 3 | 0.5  -0.76%   best single 3  +0.00%   room  0.77
+   m200_r080  (fit     ) best pair 3 | 0  -8.56%   best single 1  -2.86%   room  6.23
+   m75_r035   (held out) best pair 0.5 | 0 -10.15%   best single 0  -9.28%   room  0.96
+   m150_r080  (held out) best pair 2 | 0 -13.19%   best single 0.5  -5.74%   room  8.58
+   m15_s1     (held out) best pair 0.5 | 0.5 -17.22%   best single 0.5 -17.22%   room  0.00
+   m50_s1     (held out) best pair 0.5 | 0 -31.24%   best single 0.5 -29.99%   room  1.81
+   m100_s0.5  (held out) best pair 0.5 | 0 -24.89%   best single 0.25 -23.37%   room  2.03
+   m100_s1    (held out) best pair 0.25 | 0 -29.45%   best single 0 -28.75%   room  0.99
+   mean room over the fit cells: 2.52 points
+   per regime (exploratory): best alpha_short with alpha_full at the cell's best pair, short-block tardiness only
+     m15_b2     short blocks: best alpha_short 2
+     m20_r052   short blocks: best alpha_short 2
+     m30_r052   short blocks: best alpha_short 2
+     m50_r052   short blocks: best alpha_short 0.25
+     m75_r052   short blocks: best alpha_short 0
+     m100_r052  short blocks: best alpha_short 0
+     m150_r052  short blocks: best alpha_short 0
+     m200_r052  short blocks: best alpha_short 0
+     m50_r035   short blocks: best alpha_short 0
+     m50_r080   short blocks: best alpha_short 3
+     m100_r035  short blocks: best alpha_short 0
+     m100_r080  short blocks: best alpha_short 0.5
+     m200_r080  short blocks: best alpha_short 0
+
+-- 2. laws (mean regret over the fit cells: in sample / leave-one-cell-out)
+   S0  x0 0.175 x1 0.297                          2.97% /   2.97%
+   S   x0 0.169 x1 0.299                          2.98% /   3.32%
+   O1  x0 0.175 x1 0.297                          1.19% /   1.19%
+   O2  x0 0.189 x1 0.339                          0.62% /   0.81%
+   O3  x0 0.259 x1 0.319; x0 0.020 x1 0.420       0.50% /   0.74%
+   M   x0 0.175 x1 0.297                          2.24% /   2.24%
+   per cell, leave-one-out regret:
+        m15_b2  m20_r052  m30_r052  m50_r052  m75_r052 m100_r052 m150_r052 m200_r052  m50_r035  m50_r080 m100_r035 m100_r080 m200_r080
+   S0       2.82      2.95      2.13      1.45      6.44      9.22      0.94      0.00      4.69      0.32      0.00      0.77      6.90
+   S        2.82      2.95      2.13      1.51      6.96      9.22      4.48      0.00      4.82      0.32      0.00      0.77      7.15
+   O1       2.21      1.66      2.37      1.24      0.58      1.91      0.94      0.00      1.54      1.14      0.00      1.07      0.80
+   O2       2.21      2.69      1.86      0.98      0.10      0.41      0.77      0.00      0.64      0.66      0.00      0.05      0.14
+   O3       1.51      1.96      1.33      0.43      0.43      0.26      1.31      0.00      0.80      1.11      0.00      0.45      0.00
+   M        2.21      8.95      4.23      1.24      0.58      1.91      0.94      0.00      1.54      5.68      0.00      1.07      0.80
+   the laws' pairs (alpha_full | alpha_short) per cell, in-sample knots:
+   S0  3.00|3.00 3.00|3.00 3.00|3.00 2.60|2.60 1.88|1.88 1.43|1.43 0.00|0.00 0.00|0.00 0.51|0.51 3.00|3.00 0.00|0.00 3.00|3.00 1.56|1.56
+   S   3.00|3.00 3.00|3.00 3.00|3.00 2.49|2.49 1.81|1.81 1.39|1.39 0.00|0.00 0.00|0.00 0.52|0.52 3.00|3.00 0.00|0.00 3.00|3.00 1.51|1.51
+   O1  3.00|0.00 3.00|1.97 3.00|0.37 2.60|0.00 1.88|0.00 1.43|0.00 0.00|0.00 0.00|0.00 0.51|0.00 3.00|1.19 0.00|0.00 3.00|0.00 1.56|0.00
+   O2  3.00|0.00 3.00|2.44 3.00|1.13 2.95|0.00 2.37|0.00 2.00|0.00 0.58|0.00 0.00|0.00 1.25|0.00 3.00|1.81 0.00|0.00 3.00|0.57 2.11|0.00
+   O3  3.00|0.55 3.00|1.52 3.00|1.03 3.00|0.28 3.00|0.00 3.00|0.00 0.45|0.00 0.00|0.00 2.14|0.00 3.00|1.29 0.00|0.00 3.00|0.82 3.00|0.00
+   M   3.00|0.00 3.00|0.00 3.00|0.00 2.60|0.00 1.88|0.00 1.43|0.00 0.00|0.00 0.00|0.00 0.51|0.00 3.00|0.00 0.00|0.00 3.00|0.00 1.56|0.00
+
+-- 3. selection and gate (pre-declared)
+   selected O1 (leave-one-out 1.19%; lowest online 0.74%; simplest within 0.5 points)
+   G1: O1 1.19% vs S 3.32% (needs 1.0 points lower): PASS
+   one hinge for both fleet states? O2 0.81% vs O3 0.74% leave-one-out
+
+-- 4. held-out cells (test-seed surfaces; interpolated, stage 2 runs the laws exactly)
+   m75_r035   S0 0.00|0.00  0.96   O1 0.00|0.00  0.96   M 0.00|0.00  0.96
+   m150_r080  S0 2.35|2.35 13.06   O1 2.35|0.00  0.23   M 2.35|0.00  0.23
+   m15_s1     S0 0.70|0.70  1.21   O1 0.70|0.00  1.34   M 0.70|0.00  1.34
+   m50_s1     S0 0.65|0.65  3.42   O1 0.65|0.00  1.20   M 0.65|0.00  1.20
+   m100_s0.5  S0 0.92|0.92  6.95   O1 0.92|0.00  1.57   M 0.92|0.00  1.57
+   m100_s1    S0 0.46|0.46  3.53   O1 0.46|0.00  1.56   M 0.46|0.00  1.56
+
+   wrote /home/ubuntupc/Documents/Github/Capstone/results/rq3-alpha-online/law_online.json (G1 PASS, selected O1)

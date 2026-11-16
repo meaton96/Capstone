@@ -1,0 +1,42 @@
+(1) planner at D1 900 s vs the 10-29 screen (switching oracle at 900 s slots), seeds 0-19, gain over plan-once
+   size m 15      planner +5.28   screen +5.3   (40 seeds +5.14)
+   size m 20      planner +6.58   screen +nan   (40 seeds +6.40)
+   size m 30      planner +4.88   screen +nan   (40 seeds +5.06)
+   size m 50      planner +5.55   screen +5.6   (40 seeds +5.97)
+   size m 100     planner +2.48   screen +2.5   (40 seeds +2.59)
+   fleet r 0.35   planner +6.00   screen +6.0   (40 seeds +3.85)
+   fleet r 0.8    planner +6.17   screen +6.2   (40 seeds +5.19)
+
+(2) seed noise in the reference of R (D1 300 s) and R120 (D1 120 s): 4000 paired resamples, 2000 cross-fit splits, X 15%
+level           best          kept 300: grid  boot-bias  cross-fit  non-incr  P>=85% | kept 120: grid  boot-bias  cross-fit  non-incr  P>=85% | boot bias, SE g(60)-g(120)
+size m 15      +7.28 @  60 |      96.8%    99.0%    101.9%    96.8%     96% |      98.6%   100.8%    103.8%    98.6%    100% | +0.16, 0.26
+size m 20      +7.84 @  60 |      83.5%    84.0%     84.5%    83.5%     36% |      92.1%    92.6%     93.2%    92.1%     98% | +0.04, 0.28
+size m 30      +6.30 @ 450 |      87.9%    91.0%     90.7%    93.1%     65% |      92.7%    96.1%     95.7%    98.2%     84% | +0.22, 0.29
+size m 50      +10.19 @  60 |      82.3%    83.0%     81.8%    82.3%     34% |      83.9%    84.7%     83.5%    83.9%     40% | +0.09, 0.35
+size m 100     +4.55 @ 120 |      75.5%    77.7%     76.6%    76.2%      3% |      100.0%   102.9%    101.5%   100.9%    100% | +0.13, 0.25
+fleet r 0.35   +6.56 @  60 |      86.1%    87.8%     89.2%    86.1%     51% |      84.4%    86.1%     87.4%    84.4%     36% | +0.13, 0.34
+fleet r 0.8    +7.23 @  60 |      88.7%    91.2%     92.1%    88.7%     68% |      92.2%    94.7%     95.7%    92.2%     86% | +0.19, 0.50
+   size R: passes in 0% of resamples; worst kept share: grid 75.5%, bias-corrected 77.7%, cross-fit 76.6%, non-increasing 76.2%
+   size R120: passes in 34% of resamples; worst kept share: grid 83.9%, bias-corrected 84.7%, cross-fit 83.5%, non-increasing 83.9%
+   fleet R: passes in 20% of resamples; worst kept share: grid 82.3%, bias-corrected 83.0%, cross-fit 81.8%, non-increasing 82.3%
+   fleet R120: passes in 13% of resamples; worst kept share: grid 83.9%, bias-corrected 84.7%, cross-fit 83.5%, non-increasing 83.9%
+
+(3) S_m with one size level left out (point slope, 90% joint seed bootstrap)
+   all levels     -0.511 [-0.694, -0.158]  MOVES Δ*
+   without m15    -0.487 [-0.832, -0.119]  MOVES Δ*
+   without m20    -0.598 [-0.771, -0.207]  MOVES Δ*
+   without m30    -0.465 [-0.651, -0.123]  MOVES Δ*
+   without m50    -0.359 [-0.553, -0.111]  MOVES Δ*
+   without m100   -0.858 [-1.137, +0.416]  INDETERMINATE: log m enters the fit as a covariate, R decides
+
+(4) post hoc: Δ* / p̄, on-duty AGV share and decisions per Δ* (size and fleet levels)
+   level           Δ*/p̄   upper bound   AGV busy on duty   machine busy   decisions per window   per Δ*
+   size m 15       1.29   True           0.37               0.68             1896                   37
+   size m 20       0.83   True           0.44               0.65             2441                   31
+   size m 30       1.70   False          0.47               0.62             3647                   93
+   size m 50       0.35   True           0.58               0.61             6109                   32
+   size m 100      0.58   False          0.69               0.59            12161                  108
+   fleet r 0.35    0.36   True           0.79               0.60             6000                   32
+   fleet r 0.52    0.35   True           0.58               0.61             6109                   32
+   fleet r 0.8     1.01   True           0.38               0.61             6124                   93
+   over the 7 distinct levels: corr(log2 AGV busy on duty, log2 Δ*/p̄) = -0.78; slope -1.64 (post hoc, no CI: the levels share seeds)

@@ -1,0 +1,12 @@
+compare none 0
+compare none 1
+compare none 2
+compare none 3
+compare unif 0
+compare unif 1
+compare unif 2
+compare unif 3
+compare unif-cal 0
+compare unif-cal 1
+compare unif-cal 2
+compare unif-cal 3
